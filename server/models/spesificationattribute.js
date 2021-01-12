@@ -2,7 +2,7 @@
 
 const sequelize = require("sequelize")
 
-module.exports - ( sequelize, DataTypes ) => {
+module.exports = ( sequelize, DataTypes ) => {
     const SpesificationAttribute = sequelize.define( 'ms_spesificationattributes', {
         id: {
             type: DataTypes.INTEGER,
