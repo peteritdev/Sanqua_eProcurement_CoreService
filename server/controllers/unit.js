@@ -1,5 +1,5 @@
 //Service
-const UnitService = require('../services/UnitService.js');
+const UnitService = require('../services/unitservice.js');
 const unitServiceInstance = new UnitService();
 
 // OAuth Service
