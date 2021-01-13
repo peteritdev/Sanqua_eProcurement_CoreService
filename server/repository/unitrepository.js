@@ -6,45 +6,56 @@ const { hash } = require('bcryptjs');
 const Op = sequelize.Op;
 
 //Model
-const modelDb = require('../models').ms_units;
+const _modelDb = require('../models').ms_units;
 
-const Utility = require('../utils/globalutility.js');
-const utilInstance = new Utility();
+const Utility = require('peters-globallib');
+const _utilInstance = new Utility();
+
+var config = require('../config/config.json');
 
 class UnitRepository{
     constructor(){}
 
-    async list( param ){
+    async list( pParam ){
 
-        var data = await modelDb.findAndCountAll({
+        var xOrder = ['name', 'ASC'];
+
+        if( pParam.order_by != '' && pParam.hasOwnProperty('order_by') ){
+            xOrder = [pParam.order_by, (pParam.order_type == 'desc' ? 'DESC' : 'ASC') ];
+        }
+
+        var xParamQuery = {
             where: {
-                [Op.or]:[
-                    {
-                        name:{
-                            [Op.like]: '%' + param.keyword + '%'
-                        }
-                    }
-                ],
                 [Op.and]:[
                     {
                         is_delete: 0
                     }
+                ],
+                [Op.or]: [
+                    {
+                        name: {
+                            [Op.iLike]: '%' + pParam.keyword + '%'
+                        },
+                    },
                 ]
-
-            },
-            limit: param.limit,
-            offset: param.offset
-        });
-
-        return {
-            "status_code": "00",
-            "status_msg": "OK",
-            "data": data
+            },            
+            order: [xOrder],
         };
+
+        if( pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit') ){
+            if( pParam.offset != '' && pParam.limit != '' && pParam.offset != 0 && pParam.limit != 0 ){
+                xParamQuery.offset = pParam.offset;
+                xParamQuery.limit = pParam.limit;
+            }
+        }
+
+        var xData = await _modelDb.findAndCountAll(xParamQuery);
+
+        return xData;
     }
 
     async isDataExists( pName ){
-        var data = await modelDb.findOne({
+        var data = await _modelDb.findOne({
             where: {
                 name: pName,
                 is_delete: 0
@@ -54,101 +65,123 @@ class UnitRepository{
         return data;
     }
 
-    async save(param){
-        let transaction;
-        var joResult = {};
-
+    async save(pParam, pAct){
+        let xTransaction;
+        var xJoResult = {};
+        
         try{
 
-            var saved = null;
-            transaction = await sequelize.transaction(); 
+            var xSaved = null;
+            xTransaction = await sequelize.transaction();
 
-            if( param.act == "add" ){
-                saved = await modelDb.create({
-                    name: param.name,
-                    created_by: param.user_id,
-                    is_delete: 0
-                },{transaction});
-    
-                await transaction.commit();
-    
-                joResult = {
-                    status_code: "00",
-                    status_msg: "Data has been successfully saved",
-                    created_id: saved.id
-                }
-            }else if( param.act == "update" ){
-                saved = await modelDb.update({
-                    name: param.name,
-                    photo: param.photo,
-                    updated_by: param.user_id
-                },{
-                    where: {
-                        id: param.id
+            if( pAct == "add" ){
+
+                pParam.status = 1;
+                pParam.is_delete = 0;
+
+                xSaved = await _modelDb.create(pParam, {xTransaction}); 
+
+                if( xSaved.id != null ){
+
+                    await xTransaction.commit();
+
+                    xJoResult = {
+                        status_code: "00",
+                        status_msg: "Data has been successfully saved",
+                        created_id: await _utilInstance.encrypt( (xSaved.id).toString(), config.cryptoKey.hashKey ),
+                    }                     
+                    
+
+                }else{
+
+                    if( xTransaction ) await xTransaction.rollback();
+
+                    xJoResult = {
+                        status_code: "-99",
+                        status_msg: "Failed save to database",
                     }
-                },{transaction});
 
-                await transaction.commit();
-    
-                joResult = {
+                }                
+
+            }else if( pAct == "update" ){
+                
+                pParam.updatedAt = await _utilInstance.getCurrDateTime();
+                var xId = pParam.id;
+                delete pParam.id;
+                var xWhere = {
+                    where : {
+                        id: xId,
+                    }
+                };
+                xSaved = await _modelDb.update( pParam, xWhere, {xTransaction} );
+
+                await xTransaction.commit();
+
+                xJoResult = {
                     status_code: "00",
                     status_msg: "Data has been successfully updated"
                 }
+
             }
 
-            return joResult;
         }catch(e){
-            if( transaction ) await transaction.rollback();
-            joResult = {
+            if( xTransaction ) await xTransaction.rollback();
+            xJoResult = {
+                status_code: "-99",
+                status_msg: "Failed save or update data. Error : " + e,
+                err_msg: e
+            }
+
+            
+        }
+        
+        return xJoResult;
+    }
+
+    async delete( pParam ){
+        let xTransaction;
+        var xJoResult = {};
+
+        try{
+            var xSaved = null;
+            xTransaction = await sequelize.transaction();
+
+            console.log(JSON.stringify(pParam));
+
+            xSaved = await _modelDb.update(
+                {
+                    is_delete: 1,
+                    deleted_by: pParam.deleted_by,
+                    deleted_by_name: pParam.deleted_by_name,
+                    deleted_at: await _utilInstance.getCurrDateTime(),
+                },
+                {
+                    where: {
+                        id: pParam.id
+                    }
+                },
+                {xTransaction}
+            );
+    
+            await xTransaction.commit();
+
+            xJoResult = {
+                status_code: "00",
+                status_msg: "Data has been successfully deleted",
+            }
+
+            return xJoResult;
+
+        }catch(e){
+            if( xTransaction ) await xTransaction.rollback();
+            xJoResult = {
                 status_code: "-99",
                 status_msg: "Failed save or update data",
                 err_msg: e
             }
 
-            return joResult;
+            return xJoResult;
         }
-    }
-
-    async delete( param ){
-        let transaction;
-        var joResult = {};
-
-        try{
-		
-			var saved = null;
-            transaction = await sequelize.transaction();      
-
-			/*created = await modelDb.delete({
-                where: {
-                    id: id
-                }
-            },{transaction});*/
-            saved = await modelDb.update({
-                is_delete: 1,
-                deleted_by: param.user_id,
-                deleted_at: await utilInstance.getCurrDateTime()
-            },{
-                where: {
-                    id: param.id
-                }
-            });
-
-            await transaction.commit();
-
-            joResult = {
-                status_code: "00",
-                status_msg: "Data successfully deleted"
-            }
-        }catch(e){
-            if( transaction ) await transaction.rollback();
-            joResult = {
-                status_code: "-99",
-                status_msg: "Failed delete data",
-                err_msg: e
-            }
-        }
-
-        return joResult;
     }
 }
 

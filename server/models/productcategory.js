@@ -15,6 +15,7 @@ module.exports = (sequelize, DataTypes) => {
 
         deleted_at: DataTypes.DATE,
         deleted_by: DataTypes.INTEGER,
+        deleted_by_name: DataTypes.STRING,
 
         createdAt:{
             type: DataTypes.DATE,

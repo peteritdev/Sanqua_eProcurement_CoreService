@@ -7,11 +7,7 @@ const OAuthService = require('../services/oauthservice.js');
 const oAuthServiceInstance = new OAuthService();
 
 //Validation
-const Validation = require('../utils/validation/mastervalidation.js');
-const product = require('../models/product.js');
-const { eq } = require('lodash');
-const validationInstance = new Validation();
-
+const { check, validationResult } = require('express-validator');
 
 module.exports = {unit_Save, unit_List, unit_Delete};
 
@@ -24,14 +20,16 @@ async function unit_List( req, res ){
 
     if( oAuthResult.status_code == "00" ){
         if( oAuthResult.token_data.status_code == "00" ){
-            errors = await validationInstance.listUnit(req);
-            if( errors ){
+            // Validate first
+            var errors = validationResult(req).array();   
+            
+            if( errors.length != 0 ){
                 joResult = JSON.stringify({
                     "status_code": "-99",
                     "status_msg":"Parameter value has problem",
                     "error_msg": errors
                 });
-            }else{                
+            }else{                      
                 joResult = await unitServiceInstance.list(req.query);
                 joResult.token_data = oAuthResult.token_data;
                 joResult = JSON.stringify(joResult);
@@ -56,24 +54,19 @@ async function unit_Save(req, res){
     if( oAuthResult.status_code == "00" ){
         if( oAuthResult.token_data.status_code == "00" ){
 
-            //Validate first
-            if( req.body.act == "add" ){
-                errors = await validationInstance.addUnit(req);
-            }else if( req.body.act == "update" ){
-                errors = await validationInstance.updateUnit(req);
-            }else{
-                errors = null;
-            }
+            // Validate first
+            var errors = validationResult(req).array();   
             
-            if( errors ){
+            if( errors.length != 0 ){
                 joResult = JSON.stringify({
                     "status_code": "-99",
                     "status_msg":"Parameter value has problem",
                     "error_msg": errors
                 });
-            }else{
+            }else{      
                 
                 req.body.user_id = oAuthResult.token_data.result_verify.id;
+                req.body.user_name = oAuthResult.token_data.result_verify.name;
                 joResult = await unitServiceInstance.save(req.body);
                 joResult.token_data = oAuthResult.token_data;
                 joResult = JSON.stringify(joResult);
@@ -100,20 +93,22 @@ async function unit_Delete( req, res ){
     if( oAuthResult.status_code == "00" ){
         if( oAuthResult.token_data.status_code == "00" ){
 
-            errors = await validationInstance.deleteUnit(req);
-            if( errors ){
+            // Validate first
+            var errors = validationResult(req).array();   
+            
+            if( errors.length != 0 ){
                 joResult = JSON.stringify({
                     "status_code": "-99",
                     "status_msg":"Parameter value has problem",
                     "error_msg": errors
                 });
-            }else{
-                req.query.user_id = oAuthResult.token_data.result_verify.id;
-                joResult = await unitServiceInstance.delete(req.query);
+            }else{      
+                req.params.user_id = oAuthResult.token_data.result_verify.id;
+                req.params.user_name = oAuthResult.token_data.result_verify.name;
+                joResult = await unitServiceInstance.delete(req.params);
                 joResult.token_data = oAuthResult.token_data;
                 joResult = JSON.stringify(joResult);
             }
-            console.log(oAuthResult);
 
         }else{
             joResult = JSON.stringify(oAuthResult);

@@ -11,7 +11,6 @@ module.exports = ( sequelize, DataTypes ) => {
         status: DataTypes.INTEGER,
         is_delete: DataTypes.INTEGER,
         status: DataTypes.INTEGER,
-        is_delete: DataTypes.INTEGER,
         deleted_at: DataTypes.DATE,
         deleted_by: DataTypes.INTEGER,
         deleted_by_name: DataTypes.STRING,
