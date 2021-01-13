@@ -8,7 +8,29 @@ const _oAuthServiceInstance = new OAuthService();
 
 const { check, validationResult } = require('express-validator');
 
-module.exports = {productCategory_Save, productCategory_List, productCategory_Delete, productCategory_Upload, productCategory_BatchSave};
+module.exports = {productCategory_Save, productCategory_List, productCategory_Delete, productCategory_Upload, productCategory_BatchSave, productCategory_DropDown};
+
+async function productCategory_DropDown( req, res ){
+    var joResult;
+    var errors = null;
+
+    var oAuthResult = await _oAuthServiceInstance.verifyToken( req.headers['x-token'], req.headers['x-method'] );
+
+    if( oAuthResult.status_code == "00" ){
+        if( oAuthResult.token_data.status_code == "00" ){
+            joResult = await _productCategoryServiceInstance.dropDownList(req.query);
+            // joResult.token_data = oAuthResult.token_data;
+            joResult = JSON.stringify(joResult);
+        }else{
+            joResult = JSON.stringify(oAuthResult);
+        }   
+    }else{
+        joResult = JSON.stringify(oAuthResult);
+    }    
+
+    res.setHeader('Content-Type','application/json');
+    res.status(200).send(joResult);
+}
 
 async function productCategory_Upload( req, res ){
     var joResult = {};

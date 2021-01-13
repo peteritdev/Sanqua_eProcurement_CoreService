@@ -58,6 +58,41 @@ class UnitService {
         return xJoResult;
     }
 
+    async dropDownList(pParam){
+        var xJoResult = {};
+        var xJoArrData = [];  
+        var xFlagProcess = true;     
+
+        if( xFlagProcess ){
+
+            var xResultList = await _unitRepoInstance.list(pParam);
+
+            if( xResultList.count > 0 ){
+                xJoResult.status_code = "00";
+                xJoResult.status_msg = "OK";
+
+                var xRows = xResultList.rows;
+
+                for(var index in xRows){                
+
+                    xJoArrData.push({
+                        id: xRows[index].id,
+                        name: xRows[index].name,
+                    });
+                }
+
+                xJoResult.data = xJoArrData;
+            }else{
+                xJoResult.status_code = "00";
+                xJoResult.status_msg = "OK";
+                xJoResult.data = xJoArrData;
+            }
+
+        }        
+
+        return (xJoResult);
+    }
+
     async save(pParam){
         var xJoResult;
         var xAct = pParam.act;

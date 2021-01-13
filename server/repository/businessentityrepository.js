@@ -43,7 +43,7 @@ class BusinessEntityRepository {
         };
 
         if( pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit') ){
-            if( pParam.offset != '' && pParam.limit != '' && pParam.offset != 0 && pParam.limit != 0 ){
+            if( pParam.offset != '' && pParam.limit != ''){
                 xParamQuery.offset = pParam.offset;
                 xParamQuery.limit = pParam.limit;
             }

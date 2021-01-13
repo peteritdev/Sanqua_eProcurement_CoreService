@@ -40,6 +40,9 @@ module.exports = (app) => {
     app.get( rootAPIPath + 'master/product_category/list', arrValidate, productCategoryController.productCategory_List );
 
     arrValidate = [];
+    app.get( rootAPIPath + 'master/product_category/drop_down', arrValidate, productCategoryController.productCategory_DropDown );
+
+    arrValidate = [];
     arrValidate = [
         check("id").not().isEmpty().withMessage("Parameter id can not be empty"),
     ];
@@ -88,6 +91,9 @@ module.exports = (app) => {
         check("limit","Parameter limit must be integer and cannot be empty").not().isEmpty().isInt(),
     ];
     app.get( rootAPIPath + 'master/unit/list', arrValidate, unitController.unit_List );
+
+    arrValidate = [];
+    app.get( rootAPIPath + 'master/unit/drop_down', arrValidate, unitController.unit_DropDown );
 
     // Delete
     arrValidate = [];

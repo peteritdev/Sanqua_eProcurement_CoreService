@@ -225,40 +225,47 @@ class ProductService {
         return joResult;
     }
 
-    async list(param){
-        var joResult = {};
-        var joArrData = [];       
+    async list(pParam){
+        var xJoResult = {};
+        var xJoArrData = [];
 
-        var xResultList = await _productRepoInstance.list(param);
+        var xResultList = await _productRepoInstance.list(pParam);
 
-        if( xResultList.data.count > 0 ){
-            joResult.status_code = "00";
-            joResult.status_msg = "OK";
-            joResult.recordsTotal = xResultList.count;
-            joResult.recordsFiltered = xResultList.count;
-            joResult.draw = param.draw;
-
-            var xRows = xResultList.data.rows;
-
-            for(var index in xRows){
-                joArrData.push({
-                    id: await _utilInstance.encrypt((xRows[index].id).toString(), config.cryptoKey.hashKey),
+        if( xResultList.count > 0 ){
+            var xRows = xResultList.rows;
+            for( var index in xRows ){
+                xJoArrData.push({
+                    id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
+                    category: xRows[index].category,
                     name: xRows[index].name,
-                    photo: xRows[index].photo
+                    photo: {
+                        photo_1: xRows[index].photo_1,
+                        photo_2: xRows[index].photo_2,
+                        photo_3: xRows[index].photo_3,
+                        photo_4: xRows[index].photo_4,
+                        photo_5: xRows[index].photo_5,
+                    },
+                    created_at: xRows[index].createdAt,
+                    created_by_name: xRows[index].created_by_name,
+                    updated_at: xRows[index].updatedAt,
+                    updated_by_name: xRows[index].updated_by_name,
                 });
             }
+            xJoResult = {
+                status_code: "00",
+                status_msg: "OK",
+                data: xJoArrData,
+                total_record: xResultList.count,
+            }
 
-            joResult.data = joArrData;
         }else{
-            joResult.status_code = "00";
-            joResult.status_msg = "OK";
-            joResult.recordsTotal = xResultList.count;
-            joResult.recordsFiltered = xResultList.count;
-            joResult.draw = param.draw;
-            joResult.data = joArrData;
+            xJoResult = {
+                status_code: "-99",
+                status_msg: "Data not found",
+            };
         }
 
-        return (joResult);
+        return xJoResult;
     }
 
     async dropDownList(pParam){
@@ -294,80 +301,89 @@ class ProductService {
         return (xJoResult);
     }
 
-    async save(param){
-        var joResult;
-        var checkDuplicateResult = await _productRepoInstance.isDataExists(param.name);
-        var flagProcess = true;
-        var xDec = null;
+    async save(pParam){
+        var xJoResult;
+        var xAct = pParam.act;
+        var xFlagProcess = true;
 
-        if( ( param.act == "add" && checkDuplicateResult == null ) || param.act == "update" ){
+        delete pParam.act;
 
-            if( param.act == "update" ){
-                xDec = await _utilInstance.decrypt(param.id);
-                param.id = xDec.decrypted;
-            }
+        if( xAct == "add" ){           
 
-            if( ( param.act == "update" && xDec.status_code == "00" ) || ( param.act == "add" ) ){                    
-                var xDecUserId = await _utilInstance.decrypt(param.user_id);
-                if( xDecUserId.status_code == "00" ){
-                    param.user_id = xDecUserId.decrypted;
-                    var xDecCategoryId = await _utilInstance.decrypt(param.category_id);
-                    if( xDecCategoryId.status_code == "00" ){
-                        param.category_id = xDecCategoryId.decrypted;
-                        var xDecUnitId = await _utilInstance.decrypt(param.unit_id);
-                        if( xDecUnitId.status_code == "00" ){
-                            param.unit_id = xDecUnitId.decrypted;
-                        }else{
-                            flagProcess = false;
-                            joResult = xDecUnitId;
-                        }
-                    }else{
-                        flagProcess = false;
-                        joResult = xDecCategoryId;
-                    }
-                }else{
-                    flagProcess = false;
-                    joResult = xDecUserId;
-                }                    
+            // User Id
+            var xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+            if( xDecId.status_code == '00' ){
+                pParam.created_by = xDecId.decrypted;
+                pParam.created_by_name = pParam.user_name;
             }else{
-                flagProcess = false;
-                joResult = xDec; 
-            }       
-
-            if( flagProcess )joResult = await _productRepoInstance.save( param );
-
-        }else{
-            joResult = {
-                status_code: "01",
-                status_msg: "Data already exist in database"
+                xFlagProcess = false;
+                xJoResult = xDecId;
             }
+            
+            if( xFlagProcess ){
+                var xAddResult = await _productRepoInstance.save( pParam, xAct );
+                xJoResult = xAddResult;
+            }           
+
+
+        }else if( xAct == "update" || xAct == "update_by_erpid" ){
+
+            console.log(JSON.stringify(pParam));
+
+            var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+            if( xDecId.status_code == "00" ){
+                pParam.id = xDecId.decrypted;                    
+                xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+                if( xDecId.status_code == "00" ){
+                    pParam.updated_by = xDecId.decrypted;
+                    pParam.updated_by_name = pParam.user_name;
+                }else{
+                    xFlagProcess = false;
+                    xJoResult = xDecId;
+                }                
+            }else{
+                xFlagProcess = false;
+                xJoResult = xDecId;
+            }
+
+            if( xFlagProcess ){
+                var xAddResult = await _productRepoInstance.save( pParam, xAct );
+                xJoResult = xAddResult;
+            }
+            
         }
 
-        return (joResult);
+        return xJoResult;
     }
 
-    async delete( param ){
-        var joResult;
-        var flagProcess = true;
-        var xDecId = await _utilInstance.decrypt(param.id);
-        var xDecUserId = await _utilInstance.decrypt(param.user_id);
+    async delete( pParam ){
+        var xJoResult;
+        var xFlagProcess = true;  
 
+        var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
         if( xDecId.status_code == "00" ){
-            param.id = xDecId.decrypted;    
-            if( xDecUserId.status_code == "00" ){
-                param.user_id = xDecUserId.decrypted;
+            pParam.id = xDecId.decrypted;                    
+            xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+            if( xDecId.status_code == "00" ){
+                pParam.deleted_by = xDecId.decrypted;
+                pParam.deleted_by_name = pParam.user_name;
             }else{
-                flagProcess = false;
-                joResult = xDecUserId;
-            }                
+                xFlagProcess = false;
+                xJoResult = xDecId;
+            }
         }else{
-            flagProcess = false;
-            joResult = xDecId;
+            xFlagProcess = false;
+            xJoResult = xDecId;
         }
 
-        if( flagProcess )joResult = await _productRepoInstance.delete(param);
+        if( xFlagProcess ){           
 
-        return (joResult);
+            var xDeleteResult = await _productRepoInstance.delete( pParam );
+            xJoResult = xDeleteResult;
+            
+        }
+
+        return xJoResult;
     }
 
     async upload( param ){
