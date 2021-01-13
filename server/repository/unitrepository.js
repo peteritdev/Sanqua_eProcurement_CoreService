@@ -16,6 +16,17 @@ var config = require('../config/config.json');
 class UnitRepository{
     constructor(){}
 
+    async getById( pParam ){
+        var xData = await _modelDb.findOne({
+            where: {
+                id: pParam.id,
+                is_delete: 0,
+            },
+        });
+
+        return xData;
+    }
+
     async list( pParam ){
 
         var xOrder = ['name', 'ASC'];

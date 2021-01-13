@@ -11,8 +11,21 @@ const _modelDb = require('../models').ms_vendorcatalogues;
 const Utility = require('peters-globallib');
 const _utilInstance = new Utility();
 
+var config = require('../config/config.json');
+
 class VendorCatalogueRepository {
     constructor(){}
+
+    async getById( pParam ){
+        var xData = await _modelDb.findOne({
+            where: {
+                id: pParam.id,
+                is_delete: 0,
+            }
+        });
+
+        return xData;
+    }
 
     async list( pParam ){
 
@@ -91,6 +104,7 @@ class VendorCatalogueRepository {
                     xJoResult = {
                         status_code: "00",
                         status_msg: "Data has been successfully saved",
+                        created_id: await _utilInstance.encrypt( xSaved.id, config.cryptoKey.hashKey ),
                     }                     
                     
 

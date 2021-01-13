@@ -17,40 +17,119 @@ const _utilInstance = new Utility();
 const VendorCatalogueRepository = require('../repository/vendorcataloguerepository.js');
 const _vendorCatalogueRepoInstance = new VendorCatalogueRepository();
 
+const ProductRepository = require('../repository/productrepository.js');
+const _productRepoInstance = new ProductRepository();
+
+const UnitRepository = require('../repository/unitrepository.js');
+const _unitRepoInstance = new UnitRepository();
+
 class VendorCatalogueService {
     constructor(){}
+
+    async getById( pParam ){
+        var xJoResult = {};
+        var xFlagProcess = true;
+
+        var xDecId = await _utilInstance.decrypt( pParam.id, config.cryptoKey.hashKey );
+        if( xDecId.status_code == '00' ){
+            pParam.id = xDecId.decrypted;
+        }else{
+            xFlagProcess = false;
+            xJoResult = xDecId;
+        }
+
+        if( xFlagProcess ){
+            var xResultList = await _vendorCatalogueRepoInstance.getById( pParam );
+            if( xResultList != null ){
+                xJoResult = {
+                    status_code: '00',
+                    status_message: 'OK',
+                    data: {
+                        id: await _utilInstance.encrypt( xResultList.id, config.cryptoKey.hashKey ),
+                        vendor_id: xResultList.vendor_id,
+                        product_id: xResultList.product_id,
+                        product_code: xResultList.product_code,
+                        product_name: xResultList.product_name,
+                        product_category_name: xResultList.product_category_name,
+                        merk: xResultList.merk,
+                        file_brochure: xResultList.file_brochure,
+                        description: xResultList.description,
+                        uom: {
+                            id: xResultList.uom_id,
+                            name: xResultList.uom_name,
+                        },
+                        purchase_uom: {
+                            id: xResultList.purchase_uom_id,
+                            name: xResultList.purchase_uom_name,
+                        },
+                        last_price: xResultList.last_price,
+                        last_ordered: xResultList.last_ordered,
+                        status: xResultList.status,
+                        created_at: xResultList.createdAt,
+                        created_by_name: xResultList.created_by_name,
+                        updated_at: xResultList.updatedAt,
+                        updated_by_name: xResultList.updated_by_name,
+                        
+                    }
+                }
+            }else{
+                xJoResult = {
+                    status_code: '-99',
+                    status_message: 'Data not found',
+                }
+            }
+        }
+
+        return xJoResult;
+    }
 
     async list( pParam  ){
         var xJoResult = {};
         var xJoArrData = [];
+        var xFlagProcess = true;
 
-        var xResultList = await _vendorCatalogueRepoInstance.list(pParam);
-
-        if( xResultList.count > 0 ){
-            var xRows = xResultList.rows;
-            for( var index in xRows ){
-                xJoArrData.push({
-                    id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
-                    product: {
-                        code: xRows[index].product_code,
-                        name: xRows[index].product_name,
-                        category: xRows[index].product_category_name,
-                    },
-                    last_price: xRows[index].last_price,
-                    last_ordered: xRows[index].last_ordered,
-                });
+        // Decrypt vendor_id
+        if( pParam.hasOwnProperty('vendor_id') ){
+            if( pParam.vendor_id != '' ){
+                var xDecId = await _utilInstance.decrypt( pParam.vendor_id, config.cryptoKey.hashKey );
+                if( xDecId.status_code == '00' ){
+                    pParam.vendor_id = xDecId.decrypted;
+                }else{
+                    xJoResult = xDecId;
+                    xFlagProcess = false;
+                }
             }
-            xJoResult = {
-                status_code: "00",
-                status_msg: "OK",
-                data: xJoArrData,
-            }
-        }else{
-            xJoResult = {
-                status_code: "-99",
-                status_msg: "Data not found",
-            };
         }
+
+        if( xFlagProcess ){
+            var xResultList = await _vendorCatalogueRepoInstance.list(pParam);
+
+            if( xResultList.count > 0 ){
+                var xRows = xResultList.rows;
+                for( var index in xRows ){
+                    xJoArrData.push({
+                        id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
+                        product: {
+                            code: xRows[index].product_code,
+                            name: xRows[index].product_name,
+                            category: xRows[index].product_category_name,
+                        },
+                        last_price: xRows[index].last_price,
+                        last_ordered: xRows[index].last_ordered,
+                    });
+                }
+                xJoResult = {
+                    status_code: "00",
+                    status_msg: "OK",
+                    data: xJoArrData,
+                }
+            }else{
+                xJoResult = {
+                    status_code: "-99",
+                    status_msg: "Data not found",
+                };
+            }
+        }       
 
         return xJoResult;
     }
@@ -72,39 +151,61 @@ class VendorCatalogueService {
         }
 
         if( xFlagProcess ){
-            if( xAct == "add" ){            
 
-                // User Id
-                var xDecId = await _utilInstance.decrypt(pParam.user_id,config.cryptoKey.hashKey);
-                pParam.created_by = xDecId.decrypted;
-                pParam.created_by_name = pParam.user_name;
-    
-                var xAddResult = await _vendorExperienceRepoInstance.save( pParam, xAct );
-                xJoResult = xAddResult;
-            }else if( xAct == "update" ){
-    
-                var xDecId = await _utilInstance.decrypt(pParam.id,config.cryptoKey.hashKey);
-                if( xDecId.status_code == "00" ){
-                    pParam.id = xDecId.decrypted;                    
-                    xDecId = await _utilInstance.decrypt(pParam.user_id,config.cryptoKey.hashKey);
+            // Get Product Info
+            var xProductDetail = await _productRepoInstance.getProductById( { id: pParam.product_id } );
+            var xUnitDetail = await _unitRepoInstance.getById( {id: pParam.uom_id} );
+            var xPurchaseUnitDetail = await _unitRepoInstance.getById( {id: pParam.purchase_uom_id} );
+
+            if( xProductDetail != null && xUnitDetail != null && xPurchaseUnitDetail != null){
+
+                pParam.product_code = xProductDetail.code;
+                pParam.product_name = xProductDetail.name;
+                pParam.product_category_name = xProductDetail.category.name;
+
+                pParam.uom_name = xUnitDetail.name;
+                pParam.purchase_uom_name = xPurchaseUnitDetail.name;
+
+                if( xAct == "add" ){            
+
+                    // User Id
+                    var xDecId = await _utilInstance.decrypt(pParam.user_id,config.cryptoKey.hashKey);
+                    pParam.created_by = xDecId.decrypted;
+                    pParam.created_by_name = pParam.user_name;
+        
+                    var xAddResult = await _vendorCatalogueRepoInstance.save( pParam, xAct );
+                    xJoResult = xAddResult;
+                }else if( xAct == "update" ){
+        
+                    var xDecId = await _utilInstance.decrypt(pParam.id,config.cryptoKey.hashKey);
                     if( xDecId.status_code == "00" ){
-                        pParam.updated_by = xDecId.decrypted;
-                        pParam.updated_by_name = pParam.user_name;
+                        pParam.id = xDecId.decrypted;                    
+                        xDecId = await _utilInstance.decrypt(pParam.user_id,config.cryptoKey.hashKey);
+                        if( xDecId.status_code == "00" ){
+                            pParam.updated_by = xDecId.decrypted;
+                            pParam.updated_by_name = pParam.user_name;
+                        }else{
+                            xFlagProcess = false;
+                            xJoResult = xDecId;
+                        }
                     }else{
                         xFlagProcess = false;
                         xJoResult = xDecId;
                     }
-                }else{
-                    xFlagProcess = false;
-                    xJoResult = xDecId;
+        
+                    if( xFlagProcess ){
+                        var xAddResult = await _vendorCatalogueRepoInstance.save( pParam, xAct );
+                        xJoResult = xAddResult;
+                    }
+                    
                 }
-    
-                if( xFlagProcess ){
-                    var xAddResult = await _vendorExperienceRepoInstance.save( pParam, xAct );
-                    xJoResult = xAddResult;
+            }else{
+                xJoResult = {
+                    status_code: "-99",
+                    status_msg: "Product not found",
                 }
-                
-            }
+            }   
+            
         }        
 
         return xJoResult;
@@ -132,7 +233,7 @@ class VendorCatalogueService {
 
         if( xFlagProcess ){
 
-            var xDeleteResult = await _vendorExperienceRepoInstance.delete( pParam );
+            var xDeleteResult = await _vendorCatalogueRepoInstance.delete( pParam );
             xJoResult = xDeleteResult;
             
         }

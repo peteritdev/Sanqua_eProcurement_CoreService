@@ -90,6 +90,23 @@ class ProductRepository{
         return data;
     }
 
+    async getProductById( pParam ){
+        var xData = await _modelDb.findOne({
+            where: {
+                id: pParam.id,
+                is_delete: 0,
+            },
+            include:[
+                {
+                    model: _modelCategory,
+                    as: 'category'
+                }
+            ],
+        });
+
+        return xData;
+    }
+
     async save(pParam, pAct){
         let xTransaction;
         var xJoResult = {};
@@ -147,7 +164,7 @@ class ProductRepository{
                     status_msg: "Data has been successfully updated"
                 }
 
-            }else if( xAct == "update_by_erpid" ){
+            }else if( pAct == "update_by_erpid" ){
                 var xErpId = pParam.erp_id;
                 delete pParam.erp_id;
                 
@@ -155,9 +172,9 @@ class ProductRepository{
                     where: {
                         erp_id: xErpId
                     }
-                },{transaction});
+                },{xTransaction});
 
-                await transaction.commit();
+                await xTransaction.commit();
     
                 joResult = {
                     status_code: "00",
@@ -173,6 +190,7 @@ class ProductRepository{
                 err_msg: e
             }
 
+            console.log(">>> Catch : " + JSON.stringify(xJoResult));
             
         }
         

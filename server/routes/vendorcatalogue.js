@@ -26,14 +26,22 @@ module.exports = (app) => {
         check("uom_id","Parameter uom_id must be integer and cannot be empty").not().isEmpty().isInt(),
         check("purchase_uom_id","Parameter purchase_uom_id must be integer and cannot be empty").not().isEmpty().isInt(),
     ];
-    app.get( rootAPIPath + 'vendor/catalogue/save', arrValidate, vendorCatalogueController.list);
+    app.post( rootAPIPath + 'vendor/catalogue/save', arrValidate, vendorCatalogueController.save);
 
-    // Save
+    // List
     arrValidate = [];
     arrValidate = [
         check("offset","Parameter offset must be integer and cannot be empty").not().isEmpty().isInt(),
         check("limit","Parameter limit must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("vendor_id").not().isEmpty().withMessage("Parameter vendor_id cannot be empty"),
     ];
     app.get( rootAPIPath + 'vendor/catalogue/list', arrValidate, vendorCatalogueController.list);
+
+    // Get By Id
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+    ];
+    app.get( rootAPIPath + 'vendor/catalogue/detail/:id', arrValidate, vendorCatalogueController.getById);
 
 }

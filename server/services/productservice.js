@@ -198,18 +198,23 @@ class ProductService {
                     pParam.data[i].category_id = xCategory.id;
                 }
 
-                if( xCheckData != null ){                    
+                // console.log(">>> productservice:");
+                // console.log(">>> xCheckData : " + JSON.stringify(xCheckData));
+                // console.log(">>> xCategory : " + JSON.stringify(xCategory));
+                // console.log(">>> pParam : " + JSON.stringify( pParam.data[i]));
+
+                if( xCheckData != null ){        
+                    // console.log(">>> Start : Update By ERP ID");            
                     pParam.data[i].updated_by = pParam.user_id;
                     pParam.data[i].updated_by_name = pParam.user_name;
-                    pParam.data[i].act = 'update_by_erpid';
                     pParam.data[i].is_delete = 0;
-                    xAddResult = await _productCategoryRepoInstance.save( pParam.data[i] );
+                    xAddResult = await _productRepoInstance.save( pParam.data[i], 'update_by_erpid' );
+                    // console.log(">>> End : Update By ERP ID");
                 }else{
                     pParam.data[i].created_by = pParam.user_id;
                     pParam.data[i].created_by_name = pParam.user_name;
-                    pParam.data[i].act = 'add';
                     pParam.data[i].is_delete = 0;
-                    xAddResult = await _productRepoInstance.save( pParam.data[i] );
+                    xAddResult = await _productRepoInstance.save( pParam.data[i], 'add' );
                 }
                 jaResult.push(xAddResult);
             }

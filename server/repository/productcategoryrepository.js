@@ -76,6 +76,17 @@ class ProductCategoryRepository{
         return data;
     }
 
+    async getProductById( pParam ){
+        var xData = await _modelDb.findOne({
+            where: {
+                id: pParam.id,
+                is_delete: 0,
+            }
+        });
+
+        return xData;
+    }
+
     async save(pParam, pAct){
         let xTransaction;
         var xJoResult = {};

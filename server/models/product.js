@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
             autoIncrement: true
         },
+        code: DataTypes.STRING,
         erp_id: DataTypes.INTEGER,
         erp_category_id: DataTypes.INTEGER,
         category_id: DataTypes.INTEGER,
