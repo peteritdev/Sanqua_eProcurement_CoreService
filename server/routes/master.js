@@ -2,6 +2,8 @@ const masterController = require('../controllers').master;
 const productCategoryController = require('../controllers').productCategory;
 const productController = require('../controllers').product;
 const unitController = require('../controllers').unit;
+const spesificationCategoryController = require('../controllers').spesificationCategory;
+const spesificationAttributeController = require('../controllers').spesificationAttribute;
 
 const { check, validationResult } = require('express-validator');
 
@@ -116,4 +118,69 @@ module.exports = (app) => {
 
     //Province
     app.get( rootAPIPath + 'master/province/drop_down', masterController.province_DropDown );
+
+    // SPESIFICATION CATEGORY
+    // Save
+    arrValidate = [];
+    arrValidate = [
+        check("name").not().isEmpty().withMessage("Parameter name cannot be empty"),
+    ];
+    app.post( rootAPIPath + 'master/spesification_category/save', arrValidate, spesificationCategoryController.spesificationCategory_Save );
+
+    // List
+    arrValidate = [];
+    arrValidate = [
+        check("offset","Parameter offset must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("limit","Parameter limit must be integer and cannot be empty").not().isEmpty().isInt(),
+    ];
+    app.get( rootAPIPath + 'master/spesification_category/list', arrValidate, spesificationCategoryController.spesificationCategory_List );
+
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty")
+    ];
+    app.get( rootAPIPath + 'master/spesification_category/detail/:id', arrValidate, spesificationCategoryController.spesificationCategory_GetById );
+
+    arrValidate = [];
+    app.get( rootAPIPath + 'master/spesification_category/drop_down', arrValidate, spesificationCategoryController.spesificationCategory_DropDown );
+
+    // Delete
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+    ];
+    app.delete( rootAPIPath + 'master/spesification_category/delete/:id', spesificationCategoryController.spesificationCategory_Delete );
+
+
+    // SPESIFICATION ATTRIBUTE
+    // Save
+    arrValidate = [];
+    arrValidate = [
+        check("name").not().isEmpty().withMessage("Parameter name cannot be empty"),
+    ];
+    app.post( rootAPIPath + 'master/spesification_attribute/save', arrValidate, spesificationAttributeController.spesificationAttribute_Save );
+
+    // List
+    arrValidate = [];
+    arrValidate = [
+        check("offset","Parameter offset must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("limit","Parameter limit must be integer and cannot be empty").not().isEmpty().isInt(),
+    ];
+    app.get( rootAPIPath + 'master/spesification_attribute/list', arrValidate, spesificationAttributeController.spesificationAttribute_List );
+
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty")
+    ];
+    app.get( rootAPIPath + 'master/spesification_attribute/detail/:id', arrValidate, spesificationAttributeController.spesificationAttribute_GetById );
+
+    arrValidate = [];
+    app.get( rootAPIPath + 'master/spesification_attribute/drop_down', arrValidate, spesificationAttributeController.spesificationAttribute_DropDown );
+
+    // Delete
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+    ];
+    app.delete( rootAPIPath + 'master/spesification_attribute/delete/:id', spesificationAttributeController.spesificationAttribute_Delete );
 }

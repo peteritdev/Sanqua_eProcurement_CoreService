@@ -9,8 +9,11 @@ module.exports = ( sequelize, DataTypes ) => {
             primaryKey: true,
             autoIncrement: true
         },
+        spesification_category_id: DataTypes.INTEGER,
         name: DataTypes.STRING,
         status: DataTypes.INTEGER,
+
+        // attribute_type: DataTypes.INTEGER, //1: Bahan Baku, 2: Non Bahan Baku      
 
         is_delete: DataTypes.INTEGER,
         deleted_at: DataTypes.DATE,
@@ -31,6 +34,14 @@ module.exports = ( sequelize, DataTypes ) => {
         updated_by: DataTypes.INTEGER,
         updated_by_name: DataTypes.STRING,
     } );
+
+    SpesificationAttribute.associate = function(models){
+        SpesificationAttribute.belongsTo( models.ms_spesificationcategories, {
+            foreignKey: 'spesification_category_id',
+            as: 'spesification_category',
+            onDelete: 'CASCADE'
+        } );
+    };
 
     return SpesificationAttribute;
 }
