@@ -39,6 +39,13 @@ module.exports = (app) => {
     arrValidate = [];
     app.get( rootAPIPath + 'vendor/list', arrValidate, vendorController.list);
 
+    // Delete
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+    ];
+    app.delete( rootAPIPath + 'vendor/delete/:id', vendorController.vendor_Delete );
+
     // VENDOR'S DOCUMENTS
     app.post( rootAPIPath + 'vendor/document/save', arrValidate, vendorController.saveVendorDocument );
 

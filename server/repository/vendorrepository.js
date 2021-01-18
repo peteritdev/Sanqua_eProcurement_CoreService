@@ -289,6 +289,50 @@ class VendorRepository{
         } 
     }
 
+    async delete( pParam ){
+        let xTransaction;
+        var xJoResult = {};
+
+        try{
+            var xSaved = null;
+            xTransaction = await sequelize.transaction();
+
+            xSaved = await _modelVendor.update(
+                {
+                    is_delete: 1,
+                    deleted_by: pParam.deleted_by,
+                    deleted_by_name: pParam.deleted_by_name,
+                    deleted_at: await _utilInstance.getCurrDateTime(),
+                },
+                {
+                    where: {
+                        id: pParam.id
+                    }
+                },
+                {xTransaction}
+            );
+    
+            await xTransaction.commit();
+
+            xJoResult = {
+                status_code: "00",
+                status_msg: "Data has been successfully deleted",
+            }
+
+            return xJoResult;
+
+        }catch(e){
+            if( xTransaction ) await xTransaction.rollback();
+            xJoResult = {
+                status_code: "-99",
+                status_msg: "Failed save or update data",
+                err_msg: e
+            }
+
+            return xJoResult;
+        }
+    }
+
 }
 
 module.exports = VendorRepository;
