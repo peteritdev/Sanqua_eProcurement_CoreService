@@ -1,4 +1,5 @@
 const vendorCatalogueController = require('../controllers').vendorCatalogue;
+const vendorCatalogueQuotationController = require('../controllers').vendorCatalogueQuotation;
 const { check, validationResult } = require('express-validator');
 
 var rootAPIPath = '/api/procurement/v1/';
@@ -16,10 +17,12 @@ module.exports = (app) => {
 
     var arrValidate = [];
 
+    // VENDOR CATALOGUE
     // List
     arrValidate = [];
     arrValidate = [
 
+        check("act").not().isEmpty().withMessage("Parameter act cannot be empty"),
         check("vendor_id").not().isEmpty().withMessage("Parameter vendor_id cannot be empty"),
         check("product_id","Parameter product_id must be integer and cannot be empty").not().isEmpty().isInt(),
         check("merk").not().isEmpty().withMessage("Parameter merk cannot be empty"),
@@ -43,5 +46,42 @@ module.exports = (app) => {
         check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
     ];
     app.get( rootAPIPath + 'vendor/catalogue/detail/:id', arrValidate, vendorCatalogueController.getById);
+
+    // VENDOR CATALOGUE QUOTATION
+    // Save
+    arrValidate = [];
+    arrValidate = [
+        check("act").not().isEmpty().withMessage("Parameter act cannot be empty"),
+        check("vendor_catalogue_id").not().isEmpty().withMessage("Parameter vendor_catalogue_id cannot be empty"),
+        check("period_start").not().isEmpty().withMessage("Parameter period_start cannot be empty"),
+        check("period_end").not().isEmpty().withMessage("Parameter period_end cannot be empty"),
+        check("uom_id","Parameter uom_id must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("price_per_unit","Parameter price_per_unit must be numeric(double) and cannot be empty").not().isEmpty().isFloat(),
+        check("file_quotation").not().isEmpty().withMessage("Parameter file_quotation cannot be empty"),
+    ];
+    app.post( rootAPIPath + 'vendor/catalogue_quotation/save', arrValidate, vendorCatalogueQuotationController.vendorCatalogueQuotation_Save);
+
+    // List
+    arrValidate = [];
+    arrValidate = [
+        check("offset","Parameter offset must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("limit","Parameter limit must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("vendor_catalogue_id").not().isEmpty().withMessage("Parameter vendor_catalogue_id cannot be empty"),
+    ];
+    app.get( rootAPIPath + 'vendor/catalogue_quotation/list', arrValidate, vendorCatalogueQuotationController.vendorCatalogueQuotation_List);
+
+    // Get By Id
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+    ];
+    app.get( rootAPIPath + 'vendor/catalogue_quotation/detail/:id', arrValidate, vendorCatalogueQuotationController.vendorCatalogueQuotation_GetById);
+
+    // Delete
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id can not be empty"),
+    ];
+    app.delete( rootAPIPath + 'vendor/catalogue_quotation/delete/:id', vendorCatalogueQuotationController.vendorCatalogueQuotation_Delete );
 
 }

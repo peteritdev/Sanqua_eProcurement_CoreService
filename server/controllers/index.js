@@ -9,10 +9,11 @@ const unit = require('./unit');
 
 const spesificationCategory = require( './spesificationcategory' );
 const spesificationAttribute = require('./spesificationattribute');
+const vendorCatalogueQuotation = require('./vendorcataloguequotation');
 
 module.exports = {
 	vendor,
 	master, productCategory, product, unit,
 	vendorExperience, vendorCatalogue,
-	spesificationCategory, spesificationAttribute,
+	spesificationCategory, spesificationAttribute, vendorCatalogueQuotation,
 }

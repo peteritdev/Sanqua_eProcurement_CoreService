@@ -38,5 +38,13 @@ module.exports = ( sequelize, DataTypes ) => {
 
     } );
 
+    VendorCatalogueQuotation.associate = function(models){
+        VendorCatalogueQuotation.belongsTo( models.ms_units, {
+            foreignKey: 'uom_id',
+            as: 'uom',
+            onDelete: 'CASCADE',
+        } );
+    }
+
     return VendorCatalogueQuotation;
 }

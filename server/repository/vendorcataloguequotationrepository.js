@@ -7,6 +7,7 @@ const Op = sequelize.Op;
 
 //Model
 const _modelDb = require('../models').ms_vendorcataloguequotations;
+const _modelUnit = require('../models').ms_units;
 
 const Utility = require('peters-globallib');
 const _utilInstance = new Utility();
@@ -18,27 +19,34 @@ class VendorCatalogueRepository{
 
     async list( pParam ){
 
-        var xOrder = ['name', 'ASC'];
-        var xInclude = []
+        var xOrder = ['createdAt', 'ASC'];
+        var xInclude = [];
+        var xWhereAnd = [];
+        xWhereAnd.push({is_delete: 0});
 
         if( pParam.order_by != '' && pParam.hasOwnProperty('order_by') ){
             xOrder = [pParam.order_by, (pParam.order_type == 'desc' ? 'DESC' : 'ASC') ];
         }
 
+        if( pParam.hasOwnProperty('vendor_catalogue_id') ){
+            if( pParam.vendor_catalogue_id != '' ){
+                xWhereAnd.push({
+                    vendor_catalogue_id: pParam.vendor_catalogue_id,
+                });
+            }
+        }
+
+        xInclude = [
+            {
+                model: _modelUnit,
+                as: 'uom'
+            }
+        ]
+
         var xParamQuery = {
             where: {
-                [Op.and]:[
-                    {
-                        is_delete: 0
-                    }
-                ],
-                [Op.or]: [
-                    {
-                        name: {
-                            [Op.iLike]: '%' + pParam.keyword + '%'
-                        },
-                    },
-                ]
+                [Op.and]:xWhereAnd,
+                // [Op.or]: []
             },          
             include: xInclude,  
             order: [xOrder],
