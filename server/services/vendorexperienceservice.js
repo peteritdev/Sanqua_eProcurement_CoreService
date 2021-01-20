@@ -24,32 +24,47 @@ class VendorExperienceService {
         var xJoResult = {};
         var xJoArrData = [];
 
-        var xResultList = await _vendorExperienceRepoInstance.list(pParam);
-
-        if( xResultList.count > 0 ){
-            var xRows = xResultList.rows;
-            for( var index in xRows ){
-                xJoArrData.push({
-                    id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
-                    name: xRows[index].name,
-                    type: xRows[index].type,
-                    location: xRows[index].location,
-                    month: xRows[index].month,
-                    year: xRows[index].year,
-
-                });
+        // Decrypt vendor_id
+        if( pParam.hasOwnProperty('vendor_id') ){
+            if( pParam.vendor_id != '' ){
+                var xDecId = await _utilInstance.decrypt( pParam.vendor_id, config.cryptoKey.hashKey );
+                if( xDecId.status_code == '00' ){
+                    pParam.vendor_id = xDecId.decrypted;
+                }else{
+                    xJoResult = xDecId;
+                    xFlagProcess = false;
+                }
             }
-            xJoResult = {
-                status_code: "00",
-                status_msg: "OK",
-                data: xJoArrData,
-            }
-        }else{
-            xJoResult = {
-                status_code: "-99",
-                status_msg: "Data not found",
-            };
         }
+
+        if( xFlagProcess ){
+            var xResultList = await _vendorExperienceRepoInstance.list(pParam);
+
+            if( xResultList.count > 0 ){
+                var xRows = xResultList.rows;
+                for( var index in xRows ){
+                    xJoArrData.push({
+                        id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
+                        name: xRows[index].name,
+                        type: xRows[index].type,
+                        location: xRows[index].location,
+                        month: xRows[index].month,
+                        year: xRows[index].year,
+
+                    });
+                }
+                xJoResult = {
+                    status_code: "00",
+                    status_msg: "OK",
+                    data: xJoArrData,
+                }
+            }else{
+                xJoResult = {
+                    status_code: "-99",
+                    status_msg: "Data not found",
+                };
+            }
+        }        
 
         return xJoResult;
     }

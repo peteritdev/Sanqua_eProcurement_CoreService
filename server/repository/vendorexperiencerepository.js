@@ -17,9 +17,18 @@ class VendorExperienceRepository {
     async list( pParam ){
 
         var xOrder = ['name', 'ASC'];
+        var xWhereVendorId = {};
 
         if( pParam.order_by != '' && pParam.hasOwnProperty('order_by') ){
             xOrder = [pParam.order_by, (pParam.order_type == 'desc' ? 'DESC' : 'ASC') ];
+        }
+
+        if( pParam.hasOwnProperty('vendor_id') ){
+            if( pParam.vendor_id != '' ){
+                xWhereVendorId = {
+                    vendor_id: pParam.vendor_id,
+                }
+            }
         }
 
         var xData = await _modelDb.findAndCountAll({
@@ -27,7 +36,8 @@ class VendorExperienceRepository {
                 [Op.and]:[
                     {
                         is_delete: 0
-                    }
+                    },
+                    xWhereVendorId,
                 ],
                 [Op.or]: [
                     {
