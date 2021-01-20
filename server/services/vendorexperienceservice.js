@@ -23,6 +23,7 @@ class VendorExperienceService {
     async list( pParam  ){
         var xJoResult = {};
         var xJoArrData = [];
+        var xFlagProcess = true;
 
         // Decrypt vendor_id
         if( pParam.hasOwnProperty('vendor_id') ){
