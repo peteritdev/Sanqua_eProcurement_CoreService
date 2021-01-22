@@ -103,7 +103,7 @@ class DocumentTypeService {
             }
 
             if( xFlagProcess ){
-                var xAddResult = await _unitRepoInstance.save( pParam, xAct );
+                var xAddResult = await _docTypeRepoInstance.save( pParam, xAct );
                 xJoResult = xAddResult;
             }
             
