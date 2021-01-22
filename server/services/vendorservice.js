@@ -257,6 +257,50 @@ class VendorService {
         return xJoResult;
     }
 
+    async getVendorDocumentByDocumentTypeId( pParam ){
+        var xJoResult = {};
+        var xFlagProcess = true;
+
+        if( pParam.vendor_id != '' && pParam.document_type_id != '' ){
+            var xDecId = await _utilInstance.decrypt( pParam.vendor_id, config.cryptoKey.hashKey );
+            if( xDecId.status_code == '00' ){
+                pParam.vendor_id = xDecId.decrypted;
+            }else{
+                xFlagProcess = false;
+                xJoResult = xDecId;
+            }
+        }
+
+        if( xFlagProcess ){
+            var xResult = await _vendorRepoInstance.getVendorDocumentByDocumentTypeId( pParam );
+            if( xResult != null ){
+                xJoResult = {
+                    status_code: '00',
+                    status_msg: 'OK',
+                    data: {
+                        id: await _utilInstance.encrypt( xResult.id, config.cryptoKey.hashKey ),
+                        document_type_id: xResult.document_type_id,
+                        document_no: xResult.document_no,
+                        date: xResult.date,
+                        expire_date: xResult.expire_date,
+                        file: xResult.file,
+                        description: xResult.description,
+                        instance: xResult.instance,
+                        siup_qualification: xResult.siup_qualification,
+                        address: xResult.address,
+                    },
+                }
+            }else{
+                xJoResult = {
+                    status_code: '-99',
+                    status_msg: 'Data not found'
+                };
+            }
+        }
+
+        return xJoResult;
+    }
+
 }
 
 module.exports = VendorService;

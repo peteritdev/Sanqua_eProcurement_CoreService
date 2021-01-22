@@ -32,6 +32,19 @@ class VendorRepository{
         return data;
     } 
 
+    async getVendorDocumentByDocumentTypeId( pParam ){
+        var xData = await _modelVendorDocument.findOne({
+            where: {
+                document_type_id: pParam.document_type_id,
+                vendor_id: pParam.vendor_id,
+            },
+            limit: pParam.limit,
+            offset: pParam.offset,
+        });
+
+        return xData;
+    }
+
     async list( pParam ){
         var xOrder = ['name', 'ASC'];
         var xWhere = [{

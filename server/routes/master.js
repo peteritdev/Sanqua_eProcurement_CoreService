@@ -25,6 +25,7 @@ module.exports = (app) => {
     // Document Type
     app.post( rootAPIPath + 'master/document_type/save', masterController.documentType_Save );
     app.get( rootAPIPath + 'master/document_type/list', masterController.documentType_List );
+    app.get( rootAPIPath + 'master/document_type/drop_down', masterController.documentType_DropDown );
     app.delete( rootAPIPath + 'master/document_type/delete/:id', masterController.documentType_Delete );
 
     // Product Category

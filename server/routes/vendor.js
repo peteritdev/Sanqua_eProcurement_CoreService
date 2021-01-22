@@ -49,6 +49,15 @@ module.exports = (app) => {
     // VENDOR'S DOCUMENTS
     app.post( rootAPIPath + 'vendor/document/save', arrValidate, vendorController.saveVendorDocument );
 
+    arrValidate = [];
+    arrValidate = [
+        check("offset","Parameter offset must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("limit","Parameter limit must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("document_type_id","Parameter document_type_id must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("vendor_id").not().isEmpty().withMessage("Parameter vendor_id can not be empty"),
+    ];
+    app.get( rootAPIPath + 'vendor/document/list', arrValidate, vendorController.vendor_GetVendorDocument );
+
     // VENDOR's EXPERIENCE
     arrValidate = [];
     arrValidate = [
@@ -68,5 +77,7 @@ module.exports = (app) => {
     ];
     app.post( rootAPIPath + 'vendor/experience/save', arrValidate, vendorExperienceController.save );
     app.post( rootAPIPath + 'vendor/experience/delete/:id', arrValidate, vendorExperienceController.deleteVendorExperience );
+
+
 
 }
