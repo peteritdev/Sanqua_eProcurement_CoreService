@@ -47,6 +47,7 @@ module.exports = (app) => {
     app.delete( rootAPIPath + 'vendor/delete/:id', vendorController.vendor_Delete );
 
     // VENDOR'S DOCUMENTS
+    arrValidate = [];
     app.post( rootAPIPath + 'vendor/document/save', arrValidate, vendorController.saveVendorDocument );
 
     arrValidate = [];
