@@ -76,7 +76,12 @@ module.exports = (app) => {
         check("year","Parameter year must be integer and cannot be empty").not().isEmpty().isInt(),     
     ];
     app.post( rootAPIPath + 'vendor/experience/save', arrValidate, vendorExperienceController.save );
-    app.post( rootAPIPath + 'vendor/experience/delete/:id', arrValidate, vendorExperienceController.deleteVendorExperience );
+
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id can not be empty"),   
+    ];
+    app.delete( rootAPIPath + 'vendor/experience/delete/:id', arrValidate, vendorExperienceController.deleteVendorExperience );
 
 
 
