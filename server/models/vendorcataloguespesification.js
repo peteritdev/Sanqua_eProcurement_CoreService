@@ -12,6 +12,14 @@ module.exports = ( sequelize, DataTypes ) => {
         spesification_attribute_id: DataTypes.INTEGER,
         description: DataTypes.STRING,
         status: DataTypes.INTEGER,
+
+        spesification_type: DataTypes.INTEGER, // 1: Bahan Baku, 2: Umum
+        standard: DataTypes.STRING,
+        unit_id: DataTypes.INTEGER,
+        criteria: DataTypes.INTEGER, //1: Mayor, 2: Critical
+        analysis_method: DataTypes.STRING,
+        min_frequency_supplier: DataTypes.STRING,
+        min_frequency_sanqua: DataTypes.STRING,
         
         is_delete: DataTypes.INTEGER,
         deleted_at: DataTypes.DATE,
@@ -42,6 +50,11 @@ module.exports = ( sequelize, DataTypes ) => {
         VendorCatalogueSpesification.belongsTo( models.ms_spesificationattributes, {
             foreignKey: 'spesification_attribute_id',
             as: 'spesification_attribute',
+        } );
+
+        VendorCatalogueSpesification.belongsTo( models.ms_units, {
+            foreignKey: 'unit_id',
+            as: 'unit',
         } );
     }
 

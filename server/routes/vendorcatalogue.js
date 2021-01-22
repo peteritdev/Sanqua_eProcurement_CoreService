@@ -1,5 +1,6 @@
 const vendorCatalogueController = require('../controllers').vendorCatalogue;
 const vendorCatalogueQuotationController = require('../controllers').vendorCatalogueQuotation;
+const vendorCatalogueSpesificationController = require('../controllers').vendorCatalogueSpesification;
 const { check, validationResult } = require('express-validator');
 
 var rootAPIPath = '/api/procurement/v1/';
@@ -83,5 +84,42 @@ module.exports = (app) => {
         check("id").not().isEmpty().withMessage("Parameter id can not be empty"),
     ];
     app.delete( rootAPIPath + 'vendor/catalogue_quotation/delete/:id', vendorCatalogueQuotationController.vendorCatalogueQuotation_Delete );
+
+
+    // VENDOR CATALOGUE SPESIFICATION
+    // Save
+    arrValidate = [];
+    arrValidate = [
+        check("act").not().isEmpty().withMessage("Parameter act cannot be empty"),
+        check("vendor_catalogue_id").not().isEmpty().withMessage("Parameter vendor_catalogue_id cannot be empty"),
+        check("spesification_category_id","Parameter spesification_category_id must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("spesification_attribute_id","Parameter spesification_attribute_id must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("spesification_type","Parameter spesification_type must be integer and cannot be empty").not().isEmpty().isInt(),
+    ];
+    app.post( rootAPIPath + 'vendor/catalogue_spesification/save', arrValidate, vendorCatalogueSpesificationController.vendorCatalogueSpesification_Save);
+
+    // List
+    arrValidate = [];
+    arrValidate = [
+        check("offset","Parameter offset must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("limit","Parameter limit must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("vendor_catalogue_id").not().isEmpty().withMessage("Parameter vendor_catalogue_id cannot be empty"),
+    ];
+    app.get( rootAPIPath + 'vendor/catalogue_spesification/list', arrValidate, vendorCatalogueSpesificationController.vendorCatalogueSpesification_List);
+
+    // Get By Id
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+    ];
+    app.get( rootAPIPath + 'vendor/catalogue_spesification/detail/:id', arrValidate, vendorCatalogueSpesificationController.vendorCatalogueSpesification_GetById);
+
+    // Delete
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id can not be empty"),
+    ];
+    app.delete( rootAPIPath + 'vendor/catalogue_spesification/delete/:id', vendorCatalogueSpesificationController.vendorCatalogueSpesification_Delete );
+    
 
 }
