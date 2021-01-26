@@ -258,10 +258,10 @@ class VendorRepository{
     async isVendorDocumentExists( pVendorId, pDocumentTypeId ){
         var data = await _modelVendorDocument.findOne({
             where: {
-                id: pVendorId,
+                vendor_id: pVendorId,
                 document_type_id: pDocumentTypeId,
                 is_delete: 0
-            }
+            },
         });
         
         return data;
@@ -271,7 +271,7 @@ class VendorRepository{
         let transaction;
         var joResult = {};
         var xAct = pParam.act;
-        var xId = 0;
+        var xId, xDocumentTypeId = 0;
 
         delete pParam.act;
 
@@ -299,10 +299,12 @@ class VendorRepository{
                 }
             }else if( xAct == "update" ){
 
-                xId = pParam.id;
+                xId = pParam.vendor_id;
+                xDocumentTypeId = pParam.document_type_id;
                 delete pParam.id;
+                delete pParam.document_type_id;
     
-                saved = await _modelVendorDocument.update(pParam, { where: { id: xId } }, {transaction});
+                saved = await _modelVendorDocument.update(pParam, { where: { vendor_id: xId, document_type_id: xDocumentTypeId  } }, {transaction});
 
                 await transaction.commit();
 
