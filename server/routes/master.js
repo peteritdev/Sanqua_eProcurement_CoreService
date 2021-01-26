@@ -74,6 +74,12 @@ module.exports = (app) => {
     xArrValidateProduct = [
         check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
     ];
+    app.get( rootAPIPath + 'master/product/detail/:id', xArrValidateProduct, productController.product_GetById );
+
+    xArrValidateProduct = [];
+    xArrValidateProduct = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+    ];
     app.delete( rootAPIPath + 'master/product/delete/:id', productController.product_Delete );
     app.post( rootAPIPath + 'master/product/upload', productController.product_Upload );
     app.post( rootAPIPath + 'master/product/batch_save', productController.product_BatchSave );

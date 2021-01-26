@@ -9,7 +9,7 @@ const _oAuthServiceInstance = new OAuthService();
 
 const { check, validationResult } = require('express-validator');
 
-module.exports = {product_Save, product_List, product_Delete, product_DropDown, product_Upload, product_BatchSave};
+module.exports = {product_Save, product_List, product_Delete, product_DropDown, product_Upload, product_BatchSave, product_GetById};
 
 async function product_BatchSave(req, res){
     var joResult;
@@ -81,6 +81,39 @@ async function product_List( req, res ){
                 });
             }else{                      
                 joResult = await _productServiceInstance.list(req.query);
+                joResult.token_data = oAuthResult.token_data;
+                joResult = JSON.stringify(joResult);
+            }
+        }else{
+            joResult = JSON.stringify(oAuthResult);
+        }   
+    }else{
+        joResult = JSON.stringify(oAuthResult);
+    }    
+
+    res.setHeader('Content-Type','application/json');
+    res.status(200).send(joResult);
+}
+
+async function product_GetById( req, res ){
+    var joResult;
+    var errors = null;
+
+    var oAuthResult = await _oAuthServiceInstance.verifyToken( req.headers['x-token'], req.headers['x-method'] );
+
+    if( oAuthResult.status_code == "00" ){
+        if( oAuthResult.token_data.status_code == "00" ){
+            // Validate first
+            var errors = validationResult(req).array();   
+            
+            if( errors.length != 0 ){
+                joResult = JSON.stringify({
+                    "status_code": "-99",
+                    "status_msg":"Parameter value has problem",
+                    "error_msg": errors
+                });
+            }else{                      
+                joResult = await _productServiceInstance.getById(req.params);
                 joResult.token_data = oAuthResult.token_data;
                 joResult = JSON.stringify(joResult);
             }

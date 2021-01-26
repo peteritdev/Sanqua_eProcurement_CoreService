@@ -57,6 +57,45 @@ var _upload = _multer({
 class ProductService {
     constructor(){}
 
+    async getById( pParam ){
+        var xJoResult;
+        var xFlag = true;
+
+        var xDecId = await _utilInstance.decrypt( pParam.id, config.cryptoKey.hashKey );
+        if( xDecId.status_code == '00' ){
+            pParam.id = xDecId.decrypted;
+        }else{
+            xFlag = false;
+            xJoResult = xDecId;
+        }
+
+        if( xFlag ){
+            var xData = await _productRepoInstance.getProductById(pParam);
+            if( xData != null ){
+                xJoResult = {
+                    status_code: "00",
+                    status_msg: "OK",
+                    data: {
+                        id: await _utilInstance.encrypt( xData.id, config.cryptoKey.hashKey ),
+                        code: xData.code,
+                        category: xData.category,
+                        name: xData.name,
+                        unit: xData.unit,
+                        merk: xData.merk,
+                        spesification: xData.spesification,
+                        photo_1: xData.photo_1,
+                        photo_2: xData.photo_2,
+                        photo_3: xData.photo_3,
+                        photo_4: xData.photo_4,
+                        photo_5: xData.photo_5,
+                    }
+                }
+            }
+        }
+
+        return xJoResult;
+    }
+
     async uploadFromExcel( pReq, pRes ){
         var xExcelToJSON;
         _upload( pReq, pRes, function( pErr ){

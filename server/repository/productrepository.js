@@ -98,9 +98,15 @@ class ProductRepository{
             },
             include:[
                 {
+                    attributes: ['id','name'],
                     model: _modelCategory,
                     as: 'category'
-                }
+                },
+                {
+                    attributes: ['id','name'],
+                    model: _modelUnit,
+                    as: 'unit'
+                },
             ],
         });
 
