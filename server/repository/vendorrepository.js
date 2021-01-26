@@ -47,9 +47,32 @@ class VendorRepository{
 
     async list( pParam ){
         var xOrder = ['name', 'ASC'];
-        var xWhere = [{
-            is_delete: 0
-        }];
+        var xWhereAnd = [
+            {
+                is_delete: 0,
+            },
+        ];
+
+        var xWhereOr = [];
+        if( pParam.keyword != '' && pParam.hasOwnProperty('keyword') ){
+            xWhereOr = [
+                {
+                    code: {
+                        [Op.iLike]: '%' + pParam.keyword + '%',
+                    },
+                },
+                {                    
+                    name: {
+                        [Op.iLike]: '%' + pParam.keyword + '%',
+                    },
+                },
+                {                    
+                    email: {
+                        [Op.iLike]: '%' + pParam.keyword + '%',
+                    },
+                }
+            ]
+        }
 
         var xJoinedTable = [
             {
@@ -76,7 +99,8 @@ class VendorRepository{
 
         var xData = await _modelVendor.findAndCountAll({
             where: {
-                [Op.and]:xWhere
+                [Op.and]:xWhereAnd,
+                [Op.or]: xWhereOr,
 
             },
             include: xJoinedTable,
