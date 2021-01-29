@@ -145,7 +145,7 @@ class VendorRepository{
                 },
                 {
                     attributes: ['id','name'],
-                    model: _modelClassification,
+                    model: _modelSubClassification,
                     as: 'sub_classification',
                 }
             ],
