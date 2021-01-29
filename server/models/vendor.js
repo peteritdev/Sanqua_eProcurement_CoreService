@@ -73,7 +73,7 @@ module.exports = ( sequelize, DataTypes ) => {
             onDelete: 'CASCADE',
         } );
 
-        Vendor.belongsTo( models.ms_classifications, {
+        Vendor.belongsTo( models.ms_subclassifications, {
             foreignKey: 'sub_classification_id',
             as: 'sub_classification',
             onDelete: 'CASCADE',
