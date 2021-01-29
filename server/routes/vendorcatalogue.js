@@ -19,7 +19,7 @@ module.exports = (app) => {
     var arrValidate = [];
 
     // VENDOR CATALOGUE
-    // List
+    // Save
     arrValidate = [];
     arrValidate = [
 
@@ -47,6 +47,13 @@ module.exports = (app) => {
         check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
     ];
     app.get( rootAPIPath + 'vendor/catalogue/detail/:id', arrValidate, vendorCatalogueController.getById);
+
+    // Delete
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id can not be empty"),
+    ];
+    app.delete( rootAPIPath + 'vendor/catalogue/delete/:id', vendorCatalogueController.deleteVendorCatalogue );
 
     // VENDOR CATALOGUE QUOTATION
     // Save
