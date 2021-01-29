@@ -9,6 +9,7 @@ const Op = sequelize.Op;
 const _modelVendor = require('../models').ms_vendors;
 const _modelBusinessEntity = require('../models').ms_businessentities;
 const _modelClassification = require('../models').ms_classifications;
+const _modelSubClassification = require('../models').ms_subclassifications;
 const _modelProvince = require('../models').ms_provinces;
 const _modelCity = require('../models').ms_cities;
 const _modelVendorDocument = require('../models').ms_vendordocuments;
