@@ -8,7 +8,8 @@ const Op = sequelize.Op;
 const bcrypt = require('bcrypt');
 
 
-var config = require('../config/config.json');
+const env         = process.env.NODE_ENV || 'development';
+const config      = require(__dirname + '/../config/config.json')[env];
 
 // Model
 const modelUser = require('../models').ms_products;

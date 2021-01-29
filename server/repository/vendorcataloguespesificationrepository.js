@@ -1,7 +1,7 @@
 var env = process.env.NODE_ENV || 'development';
-var configEnv = require(__dirname + '/../config/config.json')[env];
+var config = require(__dirname + '/../config/config.json')[env];
 var Sequelize = require('sequelize');
-var sequelize = new Sequelize(configEnv.database, configEnv.username, configEnv.password, configEnv);
+var sequelize = new Sequelize(config.database, config.username, config.password, config);
 const { hash } = require('bcryptjs');
 const Op = sequelize.Op;
 
@@ -14,7 +14,7 @@ const _modelUnit = require('../models').ms_units;
 const Utility = require('peters-globallib');
 const _utilInstance = new Utility();
 
-var config = require('../config/config.json');
+
 
 class VendorCatalogueSpesificationRepository{
     constructor(){}

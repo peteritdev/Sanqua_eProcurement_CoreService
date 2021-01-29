@@ -58,8 +58,8 @@ module.exports = (app) => {
         check("category_id","Parameter category_id can not be empty and must be integer").not().isEmpty().isInt(),
         check("name").not().isEmpty().withMessage("Parameter name can not be empty"),
         check("unit_id","Parameter unit_id can not be empty and must be integer").not().isEmpty().isInt(),
-        check("merk").not().isEmpty().withMessage("Merk cannot be empty"),
-        check("spesification").not().isEmpty().withMessage("Spesification cannot be empty"),
+        // check("merk").not().isEmpty().withMessage("Merk cannot be empty"),
+        // check("spesification").not().isEmpty().withMessage("Spesification cannot be empty"),
     ];
     app.post( rootAPIPath + 'master/product/save', xArrValidateProduct, productController.product_Save );
     

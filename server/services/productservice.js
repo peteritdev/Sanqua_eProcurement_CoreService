@@ -7,8 +7,8 @@ const dateFormat = require('dateformat');
 const Op = sequelize.Op;
 const bcrypt = require('bcrypt');
 
-
-var config = require('../config/config.json');
+const env         = process.env.NODE_ENV || 'development';
+const config      = require(__dirname + '/../config/config.json')[env];
 
 // Model
 const _modelUser = require('../models').ms_products;
@@ -60,6 +60,7 @@ class ProductService {
     async getById( pParam ){
         var xJoResult;
         var xFlag = true;
+        var xProductPhotoPath = config.frontParam.photoPath.product;
 
         var xDecId = await _utilInstance.decrypt( pParam.id, config.cryptoKey.hashKey );
         if( xDecId.status_code == '00' ){
@@ -83,11 +84,11 @@ class ProductService {
                         unit: xData.unit,
                         merk: xData.merk,
                         spesification: xData.spesification,
-                        photo_1: xData.photo_1,
-                        photo_2: xData.photo_2,
-                        photo_3: xData.photo_3,
-                        photo_4: xData.photo_4,
-                        photo_5: xData.photo_5,
+                        photo_1: ( xData.photo_1 == '' ? null : ( xProductPhotoPath.product1 + xData.photo_1 ) ), 
+                        photo_2: ( xData.photo_2 == '' ? null : ( xProductPhotoPath.product2 + xData.photo_2 ) ),
+                        photo_3: ( xData.photo_3 == '' ? null : ( xProductPhotoPath.product3 + xData.photo_3 ) ),
+                        photo_4: ( xData.photo_4 == '' ? null : ( xProductPhotoPath.product4 + xData.photo_4 ) ),
+                        photo_5: ( xData.photo_5 == '' ? null : ( xProductPhotoPath.product5 + xData.photo_5 ) ),
                     }
                 }
             }
@@ -283,11 +284,11 @@ class ProductService {
                     category: xRows[index].category,
                     name: xRows[index].name,
                     photo: {
-                        photo_1: xRows[index].photo_1,
-                        photo_2: xRows[index].photo_2,
-                        photo_3: xRows[index].photo_3,
-                        photo_4: xRows[index].photo_4,
-                        photo_5: xRows[index].photo_5,
+                        photo_1: ( ( xRows[index].photo_1 != null && xRows[index].photo_1 != '' ) ? ( config.frontParam.photoPath.product.product1 + xRows[index].photo_1 ) : null ),
+                        photo_2: ( ( xRows[index].photo_2 != null && xRows[index].photo_2 != '' ) ? ( config.frontParam.photoPath.product.product2 + xRows[index].photo_2 ) : null ),
+                        photo_3: ( ( xRows[index].photo_3 != null && xRows[index].photo_3 != '' ) ? ( config.frontParam.photoPath.product.product3 + xRows[index].photo_3 ) : null ),
+                        photo_4: ( ( xRows[index].photo_4 != null && xRows[index].photo_4 != '' ) ? ( config.frontParam.photoPath.product.product4 + xRows[index].photo_4 ) : null ),
+                        photo_5: ( ( xRows[index].photo_5 != null && xRows[index].photo_5 != '' ) ? ( config.frontParam.photoPath.product.product5 + xRows[index].photo_5 ) : null ),
                     },
                     created_at: xRows[index].createdAt,
                     created_by_name: xRows[index].created_by_name,

@@ -1,7 +1,8 @@
 const moment = require('moment');
 const sequelize = require('sequelize');
 const Op = sequelize.Op;
-var config = require('../config/config.json');
+const env         = process.env.NODE_ENV || 'development';
+const config      = require(__dirname + '/../config/config.json')[env];
 const promise = require('promise');
 const dateFormat = require('dateformat');
 

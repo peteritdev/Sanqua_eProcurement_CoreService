@@ -10,53 +10,136 @@
       "dateStrings": true,
       "typeCast": true
     },
-    "timezone": "Asia/Jakarta"
-  },  
-  
-  "token_expire":"7",
-  "token_expire_unit":"day",
-  "secret": "yZh7fv62xLshZmt8LuSlI9RmstrdQ0nE",
-  
-  "cryptoKey":{
-    "md5Key": "4B1C9E44D769C429",
-    "hashKey": "51beba089ef1612152be4933ea6a9a48"
-  },
+    "timezone": "Asia/Jakarta",
 
-  "frontParam":{
-    "separatorData": "Þ",
-    "forgotPasswordLink": "http://localhost:8080/procurement/u/forgot_password/#VERIFICATION_CODE#"
-  },  
+    "frontParam": {
+      "photoPath": {
+        "product": {
+          "product1": "http://localhost/uploads/products/photo_1/",
+          "product2": "http://localhost/uploads/products/photo_2/",
+          "product3": "http://localhost/uploads/products/photo_3/",
+          "product4": "http://localhost/uploads/products/photo_4/",
+          "product5": "http://localhost/uploads/products/photo_5/"
+        }
+      },
+      "separatorData": "Þ",
+      "forgotPasswordLink": "http://localhost:8080/procurement/u/forgot_password/#VERIFICATION_CODE#"
+    },
+    
 
-  "api":{
-    "notification": {
-      "emailVerification": "http://localhost:1190/api/notification/v1/email_verification",
-      "forgotPassword": "http://localhost:1190/api/notification/v1/forgot_password"
+    "token_expire":"7",
+    "token_expire_unit":"day",
+    "secret": "yZh7fv62xLshZmt8LuSlI9RmstrdQ0nE",
+    
+    "cryptoKey":{
+      "md5Key": "4B1C9E44D769C429",
+      "hashKey": "51beba089ef1612152be4933ea6a9a48"
     },
 
-    "oAuth": {
-      "url": {
-        "verifyToken": "http://localhost:1189/api/oauth/v1/user/verify_token"
-      }
-    }
-  },
+    "api":{
+      "notification": {
+        "emailVerification": "http://localhost:1190/api/notification/v1/email_verification",
+        "forgotPassword": "http://localhost:1190/api/notification/v1/forgot_password"
+      },
 
-  "login":{
-    "expireToken": "24h",
-    "oAuth2":{
-      "google":{
-        "clientId": "166708906762-uel1grlnqjsqv47k8dvdk0htsh765lhq.apps.googleusercontent.com",
-        "clientSecret": "6KAAGWF11bpB-JgWi2CvDjKr",
-        "redirect": "http://sanquawater.co.id",
-        "urlUserInfo": "https://www.googleapis.com/oauth2/v2/userinfo",
-        "urlVerifyToken": "https://oauth2.googleapis.com/tokeninfo?access_token="
+      "oAuth": {
+        "url": {
+          "verifyToken": "http://localhost:1189/api/oauth/v1/user/verify_token"
+        }
       }
-    }
-  },
+    },
 
-  "dialectOptions": {
-    "useUTC": false,
-    "charset": "utf8mb4_unicode_ci"
-  },
-  "timezone": "+07:00"
-  
+    "login":{
+      "expireToken": "24h",
+      "oAuth2":{
+        "google":{
+          "clientId": "166708906762-uel1grlnqjsqv47k8dvdk0htsh765lhq.apps.googleusercontent.com",
+          "clientSecret": "6KAAGWF11bpB-JgWi2CvDjKr",
+          "redirect": "http://sanquawater.co.id",
+          "urlUserInfo": "https://www.googleapis.com/oauth2/v2/userinfo",
+          "urlVerifyToken": "https://oauth2.googleapis.com/tokeninfo?access_token="
+        }
+      }
+    },
+
+    "dialectOptions": {
+      "useUTC": false,
+      "charset": "utf8mb4_unicode_ci"
+    },
+    "timezone": "+07:00"
+  },  
+
+  "production": {
+    "username": "postgres",
+    "password": "P455uu0rd^^ok",
+    "database": "sanqua_procurementdb",
+    "host": "127.0.0.1",
+    "port":5432,
+    "dialect": "postgres",
+    "dialectOptions": {
+      "dateStrings": true,
+      "typeCast": true
+    },
+    "timezone": "Asia/Jakarta",
+
+    "frontParam": {
+      "photoPath": {
+        "product": {
+          "product1": "http://localhost/uploads/products/photo_1/",
+          "product2": "http://localhost/uploads/products/photo_2/",
+          "product3": "http://localhost/uploads/products/photo_3/",
+          "product4": "http://localhost/uploads/products/photo_4/",
+          "product5": "http://localhost/uploads/products/photo_5/"
+        }
+      },
+      "separatorData": "Þ",
+      "forgotPasswordLink": "http://localhost:8080/procurement/u/forgot_password/#VERIFICATION_CODE#"
+    },
+
+    "token_expire":"7",
+    "token_expire_unit":"day",
+    "secret": "yZh7fv62xLshZmt8LuSlI9RmstrdQ0nE",
+    
+    "cryptoKey":{
+      "md5Key": "4B1C9E44D769C429",
+      "hashKey": "51beba089ef1612152be4933ea6a9a48"
+    },
+
+    "frontParam":{
+      "separatorData": "Þ",
+      "forgotPasswordLink": "http://localhost:8080/procurement/u/forgot_password/#VERIFICATION_CODE#"    
+    },  
+
+    "api":{
+      "notification": {
+        "emailVerification": "http://localhost:1190/api/notification/v1/email_verification",
+        "forgotPassword": "http://localhost:1190/api/notification/v1/forgot_password"
+      },
+
+      "oAuth": {
+        "url": {
+          "verifyToken": "http://localhost:1189/api/oauth/v1/user/verify_token"
+        }
+      }
+    },
+
+    "login":{
+      "expireToken": "24h",
+      "oAuth2":{
+        "google":{
+          "clientId": "166708906762-uel1grlnqjsqv47k8dvdk0htsh765lhq.apps.googleusercontent.com",
+          "clientSecret": "6KAAGWF11bpB-JgWi2CvDjKr",
+          "redirect": "http://sanquawater.co.id",
+          "urlUserInfo": "https://www.googleapis.com/oauth2/v2/userinfo",
+          "urlVerifyToken": "https://oauth2.googleapis.com/tokeninfo?access_token="
+        }
+      }
+    },
+
+    "dialectOptions": {
+      "useUTC": false,
+      "charset": "utf8mb4_unicode_ci"
+    },
+    "timezone": "+07:00"
+  }  
 }

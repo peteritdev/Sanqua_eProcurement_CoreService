@@ -1,5 +1,6 @@
 const crypto = require('crypto');
-var config = require('../config/config.json');
+const env         = process.env.NODE_ENV || 'development';
+const config      = require(__dirname + '/../config/config.json')[env];
 const encKey = config.cryptoKey.hashKey
 const dateTime = require('node-datetime');
 const axios = require('axios');
