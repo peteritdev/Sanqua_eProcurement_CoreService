@@ -122,6 +122,7 @@ class VendorCatalogueService {
                 xJoResult = {
                     status_code: "00",
                     status_msg: "OK",
+                    total_record: xResultList.count,
                     data: xJoArrData,
                 }
             }else{
