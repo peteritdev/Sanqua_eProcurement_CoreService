@@ -47,13 +47,14 @@ class VendorRepository{
 
     async list( pParam ){
         var xOrder = ['name', 'ASC'];
+        var xWhere = {};
         var xWhereAnd = [
             {
                 is_delete: 0,
             },
         ];
 
-        var xWhereOr = [];
+        var xWhereOr = null;
         if( pParam.keyword != '' && pParam.hasOwnProperty('keyword') ){
             xWhereOr = [
                 {
