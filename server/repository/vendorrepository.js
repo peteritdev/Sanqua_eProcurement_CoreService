@@ -54,7 +54,9 @@ class VendorRepository{
             },
         ];
 
-        var xWhereOr = null;
+        xWhere.$and = xWhereAnd;
+
+        var xWhereOr = [];
         if( pParam.keyword != '' && pParam.hasOwnProperty('keyword') ){
             xWhereOr = [
                 {
@@ -73,6 +75,7 @@ class VendorRepository{
                     },
                 }
             ]
+            xWhere.$or = xWhereOr;
         }
 
         var xJoinedTable = [
@@ -99,11 +102,12 @@ class VendorRepository{
         }
 
         var xData = await _modelVendor.findAndCountAll({
-            where: {
-                [Op.and]:xWhereAnd,
-                [Op.or]: xWhereOr,
+            // where: {
+            //     [Op.and]:xWhereAnd,
+            //     [Op.or]: xWhereOr,
 
-            },
+            // },
+            where: xWhere,
             include: xJoinedTable,
             limit: pParam.limit,
             offset: pParam.offset,
