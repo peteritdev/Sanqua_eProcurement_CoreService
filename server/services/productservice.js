@@ -274,43 +274,50 @@ class ProductService {
         var xJoResult = {};
         var xJoArrData = [];
 
-        console.log(">>> ENV : " + env);
-
         var xResultList = await _productRepoInstance.list(pParam);
 
-        if( xResultList.count > 0 ){
-            var xRows = xResultList.rows;
-            for( var index in xRows ){
-                xJoArrData.push({
-                    id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
-                    category: xRows[index].category,
-                    name: xRows[index].name,
-                    photo: {
-                        photo_1: ( ( xRows[index].photo_1 != null && xRows[index].photo_1 != '' ) ? ( config.frontParam.photoPath.product.product1 + xRows[index].photo_1 ) : null ),
-                        photo_2: ( ( xRows[index].photo_2 != null && xRows[index].photo_2 != '' ) ? ( config.frontParam.photoPath.product.product2 + xRows[index].photo_2 ) : null ),
-                        photo_3: ( ( xRows[index].photo_3 != null && xRows[index].photo_3 != '' ) ? ( config.frontParam.photoPath.product.product3 + xRows[index].photo_3 ) : null ),
-                        photo_4: ( ( xRows[index].photo_4 != null && xRows[index].photo_4 != '' ) ? ( config.frontParam.photoPath.product.product4 + xRows[index].photo_4 ) : null ),
-                        photo_5: ( ( xRows[index].photo_5 != null && xRows[index].photo_5 != '' ) ? ( config.frontParam.photoPath.product.product5 + xRows[index].photo_5 ) : null ),
-                    },
-                    created_at: xRows[index].createdAt,
-                    created_by_name: xRows[index].created_by_name,
-                    updated_at: xRows[index].updatedAt,
-                    updated_by_name: xRows[index].updated_by_name,
-                });
-            }
-            xJoResult = {
-                status_code: "00",
-                status_msg: "OK",
-                data: xJoArrData,
-                total_record: xResultList.count,
+        try{
+
+            if( xResultList.count > 0 ){
+                var xRows = xResultList.rows;
+                for( var index in xRows ){
+                    xJoArrData.push({
+                        id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
+                        category: xRows[index].category,
+                        name: xRows[index].name,
+                        photo: {
+                            photo_1: ( ( xRows[index].photo_1 != null && xRows[index].photo_1 != '' ) ? ( config.frontParam.photoPath.product.product1 + xRows[index].photo_1 ) : null ),
+                            photo_2: ( ( xRows[index].photo_2 != null && xRows[index].photo_2 != '' ) ? ( config.frontParam.photoPath.product.product2 + xRows[index].photo_2 ) : null ),
+                            photo_3: ( ( xRows[index].photo_3 != null && xRows[index].photo_3 != '' ) ? ( config.frontParam.photoPath.product.product3 + xRows[index].photo_3 ) : null ),
+                            photo_4: ( ( xRows[index].photo_4 != null && xRows[index].photo_4 != '' ) ? ( config.frontParam.photoPath.product.product4 + xRows[index].photo_4 ) : null ),
+                            photo_5: ( ( xRows[index].photo_5 != null && xRows[index].photo_5 != '' ) ? ( config.frontParam.photoPath.product.product5 + xRows[index].photo_5 ) : null ),
+                        },
+                        created_at: xRows[index].createdAt,
+                        created_by_name: xRows[index].created_by_name,
+                        updated_at: xRows[index].updatedAt,
+                        updated_by_name: xRows[index].updated_by_name,
+                    });
+                }
+                xJoResult = {
+                    status_code: "00",
+                    status_msg: "OK",
+                    data: xJoArrData,
+                    total_record: xResultList.count,
+                }
+    
+            }else{
+                xJoResult = {
+                    status_code: "-99",
+                    status_msg: "Data not found",
+                };
             }
 
-        }else{
+        }catch( e ){
             xJoResult = {
                 status_code: "-99",
-                status_msg: "Data not found",
-            };
-        }
+                status_msg: "Error : " + e, 
+            }
+        }        
 
         return xJoResult;
     }
