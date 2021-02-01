@@ -24,20 +24,28 @@ class VendorCatalogueSpesificationRepository{
         var xOrder = ['id', 'ASC'];
         var xInclude = [
             {
+                attributes: ['id','name'],
                 model: _modelSpesificationCategory,
                 as: 'spesification_category'
             },
             {
+                attributes: ['id','name'],
                 model: _modelSpesificationAttribute,
                 as: 'spesification_attribute'
             },
             {
+                attributes: ['id','name'],
                 model: _modelUnit,
                 as: 'unit',
             },
         ];
         var xWhereAnd = [];
+        var xWhereOr = [];
+        var xWhere = {};
 
+        
+
+        // From xWhereAnd
         xWhereAnd.push({
             is_delete: 0,
         });
@@ -54,21 +62,50 @@ class VendorCatalogueSpesificationRepository{
             });
         }
 
+        // From xWhereOr
+        if( pParam.hasOwnProperty('keyword') ){
+            xWhereOr = [
+                {
+                    description: {
+                        [Op.iLike]: '%' + pParam.keyword + '%',
+                    }
+                },
+                {
+                    standard: {
+                        [Op.iLike]: '%' + pParam.keyword + '%',
+                    }
+                },
+                {
+                    analysis_method: {
+                        [Op.iLike]: '%' + pParam.keyword + '%',
+                    }
+                },
+                {
+                    min_frequency_supplier: {
+                        [Op.iLike]: '%' + pParam.keyword + '%',
+                    }
+                },
+                {
+                    min_frequency_sanqua: {
+                        [Op.iLike]: '%' + pParam.keyword + '%',
+                    }
+                }
+            ]
+        }
+
+        if( xWhereAnd.length > 0 ){
+            xWhere.$and = xWhereAnd;
+        }
+        if( xWhereOr.length > 0 ){
+            xWhere.$or = xWhereOr;
+        }
+
         if( pParam.order_by != '' && pParam.hasOwnProperty('order_by') ){
             xOrder = [pParam.order_by, (pParam.order_type == 'desc' ? 'DESC' : 'ASC') ];
         }
 
         var xParamQuery = {
-            where: {
-                [Op.and]:xWhereAnd,
-                // [Op.or]: [
-                //     {
-                //         name: {
-                //             [Op.iLike]: '%' + pParam.keyword + '%'
-                //         },
-                //     },
-                // ]
-            },          
+            where: xWhere,          
             include: xInclude,  
             order: [xOrder],
         };
@@ -98,11 +135,31 @@ class VendorCatalogueSpesificationRepository{
     }
 
     async getById( pParam ){
+
+        var xInclude = [
+            {
+                attributes: ['id','name'],
+                model: _modelSpesificationCategory,
+                as: 'spesification_category'
+            },
+            {
+                attributes: ['id','name'],
+                model: _modelSpesificationAttribute,
+                as: 'spesification_attribute'
+            },
+            {
+                attributes: ['id','name'],
+                model: _modelUnit,
+                as: 'unit',
+            },
+        ];
+
         var xData = await _modelDb.findOne({
             where: {
                 id: pParam.id,
                 is_delete: 0,
             },
+            include: xInclude,
         });
 
         return xData;

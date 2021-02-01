@@ -59,6 +59,7 @@ class VendorExperienceService {
                     status_code: "00",
                     status_msg: "OK",
                     data: xJoArrData,
+                    total_record: xResultList.count,
                 }
             }else{
                 xJoResult = {
