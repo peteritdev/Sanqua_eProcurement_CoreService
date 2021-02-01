@@ -274,6 +274,8 @@ class ProductService {
         var xJoResult = {};
         var xJoArrData = [];
 
+        console.log(">>> ENV : " + env);
+
         var xResultList = await _productRepoInstance.list(pParam);
 
         if( xResultList.count > 0 ){
