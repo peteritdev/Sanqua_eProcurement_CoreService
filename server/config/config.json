@@ -105,11 +105,6 @@
       "hashKey": "51beba089ef1612152be4933ea6a9a48"
     },
 
-    "frontParam":{
-      "separatorData": "Þ",
-      "forgotPasswordLink": "http://localhost:8080/procurement/u/forgot_password/#VERIFICATION_CODE#"    
-    },  
-
     "api":{
       "notification": {
         "emailVerification": "http://localhost:1190/api/notification/v1/email_verification",
