@@ -85,11 +85,11 @@
     "frontParam": {
       "photoPath": {
         "product": {
-          "product1": "http://localhost/uploads/products/photo_1/",
-          "product2": "http://localhost/uploads/products/photo_2/",
-          "product3": "http://localhost/uploads/products/photo_3/",
-          "product4": "http://localhost/uploads/products/photo_4/",
-          "product5": "http://localhost/uploads/products/photo_5/"
+          "product1": "http://10.10.20.8/products/photo_1/",
+          "product2": "http://10.10.20.8/products/photo_2/",
+          "product3": "http://10.10.20.8/products/photo_3/",
+          "product4": "http://10.10.20.8/products/photo_4/",
+          "product5": "http://10.10.20.8/products/photo_5/"
         }
       },
       "separatorData": "Þ",
