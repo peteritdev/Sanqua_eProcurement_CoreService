@@ -278,6 +278,9 @@ class ProductService {
 
         try{
 
+                console.log(">>> Config : ");
+            console.log( JSON.stringify(config.frontParam) );
+
             if( xResultList.count > 0 ){
                 var xRows = xResultList.rows;
                 for( var index in xRows ){
