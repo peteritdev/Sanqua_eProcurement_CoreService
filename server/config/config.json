@@ -83,9 +83,9 @@
     },
     "timezone": "Asia/Jakarta",
 
-    "frontParam": {
-      "logo": "http://10.10.20.8/vendor/logo/",
+    "frontParam": {      
       "photoPath": {
+        "logo": "http://10.10.20.8/vendor/logo/",
         "product": {
           "product1": "http://10.10.20.8/products/photo_1/",
           "product2": "http://10.10.20.8/products/photo_2/",
