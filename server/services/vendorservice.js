@@ -82,7 +82,7 @@ class VendorService {
                     data: {
                         id: await _utilInstance.encrypt( xData.id ),
                         name: xData.name,
-                        logo: xData.logo,
+                        logo: ( xData.logo == null ? '' : ( config.frontParam.photoPath.logo + xData.logo ) ),
                         npwp: xData.npwp,
                         business_entity: xData.business_entity,
                         classification: xData.classification,

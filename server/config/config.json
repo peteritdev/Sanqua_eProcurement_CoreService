@@ -14,6 +14,7 @@
 
     "frontParam": {
       "photoPath": {
+        "logo": "http://localhost/uploads/vendor/logo/",
         "product": {
           "product1": "http://localhost/uploads/products/photo_1/",
           "product2": "http://localhost/uploads/products/photo_2/",
