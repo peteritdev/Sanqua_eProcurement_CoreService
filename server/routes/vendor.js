@@ -46,6 +46,22 @@ module.exports = (app) => {
     ];
     app.delete( rootAPIPath + 'vendor/delete/:id', vendorController.vendor_Delete );
 
+    // Block
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+        check("reason").not().isEmpty().withMessage("Parameter reason cannot be empty"),
+    ];
+    app.post( rootAPIPath + 'vendor/block', vendorController.blockVendor );
+
+    // Unblock
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+        check("reason").not().isEmpty().withMessage("Parameter reason cannot be empty"),
+    ];
+    app.post( rootAPIPath + 'vendor/unblock', vendorController.unblockVendor );
+
     // VENDOR'S DOCUMENTS
     arrValidate = [];
     app.post( rootAPIPath + 'vendor/document/save', arrValidate, vendorController.saveVendorDocument );

@@ -31,10 +31,17 @@ module.exports = ( sequelize, DataTypes ) => {
         location_long: DataTypes.STRING,
         
         status: DataTypes.INTEGER,
+
         inactive_at: DataTypes.INTEGER,
         inactive_reason: DataTypes.STRING,
         inactive_by: DataTypes.INTEGER,
         inactive_by_name: DataTypes.STRING,
+
+        unblock_at: DataTypes.INTEGER,
+        unblock_reason: DataTypes.STRING,
+        unblock_by: DataTypes.INTEGER,
+        unblock_by_name: DataTypes.STRING,
+
         register_via: DataTypes.INTEGER, // 1=> Backoffice, 2=>Public Portal
         tags: DataTypes.STRING,
         company_scale: DataTypes.INTEGER, // 1=> Kecil, 2=> Menengah, 3=>Besar

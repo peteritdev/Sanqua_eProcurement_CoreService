@@ -12,8 +12,6 @@ const _modelUnit = require('../models').ms_units;
 const Utility = require('peters-globallib');
 const _utilInstance = new Utility();
 
-
-
 class VendorCatalogueRepository{
     constructor(){}
 

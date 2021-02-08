@@ -25,6 +25,17 @@ class VendorCatalogueRepository {
         return xData;
     }
 
+    async getTotalByVendorId( pVendorId ){
+        var xData = await _modelDb.count({
+            where: {
+                vendor_id: pVendorId,
+                is_delete: 0,
+            }
+        });
+
+        return xData;
+    }
+
     async list( pParam ){
 
         var xOrder = ['product_name', 'ASC'];

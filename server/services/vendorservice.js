@@ -14,6 +14,8 @@ const config      = require(__dirname + '/../config/config.json')[env];
 //Repository
 const VendorRepository = require('../repository/vendorrepository.js');
 const _vendorRepoInstance = new VendorRepository();
+const VendorCatalogueRepository = require('../repository/vendorcataloguerepository.js');
+const _vendorCatalogueRepoInstance = new VendorCatalogueRepository();
 
 //Util
 const Utility = require('../utils/globalutility.js');
@@ -46,7 +48,7 @@ class VendorService {
                     id: await _utilInstance.encrypt((xRows[index].id).toString()),
                     code: xRows[index].code,
                     name: xRows[index].name,
-
+                    status: xRows[index].status,
                 });
             }
 
@@ -191,6 +193,42 @@ class VendorService {
         return xJoResult;
     }
 
+    async unblockVendor( pParam ){
+        var xJoResult;
+        var xIsExist = null;
+        var xFlagProcess = true;
+        var xDecId = null;
+
+        xDecId = await _utilInstance.decrypt( pParam.id );
+        if( xDecId.status_code == "00" ){
+            pParam.id = xDecId.decrypted;
+            xDecId = await _utilInstance.decrypt(pParam.user_id);
+            if( xDecId.status_code == "00" ){
+                pParam.user_id = xDecId.decrypted;
+            }else{
+                xJoResult = xDecId;
+                xFlagProcess = false;
+            }
+        }else{
+            xDecId - xJoResult;
+            xFlagProcess = false;
+        }
+
+        if( xFlagProcess ){
+            xIsExist = await _vendorRepoInstance.getVendorById(pParam.id);
+            if( xIsExist != null ){
+                xJoResult = await _vendorRepoInstance.unblockVendor(pParam);
+            }else{
+                xJoResult = {
+                    status_code: "-99",
+                    status_msg: "Vendor not found. Please provide correct id.",
+                }
+            }
+        }
+
+        return xJoResult;
+    }
+
     async saveVendorDocument(pParam){
         var xJoResult;        
         var xFlagProcess = true;
@@ -250,9 +288,22 @@ class VendorService {
             xJoResult = xDecId;
         }
 
-        if( xFlagProcess ){        
-            var xDeleteResult = await _vendorRepoInstance.delete( pParam );
-            xJoResult = xDeleteResult;
+        if( xFlagProcess ){       
+            
+            // Check if vendor's document and vendor's catalogue has exists or not
+            var xTotalVendorDocument = await _vendorRepoInstance.getTotalVendorDocumentByVendorId( pParam.id );
+            var xTotalVendorCatalogue = await _vendorCatalogueRepoInstance.getTotalByVendorId( pParam.id );
+
+            if( xTotalVendorDocument == 0 && xTotalVendorCatalogue == 0 ){
+                var xDeleteResult = await _vendorRepoInstance.delete( pParam );
+                xJoResult = xDeleteResult;
+            }else{
+                xJoResult = {
+                    status_code: '-99',
+                    status_msg: 'Data can not delete because it has related to another data'
+                }
+            }
+            
         }
 
         return xJoResult;

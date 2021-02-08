@@ -240,10 +240,55 @@ class VendorRepository{
                 inactive_at: await _utilInstance.getCurrDateTime(),
                 inactive_by: pParam.user_id,
                 inactive_by_name: pParam.user_name,
-                inactive_reason: pParam.inactive_reason,
+                inactive_reason: pParam.reason,
             }
 
-            saved = await _modelVendor.update(xJoUpdate, { where: { id: xId } }, {transaction});
+            saved = await _modelVendor.update(xJoUpdate, { where: { id: pParam.id } }, {transaction});
+
+            xJoResult = {
+                status_code: '00',
+                status_msg: 'Vendor successfully blocked'
+            }
+
+            return xJoResult;
+        
+        }catch( e ){
+            if( transaction ) await transaction.rollback();
+            xJoResult = {
+                status_code: "-99",
+                status_msg: "Failed save or update data",
+                err_msg: e
+            }
+
+            return xJoResult;
+        }
+
+    }
+
+    async unblockVendor( pParam ){
+
+        let transaction;
+
+        try{
+
+            var saved = null;
+            transaction = await sequelize.transaction();
+
+            var xJoResult = {};
+            var xJoUpdate = {
+                status: 1,
+                unblock_at: await _utilInstance.getCurrDateTime(),
+                unblock_by: pParam.user_id,
+                unblock_by_name: pParam.user_name,
+                unblock_reason: pParam.reason,
+            }
+
+            saved = await _modelVendor.update(xJoUpdate, { where: { id: pParam.id } }, {transaction});
+
+            xJoResult = {
+                status_code: '00',
+                status_msg: 'Vendor successfully unblocked'
+            }
 
             return xJoResult;
         
@@ -271,6 +316,17 @@ class VendorRepository{
         });
         
         return data;
+    }
+
+    async getTotalVendorDocumentByVendorId( pVendorId ){
+        var xData = await _modelVendorDocument.count({
+            where: {
+                vendor_id: pVendorId,
+                is_delete: 0,
+            }
+        }); 
+
+        return xData;
     }
 
     async saveVendorDocument( pParam ){
