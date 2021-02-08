@@ -115,6 +115,7 @@ class VendorCatalogueService {
                             name: xRows[index].product_name,
                             category: xRows[index].product_category_name,
                         },
+                        merk: xRows[index].merk,
                         last_price: xRows[index].last_price,
                         last_ordered: xRows[index].last_ordered,
                     });
