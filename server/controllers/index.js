@@ -1,4 +1,5 @@
 const vendor = require('./vendor');
+const vendorRateHistory = require('./vendorratehistory');
 const vendorExperience = require('./vendorexperience');
 const vendorCatalogue = require('./vendorcatalogue');
 
@@ -17,4 +18,5 @@ module.exports = {
 	master, productCategory, product, unit,
 	vendorExperience, vendorCatalogue,
 	spesificationCategory, spesificationAttribute, vendorCatalogueQuotation, vendorCatalogueSpesification,
+	vendorRateHistory,
 }

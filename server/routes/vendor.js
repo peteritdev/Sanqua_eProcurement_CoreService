@@ -1,5 +1,6 @@
 const vendorController = require('../controllers').vendor;
 const vendorExperienceController = require('../controllers').vendorExperience;
+const vendorRateHistoryController = require('../controllers').vendorRateHistory;
 const { check, validationResult } = require('express-validator');
 
 var rootAPIPath = '/api/procurement/v1/';
@@ -100,6 +101,32 @@ module.exports = (app) => {
     ];
     app.delete( rootAPIPath + 'vendor/experience/delete/:id', arrValidate, vendorExperienceController.deleteVendorExperience );
 
+    // VENDOR'S RATE HISTORY
+    arrValidate = [
+        check("vendor_id").not().isEmpty().withMessage("Parameter vendor_id cannot be empty"),
+        check("rate_date").not().isEmpty().withMessage("Parameter rate_date cannot be empty"),
+        check("pic").not().isEmpty().withMessage("Parameter pic cannot be empty"),
+        check("harga","Parameter harga must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("kualitas","Parameter kualitas must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("pengiriman","Parameter pengiriman must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("kesesuaian_penawaran","Parameter kesesuaian_penawaran must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("komunikatif","Parameter komunikatif must be integer and cannot be empty").not().isEmpty().isInt(),
+    ];
+    app.post( rootAPIPath + 'vendor/rate/save', arrValidate, vendorRateHistoryController.vendorRateHistory_Save );
 
+    arrValidate = [
+        // check("id","ID can not be empty and must be integer").not().isEmpty().isInt(),
+        check("id").not().isEmpty().withMessage("Id cannot be empty"),
+    ];
+    app.get( rootAPIPath + 'vendor/rate/detail/:id', arrValidate, vendorRateHistoryController.vendorRateHistory_GetById);
+
+    arrValidate = [];
+    app.get( rootAPIPath + 'vendor/rate/list', arrValidate, vendorRateHistoryController.vendorRateHistory_List);
+
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id can not be empty"),   
+    ];
+    app.delete( rootAPIPath + 'vendor/rate/delete/:id', arrValidate, vendorRateHistoryController.vendorRateHistory_Delete );
 
 }

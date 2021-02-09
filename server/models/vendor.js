@@ -46,6 +46,8 @@ module.exports = ( sequelize, DataTypes ) => {
         tags: DataTypes.STRING,
         company_scale: DataTypes.INTEGER, // 1=> Kecil, 2=> Menengah, 3=>Besar
 
+        avg_rate: DataTypes.DOUBLE,
+
         is_delete: DataTypes.INTEGER,
         deleted_at: DataTypes.DATE,
         deleted_by: DataTypes.INTEGER,
