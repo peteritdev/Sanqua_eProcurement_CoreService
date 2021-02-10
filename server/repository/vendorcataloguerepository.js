@@ -7,6 +7,9 @@ const Op = sequelize.Op;
 
 // Model
 const _modelDb = require('../models').ms_vendorcatalogues;
+const _modelProduct = require('../models').ms_products;
+const _modelProductCategory = require('../models').ms_productcategories;
+const _modelVendor = require('../models').ms_vendors;
 
 const Utility = require('peters-globallib');
 const _utilInstance = new Utility();
@@ -40,6 +43,8 @@ class VendorCatalogueRepository {
 
         var xOrder = ['product_name', 'ASC'];
         var xWhereVendorId = {};
+        var xWhereCategoryId = {};
+        var xInclude = [];
 
         if( pParam.order_by != '' && pParam.hasOwnProperty('order_by') ){
             xOrder = [pParam.order_by, (pParam.order_type == 'desc' ? 'DESC' : 'ASC') ];
@@ -51,6 +56,34 @@ class VendorCatalogueRepository {
             }
         }
 
+        if( pParam.hasOwnProperty('category_id') ){
+            if( pParam.category_id != '' ){
+                xWhereCategoryId = {
+                    '$product.category_id$': pParam.category_id,
+                }
+            }
+        }
+
+        xInclude = [
+            {
+                attributes: ['id','name'],
+                model: _modelProduct,
+                as: 'product',
+                include: [
+                    {
+                        attributes: ['id','name'],
+                        model: _modelProductCategory,
+                        as: 'category',
+                    }
+                ]
+            },
+            {
+                attributes: ['id','code','name'],
+                model: _modelVendor,
+                as: 'vendor',
+            }
+        ];
+
         var xParamQuery = {
             where: {
                 [Op.and]:[
@@ -58,6 +91,7 @@ class VendorCatalogueRepository {
                         is_delete: 0
                     },
                     xWhereVendorId,
+                    xWhereCategoryId,
                 ],
                 [Op.or]: [
                     {
@@ -83,6 +117,7 @@ class VendorCatalogueRepository {
                     }
                 ]
             },            
+            include: xInclude,
             order: [xOrder],
         };
 

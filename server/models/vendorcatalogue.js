@@ -45,5 +45,19 @@ module.exports = ( sequelize, DataTypes ) => {
         updated_by_name: DataTypes.STRING,
     } );
 
+    VendorCatalogue.associate = function( models ){
+        VendorCatalogue.belongsTo( models.ms_products, {
+            foreignKey: 'product_id',
+            onDelete: 'CASCADE',
+            as: 'product',
+        } );
+
+        VendorCatalogue.belongsTo( models.ms_vendors, {
+            foreignKey: 'vendor_id',
+            onDelete: 'CASCADE',
+            as: 'vendor',
+        } )
+    }
+
     return VendorCatalogue;
 }

@@ -113,9 +113,16 @@ class VendorCatalogueService {
                         product: {
                             code: xRows[index].product_code,
                             name: xRows[index].product_name,
-                            category: xRows[index].product_category_name,
+                            category: xRows[index].product.category.name,
+                        },
+                        vendor: {
+                            id: ( xRows[index].vendor != null ? await _utilInstance.encrypt( (xRows[index].vendor.id).toString(), config.cryptoKey.hashKey ) : null ),
+                            code: ( xRows[index].vendor != null ? xRows[index].vendor.code : '' ),
+                            name: ( xRows[index].vendor != null ? xRows[index].vendor.name : null ) ,
                         },
                         merk: xRows[index].merk,
+                        brochure: xRows[index].file_brochure,
+
                         last_price: xRows[index].last_price,
                         last_ordered: xRows[index].last_ordered,
                     });
