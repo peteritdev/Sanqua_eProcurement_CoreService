@@ -18,11 +18,34 @@ class VendorCatalogueRepository {
     constructor(){}
 
     async getById( pParam ){
+
+        var xInclude = [];
+        xInclude = [
+            {
+                attributes: ['id','name'],
+                model: _modelProduct,
+                as: 'product',
+                include: [
+                    {
+                        attributes: ['id','name'],
+                        model: _modelProductCategory,
+                        as: 'category',
+                    }
+                ]
+            },
+            {
+                attributes: ['id','code','name'],
+                model: _modelVendor,
+                as: 'vendor',
+            }
+        ];
+
         var xData = await _modelDb.findOne({
             where: {
                 id: pParam.id,
                 is_delete: 0,
-            }
+            },
+            include: xInclude,
         });
 
         return xData;
@@ -44,22 +67,39 @@ class VendorCatalogueRepository {
         var xOrder = ['product_name', 'ASC'];
         var xWhereVendorId = {};
         var xWhereCategoryId = {};
+        var xWhereProductId = {};
         var xInclude = [];
 
         if( pParam.order_by != '' && pParam.hasOwnProperty('order_by') ){
             xOrder = [pParam.order_by, (pParam.order_type == 'desc' ? 'DESC' : 'ASC') ];
         }
 
-        if( pParam.hasOwnProperty('vendor_id') && pParam.vendor_id != '' ){
-            xWhereVendorId = {
-                vendor_id: pParam.vendor_id,
-            }
+        if( pParam.hasOwnProperty('vendor_id')  ){
+            if( pParam.vendor_id != '' ){
+                xWhereVendorId = {
+                    vendor_id: pParam.vendor_id,
+                }
+            }            
         }
 
         if( pParam.hasOwnProperty('category_id') ){
             if( pParam.category_id != '' ){
                 xWhereCategoryId = {
                     '$product.category_id$': pParam.category_id,
+                }
+            }
+        }
+
+        if( pParam.hasOwnProperty('product_id') && pParam.hasOwnProperty('vendor_id') ){
+            if( pParam.product_id != '' && pParam.vendor_id != '' ){
+                xWhereProductId = {
+                    product_id: pParam.product_id,
+                }
+
+                xWhereVendorId = {
+                    vendor_id: {
+                        [Op.ne]: pParam.vendor_id,
+                    }
                 }
             }
         }
@@ -78,7 +118,7 @@ class VendorCatalogueRepository {
                 ]
             },
             {
-                attributes: ['id','code','name'],
+                attributes: ['id','code','name', 'avg_rate'],
                 model: _modelVendor,
                 as: 'vendor',
             }
@@ -90,6 +130,7 @@ class VendorCatalogueRepository {
                     {
                         is_delete: 0
                     },
+                    xWhereProductId,
                     xWhereVendorId,
                     xWhereCategoryId,
                 ],

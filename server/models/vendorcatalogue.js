@@ -22,6 +22,7 @@ module.exports = ( sequelize, DataTypes ) => {
 
         last_price: DataTypes.DOUBLE,
         last_ordered: DataTypes.DATE,
+        last_purchase_plant: DataTypes.STRING,
 
         status: DataTypes.INTEGER,
 
@@ -56,7 +57,7 @@ module.exports = ( sequelize, DataTypes ) => {
             foreignKey: 'vendor_id',
             onDelete: 'CASCADE',
             as: 'vendor',
-        } )
+        } );
     }
 
     return VendorCatalogue;

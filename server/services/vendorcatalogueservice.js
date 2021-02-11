@@ -30,6 +30,7 @@ class VendorCatalogueService {
     async getById( pParam ){
         var xJoResult = {};
         var xFlagProcess = true;
+        var xArrOtherVendor = [];
 
         var xDecId = await _utilInstance.decrypt( pParam.id, config.cryptoKey.hashKey );
         if( xDecId.status_code == '00' ){
@@ -42,12 +43,37 @@ class VendorCatalogueService {
         if( xFlagProcess ){
             var xResultList = await _vendorCatalogueRepoInstance.getById( pParam );
             if( xResultList != null ){
+
+                // Get Other Vendor
+                var xOtherVendorCatalogue = await _vendorCatalogueRepoInstance.list({
+                    product_id: xResultList.product_id,
+                    vendor_id: xResultList.vendor_id,
+                    keyword: '',
+                });
+
+                if( xOtherVendorCatalogue.count > 0 ){
+                    var xRows = xOtherVendorCatalogue.rows;
+                    for( var index in xRows ){
+                        xArrOtherVendor.push({
+                            id: await _utilInstance.encrypt( xRows[index].id, config.cryptoKey.hashKey ),
+                            vendor: {
+                                code: xRows[index].vendor.code,
+                                name: xRows[index].vendor.name,
+                                avg_rate: xRows[index].vendor.avg_rate,
+                            },
+                            uom_name:  xRows[index].uom_name,
+                            last_price: xRows[index].last_price,
+                        });
+                    }   
+                }
+
                 xJoResult = {
                     status_code: '00',
                     status_message: 'OK',
                     data: {
                         id: await _utilInstance.encrypt( xResultList.id, config.cryptoKey.hashKey ),
                         vendor_id: xResultList.vendor_id,
+                        vendor_name: xResultList.vendor.name,
                         product_id: xResultList.product_id,
                         product_code: xResultList.product_code,
                         product_name: xResultList.product_name,
@@ -66,6 +92,7 @@ class VendorCatalogueService {
                         last_price: xResultList.last_price,
                         last_ordered: xResultList.last_ordered,
                         status: xResultList.status,
+                        other_vendor: xArrOtherVendor,
                         created_at: xResultList.createdAt,
                         created_by_name: xResultList.created_by_name,
                         updated_at: xResultList.updatedAt,
@@ -123,8 +150,19 @@ class VendorCatalogueService {
                         merk: xRows[index].merk,
                         brochure: xRows[index].file_brochure,
 
+                        photo: {
+                            photo_1: ( ( xRows[index].product.photo_1 != null && xRows[index].product.photo_1 != '' ) ? ( config.frontParam.photoPath.product.product1 + xRows[index].product.photo_1 ) : null ),
+                            photo_2: ( ( xRows[index].product.photo_2 != null && xRows[index].product.photo_2 != '' ) ? ( config.frontParam.photoPath.product.product2 + xRows[index].product.photo_2 ) : null ),
+                            photo_3: ( ( xRows[index].product.photo_3 != null && xRows[index].product.photo_3 != '' ) ? ( config.frontParam.photoPath.product.product3 + xRows[index].product.photo_3 ) : null ),
+                            photo_4: ( ( xRows[index].product.photo_4 != null && xRows[index].product.photo_4 != '' ) ? ( config.frontParam.photoPath.product.product4 + xRows[index].product.photo_4 ) : null ),
+                            photo_5: ( ( xRows[index].product.photo_5 != null && xRows[index].product.photo_5 != '' ) ? ( config.frontParam.photoPath.product.product5 + xRows[index].product.photo_5 ) : null ),
+                        },
+
                         last_price: xRows[index].last_price,
                         last_ordered: xRows[index].last_ordered,
+                        last_purchase_plant: xRows[index].last_purchase_plant,
+                        description: xRows[index].description,
+                        uom_name: xRows[index].uom_name,
                     });
                 }
                 xJoResult = {
