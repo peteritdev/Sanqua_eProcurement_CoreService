@@ -135,6 +135,7 @@ class VendorCatalogueService {
             if( xResultList.count > 0 ){
                 var xRows = xResultList.rows;
                 for( var index in xRows ){
+
                     xJoArrData.push({
                         id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
                         product: {
