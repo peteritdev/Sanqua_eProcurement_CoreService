@@ -91,6 +91,7 @@ class VendorCatalogueService {
                         },
                         last_price: xResultList.last_price,
                         last_ordered: xResultList.last_ordered,
+                        last_purchase_plant: xResultList.last_purchase_plant,
                         status: xResultList.status,
                         other_vendor: xArrOtherVendor,
                         created_at: xResultList.createdAt,

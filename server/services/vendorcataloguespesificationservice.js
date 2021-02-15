@@ -19,6 +19,8 @@ const _repoInstance = new VendorCatalogueSpesificationRepository();
 const Utility = require('peters-globallib');
 const _utilInstance = new Utility();
 
+const _groupBy = require('json-groupby');
+
 class VendorCatalogueSpesificationService {
     constructor(){}   
 
@@ -91,28 +93,60 @@ class VendorCatalogueSpesificationService {
             var xResultList = await _repoInstance.list(pParam);
             if( xResultList.count > 0 ){
                 var xRows = xResultList.rows;
-                for( var index in xRows ){
+
+                if( pParam.hasOwnProperty('mode') ){
+                    if( pParam.mode == 'public' ){
+                        for( var index in xRows ){
     
-                    xJoArrData.push({
-                        id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
-                        spesification_category: xRows[index].spesification_category,
-                        spesification_attribute: xRows[index].spesification_attribute,
-                        description: xRows[index].description,
-                        standard: xRows[index].standard,
-                        unit: xRows[index].unit,
-                        criteria: xRows[index].criteria,
-                        created_at: xRows[index].createdAt,
-                        created_by_name: xRows[index].created_by_name,
-                        updated_at: xRows[index].updatedAt,
-                        updated_by_name: xRows[index].updated_by_name,
-                    });
+                            xJoArrData.push({
+                                id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
+                                spesification_category: xRows[index].spesification_category.name,
+                                spesification_attribute: xRows[index].spesification_attribute,
+                                description: xRows[index].description,
+                                standard: xRows[index].standard,
+                                unit: xRows[index].unit,
+                                criteria: xRows[index].criteria,
+                                created_at: xRows[index].createdAt,
+                                created_by_name: xRows[index].created_by_name,
+                                updated_at: xRows[index].updatedAt,
+                                updated_by_name: xRows[index].updated_by_name,
+                            });
+                        }
+
+                        xJoResult = {
+                            status_code: "00",
+                            status_msg: "OK",
+                            data: _groupBy(xJoArrData,['spesification_category']),
+                            total_record: xResultList.count,
+                        }
+                    }
+                }else{
+                    for( var index in xRows ){
+    
+                        xJoArrData.push({
+                            id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
+                            spesification_category: xRows[index].spesification_category,
+                            spesification_attribute: xRows[index].spesification_attribute,
+                            description: xRows[index].description,
+                            standard: xRows[index].standard,
+                            unit: xRows[index].unit,
+                            criteria: xRows[index].criteria,
+                            created_at: xRows[index].createdAt,
+                            created_by_name: xRows[index].created_by_name,
+                            updated_at: xRows[index].updatedAt,
+                            updated_by_name: xRows[index].updated_by_name,
+                        });
+                    }
+
+                    xJoResult = {
+                        status_code: "00",
+                        status_msg: "OK",
+                        data: xJoArrData,
+                        total_record: xResultList.count,
+                    }
                 }
-                xJoResult = {
-                    status_code: "00",
-                    status_msg: "OK",
-                    data: xJoArrData,
-                    total_record: xResultList.count,
-                }
+                
+                
             }else{
                 xJoResult = {
                     status_code: "-99",
