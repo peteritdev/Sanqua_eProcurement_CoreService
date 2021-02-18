@@ -3,7 +3,7 @@
     "username": "postgres",
     "password": "P455uu0rd^^ok",
     "database": "sanqua_procurementdb",
-    "host": "127.0.0.1",
+    "host": "192.168.6.229:8020",
     "port":5432,
     "dialect": "postgres",
     "dialectOptions": {
@@ -14,7 +14,7 @@
 
     "frontParam": {
       "photoPath": {
-        "logo": "http://localhost/uploads/vendor/logo/",
+        "logo": "http://localhost/uploads/vendors/logo/",
         "product": {
           "product1": "http://localhost/uploads/products/photo_1/",
           "product2": "http://localhost/uploads/products/photo_2/",
@@ -85,13 +85,13 @@
 
     "frontParam": {      
       "photoPath": {
-        "logo": "http://10.10.20.8/vendor/logo/",
+        "logo": "http://192.168.6.229:8020/vendors/logo/",
         "product": {
-          "product1": "http://10.10.20.8/products/photo_1/",
-          "product2": "http://10.10.20.8/products/photo_2/",
-          "product3": "http://10.10.20.8/products/photo_3/",
-          "product4": "http://10.10.20.8/products/photo_4/",
-          "product5": "http://10.10.20.8/products/photo_5/"
+          "product1": "http://192.168.6.229:8020/products/photo_1/",
+          "product2": "http://192.168.6.229:8020/products/photo_2/",
+          "product3": "http://192.168.6.229:8020/products/photo_3/",
+          "product4": "http://192.168.6.229:8020/products/photo_4/",
+          "product5": "http://192.168.6.229:8020/products/photo_5/"
         }
       },
       "separatorData": "Þ",
