@@ -94,6 +94,7 @@ class VendorCatalogueService {
                         last_purchase_plant: xResultList.last_purchase_plant,
                         status: xResultList.status,
                         other_vendor: xArrOtherVendor,
+                        catalogue_type: xResultList.catalogue_type,
                         created_at: xResultList.createdAt,
                         created_by_name: xResultList.created_by_name,
                         updated_at: xResultList.updatedAt,

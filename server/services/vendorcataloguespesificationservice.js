@@ -117,6 +117,7 @@ class VendorCatalogueSpesificationService {
                             status_code: "00",
                             status_msg: "OK",
                             data: _groupBy(xJoArrData,['spesification_category']),
+                            catalogue_type: xRows[index].vendor_catalogue.catalogue_type,
                             total_record: xResultList.count,
                         }
                     }
@@ -142,6 +143,7 @@ class VendorCatalogueSpesificationService {
                         status_code: "00",
                         status_msg: "OK",
                         data: xJoArrData,
+                        catalogue_type: xRows[index].vendor_catalogue.catalogue_type,
                         total_record: xResultList.count,
                     }
                 }

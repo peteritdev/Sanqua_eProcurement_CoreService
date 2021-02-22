@@ -10,6 +10,7 @@ const _modelDb = require('../models').ms_vendorcataloguespesifications;
 const _modelSpesificationCategory = require('../models').ms_spesificationcategories;
 const _modelSpesificationAttribute = require('../models').ms_spesificationattributes;
 const _modelUnit = require('../models').ms_units;
+const _modelVendorCatalogue = require('../models').ms_vendorcatalogues;
 
 const Utility = require('peters-globallib');
 const _utilInstance = new Utility();
@@ -37,6 +38,11 @@ class VendorCatalogueSpesificationRepository{
                 attributes: ['id','name'],
                 model: _modelUnit,
                 as: 'unit',
+            },
+            {
+                attributes: ['catalogue_type'],
+                model: _modelVendorCatalogue,
+                as: 'vendor_catalogue',
             },
         ];
         var xWhereAnd = [];

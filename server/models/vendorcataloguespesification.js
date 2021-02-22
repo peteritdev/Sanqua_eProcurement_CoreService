@@ -56,6 +56,11 @@ module.exports = ( sequelize, DataTypes ) => {
             foreignKey: 'unit_id',
             as: 'unit',
         } );
+
+        VendorCatalogueSpesification.belongsTo( models.ms_vendorcatalogues, {
+            foreignKey: 'vendor_catalogue_id',
+            as: 'vendor_catalogue',
+        } );
     }
 
     return VendorCatalogueSpesification;

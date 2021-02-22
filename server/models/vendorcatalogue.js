@@ -24,6 +24,8 @@ module.exports = ( sequelize, DataTypes ) => {
         last_ordered: DataTypes.DATE,
         last_purchase_plant: DataTypes.STRING,
 
+        catalogue_type: DataTypes.INTEGER, 
+
         status: DataTypes.INTEGER,
 
         is_delete: DataTypes.INTEGER,
