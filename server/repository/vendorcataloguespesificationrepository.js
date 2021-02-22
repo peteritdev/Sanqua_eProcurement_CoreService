@@ -56,17 +56,22 @@ class VendorCatalogueSpesificationRepository{
             is_delete: 0,
         });
 
-        if( pParam.vendor_catalogue_id != '' ){
-            xWhereAnd.push({
-                vendor_catalogue_id: pParam.vendor_catalogue_id
-            });
-        }
 
-        if( pParam.spesification_type != '' ){
-            xWhereAnd.push({
-                spesification_type: pParam.spesification_type
-            });
-        }
+        if( pParam.hasOwnProperty('vendor_catalogue_id') ){
+            if( pParam.vendor_catalogue_id != '' ){
+                xWhereAnd.push({
+                    vendor_catalogue_id: pParam.vendor_catalogue_id
+                });
+            }
+        }        
+
+        if( pParam.hasOwnProperty('spesification_type') ){
+            if( pParam.spesification_type != '' ){
+                xWhereAnd.push({
+                    spesification_type: pParam.spesification_type
+                });
+            }
+        }        
 
         // From xWhereOr
         if( pParam.hasOwnProperty('keyword') ){
