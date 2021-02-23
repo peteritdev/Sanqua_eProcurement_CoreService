@@ -53,6 +53,7 @@ class VendorCatalogueSpesificationService {
                             analysis_method: xResult.analysis_method,
                             min_frequency_supplier: xResult.min_frequency_supplier,
                             min_frequency_sanqua: xResult.min_frequency_sanqua,
+                            
                             created_at: xResult.createdAt,
                             created_by_name: xResult.created_by_name,
                             updated_at: xResult.updatedAt,
