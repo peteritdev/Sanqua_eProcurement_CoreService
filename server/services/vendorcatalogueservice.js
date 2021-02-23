@@ -60,6 +60,7 @@ class VendorCatalogueService {
                                 code: xRows[index].vendor.code,
                                 name: xRows[index].vendor.name,
                                 avg_rate: xRows[index].vendor.avg_rate,
+                                merk: xRows[index].merk,
                             },
                             uom_name:  xRows[index].uom_name,
                             last_price: xRows[index].last_price,
