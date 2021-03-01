@@ -7,9 +7,10 @@ const app = express();
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.json({
-  limit: '50mb'
+  limit: '50mb',
+  extended: true,
 }));
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 app.use(cors());
 
 require('./server/routes')(app);
