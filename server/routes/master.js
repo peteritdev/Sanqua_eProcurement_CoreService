@@ -111,11 +111,19 @@ module.exports = (app) => {
     ];
     app.delete( rootAPIPath + 'master/unit/delete/:id', unitController.unit_Delete );
 
+    // Upload
+    arrValidate = [];
+    app.post( rootAPIPath + 'master/unit/upload', arrValidate, unitController.unit_UploadFromExcel );
+    app.post( rootAPIPath + 'master/unit/batch_save', arrValidate, unitController.unit_BatchSave );
+
     //Business Entity
     app.get( rootAPIPath + 'master/business_entity/drop_down', masterController.businessEntity_DropDown );
     app.get( rootAPIPath + 'master/business_entity/list', masterController.businessEntity_List );
     app.post( rootAPIPath + 'master/business_entity/save', masterController.businessEntity_Save );
     app.delete( rootAPIPath + 'master/business_entity/delete/:id', masterController.businessEntity_Delete );
+    arrValidate = [];
+    app.post( rootAPIPath + 'master/business_entity/upload', arrValidate, masterController.businessEntity_UploadFromExcel );
+    app.post( rootAPIPath + 'master/business_entity/batch_save', arrValidate, masterController.businessEntity_BatchSave );
 
     //Classification
     app.get( rootAPIPath + 'master/classification/drop_down', masterController.classification_DropDown );
@@ -158,6 +166,11 @@ module.exports = (app) => {
     ];
     app.delete( rootAPIPath + 'master/spesification_category/delete/:id', spesificationCategoryController.spesificationCategory_Delete );
 
+    // Import
+    arrValidate = [];
+    app.post( rootAPIPath + 'master/spesification_category/upload', arrValidate, spesificationCategoryController.spesificationCategory_UploadFromExcel );
+    app.post( rootAPIPath + 'master/spesification_category/batch_save', arrValidate, spesificationCategoryController.spesificationCategory_BatchSave );
+
 
     // SPESIFICATION ATTRIBUTE
     // Save
@@ -190,4 +203,9 @@ module.exports = (app) => {
         check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
     ];
     app.delete( rootAPIPath + 'master/spesification_attribute/delete/:id', spesificationAttributeController.spesificationAttribute_Delete );
+
+    // Import
+    arrValidate = [];
+    app.post( rootAPIPath + 'master/spesification_attribute/upload', arrValidate, spesificationAttributeController.spesificationAttribute_UploadFromExcel );
+    app.post( rootAPIPath + 'master/spesification_attribute/batch_save', arrValidate, spesificationAttributeController.spesificationAttribute_BatchSave );
 }

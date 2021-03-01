@@ -32,6 +32,12 @@ module.exports = (app) => {
     app.post( rootAPIPath + 'vendor/save', arrValidate, vendorController.save );
 
     arrValidate = [
+        check("name").not().isEmpty().withMessage("Parameter name cannot be empty"),
+        check("code").not().isEmpty().withMessage("Parameter code cannot be empty"),
+    ];
+    app.post( rootAPIPath + 'vendor/batch_save', arrValidate, vendorController.vendor_BatchSave );
+
+    arrValidate = [
         // check("id","ID can not be empty and must be integer").not().isEmpty().isInt(),
         check("id").not().isEmpty().withMessage("Id cannot be empty"),
     ];
@@ -62,6 +68,9 @@ module.exports = (app) => {
         check("reason").not().isEmpty().withMessage("Parameter reason cannot be empty"),
     ];
     app.post( rootAPIPath + 'vendor/unblock', vendorController.unblockVendor );
+    
+    // Upload 
+    app.post( rootAPIPath + 'vendor/upload', vendorController.vendor_UploadExcel );
 
     // VENDOR'S DOCUMENTS
     arrValidate = [];

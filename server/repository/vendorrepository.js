@@ -164,6 +164,8 @@ class VendorRepository{
         var xAct = pParam.act;
         var xId = 0;
 
+        console.log(JSON.stringify(pParam));
+
         delete pParam.act;
 
         try{
@@ -179,8 +181,6 @@ class VendorRepository{
                 pParam.created_by_name = pParam.user_name;
                 delete pParam.user_id;
                 delete pParam.user_name;
-
-                console.log(">>> Repository : "+  JSON.stringify(pParam));
 
                 saved = await _modelVendor.create(pParam,{transaction});
     
@@ -207,6 +207,25 @@ class VendorRepository{
                 joResult = {
                     status_code: "00",
                     status_msg: "Data has been successfully updated",
+                }
+
+            }else if( pAct == "update_by_code" ){
+                
+                pParam.updatedAt = await _utilInstance.getCurrDateTime();
+                var xCode = pParam.code;
+                delete pParam.code;
+                var xWhere = {
+                    where : {
+                        code: xCode,
+                    }
+                };
+                saved = await _modelVendor.update( pParam, xWhere, {transaction} );
+
+                await transaction.commit();
+
+                joResult = {
+                    status_code: "00",
+                    status_msg: "Data has been successfully updated"
                 }
 
             }
@@ -303,6 +322,17 @@ class VendorRepository{
             return xJoResult;
         }
 
+    }
+
+    async getVendorByCode( pCode ){
+        var data = await _modelVendor.findOne({
+            where: {
+               code: pCode,
+               is_delete: 0,
+            }
+        });
+
+        return data;
     }
 
     // VENDOR'S DOCUMENT

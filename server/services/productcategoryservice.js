@@ -386,6 +386,8 @@ class ProductCategoryService {
                 jaResult.push(xAddResult);
             }
 
+            await _utilInstance.changeSequenceTable((pParam.data.length)+1, 'ms_productcategories','id');
+
             joResult = {
                 "status_code": "00",
                 "status_msg": "Finish save to database",

@@ -8,7 +8,60 @@ const _vendorCatalogueServiceInstance = new VendorCatalogueService();
 
 const { check, validationResult } = require('express-validator');
 
-module.exports = { save, list, deleteVendorCatalogue, getById }
+module.exports = { save, list, deleteVendorCatalogue, getById, vendorCatalogue_UploadFromExcel, vendorCatalogue_BatchSave }
+
+async function vendorCatalogue_UploadFromExcel( req, res ){
+
+    var joResult = {};
+    var oAuthResult = await _oAuthServiceInstance.verifyToken( req.headers['x-token'], req.headers['x-method'] );
+
+    if( oAuthResult.status_code == "00" ){
+        if( oAuthResult.token_data.status_code == "00" ){
+            req.body.user_id = oAuthResult.token_data.result_verify.id;
+            req.body.id = oAuthResult.token_data.result_verify.id;
+            await _vendorCatalogueServiceInstance.uploadFromExcel(req, res);
+            
+            /*joResult.token_data = oAuthResult.token_data;
+            joResult = JSON.stringify(joResult);*/
+        }else{
+            joResult = JSON.stringify(oAuthResult);
+            res.setHeader('Content-Type','application/json');
+            res.status(200).send(joResult);
+        }
+    }else{
+        joResult = JSON.stringify(oAuthResult);
+        res.setHeader('Content-Type','application/json');
+        res.status(200).send(joResult);
+    }    
+
+}
+
+async function vendorCatalogue_BatchSave( req, res ){
+
+    var joResult = {};
+    var oAuthResult = await _oAuthServiceInstance.verifyToken( req.headers['x-token'], req.headers['x-method'] );
+
+    if( oAuthResult.status_code == "00" ){
+        if( oAuthResult.token_data.status_code == "00" ){
+            req.body.user_id = oAuthResult.token_data.result_verify.id;
+            req.body.id = oAuthResult.token_data.result_verify.id;
+            joResult = await _vendorCatalogueServiceInstance.batchSave(req.body);
+            
+            joResult = JSON.stringify(joResult);
+            res.setHeader('Content-Type','application/json');
+            res.status(200).send(joResult);
+        }else{
+            joResult = JSON.stringify(oAuthResult);
+            res.setHeader('Content-Type','application/json');
+            res.status(200).send(joResult);
+        }
+    }else{
+        joResult = JSON.stringify(oAuthResult);
+        res.setHeader('Content-Type','application/json');
+        res.status(200).send(joResult);
+    }    
+
+}
 
 async function list( req, res ){
 

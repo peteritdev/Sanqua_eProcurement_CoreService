@@ -64,6 +64,17 @@ class BusinessEntityRepository {
         return data;
     }
 
+    async getById( pParam ){
+        var data = await _modelDb.findOne({
+            where: {
+                id: pParam.id,
+                is_delete: 0
+            }
+        });
+        
+        return data;
+    }
+
     async save(pParam, pAct){
         let xTransaction;
         var xJoResult = {};
@@ -181,7 +192,7 @@ class BusinessEntityRepository {
 
             return xJoResult;
         }
-    }
+    }   
 }
 
 module.exports = BusinessEntityRepository;

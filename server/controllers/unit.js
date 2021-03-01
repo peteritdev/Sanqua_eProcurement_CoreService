@@ -9,7 +9,7 @@ const _oAuthServiceInstance = new OAuthService();
 //Validation
 const { check, validationResult } = require('express-validator');
 
-module.exports = {unit_Save, unit_List, unit_Delete, unit_DropDown};
+module.exports = {unit_Save, unit_List, unit_Delete, unit_DropDown, unit_UploadFromExcel, unit_BatchSave};
 
 // Document Type
 async function unit_List( req, res ){
@@ -153,4 +153,51 @@ async function unit_Delete( req, res ){
 
     res.setHeader('Content-Type','application/json');
     res.status(200).send(joResult);
+}
+
+async function unit_UploadFromExcel( req, res ){
+    var joResult = {};
+    var oAuthResult = await _oAuthServiceInstance.verifyToken( req.headers['x-token'], req.headers['x-method'] );
+
+    if( oAuthResult.status_code == "00" ){
+        if( oAuthResult.token_data.status_code == "00" ){
+            req.body.user_id = oAuthResult.token_data.result_verify.id;
+            req.body.id = oAuthResult.token_data.result_verify.id;
+            await _unitServiceInstance.uploadFromExcel(req, res);
+        }else{
+            joResult = JSON.stringify(oAuthResult);
+            res.setHeader('Content-Type','application/json');
+            res.status(200).send(joResult);
+        }
+    }else{
+        joResult = JSON.stringify(oAuthResult);
+        res.setHeader('Content-Type','application/json');
+        res.status(200).send(joResult);
+    }    
+}
+
+async function unit_BatchSave( req, res ){
+    var joResult = {};
+    var oAuthResult = await _oAuthServiceInstance.verifyToken( req.headers['x-token'], req.headers['x-method'] );
+
+    if( oAuthResult.status_code == "00" ){
+        if( oAuthResult.token_data.status_code == "00" ){
+            req.body.user_id = oAuthResult.token_data.result_verify.id;
+            req.body.id = oAuthResult.token_data.result_verify.id;
+            joResult = await _unitServiceInstance.batchSave(req.body);
+
+            joResult = JSON.stringify(joResult);
+            res.setHeader('Content-Type','application/json');
+            res.status(200).send(joResult);
+            
+        }else{
+            joResult = JSON.stringify(oAuthResult);
+            res.setHeader('Content-Type','application/json');
+            res.status(200).send(joResult);
+        }
+    }else{
+        joResult = JSON.stringify(oAuthResult);
+        res.setHeader('Content-Type','application/json');
+        res.status(200).send(joResult);
+    }    
 }

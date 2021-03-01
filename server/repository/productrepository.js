@@ -88,6 +88,17 @@ class ProductRepository{
         return data;
     }
 
+    async getProductByCode( pParam ){
+        var data = await _modelDb.findOne({
+            where: {
+                code: pParam.code,
+                is_delete: 0
+            }
+        });
+        
+        return data;
+    }
+
     async getProductById( pParam ){
         var xData = await _modelDb.findOne({
             where: {

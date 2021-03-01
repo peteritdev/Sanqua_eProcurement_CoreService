@@ -55,6 +55,11 @@ module.exports = (app) => {
     ];
     app.delete( rootAPIPath + 'vendor/catalogue/delete/:id', vendorCatalogueController.deleteVendorCatalogue );
 
+    // Import
+    arrValidate = [];
+    app.post( rootAPIPath + 'vendor/catalogue/upload', arrValidate, vendorCatalogueController.vendorCatalogue_UploadFromExcel );
+    app.post( rootAPIPath + 'vendor/catalogue/batch_save', arrValidate, vendorCatalogueController.vendorCatalogue_BatchSave );
+
     // VENDOR CATALOGUE QUOTATION
     // Save
     arrValidate = [];
@@ -91,6 +96,11 @@ module.exports = (app) => {
         check("id").not().isEmpty().withMessage("Parameter id can not be empty"),
     ];
     app.delete( rootAPIPath + 'vendor/catalogue_quotation/delete/:id', vendorCatalogueQuotationController.vendorCatalogueQuotation_Delete );
+
+    // Import
+    arrValidate = [];
+    app.post( rootAPIPath + 'vendor/catalogue_quotation/upload', arrValidate, vendorCatalogueQuotationController.vendorCatalogueQuotation_UploadFromExcel );
+    app.post( rootAPIPath + 'vendor/catalogue_quotation/batch_save', arrValidate, vendorCatalogueQuotationController.vendorCatalogueQuotation_BatchSave );
 
 
     // VENDOR CATALOGUE SPESIFICATION

@@ -17,6 +17,34 @@ const _utilInstance = new Utility();
 class VendorCatalogueRepository {
     constructor(){}
 
+    async getByVendorCodeAndProductCode( pParam ){
+        var xInclude = [];
+
+        xInclude = [
+            {
+                attributes: ['id','name','code'],
+                model: _modelProduct,
+                as: 'product',
+            },
+            {
+                attributes: ['id','code','name'],
+                model: _modelVendor,
+                as: 'vendor',
+            }
+        ];
+
+        var xData = await _modelDb.findOne({
+            where: {
+                '$vendor.code$': pParam.vendor_code,
+                '$product.code$': pParam.product_code,
+                is_delete: 0,
+            },
+            include: xInclude,
+        });
+
+        return xData;
+    }
+
     async getById( pParam ){
 
         var xInclude = [];
@@ -220,6 +248,26 @@ class VendorCatalogueRepository {
                 var xWhere = {
                     where : {
                         id: xId,
+                    }
+                };
+                xSaved = await _modelDb.update( pParam, xWhere, {xTransaction} );
+
+                await xTransaction.commit();
+
+                xJoResult = {
+                    status_code: "00",
+                    status_msg: "Data has been successfully updated"
+                }
+
+            }else if( pAct == "update_by_vendor_id_product_id" ){
+                
+                pParam.updatedAt = await _utilInstance.getCurrDateTime();
+                var xId = pParam.id;
+                delete pParam.id;
+                var xWhere = {
+                    where : {
+                        product_id: pParam.product_id,
+                        vendor_id: pParam.vendor_Id,
                     }
                 };
                 xSaved = await _modelDb.update( pParam, xWhere, {xTransaction} );

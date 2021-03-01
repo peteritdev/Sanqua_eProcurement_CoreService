@@ -6,6 +6,7 @@ const sequelize = require('sequelize');
 const dateFormat = require('dateformat');
 const Op = sequelize.Op;
 const bcrypt = require('bcrypt');
+const fs = require('fs');
 
 const env         = process.env.NODE_ENV || 'development';
 const config      = require(__dirname + '/../config/config.json')[env];
@@ -21,11 +22,232 @@ const _vendorCatalogueRepoInstance = new VendorCatalogueRepository();
 const ProductRepository = require('../repository/productrepository.js');
 const _productRepoInstance = new ProductRepository();
 
+const VendorRepository = require('../repository/vendorrepository.js');
+const _vendorRepoInstance = new VendorRepository();
+
 const UnitRepository = require('../repository/unitrepository.js');
 const _unitRepoInstance = new UnitRepository();
 
+const multer = require('multer');
+const _xlsToJson = require('xls-to-json-lc');
+const _xlsxToJson = require('xlsx-to-json-lc');
+
+// Setup multer storage
+var storage = multer.diskStorage({
+    destination: function( req, file, cb ){
+      cb(null, './uploads/')
+    },
+    filename: function( req, file, cb ){
+      var dateTimeStamp = Date.now();
+      cb( null, file.fieldname + '-' + dateTimeStamp + '.' + file.originalname.split('.')[file.originalname.split('.').length -1])
+    }
+});
+  
+var upload = multer({
+    storage: storage,
+    fileFilter: function( req, file, callback ){
+        if (['xls', 'xlsx'].indexOf(file.originalname.split('.')[file.originalname.split('.').length-1]) === -1) {
+            return callback(new Error('Wrong extension type'));
+        }
+        callback(null, true);
+    }
+}).single('file');
+
+var upload = multer({
+    storage: storage
+}).single('file');
+
 class VendorCatalogueService {
     constructor(){}
+
+    async uploadFromExcel( pReq, pRes ){
+        var xExcelToJSON;
+        upload( pReq, pRes, function( pErr ){
+            if( pErr ){
+                var joResult =  {
+                    "status_code": "-99",
+                    "status_msg": "",
+                    "err_msg": pErr
+                }
+
+                try {
+                    fs.unlinkSync(pReq.file.path);
+                } catch(e) {
+                    //error deleting the file
+                    console.log(e);
+                }
+                
+                pRes.setHeader('Content-Type','application/json');
+                pRes.status(200).send(joResult);
+            }
+
+            console.log(pReq.file)
+
+            if( !pReq.file ){
+                var joResult = {
+                    "status_code": "-99",
+                    "status_msg": "",
+                    "err_msg": "No file passed"
+                }
+
+                try {
+                    fs.unlinkSync(pReq.file.path);
+                } catch(e) {
+                    //error deleting the file
+                    console.log(e);
+                }
+
+                pRes.setHeader('Content-Type','application/json');
+                pRes.status(200).send(joResult);
+            }
+
+            //start convert process
+            /** Check the extension of the incoming file and
+             *  use the appropriate module
+             */
+            if(pReq.file.originalname.split('.')[pReq.file.originalname.split('.').length-1] === 'xlsx'){
+                xExcelToJSON = _xlsxToJson;
+            } else {
+                xExcelToJSON = _xlsToJson;
+            }
+
+            try {
+                xExcelToJSON({
+                    input: pReq.file.path, //the same path where we uploaded our file
+                    output: null, //since we don't need output.json
+                    lowerCaseHeaders:true
+                }, function(err,result){
+                    if(err) {
+                        var joResult = {
+                            "status_code": "-99",
+                            "status_msg": "",
+                            "err_msg": err
+                        }
+
+                        try {
+                            fs.unlinkSync(pReq.file.path);
+                        } catch(e) {
+                            //error deleting the file
+                            console.log(e);
+                        }
+
+                        pRes.setHeader('Content-Type','application/json');
+                        pRes.status(200).send(joResult);
+                    }
+                    var joResult = {
+                        "status_code": "00",
+                        "status_msg": "OK",
+                        "data": result,
+                        "err_msg": null
+                    }
+
+                    try {
+                        fs.unlinkSync(pReq.file.path);
+                    } catch(e) {
+                        //error deleting the file
+                        console.log(e);
+                    }
+
+                    console.log(joResult);
+
+                    pRes.setHeader('Content-Type','application/json');
+                    pRes.status(200).send(joResult);
+                });
+            } catch (e){
+                var joResult = {
+                    "status_code": "-99",
+                    "status_msg": "",
+                    "err_msg": "Corupted excel file"
+                }
+
+                try {
+                    fs.unlinkSync(pReq.file.path);
+                } catch(e) {
+                    //error deleting the file
+                    console.log(e);
+                }
+
+                pRes.setHeader('Content-Type','application/json');
+                pRes.status(200).send(joResult);
+            }
+
+        } );
+    }
+
+    async batchSave( pParam ){
+        
+        var joResult;
+        var jaResult = [];
+        var jaExistingData = [];
+
+        if( pParam.act == "add" ){
+
+            var xCheckData_Vendor = null;
+            var xCheckData_Product = null;
+            var xCheckData_Catalogue = null;
+            var xStringMsg = "";
+
+            for( var i = 0; i < pParam.data.length; i++ ){
+
+                xCheckData_Vendor = null;   
+                xCheckData_Product = null;    
+                xCheckData_Catalogue = null;            
+                
+                if( pParam.data[i].vendor_code != '' && pParam.data[i].product_code != '' ){
+
+                    // Check vendor_code is exists
+                    xCheckData_Vendor = await _vendorRepoInstance.getVendorByCode( pParam.data[i].vendor_code );
+
+                    // Check product_code is exists
+                    xCheckData_Product = await _productRepoInstance.getProductByCode( { code: pParam.data[i].product_code } );
+
+                    if( xCheckData_Vendor == null ){
+                        xStringMsg += "Row " + (i+1) + " vendor code " + pParam.data[i].vendor_code + " doesn't exists, \n"; 
+                    }
+
+                    if( xCheckData_Product == null ){
+                        xStringMsg += "Row " + (i+1) + " product code " + pParam.data[i].product_code + " doesn't exists, \n";    
+                    }
+
+                    // If Vendor code and product code is exists
+                    if( xCheckData_Vendor != null && xCheckData_Product != null ){
+                        // Check if catalogue exists
+                        xCheckData_Catalogue = await _vendorCatalogueRepoInstance.getByVendorCodeAndProductCode( { vendor_code: pParam.data[i].vendor_code, product_code: pParam.data[i].product_code } );
+                        pParam.data[i].vendor_id = xCheckData_Vendor.id;
+                        pParam.data[i].product_id = xCheckData_Product.id;
+                        if( xCheckData_Catalogue == null ){                            
+                            var xAddResult = await _vendorCatalogueRepoInstance.save( pParam.data[i], "add" );
+                        }else{                            
+                            var xAddResult = await _vendorCatalogueRepoInstance.save( pParam.data[i], "update_by_vendor_id_product_id" );
+                        }
+                    }
+
+                    // if( xCheckData != null ){
+                    //     var xAddResult = await _businessEntityRepoInstance.save( pParam.data[i], "update" );
+                    // }else{
+                    //     pParam.data[i].act = pParam.act;
+                    //     var xAddResult = await _businessEntityRepoInstance.save( pParam.data[i], pParam.act );
+                    // }
+                }else{
+                    xStringMsg += "Row " + (i+1) + " vendor code and product code can not be empty, \n";
+                }               
+
+            }
+
+            await _utilInstance.changeSequenceTable((pParam.data.length)+1, 'ms_vendorcatalogues','id');
+
+            joResult = {
+                "status_code": "00",
+                "status_msg": "Finish save to database",
+                "err_msg": xStringMsg,
+            }
+        }else if( pParam.act == "update" ){
+
+        }
+
+        return joResult;
+
+    }
 
     async getById( pParam ){
         var xJoResult = {};

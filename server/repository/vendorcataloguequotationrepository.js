@@ -198,6 +198,45 @@ class VendorCatalogueRepository{
             return xJoResult;
         }
     }
+
+    async deletePermanent( pParam ){
+        let xTransaction;
+        var xJoResult = {};
+
+        try{
+            var xSaved = null;
+            xTransaction = await sequelize.transaction();
+
+            xSaved = await _modelDb.destroy(
+                {
+                    where: {
+                        id: pParam.id
+                    },
+                    force: true,
+                },
+                {xTransaction}
+            );
+    
+            await xTransaction.commit();
+
+            xJoResult = {
+                status_code: "00",
+                status_msg: "Data has been successfully deleted permanently",
+            }
+
+            return xJoResult;
+
+        }catch(e){
+            if( xTransaction ) await xTransaction.rollback();
+            xJoResult = {
+                status_code: "-99",
+                status_msg: "Failed delete data permanently",
+                err_msg: e
+            }
+
+            return xJoResult;
+        }
+    }
 }
 
 module.exports = VendorCatalogueRepository;
