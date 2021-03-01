@@ -19,7 +19,7 @@ const VendorCatalogueRepository = require('../repository/vendorcataloguereposito
 const _vendorCatalogueRepoInstance = new VendorCatalogueRepository();
 
 //Util
-const Utility = require('../utils/globalutility.js');
+const Utility = require('peters-globallib');
 const { forEach } = require('lodash');
 const _utilInstance = new Utility();
 
@@ -75,7 +75,7 @@ class VendorService {
             for(var index in xRows){                
 
                 xJoArrData.push({
-                    id: await _utilInstance.encrypt((xRows[index].id).toString()),
+                    id: await _utilInstance.encrypt((xRows[index].id).toString(), config.cryptoKey.hashKey),
                     code: xRows[index].code,
                     name: xRows[index].name,
                     status: xRows[index].status,
@@ -97,7 +97,7 @@ class VendorService {
         var xJoResult;
         var xFlag = true;
 
-        var xDecId = await _utilInstance.decrypt( pParam.id );
+        var xDecId = await _utilInstance.decrypt( pParam.id, config.cryptoKey.hashKey );
         if( xDecId.status_code == '00' ){
             pParam.id = xDecId.decrypted;
         }else{
@@ -112,7 +112,7 @@ class VendorService {
                     status_code: "00",
                     status_msg: "OK",
                     data: {
-                        id: await _utilInstance.encrypt( xData.id ),
+                        id: await _utilInstance.encrypt( xData.id, config.cryptoKey.hashKey ),
                         name: xData.name,
                         logo: ( xData.logo == null ? '' : ( config.frontParam.photoPath.logo + xData.logo ) ),
                         npwp: xData.npwp,
@@ -123,9 +123,9 @@ class VendorService {
                         city: xData.city,
                         address: xData.address,
                         zip_code: xData.zip_code,
-                        phone1: (await _utilInstance.decrypt( xData.phone1 )).decrypted,
-                        phone2: (await _utilInstance.decrypt( xData.phone2 )).decrypted,
-                        email: (await _utilInstance.decrypt( xData.email )).decrypted,
+                        phone1: (await _utilInstance.decrypt( xData.phone1, config.cryptoKey.hashKey )).decrypted,
+                        phone2: (await _utilInstance.decrypt( xData.phone2, config.cryptoKey.hashKey )).decrypted,
+                        email: (await _utilInstance.decrypt( xData.email, config.cryptoKey.hashKey )).decrypted,
                         website: xData.website,
                         about: xData.about,
                         location_lat: xData.location_lat,
@@ -154,12 +154,12 @@ class VendorService {
         if( ( param.act == "add" && checkDuplicateResult == null ) || param.act == "update" ){
 
             if( param.act == "update" ){
-                xDec = await _utilInstance.decrypt(param.id);
+                xDec = await _utilInstance.decrypt(param.id, config.cryptoKey.hashKey);
                 param.id = xDec.decrypted;
             }
 
             if( ( param.act == "update" && xDec.status_code == "00" ) || ( param.act == "add" ) ){                    
-                var xDecUserId = await _utilInstance.decrypt(param.user_id);
+                var xDecUserId = await _utilInstance.decrypt(param.user_id, config.cryptoKey.hashKey);
                 if( xDecUserId.status_code == "00" ){
                     param.user_id = xDecUserId.decrypted;                    
                 }else{
@@ -193,10 +193,10 @@ class VendorService {
         var xFlagProcess = true;
         var xDecId = null;
 
-        xDecId = await _utilInstance.decrypt( pParam.id );
+        xDecId = await _utilInstance.decrypt( pParam.id, config.cryptoKey.hashKey );
         if( xDecId.status_code == "00" ){
             pParam.id = xDecId.decrypted;
-            xDecId = await _utilInstance.decrypt(pParam.user_id);
+            xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
             if( xDecId.status_code == "00" ){
                 pParam.user_id = xDecId.decrypted;
             }else{
@@ -229,10 +229,10 @@ class VendorService {
         var xFlagProcess = true;
         var xDecId = null;
 
-        xDecId = await _utilInstance.decrypt( pParam.id );
+        xDecId = await _utilInstance.decrypt( pParam.id, config.cryptoKey.hashKey );
         if( xDecId.status_code == "00" ){
             pParam.id = xDecId.decrypted;
-            xDecId = await _utilInstance.decrypt(pParam.user_id);
+            xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
             if( xDecId.status_code == "00" ){
                 pParam.user_id = xDecId.decrypted;
             }else{
@@ -265,10 +265,10 @@ class VendorService {
         var xDec = null;
         var isExists = null;       
 
-        xDec = await _utilInstance.decrypt(pParam.vendor_id);
+        xDec = await _utilInstance.decrypt(pParam.vendor_id, config.cryptoKey.hashKey);
         if( xDec.status_code == '00' ){
             pParam.vendor_id = xDec.decrypted;     
-            xDec = await _utilInstance.decrypt(pParam.user_id);
+            xDec = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
             if( xDec.status_code == "00" ){
                 pParam.user_id = xDec.decrypted;                    
             }else{
