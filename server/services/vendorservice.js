@@ -514,7 +514,7 @@ class VendorService {
                 pParam.data[i].province_id = parseInt(pParam.data[i].province_id);
                 pParam.data[i].city_id = parseInt(pParam.data[i].city_id);
 
-                if( pParam.data[i].vendor_code == '' ){
+                if( pParam.data[i].code == '' ){
                     xMessageResult += "Vendor name <strong>" + pParam.data[i].name + "</strong> must have code. Please fill valid code <br>";
                 }else{
                     // If row has id meaning update based on id
