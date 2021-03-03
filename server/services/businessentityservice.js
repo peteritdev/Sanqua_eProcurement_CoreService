@@ -326,28 +326,25 @@ class BusinessEntityService {
         if( pParam.act == "add" ){
             for( var i = 0; i < pParam.data.length; i++ ){
 
-                if( pParam.data[i].code != '' ){
-                    var xCheckData = await _businessEntityRepoInstance.getById( { id: parseInt(pParam.data[i].id) } );
-
-                    if( xCheckData != null ){
+                if( pParam.data[i].hasOwnProperty('id') ){
+                    if( pParam.data[i].id != '' ){
+                        pParam.data[i].act = "update";
                         var xAddResult = await _businessEntityRepoInstance.save( pParam.data[i], "update" );
-                    }else{
-                        pParam.data[i].act = pParam.act;
-                        var xAddResult = await _businessEntityRepoInstance.save( pParam.data[i], pParam.act );
-                    }
+                    }         
                 }else{
                     var xAddResult = await _businessEntityRepoInstance.save( pParam.data[i], pParam.act );
-                }               
+                }   
 
             }
 
-            await _utilInstance.changeSequenceTable((pParam.data.length)+1, 'ms_businessentities','id');
+            // await _utilInstance.changeSequenceTable((pParam.data.length)+1, 'ms_units','id');
 
             joResult = {
                 "status_code": "00",
                 "status_msg": "Finish save to database",
             }
         }else if( pParam.act == "update" ){
+            
 
         }
 

@@ -199,27 +199,40 @@ class VendorCatalogueService {
                     xCheckData_Vendor = await _vendorRepoInstance.getVendorByCode( pParam.data[i].vendor_code );
 
                     // Check product_code is exists
-                    xCheckData_Product = await _productRepoInstance.getProductByCode( { code: pParam.data[i].product_code } );
+                    xCheckData_Product = await _productRepoInstance.getProductByCode( { code: pParam.data[i].product_code } );                  
+                    
 
                     if( xCheckData_Vendor == null ){
                         xStringMsg += "Row " + (i+1) + " vendor code " + pParam.data[i].vendor_code + " doesn't exists, \n"; 
+                    }else{
+                        pParam.data[i].vendor_id = xCheckData_Vendor.id;
                     }
 
                     if( xCheckData_Product == null ){
                         xStringMsg += "Row " + (i+1) + " product code " + pParam.data[i].product_code + " doesn't exists, \n";    
+                    }else{
+                        pParam.data[i].product_id = xCheckData_Product.id;
                     }
 
-                    // If Vendor code and product code is exists
-                    if( xCheckData_Vendor != null && xCheckData_Product != null ){
-                        // Check if catalogue exists
-                        xCheckData_Catalogue = await _vendorCatalogueRepoInstance.getByVendorCodeAndProductCode( { vendor_code: pParam.data[i].vendor_code, product_code: pParam.data[i].product_code } );
-                        pParam.data[i].vendor_id = xCheckData_Vendor.id;
-                        pParam.data[i].product_id = xCheckData_Product.id;
-                        if( xCheckData_Catalogue == null ){                            
-                            var xAddResult = await _vendorCatalogueRepoInstance.save( pParam.data[i], "add" );
-                        }else{                            
-                            var xAddResult = await _vendorCatalogueRepoInstance.save( pParam.data[i], "update_by_vendor_id_product_id" );
+                    if( pParam.data[i].hasOwnProperty('id') ){
+                        if( pParam.data[i].id != '' ){
+                            pParam.data[i].act = "update";
+                            var xAddResult = await _vendorCatalogueRepoInstance.save( pParam.data[i], "update" );
+                        }         
+                    }else{
+
+                        // If Vendor code and product code is exists
+                        if( xCheckData_Vendor != null && xCheckData_Product != null ){
+                            // Check if catalogue exists
+                            xCheckData_Catalogue = await _vendorCatalogueRepoInstance.getByVendorCodeAndProductCode( { vendor_code: pParam.data[i].vendor_code, product_code: pParam.data[i].product_code } );
+                            
+                            if( xCheckData_Catalogue == null ){                            
+                                var xAddResult = await _vendorCatalogueRepoInstance.save( pParam.data[i], "add" );
+                            }else{                            
+                                var xAddResult = await _vendorCatalogueRepoInstance.save( pParam.data[i], "update_by_vendor_id_product_id" );
+                            }
                         }
+
                     }
 
                     // if( xCheckData != null ){
@@ -234,7 +247,7 @@ class VendorCatalogueService {
 
             }
 
-            await _utilInstance.changeSequenceTable((pParam.data.length)+1, 'ms_vendorcatalogues','id');
+            // await _utilInstance.changeSequenceTable((pParam.data.length)+1, 'ms_vendorcatalogues','id');
 
             joResult = {
                 "status_code": "00",

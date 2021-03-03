@@ -324,12 +324,21 @@ class VendorRepository{
 
     }
 
-    async getVendorByCode( pCode ){
-        var data = await _modelVendor.findOne({
-            where: {
-               code: pCode,
-               is_delete: 0,
+    async getVendorByCode( pCode, pId = null ){
+
+        var xWhere = {
+            code: pCode,
+            is_delete: 0,
+        };
+
+        if( pId != null ) {
+            xWhere.id = {
+                [Op.ne]: pId,
             }
+        }
+
+        var data = await _modelVendor.findOne({
+            where: xWhere,
         });
 
         return data;

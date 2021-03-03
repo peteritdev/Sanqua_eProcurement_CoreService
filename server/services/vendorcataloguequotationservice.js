@@ -209,15 +209,23 @@ class VendorCatalogueQuotationService {
                         xStringMsg += "Row " + (i+1) + " product code " + pParam.data[i].product_code + " doesn't exists, \n";    
                     }
 
-                    // If Vendor code and product code is exists
-                    if( xCheckData_Vendor != null && xCheckData_Product != null ){
-                        // Get Catalogue Id from Vendor Catalogue
-                        xCheckData_Catalogue = await _vendorCatalogueRepoInstance.getByVendorCodeAndProductCode( { vendor_code: pParam.data[i].vendor_code, product_code: pParam.data[i].product_code } );
-                        if( xCheckData_Catalogue == null ){                            
-                            xStringMsg += "Row " + (i+1) + " vendor code and product code not valid, \n";
-                        }else{                            
-                            pParam.data[i].vendor_catalogue_id = xCheckData_Catalogue.id;
-                            var xAddResult = await _repoInstance.save( pParam.data[i], "add" );
+                    if( pParam.data[i].hasOwnProperty('id') ){
+                        if( pParam.data[i].id != '' ){
+                            pParam.data[i].act = "update";
+                            var xAddResult = await _repoInstance.save( pParam.data[i], "update" );
+                        }         
+                    }else{
+
+                        // If Vendor code and product code is exists
+                        if( xCheckData_Vendor != null && xCheckData_Product != null ){
+                            // Get Catalogue Id from Vendor Catalogue
+                            xCheckData_Catalogue = await _vendorCatalogueRepoInstance.getByVendorCodeAndProductCode( { vendor_code: pParam.data[i].vendor_code, product_code: pParam.data[i].product_code } );
+                            if( xCheckData_Catalogue == null ){                            
+                                xStringMsg += "Row " + (i+1) + " vendor code and product code not valid, \n";
+                            }else{                            
+                                pParam.data[i].vendor_catalogue_id = xCheckData_Catalogue.id;
+                                var xAddResult = await _repoInstance.save( pParam.data[i], "add" );
+                            }
                         }
                     }
 
@@ -227,7 +235,7 @@ class VendorCatalogueQuotationService {
 
             }
 
-            await _utilInstance.changeSequenceTable((pParam.data.length)+1, 'ms_vendorcataloguequotations','id');
+            // await _utilInstance.changeSequenceTable((pParam.data.length)+1, 'ms_vendorcataloguequotations','id');
 
             joResult = {
                 "status_code": "00",

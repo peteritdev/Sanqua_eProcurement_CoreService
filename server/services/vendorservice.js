@@ -501,65 +501,62 @@ class VendorService {
         
         var joResult;
         var jaResult = [];
-        var jaDuplicateResult = [];
+        var xMessageResult = "";
 
         console.log(">>> Length : " + pParam.data.length);
 
         if( pParam.act == "add" ){
             for( var i = 0; i < pParam.data.length; i++ ){
-                /*console.log("Data ke (" + i + ")");
-                console.log("-------------------");
-                console.log("invoice_no: " + pParam.data[i].invoice_no);
-                console.log("invoice_date: " + pParam.data[i].invoice_date);
-                console.log("deduction: " + pParam.data[i].deduction);
-                console.log("vendor_code: " + pParam.data[i].vendor_code);
-                console.log("vendor_name: " + pParam.data[i].vendor_name);
-                console.log("total_after_tax: " + pParam.data[i].total_after_tax);
-                console.log("receive_invoice_date: " + pParam.data[i].receive_invoice_date);*/
 
-                if( pParam.data[i].code != '' ){
-                    var xCheckData = await _vendorRepoInstance.getVendorByCode( pParam.data[i].code );
+                pParam.data[i].business_entity_id = parseInt(pParam.data[i].business_entity_id);
+                pParam.data[i].classification_id = parseInt(pParam.data[i].classification_id);
+                pParam.data[i].sub_classification_id = parseInt(pParam.data[i].sub_classification_id);
+                pParam.data[i].province_id = parseInt(pParam.data[i].province_id);
+                pParam.data[i].city_id = parseInt(pParam.data[i].city_id);
 
-                    pParam.data[i].business_entity_id = parseInt(pParam.data[i].business_entity_id);
-                    pParam.data[i].classification_id = parseInt(pParam.data[i].classification_id);
-                    pParam.data[i].sub_classification_id = parseInt(pParam.data[i].sub_classification_id);
-                    pParam.data[i].province_id = parseInt(pParam.data[i].province_id);
-                    pParam.data[i].city_id = parseInt(pParam.data[i].city_id);
-
-                    if( xCheckData != null ){
-                        // jaDuplicateResult.push(pParam.data[i].code);
-                        pParam.data[i].act = "update_by_code";
-                        var xAddResult = await _vendorRepoInstance.save( pParam.data[i] );
-                        jaResult.push(xAddResult);
-                    }else{
-                        pParam.data[i].act = pParam.act;
-                        var xAddResult = await _vendorRepoInstance.save( pParam.data[i] );
-                        jaResult.push(xAddResult);
-                    }
+                if( pParam.data[i].vendor_code == '' ){
+                    xMessageResult += "Vendor name <strong>" + pParam.data[i].name + "</strong> must have code. Please fill valid code <br>";
                 }else{
-                    pParam.data[i].business_entity_id = parseInt(pParam.data[i].business_entity_id);
-                    pParam.data[i].classification_id = parseInt(pParam.data[i].classification_id);
-                    pParam.data[i].sub_classification_id = parseInt(pParam.data[i].sub_classification_id);
-                    pParam.data[i].province_id = parseInt(pParam.data[i].province_id);
-                    pParam.data[i].city_id = parseInt(pParam.data[i].city_id);
-
-                    pParam.data[i].act = pParam.act;
-                    var xAddResult = await _vendorRepoInstance.save( pParam.data[i] );
-                    jaResult.push(xAddResult);
-                }               
+                    // If row has id meaning update based on id
+                    if( pParam.data[i].hasOwnProperty('id') ){
+                        if( pParam.data[i].id != '' ){
+                            // Check vendor code is duplicate or not
+                            var xCheckData = await _vendorRepoInstance.getVendorByCode( pParam.data[i].code, pParam.data[i].id );
+                            if( xCheckData != null ){
+                                xMessageResult += "Vendor code <strong>" + pParam.data[i].code + "</strong> already exists. Please use another code <br>";
+                            }else{
+                                // Do update based on id
+                                pParam.data[i].act = "update";
+                                var xAddResult = await _vendorRepoInstance.save( pParam.data[i] );
+                            }
+                        }
+                    }else{
+                        var xCheckData = await _vendorRepoInstance.getVendorByCode( pParam.data[i].code, null );
+                        if( xCheckData != null ){
+                            xMessageResult += "Vendor code <strong>" + pParam.data[i].code + "</strong> already exists. Please use another code <br>";
+                        }else{
+                            // Do update based on id
+                            pParam.data[i].act = "add";
+                            var xAddResult = await _vendorRepoInstance.save( pParam.data[i] );
+                        }
+                    }
+                }                         
 
             }
 
-            await _utilInstance.changeSequenceTable((pParam.data.length)+1, 'ms_vendors','id');
+            // await _utilInstance.changeSequenceTable((pParam.data.length)+1, 'ms_vendors','id');
 
             joResult = {
                 "status_code": "00",
                 "status_msg": "Finish save to database",
                 "line_saved": jaResult,
-                "line_duplicate": jaDuplicateResult,
+                "err_msg": xMessageResult,
             }
         }else if( pParam.act == "update" ){
-
+            joResult = {
+                "status_code": "-99",
+                "status_msg": "Wrong value for parameter act",
+            }
         }
 
         return joResult;
