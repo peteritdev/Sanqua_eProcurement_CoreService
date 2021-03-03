@@ -228,8 +228,6 @@ class VendorCatalogueService {
                             
                             if( xCheckData_Catalogue == null ){                            
                                 var xAddResult = await _vendorCatalogueRepoInstance.save( pParam.data[i], "add" );
-                            }else{                            
-                                var xAddResult = await _vendorCatalogueRepoInstance.save( pParam.data[i], "update_by_vendor_id_product_id" );
                             }
                         }
 

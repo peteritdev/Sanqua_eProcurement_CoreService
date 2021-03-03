@@ -137,6 +137,11 @@ module.exports = (app) => {
         check("id").not().isEmpty().withMessage("Parameter id can not be empty"),
     ];
     app.delete( rootAPIPath + 'vendor/catalogue_spesification/delete/:id', vendorCatalogueSpesificationController.vendorCatalogueSpesification_Delete );
+
+    // Import
+    arrValidate = [];
+    app.post( rootAPIPath + 'vendor/catalogue_spesification/upload', arrValidate, vendorCatalogueSpesificationController.vendorCatalogueSpesification_UploadFromExcel );
+    app.post( rootAPIPath + 'vendor/catalogue_spesification/batch_save', arrValidate, vendorCatalogueSpesificationController.vendorCatalogueSpesification_BatchSave );
     
 
 }
