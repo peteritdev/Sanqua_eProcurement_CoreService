@@ -62,7 +62,7 @@ class VendorCatalogueRepository {
                 ]
             },
             {
-                attributes: ['id','code','name'],
+                attributes: ['id','code','name','location_lat','location_long'],
                 model: _modelVendor,
                 as: 'vendor',
             }

@@ -217,6 +217,9 @@ class VendorCatalogueService {
                     if( pParam.data[i].hasOwnProperty('id') ){
                         if( pParam.data[i].id != '' ){
                             pParam.data[i].act = "update";
+                            if( pParam.data[i].last_ordered == '' ){
+                                pParam.data[i].last_ordered = null;
+                            }
                             var xAddResult = await _vendorCatalogueRepoInstance.save( pParam.data[i], "update" );
                         }         
                     }else{
@@ -226,7 +229,10 @@ class VendorCatalogueService {
                             // Check if catalogue exists
                             xCheckData_Catalogue = await _vendorCatalogueRepoInstance.getByVendorCodeAndProductCode( { vendor_code: pParam.data[i].vendor_code, product_code: pParam.data[i].product_code } );
                             
-                            if( xCheckData_Catalogue == null ){                            
+                            if( xCheckData_Catalogue == null ){                    
+                                if( pParam.data[i].last_ordered == '' ){
+                                    pParam.data[i].last_ordered = null;
+                                }        
                                 var xAddResult = await _vendorCatalogueRepoInstance.save( pParam.data[i], "add" );
                             }
                         }
@@ -308,6 +314,10 @@ class VendorCatalogueService {
                         id: await _utilInstance.encrypt( xResultList.id, config.cryptoKey.hashKey ),
                         vendor_id: xResultList.vendor_id,
                         vendor_name: xResultList.vendor.name,
+                        vendor_location:{
+                            longitude: xResultList.vendor.location_long,
+                            latitude: xResultList.vendor.location_lat,
+                        },
                         product_id: xResultList.product_id,
                         product_code: xResultList.product_code,
                         product_name: xResultList.product_name,
