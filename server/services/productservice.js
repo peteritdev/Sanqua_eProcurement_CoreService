@@ -211,7 +211,7 @@ class ProductService {
         } );
     }
 
-    async batchSave( pParam ){
+    async batchSaveOdoo( pParam ){
         var joResult;
         var jaResult = [];
         var xFlagProcess = true;
@@ -265,6 +265,77 @@ class ProductService {
                 "status_code": "00",
                 "status_msg": "Finish save to database",
                 "line_saved": jaResult,
+            }
+
+        }
+
+        return joResult;
+    }
+
+    async batchSave( pParam ){
+        var joResult;
+        var jaResult = [];
+        var xFlagProcess = true;
+
+        var xCheckData_ProductByCode, xCheckData_ProductByName = null;
+        var xStringMsg = '';
+
+        if( pParam.user_id != '' ){
+            var xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+            if( xDecId.status_code == '00' ){
+                pParam.user_id = xDecId.decrypted;
+            }else{
+                joResult = xDecId;
+                xFlagProcess = false;
+            }
+        }
+        
+        if( xFlagProcess ){        
+
+            for( var i = 0; i < pParam.data.length; i++ ){
+                xCheckData_ProductByCode = null;    
+                xCheckData_ProductByName = null;        
+                
+                if( pParam.data[i].code != '' ){                    
+
+                    if( pParam.data[i].hasOwnProperty('id') ){
+                        if( pParam.data[i].id != '' ){
+
+                            // Check product_code is exists
+                            xCheckData_ProductByCode = await _productRepoInstance.getProductByCode( { code: pParam.data[i].code, id: pParam.data[i].id } );
+
+                            if( xCheckData_ProductByCode == null ){
+                                pParam.data[i].act = "update";
+                                var xAddResult = await _vendorCatalogueRepoInstance.save( pParam.data[i], "update" );
+                            }else{
+                                xStringMsg += "Row " + (i+1) + " product code " + pParam.data[i].code + " can not duplicate, <br>";
+                            }
+                            
+                        }         
+                    }else{
+
+                        // Check product_code is exists
+                        xCheckData_ProductByCode = await _productRepoInstance.getProductByCode( { code: pParam.data[i].code } );
+                        xCheckData_ProductByName = await _productRepoInstance.getProductByName( { code: pParam.data[i].name } );
+
+                        if( xCheckData_ProductByCode == null && xCheckData_ProductByName == null ){
+                            var xAddResult = await _productRepoInstance.save( pParam.data[i], "add" );
+                        }else{
+                            xStringMsg += "Row " + (i+1) + " product code " + pParam.data[i].code + " can not duplicate, <br>";
+                        }
+
+                    }
+                }else{
+                    xStringMsg += "Row " + (i+1) + " product code can not be empty, \n";
+                }
+            }
+
+            // await _utilInstance.changeSequenceTable((pParam.data.length)+1, 'ms_products','id');
+
+            joResult = {
+                "status_code": "00",
+                "status_msg": "Finish save to database",
+                "err_msg": xStringMsg,
             }
 
         }

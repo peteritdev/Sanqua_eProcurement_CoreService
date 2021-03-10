@@ -350,7 +350,7 @@ class ProductCategoryService {
         }
     }
 
-    async batchSave( pParam ){
+    async batchSaveOdoo( pParam ){
         var joResult;
         var jaResult = [];
         var xFlagProcess = true;
@@ -392,6 +392,54 @@ class ProductCategoryService {
                 "status_code": "00",
                 "status_msg": "Finish save to database",
                 "line_saved": jaResult,
+            }
+
+        }
+
+        return joResult;
+    }
+
+    async batchSave( pParam ){
+        var joResult;
+        var jaResult = [];
+        var xFlagProcess = true;
+
+        var xStringMsg = '';
+
+        if( pParam.user_id != '' ){
+            var xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+            if( xDecId.status_code == '00' ){
+                pParam.user_id = xDecId.decrypted;
+            }else{
+                joResult = xDecId;
+                xFlagProcess = false;
+            }
+        }
+        
+        if( xFlagProcess ){        
+
+            for( var i = 0; i < pParam.data.length; i++ ){  
+                
+                if( pParam.data[i].hasOwnProperty('id') ){
+                    if( pParam.data[i].id != '' ){
+
+                        pParam.data[i].act = "update";
+                        var xAddResult = await _productCategoryRepoInstance.save( pParam.data[i], "update" );
+                        
+                    }         
+                }else{
+
+                    var xAddResult = await _productCategoryRepoInstance.save( pParam.data[i], "add" );
+
+                }
+            }
+
+            // await _utilInstance.changeSequenceTable((pParam.data.length)+1, 'ms_products','id');
+
+            joResult = {
+                "status_code": "00",
+                "status_msg": "Finish save to database",
+                "err_msg": xStringMsg,
             }
 
         }

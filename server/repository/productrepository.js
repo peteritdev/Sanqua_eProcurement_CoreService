@@ -89,11 +89,66 @@ class ProductRepository{
     }
 
     async getProductByCode( pParam ){
-        var data = await _modelDb.findOne({
-            where: {
-                code: pParam.code,
-                is_delete: 0
+
+        var xWhere = {};
+
+        if( pParam.hasOwnProperty('id') ){
+            if( pParam.id != '' ){
+                xWhere = {
+                    code: pParam.code,
+                    is_delete: 0,
+                    id: {
+                        [Op.ne]: pParam.id,
+                    }
+                }
+            }else{
+                xWhere = {
+                    code: pParam.code,
+                    is_delete: 0,
+                }
             }
+        }else{
+            xWhere = {
+                code: pParam.code,
+                is_delete: 0,
+            }
+        }
+
+        var data = await _modelDb.findOne({
+            where: xWhere
+        });
+        
+        return data;
+    }
+
+    async getProductByName( pParam ){
+
+        var xWhere = {};
+
+        if( pParam.hasOwnProperty('id') ){
+            if( pParam.id != '' ){
+                xWhere = {
+                    name: pParam.name,
+                    is_delete: 0,
+                    id: {
+                        [Op.ne]: pParam.id,
+                    }
+                }
+            }else{
+                xWhere = {
+                    name: pParam.name,
+                    is_delete: 0,
+                }
+            }
+        }else{
+            xWhere = {
+                name: pParam.name,
+                is_delete: 0,
+            }
+        }
+
+        var data = await _modelDb.findOne({
+            where: xWhere
         });
         
         return data;
