@@ -387,7 +387,7 @@ class VendorCatalogueService {
                         product: {
                             code: xRows[index].product_code,
                             name: xRows[index].product_name,
-                            category: xRows[index].product.category.name,
+                            category: ( xRows[index].product.category == null ? null : xRows[index].product.category.name ),
                         },
                         vendor: {
                             id: ( xRows[index].vendor != null ? await _utilInstance.encrypt( (xRows[index].vendor.id).toString(), config.cryptoKey.hashKey ) : null ),
