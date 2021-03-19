@@ -183,7 +183,12 @@ class VendorCatalogueRepository {
                         merk: {
                             [Op.iLike]: '%' + pParam.keyword + '%'
                         }
-                    }
+                    },
+                    {
+                        '$vendor.name$': {
+                            [Op.iLike]: '%' + pParam.keyword + '%'
+                        },
+                    },
                 ]
             },            
             include: xInclude,
