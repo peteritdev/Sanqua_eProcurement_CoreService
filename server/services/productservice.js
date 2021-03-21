@@ -306,7 +306,10 @@ class ProductService {
 
                             if( xCheckData_ProductByCode == null ){
                                 pParam.data[i].act = "update";
-                                var xAddResult = await _vendorCatalogueRepoInstance.save( pParam.data[i], "update" );
+                                if( pParam.data[i].unit_id == '' ){
+                                    delete pParam.data[i].unit_id;
+                                }
+                                var xAddResult = await _productRepoInstance.save( pParam.data[i], "update" );
                             }else{
                                 xStringMsg += "Row " + (i+1) + " product code " + pParam.data[i].code + " can not duplicate, <br>";
                             }
