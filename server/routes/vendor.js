@@ -10,6 +10,12 @@ module.exports = (app) => {
         message: 'Welcome to the Todos API!',
     }));
 
+    app.use(function(req, res, next) {
+        res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
+        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, x-method, x-token");
+        next();
+    });
+
     var arrValidate = [];
 
     // VENDOR'S PROFILE
