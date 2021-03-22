@@ -85,13 +85,13 @@
 
     "frontParam": {      
       "photoPath": {
-        "logo": "https://e-sanqua.sanquawater.co.id/image/vendors/logo/",
+        "logo": "https://e-sanqua.sanquawater.co.id/image/ecatalogue/vendors/logo/",
         "product": {
-          "product1": "https://e-sanqua.sanquawater.co.id/image/products/photo_1/",
-          "product2": "https://e-sanqua.sanquawater.co.id/image/products/photo_2/",
-          "product3": "https://e-sanqua.sanquawater.co.id/image/products/photo_3/",
-          "product4": "https://e-sanqua.sanquawater.co.id/image/products/photo_4/",
-          "product5": "https://e-sanqua.sanquawater.co.id/image/products/photo_5/"
+          "product1": "https://e-sanqua.sanquawater.co.id/image/ecatalogue/products/photo_1/",
+          "product2": "https://e-sanqua.sanquawater.co.id/image/ecatalogue/products/photo_2/",
+          "product3": "https://e-sanqua.sanquawater.co.id/image/ecatalogue/products/photo_3/",
+          "product4": "https://e-sanqua.sanquawater.co.id/image/ecatalogue/products/photo_4/",
+          "product5": "https://e-sanqua.sanquawater.co.id/image/ecatalogue/products/photo_5/"
         }
       },
       "separatorData": "Þ",
