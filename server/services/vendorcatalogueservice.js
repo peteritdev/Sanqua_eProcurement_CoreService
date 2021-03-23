@@ -319,8 +319,8 @@ class VendorCatalogueService {
                             latitude: xResultList.vendor.location_lat,
                         },
                         product_id: xResultList.product_id,
-                        product_code: xResultList.product_code,
-                        product_name: xResultList.product_name,
+                        product_code: xResultList.product.code,
+                        product_name: xResultList.product.name,
                         product_category_name: xResultList.product_category_name,
                         merk: xResultList.merk,
                         file_brochure: xResultList.file_brochure,
@@ -385,8 +385,8 @@ class VendorCatalogueService {
                     xJoArrData.push({
                         id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
                         product: {
-                            code: xRows[index].product_code,
-                            name: xRows[index].product_name,
+                            code: xRows[index].product.code,
+                            name: xRows[index].product.name,
                             category: ( xRows[index].product.category == null ? null : xRows[index].product.category.name ),
                         },
                         vendor: {
