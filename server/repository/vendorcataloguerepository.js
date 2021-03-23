@@ -164,18 +164,18 @@ class VendorCatalogueRepository {
                 ],
                 [Op.or]: [
                     {
-                        product_code: {
+                        '$product.code$': {
                             [Op.iLike]: '%' + pParam.keyword + '%'
                         },
                     },
                     {
                         
-                        product_name: {
+                        '$product.name$': {
                             [Op.iLike]: '%' + pParam.keyword + '%'
                         },
                     },
                     {                        
-                        product_category_name: {
+                        '$product.category.name$': {
                             [Op.iLike]: '%' + pParam.keyword + '%'
                         }
                     },

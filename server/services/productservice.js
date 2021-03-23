@@ -458,8 +458,6 @@ class ProductService {
 
         }else if( xAct == "update" || xAct == "update_by_erpid" ){
 
-            console.log(JSON.stringify(pParam));
-
             var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
             if( xDecId.status_code == "00" ){
                 pParam.id = xDecId.decrypted;                    
