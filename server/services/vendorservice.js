@@ -85,9 +85,9 @@ class VendorService {
                     city: xRows[index].city,
                     address: xRows[index].address,
                     zip_code: xRows[index].zip_code,
-                    phone1: xRows[index].phone1,
-                    phone2: xRows[index].phone2,
-                    email: xRows[index].email,
+                    phone1: ( xRows[index].phone1 != null && xRows[index].phone1 != '' ? (await _utilInstance.decrypt( xRows[index].phone1, config.cryptoKey.hashKey )).decrypted : '' ),
+                    phone2: ( xRows[index].phone2 != null && xRows[index].phone2 != '' ? (await _utilInstance.decrypt( xRows[index].phone2, config.cryptoKey.hashKey )).decrypted : '' ),
+                    email: ( xRows[index].email != null && xRows[index].email != '' ? (await _utilInstance.decrypt( xRows[index].email, config.cryptoKey.hashKey )).decrypted : '' ),
                     website: xRows[index].website,
                     status: xRows[index].status,
                 });
