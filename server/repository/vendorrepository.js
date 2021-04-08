@@ -1,4 +1,4 @@
-var env = process.env.NODE_ENV || 'development';
+var env = process.env.NODE_ENV || 'localhost';
 var config = require(__dirname + '/../config/config.json')[env];
 var Sequelize = require('sequelize');
 var sequelize = new Sequelize(config.database, config.username, config.password, config);
@@ -49,10 +49,21 @@ class VendorRepository{
     async list( pParam ){
         var xOrder = ['name', 'ASC'];
         var xWhere = {};
+        var xWhereVendorStatus = {};
+        var xQuery = {};
+
+        if( pParam.hasOwnProperty('status') ){
+            if( pParam.status != '' ){
+                xWhereVendorStatus = {
+                    status: pParam.status,
+                }
+            }
+        }
+
         var xWhereAnd = [
             {
                 is_delete: 0,
-            },
+            }, xWhereVendorStatus,
         ];
 
         xWhere.$and = xWhereAnd;
@@ -102,20 +113,21 @@ class VendorRepository{
             xOrder = [pParam.order_by, (pParam.order_type == 'desc' ? 'DESC' : 'ASC') ];
         }
 
-        var xData = await _modelVendor.findAndCountAll({
-            // where: {
-            //     [Op.and]:xWhereAnd,
-            //     [Op.or]: xWhereOr,
+        xQuery.where = xWhere;
+        xQuery.include = xJoinedTable;
+        
+        if( pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')  ){
+            if( pParam.offset != '' && pParam.limit != '' ){
+                if( pParam.limit != 'all' ){
+                    xQuery.limit = pParam.limit;
+                    xQuery.offset = pParam.offset;
+                }
+            }
+        }
 
-            // },
-            where: xWhere,
-            include: xJoinedTable,
-            limit: pParam.limit,
-            offset: pParam.offset,
-            order: [
-                xOrder
-            ]
-        });
+        xQuery.order = [ xOrder ];
+
+        var xData = await _modelVendor.findAndCountAll(xQuery);
 
         return xData;
     }

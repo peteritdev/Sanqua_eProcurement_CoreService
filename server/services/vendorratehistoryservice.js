@@ -7,7 +7,7 @@ const dateFormat = require('dateformat');
 const Op = sequelize.Op;
 const bcrypt = require('bcrypt');
 
-const env         = process.env.NODE_ENV || 'development';
+const env         = process.env.NODE_ENV || 'localhost';
 const config      = require(__dirname + '/../config/config.json')[env];
 
 // Utility

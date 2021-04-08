@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const env         = process.env.NODE_ENV || 'development';
+const env         = process.env.NODE_ENV || 'localhost';
 const config      = require('../../config/config.json')[env];
 
 function JWTAuth(){

@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const env         = process.env.NODE_ENV || 'development';
+const env         = process.env.NODE_ENV || 'localhost';
 const config      = require(__dirname + '/../config/config.json')[env];
 const encKey = config.cryptoKey.hashKey
 const dateTime = require('node-datetime');

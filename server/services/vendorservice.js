@@ -9,7 +9,7 @@ const bcrypt = require('bcrypt');
 const fs = require('fs');
 
 
-const env         = process.env.NODE_ENV || 'development';
+const env         = process.env.NODE_ENV || 'localhost';
 const config      = require(__dirname + '/../config/config.json')[env];
 
 //Repository
@@ -78,6 +78,17 @@ class VendorService {
                     id: await _utilInstance.encrypt((xRows[index].id).toString(), config.cryptoKey.hashKey),
                     code: xRows[index].code,
                     name: xRows[index].name,
+                    npwp: xRows[index].npwp,
+                    business_entity: xRows[index].business_entity,
+                    classification: xRows[index].classification,
+                    province: xRows[index].province,
+                    city: xRows[index].city,
+                    address: xRows[index].address,
+                    zip_code: xRows[index].zip_code,
+                    phone1: xRows[index].phone1,
+                    phone2: xRows[index].phone2,
+                    email: xRows[index].email,
+                    website: xRows[index].website,
                     status: xRows[index].status,
                 });
             }

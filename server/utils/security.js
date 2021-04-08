@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const env         = process.env.NODE_ENV || 'development';
+const env         = process.env.NODE_ENV || 'localhost';
 const config      = require(__dirname + '/../config/config.json')[env];
 
 const Utility = require('./globalutility.js');
