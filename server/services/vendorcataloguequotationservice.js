@@ -292,13 +292,17 @@ class VendorCatalogueQuotationService {
         var xJoArrData = [];
         var xFlagProcess = true;
 
-        var xDecId = await _utilInstance.decrypt(pParam.vendor_catalogue_id, config.cryptoKey.hashKey);
-        if( xDecId.status_code == '00' ){
-            pParam.vendor_catalogue_id = xDecId.decrypted;
-        }else{
-            xFlagProcess = false;
-            xJoResult = xDecId;
-        }
+        if( pParam.hasOwnProperty('vendor_catalogue_id') ){
+            if( pParam.vendor_catalogue_id != '' ){
+                var xDecId = await _utilInstance.decrypt(pParam.vendor_catalogue_id, config.cryptoKey.hashKey);
+                if( xDecId.status_code == '00' ){
+                    pParam.vendor_catalogue_id = xDecId.decrypted;
+                }else{
+                    xFlagProcess = false;
+                    xJoResult = xDecId;
+                }
+            }
+        }        
 
         if( xFlagProcess ){
             var xResultList = await _repoInstance.list(pParam);
@@ -308,6 +312,8 @@ class VendorCatalogueQuotationService {
     
                     xJoArrData.push({
                         id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
+                        vendor: ( xRows[index].vendor_catalogue != null ? xRows[index].vendor_catalogue.vendor : null ),
+                        product: ( xRows[index].vendor_catalogue != null ? xRows[index].vendor_catalogue.product : null ),
                         period_start: xRows[index].period_start,
                         period_end: xRows[index].period_end,
                         uom: xRows[index].uom,

@@ -44,6 +44,12 @@ module.exports = ( sequelize, DataTypes ) => {
             as: 'uom',
             onDelete: 'CASCADE',
         } );
+
+        VendorCatalogueQuotation.belongsTo( models.ms_vendorcatalogues, {
+            foreignKey: 'vendor_catalogue_id',
+            as: 'vendor_catalogue',
+            onDelete: 'CASCADE',
+        } );
     }
 
     return VendorCatalogueQuotation;

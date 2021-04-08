@@ -78,8 +78,8 @@ module.exports = (app) => {
     arrValidate = [];
     arrValidate = [
         check("offset","Parameter offset must be integer and cannot be empty").not().isEmpty().isInt(),
-        check("limit","Parameter limit must be integer and cannot be empty").not().isEmpty().isInt(),
-        check("vendor_catalogue_id").not().isEmpty().withMessage("Parameter vendor_catalogue_id cannot be empty"),
+        check("limit").not().isEmpty().withMessage("Parameter limit cannot be empty"),
+        // check("vendor_catalogue_id").not().isEmpty().withMessage("Parameter vendor_catalogue_id cannot be empty"),
     ];
     app.get( rootAPIPath + 'vendor/catalogue_quotation/list', arrValidate, vendorCatalogueQuotationController.vendorCatalogueQuotation_List);
 

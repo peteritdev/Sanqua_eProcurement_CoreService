@@ -8,11 +8,14 @@ const Op = sequelize.Op;
 //Model
 const _modelDb = require('../models').ms_vendorcataloguequotations;
 const _modelUnit = require('../models').ms_units;
+const _modelVendorCatalogue = require('../models').ms_vendorcatalogues;
+const _modelVendors = require('../models').ms_vendors;
+const _modelProduct = require('../models').ms_products;
 
 const Utility = require('peters-globallib');
 const _utilInstance = new Utility();
 
-class VendorCatalogueRepository{
+class VendorCatalogueQuotationRepository{
     constructor(){}
 
     async list( pParam ){
@@ -36,8 +39,25 @@ class VendorCatalogueRepository{
 
         xInclude = [
             {
+                attributes: ['id','name'],
                 model: _modelUnit,
                 as: 'uom'
+            },
+            {
+                model: _modelVendorCatalogue,
+                as: 'vendor_catalogue',
+                include: [
+                    {
+                        attributes: ['id','code','name'],
+                        model: _modelVendors,
+                        as: 'vendor'
+                    },
+                    {
+                        attributes: ['id','code','name'],
+                        model: _modelProduct,
+                        as: 'product',
+                    }
+                ]
             }
         ]
 
@@ -52,8 +72,10 @@ class VendorCatalogueRepository{
 
         if( pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit') ){
             if( pParam.offset != '' && pParam.limit != ''){
-                xParamQuery.offset = pParam.offset;
-                xParamQuery.limit = pParam.limit;
+                if( pParam.limit != 'all' ){
+                    xParamQuery.offset = pParam.offset;
+                    xParamQuery.limit = pParam.limit;
+                }                
             }
         }
 
@@ -239,5 +261,5 @@ class VendorCatalogueRepository{
     }
 }
 
-module.exports = VendorCatalogueRepository;
+module.exports = VendorCatalogueQuotationRepository;
 
