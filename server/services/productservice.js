@@ -359,8 +359,12 @@ class ProductService {
                 for( var index in xRows ){
                     xJoArrData.push({
                         id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
+                        code: xRows[index].code,
                         category: xRows[index].category,
                         name: xRows[index].name,
+                        unit: xRows[index].unit,
+                        merk: xRows[index].merk,
+                        spesification: xRows[index].spesification,
                         photo: {
                             photo_1: ( ( xRows[index].photo_1 != null && xRows[index].photo_1 != '' ) ? ( config.frontParam.photoPath.product.product1 + xRows[index].photo_1 ) : null ),
                             photo_2: ( ( xRows[index].photo_2 != null && xRows[index].photo_2 != '' ) ? ( config.frontParam.photoPath.product.product2 + xRows[index].photo_2 ) : null ),

@@ -21,9 +21,11 @@ class ProductRepository{
         var xOrder = ['name', 'ASC'];
         var xInclude = [
             {
+                attributes: ['id','name'],
                 model: _modelCategory,
                 as: 'category'
             },{
+                attributes: ['id','name'],
                 model: _modelUnit,
                 as: 'unit'
             }
@@ -54,13 +56,12 @@ class ProductRepository{
 
         if( pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit') ){
             if( pParam.offset != '' && pParam.limit != ''){
-                console.log(">>> HERE");
-                xParamQuery.offset = pParam.offset;
-                xParamQuery.limit = pParam.limit;
+                if( pParam.limit != 'all' ){
+                    xParamQuery.offset = pParam.offset;
+                    xParamQuery.limit = pParam.limit;
+                }                
             }
         }
-
-        console.log(JSON.stringify(pParam));
 
         var xData = await _modelDb.findAndCountAll(xParamQuery);
 

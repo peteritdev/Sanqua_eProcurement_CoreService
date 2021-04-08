@@ -65,7 +65,7 @@ module.exports = (app) => {
     
     xArrValidateProduct = [];
     xArrValidateProduct = [
-        check("limit","Parameter unit_id can not be empty and must be integer").not().isEmpty().isInt(),
+        check("limit").not().isEmpty().withMessage("Parameter limit can not be empty"),
         check("offset","Parameter offset can not be empty and must be integer").not().isEmpty().isInt(),
     ];
     app.get( rootAPIPath + 'master/product/list', xArrValidateProduct, productController.product_List );
