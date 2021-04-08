@@ -197,8 +197,10 @@ class VendorCatalogueRepository {
 
         if( pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit') ){
             if( pParam.offset != '' && pParam.limit != ''){
-                xParamQuery.offset = pParam.offset;
-                xParamQuery.limit = pParam.limit;
+                if( pParam.limit != 'all' ){
+                    xParamQuery.offset = pParam.offset;
+                    xParamQuery.limit = pParam.limit;
+                }                
             }
         }
 

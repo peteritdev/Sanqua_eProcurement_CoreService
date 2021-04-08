@@ -409,7 +409,12 @@ class VendorCatalogueService {
                         last_ordered: xRows[index].last_ordered,
                         last_purchase_plant: xRows[index].last_purchase_plant,
                         description: xRows[index].description,
+                        uom_id: xRows[index].uom_id,
                         uom_name: xRows[index].uom_name,
+                        purchase_uom_id: xRows[index].purchase_uom_id,
+                        purchase_uom_name: xRows[index].purchase_uom_name,
+                        catalogue_type: xRows[index].catalogue_type,
+                        catalogue_type_name: ( xRows[index].catalogue_type == 1 ? 'Bahan Baku' : ( xRows[index].catalogue_type == 2 ? 'Umum' : null )),
                     });
                 }
                 xJoResult = {

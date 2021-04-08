@@ -36,7 +36,7 @@ module.exports = (app) => {
     arrValidate = [];
     arrValidate = [
         check("offset","Parameter offset must be integer and cannot be empty").not().isEmpty().isInt(),
-        check("limit","Parameter limit must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("limit").not().isEmpty().withMessage("Parameter limit cannot be empty"),
         // check("vendor_id").not().isEmpty().withMessage("Parameter vendor_id cannot be empty"),
     ];
     app.get( rootAPIPath + 'vendor/catalogue/list', arrValidate, vendorCatalogueController.list);
