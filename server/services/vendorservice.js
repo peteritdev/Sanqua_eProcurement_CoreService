@@ -513,6 +513,7 @@ class VendorService {
         var joResult;
         var jaResult = [];
         var xMessageResult = "";
+        var xFlagProcess = true;
 
         console.log(">>> Length : " + pParam.data.length);
 
@@ -531,15 +532,25 @@ class VendorService {
                     // If row has id meaning update based on id
                     if( pParam.data[i].hasOwnProperty('id') ){
                         if( pParam.data[i].id != '' ){
-                            // Check vendor code is duplicate or not
-                            var xCheckData = await _vendorRepoInstance.getVendorByCode( pParam.data[i].code, pParam.data[i].id );
-                            if( xCheckData != null ){
-                                xMessageResult += "Vendor code <strong>" + pParam.data[i].code + "</strong> already exists. Please use another code <br>";
+                            // Decrypt the value first
+                            var xDecId = await _utilInstance.decrypt( pParam.data[i].id, config.cryptoKey.hashKey );
+                            if( xDecId.status_code == '00' ){
+                                pParam.data[i].id = xDecId.decrypted;
                             }else{
-                                // Do update based on id
-                                pParam.data[i].act = "update";
-                                var xAddResult = await _vendorRepoInstance.save( pParam.data[i] );
+                                xFlagProcess = false;
                             }
+
+                            if( xFlagProcess ){
+                                // Check vendor code is duplicate or not
+                                var xCheckData = await _vendorRepoInstance.getVendorByCode( pParam.data[i].code, pParam.data[i].id );
+                                if( xCheckData != null ){
+                                    xMessageResult += "Vendor code <strong>" + pParam.data[i].code + "</strong> already exists. Please use another code <br>";
+                                }else{
+                                    // Do update based on id
+                                    pParam.data[i].act = "update";
+                                    var xAddResult = await _vendorRepoInstance.save( pParam.data[i] );
+                                }   
+                            }                            
                         }
                     }else{
                         var xCheckData = await _vendorRepoInstance.getVendorByCode( pParam.data[i].code, null );
