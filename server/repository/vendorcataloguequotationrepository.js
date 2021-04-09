@@ -38,13 +38,15 @@ class VendorCatalogueQuotationRepository{
             }
         }
 
-        // if( pParam.hasOwnProperty('keyword') ){
-        //     if( pParam.keyword != '' ){
-        //         xWhereOr.push({
-        //             vendor_catalogue_id: pParam.vendor_catalogue_id,
-        //         });
-        //     }
-        // }
+        if( pParam.hasOwnProperty('keyword') ){
+            if( pParam.keyword != '' ){
+                xWhereOr.push({
+                    '$vendor_catalogue.vendor.name$': {
+                        [Op.like]: '%' + pParam.keyword + '%',
+                    },
+                });
+            }
+        }
 
         xInclude = [
             {
@@ -60,11 +62,6 @@ class VendorCatalogueQuotationRepository{
                         attributes: ['id','code','name'],
                         model: _modelVendors,
                         as: 'vendor',
-                        where: {
-                            name: {
-                                [Op.like]: '%' + pParam.keyword + '%',
-                            }
-                        }
                     },
                     {
                         attributes: ['id','code','name'],
@@ -78,7 +75,7 @@ class VendorCatalogueQuotationRepository{
         var xParamQuery = {
             where: {
                 [Op.and]:xWhereAnd,
-                // [Op.or]: []
+                [Op.or]: xWhereOr,
             },          
             include: xInclude,  
             order: [xOrder],
