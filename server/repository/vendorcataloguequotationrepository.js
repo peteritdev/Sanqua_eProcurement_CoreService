@@ -42,7 +42,7 @@ class VendorCatalogueQuotationRepository{
             if( pParam.keyword != '' ){
                 xWhereOr.push({
                     '$vendor_catalogue.vendor.name$': {
-                        [Op.ilike]: '%' + pParam.keyword + '%',
+                        [Op.iLike]: '%' + pParam.keyword + '%',
                     },
                 });
             }
