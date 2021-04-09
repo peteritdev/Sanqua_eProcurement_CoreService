@@ -369,12 +369,17 @@ class VendorCatalogueSpesificationService {
     
                         xJoArrData.push({
                             id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
-                            spesification_category: xRows[index].spesification_category,
+                            vendor: ( xRows[index].vendor_catalogue != null ? xRows[index].vendor_catalogue.vendor : null ),
+                            product: ( xRows[index].vendor_catalogue != null ? xRows[index].vendor_catalogue.product : null ),
+                            spesification_category: xRows[index].spesification_category.name,
                             spesification_attribute: xRows[index].spesification_attribute,
                             description: xRows[index].description,
                             standard: xRows[index].standard,
                             unit: xRows[index].unit,
                             criteria: xRows[index].criteria,
+                            analysis_method: xRows[index].analysis_method,
+                            min_frequency_supplier: xRows[index].min_frequency_supplier,
+                            min_frequency_sanqua: xRows[index].min_frequency_sanqua,
                             created_at: xRows[index].createdAt,
                             created_by_name: xRows[index].created_by_name,
                             updated_at: xRows[index].updatedAt,
