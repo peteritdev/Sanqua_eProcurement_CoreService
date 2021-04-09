@@ -418,7 +418,7 @@ class VendorCatalogueService {
                         },
 
                         last_price: xRows[index].last_price,
-                        last_ordered: xRows[index].last_ordered,
+                        last_ordered: ( xRows[index].last_ordered != null && xRows[index].last_ordered != '' ? moment(xRows[index].last_ordered).format('YYYY-MM-DD') : '' ),
                         last_purchase_plant: xRows[index].last_purchase_plant,
                         description: xRows[index].description,
                         uom_id: xRows[index].uom_id,
