@@ -301,17 +301,28 @@ class ProductService {
                     if( pParam.data[i].hasOwnProperty('id') ){
                         if( pParam.data[i].id != '' ){
 
-                            // Check product_code is exists
-                            xCheckData_ProductByCode = await _productRepoInstance.getProductByCode( { code: pParam.data[i].code, id: pParam.data[i].id } );
-
-                            if( xCheckData_ProductByCode == null ){
-                                pParam.data[i].act = "update";
-                                if( pParam.data[i].unit_id == '' ){
-                                    delete pParam.data[i].unit_id;
-                                }
-                                var xAddResult = await _productRepoInstance.save( pParam.data[i], "update" );
+                            // Decrypt the value first
+                            var xDecId = await _utilInstance.decrypt( pParam.data[i].id, config.cryptoKey.hashKey );
+                            if( xDecId.status_code == '00' ){
+                                pParam.data[i].id = xDecId.decrypted;
                             }else{
-                                xStringMsg += "Row " + (i+1) + " product code " + pParam.data[i].code + " can not duplicate, <br>";
+                                xFlagProcess = false;
+                            }
+
+                            if( xFlagProcess ){
+
+                                // Check product_code is exists
+                                xCheckData_ProductByCode = await _productRepoInstance.getProductByCode( { code: pParam.data[i].code, id: pParam.data[i].id } );
+
+                                if( xCheckData_ProductByCode == null ){
+                                    pParam.data[i].act = "update";
+                                    if( pParam.data[i].unit_id == '' ){
+                                        delete pParam.data[i].unit_id;
+                                    }
+                                    var xAddResult = await _productRepoInstance.save( pParam.data[i], "update" );
+                                }else{
+                                    xStringMsg += "Row " + (i+1) + " product code " + pParam.data[i].code + " can not duplicate, <br>";
+                                }
                             }
                             
                         }         
