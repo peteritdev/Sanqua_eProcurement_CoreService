@@ -23,6 +23,7 @@ class VendorCatalogueQuotationRepository{
         var xOrder = ['createdAt', 'ASC'];
         var xInclude = [];
         var xWhereAnd = [];
+        var xWhereOr = [];
         xWhereAnd.push({is_delete: 0});
 
         if( pParam.order_by != '' && pParam.hasOwnProperty('order_by') ){
@@ -37,6 +38,14 @@ class VendorCatalogueQuotationRepository{
             }
         }
 
+        // if( pParam.hasOwnProperty('keyword') ){
+        //     if( pParam.keyword != '' ){
+        //         xWhereOr.push({
+        //             vendor_catalogue_id: pParam.vendor_catalogue_id,
+        //         });
+        //     }
+        // }
+
         xInclude = [
             {
                 attributes: ['id','name'],
@@ -50,7 +59,12 @@ class VendorCatalogueQuotationRepository{
                     {
                         attributes: ['id','code','name'],
                         model: _modelVendors,
-                        as: 'vendor'
+                        as: 'vendor',
+                        where: {
+                            name: {
+                                [Op.like]: '%' + pParam.keyword + '%',
+                            }
+                        }
                     },
                     {
                         attributes: ['id','code','name'],
