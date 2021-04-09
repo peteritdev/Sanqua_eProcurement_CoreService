@@ -24,6 +24,7 @@ class VendorCatalogueQuotationRepository{
         var xInclude = [];
         var xWhereAnd = [];
         var xWhereOr = [];
+        var xWhere = {};
         xWhereAnd.push({is_delete: 0});
 
         if( pParam.order_by != '' && pParam.hasOwnProperty('order_by') ){
@@ -70,13 +71,17 @@ class VendorCatalogueQuotationRepository{
                     }
                 ]
             }
-        ]
+        ];
+
+        if( xWhereAnd.length > 0 ){
+            xWhere.$and = xWhereAnd;
+        }
+        if( xWhereOr.length > 0 ){
+            xWhere.$or = xWhereOr;
+        }
 
         var xParamQuery = {
-            where: {
-                [Op.and]:xWhereAnd,
-                [Op.or]: xWhereOr,
-            },          
+            where: xWhere,          
             include: xInclude,  
             order: [xOrder],
         };
