@@ -179,6 +179,7 @@ class VendorCatalogueService {
         var joResult;
         var jaResult = [];
         var jaExistingData = [];
+        var xFlagProcess = true;
 
         if( pParam.act == "add" ){
 
@@ -216,11 +217,22 @@ class VendorCatalogueService {
 
                     if( pParam.data[i].hasOwnProperty('id') ){
                         if( pParam.data[i].id != '' ){
-                            pParam.data[i].act = "update";
-                            if( pParam.data[i].last_ordered == '' ){
-                                pParam.data[i].last_ordered = null;
+
+                            // Decrypt the value first
+                            var xDecId = await _utilInstance.decrypt( pParam.data[i].id, config.cryptoKey.hashKey );
+                            if( xDecId.status_code == '00' ){
+                                pParam.data[i].id = xDecId.decrypted;
+                            }else{
+                                xFlagProcess = false;
                             }
-                            var xAddResult = await _vendorCatalogueRepoInstance.save( pParam.data[i], "update" );
+
+                            if( xFlagProcess ){
+                                pParam.data[i].act = "update";
+                                if( pParam.data[i].last_ordered == '' ){
+                                    pParam.data[i].last_ordered = null;
+                                }
+                                var xAddResult = await _vendorCatalogueRepoInstance.save( pParam.data[i], "update" );
+                            }
                         }         
                     }else{
 

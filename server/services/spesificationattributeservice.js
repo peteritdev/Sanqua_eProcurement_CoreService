@@ -74,6 +74,7 @@ class SpesificationAttributeService {
                     xJoArrData.push({
                         id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
                         name: xRows[index].name,
+                        category: xRows[index].spesification_category,
                         created_at: xRows[index].createdAt,
                         created_by_name: xRows[index].created_by_name,
                         updated_at: xRows[index].updatedAt,
@@ -396,9 +397,8 @@ class SpesificationAttributeService {
                 "status_code": "00",
                 "status_msg": "Finish save to database",
             }
-        }else if( pParam.act == "update" ){
+        }else if( pParam.act == "update" ){            
             
-
         }
 
         return joResult;
