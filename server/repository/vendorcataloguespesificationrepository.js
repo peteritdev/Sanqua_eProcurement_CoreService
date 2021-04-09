@@ -40,7 +40,6 @@ class VendorCatalogueSpesificationRepository{
                 as: 'unit',
             },
             {
-                attributes: ['catalogue_type'],
                 model: _modelVendorCatalogue,
                 as: 'vendor_catalogue',
                 include: [
