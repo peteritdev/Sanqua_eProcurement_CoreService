@@ -334,6 +334,8 @@ class VendorCatalogueSpesificationService {
     
                             xJoArrData.push({
                                 id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
+                                vendor: ( xRows[index].vendor_catalogue != null ? xRows[index].vendor_catalogue.vendor : null ),
+                                product: ( xRows[index].vendor_catalogue != null ? xRows[index].vendor_catalogue.product : null ),
                                 spesification_category: xRows[index].spesification_category.name,
                                 spesification_attribute: xRows[index].spesification_attribute,
                                 description: xRows[index].description,

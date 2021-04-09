@@ -11,11 +11,11 @@ const _modelSpesificationCategory = require('../models').ms_spesificationcategor
 const _modelSpesificationAttribute = require('../models').ms_spesificationattributes;
 const _modelUnit = require('../models').ms_units;
 const _modelVendorCatalogue = require('../models').ms_vendorcatalogues;
+const _modelVendor = require('../models').ms_vendors;
+const _modelProduct = require('../models').ms_products;
 
 const Utility = require('peters-globallib');
 const _utilInstance = new Utility();
-
-
 
 class VendorCatalogueSpesificationRepository{
     constructor(){}
@@ -43,6 +43,18 @@ class VendorCatalogueSpesificationRepository{
                 attributes: ['catalogue_type'],
                 model: _modelVendorCatalogue,
                 as: 'vendor_catalogue',
+                include: [
+                    {
+                        attributes: ['id','code','name'],
+                        model: _modelVendor,
+                        as: 'vendor',
+                    },
+                    {
+                        attributes: ['id','code','name'],
+                        model: _modelProduct,
+                        as: 'product',
+                    }
+                ],
             },
         ];
         var xWhereAnd = [];
@@ -100,6 +112,11 @@ class VendorCatalogueSpesificationRepository{
                     min_frequency_sanqua: {
                         [Op.iLike]: '%' + pParam.keyword + '%',
                     }
+                },
+                {
+                    '$vendor_catalogue.vendor.name$': {
+                        [Op.iLike]: '%' + pParam.keyword + '%',
+                    }
                 }
             ]
         }
@@ -122,7 +139,7 @@ class VendorCatalogueSpesificationRepository{
         };
 
         if( pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit') ){
-            if( pParam.offset != '' && pParam.limit != ''){
+            if( pParam.offset != '' && pParam.limit != '' && pParam.limit != 'all' ){
                 xParamQuery.offset = pParam.offset;
                 xParamQuery.limit = pParam.limit;
             }
