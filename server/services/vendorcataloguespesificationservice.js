@@ -315,13 +315,17 @@ class VendorCatalogueSpesificationService {
         var xJoArrData = [];
         var xFlagProcess = true;
 
-        var xDecId = await _utilInstance.decrypt(pParam.vendor_catalogue_id, config.cryptoKey.hashKey);
-        if( xDecId.status_code == '00' ){
-            pParam.vendor_catalogue_id = xDecId.decrypted;
-        }else{
-            xFlagProcess = false;
-            xJoResult = xDecId;
-        }
+        if( pParam.hasOwnProperty('vendor_catalogue_id') ){
+            if( pParam.vendor_catalogue_id != '' ){
+                var xDecId = await _utilInstance.decrypt(pParam.vendor_catalogue_id, config.cryptoKey.hashKey);
+                if( xDecId.status_code == '00' ){
+                    pParam.vendor_catalogue_id = xDecId.decrypted;
+                }else{
+                    xFlagProcess = false;
+                    xJoResult = xDecId;
+                }
+            }
+        }        
 
         if( xFlagProcess ){
             var xResultList = await _repoInstance.list(pParam);
