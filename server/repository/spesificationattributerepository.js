@@ -22,6 +22,7 @@ class SpesificationAttributeRepository{
         var xOrder = ['name', 'ASC'];
         var xInclude = [
             {
+                attributes: ['id','name'],
                 model: _modelSpesificationCategory,
                 as: 'spesification_category',
             }
@@ -62,8 +63,10 @@ class SpesificationAttributeRepository{
 
         if( pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit') ){
             if( pParam.offset != '' && pParam.limit != ''){
-                xParamQuery.offset = pParam.offset;
-                xParamQuery.limit = pParam.limit;
+                if( pParam.limit != 'all' ){
+                    xParamQuery.offset = pParam.offset;
+                    xParamQuery.limit = pParam.limit;
+                }                
             }
         }
 

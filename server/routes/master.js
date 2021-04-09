@@ -146,7 +146,7 @@ module.exports = (app) => {
     arrValidate = [];
     arrValidate = [
         check("offset","Parameter offset must be integer and cannot be empty").not().isEmpty().isInt(),
-        check("limit","Parameter limit must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("limit").not().isEmpty().withMessage("Parameter limit cannot be empty"),
     ];
     app.get( rootAPIPath + 'master/spesification_category/list', arrValidate, spesificationCategoryController.spesificationCategory_List );
 
@@ -184,7 +184,7 @@ module.exports = (app) => {
     arrValidate = [];
     arrValidate = [
         check("offset","Parameter offset must be integer and cannot be empty").not().isEmpty().isInt(),
-        check("limit","Parameter limit must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("limit").not().isEmpty().withMessage("Parameter limit cannot be empty"),
     ];
     app.get( rootAPIPath + 'master/spesification_attribute/list', arrValidate, spesificationAttributeController.spesificationAttribute_List );
 
