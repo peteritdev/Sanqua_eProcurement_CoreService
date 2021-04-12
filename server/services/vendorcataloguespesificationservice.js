@@ -233,7 +233,7 @@ class VendorCatalogueSpesificationService {
 
                                 pParam.data[i].spesification_category_id = ( pParam.data[i].spesification_category_id == '' ? 0 : parseInt( pParam.data[i].spesification_category_id ) );
                                 pParam.data[i].spesification_attribute_id = ( pParam.data[i].spesification_attribute_id == '' ? 0 : parseInt( pParam.data[i].spesification_attribute_id ) );
-                                pParam.data[i].spesification_type = ( pParam.data[i].spesification_type == '' ? 0 : parseInt( pParam.data[i].spesification_type ) );
+                                // pParam.data[i].spesification_type = ( pParam.data[i].spesification_type == '' ? 0 : parseInt( pParam.data[i].spesification_type ) );
                                 pParam.data[i].unit_id = ( pParam.data[i].unit_id == '' ? 0 : parseInt( pParam.data[i].unit_id ) );
                                 pParam.data[i].criteria = ( pParam.data[i].criteria == '' ? 0 : parseInt( pParam.data[i].criteria ) );
 
