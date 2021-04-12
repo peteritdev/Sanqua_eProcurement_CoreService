@@ -16,6 +16,9 @@ const config      = require(__dirname + '/../config/config.json')[env];
 const VendorCatalogueSpesificationRepository = require('../repository/vendorcataloguespesificationrepository.js');
 const _repoInstance = new VendorCatalogueSpesificationRepository();
 
+const SpesificationAttributeRepository = require('../repository/spesificationattributerepository.js');
+const _spesificationAttributeRepoInstance = new SpesificationAttributeRepository();
+
 const VendorCatalogueRepository = require('../repository/vendorcataloguerepository.js');
 const _vendorCatalogueRepoInstance = new VendorCatalogueRepository();
 
@@ -227,6 +230,14 @@ class VendorCatalogueSpesificationService {
                             }else{
                                 xFlagProcess = false;
                             }
+
+                            // If spesification category id empty but the spesification attribute id filled, so search the category by the attribute.
+                            if( pParam.data[i].spesification_category_id == '' ){
+                                var xSpesificationAttribute = await _spesificationAttributeRepoInstance.getById( { id: pParam.data[i].spesification_attribute_id } );
+                                if( xSpesificationAttribute != null ){
+                                    pParam.data[i].spesification_category_id = xSpesificationAttribute.spesification_category_id;
+                                }                                
+                            }                            
 
                             if( xFlagProcess ){
                                 pParam.data[i].act = "update";
