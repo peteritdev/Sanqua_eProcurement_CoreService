@@ -231,11 +231,11 @@ class VendorCatalogueSpesificationService {
                             if( xFlagProcess ){
                                 pParam.data[i].act = "update";
 
-                                pParam.spesification_category_id = ( pParam.spesification_category_id == '' ? 0 : parseInt( pParam.spesification_category_id ) );
-                                pParam.spesification_attribute_id = ( pParam.spesification_attribute_id == '' ? 0 : parseInt( pParam.spesification_attribute_id ) );
-                                pParam.spesification_type = ( pParam.spesification_type == '' ? 0 : parseInt( pParam.spesification_type ) );
-                                pParam.unit_id = ( pParam.unit_id == '' ? 0 : parseInt( pParam.unit_id ) );
-                                pParam.criteria = ( pParam.criteria == '' ? 0 : parseInt( pParam.criteria ) );
+                                pParam.data[i].spesification_category_id = ( pParam.data[i].spesification_category_id == '' ? 0 : parseInt( pParam.data[i].spesification_category_id ) );
+                                pParam.data[i].spesification_attribute_id = ( pParam.data[i].spesification_attribute_id == '' ? 0 : parseInt( pParam.data[i].spesification_attribute_id ) );
+                                pParam.data[i].spesification_type = ( pParam.data[i].spesification_type == '' ? 0 : parseInt( pParam.data[i].spesification_type ) );
+                                pParam.data[i].unit_id = ( pParam.data[i].unit_id == '' ? 0 : parseInt( pParam.data[i].unit_id ) );
+                                pParam.data[i].criteria = ( pParam.data[i].criteria == '' ? 0 : parseInt( pParam.data[i].criteria ) );
 
                                 var xAddResult = await _repoInstance.save( pParam.data[i], "update" );
                             }
