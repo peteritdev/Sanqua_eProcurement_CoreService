@@ -234,8 +234,8 @@ class VendorCatalogueSpesificationService {
                                 pParam.spesification_category_id = ( pParam.spesification_category_id == '' ? 0 : parseInt( pParam.spesification_category_id ) );
                                 pParam.spesification_attribute_id = ( pParam.spesification_attribute_id == '' ? 0 : parseInt( pParam.spesification_attribute_id ) );
                                 pParam.spesification_type = ( pParam.spesification_type == '' ? 0 : parseInt( pParam.spesification_type ) );
-                                pParam.unit_id = ( pParam.spesification_type == '' ? 0 : parseInt( pParam.unit_id ) );
-                                pParam.criteria = ( pParam.spesification_type == '' ? 0 : parseInt( pParam.criteria ) );
+                                pParam.unit_id = ( pParam.unit_id == '' ? 0 : parseInt( pParam.unit_id ) );
+                                pParam.criteria = ( pParam.criteria == '' ? 0 : parseInt( pParam.criteria ) );
 
                                 var xAddResult = await _repoInstance.save( pParam.data[i], "update" );
                             }
