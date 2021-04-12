@@ -230,6 +230,13 @@ class VendorCatalogueSpesificationService {
 
                             if( xFlagProcess ){
                                 pParam.data[i].act = "update";
+
+                                pParam.spesification_category_id = ( pParam.spesification_category_id == '' ? 0 : parseInt( pParam.spesification_category_id ) );
+                                pParam.spesification_attribute_id = ( pParam.spesification_attribute_id == '' ? 0 : parseInt( pParam.spesification_attribute_id ) );
+                                pParam.spesification_type = ( pParam.spesification_type == '' ? 0 : parseInt( pParam.spesification_type ) );
+                                pParam.unit_id = ( pParam.spesification_type == '' ? 0 : parseInt( pParam.unit_id ) );
+                                pParam.criteria = ( pParam.spesification_type == '' ? 0 : parseInt( pParam.criteria ) );
+
                                 var xAddResult = await _repoInstance.save( pParam.data[i], "update" );
                             }
                         }         
