@@ -113,10 +113,25 @@ class VendorCatalogueSpesificationRepository{
                     }
                 },
                 {
+                    '$vendor_catalogue.vendor.code$': {
+                        [Op.iLike]: '%' + pParam.keyword + '%',
+                    }
+                },
+                {
                     '$vendor_catalogue.vendor.name$': {
                         [Op.iLike]: '%' + pParam.keyword + '%',
                     }
-                }
+                },
+                {
+                    '$vendor_catalogue.product.code$': {
+                        [Op.iLike]: '%' + pParam.keyword + '%',
+                    }
+                },
+                {
+                    '$vendor_catalogue.product.name$': {
+                        [Op.iLike]: '%' + pParam.keyword + '%',
+                    }
+                },
             ]
         }
 
