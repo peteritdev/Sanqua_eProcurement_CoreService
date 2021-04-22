@@ -10,6 +10,7 @@ const _modelDb = require('../models').ms_vendorcatalogues;
 const _modelProduct = require('../models').ms_products;
 const _modelProductCategory = require('../models').ms_productcategories;
 const _modelVendor = require('../models').ms_vendors;
+const _modelCurrency = require('../models').ms_currencies;
 
 const Utility = require('peters-globallib');
 const _utilInstance = new Utility();
@@ -30,6 +31,11 @@ class VendorCatalogueRepository {
                 attributes: ['id','code','name'],
                 model: _modelVendor,
                 as: 'vendor',
+            },
+            {
+                attributes: ['id','code','name','symbol'],
+                model: _modelCurrency,
+                as: 'currency',
             }
         ];
 
@@ -58,13 +64,18 @@ class VendorCatalogueRepository {
                         attributes: ['id','name'],
                         model: _modelProductCategory,
                         as: 'category',
-                    }
+                    },
                 ]
             },
             {
                 attributes: ['id','code','name','location_lat','location_long'],
                 model: _modelVendor,
                 as: 'vendor',
+            },
+            {
+                attributes: ['id','code','name','symbol'],
+                model: _modelCurrency,
+                as: 'currency',
             }
         ];
 
@@ -149,7 +160,12 @@ class VendorCatalogueRepository {
                 attributes: ['id','code','name', 'avg_rate'],
                 model: _modelVendor,
                 as: 'vendor',
-            }
+            },
+            {
+                attributes: ['id','code','name','symbol'],
+                model: _modelCurrency,
+                as: 'currency',
+            },
         ];
 
         var xParamQuery = {

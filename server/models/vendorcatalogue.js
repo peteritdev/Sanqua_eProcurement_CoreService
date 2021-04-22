@@ -20,6 +20,7 @@ module.exports = ( sequelize, DataTypes ) => {
         purchase_uom_id: DataTypes.INTEGER,
         purchase_uom_name: DataTypes.STRING,
 
+        currency_id: DataTypes.INTEGER,
         last_price: DataTypes.DOUBLE,
         last_ordered: DataTypes.DATE,
         last_purchase_plant: DataTypes.STRING,
@@ -59,6 +60,12 @@ module.exports = ( sequelize, DataTypes ) => {
             foreignKey: 'vendor_id',
             onDelete: 'CASCADE',
             as: 'vendor',
+        } );
+
+        VendorCatalogue.belongsTo( models.ms_currencies, {
+            foreignKey: 'currency_id',
+            onDelete: 'CASCADE',
+            as: 'currency',
         } );
     }
 

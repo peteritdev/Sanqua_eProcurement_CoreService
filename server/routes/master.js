@@ -4,6 +4,7 @@ const productController = require('../controllers').product;
 const unitController = require('../controllers').unit;
 const spesificationCategoryController = require('../controllers').spesificationCategory;
 const spesificationAttributeController = require('../controllers').spesificationAttribute;
+const currencyController = require('../controllers').currency;
 
 const { check, validationResult } = require('express-validator');
 
@@ -208,4 +209,33 @@ module.exports = (app) => {
     arrValidate = [];
     app.post( rootAPIPath + 'master/spesification_attribute/upload', arrValidate, spesificationAttributeController.spesificationAttribute_UploadFromExcel );
     app.post( rootAPIPath + 'master/spesification_attribute/batch_save', arrValidate, spesificationAttributeController.spesificationAttribute_BatchSave );
+
+
+    // Currency
+    var xArrValidateProduct = [
+        check("name").not().isEmpty().withMessage("Parameter name can not be empty"),
+        check("code").not().isEmpty().withMessage("Parameter name can not be empty"),
+        check("symbol").not().isEmpty().withMessage("Parameter name can not be empty"),
+    ];
+    app.post( rootAPIPath + 'master/currency/save', xArrValidateProduct, currencyController.currency_Save );
+    
+    xArrValidateProduct = [];
+    xArrValidateProduct = [
+        check("limit").not().isEmpty().withMessage("Parameter limit can not be empty"),
+        check("offset","Parameter offset can not be empty and must be integer").not().isEmpty().isInt(),
+    ];
+    app.get( rootAPIPath + 'master/currency/list', xArrValidateProduct, currencyController.currency_List );
+
+    xArrValidateProduct = [];
+    xArrValidateProduct = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+    ];
+    app.get( rootAPIPath + 'master/currency/detail/:id', xArrValidateProduct, currencyController.currency_GetById );
+
+    xArrValidateProduct = [];
+    xArrValidateProduct = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+    ];
+    app.delete( rootAPIPath + 'master/currency/delete/:id', currencyController.currency_Delete );
+    app.get( rootAPIPath + 'master/currency/drop_down', currencyController.currency_DropDown );
 }
