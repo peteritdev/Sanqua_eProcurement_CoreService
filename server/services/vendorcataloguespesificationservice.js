@@ -385,6 +385,8 @@ class VendorCatalogueSpesificationService {
                             });
                         }
 
+                        console.log(">>> Data Array : " + JSON.stringify(xJoArrData));
+
                         xJoResult = {
                             status_code: "00",
                             status_msg: "OK",
