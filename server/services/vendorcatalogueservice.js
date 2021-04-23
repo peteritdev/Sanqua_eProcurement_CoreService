@@ -345,6 +345,7 @@ class VendorCatalogueService {
                             id: xResultList.purchase_uom_id,
                             name: xResultList.purchase_uom_name,
                         },
+                        currency: xResultList.currency,
                         last_price: xResultList.last_price,
                         last_ordered: xResultList.last_ordered,
                         last_purchase_plant: xResultList.last_purchase_plant,
@@ -417,6 +418,7 @@ class VendorCatalogueService {
                             photo_5: ( ( xRows[index].product.photo_5 != null && xRows[index].product.photo_5 != '' ) ? ( config.frontParam.photoPath.product.product5 + xRows[index].product.photo_5 ) : null ),
                         },
 
+                        currency: xRows[index].currency,
                         last_price: xRows[index].last_price,
                         last_ordered: ( xRows[index].last_ordered != null && xRows[index].last_ordered != '' ? moment(xRows[index].last_ordered).format('YYYY-MM-DD') : '' ),
                         last_purchase_plant: xRows[index].last_purchase_plant,
