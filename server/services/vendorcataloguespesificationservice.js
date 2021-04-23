@@ -390,7 +390,7 @@ class VendorCatalogueSpesificationService {
                         xJoResult = {
                             status_code: "00",
                             status_msg: "OK",
-                            data: _groupBy(xJoArrData,['spesification_category']),
+                            data: _groupBy(xJoArrData,['spesification_category.name']),
                             catalogue_type: xRows[index].vendor_catalogue.catalogue_type,
                             total_record: xResultList.count,
                         }
