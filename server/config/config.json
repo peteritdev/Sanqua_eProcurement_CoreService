@@ -2,8 +2,8 @@
   "localhost": {
     "username": "postgres",
     "password": "P455uu0rd^^ok",
-    "database": "sanqua_procurementdb",
-    "host": "localhost",
+    "database": "sanqua_procurementdb", 
+    "host": "10.10.20.8",
     "port":5432,
     "dialect": "postgres",
     "dialectOptions": {
