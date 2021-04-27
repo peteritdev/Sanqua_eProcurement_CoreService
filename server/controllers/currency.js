@@ -4,7 +4,7 @@ const _serviceInstance = new CurrencyService();
 
 // OAuth Service
 const OAuthService = require('../services/oauthservice.js');
-const _oAuthServiceInstance = new OAuthService();
+const _oAuthServiceInstance = new OAuthService(); 
 
 //Validation
 const { check, validationResult } = require('express-validator');
