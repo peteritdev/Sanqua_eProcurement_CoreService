@@ -520,11 +520,21 @@ class VendorService {
         if( pParam.act == "add" ){
             for( var i = 0; i < pParam.data.length; i++ ){
 
-                pParam.data[i].business_entity_id = parseInt(pParam.data[i].business_entity_id);
-                pParam.data[i].classification_id = parseInt(pParam.data[i].classification_id);
-                pParam.data[i].sub_classification_id = parseInt(pParam.data[i].sub_classification_id);
-                pParam.data[i].province_id = parseInt(pParam.data[i].province_id);
-                pParam.data[i].city_id = parseInt(pParam.data[i].city_id);
+                if( pParam.data[i].hasOwnProperty('business_entity_id') ){
+                    pParam.data[i].business_entity_id = parseInt( pParam.data[i].business_entity_id );
+                }
+                if( pParam.data[i].hasOwnProperty('classification_id') ){
+                    pParam.data[i].classification_id = parseInt( pParam.data[i].classification_id );
+                }
+                if( pParam.data[i].hasOwnProperty('sub_classification_id') ){
+                    pParam.data[i].sub_classification_id = parseInt( pParam.data[i].sub_classification_id );
+                }
+                if( pParam.data[i].hasOwnProperty('province_id') ){
+                    pParam.data[i].province_id = parseInt( pParam.data[i].province_id );
+                }
+                if( pParam.data[i].hasOwnProperty('city_id') ){
+                    pParam.data[i].city_id = parseInt( pParam.data[i].city_id );
+                }
 
                 if( pParam.data[i].code == '' ){
                     xMessageResult += "Vendor name <strong>" + pParam.data[i].name + "</strong> must have code. Please fill valid code <br>";
