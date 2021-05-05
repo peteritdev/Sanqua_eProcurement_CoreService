@@ -60,6 +60,14 @@ module.exports = (app) => {
     app.post( rootAPIPath + 'vendor/catalogue/upload', arrValidate, vendorCatalogueController.vendorCatalogue_UploadFromExcel );
     app.post( rootAPIPath + 'vendor/catalogue/batch_save', arrValidate, vendorCatalogueController.vendorCatalogue_BatchSave );
 
+    // Sync catalogue
+    arrValidate = [];
+    arrValidate = [
+        check("vendor_code").not().isEmpty().withMessage("Parameter vendor_code can not be empty"),
+        check("product_code").not().isEmpty().withMessage("Parameter product_code can not be empty"),
+    ];
+    app.post( rootAPIPath + 'vendor/catalogue/sync_from_odoo', arrValidate, vendorCatalogueController.vendorCatalogue_UpdateFromOdoo )
+
     // VENDOR CATALOGUE QUOTATION
     // Save
     arrValidate = [];

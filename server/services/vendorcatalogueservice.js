@@ -555,6 +555,33 @@ class VendorCatalogueService {
         return xJoResult;
 
     }
+
+    async updatePriceFromOdoo( pParam ){
+
+        var xJoResult = {};
+        
+        // Loop each line
+        for( index in pParam.product ){
+            // Check Vendor Code and Product Code
+            var xVendorCatalogue = await _vendorCatalogueRepoInstance.getByVendorCodeAndProductCode({
+                vendor_code: pParam.vendor.code,
+                product_code: pParam.product[index].product.default_code,
+            });
+
+            if( xVendorCatalogue != null ){
+                // Process update price
+                console.log(">>> Vendor Catalogue Detail : " + JSON.stringify(xVendorCatalogue));
+            }else{
+                xJoResult = {
+                    status_code: '-99',
+                    status_msg: 'Data not found',
+                }
+            }
+        }        
+
+        return xJoResult;
+
+    }
 }
 
 module.exports = VendorCatalogueService
