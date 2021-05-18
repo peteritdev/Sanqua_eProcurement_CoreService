@@ -62,10 +62,6 @@ module.exports = (app) => {
 
     // Sync catalogue
     arrValidate = [];
-    arrValidate = [
-        check("vendor_code").not().isEmpty().withMessage("Parameter vendor_code can not be empty"),
-        check("product_code").not().isEmpty().withMessage("Parameter product_code can not be empty"),
-    ];
     app.post( rootAPIPath + 'vendor/catalogue/sync_from_odoo', arrValidate, vendorCatalogueController.vendorCatalogue_UpdateFromOdoo )
 
     // VENDOR CATALOGUE QUOTATION

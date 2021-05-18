@@ -28,6 +28,9 @@ const _vendorRepoInstance = new VendorRepository();
 const UnitRepository = require('../repository/unitrepository.js');
 const _unitRepoInstance = new UnitRepository();
 
+const CurrencyRepository = require('../repository/currencyrepository.js');
+const _currencyRepoInstance = new CurrencyRepository();
+
 const multer = require('multer');
 const _xlsToJson = require('xls-to-json-lc');
 const _xlsxToJson = require('xlsx-to-json-lc');
@@ -559,25 +562,60 @@ class VendorCatalogueService {
     async updatePriceFromOdoo( pParam ){
 
         var xJoResult = {};
+        var xJoDataResult = [];
+
+        var xRows = pParam.product;
         
         // Loop each line
-        for( index in pParam.product ){
+        for( var index in xRows ){
             // Check Vendor Code and Product Code
             var xVendorCatalogue = await _vendorCatalogueRepoInstance.getByVendorCodeAndProductCode({
                 vendor_code: pParam.vendor.code,
-                product_code: pParam.product[index].product.default_code,
+                product_code: xRows[index].product.default_code,
             });
 
             if( xVendorCatalogue != null ){
                 // Process update price
                 console.log(">>> Vendor Catalogue Detail : " + JSON.stringify(xVendorCatalogue));
+
+                // Get uom_id 
+                var xUom = await _unitRepoInstance.getByName( {name: xRows[index].uom.name} );
+
+                // Get Purchase uom_id
+                // var xPurUom = await _unitRepoInstance.getByName( { name: xRows[index].product_uom } );
+
+                // Get Currency
+                var xCurrency = await _currencyRepoInstance.getByCode( {code: xRows[index].currency.name} );
+
+                var xParamUpdate = {
+                    id: xVendorCatalogue.id,
+                    uom_id: ( xUom != null ? xUom.id : null ),
+                    uom_name: ( xUom != null ? xUom.name : null ),
+                    purchase_uom_id: ( xUom != null ? xUom.id : null ),
+                    purchase_uom_name: ( xUom != null ? xUom.name : null ),
+                    last_price: xRows[index].price_unit,
+                    last_ordered: xRows[index].createdat,
+                    currency_id: (xCurrency != null ? xCurrency.id : null),
+
+                };
+                var xUpdate = await _vendorCatalogueRepoInstance.save(xParamUpdate, 'update');
+                xJoDataResult.push({
+                    product_code: xRows[index].product.default_code,
+                    status: true,
+                })
+                
             }else{
-                xJoResult = {
-                    status_code: '-99',
-                    status_msg: 'Data not found',
-                }
+                xJoDataResult.push({
+                    product_code: xRows[index].product.default_code,
+                    status: false,
+                })
             }
         }        
+
+        xJoResult = {
+            status_code: '00',
+            status_sync: xJoDataResult,
+        }
 
         return xJoResult;
 

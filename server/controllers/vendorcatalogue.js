@@ -66,27 +66,11 @@ async function vendorCatalogue_BatchSave( req, res ){
 async function vendorCatalogue_UpdateFromOdoo( req, res ){
 
     var joResult = {};
-    var oAuthResult = await _oAuthServiceInstance.verifyToken( req.headers['x-token'], req.headers['x-method'] );
-
-    if( oAuthResult.status_code == "00" ){
-        if( oAuthResult.token_data.status_code == "00" ){
-            req.body.user_id = oAuthResult.token_data.result_verify.id;
-            req.body.id = oAuthResult.token_data.result_verify.id;
-            joResult = await _vendorCatalogueServiceInstance.updatePriceFromOdoo(req.body);
+    joResult = await _vendorCatalogueServiceInstance.updatePriceFromOdoo(req.body);
             
-            joResult = JSON.stringify(joResult);
-            res.setHeader('Content-Type','application/json');
-            res.status(200).send(joResult);
-        }else{
-            joResult = JSON.stringify(oAuthResult);
-            res.setHeader('Content-Type','application/json');
-            res.status(200).send(joResult);
-        }
-    }else{
-        joResult = JSON.stringify(oAuthResult);
-        res.setHeader('Content-Type','application/json');
-        res.status(200).send(joResult);
-    }    
+    joResult = JSON.stringify(joResult);
+    res.setHeader('Content-Type','application/json');
+    res.status(200).send(joResult);    
 
 }
 

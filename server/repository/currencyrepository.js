@@ -80,6 +80,17 @@ class CurrencyRepository{
         return xData;
     }
 
+    async getByCode( pParam ){
+        var xData = await _modelDb.findOne({
+            where: {
+                code: pParam.code,
+                is_delete: 0,
+            },
+        });
+
+        return xData;
+    }
+
     async save(pParam, pAct){
         let xTransaction;
         var xJoResult = {};

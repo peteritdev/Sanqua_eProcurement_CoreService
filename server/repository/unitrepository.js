@@ -25,6 +25,19 @@ class UnitRepository{
         return xData;
     }
 
+    async getByName( pParam ){
+        var xData = await _modelDb.findOne({
+            where: {
+                name: {
+                    [Op.like]: pParam.name,
+                },
+                is_delete: 0,
+            },
+        });
+
+        return xData;
+    }
+
     async list( pParam ){
 
         var xOrder = ['name', 'ASC'];
