@@ -21,6 +21,8 @@ module.exports = ( sequelize, DataTypes ) => {
         purchase_uom_name: DataTypes.STRING,
 
         currency_id: DataTypes.INTEGER,
+        purchase_frequency: DataTypes.INTEGER,
+        
         last_price: DataTypes.DOUBLE,
         last_ordered: DataTypes.DATE,
         last_purchase_plant: DataTypes.STRING,

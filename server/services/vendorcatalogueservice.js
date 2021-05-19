@@ -595,7 +595,8 @@ class VendorCatalogueService {
                     purchase_uom_name: ( xUom != null ? xUom.name : null ),
                     last_price: xRows[index].price_unit,
                     last_ordered: xRows[index].createdat,
-                    currency_id: (xCurrency != null ? xCurrency.id : null),
+                    currency_id: (xCurrency != null ? xCurrency.id : null),                    
+                    purchase_frequency: sequelize.literal('purchase_frequency + 1'),
 
                 };
                 var xUpdate = await _vendorCatalogueRepoInstance.save(xParamUpdate, 'update');
