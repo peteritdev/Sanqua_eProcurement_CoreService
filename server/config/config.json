@@ -143,7 +143,7 @@
 
   "production": {
     "username": "postgres",
-    "password": "P455uu0rd^^ok",
+    "password": "SANQUAD0ck3rP912",
     "database": "sanqua_procurementdb",
     "host": "127.0.0.1",
     "port":5435,
