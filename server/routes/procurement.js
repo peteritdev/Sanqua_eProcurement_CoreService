@@ -1,6 +1,7 @@
 const procurementController = require('../controllers').procurement;
 const procurementItemController = require('../controllers').procurementItem;
 const procurementScheduleController = require('../controllers').procurementSchedule;
+const procurementTermController = require('../controllers').procurementTerm;
 
 const { check, validationResult } = require('express-validator');
 
@@ -168,5 +169,47 @@ module.exports = (app) => {
     arrValidate = [
         check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
     ];
-    app.put( rootAPIPath + 'schedule/unarchive/:id', procurementScheduleController.procurementSchedule_Archive );
+    app.put( rootAPIPath + 'schedule/unarchive/:id', procurementScheduleController.procurementSchedule_Unarchive );
+
+
+    // *** PROCUREMENT TERM ***
+    // Save
+    arrValidate = [];
+    arrValidate = [
+        check("act").not().isEmpty().withMessage("Parameter act cannot be empty"),
+        check("procurement_id").not().isEmpty().withMessage("Parameter procurement_id cannot be empty"),
+        check("term").not().isEmpty().withMessage("Parameter term cannot be empty"),
+        check("description").not().isEmpty().withMessage("Parameter description cannot be empty"),
+    ];
+    app.post( rootAPIPath + 'term/save', arrValidate, procurementTermController.procurementTerm_Save);
+
+    // List
+    arrValidate = [];
+    arrValidate = [
+        check("offset","Parameter offset must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("limit").not().isEmpty().withMessage("Parameter limit cannot be empty"),
+        check("procurement_id").not().isEmpty().withMessage("Parameter procurement_id cannot be empty"),
+    ];
+    app.get( rootAPIPath + 'term/list', arrValidate, procurementTermController.procurementTerm_List);
+
+    // Delete
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+    ];
+    app.delete( rootAPIPath + 'term/delete/:id', procurementTermController.procurementTerm_Delete );
+
+    // Archive
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+    ];
+    app.put( rootAPIPath + 'term/archive/:id', procurementTermController.procurementTerm_Archive );
+
+    // Archive
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+    ];
+    app.put( rootAPIPath + 'term/unarchive/:id', procurementTermController.procurementTerm_Unarchive );
 }
