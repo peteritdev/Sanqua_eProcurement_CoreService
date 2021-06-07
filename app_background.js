@@ -21,7 +21,7 @@ app.get('*', (req, res) => res.status(200).send({
 const http = require('http');
 //const app = require('../app'); // The express app we just created
 
-const port = parseInt(process.env.PORT, 10) || 1191;
+const port = parseInt(process.env.PORT, 10) || 9191;
 app.set('port', port);
 
 const server = http.createServer(app);
