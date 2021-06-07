@@ -102,7 +102,13 @@ class GlobalUtility{
         
     }
 
-    
+    async generateProcurementNo( pId, pCompany ){
+        // Formula : SMI/21/06/00001
+        var dt = dateTime.create();
+        var xDate = dt.format('ym');
+        var xNo = `${pCompany}/${xDate}/` + pId.padStart(5,'0');
+        return xNo;        
+    }
 
 }
 

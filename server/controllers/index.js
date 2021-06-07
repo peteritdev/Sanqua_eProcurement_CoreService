@@ -14,10 +14,16 @@ const spesificationAttribute = require('./spesificationattribute');
 const vendorCatalogueQuotation = require('./vendorcataloguequotation');
 const vendorCatalogueSpesification = require('./vendorcataloguespesification');
 
+const globalMaster = require('./globalmaster');
+const procurement = require('./procurement');
+const procurementItem = require('./procurementitem');
+const procurementSchedule = require('./procurementschedule');
+
 module.exports = {
 	vendor,
 	master, productCategory, product, unit, currency,
 	vendorExperience, vendorCatalogue,
 	spesificationCategory, spesificationAttribute, vendorCatalogueQuotation, vendorCatalogueSpesification,
 	vendorRateHistory,
+	procurement, procurementItem, globalMaster, procurementSchedule,
 }

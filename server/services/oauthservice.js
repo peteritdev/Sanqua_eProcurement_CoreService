@@ -11,9 +11,9 @@ const env         = process.env.NODE_ENV || 'localhost';
 const config      = require(__dirname + '/../config/config.json')[env];
 
 // Utility
-const Util = require('../utils/globalutility.js');
+const Util = require('peters-globallib');
 const { default: Axios } = require('axios');
-const utilInstance = new Util();
+const _utilInstance = new Util();
 
 class OAuthService {
 
@@ -21,7 +21,55 @@ class OAuthService {
 
     async verifyToken( pToken, pMethod ){
         var xApiUrl = config.api.oAuth.url.verifyToken + "?token=" + pToken + "&method=" + pMethod;
-        var xResultVerify = await utilInstance.axiosRequest( xApiUrl, {} );
+        var xResultVerify = await _utilInstance.axiosRequest( xApiUrl, {} );
+        return xResultVerify;
+    }
+
+    async addApprovalMatrix( pMethod, pToken, pParam ){
+        var xAPIUrl = config.api.oAuth.url.approval_matrix_document.save;
+        // console.log(">>> API URL : " + xAPIUrl);
+        var xHeader = {
+            'headers': {
+                'x-method': pMethod,
+                'x-token': pToken
+            }
+        }
+        var xResultVerify = await _utilInstance.axiosRequestPost(xAPIUrl, 'POST', pParam, xHeader);
+
+        return xResultVerify;
+    }
+
+    async getApprovalMatrix( pMethod, pToken, pParam ){
+        var xAPIUrl = config.api.oAuth.url.approval_matrix_document.list;
+        var xQueryParam = `?offset=0&limit=10&keyword=&application_id=${pParam.application_id}&table_name=${pParam.table_name}&document_id=${pParam.document_id}`
+        var xHeader = {
+            'headers': {
+                'x-method': pMethod,
+                'x-token': pToken
+            }
+        }
+        var xResultVerify = await _utilInstance.axiosRequest((xAPIUrl+xQueryParam), xHeader);
+
+        return xResultVerify
+    }
+
+    async confirmApprovalMatrix( pMethod, pToken, pParam ){
+        var xAPIUrl = config.api.oAuth.url.approval_matrix_document.confirm;
+        var xHeader = {
+            'headers': {
+                'x-method': pMethod,
+                'x-token': pToken
+            }
+        }
+        var xResultVerify = await _utilInstance.axiosRequestPost(xAPIUrl, 'POST', pParam, xHeader);
+
+        return xResultVerify;
+    }
+
+    async confirmApprovalMatrixViaEmail( pParam ){
+        var xAPIUrl = config.api.oAuth.url.approval_matrix_document.confirm_via_email;
+        var xResultVerify = await _utilInstance.axiosRequestPost(xAPIUrl, 'POST', pParam, {});
+
         return xResultVerify;
     }
 
