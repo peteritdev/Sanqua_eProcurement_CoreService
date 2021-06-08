@@ -199,7 +199,7 @@ class VendorService {
 
                 if( joResult.status_code == '00' ){
 
-                    if( param.act == "add" ){
+                    if( param.act == "add" && pParam.code == '' ){
                         // Get currency code by id
                         var xCurrency = await _currencyService.getById( {id: param.currency_id} );
 
