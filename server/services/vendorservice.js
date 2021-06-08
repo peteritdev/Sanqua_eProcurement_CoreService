@@ -23,6 +23,13 @@ const Utility = require('peters-globallib');
 const { forEach } = require('lodash');
 const _utilInstance = new Utility();
 
+const GlobalUtility = require('../utils/globalutility.js');
+const _globalUtilInstance = new GlobalUtility();
+
+// Service
+const CurrencyService = require('../services/currencyservice.js');
+const _currencyService = new CurrencyService();
+
 const Security = require('../utils/security.js');
 const e = require('express');
 const _secureInstance = new Security();
@@ -90,6 +97,7 @@ class VendorService {
                     email: ( xRows[index].email != null && xRows[index].email != '' ? (await _utilInstance.decrypt( xRows[index].email, config.cryptoKey.hashKey )).decrypted : '' ),
                     website: xRows[index].website,
                     status: xRows[index].status,
+                    currency: xRows[index].currency,
                 });
             }
 
@@ -145,6 +153,7 @@ class VendorService {
                         register_via: xData.register_via,
                         tags: xData.tags,
                         company_scale: xData.company_scale,
+                        currency: xData.currency,
                     }
                 }
             }
@@ -158,9 +167,10 @@ class VendorService {
         var checkDuplicateResult = await _vendorRepoInstance.isDataExists(param.name, param.email);
         var flagProcess = true;
         var xDec = null;
+        var xVendorCode = "";
 
-        console.log(">>> Service : ");
-        console.log(JSON.stringify(param));
+        // console.log(">>> Service : ");
+        // console.log(JSON.stringify(param));
 
         if( ( param.act == "add" && checkDuplicateResult == null ) || param.act == "update" ){
 
@@ -186,6 +196,34 @@ class VendorService {
             if( flagProcess ){
                 param = await _secureInstance.encryptCriticalField(param);
                 joResult = await _vendorRepoInstance.save( param );
+
+                if( joResult.status_code == '00' ){
+
+                    if( param.act == "add" ){
+                        // Get currency code by id
+                        var xCurrency = await _currencyService.getById( {id: param.currency_id} );
+
+                        // Generate Vendor Code
+                        if( xCurrency.status_code == '00' ){
+                            xVendorCode = await _globalUtilInstance.generateVendorCode(joResult.clear_id, xCurrency.data.code );
+                        }else{
+                            xVendorCode = await _globalUtilInstance.generateVendorCode(joResult.clear_id, "IDR" );
+                        }
+
+                        // Update Vendor Code
+                        var xParamUpdate = {
+                            id: joResult.clear_id,
+                            code: xVendorCode,
+                            act: 'update',
+                        }
+                        var xUpdateResult = await _vendorRepoInstance.save(xParamUpdate);
+                        joResult.result_update_vendor = xUpdateResult;
+                    }
+                    
+                }
+
+                
+
             }
 
         }else{

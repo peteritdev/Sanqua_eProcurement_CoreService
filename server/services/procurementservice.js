@@ -146,6 +146,8 @@ class ProcurementService {
                     sub_total: xResult.sub_total,
                     ppn: xResult.ppn,
                     grand_total: xResult.grand_total,
+                    business_fields: xResult.business_fields,
+                    qualification_requirements: xResult.qualification_requirements,
                     status: {
                         id: xResult.status,
                         name: ( xResult.status == 1 ? 'Active' : ( xResult.status == 0 ? 'Inactive' : ( xResult.status == -1 ? 'Cancel' : '' ) ) )

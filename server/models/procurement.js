@@ -18,6 +18,10 @@ module.exports = ( sequelize, DataTypes ) => {
         total_working_days: DataTypes.INTEGER,
         validity_period_offer: DataTypes.INTEGER,
         qualification: DataTypes.STRING,
+
+        business_fields: DataTypes.STRING,
+        qualification_requirements: DataTypes.STRING,
+
         sub_total: DataTypes.DOUBLE,
         ppn: DataTypes.DOUBLE,
         grand_total: DataTypes.DOUBLE,

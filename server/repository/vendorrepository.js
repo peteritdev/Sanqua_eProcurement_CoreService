@@ -13,6 +13,7 @@ const _modelSubClassification = require('../models').ms_subclassifications;
 const _modelProvince = require('../models').ms_provinces;
 const _modelCity = require('../models').ms_cities;
 const _modelVendorDocument = require('../models').ms_vendordocuments;
+const _modelCurrency = require('../models').ms_currencies;
 
 
 const Utility = require('../utils/globalutility.js');
@@ -106,6 +107,11 @@ class VendorRepository{
             {
                 model: _modelClassification,
                 as: 'classification',
+            },
+            {
+                attributes: ['id','name','code'],
+                model: _modelCurrency,
+                as: 'currency',
             }
         ];
 
@@ -159,6 +165,11 @@ class VendorRepository{
                     attributes: ['id','name'],
                     model: _modelSubClassification,
                     as: 'sub_classification',
+                },
+                {
+                    attributes: ['id','name','code'],
+                    model: _modelCurrency,
+                    as: 'currency',
                 }
             ],
             where: {
@@ -201,7 +212,8 @@ class VendorRepository{
                 joResult = {
                     status_code: "00",
                     status_msg: "Data has been successfully saved",
-                    created_id: (await _utilInstance.encrypt(saved.id))
+                    created_id: (await _utilInstance.encrypt(saved.id)),
+                    clear_id: saved.id,
                 }
             }else if( xAct == "update" ){
 
