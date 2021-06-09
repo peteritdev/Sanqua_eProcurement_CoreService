@@ -82,6 +82,9 @@
   },
 
   "development": {
+    "dbTables": {
+      "procurement": "tr_procurements"
+    },
     "username": "postgres",
     "password": "P455uu0rd^^ok",
     "database": "sanqua_procurementdb",
@@ -149,7 +152,8 @@
       "useUTC": false,
       "charset": "utf8mb4_unicode_ci"
     },
-    "timezone": "+07:00"
+    "timezone": "+07:00",
+    "applicationId": 2
   },  
 
   "production": {
