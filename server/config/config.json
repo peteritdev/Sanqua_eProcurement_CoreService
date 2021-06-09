@@ -130,7 +130,13 @@
 
       "oAuth": {
         "url": {
-          "verifyToken": "http://localhost:9189/api/oauth/v1/user/verify_token"
+          "verifyToken": "http://localhost:1189/api/oauth/v1/user/verify_token",
+          "approval_matrix_document": {
+            "save": "http://localhost:1189/api/oauth/v1/approval_matrix/document/save",
+            "list": "http://localhost:1189/api/oauth/v1/approval_matrix/document/list",
+            "confirm": "http://localhost:1189/api/oauth/v1/approval_matrix/document/confirm",
+            "confirm_via_email": "http://localhost:1189/api/oauth/v1/approval_matrix/document/confirm_via_email"
+          }
         }
       }
     },
