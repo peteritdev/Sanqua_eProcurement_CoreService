@@ -11,6 +11,8 @@ const _modelProduct = require('../models').ms_products;
 const _modelProductCategory = require('../models').ms_productcategories;
 const _modelVendor = require('../models').ms_vendors;
 const _modelCurrency = require('../models').ms_currencies;
+const _modelProvince = require('../models').ms_provinces;
+const _modelCity = require('../models').ms_cities;
 
 const Utility = require('peters-globallib');
 const _utilInstance = new Utility();
@@ -360,6 +362,100 @@ class VendorCatalogueRepository {
 
             return xJoResult;
         }        
+    }
+
+    async getVendorByProductId( pParam ){
+
+        var xOrder = ['product_name', 'ASC'];
+        var xWhereProductId = {};
+        var xInclude = [];
+
+        if( pParam.order_by != '' && pParam.hasOwnProperty('order_by') ){
+            xOrder = [pParam.order_by, (pParam.order_type == 'desc' ? 'DESC' : 'ASC') ];
+        }
+
+        if( pParam.hasOwnProperty('product_id')  ){
+            if( pParam.product_id != '' ){
+                xWhereProductId = {
+                    product_id: {
+                        [Op.in]: pParam.product_id,
+                    }
+                }
+            }            
+        }
+
+        xInclude = [
+            {
+                model: _modelVendor,
+                as: 'vendor',
+                include: [
+                    {
+                        attributes: ['id','name'],
+                        model: _modelProvince,
+                        as: 'province',
+                    },
+                    {
+                        attributes: ['id','name'],
+                        model: _modelCity,
+                        as: 'city',
+                    }
+                ]
+            },
+            {
+                attributes: ['id','code','name','symbol'],
+                model: _modelCurrency,
+                as: 'currency',
+            },
+        ];
+
+        var xParamQuery = {
+            where: {
+                [Op.and]:[
+                    {
+                        is_delete: 0
+                    },
+                    xWhereProductId,
+                ],
+                [Op.or]: [
+                    {
+                        '$vendor.name$': {
+                            [Op.iLike]: '%' + pParam.keyword + '%'
+                        },
+                    },
+                    {
+                        
+                        '$vendor.province.name$': {
+                            [Op.iLike]: '%' + pParam.keyword + '%'
+                        },
+                    },
+                    {                        
+                        '$vendor.city.name$': {
+                            [Op.iLike]: '%' + pParam.keyword + '%'
+                        }
+                    },
+                    {                        
+                        '$vendor.address$': {
+                            [Op.iLike]: '%' + pParam.keyword + '%'
+                        }
+                    },
+                ]
+            },            
+            include: xInclude,
+            order: [xOrder],
+        };
+
+        if( pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit') ){
+            if( pParam.offset != '' && pParam.limit != ''){
+                if( pParam.limit != 'all' ){
+                    xParamQuery.offset = pParam.offset;
+                    xParamQuery.limit = pParam.limit;
+                }                
+            }
+        }
+
+        var xData = await _modelDb.findAndCountAll(xParamQuery);
+
+        return xData;
     }
 }
 
