@@ -24,7 +24,7 @@ class NotificationService {
         pMsg = pMsg.replace( "#SUPPLIER_NAME#", pParam.vendor.name );
         pMsg = pMsg.replace( "#PROCUREMENT_NAME#", pParam.name );
         pMsg = pMsg.replace( "#PROCUREMENT_YEAR#", pParam.year );
-        pMsg = pMsg.replace( "#TOTAL_HPS#", (pParam.total_hps).toLocaleString('id-IDR', {maximumFractionDigits:2}) );
+        pMsg = pMsg.replace( "#TOTAL_HPS#", (pParam.total_hps).toLocaleString('en-US', {maximumFractionDigits:2}) );
 
         var xStartDate = moment(pParam.period_start).format('DD MMM YYYY');
         var xEndDate = moment(pParam.period_end).format('DD MMM YYYY');
