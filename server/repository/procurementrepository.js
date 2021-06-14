@@ -34,7 +34,7 @@ class ProcurementRepository {
             {
                 model: _modelProcurementItem,
                 as: 'procurement_item',
-                attributes: ['id','unit_price','qty','total'],
+                attributes: ['id','unit_price','qty','total','description'],
                 include: [
                     {
                         model: _modelUnit,

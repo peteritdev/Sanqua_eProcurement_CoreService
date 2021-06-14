@@ -50,7 +50,7 @@ class NotificationService {
             }
             xTable_Item += '</table>';
         }
-        pMsg = pMsg.replace( "#PROCUREMENT_SCHEDULE#", xTable_Item );
+        pMsg = pMsg.replace( "#PROCUREMENT_ITEMS#", xTable_Item );
 
         // Display Procurement Schedule
         if( pParam.procurement_schedule != null && pParam.procurement_schedule.length > 0 ){
@@ -61,10 +61,33 @@ class NotificationService {
             xTable_Schedule += '<td text-align: center;"><strong>Jadwal</strong></td>';
             xTable_Schedule += '</tr>';
             for( var i in pParam.procurement_schedule ){
+
+                var xStartDate = moment(pParam.procurement_schedule[i].start_date).format('DD MMM YYYY');
+                var xEndDate = moment(pParam.procurement_schedule[i].end_date).format('DD MMM YYYY');
+
                 xTable_Schedule += '<tr>';
                 xTable_Schedule += `<td tex-align: right;>${i+1}</td>`;
                 xTable_Schedule += `<td tex-align: left;>${pParam.procurement_schedule[i].schedule_attribute.name}</td>`;
-                xTable_Schedule += `<td tex-align: left;>${pParam.procurement_schedule[i].start_date} s/d ${pParam.procurement_schedule[i].end_date}</td>`;
+                xTable_Schedule += `<td tex-align: left;>${xStartDate} s/d ${xEndDate}</td>`;
+                xTable_Schedule += '</tr>';
+            }
+        }
+        pMsg = pMsg.replace( "#PROCUREMENT_SCHEDULE#", xTable_Schedule );
+
+        // Display Procurement Terms
+        if( pParam.procurement_term != null && pParam.procurement_term.length > 0 ){
+            var xTable_Schedule = '<table style="border-collapse: collapse; width: 100%;" border="1">';
+            xTable_Schedule += '<tr>';
+            xTable_Schedule += '<td text-align: center;"><strong>No.</strong></td>';
+            xTable_Schedule += '<td text-align: center;"><strong>Syarat</strong></td>';
+            xTable_Schedule += '<td text-align: center;"><strong>Deskripsi</strong></td>';
+            xTable_Schedule += '</tr>';
+            for( var i in pParam.procurement_term ){
+
+                xTable_Schedule += '<tr>';
+                xTable_Schedule += `<td tex-align: right;>${i+1}</td>`;
+                xTable_Schedule += `<td tex-align: left;>${pParam.procurement_term[i].term}</td>`;
+                xTable_Schedule += `<td tex-align: left;>${pParam.procurement_term[i].description}</td>`;
                 xTable_Schedule += '</tr>';
             }
         }
