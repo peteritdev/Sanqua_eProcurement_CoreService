@@ -24,9 +24,13 @@ class NotificationService {
         pMsg = pMsg.replace( "#SUPPLIER_NAME#", pParam.vendor.name );
         pMsg = pMsg.replace( "#PROCUREMENT_NAME#", pParam.name );
         pMsg = pMsg.replace( "#PROCUREMENT_YEAR#", pParam.year );
-        pMsg = pMsg.replace( "#TOTAL_HPS#", pParam.total_hps );
-        pMsg = pMsg.replace( "#PROCUREMENT_PERIOD#", `${pParam.period_start} s/d ${pParam.period_end}` );
-        pMsg = pMsg.replace( "#TOTAL_WORK_DAYS#", pParam.total_working_days );
+        pMsg = pMsg.replace( "#TOTAL_HPS#", (pParam.total_hps).toLocaleString('id-IDR', {maximumFractionDigits:2}) );
+
+        var xStartDate = moment(pParam.period_start).format('DD MMM YYYY');
+        var xEndDate = moment(pParam.period_end).format('DD MMM YYYY');
+        pMsg = pMsg.replace( "#PROCUREMENT_PERIOD#", `${xStartDate} s/d ${xEndDate}` );
+
+        pMsg = pMsg.replace( "#TOTAL_WORK_DAYS#", `${pParam.total_working_days} hari` );
 
         // Display Procurement Display
         if( pParam.procurement_item != null && pParam.procurement_item.length > 0 ){
@@ -62,13 +66,13 @@ class NotificationService {
             xTable_Schedule += '</tr>';
             for( var i in pParam.procurement_schedule ){
 
-                var xStartDate = moment(pParam.procurement_schedule[i].start_date).format('DD MMM YYYY');
-                var xEndDate = moment(pParam.procurement_schedule[i].end_date).format('DD MMM YYYY');
+                var xStartDateSchedule = moment(pParam.procurement_schedule[i].start_date).format('DD MMM YYYY');
+                var xEndDateSchedule = moment(pParam.procurement_schedule[i].end_date).format('DD MMM YYYY');
 
                 xTable_Schedule += '<tr>';
                 xTable_Schedule += `<td tex-align: right;>${i+1}</td>`;
                 xTable_Schedule += `<td tex-align: left;>${pParam.procurement_schedule[i].schedule_attribute.name}</td>`;
-                xTable_Schedule += `<td tex-align: left;>${xStartDate} s/d ${xEndDate}</td>`;
+                xTable_Schedule += `<td tex-align: left;>${xStartDateSchedule} s/d ${xEndDateSchedule}</td>`;
                 xTable_Schedule += '</tr>';
             }
         }
@@ -94,8 +98,10 @@ class NotificationService {
         pMsg = pMsg.replace( "#PROCUREMENT_TERMS#", xTable_Schedule );
 
         // Display link confirmation
+        pMsg = pMsg.replace( "#LINK_CONFIRM_PROCUREMENT#", "" );
 
         // Display link registration at eSanQua
+        pMsg = pMsg.replace( "#LINK_REGISTRATION_ESANQUA#", "" );
 
         return pMsg;
     }
