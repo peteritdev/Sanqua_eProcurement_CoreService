@@ -14,7 +14,7 @@ const _modelVendorCatalogue = require('../models').ms_vendorcatalogues;
 const _modelVendor = require('../models').ms_vendors;
 const _modelProduct = require('../models').ms_products;
 
-const Utility = require('peters-globallib');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 class VendorCatalogueSpesificationRepository{

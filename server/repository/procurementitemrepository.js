@@ -13,7 +13,7 @@ const _modelUnit =  require('../models').ms_units;
 const _modelCurrency = require('../models').ms_currencies;
 const _modelProductCategory = require('../models').ms_productcategories;
 
-const Utility = require('peters-globallib');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 const GlobalUtility = require('../utils/globalutility.js');

@@ -11,7 +11,7 @@ const env         = process.env.NODE_ENV || 'localhost';
 const config      = require(__dirname + '/../config/config.json')[env];
 
 // Utility
-const Util = require('peters-globallib');
+const Util = require('peters-globallib-v2');
 const _utilInstance = new Util();
 
 // Repository

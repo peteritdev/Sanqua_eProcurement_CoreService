@@ -19,7 +19,7 @@ const VendorCatalogueRepository = require('../repository/vendorcataloguereposito
 const _vendorCatalogueRepoInstance = new VendorCatalogueRepository();
 
 //Util
-const Utility = require('peters-globallib');
+const Utility = require('peters-globallib-v2');
 const { forEach } = require('lodash');
 const _utilInstance = new Utility();
 

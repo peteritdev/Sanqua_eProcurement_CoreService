@@ -11,7 +11,7 @@ const _modelUnit = require('../models').ms_units;
 
 const _modelDb = require('../models');
 
-const Utility = require('peters-globallib');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 class MasterRepository {

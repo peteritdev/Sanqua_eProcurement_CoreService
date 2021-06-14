@@ -16,7 +16,7 @@ const SpesificationAttributeRepository = require('../repository/spesificationatt
 const _repoInstance = new SpesificationAttributeRepository();
 
 //Util
-const Utility = require('peters-globallib');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 const multer = require('multer');

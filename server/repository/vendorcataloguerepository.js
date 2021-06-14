@@ -14,7 +14,7 @@ const _modelCurrency = require('../models').ms_currencies;
 const _modelProvince = require('../models').ms_provinces;
 const _modelCity = require('../models').ms_cities;
 
-const Utility = require('peters-globallib');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 class VendorCatalogueRepository {
@@ -377,9 +377,7 @@ class VendorCatalogueRepository {
         if( pParam.hasOwnProperty('product_id')  ){
             if( pParam.product_id != '' ){
                 xWhereProductId = {
-                    product_id: {
-                        [Op.in]: pParam.product_id,
-                    }
+                    product_id: pParam.product_id,
                 }
             }            
         }

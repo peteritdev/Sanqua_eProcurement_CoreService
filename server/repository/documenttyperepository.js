@@ -8,7 +8,7 @@ const Op = sequelize.Op;
 //Model
 const _modelDb = require('../models').ms_documenttypes;
 
-const Utility = require('peters-globallib');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 

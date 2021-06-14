@@ -11,7 +11,7 @@ const env         = process.env.NODE_ENV || 'localhost';
 const config      = require(__dirname + '/../config/config.json')[env];
 
 // Utility
-const Util = require('peters-globallib');
+const Util = require('peters-globallib-v2');
 const { default: Axios } = require('axios');
 const _utilInstance = new Util();
 
@@ -71,6 +71,22 @@ class OAuthService {
         var xResultVerify = await _utilInstance.axiosRequestPost(xAPIUrl, 'POST', pParam, {});
 
         return xResultVerify;
+    }
+
+    async getNotificationTemplate( pMethod, pToken, pCode ){
+        
+        var xAPIUrl = config.api.notification.notificationTemplate;
+        var xQueryParam = `/${pCode}`;
+        var xHeader = {
+            'headers': {
+                'x-method': pMethod,
+                'x-token': pToken
+            }
+        }
+        // console.log(">>> API URL : " + (xAPIUrl+xQueryParam));
+        var xResult = await _utilInstance.axiosRequest((xAPIUrl+xQueryParam), xHeader);
+
+        return xResult;
     }
 
 };

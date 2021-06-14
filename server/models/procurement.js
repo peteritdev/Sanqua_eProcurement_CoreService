@@ -71,6 +71,16 @@ module.exports = ( sequelize, DataTypes ) => {
             foreignKey: 'procurement_id',
             as: 'procurement_item',
         } );
+
+        Procurement.hasMany( models.tr_procurementschedules, {
+            foreignKey: 'procurement_id',
+            as: 'procurement_schedule',
+        } );
+
+        Procurement.hasMany( models.tr_procurementterms, {
+            foreignKey: 'procurement_id',
+            as: 'procurement_term',
+        } );
     }
 
     return Procurement;

@@ -8,7 +8,7 @@ const Op = sequelize.Op;
 // Model
 const _modelDb = require('../models').tr_procurementterms;
 
-const Utility = require('peters-globallib');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 const GlobalUtility = require('../utils/globalutility.js');

@@ -8,11 +8,14 @@ const Op = sequelize.Op;
 // Model
 const _modelDb = require('../models').tr_procurements;
 const _modelProcurementItem = require('../models').tr_procurementitems;
+const _modelProcurementSchedule = require('../models').tr_procurementschedules;
+const _modelScheduleAttribute = require('../models').ms_procurementscheduleattributes;
+const _modelProcurementTerm = require('../models').tr_procurementterms;
 const _modelProduct = require('../models').ms_products;
 const _modelUnit =  require('../models').ms_units;
 const _modelCurrency = require('../models').ms_currencies;
 
-const Utility = require('peters-globallib');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 const GlobalUtility = require('../utils/globalutility.js');
@@ -26,6 +29,43 @@ class ProcurementRepository {
         var xInclude = [];
         var xWhere = {};
         var xWhereAnd = [], xWhereOr = [];
+
+        xInclude = [
+            {
+                model: _modelProcurementItem,
+                as: 'procurement_item',
+                attributes: ['id','unit_price','qty','total'],
+                include: [
+                    {
+                        model: _modelUnit,
+                        as: 'unit',
+                        attributes: ['id','name'],
+                    },
+                    {
+                        model: _modelProduct,
+                        as: 'product',
+                        attributes: ['id','name'],
+                    }
+                ]
+            },
+            {
+                model: _modelProcurementSchedule,
+                as: 'procurement_schedule',
+                include: [
+                    {
+                        model: _modelScheduleAttribute,
+                        as: 'schedule_attribute',
+                        attributes: ['id','name'],
+                    }
+                ],
+                attributes: ['id','start_date','end_date']
+            },
+            {
+                model: _modelProcurementTerm,
+                as: 'procurement_term',
+                attributes: ['id','term','description']
+            }
+        ]
 
         var xData = await _modelDb.findOne({
             where: {

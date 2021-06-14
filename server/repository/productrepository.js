@@ -10,7 +10,7 @@ const _modelDb = require('../models').ms_products;
 const _modelCategory = require('../models').ms_productcategories;
 const _modelUnit = require('../models').ms_units;
 
-const Utility = require('peters-globallib');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 class ProductRepository{

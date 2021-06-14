@@ -43,7 +43,8 @@
     "api":{
       "notification": {
         "emailVerification": "http://localhost:1190/api/notification/v1/email_verification",
-        "forgotPassword": "http://localhost:1190/api/notification/v1/forgot_password"
+        "forgotPassword": "http://localhost:1190/api/notification/v1/forgot_password",
+        "notificationTemplate": "http://localhost:1189/api/oauth/v1/notification_template/detail/code"
       },
 
       "oAuth": {
@@ -125,7 +126,8 @@
     "api":{
       "notification": {
         "emailVerification": "http://localhost:1190/api/notification/v1/email_verification",
-        "forgotPassword": "http://localhost:1190/api/notification/v1/forgot_password"
+        "forgotPassword": "http://localhost:1190/api/notification/v1/forgot_password",
+        "notificationTemplate": "http://localhost:1189/api/oauth/v1/notification_template/detail/code"
       },
 
       "oAuth": {

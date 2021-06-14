@@ -12,7 +12,7 @@ const env         = process.env.NODE_ENV || 'localhost';
 const config      = require(__dirname + '/../config/config.json')[env];
 
 // Utility
-const Utility = require('peters-globallib');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 const GlobalUtility = require('../utils/globalutility.js');
@@ -29,6 +29,10 @@ const _oAuthService = new OAuthService();
 // Procurement Item Service
 const ProcurementItemRepo = require('../repository/procurementitemrepository.js');
 const _procItemRepoInstance = new ProcurementItemRepo();
+
+// Notification Service
+const NotificationService = require('../services/notificationservice.js');
+const _notificationServiceInstance = new NotificationService();
 
 class ProcurementService {
     constructor(){}
@@ -75,7 +79,7 @@ class ProcurementService {
                     department: {
                         id: xRows[index].department_id,
                         name: xRows[index].department_name,
-                    },
+                    },                    
 
                     created_at: moment(xRows[index].createdAt).format('YYYY-mm-dd H:i:s'),
                     created_by_name: xRows[index].created_by_name,
@@ -166,6 +170,10 @@ class ProcurementService {
                         id: xResult.department_id,
                         name: xResult.department_name,
                     },
+
+                    item: xResult.procurement_item,
+                    schedule: xResult.procurement_schedule,
+                    term: xResult.procurement_term,
 
                     approval_matrix: ( ( xResultApprovalMatrix.status_code == '00' && xResultApprovalMatrix.token_data.status_code == '00' ) ? xResultApprovalMatrix.token_data.data : null ),
 
@@ -574,6 +582,44 @@ class ProcurementService {
         }
 
         return xJoResult;
+    }
+
+    async inviteVendor( pParam ){
+
+        var xJoResult = {};
+        var xFlagProcess = false;
+        var xDecId = null;
+        
+        // Get procurement detail
+        if( pParam.hasOwnProperty('id') ){
+            if( pParam.id != '' ){
+                xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+                if( xDecId.status_code == '00' ){
+                    xFlagProcess = true;
+                    pParam.id = xDecId.decrypted;
+                }else{
+                    xJoResult = xDecId;
+                }
+            }else{
+                xJoResult = {
+                    status_code: '-99',
+                    status_msg: 'You need to supply correct id'
+                }
+            }
+        }
+
+        if( xFlagProcess ){
+
+            // Get Procurement Detail
+            var xProcurementDetail = await _repoInstance.getById( pParam );
+            xProcurementDetail.vendor = {
+                name: pParam.vendor_name,
+                email: pParam.email,
+            }
+
+            await _notificationServiceInstance.sendNotification_AnnouncementNewProcurement( pParam.method, pParam.token, xProcurementDetail  );
+        }
+
     }
 }
 

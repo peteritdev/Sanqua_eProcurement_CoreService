@@ -19,7 +19,7 @@ const UnitRepository = require('../repository/unitrepository.js');
 const _unitRepoInstance = new UnitRepository();
 
 //Util
-const Utility = require('peters-globallib');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 const multer = require('multer');

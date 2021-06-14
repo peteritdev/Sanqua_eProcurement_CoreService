@@ -86,6 +86,15 @@ module.exports = (app) => {
     ];
     app.post( rootAPIPath + 'set_to_draft', arrValidate, procurementController.procurement_SetToDraft );
 
+    // Invite Vendor
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id can not be empty"),
+        check("vendor_name").not().isEmpty().withMessage("Parameter vendor_name can not be empty"),
+        check("email").not().isEmpty().withMessage("Parameter email can not be empty"),
+    ];
+    app.post( rootAPIPath + 'invite_vendor', arrValidate, procurementController.procurement_InviteVendor );
+
     // *** PROCUREMENT ITEM ***
     // Save
     arrValidate = [];

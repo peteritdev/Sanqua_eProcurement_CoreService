@@ -19,7 +19,7 @@ const ProductCategoryRepository = require('../repository/productcategoryreposito
 const _productCategoryRepoInstance = new ProductCategoryRepository();
 
 //Util
-const Utility = require('peters-globallib');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 const _multer = require('multer');

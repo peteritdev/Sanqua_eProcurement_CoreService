@@ -12,7 +12,7 @@ const env         = process.env.NODE_ENV || 'localhost';
 const config      = require(__dirname + '/../config/config.json')[env];
 
 // Utility
-const Utility = require('peters-globallib');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 // Repository
@@ -620,6 +620,49 @@ class VendorCatalogueService {
 
         return xJoResult;
 
+    }
+
+    async getVendorByProductId( pParam  ){
+        var xJoResult = {};
+        var xJoArrData = [];
+        var xFlagProcess = true;
+
+        // Decrypt vendor_id
+        if( pParam.hasOwnProperty('product_id') ){
+            if( pParam.product_id != '' ){
+                var xDecId = await _utilInstance.decrypt( pParam.product_id, config.cryptoKey.hashKey );
+                if( xDecId.status_code == '00' ){
+                    pParam.product_id = xDecId.decrypted;
+                }else{
+                    xJoResult = xDecId;
+                    xFlagProcess = false;
+                }
+            }
+        }
+
+        if( xFlagProcess ){
+            var xResultList = await _vendorCatalogueRepoInstance.getVendorByProductId(pParam);
+
+            if( xResultList.count > 0 ){
+                var xRows = xResultList.rows;
+                for( var index in xRows ){
+                    xJoArrData.push(xRows[index].vendor);
+                }
+                xJoResult = {
+                    status_code: "00",
+                    status_msg: "OK",
+                    total_record: xResultList.count,
+                    data: xJoArrData,
+                }
+            }else{
+                xJoResult = {
+                    status_code: "-99",
+                    status_msg: "Data not found",
+                };
+            }
+        }       
+
+        return xJoResult;
     }
 }
 
