@@ -46,6 +46,8 @@ module.exports = ( sequelize, DataTypes ) => {
         submit_by: DataTypes.INTEGER,
         submit_by_name: DataTypes.STRING,
 
+        integrity_pact: DataTypes.INTEGER,
+
         is_delete: DataTypes.INTEGER,
         deleted_at: DataTypes.DATE,
         deleted_by: DataTypes.INTEGER,

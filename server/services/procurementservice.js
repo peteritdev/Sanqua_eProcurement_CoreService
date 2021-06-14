@@ -617,8 +617,10 @@ class ProcurementService {
                 email: pParam.email,
             }
 
-            await _notificationServiceInstance.sendNotification_AnnouncementNewProcurement( pParam.method, pParam.token, xProcurementDetail  );
+            xJoResult = await _notificationServiceInstance.sendNotification_AnnouncementNewProcurement( pParam.method, pParam.token, xProcurementDetail  );
         }
+
+        return xJoResult;
 
     }
 }

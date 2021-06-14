@@ -121,9 +121,16 @@ class NotificationService {
                 message: (`{"subject": "${xSubject}","body": "${xStringifyBody}","recipients": {"to": "${pParam.vendor.email}"}}`),
             }
 
-            var xSendToKafka = await _utilInstance.sendNotification( xParamKafkaProducer );
+            xJoResult = await _utilInstance.sendNotification( xParamKafkaProducer );            
 
+        }else{
+            xJoResult = {
+                status_code: '-99',
+                status_msg: 'Template doesn\'t exists! ',
+            }
         }
+
+        return xJoResult;
 
     }
 }
