@@ -98,10 +98,10 @@ class NotificationService {
         pMsg = pMsg.replace( "#PROCUREMENT_TERMS#", xTable_Schedule );
 
         // Display link confirmation
-        pMsg = pMsg.replace( "#LINK_CONFIRM_PROCUREMENT#", "" );
+        // pMsg = pMsg.replace( "#LINK_CONFIRM_PROCUREMENT#", "" );
 
         // Display link registration at eSanQua
-        pMsg = pMsg.replace( "#LINK_REGISTRATION_ESANQUA#", "" );
+        // pMsg = pMsg.replace( "#LINK_REGISTRATION_ESANQUA#", "" );
 
         return pMsg;
     }
