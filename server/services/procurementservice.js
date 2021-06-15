@@ -669,6 +669,8 @@ class ProcurementService {
                 }
             }
 
+            console.log(">>> Param Add : " + JSON.stringify(xParamAddToDB));
+
             var xResultAddToDB = await _procurementVendorServiceInstance.save( xParamAddToDB );
             xJoResult.result_addto_db = xResultAddToDB;
         }
