@@ -243,13 +243,36 @@ class ProcurementVendorService {
                 
             }else if( xAct == "update" ){
     
-                var xDecId = await _utilInstance.decrypt(pParam.id,config.cryptoKey.hashKey);
-                if( xDecId.status_code == "00" ){
-                    pParam.id = xDecId.decrypted;                    
-                    
+                // Procurement Id
+                if( pParam.hasOwnProperty('procurement_id') && pParam.hasOwnProperty('vendor_id') ){
+                    if( pParam.procurement_id != '' && pParam.vendor_id != '' ){
+                        var xDecId = await _utilInstance.decrypt( pParam.procurement_id, config.cryptoKey.hashKey );
+                        if( xDecId.status_code == '00' ){
+                            pParam.procurement_id = xDecId.decrypted;  
+                            var xDecId = await _utilInstance.decrypt( pParam.vendor_id, config.cryptoKey.hashKey );
+                            if( xDecId.status_code == '00' ){
+                                pParam.vendor_id = xDecId.decrypted;                                           
+                            }else{
+                                xFlagProcess = false;
+                                xJoResult = xDecId;
+                            }                                         
+                        }else{
+                            xFlagProcess = false;
+                            xJoResult = xDecId;
+                        }
+                    }else{
+                        xFlagProcess = false;
+                        xJoResult = {
+                            status_code: '-99',
+                            status_msg: 'Procurement ID and Vendor ID can not empty',
+                        }
+                    }
                 }else{
                     xFlagProcess = false;
-                    xJoResult = xDecId;
+                    xJoResult = {
+                        status_code: '-99',
+                        status_msg: 'You need to supply correct ID',
+                    }
                 }
     
                 if( xFlagProcess ){

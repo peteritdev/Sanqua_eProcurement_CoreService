@@ -201,13 +201,15 @@ class ProcurementVendorRepository {
             }else if( pAct == "update" ){
                 
                 pParam.updatedAt = await _utilInstance.getCurrDateTime();
-                var xId = pParam.id;
-                delete pParam.id;
+                
                 var xWhere = {
                     where : {
-                        id: xId,
+                        procurement_id: pParam.procurement_id,
+                        vendor_id: pParam.vendor_id,
                     }
                 };
+                delete pParam.procurement_id;
+                delete pParam.vendor_id;
                 xSaved = await _modelDb.update( pParam, xWhere, {xTransaction} );
 
                 await xTransaction.commit();
