@@ -648,7 +648,7 @@ class ProcurementService {
             if( xCheckExist == null ){
                 xParamAddToDB = {
                     act: 'add',
-                    procurement_id: pParam.id,
+                    procurement_id: xEncProcurementId,
                     vendor_id: pParam.vendor_id,
                     invited_at: await _utilInstance.getCurrDateTime(),
                     invited_by: pParam.user_id,
@@ -660,7 +660,7 @@ class ProcurementService {
             }else{
                 xParamAddToDB = {
                     act: 'update',
-                    procurement_id: pParam.id,
+                    procurement_id: xEncProcurementId,
                     vendor_id: pParam.vendor_id,
                     invited_at: await _utilInstance.getCurrDateTime(),
                     invited_by: pParam.user_id,
@@ -668,8 +668,6 @@ class ProcurementService {
                     invited_counter: +1,
                 }
             }
-
-            console.log(">>> Param Add : " + JSON.stringify(xParamAddToDB));
 
             var xResultAddToDB = await _procurementVendorServiceInstance.save( xParamAddToDB );
             xJoResult.result_addto_db = xResultAddToDB;
