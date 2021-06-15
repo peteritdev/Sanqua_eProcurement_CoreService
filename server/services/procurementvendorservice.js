@@ -194,23 +194,7 @@ class ProcurementVendorService {
                     if( pParam.procurement_id != '' && pParam.vendor_id != '' ){
                         var xDecId = await _utilInstance.decrypt( pParam.procurement_id, config.cryptoKey.hashKey );
                         if( xDecId.status_code == '00' ){
-                            pParam.procurement_id = xDecId.decrypted;
-                            // User Id
-                            xDecId = await _utilInstance.decrypt(pParam.user_id,config.cryptoKey.hashKey);
-                            if( xDecId.status_code == '00' ){
-                                pParam.created_by = xDecId.decrypted;
-                                pParam.created_by_name = pParam.user_name;
-                                xDecId = await _utilInstance.decrypt(pParam.vendor_id, config.cryptoKey.hashKey);
-                                if( xDecId.status_code == '00' ){
-                                    pParam.vendor_id = xDecId.decrypted;
-                                }else{
-                                    xFlagProcess = false;
-                                    xJoResult = xDecId;
-                                }
-                            }else{
-                                xFlagProcess = false;
-                                xJoResult = xDecId;
-                            }                    
+                            pParam.procurement_id = xDecId.decrypted;                                           
                         }else{
                             xFlagProcess = false;
                             xJoResult = xDecId;
@@ -255,22 +239,7 @@ class ProcurementVendorService {
                 var xDecId = await _utilInstance.decrypt(pParam.id,config.cryptoKey.hashKey);
                 if( xDecId.status_code == "00" ){
                     pParam.id = xDecId.decrypted;                    
-                    xDecId = await _utilInstance.decrypt(pParam.user_id,config.cryptoKey.hashKey);
-                    if( xDecId.status_code == "00" ){
-                        xDecId = await _utilInstance.decrypt(pParam.procurement_id, config.cryptoKey.hashKey);
-                        if( xDecId.status_code == "00" ){
-                            pParam.procurement_id = xDecId.decrypted;
-                            pParam.updated_by = xDecId.decrypted;
-                            pParam.updated_by_name = pParam.user_name;
-                        }else{
-                            xFlagProcess = false;
-                            xJoResult = xDecId;
-                        }
-                        
-                    }else{
-                        xFlagProcess = false;
-                        xJoResult = xDecId;
-                    }
+                    
                 }else{
                     xFlagProcess = false;
                     xJoResult = xDecId;

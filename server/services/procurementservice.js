@@ -615,6 +615,19 @@ class ProcurementService {
             }
         }
 
+        if( pParam.hasOwnProperty('user_id') ){
+            if( pParam.user_id != '' ){
+                // User Id
+                xDecId = await _utilInstance.decrypt(pParam.user_id,config.cryptoKey.hashKey);
+                if( xDecId.status_code == '00' ){
+                     pParam.user_id = xDecId.decrypted;                
+                }else{
+                    xFlagProcess = false;
+                    xJoResult = xDecId;
+                } 
+            }
+        }
+
         if( xFlagProcess ){
 
             // Get Procurement Detail
