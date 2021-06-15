@@ -594,10 +594,12 @@ class ProcurementService {
         var xFlagProcess = false;
         var xDecId = null;
         var xParamAddToDB = {};
+        var xEncProcurementId = "";
         
         // Get procurement detail
         if( pParam.hasOwnProperty('id') ){
             if( pParam.id != '' ){
+                xEncProcurementId = pParam.id;
                 xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
                 if( xDecId.status_code == '00' ){
                     xFlagProcess = true;
@@ -640,7 +642,7 @@ class ProcurementService {
 
             // Add vendor invited to database
             var xCheckExist = await _procurementVendorServiceInstance.getById( {
-                procurement_id: pParam.id,
+                procurement_id: xEncProcurementId,
                 vendor_id: pParam.vendor_id,
             } );
             if( xCheckExist == null ){
