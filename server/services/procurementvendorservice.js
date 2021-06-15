@@ -19,8 +19,8 @@ const GlobalUtility = require('../utils/globalutility.js');
 const _globalUtilInstance = new GlobalUtility();
 
 // Repository
-const ProcurementTermRepository = require('../repository/procurementtermrepository.js');
-const _repoInstance = new ProcurementTermRepository();
+const ProcurementItemRepository = require('../repository/procurementvendorrepository.js');
+const _repoInstance = new ProcurementItemRepository();
 
 const ProcurementRepository = require('../repository/procurementrepository.js');
 const _procurementRepoInstance = new ProcurementRepository();
@@ -29,7 +29,10 @@ const _procurementRepoInstance = new ProcurementRepository();
 const OAuthService = require('../services/oauthservice.js');
 const _oAuthService = new OAuthService();
 
-class ProcurementTermService {
+const _xArrConfirmationStatus = ['Pending', 'Join', 'Not Join'];
+const _xArrConfirmationVia = ['', 'Email', 'Vendor Area', 'Admin'];
+
+class ProcurementVendorService {
     constructor(){}
 
     async list( pParam ){
@@ -58,8 +61,19 @@ class ProcurementTermService {
                 for( var index in xRows ){
                     xJoArrData.push({
                         id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
-                        term: xRows[index].term,
-                        description: xRows[index].description,
+                        vendor: xRows[index].vendor,
+                        invited_at: moment( xRows[index].invited_at ).format( 'DD MMM YYYY hh:mm:ss' ),
+                        confirmation_status: {
+                            id: xRows[index].confirmation_status,
+                            name: _xArrConfirmationStatus[xRows[index].confirmation_status],
+                        },
+                        confirmation_at: moment( xRows[index].confirmation_at ).format( 'DD MMM YYYY hh:mm:ss' ),
+                        confirmation_via: {
+                            id: xRows[index].confirmation_via,
+                            name: _xArrConfirmationVia[xRows[index].confirmation_via],
+                        },
+                        invited_by_name: xRows[index].invited_by_name,
+                        invited_counter: xRows[index].invited_counter,
 
                         created_at: moment(xRows[index].createdAt).format('YYYY-MM-DD hh:mm:ss'),
                         created_by_name: xRows[index].created_by_name,
@@ -87,13 +101,33 @@ class ProcurementTermService {
         var xJoData = {};
         var xFlagProcess = true;
         var xEncId = '';
+        var xDecId = null;
 
         if( pParam.hasOwnProperty('id') ){
             if( pParam.id != '' ){
-                xEncId = pParam.id;
-                var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+                xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
                 if( xDecId.status_code == '00' ){
                     pParam.id = xDecId.decrypted;
+                }else{
+                    xFlagProcess = false;
+                    xJoResult = xDecId;
+                }
+            }
+        }else if( pParam.hasOwnProperty('procurement_id') && pParam.hasOwnProperty('vendor_id') ){
+            if( pParam.procurement_id != '' && pParam.vendor_id != '' ){
+                xEncId = pParam.procurement_id;
+                xDecId = await _utilInstance.decrypt(pParam.procurement_id, config.cryptoKey.hashKey);
+                if( xDecId.status_code == '00' ){
+                    pParam.procurement_id = xDecId.decrypted;
+                    if( pParam.vendor_id != '' ){
+                        xDecId = await _utilInstance.decrypt(pParam.vendor_id, config.cryptoKey.hashKey);
+                        if( xDecId.status_code == '00' ){
+                            pParam.vendor_id = xDecId.decrypted;
+                        }else{
+                            xFlagProcess = false;
+                            xJoResult = xDecId;
+                        }
+                    }
                 }else{
                     xFlagProcess = false;
                     xJoResult = xDecId;
@@ -109,10 +143,21 @@ class ProcurementTermService {
 
                 xJoData = {
                     id: await _utilInstance.encrypt( (xResult.id).toString(), config.cryptoKey.hashKey ),
-                    term: xResult.term,
-                    description: xResult.description,
+                    vendor: xResult.vendor,
+                    invited_at: moment( xResult.invited_at ).format( 'DD MMM YYYY hh:mm:ss' ),
+                    confirmation_status: {
+                        id: xResult.confirmation_status,
+                        name: _xArrConfirmationStatus[xResult.confirmation_status],
+                    },
+                    confirmation_at: moment( xResult.confirmation_at ).format( 'DD MMM YYYY hh:mm:ss' ),
+                    confirmation_via: {
+                        id: xResult.confirmation_via,
+                        name: _xArrConfirmationVia[xResult.confirmation_via],
+                    },
+                    invited_by_name: xResult.invited_by_name,
+                    invited_counter: xResult.invited_counter,
 
-                    created_at: moment(xResult.createdAt).format('YYYY-mm-dd H:i:s'),
+                    created_at: moment(xResult.createdAt).format('YYYY-MM-DD hh:mm:ss'),
                     created_by_name: xResult.created_by_name,
                 };
                 
@@ -162,9 +207,10 @@ class ProcurementTermService {
                     xJoResult = xDecId;
                 }                
 
-                var xProcurementDetail = await _procurementRepoInstance.getById( {id: pParam.procurement_id } );
-                if( xProcurementDetail != null ){
-                    if( xProcurementDetail.status_approval == 0 ){
+                // var xProcurementDetail = await _procurementRepoInstance.getById( {id: pParam.procurement_id } );
+                // if( xProcurementDetail != null ){
+                    // if( xProcurementDetail.status_approval == 0 ){
+                    if(true){
                         var xAddResult = await _repoInstance.save( pParam, xAct );
                         xJoResult = xAddResult;
                     }else{
@@ -173,12 +219,12 @@ class ProcurementTermService {
                             status_msg: 'You can not add new item when procurement has been submited or approved'
                         }
                     }
-                }else{
-                    xJoResult = {
-                        status_code: '-99',
-                        status_msg: 'The ID that supplied not exist.'
-                    }
-                }
+                // }else{
+                //     xJoResult = {
+                //         status_code: '-99',
+                //         status_msg: 'The ID that supplied not exist.'
+                //     }
+                // }
                 
                 
             }else if( xAct == "update" ){
@@ -188,15 +234,16 @@ class ProcurementTermService {
                     pParam.id = xDecId.decrypted;                    
                     xDecId = await _utilInstance.decrypt(pParam.user_id,config.cryptoKey.hashKey);
                     if( xDecId.status_code == "00" ){
-                        pParam.updated_by = xDecId.decrypted;
-                        pParam.updated_by_name = pParam.user_name;      
-                        xDecId = await _utilInstance.decrypt(pParam.procurement_id,config.cryptoKey.hashKey);
+                        xDecId = await _utilInstance.decrypt(pParam.procurement_id, config.cryptoKey.hashKey);
                         if( xDecId.status_code == "00" ){
                             pParam.procurement_id = xDecId.decrypted;
+                            pParam.updated_by = xDecId.decrypted;
+                            pParam.updated_by_name = pParam.user_name;
                         }else{
                             xFlagProcess = false;
                             xJoResult = xDecId;
                         }
+                        
                     }else{
                         xFlagProcess = false;
                         xJoResult = xDecId;
@@ -207,9 +254,10 @@ class ProcurementTermService {
                 }
     
                 if( xFlagProcess ){
-                    var xProcurementDetail = await _procurementRepoInstance.getById( {id: pParam.procurement_id } );
-                    if( xProcurementDetail != null ){
-                        if( xProcurementDetail.status_approval == 0 ){
+                    // var xProcurementDetail = await _procurementRepoInstance.getById( {id: pParam.procurement_id } );
+                    // if( xProcurementDetail != null ){
+                        // if( xProcurementDetail.status_approval == 0 ){
+                        if(true){
                             var xAddResult = await _repoInstance.save( pParam, xAct );
                             xJoResult = xAddResult;
                         }else{
@@ -218,12 +266,12 @@ class ProcurementTermService {
                                 status_msg: 'You can not update item when procurement has been submited or approved'
                             }
                         }
-                    }else{
-                        xJoResult = {
-                            status_code: '-99',
-                            status_msg: 'The Procurement ID that supplied not exist.'
-                        }
-                    }
+                    // }else{
+                    //     xJoResult = {
+                    //         status_code: '-99',
+                    //         status_msg: 'The Procurement ID that supplied not exist.'
+                    //     }
+                    // }
                 }
                 
             }
@@ -319,4 +367,4 @@ class ProcurementTermService {
     }
 }
 
-module.exports = ProcurementTermService;
+module.exports = ProcurementVendorService;

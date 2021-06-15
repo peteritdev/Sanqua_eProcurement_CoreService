@@ -646,7 +646,22 @@ class VendorCatalogueService {
             if( xResultList.count > 0 ){
                 var xRows = xResultList.rows;
                 for( var index in xRows ){
-                    xJoArrData.push(xRows[index].vendor);
+                    xJoArrData.push({
+                        id: await _utilInstance.encrypt(xRows[index].vendor.id, config.cryptoKey.hashKey),
+                        name: xRows[index].vendor.name,
+                        code: xRows[index].vendor.code,
+                        logo: xRows[index].vendor.logo,
+                        address: xRows[index].vendor.address,
+                        phone1: xRows[index].vendor.phone1,
+                        phone2: xRows[index].vendor.phone2,
+                        email: xRows[index].vendor.email,
+                        website: xRows[index].vendor.website,
+                        location_lat: xRows[index].vendor.location_lat,
+                        location_long: xRows[index].vendor.location_long,
+                        avg_rate: xRows[index].vendor.avg_rate,
+                        province: xRows[index].vendor.province,
+                        city: xRows[index].vendor.city,
+                    });
                 }
                 xJoResult = {
                     status_code: "00",

@@ -19,6 +19,7 @@ const procurement = require('./procurement');
 const procurementItem = require('./procurementitem');
 const procurementSchedule = require('./procurementschedule');
 const procurementTerm = require('./procurementterm');
+const procurementVendor = require('./procurementvendor');
 
 module.exports = {
 	vendor,
@@ -26,5 +27,5 @@ module.exports = {
 	vendorExperience, vendorCatalogue,
 	spesificationCategory, spesificationAttribute, vendorCatalogueQuotation, vendorCatalogueSpesification,
 	vendorRateHistory,
-	procurement, procurementItem, globalMaster, procurementSchedule, procurementTerm,
+	procurement, procurementItem, globalMaster, procurementSchedule, procurementTerm, procurementVendor,
 }
