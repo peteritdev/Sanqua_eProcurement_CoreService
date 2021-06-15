@@ -645,7 +645,7 @@ class ProcurementService {
                 procurement_id: xEncProcurementId,
                 vendor_id: pParam.vendor_id,
             } );
-            if( xCheckExist == null ){
+            if( xCheckExist.status_code == '-99' ){
                 xParamAddToDB = {
                     act: 'add',
                     procurement_id: xEncProcurementId,
