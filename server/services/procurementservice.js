@@ -665,7 +665,7 @@ class ProcurementService {
                     invited_at: await _utilInstance.getCurrDateTime(),
                     invited_by: pParam.user_id,
                     invited_by_name: pParam.user_name,
-                    invited_counter: +1,
+                    invited_counter: sequelize.literal('invited + 1'),
                 }
             }
 
