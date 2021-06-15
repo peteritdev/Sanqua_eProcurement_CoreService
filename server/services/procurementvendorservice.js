@@ -194,7 +194,14 @@ class ProcurementVendorService {
                     if( pParam.procurement_id != '' && pParam.vendor_id != '' ){
                         var xDecId = await _utilInstance.decrypt( pParam.procurement_id, config.cryptoKey.hashKey );
                         if( xDecId.status_code == '00' ){
-                            pParam.procurement_id = xDecId.decrypted;                                           
+                            pParam.procurement_id = xDecId.decrypted;  
+                            var xDecId = await _utilInstance.decrypt( pParam.vendor_id, config.cryptoKey.hashKey );
+                            if( xDecId.status_code == '00' ){
+                                pParam.vendor_id = xDecId.decrypted;                                           
+                            }else{
+                                xFlagProcess = false;
+                                xJoResult = xDecId;
+                            }                                         
                         }else{
                             xFlagProcess = false;
                             xJoResult = xDecId;
