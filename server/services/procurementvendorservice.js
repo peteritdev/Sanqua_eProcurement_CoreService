@@ -190,22 +190,45 @@ class ProcurementVendorService {
             if( xAct == "add" ){             
 
                 // Procurement Id
-                var xDecId = await _utilInstance.decrypt( pParam.procurement_id, config.cryptoKey.hashKey );
-                if( xDecId.status_code == '00' ){
-                    pParam.procurement_id = xDecId.decrypted;
-                    // User Id
-                    xDecId = await _utilInstance.decrypt(pParam.user_id,config.cryptoKey.hashKey);
-                    if( xDecId.status_code == '00' ){
-                        pParam.created_by = xDecId.decrypted;
-                        pParam.created_by_name = pParam.user_name;
+                if( pParam.hasOwnProperty('procurement_id') && pParam.hasOwnProperty('vendor_id') ){
+                    if( pParam.procurement_id != '' && pParam.vendor_id != '' ){
+                        var xDecId = await _utilInstance.decrypt( pParam.procurement_id, config.cryptoKey.hashKey );
+                        if( xDecId.status_code == '00' ){
+                            pParam.procurement_id = xDecId.decrypted;
+                            // User Id
+                            xDecId = await _utilInstance.decrypt(pParam.user_id,config.cryptoKey.hashKey);
+                            if( xDecId.status_code == '00' ){
+                                pParam.created_by = xDecId.decrypted;
+                                pParam.created_by_name = pParam.user_name;
+                                xDecId = await _utilInstance.decrypt(pParam.vendor_id, config.cryptoKey.hashKey);
+                                if( xDecId.status_code == '00' ){
+                                    pParam.vendor_id = xDecId.decrypted;
+                                }else{
+                                    xFlagProcess = false;
+                                    xJoResult = xDecId;
+                                }
+                            }else{
+                                xFlagProcess = false;
+                                xJoResult = xDecId;
+                            }                    
+                        }else{
+                            xFlagProcess = false;
+                            xJoResult = xDecId;
+                        }
                     }else{
                         xFlagProcess = false;
-                        xJoResult = xDecId;
-                    }                    
+                        xJoResult = {
+                            status_code: '-99',
+                            status_msg: 'Procurement ID and Vendor ID can not empty',
+                        }
+                    }
                 }else{
                     xFlagProcess = false;
-                    xJoResult = xDecId;
-                }                
+                    xJoResult = {
+                        status_code: '-99',
+                        status_msg: 'You need to supply correct ID',
+                    }
+                }                                
 
                 // var xProcurementDetail = await _procurementRepoInstance.getById( {id: pParam.procurement_id } );
                 // if( xProcurementDetail != null ){

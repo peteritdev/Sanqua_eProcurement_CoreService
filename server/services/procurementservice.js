@@ -593,6 +593,7 @@ class ProcurementService {
         var xJoResult = {};
         var xFlagProcess = false;
         var xDecId = null;
+        var xParamAddToDB = {};
         
         // Get procurement detail
         if( pParam.hasOwnProperty('id') ){
@@ -612,6 +613,19 @@ class ProcurementService {
             }
         }
 
+        if( pParam.hasOwnProperty('user_id') ){
+            if( pParam.user_id != '' ){
+                // User Id
+                xDecId = await _utilInstance.decrypt(pParam.user_id,config.cryptoKey.hashKey);
+                if( xDecId.status_code == '00' ){
+                     pParam.user_id = xDecId.decrypted;                
+                }else{
+                    xFlagProcess = false;
+                    xJoResult = xDecId;
+                } 
+            }
+        }
+
         if( xFlagProcess ){
 
             // Get Procurement Detail
@@ -627,8 +641,34 @@ class ProcurementService {
             // Add vendor invited to database
             var xCheckExist = await _procurementVendorServiceInstance.getById( {
                 procurement_id: pParam.id,
+                vendor_id: pParam.vendor_id,
+            } );
+            if( xCheckExist == null ){
+                xParamAddToDB = {
+                    act: 'add',
+                    procurement_id: pParam.id,
+                    vendor_id: pParam.vendor_id,
+                    invited_at: await _utilInstance.getCurrDateTime(),
+                    invited_by: pParam.user_id,
+                    invited_by_name: pParam.user_name,
+                    invited_counter: 1,
+                    created_by: pParam.user_id,
+                    created_by_name: pParam.user_name,
+                }
+            }else{
+                xParamAddToDB = {
+                    act: 'update',
+                    procurement_id: pParam.id,
+                    vendor_id: pParam.vendor_id,
+                    invited_at: await _utilInstance.getCurrDateTime(),
+                    invited_by: pParam.user_id,
+                    invited_by_name: pParam.user_name,
+                    invited_counter: +1,
+                }
+            }
 
-            } )
+            var xResultAddToDB = await _procurementVendorServiceInstance.save( xParamAddToDB );
+            xJoResult.result_addto_db = xResultAddToDB;
         }
 
         return xJoResult;
