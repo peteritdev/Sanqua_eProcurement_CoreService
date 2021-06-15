@@ -45,6 +45,12 @@ module.exports = ( sequelize, DataTypes ) => {
             as: 'vendor',
             onDelete: 'CASCADE',
         } );
+
+        ProcurementVendor.belongsTo( models.tr_procurements, {
+            foreignKey: 'procurement_id',
+            as: 'procurement',
+            onDelete: 'CASCADE',
+        } );
     }
 
     return ProcurementVendor;
