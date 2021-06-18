@@ -630,13 +630,15 @@ class VendorCatalogueService {
         // Decrypt vendor_id
         if( pParam.hasOwnProperty('product_id') ){
             if( pParam.product_id != '' ){
-                var xDecId = await _utilInstance.decrypt( pParam.product_id, config.cryptoKey.hashKey );
-                if( xDecId.status_code == '00' ){
-                    pParam.product_id = xDecId.decrypted;
-                }else{
-                    xJoResult = xDecId;
-                    xFlagProcess = false;
-                }
+                if( (pParam.product_id).length == 65 ){
+                    var xDecId = await _utilInstance.decrypt( pParam.product_id, config.cryptoKey.hashKey );
+                    if( xDecId.status_code == '00' ){
+                        pParam.product_id = xDecId.decrypted;
+                    }else{
+                        xJoResult = xDecId;
+                        xFlagProcess = false;
+                    }
+                }                
             }
         }
 
