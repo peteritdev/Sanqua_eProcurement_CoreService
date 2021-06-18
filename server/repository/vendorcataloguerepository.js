@@ -377,7 +377,9 @@ class VendorCatalogueRepository {
         if( pParam.hasOwnProperty('product_id')  ){
             if( pParam.product_id != '' ){
                 xWhereProductId = {
-                    product_id: pParam.product_id,
+                    product_id: {
+                        [Op.in]: JSON.parse(pParam.product_id),
+                    }
                 }
             }            
         }
