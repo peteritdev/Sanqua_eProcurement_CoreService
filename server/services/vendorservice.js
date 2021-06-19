@@ -194,33 +194,49 @@ class VendorService {
 
             
             if( flagProcess ){
-                param = await _secureInstance.encryptCriticalField(param);
-                joResult = await _vendorRepoInstance.save( param );
+                // Note: This line for autogenerate vendor code
+                // param = await _secureInstance.encryptCriticalField(param);
+                // joResult = await _vendorRepoInstance.save( param );
 
-                if( joResult.status_code == '00' ){
+                // if( joResult.status_code == '00' ){
 
-                    if( param.act == "add" && pParam.code == '' ){
-                        // Get currency code by id
-                        var xCurrency = await _currencyService.getById( {id: param.currency_id} );
+                    // This line when use autogenerate vendor code
+                    // if( param.act == "add" && pParam.code == '' ){
+                    //     // Get currency code by id
+                    //     var xCurrency = await _currencyService.getById( {id: param.currency_id} );
 
-                        // Generate Vendor Code
-                        if( xCurrency.status_code == '00' ){
-                            xVendorCode = await _globalUtilInstance.generateVendorCode(joResult.clear_id, xCurrency.data.code );
-                        }else{
-                            xVendorCode = await _globalUtilInstance.generateVendorCode(joResult.clear_id, "IDR" );
+                    //     // Generate Vendor Code
+                    //     if( xCurrency.status_code == '00' ){
+                    //         xVendorCode = await _globalUtilInstance.generateVendorCode(joResult.clear_id, xCurrency.data.code );
+                    //     }else{
+                    //         xVendorCode = await _globalUtilInstance.generateVendorCode(joResult.clear_id, "IDR" );
+                    //     }
+
+                    //     // Update Vendor Code
+                    //     var xParamUpdate = {
+                    //         id: joResult.clear_id,
+                    //         code: xVendorCode,
+                    //         act: 'update',
+                    //     }
+                    //     var xUpdateResult = await _vendorRepoInstance.save(xParamUpdate);
+                    //     joResult.result_update_vendor = xUpdateResult;
+                    // }
+
+                    if( param.act == "add" && pParam.code != '' ){
+                        // Check if code exists or not
+                        var xCheckData = await _vendorRepoInstance.getVendorByCode( pParam.code, null );
+                        if( xCheckData != null ){
+                            xJoResult = {
+                                status_code: '-99',
+                                status_msg: 'Vendor code already exists.'
+                            }
                         }
-
-                        // Update Vendor Code
-                        var xParamUpdate = {
-                            id: joResult.clear_id,
-                            code: xVendorCode,
-                            act: 'update',
-                        }
-                        var xUpdateResult = await _vendorRepoInstance.save(xParamUpdate);
-                        joResult.result_update_vendor = xUpdateResult;
                     }
+
+                    param = await _secureInstance.encryptCriticalField(param);
+                    joResult = await _vendorRepoInstance.save( param );
                     
-                }
+                // }
 
                 
 
