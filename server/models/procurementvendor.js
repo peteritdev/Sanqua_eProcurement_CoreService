@@ -19,6 +19,13 @@ module.exports = ( sequelize, DataTypes ) => {
         invited_by_name: DataTypes.STRING,
         invited_counter: DataTypes.INTEGER,
 
+        quotation_letter_file: DataTypes.STRING, // Surat Penawaran,
+        file: DataTypes.STRING, // File pendukung
+
+        sub_total: DataTypes.DOUBLE,
+        ppn: DataTypes.DOUBLE,
+        grand_total: DataTypes.DOUBLE,
+
         is_delete: DataTypes.INTEGER,
         deleted_at: DataTypes.DATE,
         deleted_by: DataTypes.INTEGER,

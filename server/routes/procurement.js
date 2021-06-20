@@ -263,4 +263,13 @@ module.exports = (app) => {
         check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
     ];
     app.put( rootAPIPath + 'member/unarchive/:id', procurementVendorController.procurementVendor_Unarchive );
+
+    // Vendor Confirm 
+    arrValidate = [];
+    arrValidate = [
+        check("procurement_id").not().isEmpty().withMessage("Parameter procurement_id can not be empty"),
+        check("vendor_id").not().isEmpty().withMessage("Parameter vendor_id can not be empty"),
+        check("status","Parameter status must be integer and cannot be empty").not().isEmpty().isInt(),
+    ]
+    app.post( rootAPIPath + 'member/confirm', procurementVendorController.procurementVendor_VendorConfirm );
 }

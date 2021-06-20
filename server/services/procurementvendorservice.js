@@ -22,12 +22,12 @@ const _globalUtilInstance = new GlobalUtility();
 const ProcurementItemRepository = require('../repository/procurementvendorrepository.js');
 const _repoInstance = new ProcurementItemRepository();
 
-const ProcurementRepository = require('../repository/procurementrepository.js');
-const _procurementRepoInstance = new ProcurementRepository();
-
 // OAuth Service
 const OAuthService = require('../services/oauthservice.js');
 const _oAuthService = new OAuthService();
+
+const ProcurementQuotationItemService = require('../services/procurementquotationitemservice.js');
+const _procurementQuotationItemServiceInstance = new ProcurementQuotationItemService();
 
 const _xArrConfirmationStatus = ['Pending', 'Join', 'Not Join'];
 const _xArrConfirmationVia = ['', 'Email', 'Vendor Area', 'Admin'];
@@ -74,6 +74,9 @@ class ProcurementVendorService {
                         },
                         invited_by_name: xRows[index].invited_by_name,
                         invited_counter: xRows[index].invited_counter,
+
+                        quotation_letter_file: xRows[index].quotation_letter_file,
+                        file: xRows[index].file,
 
                         created_at: moment(xRows[index].createdAt).format('YYYY-MM-DD hh:mm:ss'),
                         created_by_name: xRows[index].created_by_name,
@@ -296,6 +299,54 @@ class ProcurementVendorService {
                     // }
                 }
                 
+            }else if( xAct == "update_by_id" ){
+    
+                // Procurement Vendor Id
+                if( pParam.hasOwnProperty('id') ){
+                    if( pParam.id != '' ){
+                        var xDecId = await _utilInstance.decrypt( pParam.id, config.cryptoKey.hashKey );
+                        if( xDecId.status_code == '00' ){
+                            pParam.id = xDecId.decrypted;         
+                        }else{
+                            xFlagProcess = false;
+                            xJoResult = xDecId;
+                        }
+                    }else{
+                        xFlagProcess = false;
+                        xJoResult = {
+                            status_code: '-99',
+                            status_msg: 'ID can not empty',
+                        }
+                    }
+                }else{
+                    xFlagProcess = false;
+                    xJoResult = {
+                        status_code: '-99',
+                        status_msg: 'You need to supply correct ID',
+                    }
+                }
+    
+                if( xFlagProcess ){
+                    // var xProcurementDetail = await _procurementRepoInstance.getById( {id: pParam.procurement_id } );
+                    // if( xProcurementDetail != null ){
+                        // if( xProcurementDetail.status_approval == 0 ){
+                        if(true){
+                            var xAddResult = await _repoInstance.save( pParam, xAct );
+                            xJoResult = xAddResult;
+                        }else{
+                            xJoResult = {
+                                status_code: '-99',
+                                status_msg: 'You can not update item when procurement has been submited or approved'
+                            }
+                        }
+                    // }else{
+                    //     xJoResult = {
+                    //         status_code: '-99',
+                    //         status_msg: 'The Procurement ID that supplied not exist.'
+                    //     }
+                    // }
+                }
+                
             }
             
         }        
@@ -383,6 +434,48 @@ class ProcurementVendorService {
 
             var xDeleteResult = await _repoInstance.delete( pParam );
             xJoResult = xDeleteResult;
+        }
+
+        return xJoResult;
+    }
+
+    async vendorConfirm( pParam ){
+        var xJoResult = {};
+        var xFlagProcess = true;
+        var xDecId = null;
+
+        if( pParam.hasOwnProperty('procurement_id') && pParam.hasOwnProperty('vendor_id') ){
+            if( pParam.procurement_id != '' && pParam.vendor_id != '' ){
+                xDecId = await _utilInstance.decrypt( pParam.procurement_id, config.cryptoKey.hashKey );
+                if( xDecId.status_code == '00' ){
+                    pParam.procurement_id = xDecId.decrypted;
+                    xDecId = await _utilInstance.decrypt( pParam.vendor_id, config.cryptoKey.hashKey );
+                    if( xDecId.status_code == '00' ){
+                        pParam.vendor_id = xDecId.decrypted;
+                    }else{
+                        xFlagProcess = false;
+                        xJoResult = xDecId;
+                    }
+                }else{
+                    xFlagProcess = false;
+                    xJoResult = xDecId;
+                }
+            }
+        }
+
+        if( xFlagProcess ){
+            // Update status
+            var xParamUpdate = {
+                procurement_id: pParam.procurement_id,
+                vendor_id: pParam.vendor_id,
+                confirmation_status: pParam.status,
+            }
+            var xUpdateResult = await _repoInstance.save( xParamUpdate, 'update' );
+            xJoResult = xUpdateResult;
+
+            // Add quotation item to ProcurementQuotationItem
+            var xAddQuotationItem = await _procurementQuotationItemServiceInstance.addItemCopyFromProcurementItem(pParam);
+            xJoResult.result_quotation_item = xAddQuotationItem;
         }
 
         return xJoResult;

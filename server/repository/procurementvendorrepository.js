@@ -219,6 +219,25 @@ class ProcurementVendorRepository {
                     status_msg: "Data has been successfully updated"
                 }
 
+            }else if( pAct == "update_by_id" ){
+                
+                pParam.updatedAt = await _utilInstance.getCurrDateTime();
+                
+                var xWhere = {
+                    where : {
+                        id: pParam.id,
+                    }
+                };
+                delete pParam.id;
+                xSaved = await _modelDb.update( pParam, xWhere, {xTransaction} );
+
+                await xTransaction.commit();
+
+                xJoResult = {
+                    status_code: "00",
+                    status_msg: "Data has been successfully updated"
+                }
+
             }
 
         }catch(e){

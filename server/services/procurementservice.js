@@ -38,6 +38,10 @@ const _notificationServiceInstance = new NotificationService();
 const ProcurementVendorService = require('../services/procurementvendorservice.js');
 const _procurementVendorServiceInstance = new ProcurementVendorService();
 
+// Procurement Quotation Item Service
+const ProcurementQuotationItemService = require('../services/procurementquotationitemservice.js');
+const _procurementQuotationItemServiceInstance = new ProcurementQuotationItemService();
+
 class ProcurementService {
     constructor(){}
 
@@ -638,7 +642,7 @@ class ProcurementService {
             }
             
             // Send Notification
-            xJoResult = await _notificationServiceInstance.sendNotification_AnnouncementNewProcurement( pParam.method, pParam.token, xProcurementDetail  );
+            // xJoResult = await _notificationServiceInstance.sendNotification_AnnouncementNewProcurement( pParam.method, pParam.token, xProcurementDetail  );
 
             // Add vendor invited to database
             var xCheckExist = await _procurementVendorServiceInstance.getById( {
