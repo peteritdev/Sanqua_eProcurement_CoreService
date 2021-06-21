@@ -16,6 +16,11 @@ module.exports = (sequelize, DataTypes) => {
         qty: DataTypes.INTEGER,
         total: DataTypes.DOUBLE,
         description: DataTypes.STRING,
+
+        unit_price_negotiation: DataTypes.DOUBLE,
+        qty_negotiation: DataTypes.DOUBLE,
+        total_negotiation: DataTypes.DOUBLE,
+        description_negotiation: DataTypes.STRING,
         
         status: DataTypes.INTEGER,
         is_delete: DataTypes.INTEGER,
@@ -54,6 +59,12 @@ module.exports = (sequelize, DataTypes) => {
         ProcurementQuotationItem.belongsTo( models.ms_units, {
             foreignKey: 'unit_id',
             as: 'unit',
+            onDelete: 'CASCADE',
+        } );
+
+        ProcurementQuotationItem.belongsTo( models.ms_currencies, {
+            foreignKey: 'currency_id',
+            as: 'currency',
             onDelete: 'CASCADE',
         } );
     }

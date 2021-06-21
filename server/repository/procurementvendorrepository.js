@@ -53,7 +53,7 @@ class ProcurementVendorRepository {
             {
                 model: _modelProcurement,
                 as: 'procurement',
-                attributes: ['id','procurement_no', 'name'],
+                attributes: ['id','procurement_no', 'name', 'status'],
             },
             {
                 attributes: ['id','name','code'],

@@ -3,6 +3,7 @@ const procurementItemController = require('../controllers').procurementItem;
 const procurementScheduleController = require('../controllers').procurementSchedule;
 const procurementTermController = require('../controllers').procurementTerm;
 const procurementVendorController = require('../controllers').procurementVendor;
+const procurementQuotationItemController = require('../controllers').procurementQuotationItem;
 
 const { check, validationResult } = require('express-validator');
 
@@ -272,4 +273,18 @@ module.exports = (app) => {
         check("status","Parameter status must be integer and cannot be empty").not().isEmpty().isInt(),
     ]
     app.post( rootAPIPath + 'member/confirm', procurementVendorController.procurementVendor_VendorConfirm );
+
+
+    // *** PROCUREMENT QUOTATION ITEM ***
+
+    // List
+    arrValidate = [];
+    arrValidate = [
+        check("offset","Parameter offset must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("limit").not().isEmpty().withMessage("Parameter limit cannot be empty"),
+        check("procurement_id").not().isEmpty().withMessage("Parameter procurement_id cannot be empty"),
+    ];
+    app.get( rootAPIPath + 'quotation_item/list', arrValidate, procurementQuotationItemController.procurementQuotationItem_List);
+
+    
 }

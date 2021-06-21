@@ -26,6 +26,10 @@ module.exports = ( sequelize, DataTypes ) => {
         ppn: DataTypes.DOUBLE,
         grand_total: DataTypes.DOUBLE,
 
+        sub_total_negotiation: DataTypes.DOUBLE,
+        ppn_negotiation: DataTypes.DOUBLE,
+        grand_total_negotiation: DataTypes.DOUBLE,
+
         is_delete: DataTypes.INTEGER,
         deleted_at: DataTypes.DATE,
         deleted_by: DataTypes.INTEGER,

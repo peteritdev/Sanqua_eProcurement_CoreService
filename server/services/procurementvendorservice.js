@@ -15,7 +15,7 @@ const config      = require(__dirname + '/../config/config.json')[env];
 const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
-const GlobalUtility = require('../utils/globalutility.js');
+const GlobalUtility = require('../utils/globalutility.js'); 
 const _globalUtilInstance = new GlobalUtility();
 
 // Repository
@@ -147,6 +147,7 @@ class ProcurementVendorService {
                 xJoData = {
                     id: await _utilInstance.encrypt( (xResult.id).toString(), config.cryptoKey.hashKey ),
                     vendor: xResult.vendor,
+                    procurement_id: await _utilInstance.encrypt( (xResult.procurement_id).toString(), config.cryptoKey.hashKey ),
                     invited_at: moment( xResult.invited_at ).format( 'DD MMM YYYY hh:mm:ss' ),
                     confirmation_status: {
                         id: xResult.confirmation_status,

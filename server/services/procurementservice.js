@@ -39,8 +39,8 @@ const ProcurementVendorService = require('../services/procurementvendorservice.j
 const _procurementVendorServiceInstance = new ProcurementVendorService();
 
 // Procurement Quotation Item Service
-const ProcurementQuotationItemService = require('../services/procurementquotationitemservice.js');
-const _procurementQuotationItemServiceInstance = new ProcurementQuotationItemService();
+// const ProcurementQuotationItemService = require('../services/procurementquotationitemservice.js');
+// const _procurementQuotationItemServiceInstance = new ProcurementQuotationItemService();
 
 class ProcurementService {
     constructor(){}
