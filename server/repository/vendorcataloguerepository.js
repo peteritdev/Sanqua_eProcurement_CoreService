@@ -205,6 +205,11 @@ class VendorCatalogueRepository {
                             [Op.iLike]: '%' + pParam.keyword + '%'
                         },
                     },
+                    {
+                        '$vendor.code$': {
+                            [Op.iLike]: '%' + pParam.keyword + '%'
+                        },
+                    },
                 ]
             },            
             include: xInclude,

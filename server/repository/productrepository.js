@@ -48,6 +48,11 @@ class ProductRepository{
                             [Op.iLike]: '%' + pParam.keyword + '%'
                         },
                     },
+                    {
+                        code: {
+                            [Op.iLike]: '%' + pParam.keyword + '%'
+                        },
+                    },
                 ]
             },          
             include: xInclude,  
