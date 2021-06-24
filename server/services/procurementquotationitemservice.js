@@ -67,11 +67,11 @@ class ProcurementQuotationItemService {
         var xJoArrData = [];
         var xFlagProcess = false;
 
-        if( pParam.hasOwnProperty('procurement_id') ){
-            if( pParam.procurement_id != '' ){
-                var xDecId = await _utilInstance.decrypt( pParam.procurement_id, config.cryptoKey.hashKey );
+        if( pParam.hasOwnProperty('procurement_vendor_id') ){
+            if( pParam.procurement_vendor_id != '' ){
+                var xDecId = await _utilInstance.decrypt( pParam.procurement_vendor_id, config.cryptoKey.hashKey );
                 if( xDecId.status_code == '00' ){
-                    pParam.procurement_id = xDecId.decrypted;
+                    pParam.procurement_vendor_id = xDecId.decrypted;
                     xFlagProcess = true;
                 }else{
                     xJoResult = xDecId;
@@ -231,23 +231,72 @@ class ProcurementQuotationItemService {
                 if( xFlagProcess ){
 
                     var xProcurementDetail = await _repoInstance.getById( pParam );
-                    console.log(">>> Detail : " + JSON.stringify(xProcurementDetail));
-                    // if( xProcurementDetail != null ){
-                    //     if( xProcurementDetail.status == 0 ){
-                    //         var xAddResult = await _repoInstance.save( pParam, xAct );
-                    //         xJoResult = xAddResult;
-                    //     }else{
-                    //         xJoResult = {
-                    //             status_code: '-99',
-                    //             status_msg: 'You can not update item when procurement has been submitted or approved'
-                    //         }
-                    //     }
-                    // }else{
-                    //     xJoResult = {
-                    //         status_code: '-99',
-                    //         status_msg: 'The Procurement ID that supplied not exist.'
-                    //     }
-                    // }
+
+                    if( xProcurementDetail != null ){
+                        if( xProcurementDetail.status == 1 ){
+
+                            pParam.total = xProcurementDetail.qty * pParam.unit_price;
+
+                            var xAddResult = await _repoInstance.save( pParam, xAct );
+                            xJoResult = xAddResult;
+                        }else if( xProcurementDetail.status == 2 ){
+                            xJoResult = {
+                                status_code: '-99',
+                                status_msg: 'You can not update item when procurement has been closed'
+                            }
+                        }else{
+                            xJoResult = {
+                                status_code: '-99',
+                                status_msg: 'You can not update item when procurement has been inactive / cancel.'
+                            }
+                        }
+                    }else{
+                        xJoResult = {
+                            status_code: '-99',
+                            status_msg: 'The Procurement ID that supplied not exist.'
+                        }
+                    }
+                }
+                
+            }else if( xAct == "update_after_negotiation" ){
+    
+                var xDecId = await _utilInstance.decrypt(pParam.id,config.cryptoKey.hashKey);
+                if( xDecId.status_code == "00" ){
+                    pParam.id = xDecId.decrypted;                    
+                    xDecId = await _utilInstance.decrypt(pParam.user_id,config.cryptoKey.hashKey);
+                    if( xDecId.status_code == "00" ){
+                        pParam.update_negotiate_at = await _utilInstance.getCurrDateTime();
+                        pParam.update_negotiate_by = xDecId.decrypted;
+                        pParam.update_negotiate_by_name = pParam.user_name;                        
+                    }else{
+                        xFlagProcess = false;
+                        xJoResult = xDecId;
+                    }
+                }else{
+                    xFlagProcess = false;
+                    xJoResult = xDecId;
+                }
+    
+                if( xFlagProcess ){
+
+                    var xProcurementDetail = await _repoInstance.getById( pParam );
+                    if( xProcurementDetail != null ){
+                        if( xProcurementDetail.status == 1 ){
+                            pParam.total_negotiation = pParam.qty_negotiation * pParam.unit_price_negotiation;
+                            var xAddResult = await _repoInstance.save( pParam, xAct );
+                            xJoResult = xAddResult;
+                        }else{
+                            xJoResult = {
+                                status_code: '-99',
+                                status_msg: 'You can not update item when procurement has been cancel or closed'
+                            }
+                        }
+                    }else{
+                        xJoResult = {
+                            status_code: '-99',
+                            status_msg: 'The Procurement ID that supplied not exist.'
+                        }
+                    }
                 }
                 
             }

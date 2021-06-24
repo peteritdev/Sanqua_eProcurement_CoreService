@@ -21,6 +21,10 @@ module.exports = (sequelize, DataTypes) => {
         qty_negotiation: DataTypes.DOUBLE,
         total_negotiation: DataTypes.DOUBLE,
         description_negotiation: DataTypes.STRING,
+
+        update_negotiate_at: DataTypes.DATE,
+        update_negotiate_by: DataTypes.INTEGER,
+        update_negotiate_by_name: DataTypes.STRING,
         
         status: DataTypes.INTEGER,
         is_delete: DataTypes.INTEGER,

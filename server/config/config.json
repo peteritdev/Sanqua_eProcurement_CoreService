@@ -1,5 +1,6 @@
 {
   "localhost": {
+    "appPort": 9191,
     "dbTables": {
       "procurement": "tr_procurements"
     },
@@ -44,17 +45,17 @@
       "notification": {
         "emailVerification": "http://localhost:1190/api/notification/v1/email_verification",
         "forgotPassword": "http://localhost:1190/api/notification/v1/forgot_password",
-        "notificationTemplate": "http://localhost:1189/api/oauth/v1/notification_template/detail/code"
+        "notificationTemplate": "http://localhost:9189/api/oauth/v1/notification_template/detail/code"
       },
 
       "oAuth": {
         "url": {
-          "verifyToken": "http://localhost:1189/api/oauth/v1/user/verify_token",
+          "verifyToken": "http://localhost:9189/api/oauth/v1/user/verify_token",
           "approval_matrix_document": {
-            "save": "http://localhost:1189/api/oauth/v1/approval_matrix/document/save",
-            "list": "http://localhost:1189/api/oauth/v1/approval_matrix/document/list",
-            "confirm": "http://localhost:1189/api/oauth/v1/approval_matrix/document/confirm",
-            "confirm_via_email": "http://localhost:1189/api/oauth/v1/approval_matrix/document/confirm_via_email"
+            "save": "http://localhost:9189/api/oauth/v1/approval_matrix/document/save",
+            "list": "http://localhost:9189/api/oauth/v1/approval_matrix/document/list",
+            "confirm": "http://localhost:9189/api/oauth/v1/approval_matrix/document/confirm",
+            "confirm_via_email": "http://localhost:9189/api/oauth/v1/approval_matrix/document/confirm_via_email"
           }
         }
       }
@@ -83,6 +84,7 @@
   },
 
   "development": {
+    "appPort": 9191,
     "dbTables": {
       "procurement": "tr_procurements"
     },
@@ -165,6 +167,7 @@
   },  
 
   "production": {
+    "appPort": 1191,
     "username": "postgres",
     "password": "SANQUAD0ck3rP912",
     "database": "sanqua_procurementdb",

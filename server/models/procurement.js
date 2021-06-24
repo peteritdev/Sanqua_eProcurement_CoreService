@@ -34,7 +34,7 @@ module.exports = ( sequelize, DataTypes ) => {
         set_to_draft_by: DataTypes.INTEGER,
         set_to_draft_by_name: DataTypes.STRING,
 
-        status: DataTypes.INTEGER, // 1=> Active, 0=> inactive, -1=> cancel, -2=> Closed
+        status: DataTypes.INTEGER, // 1=> Active, 0=> inactive, -1=> cancel, 2=> Closed
         status_approval: DataTypes.INTEGER, // 0=> Pending, 1=> approved by head department, -1 => rejected by head department, -2 => cancel by user
 
         company_id: DataTypes.INTEGER,

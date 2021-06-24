@@ -121,10 +121,10 @@ class ProcurementQuotationItemRepository {
             }
         }        
 
-        if( pParam.hasOwnProperty('procurement_id') ){
-            if( pParam.year != '' ){
+        if( pParam.hasOwnProperty('procurement_vendor_id') ){
+            if( pParam.procurement_vendor_id != '' ){
                 xWhereAnd.push({
-                    '$procurement_vendor.procurement.id$': pParam.procurement_id,
+                    '$procurement_vendor.id$': pParam.procurement_vendor_id,
                 });
             }
         }
@@ -215,7 +215,7 @@ class ProcurementQuotationItemRepository {
                 include: [
                     {
                         model: _modelProductCategory,
-                        as: 'product_category',
+                        as: 'category',
                         attributes: ['id', 'name'],
                     }
                 ],
@@ -290,7 +290,40 @@ class ProcurementQuotationItemRepository {
                         id: xId,
                     }
                 };
-                xSaved = await _modelDb.update( pParam, xWhere, {xTransaction} );
+                
+                var xParamUpdate = {
+                    unit_price: pParam.unit_price,
+                    description: pParam.description,
+                    total: pParam.total,
+                }
+
+                xSaved = await _modelDb.update( xParamUpdate, xWhere, {xTransaction} );
+
+                await xTransaction.commit();
+
+                xJoResult = {
+                    status_code: "00",
+                    status_msg: "Data has been successfully updated"
+                }
+
+            }else if( pAct == "update_after_negotiation" ){
+                
+                pParam.updatedAt = await _utilInstance.getCurrDateTime();
+                var xId = pParam.id;
+                delete pParam.id;
+                var xWhere = {
+                    where : {
+                        id: xId,
+                    }
+                };
+
+                var xParamUpdate = {
+                    unit_price_negotiation: pParam.unit_price_negotiation,
+                    qty_negotiation: pParam.qty_negotiation,
+                    total_negotiation: pParam.total_negotiation,
+                    description_negotiation: pParam.description_negotiation,
+                }
+                xSaved = await _modelDb.update( xParamUpdate, xWhere, {xTransaction} );
 
                 await xTransaction.commit();
 

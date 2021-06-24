@@ -33,7 +33,17 @@ class MasterRepository {
 
         if( pParam.order_by != '' && pParam.hasOwnProperty('order_by') ){
             xOrder = [pParam.order_by, (pParam.order_type == 'desc' ? 'DESC' : 'ASC') ];
-        }        
+        }
+        
+        if( pParam.hasOwnProperty('filter') ){
+            var xFilter = JSON.parse(pParam.filter);
+            if( xFilter.length > 0 ){                
+                // xWhereAnd.push( pParam.filter );
+                for( var index in xFilter ){
+                    xWhereAnd.push( xFilter[index] );
+                }
+            }
+        }
 
         if( pParam.hasOwnProperty('is_archived') ){
             if( pParam.is_archived != '' ){

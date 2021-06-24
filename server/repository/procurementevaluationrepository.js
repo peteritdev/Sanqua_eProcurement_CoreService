@@ -6,12 +6,10 @@ const { hash } = require('bcryptjs');
 const Op = sequelize.Op;
 
 // Model
-const _modelDb = require('../models').tr_procurementitems;
+const _modelDb = require('../models').tr_procurementevaluations;
 const _modelProcurement = require('../models').tr_procurements;
-const _modelProduct = require('../models').ms_products;
-const _modelUnit =  require('../models').ms_units;
-const _modelCurrency = require('../models').ms_currencies;
-const _modelProductCategory = require('../models').ms_productcategories;
+const _modelAttribute = require('../models').ms_evaluationattributes;
+const _modeAttributeCategory = require('../models').ms_evaluationcategories;
 
 const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
@@ -20,7 +18,7 @@ const GlobalUtility = require('../utils/globalutility.js');
 const { unit } = require('../controllers');
 const _globalUtilInstance = new GlobalUtility();
 
-class ProcurementItemRepository {
+class ProcurementEvaluationRepository {
     constructor(){}
 
     async getById( pParam ){
@@ -35,26 +33,9 @@ class ProcurementItemRepository {
                 as: 'procurement',
             },
             {
-                attributes: ['id','name','code'],
-                model: _modelProduct,
-                as: 'product',
-                include: [
-                    {
-                        model: _modelProductCategory,
-                        as: 'product_category',
-                        attributes: ['id', 'name'],
-                    }
-                ],
-            },
-            {
                 attributes: ['id','name'],
-                model: _modelUnit,
-                as: 'unit',
-            },
-            {
-                attributes: ['id','name'],
-                model: _modelCurrency,
-                as: 'currency',
+                model: _modelAttribute,
+                as: 'evaluation_attribute',
             },
         ];
 
@@ -77,26 +58,20 @@ class ProcurementItemRepository {
 
         xInclude = [
             {
-                attributes: ['id','name','code'],
-                model: _modelProduct,
-                as: 'product',
+                model: _modelProcurement,
+                as: 'procurement',
+            },
+            {
+                attributes: ['id','name'],
+                model: _modelAttribute,
+                as: 'evaluation_attribute',
                 include: [
                     {
-                        model: _modelProductCategory,
-                        as: 'category',
+                        model: _modeAttributeCategory,
+                        as: 'evaluation_category',
                         attributes: ['id', 'name'],
                     }
-                ],
-            },
-            {
-                attributes: ['id','name'],
-                model: _modelUnit,
-                as: 'unit',
-            },
-            {
-                attributes: ['id','name'],
-                model: _modelCurrency,
-                as: 'currency',
+                ]
             },
         ];
 
@@ -133,15 +108,7 @@ class ProcurementItemRepository {
         if( pParam.hasOwnProperty('keyword') ){
             if( pParam.keyword != '' ){
                 xWhereOr.push({
-                    '$product.name$': {
-                        [Op.iLike]: '%' + pParam.keyword + '%'
-                    }
-                },{
-                    '$product.code$': {
-                        [Op.iLike]: '%' + pParam.keyword + '%'
-                    }
-                },{
-                    '$product.category.name$': {
+                    '$evaluation_attribute.name$': {
                         [Op.iLike]: '%' + pParam.keyword + '%'
                     }
                 })   
@@ -337,4 +304,4 @@ class ProcurementItemRepository {
     }
 }
 
-module.exports = ProcurementItemRepository;
+module.exports = ProcurementEvaluationRepository;
