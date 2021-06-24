@@ -46,7 +46,12 @@ class ProductRepository{
                     {
                         name: {
                             [Op.iLike]: '%' + pParam.keyword + '%'
-                        },
+                        },                        
+                    },
+                    {
+                        code: {
+                            [Op.iLike]: '%' + pParam.keyword + '%'
+                        },                        
                     },
                 ]
             },          
