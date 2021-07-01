@@ -314,15 +314,21 @@ class ProductService {
                                 // Check product_code is exists
                                 xCheckData_ProductByCode = await _productRepoInstance.getProductByCode( { code: pParam.data[i].code, id: pParam.data[i].id } );
 
-                                if( xCheckData_ProductByCode == null ){
-                                    pParam.data[i].act = "update";
-                                    if( pParam.data[i].unit_id == '' ){
-                                        delete pParam.data[i].unit_id;
-                                    }
-                                    var xAddResult = await _productRepoInstance.save( pParam.data[i], "update" );
-                                }else{
-                                    xStringMsg += "Row " + (i+1) + " product code " + pParam.data[i].code + " can not duplicate, <br>";
+                                // if( xCheckData_ProductByCode == null ){
+                                //     pParam.data[i].act = "update";
+                                //     if( pParam.data[i].unit_id == '' ){
+                                //         delete pParam.data[i].unit_id;
+                                //     }
+                                //     var xAddResult = await _productRepoInstance.save( pParam.data[i], "update" );
+                                // }else{
+                                //     xStringMsg += "Row " + (i+1) + " product code " + pParam.data[i].code + " can not duplicate, <br>";
+                                // }
+
+                                pParam.data[i].act = "update";
+                                if( pParam.data[i].unit_id == '' ){
+                                    delete pParam.data[i].unit_id;
                                 }
+                                var xAddResult = await _productRepoInstance.save( pParam.data[i], "update" );
                             }
                             
                         }         
