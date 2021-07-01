@@ -552,14 +552,19 @@ class VendorService {
 
                             if( xFlagProcess ){
                                 // Check vendor code is duplicate or not
-                                var xCheckData = await _vendorRepoInstance.getVendorByCode( pParam.data[i].code, pParam.data[i].id );
-                                if( xCheckData != null ){
-                                    xMessageResult += "Vendor code <strong>" + pParam.data[i].code + "</strong> already exists. Please use another code <br>";
-                                }else{
-                                    // Do update based on id
-                                    pParam.data[i].act = "update";
-                                    var xAddResult = await _vendorRepoInstance.save( pParam.data[i] );
-                                }   
+                                // var xCheckData = await _vendorRepoInstance.getVendorByCode( pParam.data[i].code, pParam.data[i].id );
+                                // if( xCheckData != null ){
+                                //     xMessageResult += "Vendor code <strong>" + pParam.data[i].code + "</strong> already exists. Please use another code <br>";
+                                // }else{
+                                //     // Do update based on id
+                                //     pParam.data[i].act = "update";
+                                //     var xAddResult = await _vendorRepoInstance.save( pParam.data[i] );
+                                // }   
+
+                                // Temporary not use this 
+                                // Do update based on id
+                                pParam.data[i].act = "update";
+                                var xAddResult = await _vendorRepoInstance.save( pParam.data[i] );
                             }                            
                         }
                     }else{
