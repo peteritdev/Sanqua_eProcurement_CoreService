@@ -73,6 +73,7 @@ class SpesificationAttributeService {
                 for( var index in xRows ){
                     xJoArrData.push({
                         id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
+                        clear_id: xRows[index].id,
                         name: xRows[index].name,
                         category: xRows[index].spesification_category,
                         created_at: xRows[index].createdAt,

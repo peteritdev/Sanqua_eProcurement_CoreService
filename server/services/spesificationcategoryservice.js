@@ -100,6 +100,7 @@ class SpesificationCategoryService {
             for( var index in xRows ){
                 xJoArrData.push({
                     id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
+                    clear_id: xRows[index].id,
                     name: xRows[index].name,
                     created_at: xRows[index].createdAt,
                     created_by_name: xRows[index].created_by_name,
