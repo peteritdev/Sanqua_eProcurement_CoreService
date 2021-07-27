@@ -144,12 +144,17 @@ class ProductService {
              *  use the appropriate module
              */
             if(pReq.file.originalname.split('.')[pReq.file.originalname.split('.').length-1] === 'xlsx'){
+                console.log(">>> XLSX");
                 xExcelToJSON = _xlsxToJson;
             } else {
+                console.log(">>> XLS");
                 xExcelToJSON = _xlsToJson;
             }
 
             try {
+
+                console.log(">>> Path : "+  pReq.file.path);
+
                 xExcelToJSON({
                     input: pReq.file.path, //the same path where we uploaded our file
                     output: null, //since we don't need output.json
