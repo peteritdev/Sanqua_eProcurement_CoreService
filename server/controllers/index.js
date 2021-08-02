@@ -19,11 +19,13 @@ const procurement = require('./procurement');
 const procurementItem = require('./procurementitem');
 const procurementSchedule = require('./procurementschedule');
 
+const purchaseRequest = require('./purchaserequest');
+
 module.exports = {
 	vendor,
 	master, productCategory, product, unit, currency,
 	vendorExperience, vendorCatalogue,
 	spesificationCategory, spesificationAttribute, vendorCatalogueQuotation, vendorCatalogueSpesification,
 	vendorRateHistory,
-	procurement, procurementItem, globalMaster, procurementSchedule,
+	procurement, procurementItem, globalMaster, procurementSchedule, purchaseRequest, 
 }

@@ -124,6 +124,7 @@ class VendorService {
                     status_msg: "OK",
                     data: {
                         id: await _utilInstance.encrypt( xData.id, config.cryptoKey.hashKey ),
+                        code: xData.code,
                         name: xData.name,
                         logo: ( xData.logo == null ? '' : ( config.frontParam.photoPath.logo + xData.logo ) ),
                         npwp: xData.npwp,
