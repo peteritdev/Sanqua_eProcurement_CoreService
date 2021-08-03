@@ -18,7 +18,7 @@ const DocumentTypeRepository = require('../repository/documenttyperepository.js'
 const _docTypeRepoInstance = new DocumentTypeRepository();
 
 //Util
-const Utility = require('peters-globallib');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 class DocumentTypeService {

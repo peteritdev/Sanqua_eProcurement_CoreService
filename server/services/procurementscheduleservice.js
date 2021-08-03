@@ -12,7 +12,7 @@ const env         = process.env.NODE_ENV || 'localhost';
 const config      = require(__dirname + '/../config/config.json')[env];
 
 // Utility
-const Utility = require('peters-globallib');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 const GlobalUtility = require('../utils/globalutility.js');
@@ -167,6 +167,7 @@ class ProcurementScheduleService {
 
                 var xProcurementDetail = await _procurementRepoInstance.getById( {id: pParam.procurement_id } );
                 if( xProcurementDetail != null ){
+                    // if(true){
                     if( xProcurementDetail.status_approval == 0 ){
                         var xAddResult = await _repoInstance.save( pParam, xAct );
                         xJoResult = xAddResult;

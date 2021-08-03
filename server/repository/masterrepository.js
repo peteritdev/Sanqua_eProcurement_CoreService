@@ -11,7 +11,7 @@ const _modelUnit = require('../models').ms_units;
 
 const _modelDb = require('../models');
 
-const Utility = require('peters-globallib');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 class MasterRepository {
@@ -33,7 +33,17 @@ class MasterRepository {
 
         if( pParam.order_by != '' && pParam.hasOwnProperty('order_by') ){
             xOrder = [pParam.order_by, (pParam.order_type == 'desc' ? 'DESC' : 'ASC') ];
-        }        
+        }
+        
+        if( pParam.hasOwnProperty('filter') ){
+            var xFilter = JSON.parse(pParam.filter);
+            if( xFilter.length > 0 ){                
+                // xWhereAnd.push( pParam.filter );
+                for( var index in xFilter ){
+                    xWhereAnd.push( xFilter[index] );
+                }
+            }
+        }
 
         if( pParam.hasOwnProperty('is_archived') ){
             if( pParam.is_archived != '' ){

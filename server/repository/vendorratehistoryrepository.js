@@ -9,7 +9,7 @@ const Op = sequelize.Op;
 const _modelDb = require('../models').tr_vendorratehistories;
 const _modelVendor = require('../models').ms_vendors;
 
-const Utility = require('peters-globallib');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 class VendorRateHistoryRepository {

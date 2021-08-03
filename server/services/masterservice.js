@@ -15,7 +15,7 @@ const config      = require(__dirname + '/../config/config.json')[env];
 const MasterRepository = require('../repository/masterrepository.js');
 
 //Util
-const Utility = require('peters-globallib');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 class MasterService {

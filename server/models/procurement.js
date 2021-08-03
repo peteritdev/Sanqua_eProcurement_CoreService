@@ -18,6 +18,10 @@ module.exports = ( sequelize, DataTypes ) => {
         total_working_days: DataTypes.INTEGER,
         validity_period_offer: DataTypes.INTEGER,
         qualification: DataTypes.STRING,
+
+        business_fields: DataTypes.STRING,
+        qualification_requirements: DataTypes.STRING,
+
         sub_total: DataTypes.DOUBLE,
         ppn: DataTypes.DOUBLE,
         grand_total: DataTypes.DOUBLE,
@@ -30,7 +34,7 @@ module.exports = ( sequelize, DataTypes ) => {
         set_to_draft_by: DataTypes.INTEGER,
         set_to_draft_by_name: DataTypes.STRING,
 
-        status: DataTypes.INTEGER, // 1=> Active, 0=> inactive, -1=> cancel
+        status: DataTypes.INTEGER, // 1=> Active, 0=> inactive, -1=> cancel, 2=> Closed
         status_approval: DataTypes.INTEGER, // 0=> Pending, 1=> approved by head department, -1 => rejected by head department, -2 => cancel by user
 
         company_id: DataTypes.INTEGER,
@@ -41,6 +45,8 @@ module.exports = ( sequelize, DataTypes ) => {
         submit_at: DataTypes.DATE,
         submit_by: DataTypes.INTEGER,
         submit_by_name: DataTypes.STRING,
+
+        integrity_pact: DataTypes.INTEGER,
 
         is_delete: DataTypes.INTEGER,
         deleted_at: DataTypes.DATE,
@@ -66,6 +72,16 @@ module.exports = ( sequelize, DataTypes ) => {
         Procurement.hasMany( models.tr_procurementitems, {
             foreignKey: 'procurement_id',
             as: 'procurement_item',
+        } );
+
+        Procurement.hasMany( models.tr_procurementschedules, {
+            foreignKey: 'procurement_id',
+            as: 'procurement_schedule',
+        } );
+
+        Procurement.hasMany( models.tr_procurementterms, {
+            foreignKey: 'procurement_id',
+            as: 'procurement_term',
         } );
     }
 

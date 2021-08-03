@@ -29,6 +29,8 @@ module.exports = ( sequelize, DataTypes ) => {
         about: DataTypes.STRING,
         location_lat: DataTypes.STRING,
         location_long: DataTypes.STRING,
+
+        currency_id: DataTypes.INTEGER,
         
         status: DataTypes.INTEGER,
 
@@ -97,6 +99,12 @@ module.exports = ( sequelize, DataTypes ) => {
         Vendor.belongsTo( models.ms_cities, {
             foreignKey: 'city_id',
             as: 'city',
+            onDelete: 'CASCADE',
+        } );
+
+        Vendor.belongsTo( models.ms_currencies, {
+            foreignKey: 'currency_id',
+            as: 'currency',
             onDelete: 'CASCADE',
         } );
     }

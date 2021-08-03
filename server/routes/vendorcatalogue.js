@@ -147,5 +147,13 @@ module.exports = (app) => {
     app.post( rootAPIPath + 'vendor/catalogue_spesification/upload', arrValidate, vendorCatalogueSpesificationController.vendorCatalogueSpesification_UploadFromExcel );
     app.post( rootAPIPath + 'vendor/catalogue_spesification/batch_save', arrValidate, vendorCatalogueSpesificationController.vendorCatalogueSpesification_BatchSave );
     
+    // List
+    arrValidate = [];
+    arrValidate = [
+        check("offset","Parameter offset must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("limit").not().isEmpty().withMessage("Parameter limit cannot be empty"),
+        check("product_id").not().isEmpty().withMessage("Parameter product_id cannot be empty"),
+    ];
+    app.get( rootAPIPath + 'vendor/catalogue/get_by_product', arrValidate, vendorCatalogueController.vendorCatalogue_GetVendorByProductId );
 
 }

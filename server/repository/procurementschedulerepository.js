@@ -9,7 +9,7 @@ const Op = sequelize.Op;
 const _modelDb = require('../models').tr_procurementschedules;
 const _modelScheduleAttribute = require('../models').ms_procurementscheduleattributes;
 
-const Utility = require('peters-globallib');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 const GlobalUtility = require('../utils/globalutility.js');

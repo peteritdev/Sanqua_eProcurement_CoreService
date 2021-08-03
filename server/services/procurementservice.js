@@ -12,7 +12,7 @@ const env         = process.env.NODE_ENV || 'localhost';
 const config      = require(__dirname + '/../config/config.json')[env];
 
 // Utility
-const Utility = require('peters-globallib');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 const GlobalUtility = require('../utils/globalutility.js');
@@ -29,6 +29,18 @@ const _oAuthService = new OAuthService();
 // Procurement Item Service
 const ProcurementItemRepo = require('../repository/procurementitemrepository.js');
 const _procItemRepoInstance = new ProcurementItemRepo();
+
+// Notification Service
+const NotificationService = require('../services/notificationservice.js');
+const _notificationServiceInstance = new NotificationService();
+
+// Procurement Service
+const ProcurementVendorService = require('../services/procurementvendorservice.js');
+const _procurementVendorServiceInstance = new ProcurementVendorService();
+
+// Procurement Quotation Item Service
+// const ProcurementQuotationItemService = require('../services/procurementquotationitemservice.js');
+// const _procurementQuotationItemServiceInstance = new ProcurementQuotationItemService();
 
 class ProcurementService {
     constructor(){}
@@ -75,7 +87,7 @@ class ProcurementService {
                     department: {
                         id: xRows[index].department_id,
                         name: xRows[index].department_name,
-                    },
+                    },                    
 
                     created_at: moment(xRows[index].createdAt).format('YYYY-mm-dd H:i:s'),
                     created_by_name: xRows[index].created_by_name,
@@ -146,6 +158,8 @@ class ProcurementService {
                     sub_total: xResult.sub_total,
                     ppn: xResult.ppn,
                     grand_total: xResult.grand_total,
+                    business_fields: xResult.business_fields,
+                    qualification_requirements: xResult.qualification_requirements,
                     status: {
                         id: xResult.status,
                         name: ( xResult.status == 1 ? 'Active' : ( xResult.status == 0 ? 'Inactive' : ( xResult.status == -1 ? 'Cancel' : '' ) ) )
@@ -164,6 +178,10 @@ class ProcurementService {
                         id: xResult.department_id,
                         name: xResult.department_name,
                     },
+
+                    item: xResult.procurement_item,
+                    schedule: xResult.procurement_schedule,
+                    term: xResult.procurement_term,
 
                     approval_matrix: ( ( xResultApprovalMatrix.status_code == '00' && xResultApprovalMatrix.token_data.status_code == '00' ) ? xResultApprovalMatrix.token_data.data : null ),
 
@@ -572,6 +590,97 @@ class ProcurementService {
         }
 
         return xJoResult;
+    }
+
+    async inviteVendor( pParam ){
+
+        var xJoResult = {};
+        var xFlagProcess = false;
+        var xDecId = null;
+        var xParamAddToDB = {};
+        var xEncProcurementId = "";
+        
+        // Get procurement detail
+        if( pParam.hasOwnProperty('id') ){
+            if( pParam.id != '' ){
+                xEncProcurementId = pParam.id;
+                xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+                if( xDecId.status_code == '00' ){
+                    xFlagProcess = true;
+                    pParam.id = xDecId.decrypted;
+                }else{
+                    xJoResult = xDecId;
+                }
+            }else{
+                xJoResult = {
+                    status_code: '-99',
+                    status_msg: 'You need to supply correct id'
+                }
+            }
+        }
+
+        if( pParam.hasOwnProperty('user_id') ){
+            if( pParam.user_id != '' ){
+                // User Id
+                xDecId = await _utilInstance.decrypt(pParam.user_id,config.cryptoKey.hashKey);
+                if( xDecId.status_code == '00' ){
+                     pParam.user_id = xDecId.decrypted;                
+                }else{
+                    xFlagProcess = false;
+                    xJoResult = xDecId;
+                } 
+            }
+        }
+
+        if( xFlagProcess ){
+
+            // Get Procurement Detail
+            var xProcurementDetail = await _repoInstance.getById( pParam );
+            xProcurementDetail.vendor = {
+                name: pParam.vendor_name,
+                email: pParam.email,
+            }
+            
+            // Send Notification
+            // xJoResult = await _notificationServiceInstance.sendNotification_AnnouncementNewProcurement( pParam.method, pParam.token, xProcurementDetail  );
+
+            // Add vendor invited to database
+            var xCheckExist = await _procurementVendorServiceInstance.getById( {
+                procurement_id: xEncProcurementId,
+                vendor_id: pParam.vendor_id,
+            } );
+            if( xCheckExist.status_code == '-99' ){
+                xParamAddToDB = {
+                    act: 'add',
+                    procurement_id: xEncProcurementId,
+                    vendor_id: pParam.vendor_id,
+                    invited_at: await _utilInstance.getCurrDateTime(),
+                    invited_by: pParam.user_id,
+                    invited_by_name: pParam.user_name,
+                    invited_counter: 1,
+                    created_by: pParam.user_id,
+                    created_by_name: pParam.user_name,
+                }
+            }else{
+                xParamAddToDB = {
+                    act: 'update',
+                    procurement_id: xEncProcurementId,
+                    vendor_id: pParam.vendor_id,
+                    invited_at: await _utilInstance.getCurrDateTime(),
+                    invited_by: pParam.user_id,
+                    invited_by_name: pParam.user_name,
+                    invited_counter: sequelize.literal('invited_counter + 1'),
+                }
+            }
+
+            console.log(">>> Param Add : " + JSON.stringify(xParamAddToDB));
+
+            var xResultAddToDB = await _procurementVendorServiceInstance.save( xParamAddToDB );
+            xJoResult.result_addto_db = xResultAddToDB;
+        }
+
+        return xJoResult;
+
     }
 }
 

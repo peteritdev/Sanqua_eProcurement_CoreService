@@ -1,6 +1,10 @@
 const procurementController = require('../controllers').procurement;
 const procurementItemController = require('../controllers').procurementItem;
 const procurementScheduleController = require('../controllers').procurementSchedule;
+const procurementTermController = require('../controllers').procurementTerm;
+const procurementVendorController = require('../controllers').procurementVendor;
+const procurementQuotationItemController = require('../controllers').procurementQuotationItem;
+const procurementEvaluationController = require('../controllers').procurementEvaluation;
 
 const { check, validationResult } = require('express-validator');
 
@@ -85,6 +89,15 @@ module.exports = (app) => {
     ];
     app.post( rootAPIPath + 'set_to_draft', arrValidate, procurementController.procurement_SetToDraft );
 
+    // Invite Vendor
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id can not be empty"),
+        check("vendor_name").not().isEmpty().withMessage("Parameter vendor_name can not be empty"),
+        check("email").not().isEmpty().withMessage("Parameter email can not be empty"),
+    ];
+    app.post( rootAPIPath + 'invite_vendor', arrValidate, procurementController.procurement_InviteVendor );
+
     // *** PROCUREMENT ITEM ***
     // Save
     arrValidate = [];
@@ -168,5 +181,178 @@ module.exports = (app) => {
     arrValidate = [
         check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
     ];
-    app.put( rootAPIPath + 'schedule/unarchive/:id', procurementScheduleController.procurementSchedule_Archive );
+    app.put( rootAPIPath + 'schedule/unarchive/:id', procurementScheduleController.procurementSchedule_Unarchive );
+
+
+    // *** PROCUREMENT TERM ***
+    // Save
+    arrValidate = [];
+    arrValidate = [
+        check("act").not().isEmpty().withMessage("Parameter act cannot be empty"),
+        check("procurement_id").not().isEmpty().withMessage("Parameter procurement_id cannot be empty"),
+        check("term").not().isEmpty().withMessage("Parameter term cannot be empty"),
+        check("description").not().isEmpty().withMessage("Parameter description cannot be empty"),
+    ];
+    app.post( rootAPIPath + 'term/save', arrValidate, procurementTermController.procurementTerm_Save);
+
+    // List
+    arrValidate = [];
+    arrValidate = [
+        check("offset","Parameter offset must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("limit").not().isEmpty().withMessage("Parameter limit cannot be empty"),
+        check("procurement_id").not().isEmpty().withMessage("Parameter procurement_id cannot be empty"),
+    ];
+    app.get( rootAPIPath + 'term/list', arrValidate, procurementTermController.procurementTerm_List);
+
+    // Delete
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+    ];
+    app.delete( rootAPIPath + 'term/delete/:id', procurementTermController.procurementTerm_Delete );
+
+    // Archive
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+    ];
+    app.put( rootAPIPath + 'term/archive/:id', procurementTermController.procurementTerm_Archive );
+
+    // Archive
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+    ];
+    app.put( rootAPIPath + 'term/unarchive/:id', procurementTermController.procurementTerm_Unarchive );
+
+
+    // *** PROCUREMENT VENDOR ***
+    // Save
+    arrValidate = [];
+    arrValidate = [
+        check("act").not().isEmpty().withMessage("Parameter act cannot be empty"),
+        check("procurement_id").not().isEmpty().withMessage("Parameter procurement_id cannot be empty"),
+        check("vendor_id","Parameter product_id must be integer and cannot be empty").not().isEmpty().isInt(),
+    ];
+    app.post( rootAPIPath + 'member/save', arrValidate, procurementVendorController.procurementVendor_Save);
+
+    // List
+    arrValidate = [];
+    arrValidate = [
+        check("offset","Parameter offset must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("limit").not().isEmpty().withMessage("Parameter limit cannot be empty"),
+        check("procurement_id").not().isEmpty().withMessage("Parameter procurement_id cannot be empty"),
+    ];
+    app.get( rootAPIPath + 'member/list', arrValidate, procurementVendorController.procurementVendor_List);
+
+    // Delete
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+    ];
+    app.delete( rootAPIPath + 'member/delete/:id', procurementVendorController.procurementVendor_Delete );
+
+    // Archive
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+    ];
+    app.put( rootAPIPath + 'member/archive/:id', procurementVendorController.procurementVendor_Archive );
+
+    // Unarchive
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+    ];
+    app.put( rootAPIPath + 'member/unarchive/:id', procurementVendorController.procurementVendor_Unarchive );
+
+    // Vendor Confirm 
+    arrValidate = [];
+    arrValidate = [
+        check("procurement_id").not().isEmpty().withMessage("Parameter procurement_id can not be empty"),
+        check("vendor_id").not().isEmpty().withMessage("Parameter vendor_id can not be empty"),
+        check("status","Parameter status must be integer and cannot be empty").not().isEmpty().isInt(),
+    ]
+    app.post( rootAPIPath + 'member/confirm', procurementVendorController.procurementVendor_VendorConfirm );
+
+
+    // *** PROCUREMENT QUOTATION ITEM ***
+
+    // List
+    arrValidate = [];
+    arrValidate = [
+        check("offset","Parameter offset must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("limit").not().isEmpty().withMessage("Parameter limit cannot be empty"),
+        check("procurement_vendor_id").not().isEmpty().withMessage("Parameter procurement_vendor_id cannot be empty"),
+    ];
+    app.get( rootAPIPath + 'quotation_item/list', arrValidate, procurementQuotationItemController.procurementQuotationItem_List);
+
+    // Update
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+        check("unit_price","Parameter unit_price must be integer and cannot be empty").not().isEmpty().isInt(),
+    ];
+    app.post( rootAPIPath + 'quotation_item/update', arrValidate, procurementQuotationItemController.procurementQuotationItem_Update);
+
+    // Update
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+        check("unit_price_negotiation","Parameter unit_price must be integer and cannot be empty").not().isEmpty().isInt(),
+    ];
+    app.post( rootAPIPath + 'quotation_item/update_negotiation', arrValidate, procurementQuotationItemController.procurementQuotationItem_UpdateNegotiation);
+
+
+    // *** PROCUREMENT EVALUATION ***
+    // Save
+    arrValidate = [];
+    arrValidate = [
+        check("act").not().isEmpty().withMessage("Parameter act cannot be empty"),
+        check("procurement_id").not().isEmpty().withMessage("Parameter procurement_id cannot be empty"),
+        check("evaluation_attribute_id","Parameter evaluation_attribute_id must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("sequence","Parameter sequence must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("is_check","Parameter is_check must be integer and cannot be empty").not().isEmpty().isInt(),
+    ];
+    app.post( rootAPIPath + 'evaluation/save', arrValidate, procurementEvaluationController.procurementEvaluation_Save);
+
+    arrValidate = [];
+    arrValidate = [
+        check("act").not().isEmpty().withMessage("Parameter act cannot be empty"),
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+        check("is_check","Parameter is_check must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("description").not().isEmpty().withMessage("Parameter description cannot be empty"),
+    ];
+    app.post( rootAPIPath + 'evaluation/save_evaluation', arrValidate, procurementEvaluationController.procurementEvaluation_SaveEvaluation);
+
+    // List
+    arrValidate = [];
+    arrValidate = [
+        check("offset","Parameter offset must be integer and cannot be empty").not().isEmpty().isInt(),
+        check("limit").not().isEmpty().withMessage("Parameter limit cannot be empty"),
+        check("procurement_id").not().isEmpty().withMessage("Parameter procurement_id cannot be empty"),
+    ];
+    app.get( rootAPIPath + 'evaluation/list', arrValidate, procurementEvaluationController.procurementEvaluation_List);
+
+    // Delete
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+    ];
+    app.delete( rootAPIPath + 'evaluation/delete/:id', procurementEvaluationController.procurementEvaluation_Delete );
+
+    // Archive
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+    ];
+    app.put( rootAPIPath + 'evaluation/archive/:id', procurementEvaluationController.procurementEvaluation_Archive );
+
+    // Archive
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+    ];
+    app.put( rootAPIPath + 'evaluation/unarchive/:id', procurementEvaluationController.procurementEvaluation_Unarchive );
+    
 }

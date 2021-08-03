@@ -117,6 +117,12 @@ class GlobalUtility{
         var xNo = `${pCompany}/FPB/${xDate}/` + pId.padStart(5,'0');
         return xNo;        
     }
+    
+    async generateVendorCode( pId, pCurrencyCode ){
+        // Formula: V-IDR-001
+        var xNo = `V-${pCurrencyCode}-` + pId.padStart(3,'0');
+        return xNo;
+    }
 
 }
 

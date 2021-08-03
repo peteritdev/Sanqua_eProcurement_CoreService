@@ -9,7 +9,7 @@ const Op = sequelize.Op;
 const _modelDb = require('../models').ms_spesificationattributes;
 const _modelSpesificationCategory = require('../models').ms_spesificationcategories;
 
-const Utility = require('peters-globallib');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 

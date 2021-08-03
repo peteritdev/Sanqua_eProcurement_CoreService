@@ -12,7 +12,7 @@ const env         = process.env.NODE_ENV || 'localhost';
 const config      = require(__dirname + '/../config/config.json')[env];
 
 // Utility
-const Utility = require('peters-globallib');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 // Repository
@@ -620,6 +620,66 @@ class VendorCatalogueService {
 
         return xJoResult;
 
+    }
+
+    async getVendorByProductId( pParam  ){
+        var xJoResult = {};
+        var xJoArrData = [];
+        var xFlagProcess = true;
+
+        // Decrypt vendor_id
+        if( pParam.hasOwnProperty('product_id') ){
+            if( pParam.product_id != '' ){
+                if( (pParam.product_id).length == 65 ){
+                    var xDecId = await _utilInstance.decrypt( pParam.product_id, config.cryptoKey.hashKey );
+                    if( xDecId.status_code == '00' ){
+                        pParam.product_id = xDecId.decrypted;
+                    }else{
+                        xJoResult = xDecId;
+                        xFlagProcess = false;
+                    }
+                }                
+            }
+        }
+
+        if( xFlagProcess ){
+            var xResultList = await _vendorCatalogueRepoInstance.getVendorByProductId(pParam);
+
+            if( xResultList.count > 0 ){
+                var xRows = xResultList.rows;
+                for( var index in xRows ){
+                    xJoArrData.push({
+                        id: await _utilInstance.encrypt(xRows[index].vendor.id, config.cryptoKey.hashKey),
+                        name: xRows[index].vendor.name,
+                        code: xRows[index].vendor.code,
+                        logo: xRows[index].vendor.logo,
+                        address: xRows[index].vendor.address,
+                        phone1: ( xRows[index].vendor.phone1 != '' ? (await _utilInstance.decrypt( xRows[index].vendor.phone1, config.cryptoKey.hashKey )).decrypted : '' ),
+                        phone2: ( xRows[index].vendor.phone2 != '' ? (await _utilInstance.decrypt( xRows[index].vendor.phone2, config.cryptoKey.hashKey )).decrypted : '' ),
+                        email: ( xRows[index].vendor.email != '' ? (await _utilInstance.decrypt( xRows[index].vendor.email, config.cryptoKey.hashKey )).decrypted : '' ),
+                        website: xRows[index].vendor.website,
+                        location_lat: xRows[index].vendor.location_lat,
+                        location_long: xRows[index].vendor.location_long,
+                        avg_rate: xRows[index].vendor.avg_rate,
+                        province: xRows[index].vendor.province,
+                        city: xRows[index].vendor.city,
+                    });
+                }
+                xJoResult = {
+                    status_code: "00",
+                    status_msg: "OK",
+                    total_record: xResultList.count,
+                    data: xJoArrData,
+                }
+            }else{
+                xJoResult = {
+                    status_code: "-99",
+                    status_msg: "Data not found",
+                };
+            }
+        }       
+
+        return xJoResult;
     }
 }
 

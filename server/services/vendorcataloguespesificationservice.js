@@ -29,7 +29,7 @@ const VendorRepository = require('../repository/vendorrepository.js');
 const _vendorRepoInstance = new VendorRepository();
 
 //Util
-const Utility = require('peters-globallib');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 const _groupBy = require('json-groupby');

@@ -73,6 +73,22 @@ class OAuthService {
         return xResultVerify;
     }
 
+    async getNotificationTemplate( pMethod, pToken, pCode ){
+        
+        var xAPIUrl = config.api.notification.notificationTemplate;
+        var xQueryParam = `/${pCode}`;
+        var xHeader = {
+            'headers': {
+                'x-method': pMethod,
+                'x-token': pToken
+            }
+        }
+        // console.log(">>> API URL : " + (xAPIUrl+xQueryParam));
+        var xResult = await _utilInstance.axiosRequest((xAPIUrl+xQueryParam), xHeader);
+
+        return xResult;
+    }
+
 };
 
 module.exports = OAuthService;
