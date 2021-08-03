@@ -83,6 +83,7 @@
   },
 
   "development": {
+    "appPort": 9191,
     "username": "postgres",
     "password": "P455uu0rd^^ok",
     "database": "sanqua_procurementdb",
