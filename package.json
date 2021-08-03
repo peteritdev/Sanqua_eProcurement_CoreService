@@ -34,11 +34,7 @@
     "json-groupby": "^1.1.0",
     "jsonwebtoken": "^8.5.1",
     "kafkajs": "^1.15.0",
-<<<<<<< HEAD
-    "lodash": "^4.17.20",
-=======
     "lodash": "^4.17.21",
->>>>>>> development
     "md5": "^2.2.1",
     "moment": "^2.22.2",
     "morgan": "^1.10.0",
@@ -47,11 +43,7 @@
     "node-datetime": "^2.1.2",
     "passport-google-oauth20": "^2.0.0",
     "peters-globallib": "^1.0.7",
-<<<<<<< HEAD
     "peters-globallib-v2": "^1.0.11",
-=======
-    "peters-globallib-v2": "^1.0.3",
->>>>>>> development
     "pg": "^7.5.0",
     "pg-hstore": "^2.3.2",
     "promise": "^8.0.3",
