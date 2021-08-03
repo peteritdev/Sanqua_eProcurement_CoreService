@@ -115,42 +115,58 @@ class PurchaseRequestService {
     async list( pParam ){
         var xJoResult = {};
         var xJoArrData = [];
-        var xFlagProcess = true;
+        var xFlagProcess = false;
+        var xDecId = {};
 
-        var xResultList = await _repoInstance.list(pParam);
-
-        if( xResultList.count > 0 ){
-            var xRows = xResultList.rows;
-            for( var index in xRows ){
-                xJoArrData.push({
-                    id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
-                    request_no: xRows[index].request_no,
-                    requested_at: xRows[index].requested_at,
-                    employee: {
-                        id: await _utilInstance.encrypt( (xRows[index].employee_id).toString(), config.cryptoKey.hashKey ),
-                        name: xRows[index].employee_name,
-                    },
-                    department: {
-                        id: xRows[index].department_id,
-                        name: xRows[index].department_name,
-                    },
-                    status: xRows[index].status,
-                    requested_at: moment(xRows[index].requested_at).format('DD MMM YYYY HH:mm')
-                });
+        if( pParam.hasOwnProperty('user_id') ){
+            if( pParam.user_id != '' ){
+                xDecId = await _utilInstance.decrypt( pParam.user_id, config.cryptoKey.hashKey );
+                if( xDecId.status_code == '00' ){
+                    pParam.user_id = xDecId.decrypted;
+                    xFlagProcess = true;
+                }else{
+                    xJoResult = xDecId;
+                }
             }
-
-            xJoResult = {
-                status_code: '00',
-                status_msg: 'OK',
-                total_record: xResultList.count,
-                data: xJoArrData,
-            }
-        }else{
-            xJoResult = {
-                status_code: "-99",
-                status_msg: "Data not found",
-            };
         }
+
+        if( xFlagProcess ){           
+
+            var xResultList = await _repoInstance.list(pParam);
+
+            if( xResultList.count > 0 ){
+                var xRows = xResultList.rows;
+                for( var index in xRows ){
+                    xJoArrData.push({
+                        id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
+                        request_no: xRows[index].request_no,
+                        requested_at: xRows[index].requested_at,
+                        employee: {
+                            id: await _utilInstance.encrypt( (xRows[index].employee_id).toString(), config.cryptoKey.hashKey ),
+                            name: xRows[index].employee_name,
+                        },
+                        department: {
+                            id: xRows[index].department_id,
+                            name: xRows[index].department_name,
+                        },
+                        status: xRows[index].status,
+                        requested_at: moment(xRows[index].requested_at).format('DD MMM YYYY HH:mm')
+                    });
+                }
+
+                xJoResult = {
+                    status_code: '00',
+                    status_msg: 'OK',
+                    total_record: xResultList.count,
+                    data: xJoArrData,
+                }
+            }else{
+                xJoResult = {
+                    status_code: "-99",
+                    status_msg: "Data not found",
+                };
+            }
+        }        
 
         return xJoResult;
     }
@@ -273,6 +289,76 @@ class PurchaseRequestService {
             pParam.status = 1;
 
             var xUpdateResult = await _repoInstance.save( pParam, 'submit_fpb' );
+            xJoResult = xUpdateResult;
+            // Next Phase : Notification to adamin
+        }
+
+        return xJoResult;
+    }
+
+    async cancelFPB( pParam ){
+
+        var xJoResult = {};
+        var xDecId = null;
+        var xFlagProcess = false;
+
+        if( pParam.id != '' && pParam.user_id != '' ){
+            xDecId = await _utilInstance.decrypt( pParam.id, config.cryptoKey.hashKey );
+            if( xDecId.status_code == '00' ){
+                xFlagProcess = true;
+                pParam.id = xDecId.decrypted;
+                xDecId = await _utilInstance.decrypt( pParam.user_id, config.cryptoKey.hashKey );
+                if( xDecId.status_code == '00' ){
+                    pParam.user_id = xDecId.decrypted;
+                    xFlagProcess = true;
+                }else{
+                    xJoResult = xDecId;
+                }
+            }else{
+                xJoResult = xDecId;
+            }
+        }
+
+        if( xFlagProcess ){
+            pParam.cancel_at = await _utilInstance.getCurrDateTime();
+            pParam.status = -1;
+
+            var xUpdateResult = await _repoInstance.save( pParam, 'cancel_fpb' );
+            xJoResult = xUpdateResult;
+            // Next Phase : Notification to adamin
+        }
+
+        return xJoResult;
+    }
+
+    async setToDraftFPB( pParam ){
+
+        var xJoResult = {};
+        var xDecId = null;
+        var xFlagProcess = false;
+
+        if( pParam.id != '' && pParam.user_id != '' ){
+            xDecId = await _utilInstance.decrypt( pParam.id, config.cryptoKey.hashKey );
+            if( xDecId.status_code == '00' ){
+                xFlagProcess = true;
+                pParam.id = xDecId.decrypted;
+                xDecId = await _utilInstance.decrypt( pParam.user_id, config.cryptoKey.hashKey );
+                if( xDecId.status_code == '00' ){
+                    pParam.user_id = xDecId.decrypted;
+                    xFlagProcess = true;
+                }else{
+                    xJoResult = xDecId;
+                }
+            }else{
+                xJoResult = xDecId;
+            }
+        }
+
+        if( xFlagProcess ){
+            pParam.set_to_draft_at = await _utilInstance.getCurrDateTime();
+            pParam.status = 0;
+
+            var xUpdateResult = await _repoInstance.save( pParam, 'set_to_draft_fpb' );
             xJoResult = xUpdateResult;
             // Next Phase : Notification to adamin
         }

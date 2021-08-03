@@ -185,7 +185,32 @@ class PurchaseRequestRepository {
 
                 }                
 
-            }else if( pAct == "update" || pAct == "submit_fpb" ){
+            }else if( pAct == "update" || pAct == "submit_fpb" || pAct == "cancel_fpb" || pAct == "set_to_draft_fpb" ){
+
+                var xComment = '';
+
+                switch(pAct) {
+                    case 'update': 
+                        xComment = 'changed';
+                        break;
+                    case 'submit_fpb':
+                        xComment = 'submitted';
+                        break;
+                    case 'cancel_fpb':
+                        pParam.cancel_at = await _utilInstance.getCurrDateTime();
+                        pParam.cancel_by = pParam.user_id;
+                        pParam.cancel_by_name = pParam.user_name;
+                        xComment = 'canceled';
+                        break;
+                    case 'set_to_draft_fpb':
+                        pParam.set_to_draft_at = await _utilInstance.getCurrDateTime();
+                        pParam.set_to_draft_by = pParam.user_id;
+                        pParam.set_to_draft_by_name = pParam.user_name;
+                        xComment = 'set to draft';
+                        break;
+                    default:
+                        xComment = 'changed';
+                }
                 
                 pParam.updatedAt = await _utilInstance.getCurrDateTime();
                 var xId = pParam.id;
@@ -205,7 +230,7 @@ class PurchaseRequestRepository {
 
                 xJoResult = {
                     status_code: "00",
-                    status_msg: `Data has been successfully ${pAct == 'update' ? 'updated' : 'submitted'}`,
+                    status_msg: `Data has been successfully ${xComment}`,
                 }
 
             }

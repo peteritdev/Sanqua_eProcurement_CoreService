@@ -70,5 +70,17 @@ module.exports = (app) => {
         check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
     ];
     app.post( rootAPIPath + 'submit', arrValidate, purchaseRequestController.purchaseRequest_Submit);
+
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+    ];
+    app.post( rootAPIPath + 'cancel', arrValidate, purchaseRequestController.purchaseRequest_Cancel);
+
+    arrValidate = [];
+    arrValidate = [
+        check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+    ];
+    app.post( rootAPIPath + 'set_to_draft', arrValidate, purchaseRequestController.purchaseRequest_SetToDraft);
 }
 
