@@ -401,6 +401,7 @@ class VendorCatalogueService {
                     xJoArrData.push({
                         id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
                         product: {
+                            id: xRows[index].product.id,
                             code: xRows[index].product.code,
                             name: xRows[index].product.name,
                             category: ( xRows[index].product.category == null ? null : xRows[index].product.category.name ),

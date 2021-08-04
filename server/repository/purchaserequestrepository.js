@@ -93,6 +93,14 @@ class PurchaseRequestRepository {
             });
         }
 
+        if( pParam.hasOwnProperty('status') ){
+            if( pParam.status != '' ){
+                xWhereAnd.push({
+                    status: pParam.status,
+                })
+            }
+        }
+
         if( pParam.hasOwnProperty('user_id') && pParam.is_admin == 0 ){
             if( pParam.user_id != '' ){
                 xWhereAnd.push({
