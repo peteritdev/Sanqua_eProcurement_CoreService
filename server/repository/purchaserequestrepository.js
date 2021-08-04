@@ -90,7 +90,7 @@ class PurchaseRequestRepository {
         }else{
             xWhereAnd.push({
                 is_delete: 0,
-            });
+            }); 
         }
 
         if( pParam.hasOwnProperty('status') ){
