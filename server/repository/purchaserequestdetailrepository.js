@@ -130,6 +130,23 @@ class PurchaseRequestDetailRepository {
             return xJoResult;
         }
     }
+
+    async getByProductIdVendorId( pParam ){
+        var xData = {};
+        var xInclude = [];
+        var xWhere = {};
+        var xWhereAnd = [], xWhereOr = [];
+
+        var xData = await _modelDb.findOne({
+            where: {
+                product_id: pParam.product_id,
+                vendor_id: pParam.vendor_id,
+            },
+            include: xInclude,
+        });
+
+        return xData;
+    }
 }
 
 module.exports = PurchaseRequestDetailRepository;

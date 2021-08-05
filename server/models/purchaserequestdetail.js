@@ -14,6 +14,8 @@ module.exports = ( sequelize, DataTypes ) => {
         qty: DataTypes.INTEGER,
         budget_price_per_unit: DataTypes.DOUBLE,
         budget_price_total: DataTypes.DOUBLE,
+        quotation_price_per_unit: DataTypes.DOUBLE,
+        quotation_price_total: DataTypes.DOUBLE,
         vendor_id: DataTypes.INTEGER,
         has_budget: DataTypes.INTEGER,
         estimate_date_use: DataTypes.INTEGER,

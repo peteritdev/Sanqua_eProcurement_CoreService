@@ -68,7 +68,18 @@ class PurchaseRequestService {
 
         if( xFlagProcess ){
 
-            if( xAct == "add" ){
+            if( xAct == "add" || xAct == "add_batch_in_item" ){
+
+                // Calculate the total
+                var xJoArrItems = [];
+                xJoArrItems = pParam.purchase_request_detail;
+                if( xJoArrItems.length > 0 ){
+                    for( var i in xJoArrItems ){
+                        if( xJoArrItems[i].hasOwnProperty('qty') && xJoArrItems[i].hasOwnProperty('budget_price_per_unit') ){
+                            xJoArrItems[i].budget_price_total = xJoArrItems[i].qty * xJoArrItems[i].budget_price_per_unit;
+                        }
+                    }
+                }
 
                 var xAddResult = await _repoInstance.save( pParam, xAct );
                 if( xAddResult.status_code == '00' && xAddResult.created_id != '' && xAddResult.clear_id != '' ){
@@ -78,6 +89,7 @@ class PurchaseRequestService {
                         request_no: xFPBNo,
                         id: xAddResult.clear_id,
                     }
+
                     var xUpdate = await _repoInstance.save(xParamUpdate, 'update');
 
                     if( xUpdate.status_code == '00' ){
@@ -140,7 +152,7 @@ class PurchaseRequestService {
                     xJoArrData.push({
                         id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
                         request_no: xRows[index].request_no,
-                        requested_at: xRows[index].requested_at,
+                        requested_at: ( xRows[index].requested_at == null ? "" : moment(xRows[index].requested_at).format("DD MMM") ),
                         employee: {
                             id: await _utilInstance.encrypt( (xRows[index].employee_id).toString(), config.cryptoKey.hashKey ),
                             name: xRows[index].employee_name,
@@ -150,7 +162,6 @@ class PurchaseRequestService {
                             name: xRows[index].department_name,
                         },
                         status: xRows[index].status,
-                        requested_at: moment(xRows[index].requested_at).format('DD MMM YYYY HH:mm')
                     });
                 }
 
