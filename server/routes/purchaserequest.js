@@ -59,6 +59,15 @@ module.exports = (app) => {
     ];
     app.post( rootAPIPath + 'save_detail', arrValidate, purchaseRequestController.purchaseRequestDetail_Save );
 
+    // Save Batch Detail
+    arrValidate = [];
+    arrValidate = [
+        check("act").not().isEmpty().withMessage("Parameter act cannot be empty"),
+        check("request_id").not().isEmpty().withMessage("Parameter request_id cannot be empty"),
+        check("items","Parameter items must be array and cannot be empty").not().isEmpty().isArray(),
+    ];
+    app.post( rootAPIPath + 'save_batch_detail', arrValidate, purchaseRequestController.purchaseRequestDetail_Save );
+
     arrValidate = [];
     arrValidate = [
         check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
