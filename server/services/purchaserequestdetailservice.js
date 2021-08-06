@@ -180,6 +180,8 @@ class PurchaseRequestDetailService {
 
                             xItems[i].budget_price_total = ( xItems[i].qty * xItems[i].budget_price_per_unit ); 
                             xItems[i].request_id = xRequestIdClear;
+                            xItems[i].user_id = pParam.user_id;
+                            xItems[i].user_name = pParam.user_name;
                             
                             xAct = 'add';
                         }                               
