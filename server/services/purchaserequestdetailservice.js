@@ -46,6 +46,8 @@ class PurchaseRequestDetailService {
             // Check if the FPB status already submit or still draft.
             // If already submit, reject
             var xPurchaseRequest = await _purchaseRequestServiceInstance.getById( {id: pParam.request_id} );
+
+            console.log(">>> PR : " + JSON.stringify(xPurchaseRequest));
             
             if( xPurchaseRequest != null ){
                 if( xPurchaseRequest.status_code == '00' ){
@@ -95,6 +97,7 @@ class PurchaseRequestDetailService {
         }
 
         if( xFlagProcess ){
+
             if( xAct == 'add' ){
 
                 // Check first whether product_id and vendor_id already exists in detail or not
