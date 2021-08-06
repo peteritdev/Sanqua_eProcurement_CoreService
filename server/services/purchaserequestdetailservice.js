@@ -38,6 +38,7 @@ class PurchaseRequestDetailService {
         var xAct = pParam.act;
         var xFlagProcess = false;
         var xDecId = null;
+        var xRequestIdClear = 0;
 
         delete pParam.act;        
 
@@ -46,8 +47,6 @@ class PurchaseRequestDetailService {
             // Check if the FPB status already submit or still draft.
             // If already submit, reject
             var xPurchaseRequest = await _purchaseRequestServiceInstance.getById( {id: pParam.request_id} );
-
-            console.log(">>> PR : " + JSON.stringify(xPurchaseRequest));
             
             if( xPurchaseRequest != null ){
                 if( xPurchaseRequest.status_code == '00' ){
@@ -74,6 +73,7 @@ class PurchaseRequestDetailService {
                         xDecId = await _utilInstance.decrypt( pParam.request_id, config.cryptoKey.hashKey );
                         if( xDecId.status_code == '00' ){
                             pParam.request_id = xDecId.decrypted;
+                            xRequestIdClear = xDecId.decrypted;
                             xFlagProcess = true;
                         }else{
                             xJoResult = xDecId;
@@ -179,6 +179,7 @@ class PurchaseRequestDetailService {
                             }
 
                             xItems[i].budget_price_total = ( xItems[i].qty * xItems[i].budget_price_per_unit ); 
+                            xItems[i].request_id = xRequestIdClear;
                             
                             xAct = 'add';
                         }                               
