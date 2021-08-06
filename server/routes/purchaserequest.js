@@ -29,6 +29,10 @@ module.exports = (app) => {
         check("reference_from_ecommerce","Parameter reference_from_ecommerce must be integer and cannot be empty").not().isEmpty().isInt(),
         check("budget_is_approved","Parameter budget_is_approved must be integer and cannot be empty").not().isEmpty().isInt(),
         check("memo_special_request","Parameter memo_special_request must be integer and cannot be empty").not().isEmpty().isInt(),
+
+        check("company_id").not().isEmpty().withMessage("Parameter company_id cannot be empty"),
+        check("company_code").not().isEmpty().withMessage("Parameter company_code cannot be empty"),
+        check("company_name").not().isEmpty().withMessage("Parameter company_name cannot be empty"),
     ];
     app.post( rootAPIPath + 'save', arrValidate, purchaseRequestController.purchaseRequest_Save );
 
