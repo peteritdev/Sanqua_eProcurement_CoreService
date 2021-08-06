@@ -62,13 +62,14 @@ class PurchaseRequestDetailRepository {
                 var xWhere = {
                     where : {
                         id: xId,
-                    }
+                    },
+                    transaction: xTransaction
                 };
 
                 pParam.updated_by = pParam.user_id;
                 pParam.updated_by_name = pParam.user_name;
 
-                xSaved = await _modelDb.update( pParam, xWhere, {xTransaction} );
+                xSaved = await _modelDb.update( pParam, xWhere );
 
                 await xTransaction.commit();
 

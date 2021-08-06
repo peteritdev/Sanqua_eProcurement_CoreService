@@ -176,6 +176,8 @@ class PurchaseRequestDetailService {
                             }
 
                             xItems[i].budget_price_total = ( xItems[i].qty * xItems[i].budget_price_per_unit ); 
+                            
+                            xAct = 'add';
                         }                               
 
                         var xAddResult = await _repoInstance.save( xItems[i], xAct );
