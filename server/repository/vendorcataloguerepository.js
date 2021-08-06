@@ -292,12 +292,14 @@ class VendorCatalogueRepository {
             }else if( pAct == "update_by_vendor_id_product_id" ){
                 
                 pParam.updatedAt = await _utilInstance.getCurrDateTime();
-                var xId = pParam.id;
-                delete pParam.id;
+                var xVendorId = pParam.vendor_id;
+                var xProductId = pParam.product_id;
+                delete pParam.vendor_id;
+                delete pParam.product_id;
                 var xWhere = {
                     where : {
-                        product_id: pParam.product_id,
-                        vendor_id: pParam.vendor_Id,
+                        product_id: xProductId,
+                        vendor_id: xVendorId,
                     }
                 };
                 xSaved = await _modelDb.update( pParam, xWhere, {xTransaction} );

@@ -26,6 +26,9 @@ const _repoInstance = new PurchaseRequestRepository();
 const OAuthService = require('../services/oauthservice.js');
 const _oAuthService = new OAuthService();
 
+const VendorCatalogueService = require('../services/vendorcatalogueservice.js');
+const _catalogueService = new VendorCatalogueService();
+
 class PurchaseRequestService {
     constructor(){}
 
@@ -162,6 +165,12 @@ class PurchaseRequestService {
                             name: xRows[index].department_name,
                         },
                         status: xRows[index].status,
+
+                        company: {
+                            id: xRows[index].company_id,
+                            code: xRows[index].company_code,
+                            name: xRows[index].company_name,
+                        },
                     });
                 }
 
@@ -187,9 +196,11 @@ class PurchaseRequestService {
         var xJoData = {};
         var xFlagProcess = false;
         var xDecId = null;
+        var xEncId = '';
 
         xDecId = await _utilInstance.decrypt( pParam.id, config.cryptoKey.hashKey );
         if( xDecId.status_code == '00' ){
+            xEncId = pParam.id;
             xFlagProcess = true;
             pParam.id = xDecId.decrypted;
         }else{
@@ -201,8 +212,6 @@ class PurchaseRequestService {
             var xResult = await _repoInstance.getById(pParam);
 
             if( xResult != null ){
-
-                console.log(JSON.stringify(xResult));
 
                 var xJoArrRequestDetailData = [];
                 var xDetail = xResult.purchase_request_detail;
@@ -218,6 +227,7 @@ class PurchaseRequestService {
                         qty: xDetail[index].qty,
                         budget_price_per_unit: xDetail[index].budget_price_per_unit,
                         budget_price_total: xDetail[index].budget_price_total,
+                        quotation_price_per_unit: xDetail[index].quotation_price_per_unit,
                         vendor: {
                             id: xDetail[index].vendor_id,
                             code: xDetail[index].vendor_code,
@@ -228,6 +238,15 @@ class PurchaseRequestService {
                         description: xDetail[index].description,
                     })
                 }
+
+                // Get Approval Matrix
+                var xParamApprovalMatrix = {
+                    application_id: config.applicationId,
+                    table_name: config.dbTables.fpb,
+                    document_id: xEncId,
+                }
+                var xResultApprovalMatrix = await _oAuthService.getApprovalMatrix( pParam.method, pParam.token, xParamApprovalMatrix );
+
 
                 xJoData = {
                     id: await _utilInstance.encrypt( (xResult.id).toString(), config.cryptoKey.hashKey ),
@@ -254,6 +273,14 @@ class PurchaseRequestService {
                     submit_price_quotation_at: moment(xResult.submit_price_quotation_at).format('DD MMM YYYY HH:mm'),
 
                     purchase_request_detail: xJoArrRequestDetailData,
+
+                    approval_matrix: ( ( xResultApprovalMatrix.status_code == '00' && xResultApprovalMatrix.token_data.status_code == '00' ) ? xResultApprovalMatrix.token_data.data : null ),
+
+                    company: {
+                        id: xResult.company_id,
+                        code: xResult.company_code,
+                        name: xResult.company_name,
+                    },
                 }
 
                 xJoResult = {
@@ -277,12 +304,16 @@ class PurchaseRequestService {
         var xJoResult = {};
         var xDecId = null;
         var xFlagProcess = false;
+        var xEncId = '';
+        var xClearId = '';
 
         if( pParam.id != '' && pParam.user_id != '' ){
             xDecId = await _utilInstance.decrypt( pParam.id, config.cryptoKey.hashKey );
             if( xDecId.status_code == '00' ){
                 xFlagProcess = true;
+                xEncId = pParam.id;
                 pParam.id = xDecId.decrypted;
+                xClearId = xDecId.decrypted;
                 xDecId = await _utilInstance.decrypt( pParam.user_id, config.cryptoKey.hashKey );
                 if( xDecId.status_code == '00' ){
                     pParam.user_id = xDecId.decrypted;
@@ -301,7 +332,26 @@ class PurchaseRequestService {
 
             var xUpdateResult = await _repoInstance.save( pParam, 'submit_fpb' );
             xJoResult = xUpdateResult;
-            // Next Phase : Notification to adamin
+            // Next Phase : Approval Matrix & Notification to admin
+            if( xUpdateResult.status_code == '00' ){
+                // Get PR Detail
+                var xPRDetail = await _repoInstance.getById( {id: xClearId} );
+                if( xPRDetail != null ){
+                    // Add Approval Matrix
+                    var xParamAddApprovalMatrix = {
+                        act: 'add',
+                        document_id: xEncId,
+                        document_no: xPRDetail.request_no,
+                        application_id: config.applicationId,
+                        table_name: config.dbTables.fpb,
+                    }
+
+                    var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix( pParam.method, pParam.token, xParamAddApprovalMatrix );
+                
+                    xJoResult.approval_matrix_result = xApprovalMatrixResult;
+                }                
+            }
+            
         }
 
         return xJoResult;
@@ -372,6 +422,104 @@ class PurchaseRequestService {
             var xUpdateResult = await _repoInstance.save( pParam, 'set_to_draft_fpb' );
             xJoResult = xUpdateResult;
             // Next Phase : Notification to adamin
+        }
+
+        return xJoResult;
+    }
+
+    async confirmFPB( pParam ){
+        var xJoResult = {};
+        var xDecId = null;
+        var xFlagProcess = false;
+        var xEncId = '';
+
+        if( pParam.document_id != '' && pParam.user_id != '' ){
+            xEncId = pParam.document_id;
+            xDecId = await _utilInstance.decrypt( pParam.document_id, config.cryptoKey.hashKey );
+            if( xDecId.status_code == '00' ){
+                xFlagProcess = true;
+                pParam.document_id = xDecId.decrypted;
+                xDecId = await _utilInstance.decrypt( pParam.user_id, config.cryptoKey.hashKey );
+                if( xDecId.status_code == '00' ){
+                    pParam.user_id = xDecId.decrypted;
+                    xFlagProcess = true;
+                }else{
+                    xJoResult = xDecId;
+                }
+            }else{
+                xJoResult = xDecId;
+            }
+        }
+
+        if( xFlagProcess ){
+            // Check if this request id valid or not
+            var xPRDetail = await _repoInstance.getById( {id: pParam.document_id} );
+            if( xPRDetail != null ){
+                
+                var xParamApprovalMatrixDocument = {
+                    document_id: xEncId,
+                    status: pParam.status,
+                    application_id: config.applicationId,
+                    table_name: config.dbTables.fpb,
+                };
+                var xResultApprovalMatrixDocument = await _oAuthService.confirmApprovalMatrix( pParam.method, pParam.token, xParamApprovalMatrixDocument );
+
+                if( xResultApprovalMatrixDocument != null ){
+                    if( xResultApprovalMatrixDocument.status_code == '00' ){
+                        // Update price eCatalogue
+                        if( xPRDetail.purchase_request_detail.length > 0 ){
+                            var xPRItem = xPRDetail.purchase_request_detail;
+                            for( var i in xPRItem ){
+                                var xParamUpdateCatalogue = {
+                                    vendor_id: xPRItem[i].vendor_id,
+                                    product_id: xPRItem[i].product_id,
+                                    last_price: xPRItem[i].quotation_price_per_unit,
+                                    last_ordered: xPRDetail.createdAt,
+                                    last_purchase_plant: xPRDetail.company_name,
+                                    act: 'update_by_vendor_id_product_id',
+                                };
+                                var xUpdateCatalogueResult = await _catalogueService.save(xParamUpdateCatalogue);
+                                console.log(`>>> Update Result : ${JSON.stringify(xUpdateCatalogueResult)}`);
+                            }
+
+                            // Update status FPB to be confirmed
+                            var xParamUpdatePR = {
+                                id: pParam.document_id,
+                                status: 2,
+                            }
+                            var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
+
+                            if( xUpdateResult.status_code == '00' ){
+                                xJoResult = {
+                                    status_code: '00',
+                                    status_msg: 'FPB successfully approved and update price to e-Catalogue',
+                                }
+                            }else{
+                                xJoResult = xUpdateResult;
+                            }
+                            
+                        }else{
+                            xJoResult = {
+                                status_code: '00',
+                                status_msg: 'FPB successfully approved but nothing to update price',
+                            }
+                        }
+                    }else{
+                        xJoResult = xResultApprovalMatrixDocument;
+                    }
+                }else{
+                    xJoResult = {
+                        status_code: '-99',
+                        status_msg: 'There is problem on approval matrix processing. Please try again'
+                    }
+                }
+
+            }else{
+                xJoResult = {
+                    status_code: '-99',
+                    status_msg: 'Data not found',
+                }
+            }
         }
 
         return xJoResult;

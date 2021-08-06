@@ -385,6 +385,22 @@ class PurchaseRequestRepository {
             return xJoResult;
         }
     }
+
+    async getByIdAndUserId( pParam ){
+        var xData = {};
+        var xInclude = [];
+        var xWhere = {};
+        var xWhereAnd = [], xWhereOr = [];
+
+        xData = await _modelDb.findOne({
+            where: {
+                id: pParam.id,
+                created_by: pParam.user_id,
+            }
+        });
+        
+        return xData;
+    }
 }
 
 module.exports = PurchaseRequestRepository;

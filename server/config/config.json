@@ -2,7 +2,8 @@
   "localhost": {
     "appPort": 9191,
     "dbTables": {
-      "procurement": "tr_procurements"
+      "procurement": "tr_procurements",
+      "fpb": "tr_purchaserequests"
     },
     "username": "postgres",
     "password": "P455uu0rd^^ok",

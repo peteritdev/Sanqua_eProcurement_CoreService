@@ -36,6 +36,14 @@ module.exports = (app) => {
     ];
     app.post( rootAPIPath + 'save', arrValidate, purchaseRequestController.purchaseRequest_Save );
 
+    // Confirm FPB
+    arrValidate = [];
+    arrValidate = [
+        check("document_id").not().isEmpty().withMessage("Parameter document_id cannot be empty"),
+        check("status","Parameter status must be integer and cannot be empty").not().isEmpty().isInt(),
+    ];
+    app.post( rootAPIPath + 'confirm', arrValidate, purchaseRequestController.purchaseRequest_Confirm );
+
     // List FPB
     arrValidate = [];
     arrValidate = [
