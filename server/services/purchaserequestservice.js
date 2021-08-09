@@ -281,6 +281,8 @@ class PurchaseRequestService {
                         code: xResult.company_code,
                         name: xResult.company_name,
                     },
+
+                    created_at: ( xResult.createdAt != null ? ( moment(xResult.createdAt).format('DD MMM YYYY') ) ),
                 }
 
                 xJoResult = {
