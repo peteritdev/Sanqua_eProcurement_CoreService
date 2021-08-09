@@ -226,15 +226,18 @@ class PurchaseRequestService {
                         },
                         qty: xDetail[index].qty,
                         budget_price_per_unit: xDetail[index].budget_price_per_unit,
+                        pdf_budget_price_per_unit: (xDetail[index].budget_price_per_unit).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'),
                         budget_price_total: xDetail[index].budget_price_total,
+                        pdf_budget_price_total: (xDetail[index].budget_price_total).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'),
                         quotation_price_per_unit: xDetail[index].quotation_price_per_unit,
+                        pdf_quotation_price_per_unit: (xDetail[index].quotation_price_per_unit).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'),
                         vendor: {
                             id: xDetail[index].vendor_id,
                             code: xDetail[index].vendor_code,
                             name: xDetail[index].vendor_name,
                         },
                         has_budget: xDetail[index].has_budget,
-                        estimate_date_use: xDetail[index].estimate_date_use,
+                        estimate_date_use: (xDetail[index].estimate_date_use != null ? moment(xDetail[index].estimate_date_use).format('DD MMM YYYY') : ''),
                         description: xDetail[index].description,
                     })
                 }
@@ -465,6 +468,7 @@ class PurchaseRequestService {
                     application_id: config.applicationId,
                     table_name: config.dbTables.fpb,
                 };
+                
                 var xResultApprovalMatrixDocument = await _oAuthService.confirmApprovalMatrix( pParam.method, pParam.token, xParamApprovalMatrixDocument );
 
                 if( xResultApprovalMatrixDocument != null ){

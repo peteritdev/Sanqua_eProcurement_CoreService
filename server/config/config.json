@@ -81,7 +81,8 @@
     },
     "timezone": "+07:00",
 
-    "applicationId": 2
+    "applicationId": 2,
+    "imagePath": "http://10.10.20.8:8020/assets/icon/"
   },
 
   "development": {
@@ -165,7 +166,9 @@
       "charset": "utf8mb4_unicode_ci"
     },
     "timezone": "+07:00",
-    "applicationId": 2
+    "applicationId": 2,
+
+    "imagePath": "http://10.10.20.8:8020/assets/icon/"
   },  
 
   "production": {

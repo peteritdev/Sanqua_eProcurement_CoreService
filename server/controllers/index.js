@@ -25,6 +25,8 @@ const procurementEvaluation = require('./procurementevaluation');
 
 const purchaseRequest = require('./purchaserequest');
 
+const _export = require('./export');
+
 module.exports = {
 	vendor,
 	master, productCategory, product, unit, currency,
@@ -32,5 +34,5 @@ module.exports = {
 	spesificationCategory, spesificationAttribute, vendorCatalogueQuotation, vendorCatalogueSpesification,
 	vendorRateHistory,
 	procurement, procurementItem, globalMaster, procurementSchedule, purchaseRequest, procurementTerm, procurementVendor, procurementQuotationItem,
-	procurementEvaluation,
+	procurementEvaluation, _export, 
 }
