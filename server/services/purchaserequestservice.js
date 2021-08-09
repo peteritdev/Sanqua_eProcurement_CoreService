@@ -282,7 +282,7 @@ class PurchaseRequestService {
                         name: xResult.company_name,
                     },
 
-                    created_at: ( xResult.createdAt != null ? ( moment(xResult.createdAt).format('DD MMM YYYY') ) ),
+                    created_at: ( xResult.createdAt != null ? ( moment(xResult.createdAt).format('DD MMM YYYY') ) : ''),
                 }
 
                 xJoResult = {
@@ -349,7 +349,8 @@ class PurchaseRequestService {
                     }
 
                     var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix( pParam.method, pParam.token, xParamAddApprovalMatrix );
-                
+                    console.log(`>>> Result Approval Matrix : ${JSON.stringify(xApprovalMatrixResult)}`);
+
                     xJoResult.approval_matrix_result = xApprovalMatrixResult;
                 }                
             }
