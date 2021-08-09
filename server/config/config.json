@@ -87,7 +87,8 @@
   "development": {
     "appPort": 9191,
     "dbTables": {
-      "procurement": "tr_procurements"
+      "procurement": "tr_procurements",
+      "fpb": "tr_purchaserequests"
     },
     "username": "postgres",
     "password": "P455uu0rd^^ok",
@@ -169,6 +170,10 @@
 
   "production": {
     "appPort": 1191,
+    "dbTables": {
+      "procurement": "tr_procurements",
+      "fpb": "tr_purchaserequests"
+    },
     "username": "postgres",
     "password": "SANQUAD0ck3rP912",
     "database": "sanqua_procurementdb",
