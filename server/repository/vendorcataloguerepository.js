@@ -465,6 +465,62 @@ class VendorCatalogueRepository {
 
         return xData;
     }
+
+    async getProductList( pParam ){
+        var xJoResult = {};
+        var xSql = "";
+        var xObjJsonWhere = {};
+        var xSqlWhere = " (1=1) ";
+        var xJsonWhere = {};
+
+        try{      
+            if( pParam.hasOwnProperty('keyword') ){
+                if( pParam.keyword != '' ){
+
+                    pParam.keyword = '%' + pParam.keyword + '%';
+                    xSqlWhere += " AND ( p.code LIKE :productCode " +
+                                  " OR p.name LIKE :productName " + 
+                                  " OR v.code LIKE :vendorCode " + 
+                                  " OR v.name LIKE :vendorName )";
+                    xJsonWhere.productCode = pParam.keyword;
+                    xJsonWhere.productName = pParam.keyword;
+                    xJsonWhere.vendorCode = pParam.keyword;
+                    xJsonWhere.vendorName = pParam.keyword;
+                }
+            }
+
+            xSql = "select p.id as \"product_id\", \
+                           p.code as \"product_code\", \
+                           p.name as \"product_name\", \
+                           v.id as \"vendor_id\", \
+                           v.code as \"vendor_code\", \
+                           v.name as \"vendor_name\" \
+                    from ms_products p left join ms_vendorcatalogues vc \
+                        on p.id = vc.product_id \
+                            left join ms_vendors v on v.id = vc.vendor_id \
+                    where " + xSqlWhere + " order by p.name";
+
+            var xDtQuery = await sequelize.query( xSql, {
+                replacements: xJsonWhere,
+                type: sequelize.QueryTypes.SELECT,
+            } );
+
+            xJoResult = {
+                status_code: '00',
+                status_msg: 'OK',
+                data: xDtQuery,
+            }
+
+        }catch(e){
+            xJoResult = {
+                status_code: '-99',
+                status_msg: 'Error get product list',
+                err_msg: e,
+            }
+        }
+
+        return xJoResult;
+    }
 }
 
 module.exports = VendorCatalogueRepository;

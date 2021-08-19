@@ -19,6 +19,21 @@ class OAuthService {
 
     constructor(){}
 
+    async getCompanyDetail( pToken, pMethod, pId ){
+        var xAPIUrl = config.api.eSanqua;
+        var xQueryParam = `/master/universal/plant/detail/${pId}`;
+        var xHeader = {
+            'headers': {
+                'x-method': pMethod,
+                'x-token': pToken
+            }
+        }
+        console.log(">>> API URL : " + (xAPIUrl+xQueryParam));
+        var xResult = await _utilInstance.axiosRequest((xAPIUrl+xQueryParam), xHeader);
+
+        return xResult;
+    }
+
     async verifyToken( pToken, pMethod ){
         var xApiUrl = config.api.oAuth.url.verifyToken + "?token=" + pToken + "&method=" + pMethod;
         var xResultVerify = await _utilInstance.axiosRequest( xApiUrl, {} );

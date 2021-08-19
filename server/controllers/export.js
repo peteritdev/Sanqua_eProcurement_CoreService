@@ -20,7 +20,7 @@ async function generateFPB( req, res ){
 
     if( oAuthResult.status_code == "00" ){
         if( oAuthResult.token_data.status_code == "00" ){
-            await _serviceInstance.generateFPB(req.params.id,res);
+            await _serviceInstance.generateFPB(req.params.id, req.headers['x-method'], req.headers['x-token'], res);
         }else{
             joResult = JSON.stringify(oAuthResult);
             res.setHeader('Content-Type','application/json');

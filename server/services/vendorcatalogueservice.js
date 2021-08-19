@@ -453,6 +453,46 @@ class VendorCatalogueService {
         return xJoResult;
     }
 
+    async dropDownFPB( pParam  ){
+        var xJoResult = {};
+        var xJoArrData = [];
+        var xFlagProcess = true;
+
+        var xResultList = await _vendorCatalogueRepoInstance.getProductList(pParam);
+
+
+        if( xResultList.data.length > 0 ){
+            var xRows = xResultList.data;
+            for( var index in xRows ){
+
+                xJoArrData.push({
+                    product: {
+                        id: xRows[index].product_id,
+                        code: xRows[index].product_code,
+                        name: xRows[index].product_name,
+                    },
+                    vendor: {
+                        id: xRows[index].vendor_id,
+                        code: xRows[index].vendor_code,
+                        name: xRows[index].vendor_name,
+                    },
+                });
+            }
+            xJoResult = {
+                status_code: "00",
+                status_msg: "OK",
+                data: xJoArrData,
+            }
+        }else{
+            xJoResult = {
+                status_code: "-99",
+                status_msg: "Data not found",
+            };
+        }       
+
+        return xJoResult;
+    }
+
     async save( pParam ){
         var xJoResult;
         var xAct = pParam.act;

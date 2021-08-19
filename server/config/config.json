@@ -59,7 +59,9 @@
             "confirm_via_email": "http://localhost:9189/api/oauth/v1/approval_matrix/document/confirm_via_email"
           }
         }
-      }
+      },
+
+      "eSanqua": "http://localhost:1193/api/esanqua/v1"
     },
 
     "login":{
@@ -82,7 +84,8 @@
     "timezone": "+07:00",
 
     "applicationId": 2,
-    "imagePath": "http://10.10.20.8:8020/assets/icon/"
+    "imagePath": "http://10.10.20.8:8020/assets/icon/",
+    "imagePathESanQua": "http://10.10.20.8:8020"
   },
 
   "development": {
@@ -145,7 +148,8 @@
             "confirm_via_email": "http://localhost:9189/api/oauth/v1/approval_matrix/document/confirm_via_email"
           }
         }
-      }
+      },
+      "eSanqua": "http://localhost:1193/api/esanqua/v1"
     },
 
     "login":{
@@ -223,7 +227,9 @@
         "url": {
           "verifyToken": "http://localhost:1189/api/oauth/v1/user/verify_token"
         }
-      }
+      },
+
+      "eSanqua": "http://localhost:1193/api/esanqua/v1"
     },
 
     "login":{

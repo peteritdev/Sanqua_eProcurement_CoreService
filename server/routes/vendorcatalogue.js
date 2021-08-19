@@ -41,6 +41,9 @@ module.exports = (app) => {
     ];
     app.get( rootAPIPath + 'vendor/catalogue/list', arrValidate, vendorCatalogueController.list);
 
+    arrValidate = [];
+    app.get( rootAPIPath + 'vendor/catalogue/dropdown_product', arrValidate, vendorCatalogueController.dropDownFPB);
+
     // Get By Id
     arrValidate = [];
     arrValidate = [
