@@ -478,10 +478,10 @@ class VendorCatalogueRepository {
                 if( pParam.keyword != '' ){
 
                     pParam.keyword = '%' + pParam.keyword + '%';
-                    xSqlWhere += " AND ( p.code LIKE :productCode " +
-                                  " OR p.name LIKE :productName " + 
-                                  " OR v.code LIKE :vendorCode " + 
-                                  " OR v.name LIKE :vendorName )";
+                    xSqlWhere += " AND ( p.code iLIKE :productCode " +
+                                  " OR p.name iLIKE :productName " + 
+                                  " OR v.code iLIKE :vendorCode " + 
+                                  " OR v.name iLIKE :vendorName )";
                     xJsonWhere.productCode = pParam.keyword;
                     xJsonWhere.productName = pParam.keyword;
                     xJsonWhere.vendorCode = pParam.keyword;
