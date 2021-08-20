@@ -100,11 +100,18 @@ class PurchaseRequestDetailService {
 
             if( xAct == 'add' ){
 
-                // Check first whether product_id and vendor_id already exists in detail or not
-                var xPurchaseRequestDetail = await _repoInstance.getByProductIdVendorId({
-                    product_id: pParam.product_id,
-                    vendor_id: pParam.vendor_id,
-                });
+                var xPurchaseRequestDetail = null, xProductDetail = null, xVendorDetail = null;
+
+                if( pParam.hasOwnProperty('product_id') && pParam.hasOwnProperty('vendor_id') ){
+                    if( pParam.product_id != '' && pParam.vendor_id != '' ){
+                        // Check first whether product_id and vendor_id already exists in detail or not
+                        xPurchaseRequestDetail = await _repoInstance.getByProductIdVendorId({
+                            product_id: pParam.product_id,
+                            vendor_id: pParam.vendor_id,
+                        });
+                    }
+                }
+                
 
                 if( xPurchaseRequestDetail != null && xPurchaseRequestDetail.budget_price_per_unit == pParam.budget_price_per_unit ){
                     var xParamUpdate = {
@@ -117,20 +124,30 @@ class PurchaseRequestDetailService {
 
                     xAct = 'update';
                 }else{
-                    // Get Product detail by Id
-                    var xProductDetail = await _productServiceInstance.getById( { id: ( await _utilInstance.encrypt( (pParam.product_id).toString(), config.cryptoKey.hashKey ) ) } );
-                    if( xProductDetail != null ){
-                        console.log(JSON.stringify(xProductDetail));
-                        pParam.product_code = xProductDetail.data.code;
-                        pParam.product_name = xProductDetail.data.name;
-                    }
 
-                    // Get Vendor detail by id
-                    var xVendorDetail = await _vendorServiceInstance.getVendorById( { id: ( await _utilInstance.encrypt( (pParam.vendor_id).toString(), config.cryptoKey.hashKey ) ) } );
-                    if( xVendorDetail != null ){
-                        pParam.vendor_code = xVendorDetail.data.code;
-                        pParam.vendor_name = xVendorDetail.data.name;
+                    if( pParam.hasOwnProperty('product_id') ){
+                        if( pParam.product_id != '' ){
+                            // Get Product detail by Id
+                            xProductDetail = await _productServiceInstance.getById( { id: ( await _utilInstance.encrypt( (pParam.product_id).toString(), config.cryptoKey.hashKey ) ) } );
+                            if( xProductDetail != null ){
+                                console.log(JSON.stringify(xProductDetail));
+                                pParam.product_code = xProductDetail.data.code;
+                                pParam.product_name = xProductDetail.data.name;
+                            }
+                        }
+                    }        
+                    
+                    
+                    if( pParam.hasOwnProperty('vendor_id') ){
+                        if( pParam.vendor_id != '' ){
+                            // Get Vendor detail by id
+                            xVendorDetail = await _vendorServiceInstance.getVendorById( { id: ( await _utilInstance.encrypt( (pParam.vendor_id).toString(), config.cryptoKey.hashKey ) ) } );
+                            if( xVendorDetail != null ){
+                                pParam.vendor_code = xVendorDetail.data.code;
+                                pParam.vendor_name = xVendorDetail.data.name;
 
+                            }
+                        }
                     }
 
                     pParam.budget_price_total = ( pParam.qty * pParam.budget_price_per_unit ); 

@@ -75,14 +75,16 @@ class PurchaseRequestService {
 
                 // Calculate the total
                 var xJoArrItems = [];
-                xJoArrItems = pParam.purchase_request_detail;
-                if( xJoArrItems.length > 0 ){
-                    for( var i in xJoArrItems ){
-                        if( xJoArrItems[i].hasOwnProperty('qty') && xJoArrItems[i].hasOwnProperty('budget_price_per_unit') ){
-                            xJoArrItems[i].budget_price_total = xJoArrItems[i].qty * xJoArrItems[i].budget_price_per_unit;
+                if( pParam.hasOwnProperty('purchase_request_detail') ){
+                    xJoArrItems = pParam.purchase_request_detail;
+                    if( xJoArrItems.length > 0 ){
+                        for( var i in xJoArrItems ){
+                            if( xJoArrItems[i].hasOwnProperty('qty') && xJoArrItems[i].hasOwnProperty('budget_price_per_unit') ){
+                                xJoArrItems[i].budget_price_total = xJoArrItems[i].qty * xJoArrItems[i].budget_price_per_unit;
+                            }
                         }
                     }
-                }
+                }                
 
                 var xAddResult = await _repoInstance.save( pParam, xAct );
                 if( xAddResult.status_code == '00' && xAddResult.created_id != '' && xAddResult.clear_id != '' ){
