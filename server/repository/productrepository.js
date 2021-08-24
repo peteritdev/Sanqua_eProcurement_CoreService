@@ -19,6 +19,7 @@ class ProductRepository{
     async list( pParam ){
 
         var xOrder = ['name', 'ASC'];
+        var xWhereAnd_isAsset = {};
         var xInclude = [
             {
                 attributes: ['id','name'],
@@ -35,12 +36,21 @@ class ProductRepository{
             xOrder = [pParam.order_by, (pParam.order_type == 'desc' ? 'DESC' : 'ASC') ];
         }
 
+        if( pParam.hasOwnProperty('is_asset') ){
+            if( pParam.is_asset != '' ){
+                xWhereAnd_isAsset = {
+                    is_asset: pParam.is_asset,
+                }
+            }
+        }
+
         var xParamQuery = {
             where: {
                 [Op.and]:[
                     {
                         is_delete: 0
-                    }
+                    },
+                    xWhereAnd_isAsset,
                 ],
                 [Op.or]: [
                     {
