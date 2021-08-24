@@ -172,7 +172,8 @@
     "timezone": "+07:00",
     "applicationId": 2,
 
-    "imagePath": "http://10.10.20.8:8020/assets/icon/"
+    "imagePath": "http://10.10.20.8:8020/assets/icon/",
+    "imagePathESanQua": "http://10.10.20.8:8020"
   },  
 
   "production": {
