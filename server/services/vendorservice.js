@@ -223,7 +223,7 @@ class VendorService {
                     //     joResult.result_update_vendor = xUpdateResult;
                     // }
 
-                    if( param.act == "add" && pParam.code != '' ){
+                    if( param.act == "add" && param.code != '' ){
                         // Check if code exists or not
                         var xCheckData = await _vendorRepoInstance.getVendorByCode( pParam.code, null );
                         if( xCheckData != null ){
