@@ -225,7 +225,7 @@ class VendorService {
 
                     if( param.act == "add" && param.code != '' ){
                         // Check if code exists or not
-                        var xCheckData = await _vendorRepoInstance.getVendorByCode( pParam.code, null );
+                        var xCheckData = await _vendorRepoInstance.getVendorByCode( param.code, null );
                         if( xCheckData != null ){
                             xJoResult = {
                                 status_code: '-99',
