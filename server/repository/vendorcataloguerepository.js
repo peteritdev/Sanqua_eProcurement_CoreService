@@ -262,7 +262,7 @@ class VendorCatalogueRepository {
         if (pParam.hasOwnProperty('category_id')) {
             if (pParam.category_id != '') {
                 xSqlWhere += " AND p.category_id = :categoryId ";
-                xObjJsonWhere.categoryId = pParam.categoryId;
+                xObjJsonWhere.categoryId = pParam.category_id;
             }
         }
 
@@ -286,6 +286,7 @@ class VendorCatalogueRepository {
                     // ` OR to_tsvector(pc.name) @@ websearch_to_tsquery('${pParam.keyword}') = TRUE ` +
                     ` OR v.name LIKE '%${pParam.keyword}%' ` +
                     ` OR pc.name LIKE '%${pParam.keyword}%' ` +
+                    ` OR p.code LIKE '%${pParam.keyword}%' ` +
                     ")";
             }
         }
