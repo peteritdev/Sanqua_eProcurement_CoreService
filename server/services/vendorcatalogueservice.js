@@ -393,9 +393,10 @@ class VendorCatalogueService {
 
         if (xFlagProcess) {
             var xResultList = await _vendorCatalogueRepoInstance.list_new(pParam);
+            console.log(`>>> Result : ${JSON.stringify(xResultList)}`);
 
-            if (xResultList.length > 0) {
-                var xRows = xResultList;
+            if (xResultList.data.length > 0) {
+                var xRows = xResultList.data;
                 for (var index in xRows) {
 
                     xJoArrData.push({
@@ -442,7 +443,7 @@ class VendorCatalogueService {
                 xJoResult = {
                     status_code: "00",
                     status_msg: "OK",
-                    total_record: xResultList.count,
+                    total_record: xResultList.total_record[0].total_record,
                     data: xJoArrData,
                 }
             } else {
