@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+                /*html {
+                  zoom: 0.75; style="width: 95%; border-width: thin; border-spacing: 0px;font-size: 9px;border-color: grey;" border="1" 
+                }*/
+                html {
+                    zoom: 0.75;
+                }
+                .center {
+                    margin-left: auto;
+                    margin-right: auto;
+                    margin-top: 15px;
+                    width:95%;
+                    /* border-collapse:collapse; */
+                    text-align:center;
+                    font-size: 8px;
+                    font-family: 'Arial';
+                    border-style: solid;
+                    border-color: #000000;
+                }
+
+                .center th, .center td {
+                    border-left: none;
+                    border-bottom: none;
+                }
+
+                .col-item {
+                    border-bottom: none;
+                    border-top: none;
+                }
+
+                th.col-header-item {
+                    border-bottom: 1px solid #000000;
+                }
+        </style>
+    </head>
+    <body>
+        <table class="center" cellspacing="0" cellpadding="5" style="border:1px solid #000000;">
+            <tr>
+                <td style="width:25%;text-align: left;padding-left: 10px;" colspan="2">
+                    <img src="<%=companyData.logo%>" height="45">
+                </td>
+                <td style="text-align: center;width:50%;">
+                    <span style="font-size: 10px;text-align: center;border:1px solid #000000;padding: 0px 50px 0px 50px; border-radius: 10px;"><strong>PERMINTAAN BARANG DAN JASA</strong></span>
+                </td>
+                <td style="width:25%;padding: 3px; text-align: left;">
+                    Doc No. <%=companyData.iso_purchase_request_no%>
+                </td> 
+            </tr> 
+            <tr>
+                <td style="text-align: left;">Permintaan Departement</td>
+                <td>:</td>
+                <td style="text-align: left;" colspan="2"><span><%=data.data.department.name%></span>&nbsp;&nbsp;<span style="padding-left:100px;">Tanggal : <%=data.data.created_at%></span></td>
+            </tr>
+            <tr>
+                <td style="text-align: left;vertical-align: top;">Kategori Barang</td>
+                <td>:</td>
+                <td colspan="2" style="padding-left:100px;">
+                    <table style="text-align: left;" cellpadding="2" cellspacing="2"> 
+                        <tr>
+                            <td><img src="<%=imagePath%>blank_checklist.png" width="15"></td>
+                            <td>Raw Material</td>
+                            <td><img src="<%=imagePath%>blank_checklist.png" width="15"></td>
+                            <td>Office Supply</td>
+                            <td><img src="<%=imagePath%>blank_checklist.png" width="15"></td>
+                            <td>Jasa</td>
+                            <td rowspan="2" style="padding-left:30px;"><img src="<%=imagePath%>blank_checklist.png" width="15"></td>
+                            <td rowspan="2" ><strong style="font-size: 10px;">Investment / Asset*</strong></td>
+                        </tr>
+                        <tr>
+                            <td><img src="<%=imagePath%>blank_checklist.png" width="15"></td>
+                            <td>Factory Supply</td>
+                            <td><img src="<%=imagePath%>blank_checklist.png" width="15"></td>
+                            <td>Sparepart</td>
+                            <td><img src="<%=imagePath%>blank_checklist.png" width="15"></td>
+                            <td>Maintenance Repair</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" style="padding:0px;margin:0px;">
+                    <table class="center" cellspacing="0" cellpadding="5" border="1" style="width:100%;border-width: 0.2px;">
+                        <thead>                            
+                            <tr>
+                                <th rowspan="2" style="text-align:center;width:3%;" class="col-header-item">No</th>
+                                <th rowspan="2" style="text-align:center;width:30%;" class="col-header-item">Deskripsi</th>
+                                <th rowspan="2" style="text-align:center;width:5%;" class="col-header-item">Stock Akhir</th>
+                                <th rowspan="2" style="text-align:center;width:4%;" class="col-header-item">Sat.</th>
+                                <th rowspan="2" style="text-align:center;width:10%;" class="col-header-item">Harga</th>
+                                <th rowspan="2" style="text-align:center;width:15%;" class="col-header-item">Supplier</th>
+                                <th colspan="2" style="text-align:center;width:10%;" >Budget</th>
+                                <th rowspan="2" style="text-align:center;width:7%;" class="col-header-item">Tgl. Diperlukan</th>
+                                <th rowspan="2" style="border-right: none !important; width: 16%;" class="col-header-item">Alasan Permintaan</th>
+                            </tr>
+                            <tr>
+                                <th class="col-header-item">Ada</th>
+                                <th class="col-header-item">Tidak</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <%
+                                var index = 1;
+                                data.data.purchase_request_detail.forEach( item => {
+                            %>
+                                <tr>
+                                    <td style="text-align:right;" class="col-item"><%=index%>.</td>
+                                    <td style="text-align: left;" class="col-item"><%=item.product.name%></td>
+                                    <td class="col-item"></td>
+                                    <td class="col-item"></td>
+                                    <td style="text-align: right;" class="col-item"><%=item.pdf_budget_price_per_unit%></td>
+                                    <td style="text-align: left;" class="col-item"><%=item.vendor.name%></td>
+                                    <td class="col-item">
+                                        <%
+                                            if( item.has_budget == 1 ){
+                                        %>
+                                                <img src="<%=imagePath%>checklist.png" width="30">
+                                        <%
+                                            }
+                                        %>
+                                    </td>
+                                    <td class="col-item">
+                                        <%
+                                            if( item.has_budget == 0 ){
+                                        %>
+                                                <img src="<%=imagePath%>checklist.png" width="30">
+                                        <%
+                                            }
+                                        %>
+                                    </td>
+                                    <td nowrap="nowrap" class="col-item"><%=item.estimate_date_use%></td>
+                                    <td style="border-right: none !important;text-align: left;" class="col-item"><%=item.description%></td>
+                                </tr>
+                            <%
+                                    index++;
+                                } )
+                            %>
+                            
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            <tr >
+                <td colspan="4" style="text-align: left;border-top: 1px solid #000000 !important;">Harap mengisi keterangan dengan lengkap dan jelas</td>
+            </tr>
+            <tr >
+                <td colspan="4" style="text-align: left;">Data Pendukung</td>
+            </tr>
+            <tr >
+                <td colspan="4" style="text-align: left;">
+                    <table style="width:100%;">
+                        <tr>
+                            <td style="width: 2%;text-align: left;">(1)</td>
+                            <td style="width: 40%;text-align: left;">Referensi penawaran vendor atau referensi harga barang dari e-commerce</td>
+                            <td style="width: 1%;text-align: left;">Ada</td>
+                            <td style="width: 1%;text-align: center;">
+                                <%
+                                    if( data.data.reference_from_ecommerce == 0 ){
+                                %>
+                                    <img src="<%=imagePath%>blank_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+
+                                <%
+                                    if( data.data.reference_from_ecommerce == 1 ){
+                                %>
+                                    <img src="<%=imagePath%>box_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+                            </td>
+                            <td style="width: 1%;text-align: left;">Tidak</td>
+                            <td style="width: 20%;text-align: left;">
+                                <%
+                                    if( data.data.reference_from_ecommerce == 1 ){
+                                %>
+                                    <img src="<%=imagePath%>blank_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+
+                                <%
+                                    if( data.data.reference_from_ecommerce == 0 ){
+                                %>
+                                    <img src="<%=imagePath%>box_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 2%;text-align: left;">(2)</td>
+                            <td style="width: 40%;text-align: left;">Budget yang sudah di approve</td>
+                            <td style="width: 1%;text-align: left;">Ada</td>
+                            <td style="width: 1%;text-align: center;">
+                                <%
+                                    if( data.data.budget_is_approved == 0 ){
+                                %>
+                                    <img src="<%=imagePath%>blank_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+
+                                <%
+                                    if( data.data.budget_is_approved == 1 ){
+                                %>
+                                    <img src="<%=imagePath%>box_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+                            </td>
+                            <td style="width: 1%;text-align: left;">Tidak</td>
+                            <td style="width: 20%;text-align: left;">
+                                <%
+                                    if( data.data.budget_is_approved == 1 ){
+                                %>
+                                    <img src="<%=imagePath%>blank_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+
+                                <%
+                                    if( data.data.budget_is_approved == 0 ){
+                                %>
+                                    <img src="<%=imagePath%>box_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 2%;text-align: left;">(3)</td>
+                            <td style="width: 40%;text-align: left;">Memo atau Berita Acara dengan permintaan kondisi khusus</td>
+                            <td style="width: 1%;text-align: left;">Ada</td>
+                            <td style="width: 1%;text-align: center;">
+                                <%
+                                    if( data.data.memo_special_request == 0 ){
+                                %>
+                                    <img src="<%=imagePath%>blank_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+
+                                <%
+                                    if( data.data.memo_special_request == 1 ){
+                                %>
+                                    <img src="<%=imagePath%>box_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+                            </td>
+                            <td style="width: 1%;text-align: left;">Tidak</td>
+                            <td style="width: 20%;text-align: left;">
+                                <%
+                                    if( data.data.memo_special_request == 1 ){
+                                %>
+                                    <img src="<%=imagePath%>blank_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+
+                                <%
+                                    if( data.data.memo_special_request == 0 ){
+                                %>
+                                    <img src="<%=imagePath%>box_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 2%;text-align: left;">*</td>
+                            <td style="width: 40%;text-align: left;" colspan="4">
+                                Pembelian kategori barang <strong>"Investment / Asset"</strong> wajib diketahui oleh <strong>Finance & Accounting</strong> dan approval <strong>Direktur</strong>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" style="padding:0px;margin:0px;">
+                    <table class="center" cellspacing="0" cellpadding="2" border="1" style="width:100%;border-width: 0.2px;font-size: 10px;">
+                        <tr>
+                            <td rowspan="2">
+                                Pemohon
+                            </td>
+                            <td colspan="2">
+                                Mengetahui
+                            </td>
+                            <td  colspan="2" style="border-right: none !important;">
+                                Disetujui
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Head Unit</td>
+                            <td><strong>Finance & Accounting*</strong></td>
+                            <td>Head PRocurement</td>
+                            <td  style="border-right: none !important;"><strong>Direktur*</strong></td>
+                        </tr>
+                        <tr style="height: 50px;">
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td  style="border-right: none !important;"></td>
+                        </tr>
+                        <tr style="height: 20px;">
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td  style="border-right: none !important;"></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+</html>

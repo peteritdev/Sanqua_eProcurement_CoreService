@@ -22,6 +22,8 @@ module.exports = (sequelize, DataTypes) => {
         photo_3: DataTypes.STRING,
         photo_4: DataTypes.STRING,
         photo_5: DataTypes.STRING,
+
+        is_asset: DataTypes.INTEGER,
         
         is_delete: DataTypes.INTEGER,
         deleted_at: DataTypes.DATE,

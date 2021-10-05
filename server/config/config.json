@@ -2,7 +2,8 @@
   "localhost": {
     "appPort": 9191,
     "dbTables": {
-      "procurement": "tr_procurements"
+      "procurement": "tr_procurements",
+      "fpb": "tr_purchaserequests"
     },
     "username": "postgres",
     "password": "P455uu0rd^^ok",
@@ -58,7 +59,9 @@
             "confirm_via_email": "http://localhost:9189/api/oauth/v1/approval_matrix/document/confirm_via_email"
           }
         }
-      }
+      },
+
+      "eSanqua": "http://localhost:1193/api/esanqua/v1"
     },
 
     "login":{
@@ -80,13 +83,16 @@
     },
     "timezone": "+07:00",
 
-    "applicationId": 2
+    "applicationId": 2,
+    "imagePath": "http://10.10.20.8:8020/assets/icon/",
+    "imagePathESanQua": "http://10.10.20.8:8020"
   },
 
   "development": {
     "appPort": 9191,
     "dbTables": {
-      "procurement": "tr_procurements"
+      "procurement": "tr_procurements",
+      "fpb": "tr_purchaserequests"
     },
     "username": "postgres",
     "password": "P455uu0rd^^ok",
@@ -142,7 +148,8 @@
             "confirm_via_email": "http://localhost:9189/api/oauth/v1/approval_matrix/document/confirm_via_email"
           }
         }
-      }
+      },
+      "eSanqua": "http://localhost:1193/api/esanqua/v1"
     },
 
     "login":{
@@ -163,11 +170,18 @@
       "charset": "utf8mb4_unicode_ci"
     },
     "timezone": "+07:00",
-    "applicationId": 2
+    "applicationId": 2,
+
+    "imagePath": "http://10.10.20.8:8020/assets/icon/",
+    "imagePathESanQua": "http://10.10.20.8:8020"
   },  
 
   "production": {
     "appPort": 1191,
+    "dbTables": {
+      "procurement": "tr_procurements",
+      "fpb": "tr_purchaserequests"
+    },
     "username": "postgres",
     "password": "SANQUAD0ck3rP912",
     "database": "sanqua_procurementdb",
@@ -214,7 +228,9 @@
         "url": {
           "verifyToken": "http://localhost:1189/api/oauth/v1/user/verify_token"
         }
-      }
+      },
+
+      "eSanqua": "http://localhost:1193/api/esanqua/v1"
     },
 
     "login":{

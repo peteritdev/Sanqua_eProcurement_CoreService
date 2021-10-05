@@ -62,13 +62,14 @@ class PurchaseRequestDetailRepository {
                 var xWhere = {
                     where : {
                         id: xId,
-                    }
+                    },
+                    transaction: xTransaction
                 };
 
                 pParam.updated_by = pParam.user_id;
                 pParam.updated_by_name = pParam.user_name;
 
-                xSaved = await _modelDb.update( pParam, xWhere, {xTransaction} );
+                xSaved = await _modelDb.update( pParam, xWhere );
 
                 await xTransaction.commit();
 
@@ -129,6 +130,23 @@ class PurchaseRequestDetailRepository {
 
             return xJoResult;
         }
+    }
+
+    async getByProductIdVendorId( pParam ){
+        var xData = {};
+        var xInclude = [];
+        var xWhere = {};
+        var xWhereAnd = [], xWhereOr = [];
+
+        var xData = await _modelDb.findOne({
+            where: {
+                product_id: pParam.product_id,
+                vendor_id: pParam.vendor_id,
+            },
+            include: xInclude,
+        });
+
+        return xData;
     }
 }
 

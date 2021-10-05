@@ -21,6 +21,7 @@ class ProductRepository {
         var xWhereAnd_LastUpdated = null;
 
         var xOrder = ['name', 'ASC'];
+        var xWhereAnd_isAsset = {};
         var xInclude = [
             {
                 attributes: ['id', 'name'],
@@ -47,12 +48,22 @@ class ProductRepository {
             }
         }
 
+        if (pParam.hasOwnProperty('is_asset')) {
+            if (pParam.is_asset != '') {
+                xWhereAnd_isAsset = {
+                    is_asset: pParam.is_asset,
+                }
+            }
+        }
+
         var xParamQuery = {
             where: {
                 [Op.and]: [
                     {
                         is_delete: 0
                     }, xWhereAnd_LastUpdated
+                    ,
+                    xWhereAnd_isAsset,
                 ],
                 [Op.or]: [
                     {

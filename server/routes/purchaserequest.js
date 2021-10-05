@@ -29,8 +29,20 @@ module.exports = (app) => {
         check("reference_from_ecommerce","Parameter reference_from_ecommerce must be integer and cannot be empty").not().isEmpty().isInt(),
         check("budget_is_approved","Parameter budget_is_approved must be integer and cannot be empty").not().isEmpty().isInt(),
         check("memo_special_request","Parameter memo_special_request must be integer and cannot be empty").not().isEmpty().isInt(),
+
+        check("company_id").not().isEmpty().withMessage("Parameter company_id cannot be empty"),
+        check("company_code").not().isEmpty().withMessage("Parameter company_code cannot be empty"),
+        check("company_name").not().isEmpty().withMessage("Parameter company_name cannot be empty"),
     ];
     app.post( rootAPIPath + 'save', arrValidate, purchaseRequestController.purchaseRequest_Save );
+
+    // Confirm FPB
+    arrValidate = [];
+    arrValidate = [
+        check("document_id").not().isEmpty().withMessage("Parameter document_id cannot be empty"),
+        check("status","Parameter status must be integer and cannot be empty").not().isEmpty().isInt(),
+    ];
+    app.post( rootAPIPath + 'confirm', arrValidate, purchaseRequestController.purchaseRequest_Confirm );
 
     // List FPB
     arrValidate = [];
@@ -58,6 +70,15 @@ module.exports = (app) => {
         check("has_budget","Parameter has_budget must be integer and cannot be empty").not().isEmpty().isInt(),
     ];
     app.post( rootAPIPath + 'save_detail', arrValidate, purchaseRequestController.purchaseRequestDetail_Save );
+
+    // Save Batch Detail
+    arrValidate = [];
+    arrValidate = [
+        check("act").not().isEmpty().withMessage("Parameter act cannot be empty"),
+        check("request_id").not().isEmpty().withMessage("Parameter request_id cannot be empty"),
+        check("items","Parameter items must be array and cannot be empty").not().isEmpty().isArray(),
+    ];
+    app.post( rootAPIPath + 'save_batch_detail', arrValidate, purchaseRequestController.purchaseRequestDetail_Save );
 
     arrValidate = [];
     arrValidate = [

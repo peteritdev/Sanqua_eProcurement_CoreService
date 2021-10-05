@@ -90,7 +90,15 @@ class PurchaseRequestRepository {
         }else{
             xWhereAnd.push({
                 is_delete: 0,
-            });
+            }); 
+        }
+
+        if( pParam.hasOwnProperty('status') ){
+            if( pParam.status != '' ){
+                xWhereAnd.push({
+                    status: pParam.status,
+                })
+            }
         }
 
         if( pParam.hasOwnProperty('user_id') && pParam.is_admin == 0 ){
@@ -162,6 +170,46 @@ class PurchaseRequestRepository {
                 pParam.created_by_name = pParam.user_name;
 
                 xSaved = await _modelDb.create(pParam, {transaction: xTransaction}); 
+
+                if( xSaved.id != null ){               
+                    
+                    xJoResult = {
+                        status_code: "00",
+                        status_msg: "Data has been successfully saved",
+                        created_id: await _utilInstance.encrypt( xSaved.id, config.cryptoKey.hashKey ),
+                        clear_id: xSaved.id,
+                    }                     
+                    
+                    await xTransaction.commit();
+
+                }else{
+
+                    if( xTransaction ) await xTransaction.rollback();
+
+                    xJoResult = {
+                        status_code: "-99",
+                        status_msg: "Failed save to database",
+                    }
+
+                }                
+
+            }if( pAct == "add_batch_in_item" ){
+
+                pParam.status = 0;
+                pParam.is_delete = 0;
+                pParam.created_by = pParam.user_id;
+                pParam.created_by_name = pParam.user_name;
+
+                xSaved = await _modelDb.create(pParam,
+                                               {
+                                                   include: [
+                                                       {
+                                                           model: _modelPurchaseRequestDetail,
+                                                           as: 'purchase_request_detail',
+                                                       }
+                                                   ],
+                                               },
+                                               {transaction: xTransaction}); 
 
                 if( xSaved.id != null ){               
                     
@@ -336,6 +384,22 @@ class PurchaseRequestRepository {
 
             return xJoResult;
         }
+    }
+
+    async getByIdAndUserId( pParam ){
+        var xData = {};
+        var xInclude = [];
+        var xWhere = {};
+        var xWhereAnd = [], xWhereOr = [];
+
+        xData = await _modelDb.findOne({
+            where: {
+                id: pParam.id,
+                created_by: pParam.user_id,
+            }
+        });
+        
+        return xData;
     }
 }
 
