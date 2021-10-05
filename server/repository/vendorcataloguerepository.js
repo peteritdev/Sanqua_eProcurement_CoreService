@@ -233,7 +233,7 @@ class VendorCatalogueRepository {
     }
 
     async list_new(pParam) {
-        var xData = [];
+        var xData, xTotalRecord = [];
         var xSql = "";
         var xObjJsonWhere = {};
         var xSqlWhere = " (1=1) ";
@@ -303,13 +303,28 @@ class VendorCatalogueRepository {
             '               INNER JOIN ms_currencies c ON c.id = vc.currency_id ' +
             ' WHERE ' + xSqlWhere + xSqlLimit + xSqlOrderBy;
 
+        let xSqlCount = ' SELECT COUNT(0) AS total_record ' +
+            ' FROM ms_vendorcatalogues vc INNER JOIN ms_products p ' +
+            '    ON vc.product_id = p.id ' +
+            '        INNER JOIN ms_productcategories pc ON pc.id = p.category_id ' +
+            '            INNER JOIN ms_vendors v ON v.id = vc.vendor_id ' +
+            '               INNER JOIN ms_currencies c ON c.id = vc.currency_id ' +
+            ' WHERE ' + xSqlWhere;
+
         xData = await sequelize.query(xSql, {
+            replacements: xObjJsonWhere, type: sequelize.QueryTypes.SELECT
+        });
+
+        xTotalRecord = await sequelize.query(xSqlCount, {
             replacements: xObjJsonWhere, type: sequelize.QueryTypes.SELECT
         });
 
         console.log(`>>> Data : ${JSON.stringify(xData)}`);
 
-        return JSON.parse(JSON.stringify(xData));
+        return {
+            data: xData,
+            total_record: xTotalRecord,
+        };
     }
 
     async save(pParam, pAct) {
