@@ -421,7 +421,12 @@ class VendorCatalogueService {
                             photo_5: ((xRows[index].product_photo_5 != null && xRows[index].product_photo_5 != '') ? (config.frontParam.photoPath.product.product5 + xRows[index].product_photo_5) : null),
                         },
 
-                        currency: xRows[index].currency,
+                        currency: {
+                            id: xRows[index].currency_id,
+                            code: xRows[index].currency_code,
+                            name: xRows[index].currency_name,
+                            symbol: xRows[index].currency_symbol,
+                        },
                         last_price: xRows[index].last_price,
                         last_ordered: (xRows[index].last_ordered != null && xRows[index].last_ordered != '' ? moment(xRows[index].last_ordered).format('YYYY-MM-DD') : ''),
                         last_purchase_plant: xRows[index].last_purchase_plant,
