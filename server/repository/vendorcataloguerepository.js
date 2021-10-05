@@ -281,10 +281,10 @@ class VendorCatalogueRepository {
             if (pParam.keyword != '') {
                 xSqlWhere += " AND ( " +
                     ` to_tsvector(p.name) @@ websearch_to_tsquery('${pParam.keyword}') = TRUE ` +
-                    // ` OR to_tsvector(v.name) @@ websearch_to_tsquery('${pParam.keyword}') = TRUE ` +
+                    ` OR to_tsvector(v.name) @@ websearch_to_tsquery('${pParam.keyword}') = TRUE ` +
                     ` OR to_tsvector(vc.merk) @@ websearch_to_tsquery('${pParam.keyword}') = TRUE ` +
                     // ` OR to_tsvector(pc.name) @@ websearch_to_tsquery('${pParam.keyword}') = TRUE ` +
-                    ` OR v.name LIKE '%${pParam.keyword}%' ` +
+                    // ` OR v.name LIKE '%${pParam.keyword}%' ` +
                     ` OR pc.name LIKE '%${pParam.keyword}%' ` +
                     ` OR p.code LIKE '%${pParam.keyword}%' ` +
                     ")";
