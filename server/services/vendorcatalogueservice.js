@@ -8,8 +8,8 @@ const Op = sequelize.Op;
 const bcrypt = require('bcrypt');
 const fs = require('fs');
 
-const env         = process.env.NODE_ENV || 'localhost';
-const config      = require(__dirname + '/../config/config.json')[env];
+const env = process.env.NODE_ENV || 'localhost';
+const config = require(__dirname + '/../config/config.json')[env];
 
 // Utility
 const Utility = require('peters-globallib-v2');
@@ -37,19 +37,19 @@ const _xlsxToJson = require('xlsx-to-json-lc');
 
 // Setup multer storage
 var storage = multer.diskStorage({
-    destination: function( req, file, cb ){
-      cb(null, './uploads/')
+    destination: function (req, file, cb) {
+        cb(null, './uploads/')
     },
-    filename: function( req, file, cb ){
-      var dateTimeStamp = Date.now();
-      cb( null, file.fieldname + '-' + dateTimeStamp + '.' + file.originalname.split('.')[file.originalname.split('.').length -1])
+    filename: function (req, file, cb) {
+        var dateTimeStamp = Date.now();
+        cb(null, file.fieldname + '-' + dateTimeStamp + '.' + file.originalname.split('.')[file.originalname.split('.').length - 1])
     }
 });
-  
+
 var upload = multer({
     storage: storage,
-    fileFilter: function( req, file, callback ){
-        if (['xls', 'xlsx'].indexOf(file.originalname.split('.')[file.originalname.split('.').length-1]) === -1) {
+    fileFilter: function (req, file, callback) {
+        if (['xls', 'xlsx'].indexOf(file.originalname.split('.')[file.originalname.split('.').length - 1]) === -1) {
             return callback(new Error('Wrong extension type'));
         }
         callback(null, true);
@@ -61,13 +61,13 @@ var upload = multer({
 }).single('file');
 
 class VendorCatalogueService {
-    constructor(){}
+    constructor() { }
 
-    async uploadFromExcel( pReq, pRes ){
+    async uploadFromExcel(pReq, pRes) {
         var xExcelToJSON;
-        upload( pReq, pRes, function( pErr ){
-            if( pErr ){
-                var joResult =  {
+        upload(pReq, pRes, function (pErr) {
+            if (pErr) {
+                var joResult = {
                     "status_code": "-99",
                     "status_msg": "",
                     "err_msg": pErr
@@ -75,18 +75,18 @@ class VendorCatalogueService {
 
                 try {
                     fs.unlinkSync(pReq.file.path);
-                } catch(e) {
+                } catch (e) {
                     //error deleting the file
                     console.log(e);
                 }
-                
-                pRes.setHeader('Content-Type','application/json');
+
+                pRes.setHeader('Content-Type', 'application/json');
                 pRes.status(200).send(joResult);
             }
 
             console.log(pReq.file)
 
-            if( !pReq.file ){
+            if (!pReq.file) {
                 var joResult = {
                     "status_code": "-99",
                     "status_msg": "",
@@ -95,12 +95,12 @@ class VendorCatalogueService {
 
                 try {
                     fs.unlinkSync(pReq.file.path);
-                } catch(e) {
+                } catch (e) {
                     //error deleting the file
                     console.log(e);
                 }
 
-                pRes.setHeader('Content-Type','application/json');
+                pRes.setHeader('Content-Type', 'application/json');
                 pRes.status(200).send(joResult);
             }
 
@@ -108,7 +108,7 @@ class VendorCatalogueService {
             /** Check the extension of the incoming file and
              *  use the appropriate module
              */
-            if(pReq.file.originalname.split('.')[pReq.file.originalname.split('.').length-1] === 'xlsx'){
+            if (pReq.file.originalname.split('.')[pReq.file.originalname.split('.').length - 1] === 'xlsx') {
                 xExcelToJSON = _xlsxToJson;
             } else {
                 xExcelToJSON = _xlsToJson;
@@ -118,9 +118,9 @@ class VendorCatalogueService {
                 xExcelToJSON({
                     input: pReq.file.path, //the same path where we uploaded our file
                     output: null, //since we don't need output.json
-                    lowerCaseHeaders:true
-                }, function(err,result){
-                    if(err) {
+                    lowerCaseHeaders: true
+                }, function (err, result) {
+                    if (err) {
                         var joResult = {
                             "status_code": "-99",
                             "status_msg": "",
@@ -129,12 +129,12 @@ class VendorCatalogueService {
 
                         try {
                             fs.unlinkSync(pReq.file.path);
-                        } catch(e) {
+                        } catch (e) {
                             //error deleting the file
                             console.log(e);
                         }
 
-                        pRes.setHeader('Content-Type','application/json');
+                        pRes.setHeader('Content-Type', 'application/json');
                         pRes.status(200).send(joResult);
                     }
                     var joResult = {
@@ -146,17 +146,17 @@ class VendorCatalogueService {
 
                     try {
                         fs.unlinkSync(pReq.file.path);
-                    } catch(e) {
+                    } catch (e) {
                         //error deleting the file
                         console.log(e);
                     }
 
                     console.log(joResult);
 
-                    pRes.setHeader('Content-Type','application/json');
+                    pRes.setHeader('Content-Type', 'application/json');
                     pRes.status(200).send(joResult);
                 });
-            } catch (e){
+            } catch (e) {
                 var joResult = {
                     "status_code": "-99",
                     "status_msg": "",
@@ -165,90 +165,90 @@ class VendorCatalogueService {
 
                 try {
                     fs.unlinkSync(pReq.file.path);
-                } catch(e) {
+                } catch (e) {
                     //error deleting the file
                     console.log(e);
                 }
 
-                pRes.setHeader('Content-Type','application/json');
+                pRes.setHeader('Content-Type', 'application/json');
                 pRes.status(200).send(joResult);
             }
 
-        } );
+        });
     }
 
-    async batchSave( pParam ){
-        
+    async batchSave(pParam) {
+
         var joResult;
         var jaResult = [];
         var jaExistingData = [];
         var xFlagProcess = true;
 
-        if( pParam.act == "add" ){
+        if (pParam.act == "add") {
 
             var xCheckData_Vendor = null;
             var xCheckData_Product = null;
             var xCheckData_Catalogue = null;
             var xStringMsg = "";
 
-            for( var i = 0; i < pParam.data.length; i++ ){
+            for (var i = 0; i < pParam.data.length; i++) {
 
-                xCheckData_Vendor = null;   
-                xCheckData_Product = null;    
-                xCheckData_Catalogue = null;            
-                
-                if( pParam.data[i].vendor_code != '' && pParam.data[i].product_code != '' ){
+                xCheckData_Vendor = null;
+                xCheckData_Product = null;
+                xCheckData_Catalogue = null;
+
+                if (pParam.data[i].vendor_code != '' && pParam.data[i].product_code != '') {
 
                     // Check vendor_code is exists
-                    xCheckData_Vendor = await _vendorRepoInstance.getVendorByCode( pParam.data[i].vendor_code );
+                    xCheckData_Vendor = await _vendorRepoInstance.getVendorByCode(pParam.data[i].vendor_code);
 
                     // Check product_code is exists
-                    xCheckData_Product = await _productRepoInstance.getProductByCode( { code: pParam.data[i].product_code } );                  
-                    
+                    xCheckData_Product = await _productRepoInstance.getProductByCode({ code: pParam.data[i].product_code });
 
-                    if( xCheckData_Vendor == null ){
-                        xStringMsg += "Row " + (i+1) + " vendor code " + pParam.data[i].vendor_code + " doesn't exists, \n"; 
-                    }else{
+
+                    if (xCheckData_Vendor == null) {
+                        xStringMsg += "Row " + (i + 1) + " vendor code " + pParam.data[i].vendor_code + " doesn't exists, \n";
+                    } else {
                         pParam.data[i].vendor_id = xCheckData_Vendor.id;
                     }
 
-                    if( xCheckData_Product == null ){
-                        xStringMsg += "Row " + (i+1) + " product code " + pParam.data[i].product_code + " doesn't exists, \n";    
-                    }else{
+                    if (xCheckData_Product == null) {
+                        xStringMsg += "Row " + (i + 1) + " product code " + pParam.data[i].product_code + " doesn't exists, \n";
+                    } else {
                         pParam.data[i].product_id = xCheckData_Product.id;
                     }
 
-                    if( pParam.data[i].hasOwnProperty('id') ){
-                        if( pParam.data[i].id != '' ){
+                    if (pParam.data[i].hasOwnProperty('id')) {
+                        if (pParam.data[i].id != '') {
 
                             // Decrypt the value first
-                            var xDecId = await _utilInstance.decrypt( pParam.data[i].id, config.cryptoKey.hashKey );
-                            if( xDecId.status_code == '00' ){
+                            var xDecId = await _utilInstance.decrypt(pParam.data[i].id, config.cryptoKey.hashKey);
+                            if (xDecId.status_code == '00') {
                                 pParam.data[i].id = xDecId.decrypted;
-                            }else{
+                            } else {
                                 xFlagProcess = false;
                             }
 
-                            if( xFlagProcess ){
+                            if (xFlagProcess) {
                                 pParam.data[i].act = "update";
-                                if( pParam.data[i].last_ordered == '' ){
+                                if (pParam.data[i].last_ordered == '') {
                                     pParam.data[i].last_ordered = null;
                                 }
-                                var xAddResult = await _vendorCatalogueRepoInstance.save( pParam.data[i], "update" );
+                                var xAddResult = await _vendorCatalogueRepoInstance.save(pParam.data[i], "update");
                             }
-                        }         
-                    }else{
+                        }
+                    } else {
 
                         // If Vendor code and product code is exists
-                        if( xCheckData_Vendor != null && xCheckData_Product != null ){
+                        if (xCheckData_Vendor != null && xCheckData_Product != null) {
                             // Check if catalogue exists
-                            xCheckData_Catalogue = await _vendorCatalogueRepoInstance.getByVendorCodeAndProductCode( { vendor_code: pParam.data[i].vendor_code, product_code: pParam.data[i].product_code } );
-                            
-                            if( xCheckData_Catalogue == null ){                    
-                                if( pParam.data[i].last_ordered == '' ){
+                            xCheckData_Catalogue = await _vendorCatalogueRepoInstance.getByVendorCodeAndProductCode({ vendor_code: pParam.data[i].vendor_code, product_code: pParam.data[i].product_code });
+
+                            if (xCheckData_Catalogue == null) {
+                                if (pParam.data[i].last_ordered == '') {
                                     pParam.data[i].last_ordered = null;
-                                }        
-                                var xAddResult = await _vendorCatalogueRepoInstance.save( pParam.data[i], "add" );
+                                }
+                                var xAddResult = await _vendorCatalogueRepoInstance.save(pParam.data[i], "add");
                             }
                         }
 
@@ -260,9 +260,9 @@ class VendorCatalogueService {
                     //     pParam.data[i].act = pParam.act;
                     //     var xAddResult = await _businessEntityRepoInstance.save( pParam.data[i], pParam.act );
                     // }
-                }else{
-                    xStringMsg += "Row " + (i+1) + " vendor code and product code can not be empty, \n";
-                }               
+                } else {
+                    xStringMsg += "Row " + (i + 1) + " vendor code and product code can not be empty, \n";
+                }
 
             }
 
@@ -273,7 +273,7 @@ class VendorCatalogueService {
                 "status_msg": "Finish save to database",
                 "err_msg": xStringMsg,
             }
-        }else if( pParam.act == "update" ){
+        } else if (pParam.act == "update") {
 
         }
 
@@ -281,22 +281,22 @@ class VendorCatalogueService {
 
     }
 
-    async getById( pParam ){
+    async getById(pParam) {
         var xJoResult = {};
         var xFlagProcess = true;
         var xArrOtherVendor = [];
 
-        var xDecId = await _utilInstance.decrypt( pParam.id, config.cryptoKey.hashKey );
-        if( xDecId.status_code == '00' ){
+        var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+        if (xDecId.status_code == '00') {
             pParam.id = xDecId.decrypted;
-        }else{
+        } else {
             xFlagProcess = false;
             xJoResult = xDecId;
         }
 
-        if( xFlagProcess ){
-            var xResultList = await _vendorCatalogueRepoInstance.getById( pParam );
-            if( xResultList != null ){
+        if (xFlagProcess) {
+            var xResultList = await _vendorCatalogueRepoInstance.getById(pParam);
+            if (xResultList != null) {
 
                 // Get Other Vendor
                 var xOtherVendorCatalogue = await _vendorCatalogueRepoInstance.list({
@@ -305,31 +305,31 @@ class VendorCatalogueService {
                     keyword: '',
                 });
 
-                if( xOtherVendorCatalogue.count > 0 ){
+                if (xOtherVendorCatalogue.count > 0) {
                     var xRows = xOtherVendorCatalogue.rows;
-                    for( var index in xRows ){
+                    for (var index in xRows) {
                         xArrOtherVendor.push({
-                            id: await _utilInstance.encrypt( xRows[index].id, config.cryptoKey.hashKey ),
+                            id: await _utilInstance.encrypt(xRows[index].id, config.cryptoKey.hashKey),
                             vendor: {
                                 code: xRows[index].vendor.code,
                                 name: xRows[index].vendor.name,
                                 avg_rate: xRows[index].vendor.avg_rate,
                                 merk: xRows[index].merk,
                             },
-                            uom_name:  xRows[index].uom_name,
+                            uom_name: xRows[index].uom_name,
                             last_price: xRows[index].last_price,
                         });
-                    }   
+                    }
                 }
 
                 xJoResult = {
                     status_code: '00',
                     status_message: 'OK',
                     data: {
-                        id: await _utilInstance.encrypt( xResultList.id, config.cryptoKey.hashKey ),
+                        id: await _utilInstance.encrypt(xResultList.id, config.cryptoKey.hashKey),
                         vendor_id: xResultList.vendor_id,
                         vendor_name: xResultList.vendor.name,
-                        vendor_location:{
+                        vendor_location: {
                             longitude: xResultList.vendor.location_long,
                             latitude: xResultList.vendor.location_lat,
                         },
@@ -359,10 +359,10 @@ class VendorCatalogueService {
                         created_by_name: xResultList.created_by_name,
                         updated_at: xResultList.updatedAt,
                         updated_by_name: xResultList.updated_by_name,
-                        
+
                     }
                 }
-            }else{
+            } else {
                 xJoResult = {
                     status_code: '-99',
                     status_message: 'Data not found',
@@ -373,59 +373,57 @@ class VendorCatalogueService {
         return xJoResult;
     }
 
-    async list( pParam  ){
+    async list(pParam) {
         var xJoResult = {};
         var xJoArrData = [];
         var xFlagProcess = true;
 
         // Decrypt vendor_id
-        if( pParam.hasOwnProperty('vendor_id') ){
-            if( pParam.vendor_id != '' ){
-                var xDecId = await _utilInstance.decrypt( pParam.vendor_id, config.cryptoKey.hashKey );
-                if( xDecId.status_code == '00' ){
+        if (pParam.hasOwnProperty('vendor_id')) {
+            if (pParam.vendor_id != '') {
+                var xDecId = await _utilInstance.decrypt(pParam.vendor_id, config.cryptoKey.hashKey);
+                if (xDecId.status_code == '00') {
                     pParam.vendor_id = xDecId.decrypted;
-                }else{
+                } else {
                     xJoResult = xDecId;
                     xFlagProcess = false;
                 }
             }
         }
 
-        if( xFlagProcess ){
-            var xResultList = await _vendorCatalogueRepoInstance.list(pParam);
+        if (xFlagProcess) {
+            var xResultList = await _vendorCatalogueRepoInstance.list_new(pParam);
 
-            if( xResultList.count > 0 ){
-                var xRows = xResultList.rows;
-                for( var index in xRows ){
+            if (xResultList.length > 0) {
+                var xRows = xResultList;
+                for (var index in xRows) {
 
                     xJoArrData.push({
-                        id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
+                        id: await _utilInstance.encrypt((xRows[index].id).toString(), config.cryptoKey.hashKey),
                         product: {
-                            id: xRows[index].product.id,
-                            code: xRows[index].product.code,
-                            name: xRows[index].product.name,
-                            category: ( xRows[index].product.category == null ? null : xRows[index].product.category.name ),
+                            code: xRows[index].product_code,
+                            name: xRows[index].product_name,
+                            category: xRows[index].category_name,
                         },
                         vendor: {
-                            id: ( xRows[index].vendor != null ? await _utilInstance.encrypt( (xRows[index].vendor.id).toString(), config.cryptoKey.hashKey ) : null ),
-                            clear_id: ( xRows[index].vendor != null ? xRows[index].vendor.id : null ),
-                            code: ( xRows[index].vendor != null ? xRows[index].vendor.code : '' ),
-                            name: ( xRows[index].vendor != null ? xRows[index].vendor.name : null ) ,
+                            id: (xRows[index].vendor_id != null ? await _utilInstance.encrypt((xRows[index].vendor_id).toString(), config.cryptoKey.hashKey) : null),
+                            code: (xRows[index].vendor_id != null ? xRows[index].vendor_code : ''),
+                            name: (xRows[index].vendor_id != null ? xRows[index].vendor_name : null),
                         },
                         merk: xRows[index].merk,
                         brochure: xRows[index].file_brochure,
 
                         photo: {
-                            photo_1: ( ( xRows[index].product.photo_1 != null && xRows[index].product.photo_1 != '' ) ? ( config.frontParam.photoPath.product.product1 + xRows[index].product.photo_1 ) : null ),
-                            photo_2: ( ( xRows[index].product.photo_2 != null && xRows[index].product.photo_2 != '' ) ? ( config.frontParam.photoPath.product.product2 + xRows[index].product.photo_2 ) : null ),
-                            photo_3: ( ( xRows[index].product.photo_3 != null && xRows[index].product.photo_3 != '' ) ? ( config.frontParam.photoPath.product.product3 + xRows[index].product.photo_3 ) : null ),
-                            photo_4: ( ( xRows[index].product.photo_4 != null && xRows[index].product.photo_4 != '' ) ? ( config.frontParam.photoPath.product.product4 + xRows[index].product.photo_4 ) : null ),
-                            photo_5: ( ( xRows[index].product.photo_5 != null && xRows[index].product.photo_5 != '' ) ? ( config.frontParam.photoPath.product.product5 + xRows[index].product.photo_5 ) : null ),
+                            photo_1: ((xRows[index].product_photo_1 != null && xRows[index].product_photo_1 != '') ? (config.frontParam.photoPath.product.product1 + xRows[index].product_photo_1) : null),
+                            photo_2: ((xRows[index].product_photo_2 != null && xRows[index].product_photo_2 != '') ? (config.frontParam.photoPath.product.product2 + xRows[index].product_photo_2) : null),
+                            photo_3: ((xRows[index].product_photo_3 != null && xRows[index].product_photo_3 != '') ? (config.frontParam.photoPath.product.product3 + xRows[index].product_photo_3) : null),
+                            photo_4: ((xRows[index].product_photo_4 != null && xRows[index].product_photo_4 != '') ? (config.frontParam.photoPath.product.product4 + xRows[index].product_photo_4) : null),
+                            photo_5: ((xRows[index].product_photo_5 != null && xRows[index].product_photo_5 != '') ? (config.frontParam.photoPath.product.product5 + xRows[index].product_photo_5) : null),
                         },
 
                         currency: xRows[index].currency,
                         last_price: xRows[index].last_price,
-                        last_ordered: ( xRows[index].last_ordered != null && xRows[index].last_ordered != '' ? moment(xRows[index].last_ordered).format('YYYY-MM-DD') : '' ),
+                        last_ordered: (xRows[index].last_ordered != null && xRows[index].last_ordered != '' ? moment(xRows[index].last_ordered).format('YYYY-MM-DD') : ''),
                         last_purchase_plant: xRows[index].last_purchase_plant,
                         description: xRows[index].description,
                         uom_id: xRows[index].uom_id,
@@ -433,7 +431,7 @@ class VendorCatalogueService {
                         purchase_uom_id: xRows[index].purchase_uom_id,
                         purchase_uom_name: xRows[index].purchase_uom_name,
                         catalogue_type: xRows[index].catalogue_type,
-                        catalogue_type_name: ( xRows[index].catalogue_type == 1 ? 'Bahan Baku' : ( xRows[index].catalogue_type == 2 ? 'Umum' : null )),
+                        catalogue_type_name: (xRows[index].catalogue_type == 1 ? 'Bahan Baku' : (xRows[index].catalogue_type == 2 ? 'Umum' : null)),
                     });
                 }
                 xJoResult = {
@@ -442,18 +440,18 @@ class VendorCatalogueService {
                     total_record: xResultList.count,
                     data: xJoArrData,
                 }
-            }else{
+            } else {
                 xJoResult = {
                     status_code: "-99",
                     status_msg: "Data not found",
                 };
             }
-        }       
+        }
 
         return xJoResult;
     }
 
-    async dropDownFPB( pParam  ){
+    async dropDownFPB(pParam) {
         var xJoResult = {};
         var xJoArrData = [];
         var xFlagProcess = true;
@@ -461,9 +459,9 @@ class VendorCatalogueService {
         var xResultList = await _vendorCatalogueRepoInstance.getProductList(pParam);
 
 
-        if( xResultList.data.length > 0 ){
+        if (xResultList.data.length > 0) {
             var xRows = xResultList.data;
-            for( var index in xRows ){
+            for (var index in xRows) {
 
                 xJoArrData.push({
                     product: {
@@ -483,44 +481,44 @@ class VendorCatalogueService {
                 status_msg: "OK",
                 data: xJoArrData,
             }
-        }else{
+        } else {
             xJoResult = {
                 status_code: "-99",
                 status_msg: "Data not found",
             };
-        }       
+        }
 
         return xJoResult;
     }
 
-    async save( pParam ){
+    async save(pParam) {
         var xJoResult;
         var xAct = pParam.act;
         var xFlagProcess = true;
 
         delete pParam.act;
 
-        if( xAct == 'add' || xAct == 'update' ){
+        if (xAct == 'add' || xAct == 'update') {
 
             // Decrypt vendor_id
-            if( (pParam.vendor_id).length == 65 ){
-                var xDecId = await _utilInstance.decrypt( pParam.vendor_id,config.cryptoKey.hashKey );
-                if( xDecId.status_code == '00' ){
+            if ((pParam.vendor_id).length == 65) {
+                var xDecId = await _utilInstance.decrypt(pParam.vendor_id, config.cryptoKey.hashKey);
+                if (xDecId.status_code == '00') {
                     pParam.vendor_id = xDecId.decrypted;
-                }else{
+                } else {
                     xFlagProcess = false;
                     xJoResult = xDecId;
                 }
-            }           
+            }
 
-            if( xFlagProcess ){
+            if (xFlagProcess) {
 
                 // Get Product Info
-                var xProductDetail = await _productRepoInstance.getProductById( { id: pParam.product_id } );
-                var xUnitDetail = await _unitRepoInstance.getById( {id: pParam.uom_id} );
-                var xPurchaseUnitDetail = await _unitRepoInstance.getById( {id: pParam.purchase_uom_id} );
+                var xProductDetail = await _productRepoInstance.getProductById({ id: pParam.product_id });
+                var xUnitDetail = await _unitRepoInstance.getById({ id: pParam.uom_id });
+                var xPurchaseUnitDetail = await _unitRepoInstance.getById({ id: pParam.purchase_uom_id });
 
-                if( xProductDetail != null && xUnitDetail != null && xPurchaseUnitDetail != null){
+                if (xProductDetail != null && xUnitDetail != null && xPurchaseUnitDetail != null) {
 
                     pParam.product_code = xProductDetail.code;
                     pParam.product_name = xProductDetail.name;
@@ -529,122 +527,122 @@ class VendorCatalogueService {
                     pParam.uom_name = xUnitDetail.name;
                     pParam.purchase_uom_name = xPurchaseUnitDetail.name;
 
-                    if( xAct == "add" ){            
+                    if (xAct == "add") {
 
                         // User Id
-                        var xDecId = await _utilInstance.decrypt(pParam.user_id,config.cryptoKey.hashKey);
+                        var xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
                         pParam.created_by = xDecId.decrypted;
                         pParam.created_by_name = pParam.user_name;
-            
-                        var xAddResult = await _vendorCatalogueRepoInstance.save( pParam, xAct );
+
+                        var xAddResult = await _vendorCatalogueRepoInstance.save(pParam, xAct);
                         xJoResult = xAddResult;
-                    }else if( xAct == "update" ){
-            
-                        var xDecId = await _utilInstance.decrypt(pParam.id,config.cryptoKey.hashKey);
-                        if( xDecId.status_code == "00" ){
-                            pParam.id = xDecId.decrypted;                    
-                            xDecId = await _utilInstance.decrypt(pParam.user_id,config.cryptoKey.hashKey);
-                            if( xDecId.status_code == "00" ){
+                    } else if (xAct == "update") {
+
+                        var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+                        if (xDecId.status_code == "00") {
+                            pParam.id = xDecId.decrypted;
+                            xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+                            if (xDecId.status_code == "00") {
                                 pParam.updated_by = xDecId.decrypted;
                                 pParam.updated_by_name = pParam.user_name;
-                            }else{
+                            } else {
                                 xFlagProcess = false;
                                 xJoResult = xDecId;
                             }
-                        }else{
+                        } else {
                             xFlagProcess = false;
                             xJoResult = xDecId;
                         }
-            
-                        if( xFlagProcess ){
-                            var xAddResult = await _vendorCatalogueRepoInstance.save( pParam, xAct );
+
+                        if (xFlagProcess) {
+                            var xAddResult = await _vendorCatalogueRepoInstance.save(pParam, xAct);
                             xJoResult = xAddResult;
                         }
-                        
+
                     }
-                }else{
+                } else {
                     xJoResult = {
                         status_code: "-99",
                         status_msg: "Product not found",
                     }
-                }   
-                
-            }    
-        }else if(xAct == 'update_by_vendor_id_product_id'){
-            xJoResult = await _vendorCatalogueRepoInstance.save( pParam, xAct );            
-        }    
+                }
+
+            }
+        } else if (xAct == 'update_by_vendor_id_product_id') {
+            xJoResult = await _vendorCatalogueRepoInstance.save(pParam, xAct);
+        }
 
         return xJoResult;
     }
 
-    async delete( pParam ){
+    async delete(pParam) {
         var xJoResult;
-        var xFlagProcess = true;       
+        var xFlagProcess = true;
 
-        var xDecId = await _utilInstance.decrypt(pParam.id,config.cryptoKey.hashKey);
-        if( xDecId.status_code == "00" ){
-            pParam.id = xDecId.decrypted;                    
-            xDecId = await _utilInstance.decrypt(pParam.user_id,config.cryptoKey.hashKey);
-            if( xDecId.status_code == "00" ){
+        var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+        if (xDecId.status_code == "00") {
+            pParam.id = xDecId.decrypted;
+            xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+            if (xDecId.status_code == "00") {
                 pParam.deleted_by = xDecId.decrypted;
                 pParam.deleted_by_name = pParam.user_name;
-            }else{
+            } else {
                 xFlagProcess = false;
                 xJoResult = xDecId;
             }
-        }else{
+        } else {
             xFlagProcess = false;
             xJoResult = xDecId;
         }
 
-        if( xFlagProcess ){
+        if (xFlagProcess) {
 
-            var xDeleteResult = await _vendorCatalogueRepoInstance.delete( pParam );
+            var xDeleteResult = await _vendorCatalogueRepoInstance.delete(pParam);
             xJoResult = xDeleteResult;
-            
+
         }
 
         return xJoResult;
 
     }
 
-    async updatePriceFromOdoo( pParam ){
+    async updatePriceFromOdoo(pParam) {
 
         var xJoResult = {};
         var xJoDataResult = [];
 
         var xRows = pParam.product;
-        
+
         // Loop each line
-        for( var index in xRows ){
+        for (var index in xRows) {
             // Check Vendor Code and Product Code
             var xVendorCatalogue = await _vendorCatalogueRepoInstance.getByVendorCodeAndProductCode({
                 vendor_code: pParam.vendor.code,
                 product_code: xRows[index].product.default_code,
             });
 
-            if( xVendorCatalogue != null ){
+            if (xVendorCatalogue != null) {
                 // Process update price
                 console.log(">>> Vendor Catalogue Detail : " + JSON.stringify(xVendorCatalogue));
 
                 // Get uom_id 
-                var xUom = await _unitRepoInstance.getByName( {name: xRows[index].uom.name} );
+                var xUom = await _unitRepoInstance.getByName({ name: xRows[index].uom.name });
 
                 // Get Purchase uom_id
                 // var xPurUom = await _unitRepoInstance.getByName( { name: xRows[index].product_uom } );
 
                 // Get Currency
-                var xCurrency = await _currencyRepoInstance.getByCode( {code: xRows[index].currency.name} );
+                var xCurrency = await _currencyRepoInstance.getByCode({ code: xRows[index].currency.name });
 
                 var xParamUpdate = {
                     id: xVendorCatalogue.id,
-                    uom_id: ( xUom != null ? xUom.id : null ),
-                    uom_name: ( xUom != null ? xUom.name : null ),
-                    purchase_uom_id: ( xUom != null ? xUom.id : null ),
-                    purchase_uom_name: ( xUom != null ? xUom.name : null ),
+                    uom_id: (xUom != null ? xUom.id : null),
+                    uom_name: (xUom != null ? xUom.name : null),
+                    purchase_uom_id: (xUom != null ? xUom.id : null),
+                    purchase_uom_name: (xUom != null ? xUom.name : null),
                     last_price: xRows[index].price_unit,
                     last_ordered: xRows[index].createdat,
-                    currency_id: (xCurrency != null ? xCurrency.id : null),                    
+                    currency_id: (xCurrency != null ? xCurrency.id : null),
                     purchase_frequency: sequelize.literal('purchase_frequency + 1'),
 
                 };
@@ -653,14 +651,14 @@ class VendorCatalogueService {
                     product_code: xRows[index].product.default_code,
                     status: true,
                 })
-                
-            }else{
+
+            } else {
                 xJoDataResult.push({
                     product_code: xRows[index].product.default_code,
                     status: false,
                 })
             }
-        }        
+        }
 
         xJoResult = {
             status_code: '00',
@@ -671,41 +669,41 @@ class VendorCatalogueService {
 
     }
 
-    async getVendorByProductId( pParam  ){
+    async getVendorByProductId(pParam) {
         var xJoResult = {};
         var xJoArrData = [];
         var xFlagProcess = true;
 
         // Decrypt vendor_id
-        if( pParam.hasOwnProperty('product_id') ){
-            if( pParam.product_id != '' ){
-                if( (pParam.product_id).length == 65 ){
-                    var xDecId = await _utilInstance.decrypt( pParam.product_id, config.cryptoKey.hashKey );
-                    if( xDecId.status_code == '00' ){
+        if (pParam.hasOwnProperty('product_id')) {
+            if (pParam.product_id != '') {
+                if ((pParam.product_id).length == 65) {
+                    var xDecId = await _utilInstance.decrypt(pParam.product_id, config.cryptoKey.hashKey);
+                    if (xDecId.status_code == '00') {
                         pParam.product_id = xDecId.decrypted;
-                    }else{
+                    } else {
                         xJoResult = xDecId;
                         xFlagProcess = false;
                     }
-                }                
+                }
             }
         }
 
-        if( xFlagProcess ){
+        if (xFlagProcess) {
             var xResultList = await _vendorCatalogueRepoInstance.getVendorByProductId(pParam);
 
-            if( xResultList.count > 0 ){
+            if (xResultList.count > 0) {
                 var xRows = xResultList.rows;
-                for( var index in xRows ){
+                for (var index in xRows) {
                     xJoArrData.push({
                         id: await _utilInstance.encrypt(xRows[index].vendor.id, config.cryptoKey.hashKey),
                         name: xRows[index].vendor.name,
                         code: xRows[index].vendor.code,
                         logo: xRows[index].vendor.logo,
                         address: xRows[index].vendor.address,
-                        phone1: ( xRows[index].vendor.phone1 != '' ? (await _utilInstance.decrypt( xRows[index].vendor.phone1, config.cryptoKey.hashKey )).decrypted : '' ),
-                        phone2: ( xRows[index].vendor.phone2 != '' ? (await _utilInstance.decrypt( xRows[index].vendor.phone2, config.cryptoKey.hashKey )).decrypted : '' ),
-                        email: ( xRows[index].vendor.email != '' ? (await _utilInstance.decrypt( xRows[index].vendor.email, config.cryptoKey.hashKey )).decrypted : '' ),
+                        phone1: (xRows[index].vendor.phone1 != '' ? (await _utilInstance.decrypt(xRows[index].vendor.phone1, config.cryptoKey.hashKey)).decrypted : ''),
+                        phone2: (xRows[index].vendor.phone2 != '' ? (await _utilInstance.decrypt(xRows[index].vendor.phone2, config.cryptoKey.hashKey)).decrypted : ''),
+                        email: (xRows[index].vendor.email != '' ? (await _utilInstance.decrypt(xRows[index].vendor.email, config.cryptoKey.hashKey)).decrypted : ''),
                         website: xRows[index].vendor.website,
                         location_lat: xRows[index].vendor.location_lat,
                         location_long: xRows[index].vendor.location_long,
@@ -720,13 +718,13 @@ class VendorCatalogueService {
                     total_record: xResultList.count,
                     data: xJoArrData,
                 }
-            }else{
+            } else {
                 xJoResult = {
                     status_code: "-99",
                     status_msg: "Data not found",
                 };
             }
-        }       
+        }
 
         return xJoResult;
     }
