@@ -651,6 +651,7 @@ class VendorCatalogueService {
                     currency_id: (xCurrency != null ? xCurrency.id : null),
                     purchase_frequency: sequelize.literal('purchase_frequency + 1'),
                     last_purchase_plant: pParam.company.name,
+                    sync_from_odoo_at: await _utilInstance.getCurrDateTime(),
 
                 };
                 var xUpdate = await _vendorCatalogueRepoInstance.save(xParamUpdate, 'update');

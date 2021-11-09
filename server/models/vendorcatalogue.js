@@ -1,7 +1,7 @@
 'use strict'
 
-module.exports = ( sequelize, DataTypes ) => {
-    const VendorCatalogue = sequelize.define( 'ms_vendorcatalogues', {
+module.exports = (sequelize, DataTypes) => {
+    const VendorCatalogue = sequelize.define('ms_vendorcatalogues', {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
@@ -22,10 +22,12 @@ module.exports = ( sequelize, DataTypes ) => {
 
         currency_id: DataTypes.INTEGER,
         purchase_frequency: DataTypes.INTEGER,
-        
+
         last_price: DataTypes.DOUBLE,
         last_ordered: DataTypes.DATE,
         last_purchase_plant: DataTypes.STRING,
+        sync_from_odoo_at: DataTypes.DATE,
+
 
         catalogue_type: DataTypes.INTEGER, // 1: Bahan Baku, 2: Umum
 
@@ -36,39 +38,39 @@ module.exports = ( sequelize, DataTypes ) => {
         deleted_by: DataTypes.INTEGER,
         deleted_by_name: DataTypes.STRING,
 
-        createdAt:{
+        createdAt: {
             type: DataTypes.DATE,
             defaultValue: sequelize.literal('NOW()'),
             field: 'created_at'
         },
         created_by: DataTypes.INTEGER,
         created_by_name: DataTypes.STRING,
-        updatedAt:{
+        updatedAt: {
             type: DataTypes.DATE,
             field: 'updated_at'
         },
         updated_by: DataTypes.INTEGER,
         updated_by_name: DataTypes.STRING,
-    } );
+    });
 
-    VendorCatalogue.associate = function( models ){
-        VendorCatalogue.belongsTo( models.ms_products, {
+    VendorCatalogue.associate = function (models) {
+        VendorCatalogue.belongsTo(models.ms_products, {
             foreignKey: 'product_id',
             onDelete: 'CASCADE',
             as: 'product',
-        } );
+        });
 
-        VendorCatalogue.belongsTo( models.ms_vendors, {
+        VendorCatalogue.belongsTo(models.ms_vendors, {
             foreignKey: 'vendor_id',
             onDelete: 'CASCADE',
             as: 'vendor',
-        } );
+        });
 
-        VendorCatalogue.belongsTo( models.ms_currencies, {
+        VendorCatalogue.belongsTo(models.ms_currencies, {
             foreignKey: 'currency_id',
             onDelete: 'CASCADE',
             as: 'currency',
-        } );
+        });
     }
 
     return VendorCatalogue;
