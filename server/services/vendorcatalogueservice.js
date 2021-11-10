@@ -647,7 +647,7 @@ class VendorCatalogueService {
                     purchase_uom_id: (xUom != null ? xUom.id : null),
                     purchase_uom_name: (xUom != null ? xUom.name : null),
                     last_price: xRows[index].price_unit,
-                    last_ordered: xRows[index].createdat,
+                    last_ordered: xRows[index].createdAt,
                     currency_id: (xCurrency != null ? xCurrency.id : null),
                     purchase_frequency: sequelize.literal('purchase_frequency + 1'),
                     last_purchase_plant: pParam.company.name,
