@@ -13,23 +13,35 @@ const _utilInstance = new Utility();
 
 
 
-class ProductCategoryRepository{
-    constructor(){}
+class ProductCategoryRepository {
+    constructor() { }
 
-    async list( pParam ){
+    async list(pParam) {
 
         var xOrder = ['name', 'ASC'];
+        var xWhereAnd_LastUpdated = {};
 
-        if( pParam.order_by != '' && pParam.hasOwnProperty('order_by') ){
-            xOrder = [pParam.order_by, (pParam.order_type == 'desc' ? 'DESC' : 'ASC') ];
+        if (pParam.order_by != '' && pParam.hasOwnProperty('order_by')) {
+            xOrder = [pParam.order_by, (pParam.order_type == 'desc' ? 'DESC' : 'ASC')];
+        }
+
+        // This parameter for sync at ams
+        if (pParam.hasOwnProperty('last_updated')) {
+            if (pParam.last_updated != '') {
+                xWhereAnd_LastUpdated = Sequelize.where(
+                    Sequelize.fn(
+                        'DATE', Sequelize.col('updated_at')), '>=', pParam.last_updated
+                )
+            }
         }
 
         var xParamQuery = {
             where: {
-                [Op.and]:[
+                [Op.and]: [
                     {
                         is_delete: 0
-                    }
+                    },
+                    xWhereAnd_LastUpdated,
                 ],
                 [Op.or]: [
                     {
@@ -38,14 +50,17 @@ class ProductCategoryRepository{
                         },
                     },
                 ]
-            },            
+            },
             order: [xOrder],
         };
 
-        if( pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit') ){
-            if( pParam.offset != '' && pParam.limit != ''){
-                xParamQuery.offset = pParam.offset;
-                xParamQuery.limit = pParam.limit;
+        if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
+            if (pParam.offset != '' && pParam.limit != '') {
+                if (pParam.limit != 'all') {
+                    xParamQuery.offset = pParam.offset;
+                    xParamQuery.limit = pParam.limit;
+                }
+
             }
         }
 
@@ -54,29 +69,29 @@ class ProductCategoryRepository{
         return xData;
     }
 
-    async isDataExists( pName ){
+    async isDataExists(pName) {
         var data = await _modelDb.findOne({
             where: {
                 name: pName,
                 is_delete: 0
             }
         });
-        
+
         return data;
     }
 
-    async getProductCategoryByERPId( pParam ){
+    async getProductCategoryByERPId(pParam) {
         var data = await _modelDb.findOne({
             where: {
                 erp_id: pParam.erp_id,
                 is_delete: 0
             }
         });
-        
+
         return data;
     }
 
-    async getProductById( pParam ){
+    async getProductById(pParam) {
         var xData = await _modelDb.findOne({
             where: {
                 id: pParam.id,
@@ -87,55 +102,55 @@ class ProductCategoryRepository{
         return xData;
     }
 
-    async save(pParam, pAct){
+    async save(pParam, pAct) {
         let xTransaction;
         var xJoResult = {};
-        
-        try{
+
+        try {
 
             var xSaved = null;
             xTransaction = await sequelize.transaction();
 
-            if( pAct == "add" ){
+            if (pAct == "add") {
 
                 pParam.status = 1;
                 pParam.is_delete = 0;
 
-                xSaved = await _modelDb.create(pParam, {xTransaction}); 
+                xSaved = await _modelDb.create(pParam, { xTransaction });
 
-                if( xSaved.id != null ){
+                if (xSaved.id != null) {
 
                     await xTransaction.commit();
 
                     xJoResult = {
                         status_code: "00",
                         status_msg: "Data has been successfully saved",
-                        created_id: await _utilInstance.encrypt( (xSaved.id).toString(), config.cryptoKey.hashKey ),
-                    }                     
-                    
+                        created_id: await _utilInstance.encrypt((xSaved.id).toString(), config.cryptoKey.hashKey),
+                    }
 
-                }else{
 
-                    if( xTransaction ) await xTransaction.rollback();
+                } else {
+
+                    if (xTransaction) await xTransaction.rollback();
 
                     xJoResult = {
                         status_code: "-99",
                         status_msg: "Failed save to database",
                     }
 
-                }                
+                }
 
-            }else if( pAct == "update" ){
-                
+            } else if (pAct == "update") {
+
                 pParam.updatedAt = await _utilInstance.getCurrDateTime();
                 var xId = pParam.id;
                 delete pParam.id;
                 var xWhere = {
-                    where : {
+                    where: {
                         id: xId,
                     }
                 };
-                xSaved = await _modelDb.update( pParam, xWhere, {xTransaction} );
+                xSaved = await _modelDb.update(pParam, xWhere, { xTransaction });
 
                 await xTransaction.commit();
 
@@ -146,25 +161,25 @@ class ProductCategoryRepository{
 
             }
 
-        }catch(e){
-            if( xTransaction ) await xTransaction.rollback();
+        } catch (e) {
+            if (xTransaction) await xTransaction.rollback();
             xJoResult = {
                 status_code: "-99",
                 status_msg: "Failed save or update data. Error : " + e,
                 err_msg: e
             }
 
-            
+
         }
-        
+
         return xJoResult;
     }
 
-    async delete( pParam ){
+    async delete(pParam) {
         let xTransaction;
         var xJoResult = {};
 
-        try{
+        try {
             var xSaved = null;
             xTransaction = await sequelize.transaction();
 
@@ -180,9 +195,9 @@ class ProductCategoryRepository{
                         id: pParam.id
                     }
                 },
-                {xTransaction}
+                { xTransaction }
             );
-    
+
             await xTransaction.commit();
 
             xJoResult = {
@@ -192,8 +207,8 @@ class ProductCategoryRepository{
 
             return xJoResult;
 
-        }catch(e){
-            if( xTransaction ) await xTransaction.rollback();
+        } catch (e) {
+            if (xTransaction) await xTransaction.rollback();
             xJoResult = {
                 status_code: "-99",
                 status_msg: "Failed save or update data",
