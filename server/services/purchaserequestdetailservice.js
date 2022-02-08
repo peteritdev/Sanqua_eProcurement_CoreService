@@ -39,6 +39,8 @@ class PurchaseRequestDetailService {
 		var xDecId = null;
 		var xRequestIdClear = 0;
 
+		console.log(`>>> Items : ${JSON.stringify(pParam)}`);
+
 		delete pParam.act;
 
 		if (pParam.hasOwnProperty('user_id') && pParam.hasOwnProperty('request_id')) {
@@ -157,8 +159,6 @@ class PurchaseRequestDetailService {
 				xJoResult = xAddResult;
 			}
 			if (xAct == 'add_batch') {
-				console.log(`>>> Items : ${JSON.stringify(pParam)}`);
-
 				if (pParam.hasOwnProperty('items')) {
 					var xItems = pParam.items;
 					for (var i in xItems) {
