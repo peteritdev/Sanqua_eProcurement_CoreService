@@ -39,7 +39,7 @@ class PurchaseRequestDetailService {
 		var xDecId = null;
 		var xRequestIdClear = 0;
 
-		console.log(`>>> Items : ${JSON.stringify(pParam)}`);
+		console.log(`>>> pParam [PurchaseRequestDetailService] : ${JSON.stringify(pParam)}`);
 
 		delete pParam.act;
 
