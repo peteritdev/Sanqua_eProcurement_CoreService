@@ -396,7 +396,6 @@ class VendorCatalogueService {
 
 		if (xFlagProcess) {
 			var xResultList = await _vendorCatalogueRepoInstance.list_new(pParam);
-			console.log(`>>> Result : ${JSON.stringify(xResultList)}`);
 
 			if (xResultList.data.length > 0) {
 				var xRows = xResultList.data;
