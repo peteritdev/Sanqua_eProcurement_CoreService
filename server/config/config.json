@@ -183,10 +183,10 @@
       "fpb": "tr_purchaserequests"
     },
     "username": "postgres",
-    "password": "SANQUAD0ck3rP912",
+    "password": "T0b3L1k3Jesus^^)ok",
     "database": "sanqua_procurementdb",
-    "host": "127.0.0.1",
-    "port":5435,
+    "host": "10.10.20.9",
+    "port":5432,
     "dialect": "postgres",
     "dialectOptions": {
       "dateStrings": true,
