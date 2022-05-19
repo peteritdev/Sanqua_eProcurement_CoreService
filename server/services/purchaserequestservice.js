@@ -308,6 +308,7 @@ class PurchaseRequestService {
 						code: xResult.company_code,
 						name: xResult.company_name
 					},
+					pr_category: xResult.pr_category,
 
 					created_at: xResult.createdAt != null ? moment(xResult.createdAt).format('DD MMM YYYY') : ''
 				};
