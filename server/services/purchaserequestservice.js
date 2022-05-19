@@ -382,7 +382,7 @@ class PurchaseRequestService {
 					}
 					let xParamPROdoo = {
 						name: 'new',
-						company_id: pParam.logged_company_id,
+						company_id: xPRDetail.company_id == null ? pParam.logged_company_id : xPRDetail.company_id,
 						date_order: await _utilInstance.getCurrDate(),
 						status: 'waiting_approval',
 						purchase_order_type: xPRDetail.pr_category == null ? 'lain' : xPRDetail.pr_category,
