@@ -152,7 +152,7 @@
         }
       },
       "eSanqua": "http://localhost:1193/api/esanqua/v1",
-      "odoo": "http://localhost:8069/api"
+      "odoo": "https://dev-erp.sanquawater.co.id/api"
     },
 
     "login":{
