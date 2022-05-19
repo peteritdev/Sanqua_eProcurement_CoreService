@@ -260,16 +260,16 @@ class PurchaseRequestService {
 				}
 
 				// Get Approval Matrix
-				var xParamApprovalMatrix = {
-					application_id: config.applicationId,
-					table_name: config.dbTables.fpb,
-					document_id: xEncId
-				};
-				var xResultApprovalMatrix = await _oAuthService.getApprovalMatrix(
-					pParam.method,
-					pParam.token,
-					xParamApprovalMatrix
-				);
+				// var xParamApprovalMatrix = {
+				// 	application_id: config.applicationId,
+				// 	table_name: config.dbTables.fpb,
+				// 	document_id: xEncId
+				// };
+				// var xResultApprovalMatrix = await _oAuthService.getApprovalMatrix(
+				// 	pParam.method,
+				// 	pParam.token,
+				// 	xParamApprovalMatrix
+				// );
 
 				xJoData = {
 					id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
@@ -297,11 +297,11 @@ class PurchaseRequestService {
 
 					purchase_request_detail: xJoArrRequestDetailData,
 
-					approval_matrix:
-						xResultApprovalMatrix.status_code == '00' &&
-						xResultApprovalMatrix.token_data.status_code == '00'
-							? xResultApprovalMatrix.token_data.data
-							: null,
+					// approval_matrix:
+					// 	xResultApprovalMatrix.status_code == '00' &&
+					// 	xResultApprovalMatrix.token_data.status_code == '00'
+					// 		? xResultApprovalMatrix.token_data.data
+					// 		: null,
 
 					company: {
 						id: xResult.company_id,
@@ -335,55 +335,95 @@ class PurchaseRequestService {
 		var xEncId = '';
 		var xClearId = '';
 
-		if (pParam.id != '' && pParam.user_id != '') {
-			xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
-			if (xDecId.status_code == '00') {
-				xFlagProcess = true;
-				xEncId = pParam.id;
-				pParam.id = xDecId.decrypted;
-				xClearId = xDecId.decrypted;
-				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+		try {
+			if (pParam.id != '' && pParam.user_id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
 				if (xDecId.status_code == '00') {
-					pParam.user_id = xDecId.decrypted;
 					xFlagProcess = true;
+					xEncId = pParam.id;
+					pParam.id = xDecId.decrypted;
+					xClearId = xDecId.decrypted;
+					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.user_id = xDecId.decrypted;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xDecId;
+					}
 				} else {
 					xJoResult = xDecId;
 				}
-			} else {
-				xJoResult = xDecId;
 			}
-		}
 
-		if (xFlagProcess) {
-			pParam.requested_at = await _utilInstance.getCurrDateTime();
-			pParam.status = 1;
+			if (xFlagProcess) {
+				pParam.requested_at = await _utilInstance.getCurrDateTime();
+				pParam.status = 1;
 
-			var xUpdateResult = await _repoInstance.save(pParam, 'submit_fpb');
-			xJoResult = xUpdateResult;
-			// Next Phase : Approval Matrix & Notification to admin
-			if (xUpdateResult.status_code == '00') {
-				// Get PR Detail
-				var xPRDetail = await _repoInstance.getById({ id: xClearId });
-				if (xPRDetail != null) {
-					// Add Approval Matrix
-					var xParamAddApprovalMatrix = {
-						act: 'add',
-						document_id: xEncId,
-						document_no: xPRDetail.request_no,
-						application_id: config.applicationId,
-						table_name: config.dbTables.fpb
+				var xUpdateResult = await _repoInstance.save(pParam, 'submit_fpb');
+				xJoResult = xUpdateResult;
+				// Next Phase : Hit to Odoo to create PR
+				// if (true) {
+				if (xUpdateResult.status_code == '00') {
+					// Get PR Detail
+					var xPRDetail = await _repoInstance.getById({ id: xClearId });
+					// console.log(`>>> xPRDetail: ${JSON.stringify(xPRDetail)}`);
+
+					// Create PR At Odoo
+					let xParamPRDetailOdoo = [];
+					if (xPRDetail) {
+						if (xPRDetail.hasOwnProperty('purchase_request_detail')) {
+							for (var i in xPRDetail.purchase_request_detail) {
+								xParamPRDetailOdoo.push({
+									product_code: xPRDetail.purchase_request_detail[i].product_code,
+									qty: xPRDetail.purchase_request_detail[i].qty
+								});
+							}
+						}
+					}
+					let xParamPROdoo = {
+						name: 'new',
+						company_id: pParam.logged_company_id,
+						date_order: await _utilInstance.getCurrDate(),
+						status: 'waiting_approval',
+						purchase_order_type: xPRDetail.pr_category == null ? 'lain' : xPRDetail.pr_category,
+						user_sanqua: pParam.user_name,
+						no_fpb: xPRDetail.request_no,
+						line_ids: xParamPRDetailOdoo
 					};
 
-					var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
-						pParam.method,
-						pParam.token,
-						xParamAddApprovalMatrix
-					);
-					console.log(`>>> Result Approval Matrix : ${JSON.stringify(xApprovalMatrixResult)}`);
+					let xOdooResult = await _oAuthService.addPRToOdoo(xParamPROdoo);
+					console.log(`>>> xOdooResult: ${JSON.stringify(xOdooResult)}`);
+					xJoResult.odoo_result = xOdooResult;
 
-					xJoResult.approval_matrix_result = xApprovalMatrixResult;
+					// console.log(`>>> xPRDetail: ${JSON.stringify(xParamPROdoo)}`);
+
+					// Note: No need approval matrix, since approval will be done by odoo
+					/*if (xPRDetail != null) {
+						// Add Approval Matrix
+						var xParamAddApprovalMatrix = {
+							act: 'add',
+							document_id: xEncId,
+							document_no: xPRDetail.request_no,
+							application_id: config.applicationId,
+							table_name: config.dbTables.fpb
+						};
+	
+						var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
+							pParam.method,
+							pParam.token,
+							xParamAddApprovalMatrix
+						);
+						console.log(`>>> Result Approval Matrix : ${JSON.stringify(xApprovalMatrixResult)}`);
+	
+						xJoResult.approval_matrix_result = xApprovalMatrixResult;
+					}*/
 				}
 			}
+		} catch (e) {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Exception error <purchaserequestservice.submitFPB>:${e.message}`
+			};
 		}
 
 		return xJoResult;

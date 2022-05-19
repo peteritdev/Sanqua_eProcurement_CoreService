@@ -51,7 +51,7 @@
 
       "oAuth": {
         "url": {
-          "verifyToken": "http://localhost:9189/api/oauth/v1/user/verify_token",
+          "verifyToken": "http://10.10.20.8:9189/api/oauth/v1/user/verify_token",
           "approval_matrix_document": {
             "save": "http://localhost:9189/api/oauth/v1/approval_matrix/document/save",
             "list": "http://localhost:9189/api/oauth/v1/approval_matrix/document/list",
@@ -61,7 +61,9 @@
         }
       },
 
-      "eSanqua": "http://localhost:1193/api/esanqua/v1"
+      "eSanqua": "http://localhost:1193/api/esanqua/v1",
+
+      "odoo": "http://localhost:8069/api"
     },
 
     "login":{
@@ -149,7 +151,8 @@
           }
         }
       },
-      "eSanqua": "http://localhost:1193/api/esanqua/v1"
+      "eSanqua": "http://localhost:1193/api/esanqua/v1",
+      "odoo": "http://localhost:8069/api"
     },
 
     "login":{
@@ -230,7 +233,8 @@
         }
       },
 
-      "eSanqua": "http://localhost:1193/api/esanqua/v1"
+      "eSanqua": "http://localhost:1193/api/esanqua/v1",
+      "odoo": "http://localhost:8069/api"
     },
 
     "login":{
