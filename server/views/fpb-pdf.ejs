@@ -61,21 +61,112 @@
                 <td colspan="2" style="padding-left:100px;">
                     <table style="text-align: left;" cellpadding="2" cellspacing="2"> 
                         <tr>
-                            <td><img src="<%=imagePath%>blank_checklist.png" width="15"></td>
+                            <td>
+                                <%
+                                    if(data.data.category_item == 1){
+                                %>
+                                    <img src="<%=imagePath%>checklist.png" width="15">
+                                <%
+                                    }else{
+                                %>
+                                    <img src="<%=imagePath%>blank_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+                                
+                            </td>
                             <td>Raw Material</td>
-                            <td><img src="<%=imagePath%>blank_checklist.png" width="15"></td>
+                            <td>
+                                <%
+                                    if(data.data.category_item == 3){
+                                %>
+                                    <img src="<%=imagePath%>checklist.png" width="15">
+                                <%
+                                    }else{
+                                %>
+                                    <img src="<%=imagePath%>blank_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+                                
+                            </td>
                             <td>Office Supply</td>
-                            <td><img src="<%=imagePath%>blank_checklist.png" width="15"></td>
+                            <td>
+                                <%
+                                    if(data.data.category_item == 5){
+                                %>
+                                    <img src="<%=imagePath%>checklist.png" width="15">
+                                <%
+                                    }else{
+                                %>
+                                    <img src="<%=imagePath%>blank_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+                                
+                            </td>
                             <td>Jasa</td>
-                            <td rowspan="2" style="padding-left:30px;"><img src="<%=imagePath%>blank_checklist.png" width="15"></td>
+                            <td>
+                                <%
+                                    if(data.data.category_item == 7){
+                                %>
+                                    <img src="<%=imagePath%>checklist.png" width="15">
+                                <%
+                                    }else{
+                                %>
+                                    <img src="<%=imagePath%>blank_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+                                
+                            </td>
                             <td rowspan="2" ><strong style="font-size: 10px;">Investment / Asset*</strong></td>
                         </tr>
                         <tr>
-                            <td><img src="<%=imagePath%>blank_checklist.png" width="15"></td>
+                            <td>
+                                <%
+                                    if(data.data.category_item == 2){
+                                %>
+                                    <img src="<%=imagePath%>checklist.png" width="15">
+                                <%
+                                    }else{
+                                %>
+                                    <img src="<%=imagePath%>blank_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+                                
+                            </td>
                             <td>Factory Supply</td>
-                            <td><img src="<%=imagePath%>blank_checklist.png" width="15"></td>
+                            <td>
+                                <%
+                                    if(data.data.category_item == 4){
+                                %>
+                                    <img src="<%=imagePath%>checklist.png" width="15">
+                                <%
+                                    }else{
+                                %>
+                                    <img src="<%=imagePath%>blank_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+                                
+                            </td>
                             <td>Sparepart</td>
-                            <td><img src="<%=imagePath%>blank_checklist.png" width="15"></td>
+                            <td>
+                                <%
+                                    if(data.data.category_item == 6){
+                                %>
+                                    <img src="<%=imagePath%>checklist.png" width="15">
+                                <%
+                                    }else{
+                                %>
+                                    <img src="<%=imagePath%>blank_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+                                
+                            </td>
                             <td>Maintenance Repair</td>
                         </tr>
                     </table>

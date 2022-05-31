@@ -25,6 +25,16 @@ module.exports = (sequelize, DataTypes) => {
 		total_price: DataTypes.DOUBLE,
 
 		pr_category: DataTypes.STRING, // bahan_baku, bahan_pendukung, asset, barang_khusus, operasional, amdk, lain
+		category_item: DataTypes.INTEGER,
+		/*
+			1: Raw Material
+			2: Factory Supply
+			3: Office Supply
+			4: Sparepart
+			5: Jasa
+			6: Maintenance Repar
+			7: Investment / Asset
+		*/
 
 		is_delete: DataTypes.INTEGER,
 		deleted_at: DataTypes.DATE,
