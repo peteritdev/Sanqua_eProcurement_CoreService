@@ -306,8 +306,8 @@ class VendorCatalogueRepository {
 			'               INNER JOIN ms_currencies c ON c.id = vc.currency_id ' +
 			' WHERE ' +
 			xSqlWhere +
-			xSqlLimit +
-			xSqlOrderBy;
+			xSqlOrderBy +
+			xSqlLimit;
 
 		let xSqlCount =
 			' SELECT COUNT(0) AS total_record ' +
