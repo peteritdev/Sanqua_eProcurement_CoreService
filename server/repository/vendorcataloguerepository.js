@@ -241,7 +241,11 @@ class VendorCatalogueRepository {
 		if (pParam.hasOwnProperty('order_by')) {
 			if (pParam.order_by != '') {
 				xSqlOrderBy = ` ORDER BY ${pParam.order_by} ${pParam.order_type != '' ? pParam.order_type : 'ASC'}`;
+			} else {
+				xSqlOrderBy = ` ORDER BY vc.updated_at DESC`;
 			}
+		} else {
+			xSqlOrderBy = ` ORDER BY vc.updated_at DESC`;
 		}
 
 		if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
