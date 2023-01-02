@@ -98,7 +98,7 @@
     "username": "postgres",
     "password": "P455uu0rd^^ok",
     "database": "sanqua_procurementdb",
-    "host": "10.10.20.8",
+    "host": "10.10.20.5",
     "port":5435,
     "dialect": "postgres",
     "dialectOptions": {
