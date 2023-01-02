@@ -365,23 +365,48 @@ class PurchaseRequestService {
 				// Get PR Detail
 				var xPRDetail = await _repoInstance.getById({ id: xClearId });
 				if (xPRDetail != null) {
+					// Non Active at: 02-01-2023
+					// Reason: Since we decide create FPB will be generate PR on Odoo.
 					// Add Approval Matrix
-					var xParamAddApprovalMatrix = {
-						act: 'add',
-						document_id: xEncId,
-						document_no: xPRDetail.request_no,
-						application_id: config.applicationId,
-						table_name: config.dbTables.fpb
+					// var xParamAddApprovalMatrix = {
+					// 	act: 'add',
+					// 	document_id: xEncId,
+					// 	document_no: xPRDetail.request_no,
+					// 	application_id: config.applicationId,
+					// 	table_name: config.dbTables.fpb
+					// };
+
+					// var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
+					// 	pParam.method,
+					// 	pParam.token,
+					// 	xParamAddApprovalMatrix
+					// );
+					// xJoResult.approval_matrix_result = xApprovalMatrixResult;
+					// console.log(`>>> Result Approval Matrix : ${JSON.stringify(xApprovalMatrixResult)}`);
+
+					// Active: 02-01-2023
+					// Description: After submit, it will hit api PR on odoo
+					let xLineIds = [];
+					if (xPRDetail.purchase_request_detail != null) {
+						for (var i in xPRDetail.purchase_request_detail) {
+							xLineIds.push({
+								product_code: xPRDetail.purchase_request_detail[i].product_code,
+								qty: xPRDetail.purchase_request_detail[i].qty
+							});
+						}
+					}
+					var xParamOdoo = {
+						name: 'New',
+						company_id: xPRDetail.company_id,
+						date_order: await _utilInstance.getCurrDate(),
+						status: 'waiting_approval',
+						purchase_order_type: xPRDetail.purchase_order_type,
+						user_sanqua: pParam.user_name,
+						no_fpb: xPRDetail.request_no,
+						line_ids: xLineIds
 					};
 
-					var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
-						pParam.method,
-						pParam.token,
-						xParamAddApprovalMatrix
-					);
-					console.log(`>>> Result Approval Matrix : ${JSON.stringify(xApprovalMatrixResult)}`);
-
-					xJoResult.approval_matrix_result = xApprovalMatrixResult;
+					console.log(`>>> xParamOdoo : ${JSON.stringify(xParamOdoo)}`);
 				}
 			}
 		}

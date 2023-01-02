@@ -61,7 +61,8 @@
         }
       },
 
-      "eSanqua": "http://localhost:1193/api/esanqua/v1"
+      "eSanqua": "http://localhost:1193/api/esanqua/v1",
+      "odoo": "http://10.10.20.6:9898/api"
     },
 
     "login":{
@@ -250,6 +251,8 @@
       "useUTC": false,
       "charset": "utf8mb4_unicode_ci"
     },
-    "timezone": "+07:00"
+    "timezone": "+07:00",
+    "imagePath": "http://10.10.20.8:8020/assets/icon/",
+    "imagePathESanQua": "http://10.10.20.8:8020"
   }  
 }
