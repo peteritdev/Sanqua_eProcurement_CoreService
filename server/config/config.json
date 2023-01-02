@@ -99,7 +99,7 @@
     "password": "P455uu0rd^^ok",
     "database": "sanqua_procurementdb",
     "host": "10.10.20.5",
-    "port":5435,
+    "port":5432,
     "dialect": "postgres",
     "dialectOptions": {
       "dateStrings": true,
