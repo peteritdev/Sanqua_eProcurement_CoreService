@@ -38,8 +38,6 @@ class PurchaseRequestService {
 		var xFlagProcess = false;
 		var xDecId = null;
 
-		console.log(`>>> pParam [PurchaseRequestService] : ${JSON.stringify(pParam)}`);
-
 		delete pParam.act;
 
 		if (pParam.hasOwnProperty('user_id')) {
@@ -48,7 +46,7 @@ class PurchaseRequestService {
 				if (xDecId.status_code == '00') {
 					pParam.user_id = xDecId.decrypted;
 					xFlagProcess = true;
-					if (pParam.hasOwnProperty('emplpyee_id')) {
+					if (pParam.hasOwnProperty('employee_id')) {
 						if (pParam.employee_id != '') {
 							xDecId = await _utilInstance.decrypt(pParam.employee_id, config.cryptoKey.hashKey);
 							if (xDecId.status_code == '00') {
