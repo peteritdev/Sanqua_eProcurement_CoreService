@@ -255,7 +255,8 @@ class PurchaseRequestService {
 							xDetail[index].estimate_date_use != null
 								? moment(xDetail[index].estimate_date_use).format('DD MMM YYYY')
 								: '',
-						description: xDetail[index].description
+						description: xDetail[index].description,
+						category_item: xDetail[index].category_item
 					});
 				}
 
