@@ -90,6 +90,12 @@ class PurchaseRequestService {
 								xJoArrItems[i].budget_price_total =
 									xJoArrItems[i].qty * xJoArrItems[i].budget_price_per_unit;
 							}
+
+							if (xJoArrItems[i].hasOwnProperty('estimate_date_use')) {
+								if (xJoArrItems[i].estimate_date_use == '') {
+									xJoArrItems[i].estimate_date_use = null;
+								}
+							}
 						}
 					}
 				}
