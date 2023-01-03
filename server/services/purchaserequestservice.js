@@ -265,8 +265,7 @@ class PurchaseRequestService {
 							xDetail[index].estimate_date_use != null
 								? moment(xDetail[index].estimate_date_use).format('DD MMM YYYY')
 								: '',
-						description: xDetail[index].description,
-						category_item: xDetail[index].category_item
+						description: xDetail[index].description
 					});
 				}
 
@@ -320,6 +319,7 @@ class PurchaseRequestService {
 						name: xResult.company_name
 					},
 
+					category_item: xResult.category_item,
 					created_at: xResult.createdAt != null ? moment(xResult.createdAt).format('DD MMM YYYY') : ''
 				};
 
