@@ -42,18 +42,29 @@ class PurchaseRequestService {
 
 		delete pParam.act;
 
-		if (pParam.hasOwnProperty('user_id') && pParam.hasOwnProperty('employee_id')) {
-			if (pParam.user_id != '' && pParam.employee_id != '') {
+		if (pParam.hasOwnProperty('user_id')) {
+			if (pParam.user_id != '') {
 				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
 				if (xDecId.status_code == '00') {
 					pParam.user_id = xDecId.decrypted;
 					xFlagProcess = true;
-					xDecId = await _utilInstance.decrypt(pParam.employee_id, config.cryptoKey.hashKey);
-					if (xDecId.status_code == '00') {
-						pParam.employee_id = xDecId.decrypted;
-						xFlagProcess = true;
+					if (pParam.hasOwnProperty('emplpyee_id')) {
+						if (pParam.employee_id != '') {
+							xDecId = await _utilInstance.decrypt(pParam.employee_id, config.cryptoKey.hashKey);
+							if (xDecId.status_code == '00') {
+								pParam.employee_id = xDecId.decrypted;
+								xFlagProcess = true;
+							} else {
+								xJoResult = xDecId;
+							}
+						} else {
+							xJoResult = {
+								status_code: '-99',
+								status_msg: 'Parameter employee_id can not be empty'
+							};
+						}
 					} else {
-						xJoResult = xDecId;
+						xFlagProcess = true;
 					}
 				} else {
 					xJoResult = xDecId;
@@ -64,11 +75,6 @@ class PurchaseRequestService {
 					status_msg: 'Parameter user_id can not be empty'
 				};
 			}
-		} else {
-			xJoResult = {
-				status_code: '-99',
-				status_msg: 'You need to supply correct parameter'
-			};
 		}
 
 		if (xFlagProcess) {
