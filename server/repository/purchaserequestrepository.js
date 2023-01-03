@@ -197,6 +197,7 @@ class PurchaseRequestRepository {
 				pParam.created_by = pParam.user_id;
 				pParam.created_by_name = pParam.user_name;
 
+				// Need disable trigger first because it affect when add batch item.
 				sequelize.query(
 					'ALTER TABLE "tr_purchaserequestdetails" DISABLE TRIGGER "trg_update_total_item_afterinsert"'
 				);
