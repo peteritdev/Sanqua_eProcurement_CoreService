@@ -51,11 +51,15 @@ class PurchaseRequestDetailService {
 		if (pParam.hasOwnProperty('user_id') && pParam.hasOwnProperty('request_id')) {
 			// Check if the FPB status already submit or still draft.
 			// If already submit, reject
-			var xPurchaseRequest = await _purchaseRequestServiceInstance.getById({ id: pParam.request_id });
+			var xPurchaseRequest = await _purchaseRequestServiceInstance.getById({
+				id: pParam.request_id,
+				method: pParam.method,
+				token: pParam.token
+			});
 
 			if (xPurchaseRequest != null) {
 				if (xPurchaseRequest.status_code == '00') {
-					if (xPurchaseRequest.data.status == 0) {
+					if (xPurchaseRequest.data.status.id == 0) {
 						xFlagProcess = true;
 					} else {
 						xJoResult = {
@@ -160,10 +164,13 @@ class PurchaseRequestDetailService {
 					pParam.budget_price_total = pParam.qty * pParam.budget_price_per_unit;
 				}
 
+				if (pParam.estimate_date_use == '') {
+					pParam.estimate_date_use = null;
+				}
+
 				var xAddResult = await _repoInstance.save(pParam, xAct);
 				xJoResult = xAddResult;
-			}
-			if (xAct == 'add_batch') {
+			} else if (xAct == 'add_batch') {
 				if (pParam.hasOwnProperty('items')) {
 					var xItems = pParam.items;
 					for (var i in xItems) {
@@ -247,6 +254,9 @@ class PurchaseRequestDetailService {
 						}
 					}
 
+					if (pParam.estimate_date_use == '') {
+						pParam.estimate_date_use = null;
+					}
 					var xUpdateResult = await _repoInstance.save(pParam, xAct);
 					xJoResult = xUpdateResult;
 				}
