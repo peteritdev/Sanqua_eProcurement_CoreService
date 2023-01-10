@@ -39,6 +39,13 @@ module.exports = (sequelize, DataTypes) => {
 		set_to_draft_by: DataTypes.INTEGER,
 		set_to_draft_by_name: DataTypes.STRING,
 
+		closed_at: DataTypes.DATE,
+		closed_by: DataTypes.INTEGER,
+		closed_by_name: DataTypes.STRING,
+		closed_reason: DataTypes.STRING,
+
+		reject_reason: DataTypes.STRING,
+
 		company_id: DataTypes.INTEGER,
 		company_code: DataTypes.STRING,
 		company_name: DataTypes.STRING,

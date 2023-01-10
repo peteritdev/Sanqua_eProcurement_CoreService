@@ -59,11 +59,16 @@ module.exports = (app) => {
 
 	// Confirm FPB
 	arrValidate = [];
+	arrValidate = [ check('document_id').not().isEmpty().withMessage('Parameter document_id cannot be empty') ];
+	app.post(rootAPIPath + 'confirm', arrValidate, purchaseRequestController.purchaseRequest_Confirm);
+
+	// Reject FPB
+	arrValidate = [];
 	arrValidate = [
 		check('document_id').not().isEmpty().withMessage('Parameter document_id cannot be empty'),
-		check('status', 'Parameter status must be integer and cannot be empty').not().isEmpty().isInt()
+		check('reject_reason').not().isEmpty().withMessage('Parameter reject_reason cannot be empty')
 	];
-	app.post(rootAPIPath + 'confirm', arrValidate, purchaseRequestController.purchaseRequest_Confirm);
+	app.post(rootAPIPath + 'reject', arrValidate, purchaseRequestController.purchaseRequest_Reject);
 
 	// List FPB
 	arrValidate = [];

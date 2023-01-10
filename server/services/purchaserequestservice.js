@@ -308,8 +308,10 @@ class PurchaseRequestService {
 
 					status: {
 						id: xResult.status,
-						name: xResult.status == -1 ? 'Cancel' : config.statusDescription.purchaseRequest[xResult.status]
+						name:
+							xResult.status == -1 ? 'Rejected' : config.statusDescription.purchaseRequest[xResult.status]
 					},
+					reject_reason: xResult.reject_reason,
 					requested_at: moment(xResult.requested_at).format('DD MMM YYYY HH:mm'),
 					printed_fpb_at: moment(xResult.printed_fpb_at).format('DD MMM YYYY HH:mm'),
 					submit_price_quotation_at: moment(xResult.submit_price_quotation_at).format('DD MMM YYYY HH:mm'),
@@ -376,63 +378,70 @@ class PurchaseRequestService {
 		}
 
 		if (xFlagProcess) {
-			pParam.requested_at = await _utilInstance.getCurrDateTime();
-			pParam.status = 1;
-
-			var xUpdateResult = await _repoInstance.save(pParam, 'submit_fpb');
-			xJoResult = xUpdateResult;
-			// Next Phase : Approval Matrix & Notification to admin
-			if (xUpdateResult.status_code == '00') {
-				// Get PR Detail
-				var xPRDetail = await _repoInstance.getById({ id: xClearId });
-				if (xPRDetail != null) {
-					// Add Approval Matrix
-					var xParamAddApprovalMatrix = {
-						act: 'add',
-						document_id: xEncId,
-						document_no: xPRDetail.request_no,
-						application_id: config.applicationId,
-						table_name: config.dbTables.fpb,
-						company_id: pParam.logged_company_id,
-						department_id: pParam.logged_department_id
-					};
-
-					var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
-						pParam.method,
-						pParam.token,
-						xParamAddApprovalMatrix
-					);
-					xJoResult.approval_matrix_result = xApprovalMatrixResult;
-
-					// Active: 02-01-2023
-					// Description: After submit, it will hit api PR on odoo
-					// let xLineIds = [];
-					// if (xPRDetail.purchase_request_detail != null) {
-					// 	for (var i in xPRDetail.purchase_request_detail) {
-					// 		xLineIds.push({
-					// 			product_code: xPRDetail.purchase_request_detail[i].product_code,
-					// 			qty: xPRDetail.purchase_request_detail[i].qty
-					// 		});
-					// 	}
-					// }
-					// var xParamOdoo = {
-					// 	name: 'New',
-					// 	company_id: xPRDetail.company_id,
-					// 	date_order: await _utilInstance.getCurrDate(),
-					// 	status: 'waiting_approval',
-					// 	purchase_order_type: xPRDetail.purchase_order_type,
-					// 	user_sanqua: pParam.user_name,
-					// 	no_fpb: xPRDetail.request_no,
-					// 	line_ids: xLineIds
-					// };
-				} else {
-					xJoResult = {
-						status_code: '-99',
-						status_msg: 'Data not found. Please supply valid identifier'
-					};
-				}
+			// Get PR Detail
+			var xPRDetail = await _repoInstance.getById({ id: xClearId });
+			if (xPRDetail.status != 0) {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'You can not submit this document. Please check again.'
+				};
 			} else {
+				pParam.requested_at = await _utilInstance.getCurrDateTime();
+				pParam.status = 1;
+
+				var xUpdateResult = await _repoInstance.save(pParam, 'submit_fpb');
 				xJoResult = xUpdateResult;
+				// Next Phase : Approval Matrix & Notification to admin
+				if (xUpdateResult.status_code == '00') {
+					if (xPRDetail != null) {
+						// Add Approval Matrix
+						var xParamAddApprovalMatrix = {
+							act: 'add',
+							document_id: xEncId,
+							document_no: xPRDetail.request_no,
+							application_id: config.applicationId,
+							table_name: config.dbTables.fpb,
+							company_id: pParam.logged_company_id,
+							department_id: pParam.logged_department_id
+						};
+
+						var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
+							pParam.method,
+							pParam.token,
+							xParamAddApprovalMatrix
+						);
+						xJoResult.approval_matrix_result = xApprovalMatrixResult;
+
+						// Active: 02-01-2023
+						// Description: After submit, it will hit api PR on odoo
+						// let xLineIds = [];
+						// if (xPRDetail.purchase_request_detail != null) {
+						// 	for (var i in xPRDetail.purchase_request_detail) {
+						// 		xLineIds.push({
+						// 			product_code: xPRDetail.purchase_request_detail[i].product_code,
+						// 			qty: xPRDetail.purchase_request_detail[i].qty
+						// 		});
+						// 	}
+						// }
+						// var xParamOdoo = {
+						// 	name: 'New',
+						// 	company_id: xPRDetail.company_id,
+						// 	date_order: await _utilInstance.getCurrDate(),
+						// 	status: 'waiting_approval',
+						// 	purchase_order_type: xPRDetail.purchase_order_type,
+						// 	user_sanqua: pParam.user_name,
+						// 	no_fpb: xPRDetail.request_no,
+						// 	line_ids: xLineIds
+						// };
+					} else {
+						xJoResult = {
+							status_code: '-99',
+							status_msg: 'Data not found. Please supply valid identifier'
+						};
+					}
+				} else {
+					xJoResult = xUpdateResult;
+				}
 			}
 		}
 
@@ -463,7 +472,7 @@ class PurchaseRequestService {
 
 		if (xFlagProcess) {
 			pParam.cancel_at = await _utilInstance.getCurrDateTime();
-			pParam.status = -1;
+			pParam.status = 4;
 
 			var xUpdateResult = await _repoInstance.save(pParam, 'cancel_fpb');
 			xJoResult = xUpdateResult;
@@ -535,76 +544,168 @@ class PurchaseRequestService {
 			// Check if this request id valid or not
 			var xPRDetail = await _repoInstance.getById({ id: pParam.document_id });
 			if (xPRDetail != null) {
-				var xParamApprovalMatrixDocument = {
-					document_id: xEncId,
-					status: 1,
-					application_id: config.applicationId,
-					table_name: config.dbTables.fpb
+				if (xPRDetail.status != 1) {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'This document already confirmed before.'
+					};
+				} else {
+					var xParamApprovalMatrixDocument = {
+						document_id: xEncId,
+						status: 1,
+						application_id: config.applicationId,
+						table_name: config.dbTables.fpb
+					};
+
+					var xResultApprovalMatrixDocument = await _oAuthService.confirmApprovalMatrix(
+						pParam.method,
+						pParam.token,
+						xParamApprovalMatrixDocument
+					);
+
+					if (xResultApprovalMatrixDocument != null) {
+						if (xResultApprovalMatrixDocument.status_code == '00') {
+							let xResultApprove = null;
+							if (xResultApprovalMatrixDocument.status_document_approved == true) {
+								// Update price eCatalogue
+								// Comment At: 09-01-2023
+								// Reason: No need for current
+								// if (xPRDetail.purchase_request_detail.length > 0) {
+								// 	// var xPRItem = xPRDetail.purchase_request_detail;
+								// 	// for (var i in xPRItem) {
+								// 	// 	var xParamUpdateCatalogue = {
+								// 	// 		vendor_id: xPRItem[i].vendor_id,
+								// 	// 		product_id: xPRItem[i].product_id,
+								// 	// 		last_price: xPRItem[i].quotation_price_per_unit,
+								// 	// 		last_ordered: xPRDetail.createdAt,
+								// 	// 		last_purchase_plant: xPRDetail.company_name,
+								// 	// 		act: 'update_by_vendor_id_product_id'
+								// 	// 	};
+								// 	// 	var xUpdateCatalogueResult = await _catalogueService.save(xParamUpdateCatalogue);
+								// 	// 	console.log(`>>> Update Result : ${JSON.stringify(xUpdateCatalogueResult)}`);
+								// 	// }
+								// } else {
+								// 	xJoResult = {
+								// 		status_code: '00',
+								// 		status_msg: 'FPB successfully approved but nothing to update price'
+								// 	};
+								// }
+
+								// Update status FPB to be confirmed
+								var xParamUpdatePR = {
+									id: pParam.document_id,
+									status: 2
+								};
+								var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
+
+								if (xUpdateResult.status_code == '00') {
+									xJoResult = {
+										status_code: '00',
+										status_msg: 'FPB successfully approved'
+									};
+								} else {
+									xJoResult = xUpdateResult;
+								}
+							} else {
+								xJoResult = {
+									status_code: '00',
+									status_msg: 'FPB successfully approved. Document available for next approver'
+								};
+							}
+						} else {
+							xJoResult = xResultApprovalMatrixDocument;
+						}
+					} else {
+						xJoResult = {
+							status_code: '-99',
+							status_msg: 'There is problem on approval matrix processing. Please try again'
+						};
+					}
+				}
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Data not found'
 				};
+			}
+		}
 
-				var xResultApprovalMatrixDocument = await _oAuthService.confirmApprovalMatrix(
-					pParam.method,
-					pParam.token,
-					xParamApprovalMatrixDocument
-				);
+		return xJoResult;
+	}
 
-				if (xResultApprovalMatrixDocument != null) {
-					if (xResultApprovalMatrixDocument.status_code == '00') {
-						let xResultApprove = null;
-						if (xResultApprovalMatrixDocument.status_document_approved == true) {
-							// Update price eCatalogue
-							// Comment At: 09-01-2023
-							// Reason: No need for current
-							// if (xPRDetail.purchase_request_detail.length > 0) {
-							// 	// var xPRItem = xPRDetail.purchase_request_detail;
-							// 	// for (var i in xPRItem) {
-							// 	// 	var xParamUpdateCatalogue = {
-							// 	// 		vendor_id: xPRItem[i].vendor_id,
-							// 	// 		product_id: xPRItem[i].product_id,
-							// 	// 		last_price: xPRItem[i].quotation_price_per_unit,
-							// 	// 		last_ordered: xPRDetail.createdAt,
-							// 	// 		last_purchase_plant: xPRDetail.company_name,
-							// 	// 		act: 'update_by_vendor_id_product_id'
-							// 	// 	};
-							// 	// 	var xUpdateCatalogueResult = await _catalogueService.save(xParamUpdateCatalogue);
-							// 	// 	console.log(`>>> Update Result : ${JSON.stringify(xUpdateCatalogueResult)}`);
-							// 	// }
-							// } else {
-							// 	xJoResult = {
-							// 		status_code: '00',
-							// 		status_msg: 'FPB successfully approved but nothing to update price'
-							// 	};
-							// }
+	async rejectFPB(pParam) {
+		var xJoResult = {};
+		var xDecId = null;
+		var xFlagProcess = false;
+		var xEncId = '';
 
+		if (pParam.document_id != '' && pParam.user_id != '') {
+			xEncId = pParam.document_id;
+			xDecId = await _utilInstance.decrypt(pParam.document_id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				xFlagProcess = true;
+				pParam.document_id = xDecId.decrypted;
+				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.user_id = xDecId.decrypted;
+					xFlagProcess = true;
+				} else {
+					xJoResult = xDecId;
+				}
+			} else {
+				xJoResult = xDecId;
+			}
+		}
+
+		if (xFlagProcess) {
+			// Check if this request id valid or not
+			var xPRDetail = await _repoInstance.getById({ id: pParam.document_id });
+			if (xPRDetail != null) {
+				if (xPRDetail.status != 1) {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'This document already confirmed before.'
+					};
+				} else {
+					var xParamApprovalMatrixDocument = {
+						document_id: xEncId,
+						status: -1,
+						application_id: config.applicationId,
+						table_name: config.dbTables.fpb
+					};
+
+					var xResultApprovalMatrixDocument = await _oAuthService.confirmApprovalMatrix(
+						pParam.method,
+						pParam.token,
+						xParamApprovalMatrixDocument
+					);
+
+					if (xResultApprovalMatrixDocument != null) {
+						if (xResultApprovalMatrixDocument.status_code == '00') {
 							// Update status FPB to be confirmed
 							var xParamUpdatePR = {
 								id: pParam.document_id,
-								status: 2
+								status: -1
 							};
 							var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
 
 							if (xUpdateResult.status_code == '00') {
 								xJoResult = {
 									status_code: '00',
-									status_msg: 'FPB successfully approved'
+									status_msg: 'FPB successfully rejected'
 								};
 							} else {
 								xJoResult = xUpdateResult;
 							}
 						} else {
-							xJoResult = {
-								status_code: '00',
-								status_msg: 'FPB successfully approved. Document available for next approver'
-							};
+							xJoResult = xResultApprovalMatrixDocument;
 						}
 					} else {
-						xJoResult = xResultApprovalMatrixDocument;
+						xJoResult = {
+							status_code: '-99',
+							status_msg: 'There is problem on approval matrix processing. Please try again'
+						};
 					}
-				} else {
-					xJoResult = {
-						status_code: '-99',
-						status_msg: 'There is problem on approval matrix processing. Please try again'
-					};
 				}
 			} else {
 				xJoResult = {
