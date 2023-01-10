@@ -236,7 +236,13 @@ class PurchaseRequestRepository {
 						status_msg: 'Failed save to database'
 					};
 				}
-			} else if (pAct == 'update' || pAct == 'submit_fpb' || pAct == 'cancel_fpb' || pAct == 'set_to_draft_fpb') {
+			} else if (
+				pAct == 'update' ||
+				pAct == 'submit_fpb' ||
+				pAct == 'cancel_fpb' ||
+				pAct == 'set_to_draft_fpb' ||
+				pAct == 'close_fpb'
+			) {
 				var xComment = '';
 
 				switch (pAct) {
@@ -257,6 +263,9 @@ class PurchaseRequestRepository {
 						pParam.set_to_draft_by = pParam.user_id;
 						pParam.set_to_draft_by_name = pParam.user_name;
 						xComment = 'set to draft';
+						break;
+					case 'close_fpb':
+						xComment = 'closed';
 						break;
 					default:
 						xComment = 'changed';

@@ -23,11 +23,37 @@ const _prDetailInstance = new PurchaseRequestDetailRepository();
 const PurchaseRequestRepository = require('../repository/purchaserequestrepository.js');
 const _prInstance = new PurchaseRequestRepository();
 
+const _xClassName = 'SyncFromOdooService';
+
 class SyncFromOdooService {
 	constructor() {}
 
+	// Status: -1: Reject, 2: PR (Approved)
 	async updateStatusPR(pParam) {
 		var xJoResult = {};
+		try {
+			if (pParam.hasOwnProperty('pr_no')) {
+				if (pParam.pr_no != '') {
+					let xReqDetail = await _prDetailInstance.getByParam({
+						pr_no: pParam.pr_no
+					});
+					if (xReqDetail.status_code == '00') {
+						let xParamUpdate = {
+							pr_no: pParam.pr_no,
+							status: pParam.status
+						};
+						xJoResult = await _prDetailInstance.save(xParamUpdate, 'update_by_pr_no');
+					} else {
+						xJoResult = xReqDetail;
+					}
+				}
+			}
+		} catch (e) {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Exception error <${_xClassName}.updateStatusPR>: ${e.message}`
+			};
+		}
 
 		return xJoResult;
 	}

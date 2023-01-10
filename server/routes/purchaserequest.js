@@ -70,6 +70,14 @@ module.exports = (app) => {
 	];
 	app.post(rootAPIPath + 'reject', arrValidate, purchaseRequestController.purchaseRequest_Reject);
 
+	// Close FPB
+	arrValidate = [];
+	arrValidate = [
+		check('document_id').not().isEmpty().withMessage('Parameter document_id cannot be empty'),
+		check('closed_reason').not().isEmpty().withMessage('Parameter closed_reason cannot be empty')
+	];
+	app.post(rootAPIPath + 'close', arrValidate, purchaseRequestController.purchaseRequest_Close);
+
 	// List FPB
 	arrValidate = [];
 	arrValidate = [

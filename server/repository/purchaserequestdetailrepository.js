@@ -91,6 +91,25 @@ class PurchaseRequestDetailRepository {
 					status_code: '00',
 					status_msg: 'Data has been successfully updated'
 				};
+			} else if (pAct == 'update_by_pr_no') {
+				pParam.updatedAt = await _utilInstance.getCurrDateTime();
+				var xPRNo = pParam.pr_no;
+				delete pParam.pr_no;
+				var xWhere = {
+					where: {
+						pr_no: xPRNo
+					},
+					transaction: xTransaction
+				};
+
+				xSaved = await _modelDb.update(pParam, xWhere);
+
+				await xTransaction.commit();
+
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'Data has been successfully updated'
+				};
 			}
 		} catch (e) {
 			if (xTransaction) await xTransaction.rollback();
@@ -182,6 +201,14 @@ class PurchaseRequestDetailRepository {
 				if (pParam.product_code != '') {
 					xWhereAnd.push({
 						product_code: pParam.product_code
+					});
+				}
+			}
+
+			if (pParam.hasOwnProperty('pr_no')) {
+				if (pParam.pr_no != '') {
+					xWhereAnd.push({
+						pr_no: pParam.pr_no
 					});
 				}
 			}
