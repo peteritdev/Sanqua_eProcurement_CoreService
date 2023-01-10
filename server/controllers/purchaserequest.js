@@ -23,7 +23,9 @@ module.exports = {
 	purchaseRequest_Submit,
 	purchaseRequest_Cancel,
 	purchaseRequest_SetToDraft,
-	purchaseRequest_Confirm
+	purchaseRequest_Confirm,
+
+	purchaseRequest_CreatePR
 };
 
 async function purchaseRequest_List(req, res) {
@@ -115,6 +117,15 @@ async function purchaseRequest_Save(req, res) {
 				req.body.user_id = oAuthResult.token_data.result_verify.id;
 				req.body.user_name = oAuthResult.token_data.result_verify.name;
 				req.body.company_code = oAuthResult.token_data.result_verify.company.alias;
+
+				req.body.company_id = oAuthResult.token_data.result_verify.company.id;
+				req.body.company_name = oAuthResult.token_data.result_verify.company.name;
+
+				req.body.employee_id = oAuthResult.token_data.result_verify.employee_info.id;
+				req.body.employee_name = oAuthResult.token_data.result_verify.employee_info.name;
+				req.body.department_id = oAuthResult.token_data.result_verify.employee_info.department.section.id;
+				req.body.department_name = oAuthResult.token_data.result_verify.employee_info.department.section.name;
+
 				req.body.token = req.headers['x-token'];
 				req.body.method = req.headers['x-method'];
 				joResult = await _serviceInstance.save(req.body);
@@ -217,6 +228,13 @@ async function purchaseRequest_Submit(req, res) {
 			} else {
 				req.body.user_id = oAuthResult.token_data.result_verify.id;
 				req.body.user_name = oAuthResult.token_data.result_verify.name;
+				req.body.logged_company_id = oAuthResult.token_data.result_verify.company.id;
+				req.body.logged_company_name = oAuthResult.token_data.result_verify.company.name;
+
+				req.body.logged_department_id =
+					oAuthResult.token_data.result_verify.employee_info.department.section.id;
+				req.body.logged_department_name =
+					oAuthResult.token_data.result_verify.employee_info.department.section.name;
 				req.body.token = req.headers['x-token'];
 				req.body.method = req.headers['x-method'];
 				joResult = await _serviceInstance.submitFPB(req.body);
@@ -322,6 +340,47 @@ async function purchaseRequest_Confirm(req, res) {
 				req.body.token = req.headers['x-token'];
 				req.body.method = req.headers['x-method'];
 				joResult = await _serviceInstance.confirmFPB(req.body);
+				joResult = JSON.stringify(joResult);
+			}
+		} else {
+			joResult = JSON.stringify(oAuthResult);
+		}
+	} else {
+		joResult = JSON.stringify(oAuthResult);
+	}
+
+	res.setHeader('Content-Type', 'application/json');
+	res.status(200).send(joResult);
+}
+
+async function purchaseRequest_CreatePR(req, res) {
+	var joResult;
+	var oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
+
+	if (oAuthResult.status_code == '00') {
+		if (oAuthResult.token_data.status_code == '00') {
+			// Validate first
+			var errors = validationResult(req).array();
+
+			if (errors.length != 0 && req.body.act == 'add') {
+				joResult = JSON.stringify({
+					status_code: '-99',
+					status_msg: 'Parameter value has problem',
+					error_msg: errors
+				});
+			} else {
+				req.body.logged_user_id = oAuthResult.token_data.result_verify.id;
+				req.body.logged_user_name = oAuthResult.token_data.result_verify.name;
+				req.body.logged_company_id = oAuthResult.token_data.result_verify.company.id;
+				req.body.logged_company_name = oAuthResult.token_data.result_verify.company.name;
+
+				req.body.logged_department_id =
+					oAuthResult.token_data.result_verify.employee_info.department.section.id;
+				req.body.logged_department_name =
+					oAuthResult.token_data.result_verify.employee_info.department.section.name;
+				req.body.token = req.headers['x-token'];
+				req.body.method = req.headers['x-method'];
+				joResult = await _serviceDetailInstance.createPR(req.body);
 				joResult = JSON.stringify(joResult);
 			}
 		} else {

@@ -12,142 +12,152 @@ const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 class PurchaseRequestDetailRepository {
-    constructor(){}
+	constructor() {}
 
-    async save( pParam, pAct ){
-        let xTransaction;
-        var xJoResult;
+	async save(pParam, pAct) {
+		let xTransaction;
+		var xJoResult;
 
-        try{
+		try {
+			var xSaved = null;
+			xTransaction = await sequelize.transaction();
 
-            var xSaved = null;
-            xTransaction = await sequelize.transaction();
+			if (pAct == 'add') {
+				pParam.status = 0;
+				pParam.is_delete = 0;
+				pParam.created_by = pParam.user_id;
+				pParam.created_by_name = pParam.user_name;
 
-            if( pAct == "add" ){
+				xSaved = await _modelDb.create(pParam, { transaction: xTransaction });
 
-                pParam.status = 0;
-                pParam.is_delete = 0;
-                pParam.created_by = pParam.user_id;
-                pParam.created_by_name = pParam.user_name;
+				if (xSaved.id != null) {
+					xJoResult = {
+						status_code: '00',
+						status_msg: 'Data has been successfully saved',
+						created_id: await _utilInstance.encrypt(xSaved.id, config.cryptoKey.hashKey)
+						// clear_id: xSaved.id,
+					};
 
-                xSaved = await _modelDb.create(pParam, {transaction: xTransaction}); 
+					await xTransaction.commit();
+				} else {
+					if (xTransaction) await xTransaction.rollback();
 
-                if( xSaved.id != null ){               
-                    
-                    xJoResult = {
-                        status_code: "00",
-                        status_msg: "Data has been successfully saved",
-                        created_id: await _utilInstance.encrypt( xSaved.id, config.cryptoKey.hashKey ),
-                        // clear_id: xSaved.id,
-                    }                     
-                    
-                    await xTransaction.commit();
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Failed save to database'
+					};
+				}
+			} else if (pAct == 'update') {
+				pParam.updatedAt = await _utilInstance.getCurrDateTime();
+				var xId = pParam.id;
+				delete pParam.id;
+				var xWhere = {
+					where: {
+						id: xId
+					},
+					transaction: xTransaction
+				};
 
-                }else{
+				pParam.updated_by = pParam.user_id;
+				pParam.updated_by_name = pParam.user_name;
 
-                    if( xTransaction ) await xTransaction.rollback();
+				xSaved = await _modelDb.update(pParam, xWhere);
 
-                    xJoResult = {
-                        status_code: "-99",
-                        status_msg: "Failed save to database",
-                    }
+				await xTransaction.commit();
 
-                }                
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'Data has been successfully updated'
+				};
+			} else if (pAct == 'update_by_product_code') {
+				pParam.updatedAt = await _utilInstance.getCurrDateTime();
+				var xProductCode = pParam.product_code;
+				delete pParam.product_code;
+				var xWhere = {
+					where: {
+						product_code: xProductCode
+					},
+					transaction: xTransaction
+				};
 
-            }else if( pAct == "update" ){
-                
-                pParam.updatedAt = await _utilInstance.getCurrDateTime();
-                var xId = pParam.id;
-                delete pParam.id;
-                var xWhere = {
-                    where : {
-                        id: xId,
-                    },
-                    transaction: xTransaction
-                };
+				pParam.updated_by = pParam.user_id;
+				pParam.updated_by_name = pParam.user_name;
 
-                pParam.updated_by = pParam.user_id;
-                pParam.updated_by_name = pParam.user_name;
+				xSaved = await _modelDb.update(pParam, xWhere);
 
-                xSaved = await _modelDb.update( pParam, xWhere );
+				await xTransaction.commit();
 
-                await xTransaction.commit();
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'Data has been successfully updated'
+				};
+			}
+		} catch (e) {
+			if (xTransaction) await xTransaction.rollback();
+			xJoResult = {
+				status_code: '-99',
+				status_msg: 'Failed save or update data. Error : ' + e,
+				err_msg: e
+			};
+		}
 
-                xJoResult = {
-                    status_code: "00",
-                    status_msg: "Data has been successfully updated",
-                }
+		return xJoResult;
+	}
 
-            }
+	async delete(pParam) {
+		let xTransaction;
+		var xJoResult = {};
 
-        }catch(e){
-            if( xTransaction ) await xTransaction.rollback();
-            xJoResult = {
-                status_code: "-99",
-                status_msg: "Failed save or update data. Error : " + e,
-                err_msg: e
-            }
+		try {
+			var xSaved = null;
+			xTransaction = await sequelize.transaction();
 
-            
-        }
-        
-        return xJoResult;
-    }
+			xSaved = await _modelDb.destroy(
+				{
+					where: {
+						id: pParam.id
+					}
+				},
+				{ xTransaction }
+			);
 
-    async delete( pParam ){
-        let xTransaction;
-        var xJoResult = {};
+			await xTransaction.commit();
 
-        try{
-            var xSaved = null;
-            xTransaction = await sequelize.transaction();
+			xJoResult = {
+				status_code: '00',
+				status_msg: 'Data has been successfully deleted'
+			};
 
-            xSaved = await _modelDb.destroy(
-                {
-                    where: {
-                        id: pParam.id
-                    }
-                },
-                {xTransaction}
-            );
-    
-            await xTransaction.commit();
+			return xJoResult;
+		} catch (e) {
+			if (xTransaction) await xTransaction.rollback();
+			xJoResult = {
+				status_code: '-99',
+				status_msg: 'Failed save or update data',
+				err_msg: e
+			};
 
-            xJoResult = {
-                status_code: "00",
-                status_msg: "Data has been successfully deleted",
-            }
+			return xJoResult;
+		}
+	}
 
-            return xJoResult;
+	async getByProductIdVendorId(pParam) {
+		var xData = {};
+		var xInclude = [];
+		var xWhere = {};
+		var xWhereAnd = [],
+			xWhereOr = [];
 
-        }catch(e){
-            if( xTransaction ) await xTransaction.rollback();
-            xJoResult = {
-                status_code: "-99",
-                status_msg: "Failed save or update data",
-                err_msg: e
-            }
+		var xData = await _modelDb.findOne({
+			where: {
+				product_id: pParam.product_id,
+				vendor_id: pParam.vendor_id
+			},
+			include: xInclude
+		});
 
-            return xJoResult;
-        }
-    }
-
-    async getByProductIdVendorId( pParam ){
-        var xData = {};
-        var xInclude = [];
-        var xWhere = {};
-        var xWhereAnd = [], xWhereOr = [];
-
-        var xData = await _modelDb.findOne({
-            where: {
-                product_id: pParam.product_id,
-                vendor_id: pParam.vendor_id,
-            },
-            include: xInclude,
-        });
-
-        return xData;
-    }
+		return xData;
+	}
 }
 
 module.exports = PurchaseRequestDetailRepository;

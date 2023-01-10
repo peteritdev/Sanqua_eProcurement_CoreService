@@ -29,6 +29,11 @@ const _vendorServiceInstance = new VendorServiceRepository();
 const PurchaseRequestService = require('../services/purchaserequestservice.js');
 const _purchaseRequestServiceInstance = new PurchaseRequestService();
 
+const IntegrationService = require('../services/oauthservice.js');
+const _integrationServiceInstance = new IntegrationService();
+
+const _xClassName = 'PurchaseRequestDetailService';
+
 class PurchaseRequestDetailService {
 	constructor() {}
 
@@ -269,6 +274,134 @@ class PurchaseRequestDetailService {
 		if (xFlagProcess) {
 			var xDeleteResult = await _repoInstance.delete(pParam);
 			xJoResult = xDeleteResult;
+		}
+
+		return xJoResult;
+	}
+
+	// Processing Odoo
+	// Format: {
+	//	id: '', --> id from tr_purchaserequest
+	//  detail: [
+	// 		{
+	// 			code: '',
+	// 			qty: 0
+	// 		}
+	// ]
+	//}
+	async createPR(pParam) {
+		var xJoResult = {};
+		var xDecId = null;
+		var xFlagProcess = false;
+
+		try {
+			// Check first if status of header is "In Progress" or not
+			if (pParam.hasOwnProperty('id')) {
+				if (pParam.id != '' && pParam.id.length == 65) {
+					let xDetail = await _purchaseRequestServiceInstance.getById(pParam);
+					if (xDetail.status_code == '00') {
+						if (xDetail.hasOwnProperty('data')) {
+							if (xDetail.data.status.id != 2) {
+								xJoResult = {
+									status_code: '-99',
+									status_msg:
+										'You can not process this item to PR since this FPB not approved yet. Please contact the approver user first.'
+								};
+							} else {
+								if (pParam.items.length > 0) {
+									let xLineIds = [];
+									for (var i in pParam.items) {
+										xLineIds.push({
+											product_code: pParam.items[i].product_code,
+											qty: pParam.items[i].qty
+										});
+									}
+									let xParamOdoo = {
+										name: 'New',
+										company_id: xDetail.data.company.id,
+										date_order: await _utilInstance.getCurrDate(),
+										status: 'waiting_approval',
+										purchase_order_type: xDetail.data.category_pr,
+										user_sanqua: pParam.logged_user_name,
+										no_fpb: xDetail.data.request_no,
+										line_ids: xLineIds
+									};
+
+									let xCreatePRResult = await _integrationServiceInstance.createPR(xParamOdoo);
+
+									if (xCreatePRResult.status_code == '00') {
+										if (xCreatePRResult.hasOwnProperty('name')) {
+											if (xCreatePRResult.name != '') {
+												if (pParam.logged_user_id != '') {
+													xDecId = await _utilInstance.decrypt(
+														pParam.logged_user_id,
+														config.cryptoKey.hashKey
+													);
+													if (xDecId.status_code == '00') {
+														xFlagProcess = true;
+														pParam.logged_user_id = xDecId.decrypted;
+													} else {
+														xJoResult = xDecId;
+													}
+												} else {
+													xFlagProcess = true;
+												}
+
+												if (xFlagProcess) {
+													for (var i in pParam.items) {
+														let xParamUpdate = {
+															pr_no: xCreatePRResult.name,
+															product_code: pParam.items[i].product_code,
+															user_id: pParam.logged_user_id,
+															user_name: pParam.logged_user_name
+														};
+														await _repoInstance.save(
+															xParamUpdate,
+															'update_by_product_code'
+														);
+													}
+
+													xJoResult = {
+														status_code: '00',
+														status_msg: `You have successfully create PR with no: ${xCreatePRResult.name}`
+													};
+												}
+											} else {
+												xJoResult = {
+													status_code: '-99',
+													status_msg: `Failed create PR on odoo since it doesn't have PR No. Please check at Odoo System.`
+												};
+											}
+										} else {
+											xJoResult = {
+												status_code: '-99',
+												status_msg: `Error result from Odoo. Please contact MIS`
+											};
+										}
+									} else {
+										xJoResult = xCreatePRResult;
+									}
+								} else {
+									xJoResult = {
+										status_code: '-99',
+										status_msg: 'Can not process create PR since items can not be empty.'
+									};
+								}
+							}
+						}
+					} else {
+						xJoResult = {
+							status_code: '-99',
+							status_msg: 'Data not found.'
+						};
+					}
+				}
+			}
+		} catch (e) {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Exception error <${_xClassName}.createPR>: ${e.message}`
+			};
 		}
 
 		return xJoResult;

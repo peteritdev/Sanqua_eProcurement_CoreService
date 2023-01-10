@@ -21,6 +21,7 @@ module.exports = (sequelize, DataTypes) => {
 		printed_fpb_at: DataTypes.DATE,
 		submit_price_quotation_at: DataTypes.DATE,
 		category_item: DataTypes.SMALLINT, // 1: Raw Material, 2: Factory supply, 3: Office Supply, 4: Sparepart, 5: Jasa, 6: Maintenance Repair, 7: Investment / Asset
+		category_pr: DataTypes.STRING,
 
 		total_qty: DataTypes.DOUBLE,
 		total_price: DataTypes.DOUBLE,

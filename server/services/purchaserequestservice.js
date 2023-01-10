@@ -48,12 +48,16 @@ class PurchaseRequestService {
 					xFlagProcess = true;
 					if (pParam.hasOwnProperty('employee_id')) {
 						if (pParam.employee_id != '') {
-							xDecId = await _utilInstance.decrypt(pParam.employee_id, config.cryptoKey.hashKey);
-							if (xDecId.status_code == '00') {
-								pParam.employee_id = xDecId.decrypted;
-								xFlagProcess = true;
+							if (pParam.employee_id.length == 65) {
+								xDecId = await _utilInstance.decrypt(pParam.employee_id, config.cryptoKey.hashKey);
+								if (xDecId.status_code == '00') {
+									pParam.employee_id = xDecId.decrypted;
+									xFlagProcess = true;
+								} else {
+									xJoResult = xDecId;
+								}
 							} else {
-								xJoResult = xDecId;
+								xFlagProcess = true;
 							}
 						} else {
 							xJoResult = {
@@ -300,7 +304,10 @@ class PurchaseRequestService {
 					total_qty: xResult.total_qty,
 					total_price: xResult.total_price,
 
-					status: xResult.status,
+					status: {
+						id: xResult.status,
+						name: xResult.status == -1 ? 'Cancel' : config.statusDescription.purchaseRequest[xResult.status]
+					},
 					requested_at: moment(xResult.requested_at).format('DD MMM YYYY HH:mm'),
 					printed_fpb_at: moment(xResult.printed_fpb_at).format('DD MMM YYYY HH:mm'),
 					submit_price_quotation_at: moment(xResult.submit_price_quotation_at).format('DD MMM YYYY HH:mm'),
@@ -320,6 +327,7 @@ class PurchaseRequestService {
 					},
 
 					category_item: xResult.category_item,
+					category_pr: xResult.category_pr,
 					created_at: xResult.createdAt != null ? moment(xResult.createdAt).format('DD MMM YYYY') : ''
 				};
 
@@ -376,49 +384,53 @@ class PurchaseRequestService {
 				// Get PR Detail
 				var xPRDetail = await _repoInstance.getById({ id: xClearId });
 				if (xPRDetail != null) {
-					// Non Active at: 02-01-2023
-					// Reason: Since we decide create FPB will be generate PR on Odoo.
 					// Add Approval Matrix
-					// var xParamAddApprovalMatrix = {
-					// 	act: 'add',
-					// 	document_id: xEncId,
-					// 	document_no: xPRDetail.request_no,
-					// 	application_id: config.applicationId,
-					// 	table_name: config.dbTables.fpb
-					// };
+					var xParamAddApprovalMatrix = {
+						act: 'add',
+						document_id: xEncId,
+						document_no: xPRDetail.request_no,
+						application_id: config.applicationId,
+						table_name: config.dbTables.fpb,
+						company_id: pParam.logged_company_id,
+						department_id: pParam.logged_department_id
+					};
 
-					// var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
-					// 	pParam.method,
-					// 	pParam.token,
-					// 	xParamAddApprovalMatrix
-					// );
-					// xJoResult.approval_matrix_result = xApprovalMatrixResult;
-					// console.log(`>>> Result Approval Matrix : ${JSON.stringify(xApprovalMatrixResult)}`);
+					var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
+						pParam.method,
+						pParam.token,
+						xParamAddApprovalMatrix
+					);
+					xJoResult.approval_matrix_result = xApprovalMatrixResult;
 
 					// Active: 02-01-2023
 					// Description: After submit, it will hit api PR on odoo
-					let xLineIds = [];
-					if (xPRDetail.purchase_request_detail != null) {
-						for (var i in xPRDetail.purchase_request_detail) {
-							xLineIds.push({
-								product_code: xPRDetail.purchase_request_detail[i].product_code,
-								qty: xPRDetail.purchase_request_detail[i].qty
-							});
-						}
-					}
-					var xParamOdoo = {
-						name: 'New',
-						company_id: xPRDetail.company_id,
-						date_order: await _utilInstance.getCurrDate(),
-						status: 'waiting_approval',
-						purchase_order_type: xPRDetail.purchase_order_type,
-						user_sanqua: pParam.user_name,
-						no_fpb: xPRDetail.request_no,
-						line_ids: xLineIds
+					// let xLineIds = [];
+					// if (xPRDetail.purchase_request_detail != null) {
+					// 	for (var i in xPRDetail.purchase_request_detail) {
+					// 		xLineIds.push({
+					// 			product_code: xPRDetail.purchase_request_detail[i].product_code,
+					// 			qty: xPRDetail.purchase_request_detail[i].qty
+					// 		});
+					// 	}
+					// }
+					// var xParamOdoo = {
+					// 	name: 'New',
+					// 	company_id: xPRDetail.company_id,
+					// 	date_order: await _utilInstance.getCurrDate(),
+					// 	status: 'waiting_approval',
+					// 	purchase_order_type: xPRDetail.purchase_order_type,
+					// 	user_sanqua: pParam.user_name,
+					// 	no_fpb: xPRDetail.request_no,
+					// 	line_ids: xLineIds
+					// };
+				} else {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Data not found. Please supply valid identifier'
 					};
-
-					console.log(`>>> xParamOdoo : ${JSON.stringify(xParamOdoo)}`);
 				}
+			} else {
+				xJoResult = xUpdateResult;
 			}
 		}
 
@@ -523,7 +535,7 @@ class PurchaseRequestService {
 			if (xPRDetail != null) {
 				var xParamApprovalMatrixDocument = {
 					document_id: xEncId,
-					status: pParam.status,
+					status: 1,
 					application_id: config.applicationId,
 					table_name: config.dbTables.fpb
 				};
@@ -536,21 +548,31 @@ class PurchaseRequestService {
 
 				if (xResultApprovalMatrixDocument != null) {
 					if (xResultApprovalMatrixDocument.status_code == '00') {
-						// Update price eCatalogue
-						if (xPRDetail.purchase_request_detail.length > 0) {
-							var xPRItem = xPRDetail.purchase_request_detail;
-							for (var i in xPRItem) {
-								var xParamUpdateCatalogue = {
-									vendor_id: xPRItem[i].vendor_id,
-									product_id: xPRItem[i].product_id,
-									last_price: xPRItem[i].quotation_price_per_unit,
-									last_ordered: xPRDetail.createdAt,
-									last_purchase_plant: xPRDetail.company_name,
-									act: 'update_by_vendor_id_product_id'
-								};
-								var xUpdateCatalogueResult = await _catalogueService.save(xParamUpdateCatalogue);
-								console.log(`>>> Update Result : ${JSON.stringify(xUpdateCatalogueResult)}`);
-							}
+						let xResultApprove = null;
+						if (xResultApprovalMatrixDocument.status_document_approved == true) {
+							// Update price eCatalogue
+							// Comment At: 09-01-2023
+							// Reason: No need for current
+							// if (xPRDetail.purchase_request_detail.length > 0) {
+							// 	// var xPRItem = xPRDetail.purchase_request_detail;
+							// 	// for (var i in xPRItem) {
+							// 	// 	var xParamUpdateCatalogue = {
+							// 	// 		vendor_id: xPRItem[i].vendor_id,
+							// 	// 		product_id: xPRItem[i].product_id,
+							// 	// 		last_price: xPRItem[i].quotation_price_per_unit,
+							// 	// 		last_ordered: xPRDetail.createdAt,
+							// 	// 		last_purchase_plant: xPRDetail.company_name,
+							// 	// 		act: 'update_by_vendor_id_product_id'
+							// 	// 	};
+							// 	// 	var xUpdateCatalogueResult = await _catalogueService.save(xParamUpdateCatalogue);
+							// 	// 	console.log(`>>> Update Result : ${JSON.stringify(xUpdateCatalogueResult)}`);
+							// 	// }
+							// } else {
+							// 	xJoResult = {
+							// 		status_code: '00',
+							// 		status_msg: 'FPB successfully approved but nothing to update price'
+							// 	};
+							// }
 
 							// Update status FPB to be confirmed
 							var xParamUpdatePR = {
@@ -562,7 +584,7 @@ class PurchaseRequestService {
 							if (xUpdateResult.status_code == '00') {
 								xJoResult = {
 									status_code: '00',
-									status_msg: 'FPB successfully approved and update price to e-Catalogue'
+									status_msg: 'FPB successfully approved'
 								};
 							} else {
 								xJoResult = xUpdateResult;
@@ -570,7 +592,7 @@ class PurchaseRequestService {
 						} else {
 							xJoResult = {
 								status_code: '00',
-								status_msg: 'FPB successfully approved but nothing to update price'
+								status_msg: 'FPB successfully approved. Document available for next approver'
 							};
 						}
 					} else {

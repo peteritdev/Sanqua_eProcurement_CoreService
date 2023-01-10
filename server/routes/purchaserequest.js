@@ -117,4 +117,12 @@ module.exports = (app) => {
 	arrValidate = [];
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
 	app.post(rootAPIPath + 'set_to_draft', arrValidate, purchaseRequestController.purchaseRequest_SetToDraft);
+
+	// Create PR from selected item
+	arrValidate = [];
+	arrValidate = [
+		check('id').not().isEmpty().withMessage('Parameter id cannot be empty'),
+		check('items', 'Parameter items must be array and cannot be empty').not().isEmpty().isArray()
+	];
+	app.post(rootAPIPath + 'odoo/create_pr', arrValidate, purchaseRequestController.purchaseRequest_CreatePR);
 };
