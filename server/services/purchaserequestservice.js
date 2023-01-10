@@ -271,7 +271,13 @@ class PurchaseRequestService {
 								: '',
 						description: xDetail[index].description,
 						pr_no: xDetail[index].pr_no,
-						ca_po: xDetail[index].ca_po
+						status: {
+							id: xDetail[index].status,
+							name:
+								xDetail[index].status == -1
+									? 'Rejected'
+									: config.statusDescription.purchaseRequestDetail[xDetail[index].status]
+						}
 					});
 				}
 

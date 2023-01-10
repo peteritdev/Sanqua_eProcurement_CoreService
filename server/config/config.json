@@ -89,7 +89,8 @@
     "imagePathESanQua": "http://10.10.20.8:8020",
 
     "statusDescription":{
-      "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel"]
+      "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel"],
+      "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel"]
     }
   },
 
@@ -180,7 +181,8 @@
     "imagePath": "http://10.10.20.8:8020/assets/icon/",
     "imagePathESanQua": "http://10.10.20.8:8020",
     "statusDescription":{
-      "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel"]
+      "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel"],
+      "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel"]
     }
   },  
 
