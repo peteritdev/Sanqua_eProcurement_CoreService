@@ -178,7 +178,10 @@
     "applicationId": 2,
 
     "imagePath": "http://10.10.20.8:8020/assets/icon/",
-    "imagePathESanQua": "http://10.10.20.8:8020"
+    "imagePathESanQua": "http://10.10.20.8:8020",
+    "statusDescription":{
+      "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel"]
+    }
   },  
 
   "production": {
