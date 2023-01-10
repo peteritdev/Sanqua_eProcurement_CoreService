@@ -353,7 +353,8 @@ class PurchaseRequestDetailService {
 															pr_no: xCreatePRResult.name,
 															product_code: pParam.items[i].product_code,
 															user_id: pParam.logged_user_id,
-															user_name: pParam.logged_user_name
+															user_name: pParam.logged_user_name,
+															ca_po: pParam.items[i].ca_po
 														};
 														await _repoInstance.save(
 															xParamUpdate,

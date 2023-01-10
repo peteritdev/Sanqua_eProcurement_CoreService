@@ -24,6 +24,7 @@ module.exports = (sequelize, DataTypes) => {
 		vendor_name: DataTypes.STRING,
 
 		pr_no: DataTypes.STRING,
+		ca_po: DataTypes.SMALLINT, //1: ca, 2: po
 
 		is_delete: DataTypes.INTEGER,
 		deleted_at: DataTypes.DATE,

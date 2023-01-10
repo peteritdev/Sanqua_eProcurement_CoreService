@@ -269,7 +269,9 @@ class PurchaseRequestService {
 							xDetail[index].estimate_date_use != null
 								? moment(xDetail[index].estimate_date_use).format('DD MMM YYYY')
 								: '',
-						description: xDetail[index].description
+						description: xDetail[index].description,
+						pr_no: xDetail[index].pr_no,
+						ca_po: xDetail[index].ca_po
 					});
 				}
 
