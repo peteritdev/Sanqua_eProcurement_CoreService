@@ -9,7 +9,7 @@ const product = require('./product');
 const unit = require('./unit');
 const currency = require('./currency');
 
-const spesificationCategory = require( './spesificationcategory' );
+const spesificationCategory = require('./spesificationcategory');
 const spesificationAttribute = require('./spesificationattribute');
 const vendorCatalogueQuotation = require('./vendorcataloguequotation');
 const vendorCatalogueSpesification = require('./vendorcataloguespesification');
@@ -24,15 +24,33 @@ const procurementQuotationItem = require('./procurementquotationitem');
 const procurementEvaluation = require('./procurementevaluation');
 
 const purchaseRequest = require('./purchaserequest');
+const syncFromOdoo = require('./syncfromodoo');
 
 const _export = require('./export');
 
 module.exports = {
 	vendor,
-	master, productCategory, product, unit, currency,
-	vendorExperience, vendorCatalogue,
-	spesificationCategory, spesificationAttribute, vendorCatalogueQuotation, vendorCatalogueSpesification,
+	master,
+	productCategory,
+	product,
+	unit,
+	currency,
+	vendorExperience,
+	vendorCatalogue,
+	spesificationCategory,
+	spesificationAttribute,
+	vendorCatalogueQuotation,
+	vendorCatalogueSpesification,
 	vendorRateHistory,
-	procurement, procurementItem, globalMaster, procurementSchedule, purchaseRequest, procurementTerm, procurementVendor, procurementQuotationItem,
-	procurementEvaluation, _export, 
-}
+	procurement,
+	procurementItem,
+	globalMaster,
+	procurementSchedule,
+	purchaseRequest,
+	procurementTerm,
+	procurementVendor,
+	procurementQuotationItem,
+	procurementEvaluation,
+	syncFromOdoo,
+	_export
+};
