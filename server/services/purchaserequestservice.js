@@ -420,10 +420,10 @@ class PurchaseRequestService {
 							table_name: config.dbTables.fpb,
 							company_id: pParam.logged_company_id,
 							department_id: pParam.logged_department_id,
-							ecatalogue_fpb_category_item: xPRDetail.category_item
+							ecatalogue_fpb_category_item: xPRDetail.category_item == 7 ? xPRDetail.category_item : null
 						};
 
-						console.log(`>>> xPRDetail.category_item: ${xParamAddApprovalMatrix}`);
+						console.log(`>>> xPRDetail.category_item: ${JSON.stringify(xParamAddApprovalMatrix)}`);
 
 						var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
 							pParam.method,
