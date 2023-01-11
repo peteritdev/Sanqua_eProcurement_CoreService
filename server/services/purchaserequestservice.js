@@ -328,6 +328,7 @@ class PurchaseRequestService {
 							xResult.status == -1 ? 'Rejected' : config.statusDescription.purchaseRequest[xResult.status]
 					},
 					reject_reason: xResult.reject_reason,
+					closed_reason: xResult.closed_reason,
 					requested_at: moment(xResult.requested_at).format('DD MMM YYYY HH:mm'),
 					printed_fpb_at: moment(xResult.printed_fpb_at).format('DD MMM YYYY HH:mm'),
 					submit_price_quotation_at: moment(xResult.submit_price_quotation_at).format('DD MMM YYYY HH:mm'),
@@ -419,7 +420,7 @@ class PurchaseRequestService {
 							table_name: config.dbTables.fpb,
 							company_id: pParam.logged_company_id,
 							department_id: pParam.logged_department_id,
-							category_item: xPRDetail.category_item
+							ecatalogue_fpb_category_item: xPRDetail.category_item
 						};
 
 						var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
