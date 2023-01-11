@@ -423,6 +423,8 @@ class PurchaseRequestService {
 							ecatalogue_fpb_category_item: xPRDetail.category_item
 						};
 
+						console.log(`>>> xPRDetail.category_item: ${xParamAddApprovalMatrix}`);
+
 						var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
 							pParam.method,
 							pParam.token,
@@ -703,7 +705,8 @@ class PurchaseRequestService {
 							// Update status FPB to be confirmed
 							var xParamUpdatePR = {
 								id: pParam.document_id,
-								status: -1
+								status: -1,
+								reject_reason: pParam.reject_reason
 							};
 							var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
 
