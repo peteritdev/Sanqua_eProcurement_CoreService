@@ -22,6 +22,10 @@ const _globalUtilInstance = new GlobalUtility();
 const PurchaseRequestRepository = require('../repository/purchaserequestrepository.js');
 const _repoInstance = new PurchaseRequestRepository();
 
+// Repository
+const PurchaseRequestDetailRepository = require('../repository/purchaserequestdetailrepository.js');
+const _repoDetailInstance = new PurchaseRequestDetailRepository();
+
 // OAuth Service
 const OAuthService = require('../services/oauthservice.js');
 const _oAuthService = new OAuthService();
@@ -414,7 +418,8 @@ class PurchaseRequestService {
 							application_id: config.applicationId,
 							table_name: config.dbTables.fpb,
 							company_id: pParam.logged_company_id,
-							department_id: pParam.logged_department_id
+							department_id: pParam.logged_department_id,
+							category_item: xPRDetail.category_item
 						};
 
 						var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
@@ -739,7 +744,7 @@ class PurchaseRequestService {
 			xDecId = await _utilInstance.decrypt(pParam.document_id, config.cryptoKey.hashKey);
 			if (xDecId.status_code == '00') {
 				xFlagProcess = true;
-				pParam.document_id = xDecId.decrypted;
+				pParam.id = xDecId.decrypted;
 				xDecId = await _utilInstance.decrypt(pParam.logged_user_id, config.cryptoKey.hashKey);
 				if (xDecId.status_code == '00') {
 					pParam.logged_user_id = xDecId.decrypted;
@@ -754,10 +759,65 @@ class PurchaseRequestService {
 
 		if (xFlagProcess) {
 			let xData = await _repoInstance.getById({
-				id: pParam.document_id
+				id: pParam.id
 			});
 			if (xData != null) {
 				if (xData.status == 2) {
+					pParam.closed_at = await _utilInstance.getCurrDateTime();
+					pParam.closed_by = pParam.logged_user_id;
+					pParam.closed_by_name = pParam.logged_user_name;
+					pParam.status = 3;
+
+					var xUpdateResult = await _repoInstance.save(pParam, 'close_fpb');
+					xJoResult = xUpdateResult;
+				} else {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: "You can't close this FPB. Only FPB with In Progress status that can be close."
+					};
+				}
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Data not found.'
+				};
+			}
+		}
+
+		return xJoResult;
+	}
+
+	async cancelFPB(pParam) {
+		var xJoResult = {};
+		var xDecId = null;
+		var xFlagProcess = false;
+
+		if (pParam.document_id != '' && pParam.logged_user_id != '') {
+			xDecId = await _utilInstance.decrypt(pParam.document_id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				xFlagProcess = true;
+				pParam.id = xDecId.decrypted;
+				xDecId = await _utilInstance.decrypt(pParam.logged_user_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.logged_user_id = xDecId.decrypted;
+					xFlagProcess = true;
+				} else {
+					xJoResult = xDecId;
+				}
+			} else {
+				xJoResult = xDecId;
+			}
+		}
+
+		if (xFlagProcess) {
+			let xData = await _repoInstance.getById({
+				id: pParam.id
+			});
+			if (xData != null) {
+				if (xData.status == 0 || xData.status == 2) {
+					if (xData.status == 2) {
+						// Check if all the items still in draft
+					}
 					pParam.closed_at = await _utilInstance.getCurrDateTime();
 					pParam.closed_by = pParam.logged_user_id;
 					pParam.closed_by_name = pParam.logged_user_name;

@@ -3,7 +3,7 @@ var config = require(__dirname + '/../config/config.json')[env];
 var Sequelize = require('sequelize');
 var sequelize = new Sequelize(config.database, config.username, config.password, config);
 const { hash } = require('bcryptjs');
-const Op = sequelize.Op;
+const Op = Sequelize.Op;
 
 // Model
 const _modelDb = require('../models').tr_purchaserequestdetails;
@@ -193,6 +193,14 @@ class PurchaseRequestDetailRepository {
 				if (pParam.id != '') {
 					xWhereAnd.push({
 						id: pParam.id
+					});
+				}
+			}
+
+			if (pParam.hasOwnProperty('request_id')) {
+				if (pParam.request_id != '') {
+					xWhereAnd.push({
+						request_id: pParam.request_id
 					});
 				}
 			}
