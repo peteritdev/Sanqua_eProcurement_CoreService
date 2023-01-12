@@ -83,12 +83,12 @@ class PurchaseRequestRepository {
 					is_delete: pParam.is_archived
 				});
 			} else {
-				xWhereOr.push({
+				xWhereAnd.push({
 					is_delete: 0
 				});
 			}
 		} else {
-			xWhereOr.push({
+			xWhereAnd.push({
 				is_delete: 0
 			});
 		}
@@ -109,14 +109,6 @@ class PurchaseRequestRepository {
 		// 	}
 		// }
 
-		if (pParam.hasOwnProperty('department_id') && pParam.is_admin == 0) {
-			if (pParam.department_id != '') {
-				xWhereOr.push({
-					department_id: pParam.department_id
-				});
-			}
-		}
-
 		if (pParam.hasOwnProperty('owned_document_no') && pParam.is_admin == 0) {
 			if (pParam.owned_document_no.length > 0) {
 				xWhereAnd.push({
@@ -129,7 +121,7 @@ class PurchaseRequestRepository {
 
 		if (pParam.hasOwnProperty('keyword')) {
 			if (pParam.keyword != '') {
-				xWhereOr.push({
+				xWhereAnd.push({
 					[Op.or]: [
 						{
 							request_no: {
@@ -148,6 +140,14 @@ class PurchaseRequestRepository {
 						}
 					]
 				});
+			} else {
+				if (pParam.hasOwnProperty('department_id') && pParam.is_admin == 0) {
+					if (pParam.department_id != '') {
+						xWhereOr.push({
+							department_id: pParam.department_id
+						});
+					}
+				}
 			}
 		}
 
