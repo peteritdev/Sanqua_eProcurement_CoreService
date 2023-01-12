@@ -855,7 +855,7 @@ class PurchaseRequestService {
 			xDecId = await _utilInstance.decrypt(pParam.document_id, config.cryptoKey.hashKey);
 			if (xDecId.status_code == '00') {
 				xFlagProcess = true;
-				pParam.id = xDecId.decrypted;
+				pParam.document_id = xDecId.decrypted;
 				xDecId = await _utilInstance.decrypt(pParam.logged_user_id, config.cryptoKey.hashKey);
 				if (xDecId.status_code == '00') {
 					pParam.logged_user_id = xDecId.decrypted;
