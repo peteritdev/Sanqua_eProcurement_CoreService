@@ -83,12 +83,12 @@ class PurchaseRequestRepository {
 					is_delete: pParam.is_archived
 				});
 			} else {
-				xWhereAnd.push({
+				xWhereOr.push({
 					is_delete: 0
 				});
 			}
 		} else {
-			xWhereAnd.push({
+			xWhereOr.push({
 				is_delete: 0
 			});
 		}
@@ -129,23 +129,25 @@ class PurchaseRequestRepository {
 
 		if (pParam.hasOwnProperty('keyword')) {
 			if (pParam.keyword != '') {
-				xWhereOr.push(
-					{
-						request_no: {
-							[Op.iLike]: '%' + pParam.keyword + '%'
+				xWhereOr.push({
+					[Op.or]: [
+						{
+							request_no: {
+								[Op.iLike]: '%' + pParam.keyword + '%'
+							}
+						},
+						{
+							employee_name: {
+								[Op.iLike]: '%' + pParam.keyword + '%'
+							}
+						},
+						{
+							department_name: {
+								[Op.iLike]: '%' + pParam.keyword + '%'
+							}
 						}
-					},
-					{
-						employee_name: {
-							[Op.iLike]: '%' + pParam.keyword + '%'
-						}
-					},
-					{
-						department_name: {
-							[Op.iLike]: '%' + pParam.keyword + '%'
-						}
-					}
-				);
+					]
+				});
 			}
 		}
 

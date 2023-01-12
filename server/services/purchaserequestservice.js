@@ -869,8 +869,9 @@ class PurchaseRequestService {
 		}
 
 		if (xFlagProcess) {
+			console.log(`>>> pParam: ${JSON.stringify(pParam)}`);
 			let xData = await _repoInstance.getById({
-				id: pParam.id
+				id: pParam.document_id
 			});
 			if (xData != null) {
 				if (xData.status == 0 || xData.status == 2) {
