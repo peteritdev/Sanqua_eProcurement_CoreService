@@ -55,7 +55,11 @@ class OAuthService {
 
 	async getApprovalMatrix(pMethod, pToken, pParam) {
 		var xAPIUrl = config.api.oAuth.url.approval_matrix_document.list;
-		var xQueryParam = `?offset=0&limit=10&keyword=&application_id=${pParam.application_id}&table_name=${pParam.table_name}&document_id=${pParam.document_id}&user_id=${pParam.user_id}`;
+		var xQueryParam = `?offset=0&limit=10&keyword=&application_id=${pParam.application_id}&table_name=${pParam.table_name}&document_id=${pParam.document_id}&${pParam.hasOwnProperty(
+			'user_id'
+		)
+			? `user_id=${pParam.user_id}`
+			: ''}`;
 		var xHeader = {
 			headers: {
 				'x-method': pMethod,
