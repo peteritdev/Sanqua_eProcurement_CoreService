@@ -193,11 +193,11 @@ class PurchaseRequestService {
 							xArrOwnedDocNo.push(xOwnedDocument.token_data.data[i].document_no);
 						}
 					} else {
-						xJoResult = xOwnedDocument.token_data;
+						xFlagAPIResult = true;
 					}
 				}
 			} else {
-				xJoResult = xOwnedDocument;
+				xFlagAPIResult = true;
 			}
 
 			if (xFlagAPIResult) {
