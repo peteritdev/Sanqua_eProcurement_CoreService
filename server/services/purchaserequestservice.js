@@ -851,14 +851,14 @@ class PurchaseRequestService {
 		var xDecId = null;
 		var xFlagProcess = false;
 
-		if (pParam.document_id != '' && pParam.logged_user_id != '') {
+		if (pParam.document_id != '' && pParam.user_id != '') {
 			xDecId = await _utilInstance.decrypt(pParam.document_id, config.cryptoKey.hashKey);
 			if (xDecId.status_code == '00') {
 				xFlagProcess = true;
 				pParam.document_id = xDecId.decrypted;
-				xDecId = await _utilInstance.decrypt(pParam.logged_user_id, config.cryptoKey.hashKey);
+				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
 				if (xDecId.status_code == '00') {
-					pParam.logged_user_id = xDecId.decrypted;
+					pParam.user_id = xDecId.decrypted;
 					xFlagProcess = true;
 				} else {
 					xJoResult = xDecId;
@@ -875,10 +875,11 @@ class PurchaseRequestService {
 			});
 			if (xData != null) {
 				if (xData.status == 0 || xData.status == 2) {
+					pParam.status = 4;
 					if (xData.status == 2) {
 						// Check if all the items still in draft
 						let xItems = await _repoDetailInstance.getByParam({
-							request_id: pParam.id,
+							request_id: pParam.document_id,
 							pr_no: null
 						});
 						if (xItems.status_code == '00') {
@@ -887,14 +888,24 @@ class PurchaseRequestService {
 								status_msg: "You can't close this FPB because there are items that already processed."
 							};
 						} else {
-							pParam.closed_at = await _utilInstance.getCurrDateTime();
-							pParam.closed_by = pParam.logged_user_id;
-							pParam.closed_by_name = pParam.logged_user_name;
-							pParam.status = 4;
-
-							var xUpdateResult = await _repoInstance.save(pParam, 'cancel_fpb');
+							var xUpdateResult = await _repoInstance.save(
+								{
+									id: pParam.document_id,
+									status: pParam.status
+								},
+								'cancel_fpb'
+							);
 							xJoResult = xUpdateResult;
 						}
+					} else {
+						var xUpdateResult = await _repoInstance.save(
+							{
+								id: pParam.document_id,
+								status: pParam.status
+							},
+							'cancel_fpb'
+						);
+						xJoResult = xUpdateResult;
 					}
 				} else {
 					xJoResult = {
