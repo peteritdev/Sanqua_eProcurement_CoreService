@@ -34,6 +34,7 @@ module.exports = (sequelize, DataTypes) => {
 		cancel_at: DataTypes.DATE,
 		cancel_by: DataTypes.INTEGER,
 		cancel_by_name: DataTypes.STRING,
+		cancel_reason: DataTypes.STRING,
 
 		set_to_draft_at: DataTypes.DATE,
 		set_to_draft_by: DataTypes.INTEGER,
