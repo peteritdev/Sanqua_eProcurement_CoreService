@@ -34,7 +34,7 @@ async function purchaseRequest_List(req, res) {
 	var joResult;
 	var oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
 
-	console.log('>>> Detail : ' + JSON.stringify(oAuthResult));
+	// console.log('>>> Detail : ' + JSON.stringify(oAuthResult));
 
 	if (oAuthResult.status_code == '00') {
 		if (oAuthResult.token_data.status_code == '00') {
@@ -54,6 +54,12 @@ async function purchaseRequest_List(req, res) {
 
 				req.query.is_admin = xLevel.is_admin;
 				req.query.user_id = oAuthResult.token_data.result_verify.id;
+				req.query.department_id =
+					oAuthResult.token_data.result_verify.employee_info.department.section.id == ''
+						? oAuthResult.token_data.result_verify.employee_info.department.id
+						: oAuthResult.token_data.result_verify.employee_info.department.section.id;
+				req.query.method = req.headers['x-method'];
+				req.query.token = req.headers['x-token'];
 				joResult = await _serviceInstance.list(req.query);
 				joResult = JSON.stringify(joResult);
 			}
@@ -125,8 +131,14 @@ async function purchaseRequest_Save(req, res) {
 
 				req.body.employee_id = oAuthResult.token_data.result_verify.employee_info.id;
 				req.body.employee_name = oAuthResult.token_data.result_verify.employee_info.name;
-				req.body.department_id = oAuthResult.token_data.result_verify.employee_info.department.section.id;
-				req.body.department_name = oAuthResult.token_data.result_verify.employee_info.department.section.name;
+				req.body.department_id =
+					oAuthResult.token_data.result_verify.employee_info.department.section.id == ''
+						? oAuthResult.token_data.result_verify.employee_info.department.id
+						: oAuthResult.token_data.result_verify.employee_info.department.section.id;
+				req.body.department_name =
+					oAuthResult.token_data.result_verify.employee_info.department.section.name == ''
+						? oAuthResult.token_data.result_verify.employee_info.department.name
+						: oAuthResult.token_data.result_verify.employee_info.department.section.name;
 
 				req.body.token = req.headers['x-token'];
 				req.body.method = req.headers['x-method'];

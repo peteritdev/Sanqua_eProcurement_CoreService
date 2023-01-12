@@ -157,6 +157,8 @@ class PurchaseRequestService {
 		var xJoArrData = [];
 		var xFlagProcess = false;
 		var xDecId = {};
+		var xFlagAPIResult = false;
+		var xArrOwnedDocNo = [];
 
 		if (pParam.hasOwnProperty('user_id')) {
 			if (pParam.user_id != '') {
@@ -171,54 +173,87 @@ class PurchaseRequestService {
 		}
 
 		if (xFlagProcess) {
-			var xResultList = await _repoInstance.list(pParam);
+			// Rules of show FPB List :
+			// - FPB that has same department
+			// - FPB that the user as an approver
 
-			if (xResultList.count > 0) {
-				var xRows = xResultList.rows;
-				for (var index in xRows) {
-					xJoArrData.push({
-						id: await _utilInstance.encrypt(xRows[index].id.toString(), config.cryptoKey.hashKey),
-						request_no: xRows[index].request_no,
-						requested_at:
-							xRows[index].requested_at == null ? '' : moment(xRows[index].requested_at).format('DD MMM'),
-						employee: {
-							id: await _utilInstance.encrypt(
-								xRows[index].employee_id.toString(),
-								config.cryptoKey.hashKey
-							),
-							name: xRows[index].employee_name
-						},
-						department: {
-							id: xRows[index].department_id,
-							name: xRows[index].department_name
-						},
-						status: {
-							id: xRows[index].status,
-							name:
-								xRows[index].status == -1
-									? 'Rejected'
-									: config.statusDescription.purchaseRequest[xRows[index].status]
-						},
+			let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, {
+				application_id: config.applicationId,
+				table_name: config.dbTables.fpb,
+				document_id: '',
+				user_id: pParam.user_id
+			});
+			// console.log(`>>> xOwnedDocument : ${JSON.stringify(xOwnedDocument)}`);
 
-						company: {
-							id: xRows[index].company_id,
-							code: xRows[index].company_code,
-							name: xRows[index].company_name
+			if (xOwnedDocument.status_code == '00') {
+				if (xOwnedDocument.hasOwnProperty('token_data')) {
+					if (xOwnedDocument.token_data.status_code == '00') {
+						xFlagAPIResult = true;
+						for (var i in xOwnedDocument.token_data.data) {
+							xArrOwnedDocNo.push(xOwnedDocument.token_data.data[i].document_no);
 						}
-					});
+					} else {
+						xJoResult = xOwnedDocument.token_data;
+					}
 				}
-
-				xJoResult = {
-					status_code: '00',
-					status_msg: 'OK',
-					total_record: xResultList.count,
-					data: xJoArrData
-				};
 			} else {
-				xJoResult = {
-					status_code: '-99',
-					status_msg: 'Data not found'
-				};
+				xJoResult = xOwnedDocument;
+			}
+
+			if (xFlagAPIResult) {
+				pParam.owned_document_no = xArrOwnedDocNo;
+				console.log(`>>> pParam : ${JSON.stringify(pParam)}`);
+				var xResultList = await _repoInstance.list(pParam);
+
+				if (xResultList.count > 0) {
+					var xRows = xResultList.rows;
+					for (var index in xRows) {
+						xJoArrData.push({
+							id: await _utilInstance.encrypt(xRows[index].id.toString(), config.cryptoKey.hashKey),
+							request_no: xRows[index].request_no,
+							requested_at:
+								xRows[index].requested_at == null
+									? ''
+									: moment(xRows[index].requested_at).format('DD MMM'),
+							employee: {
+								id: await _utilInstance.encrypt(
+									xRows[index].employee_id.toString(),
+									config.cryptoKey.hashKey
+								),
+								name: xRows[index].employee_name
+							},
+							department: {
+								id: xRows[index].department_id,
+								name: xRows[index].department_name
+							},
+							status: {
+								id: xRows[index].status,
+								name:
+									xRows[index].status == -1
+										? 'Rejected'
+										: config.statusDescription.purchaseRequest[xRows[index].status]
+							},
+
+							company: {
+								id: xRows[index].company_id,
+								code: xRows[index].company_code,
+								name: xRows[index].company_name
+							}
+						});
+					}
+
+					xJoResult = {
+						status_code: '00',
+						status_msg: 'OK',
+						total_record: xResultList.count,
+						data: xJoArrData
+					};
+				} else {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Data not found'
+					};
+				}
 			}
 		}
 

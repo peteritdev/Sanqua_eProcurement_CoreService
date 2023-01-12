@@ -42,7 +42,7 @@ class PurchaseRequestRepository {
 	async list(pParam) {
 		var xOrder = [ 'requested_at', 'DESC' ];
 		var xInclude = [];
-		var xWhere = {};
+		var xWhere = [];
 		var xWhereAnd = [],
 			xWhereOr = [];
 
@@ -101,10 +101,28 @@ class PurchaseRequestRepository {
 			}
 		}
 
-		if (pParam.hasOwnProperty('user_id') && pParam.is_admin == 0) {
-			if (pParam.user_id != '') {
+		// if (pParam.hasOwnProperty('user_id') && pParam.is_admin == 0) {
+		// 	if (pParam.user_id != '') {
+		// 		xWhereAnd.push({
+		// 			created_by: pParam.user_id
+		// 		});
+		// 	}
+		// }
+
+		if (pParam.hasOwnProperty('department_id') && pParam.is_admin == 0) {
+			if (pParam.department_id != '') {
+				xWhereOr.push({
+					department_id: pParam.department_id
+				});
+			}
+		}
+
+		if (pParam.hasOwnProperty('owned_document_no') && pParam.is_admin == 0) {
+			if (pParam.owned_document_no.length > 0) {
 				xWhereAnd.push({
-					created_by: pParam.user_id
+					request_no: {
+						[Op.in]: pParam.owned_document_no
+					}
 				});
 			}
 		}
@@ -132,15 +150,21 @@ class PurchaseRequestRepository {
 		}
 
 		if (xWhereAnd.length > 0) {
-			xWhere.$and = xWhereAnd;
+			xWhere.push({
+				[Op.and]: xWhereAnd
+			});
 		}
 
 		if (xWhereOr.length > 0) {
-			xWhere.$or = xWhereOr;
+			xWhere.push({
+				[Op.or]: xWhereOr
+			});
 		}
 
 		var xParamQuery = {
-			where: xWhere,
+			where: {
+				[Op.or]: [ xWhereAnd, xWhereOr ]
+			},
 			include: xInclude,
 			order: [ xOrder ]
 		};
