@@ -322,7 +322,8 @@ class PurchaseRequestService {
 								xDetail[index].status == -1
 									? 'Rejected'
 									: config.statusDescription.purchaseRequestDetail[xDetail[index].status]
-						}
+						},
+						last_price: xDetail[index].last_price
 					});
 				}
 
