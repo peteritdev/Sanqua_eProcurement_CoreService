@@ -214,10 +214,26 @@ class PurchaseRequestDetailRepository {
 			}
 
 			if (pParam.hasOwnProperty('pr_no')) {
-				if (pParam.pr_no != '') {
-					xWhereAnd.push({
-						pr_no: pParam.pr_no
-					});
+				if (typeof pParam.pr_no === 'boolean') {
+					if (pParam.pr_no) {
+						xWhereAnd.push({
+							pr_no: {
+								[Op.ne]: null
+							}
+						});
+					} else {
+						xWhereAnd.push({
+							pr_no: {
+								[Op.eq]: null
+							}
+						});
+					}
+				} else {
+					if (pParam.pr_no != '') {
+						xWhereAnd.push({
+							pr_no: pParam.pr_no
+						});
+					}
 				}
 			}
 
