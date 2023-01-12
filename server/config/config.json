@@ -155,7 +155,8 @@
           }
         }
       },
-      "eSanqua": "http://localhost:1193/api/esanqua/v1"
+      "eSanqua": "http://localhost:1193/api/esanqua/v1",
+      "odoo": "http://10.10.20.6:9898/api"
     },
 
     "login":{
