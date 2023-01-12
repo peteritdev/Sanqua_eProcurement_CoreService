@@ -51,9 +51,6 @@ module.exports = (sequelize, DataTypes) => {
 		company_code: DataTypes.STRING,
 		company_name: DataTypes.STRING,
 
-		vendor_catalogue_id: DataTypes.BIGINT,
-		last_price: DataTypes.DOUBLE,
-
 		createdAt: {
 			type: DataTypes.DATE,
 			defaultValue: sequelize.literal('NOW()'),
