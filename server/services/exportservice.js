@@ -41,6 +41,7 @@ class ExportService {
 		var xJoResultFPB = await _purchaseRequestServiceInstance.getById(xParam);
 		var xDecId = null;
 		var xFlagProcess = false;
+		let xFPBId = 0;
 
 		console.log(`>>> xJoResultFPB : ${JSON.stringify(xJoResultFPB)}`);
 
@@ -49,7 +50,7 @@ class ExportService {
 			if (xJoResultFPB.data.id.length == 65) {
 				xDecId = await _utilInstance.decrypt(xJoResultFPB.data.id, config.cryptoKey.hashKey);
 				if (xDecId.status_code == '00') {
-					xJoResultFPB.data.id = xDecId.decrypted;
+					xFPBId = xDecId.decrypted;
 					xFlagProcess = true;
 				}
 			}
@@ -99,11 +100,11 @@ class ExportService {
 					xStringQRCodeApprover1 =
 						`VALIDATE_SIGNATURE|FPB|` +
 						(await _utilInstance.encrypt(
-							`${xJoResultFPB.data.id}|${xApprover1.approver_user[0].user.id}`,
+							`${xFPBId}|${xApprover1.approver_user[0].user.id}`,
 							config.cryptoKey.hashKey
 						));
 					let xQRCodeApproval1 = await _qrCode.toDataURL(xStringQRCodeApprover1);
-					xQRCodeFileName1 = `approval_${xJoResultFPB.data.id}${xApprover1.approver_user[0].user.id}.png`;
+					xQRCodeFileName1 = `approval_${xFPBId}${xApprover1.approver_user[0].user.id}.png`;
 					_imageDataURI.outputFile(xQRCodeApproval1, xFilePathQRCodeApproval + xQRCodeFileName1);
 				}
 
@@ -111,11 +112,11 @@ class ExportService {
 					xStringQRCodeApprover2 =
 						`VALIDATE_SIGNATURE|FPB|` +
 						(await _utilInstance.encrypt(
-							`${xJoResultFPB.data.id}|${xApprover2.approver_user[0].user.id}`,
+							`${xFPBId}|${xApprover2.approver_user[0].user.id}`,
 							config.cryptoKey.hashKey
 						));
 					let xQRCodeApproval2 = await _qrCode.toDataURL(xStringQRCodeApprover2);
-					xQRCodeFileName2 = `approval_${xJoResultFPB.data.id}${xApprover2.approver_user[0].user.id}.png`;
+					xQRCodeFileName2 = `approval_${xFPBId}${xApprover2.approver_user[0].user.id}.png`;
 					_imageDataURI.outputFile(xQRCodeApproval2, xFilePathQRCodeApproval + xQRCodeFileName2);
 				}
 
