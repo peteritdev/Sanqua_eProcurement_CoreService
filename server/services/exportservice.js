@@ -112,8 +112,8 @@ class ExportService {
 			// console.log(`>>> Approver 1 : ${xApprovalHeadDepartment.approver_user[0].user.name}`);
 			// console.log(`>>> Approver 2 : ${xApprovalPM.approver_user[0].user.name}`);
 
-			console.log(`>>> url 1 : ` + `${imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName1}`);
-			console.log(`>>> url 2 : ` + `${imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName2}`);
+			console.log(`>>> url 1 : ` + `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName1}`);
+			console.log(`>>> url 2 : ` + `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName2}`);
 			ejs.renderFile(
 				path.join(__dirname, '../views/', 'fpb-pdf.ejs'),
 				{
@@ -123,8 +123,8 @@ class ExportService {
 					approver1: xApprover1.approver_user[0].user.name,
 					approver2: xApprover2.approver_user[0].user.name,
 					qrCode: {
-						approval1: `${imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName1}`,
-						approval2: `${imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName2}`
+						approval1: `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName1}`,
+						approval2: `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName2}`
 					}
 				},
 				(err, data) => {
