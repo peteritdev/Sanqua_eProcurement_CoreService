@@ -51,13 +51,23 @@
                 </td> 
             </tr> 
             <tr>
+                <td style="width:25%;text-align: left;padding-left: 10px;" colspan="2">&nbsp;
+                </td>
+                <td style="text-align: center;width:50%;">
+                    <span style="font-size: 12px;text-align: center;padding: 1px 0px 0px 0px;"><strong><%=data.data.request_no%></strong></span>
+                </td>
+                <td style="width:25%;padding: 3px; text-align: left;">
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
                 <td style="text-align: left;">Permintaan Departement</td>
                 <td>:</td>
                 <td style="text-align: left;" colspan="2"><span><%=data.data.department.name%></span>&nbsp;&nbsp;<span style="padding-left:100px;">Tanggal : <%=data.data.created_at%></span></td>
             </tr>
             <tr>
                 <td style="text-align: left;vertical-align: top;">Kategori Barang</td>
-                <td>:</td>
+                <td style="text-align: left;vertical-align: top;">:</td>
                 <td colspan="2" style="padding-left:100px;">
                     <table style="text-align: left;" cellpadding="2" cellspacing="2"> 
                         <tr>
@@ -296,9 +306,9 @@
                             </td>
                         </tr>
                         <tr>
-                            <td>Head Unit</td>
-                            <td><strong>Finance & Accounting*</strong></td>
-                            <td>Head PRocurement</td>
+                            <td>Head Unit / Sec. Head Unit</td>
+                            <td><strong>Head Unit/ PM / Finance & Accounting*</strong></td>
+                            <td>Head Procurement</td>
                             <td  style="border-right: none !important;"><strong>Direktur*</strong></td>
                         </tr>
                         <tr style="height: 50px;">
@@ -309,9 +319,9 @@
                             <td  style="border-right: none !important;"></td>
                         </tr>
                         <tr style="height: 20px;">
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td><%=data.data.employee.name%></td>
+                            <td><%=approver1%></td>
+                            <td><%=approver2%></td>                            
                             <td></td>
                             <td  style="border-right: none !important;"></td>
                         </tr>
