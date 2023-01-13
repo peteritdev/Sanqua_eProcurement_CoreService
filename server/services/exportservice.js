@@ -146,7 +146,8 @@ class ExportService {
 
 						xOptions = {
 							width: '210mm',
-							height: '148.5mm',
+							// height: '148.5mm',
+							height: '297mm',
 							borders: '0.3cm'
 						};
 
