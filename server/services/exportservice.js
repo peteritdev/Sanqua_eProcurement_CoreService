@@ -49,7 +49,7 @@ class ExportService {
 			if (xJoResultFPB.data.id.length == 65) {
 				xDecId = await _utilInstance.decrypt(xJoResultFPB.data.id, config.cryptoKey.hashKey);
 				if (xDecId.status_code == '00') {
-					xJoResultFPB.id = xDecId.decrypted;
+					xJoResultFPB.data.id = xDecId.decrypted;
 					xFlagProcess = true;
 				}
 			}
