@@ -89,7 +89,7 @@ class ExportService {
 						`${xJoResultFPB.data.id}|${xApprover1.approver_user[0].user.id}`,
 						config.cryptoKey.hashKey
 					));
-				xQRCodeApproval1 = await _qrCode.toDataURL(xStringQRCodeApprover1);
+				let xQRCodeApproval1 = await _qrCode.toDataURL(xStringQRCodeApprover1);
 				xQRCodeFileName1 = `approval_${xJoResultFPB.data.id}${xApprover1.approver_user[0].user.id}.png`;
 				_imageDataURI.outputFile(xQRCodeApproval1, xFilePathQRCodeApproval + xQRCodeFileName1);
 			}
@@ -101,7 +101,7 @@ class ExportService {
 						`${xJoResultFPB.data.id}|${xApprover2.approver_user[0].user.id}`,
 						config.cryptoKey.hashKey
 					));
-				xQRCodeApproval2 = await _qrCode.toDataURL(xStringQRCodeApprover2);
+				let xQRCodeApproval2 = await _qrCode.toDataURL(xStringQRCodeApprover2);
 				xQRCodeFileName2 = `approval_${xJoResultFPB.data.id}${xApprover2.approver_user[0].user.id}.png`;
 				_imageDataURI.outputFile(xQRCodeApproval2, xFilePathQRCodeApproval + xQRCodeFileName2);
 			}
