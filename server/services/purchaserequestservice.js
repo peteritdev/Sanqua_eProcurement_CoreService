@@ -383,7 +383,7 @@ class PurchaseRequestService {
 						code: xResult.company_code,
 						name: xResult.company_name
 					},
-
+					file: xResult.file,
 					category_item: xResult.category_item,
 					category_pr: xResult.category_pr,
 					created_at: xResult.createdAt != null ? moment(xResult.createdAt).format('DD MMM YYYY') : ''

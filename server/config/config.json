@@ -95,7 +95,7 @@
   },
 
   "development": {
-    "appPort": 9191,
+    "appPort": 9191, 
     "dbTables": {
       "procurement": "tr_procurements",
       "fpb": "tr_purchaserequests"
