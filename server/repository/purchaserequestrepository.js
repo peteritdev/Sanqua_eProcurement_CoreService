@@ -260,6 +260,29 @@ class PurchaseRequestRepository {
 						'ALTER TABLE "tr_purchaserequestdetails" ENABLE TRIGGER "trg_update_total_item_afterinsert"'
 					);
 
+					// Call update total on table tr_purchaserequest
+					sequelize.query(
+						`update tr_purchaserequests set total_qty = (
+							select sum( qty )
+							from tr_purchaserequestdetails
+							where request_id = ${xSaved.id}
+						),
+						total_price = (
+							select sum( budget_price_total )
+							from tr_purchaserequestdetails
+							where request_id = ${xSaved.id}
+						),
+						total_quotation_price = (
+							select sum( quotation_price_total )
+							from tr_purchaserequestdetails
+							where request_id = ${xSaved.id}
+						)
+						where id = ${xSaved.id};`,
+						{
+							transaction: xTransaction
+						}
+					);
+
 					await xTransaction.commit();
 				} else {
 					if (xTransaction) await xTransaction.rollback();
