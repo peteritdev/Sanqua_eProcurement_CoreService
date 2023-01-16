@@ -98,7 +98,7 @@ class ExportService {
 				// Generate QRCode Digital Sign
 				if (xApprover1 != null) {
 					xStringQRCodeApprover1 =
-						`VALIDATE_SIGNATURE|FPB|` +
+						`VALIDATE_SIGNATURE|PROC|` +
 						(await _utilInstance.encrypt(
 							`${xFPBId}|${xApprover1.approver_user[0].user.id}`,
 							config.cryptoKey.hashKey
@@ -110,7 +110,7 @@ class ExportService {
 
 				if (xApprover2 != null) {
 					xStringQRCodeApprover2 =
-						`VALIDATE_SIGNATURE|FPB|` +
+						`VALIDATE_SIGNATURE|PROC|` +
 						(await _utilInstance.encrypt(
 							`${xFPBId}|${xApprover2.approver_user[0].user.id}`,
 							config.cryptoKey.hashKey
