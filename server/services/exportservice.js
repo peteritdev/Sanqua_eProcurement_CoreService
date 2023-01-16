@@ -137,8 +137,14 @@ class ExportService {
 						approver1: xApprover1 != null ? xApprover1.approver_user[0].user.name : '',
 						approver2: xApprover1 != null ? xApprover2.approver_user[0].user.name : '',
 						qrCode: {
-							approval1: `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName1}`,
-							approval2: `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName2}`
+							approval1:
+								xApprover1 != null
+									? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName1}`
+									: '',
+							approval2:
+								xApprover2 != null
+									? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName2}`
+									: ''
 						}
 					},
 					(err, data) => {
