@@ -71,21 +71,94 @@
                 <td colspan="2" style="padding-left:100px;">
                     <table style="text-align: left;" cellpadding="2" cellspacing="2"> 
                         <tr>
-                            <td><img src="<%=imagePath%>blank_checklist.png" width="15"></td>
+                            <td>
+                                <%
+                                    if( data.data.category_item == 1 ){
+
+                                    }else{
+                                %>
+                                        <img src="<%=imagePath%>blank_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+                            </td>
                             <td>Raw Material</td>
-                            <td><img src="<%=imagePath%>blank_checklist.png" width="15"></td>
+                            <td>
+                                <%
+                                    if( data.data.category_item == 3 ){
+
+                                    }else{
+                                %>
+                                        <img src="<%=imagePath%>blank_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+                            </td>
                             <td>Office Supply</td>
-                            <td><img src="<%=imagePath%>blank_checklist.png" width="15"></td>
+                            <td>
+                                <%
+                                    if( data.data.category_item == 5 ){
+
+                                    }else{
+                                %>
+                                        <img src="<%=imagePath%>blank_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+                            </td>
                             <td>Jasa</td>
-                            <td rowspan="2" style="padding-left:30px;"><img src="<%=imagePath%>blank_checklist.png" width="15"></td>
+                            <td rowspan="2" style="padding-left:30px;">
+                                <%
+                                    if( data.data.category_item == 7 ){
+
+                                    }else{
+                                %>
+                                        <img src="<%=imagePath%>blank_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+                                
+                            </td>
                             <td rowspan="2" ><strong style="font-size: 10px;">Investment / Asset*</strong></td>
                         </tr>
                         <tr>
-                            <td><img src="<%=imagePath%>blank_checklist.png" width="15"></td>
+                            <td>
+                                <%
+                                    if( data.data.category_item == 2 ){
+
+                                    }else{
+                                %>
+                                        <img src="<%=imagePath%>blank_checklist.png" width="15">
+                                <%
+                                    }
+                                %>                                
+                            </td>
                             <td>Factory Supply</td>
-                            <td><img src="<%=imagePath%>blank_checklist.png" width="15"></td>
+                            <td>
+                                <%
+                                    if( data.data.category_item == 4 ){
+
+                                    }else{
+                                %>
+                                        <img src="<%=imagePath%>blank_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+                                <img src="<%=imagePath%>blank_checklist.png" width="15">
+                            </td>
                             <td>Sparepart</td>
-                            <td><img src="<%=imagePath%>blank_checklist.png" width="15"></td>
+                            <td>
+                                <%
+                                    if( data.data.category_item == 6 ){
+
+                                    }else{
+                                %>
+                                        <img src="<%=imagePath%>blank_checklist.png" width="15">
+                                <%
+                                    }
+                                %>
+                                <img src="<%=imagePath%>blank_checklist.png" width="15">
+                            </td>
                             <td>Maintenance Repair</td>
                         </tr>
                     </table>
@@ -98,7 +171,7 @@
                             <tr>
                                 <th rowspan="2" style="text-align:center;width:3%;" class="col-header-item">No</th>
                                 <th rowspan="2" style="text-align:center;width:30%;" class="col-header-item">Deskripsi</th>
-                                <th rowspan="2" style="text-align:center;width:5%;" class="col-header-item">Stock Akhir</th>
+                                <th rowspan="2" style="text-align:center;width:5%;" class="col-header-item">Qty</th>
                                 <th rowspan="2" style="text-align:center;width:4%;" class="col-header-item">Sat.</th>
                                 <th rowspan="2" style="text-align:center;width:10%;" class="col-header-item">Harga</th>
                                 <th rowspan="2" style="text-align:center;width:15%;" class="col-header-item">Supplier</th>
@@ -119,8 +192,8 @@
                                 <tr>
                                     <td style="text-align:right;" class="col-item"><%=index%>.</td>
                                     <td style="text-align: left;" class="col-item"><%=item.product.name%></td>
-                                    <td class="col-item"></td>
-                                    <td class="col-item"></td>
+                                    <td class="col-item"><%=item.qty%></td>
+                                    <td class="col-item"><%=item.uom%></td>
                                     <td style="text-align: right;" class="col-item"><%=item.quotation_price_per_unit%></td>
                                     <td style="text-align: left;" class="col-item"><%=item.vendor.name%></td>
                                     <td class="col-item">

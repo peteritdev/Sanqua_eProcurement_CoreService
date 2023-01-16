@@ -8,6 +8,7 @@ const Op = Sequelize.Op;
 // Model
 const _modelDb = require('../models').tr_purchaserequests;
 const _modelPurchaseRequestDetail = require('../models').tr_purchaserequestdetails;
+const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 
 const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
@@ -25,7 +26,13 @@ class PurchaseRequestRepository {
 		xInclude = [
 			{
 				model: _modelPurchaseRequestDetail,
-				as: 'purchase_request_detail'
+				as: 'purchase_request_detail',
+				include: [
+					{
+						model: _modelVendorCatalogueDb,
+						as: 'vendor_catalogue'
+					}
+				]
 			}
 		];
 

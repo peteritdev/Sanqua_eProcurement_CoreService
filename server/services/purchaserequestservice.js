@@ -292,6 +292,7 @@ class PurchaseRequestService {
 							name: xDetail[index].product_name
 						},
 						qty: xDetail[index].qty,
+						uom: xDetail[index].vendor_catalogue != null ? xDetail[index].vendor_catalogue.uom_name : null,
 						budget_price_per_unit: xDetail[index].budget_price_per_unit,
 						pdf_budget_price_per_unit: xDetail[index].budget_price_per_unit
 							.toFixed(2)
