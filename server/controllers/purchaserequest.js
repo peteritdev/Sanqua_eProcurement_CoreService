@@ -124,10 +124,10 @@ async function purchaseRequest_Save(req, res) {
 			} else {
 				req.body.user_id = oAuthResult.token_data.result_verify.id;
 				req.body.user_name = oAuthResult.token_data.result_verify.name;
-				req.body.company_code = oAuthResult.token_data.result_verify.company.alias;
 
-				req.body.company_id = oAuthResult.token_data.result_verify.company.id;
-				req.body.company_name = oAuthResult.token_data.result_verify.company.name;
+				// req.body.logged_company_code = oAuthResult.token_data.result_verify.company.alias;
+				// req.body.logged_company_id = oAuthResult.token_data.result_verify.company.id;
+				// req.body.logged_company_name = oAuthResult.token_data.result_verify.company.name;
 
 				req.body.employee_id = oAuthResult.token_data.result_verify.employee_info.id;
 				req.body.employee_name = oAuthResult.token_data.result_verify.employee_info.name;
