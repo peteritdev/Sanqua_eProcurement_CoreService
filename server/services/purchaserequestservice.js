@@ -456,8 +456,8 @@ class PurchaseRequestService {
 							document_no: xPRDetail.request_no,
 							application_id: config.applicationId,
 							table_name: config.dbTables.fpb,
-							company_id: pParam.logged_company_id,
-							department_id: pParam.logged_department_id,
+							company_id: xPRDetail.company_id,
+							department_id: xPRDetail.department_id,
 							ecatalogue_fpb_category_item: xPRDetail.category_item == 7 ? xPRDetail.category_item : null
 						};
 
