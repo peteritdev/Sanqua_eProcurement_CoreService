@@ -131,10 +131,25 @@ async function purchaseRequest_Save(req, res) {
 
 				req.body.employee_id = oAuthResult.token_data.result_verify.employee_info.id;
 				req.body.employee_name = oAuthResult.token_data.result_verify.employee_info.name;
-				req.body.department_id =
-					oAuthResult.token_data.result_verify.employee_info.department.section.id == ''
-						? oAuthResult.token_data.result_verify.employee_info.department.id
-						: oAuthResult.token_data.result_verify.employee_info.department.section.id;
+				let xDepartment_id = 0;
+				if (oAuthResult.token_data.result_verify.employee_info.department.hasOwnProperty('unit')) {
+					if (oAuthResult.token_data.result_verify.employee_info.department.unit != null) {
+						req.body.department_id = oAuthResult.token_data.result_verify.employee_info.department.unit.id;
+					} else {
+						if (oAuthResult.token_data.result_verify.employee_info.department.section != null) {
+							req.body.department_id =
+								oAuthResult.token_data.result_verify.employee_info.department.section.id;
+						}
+					}
+				} else {
+					if (oAuthResult.token_data.result_verify.employee_info.department.section != null) {
+						req.body.department_id =
+							oAuthResult.token_data.result_verify.employee_info.department.section.id;
+					} else {
+						req.body.department_id = oAuthResult.token_data.result_verify.employee_info.department.id;
+					}
+				}
+				req.body.department_id = xDepartment_id;
 				req.body.department_name =
 					oAuthResult.token_data.result_verify.employee_info.department.section.name == ''
 						? oAuthResult.token_data.result_verify.employee_info.department.name
