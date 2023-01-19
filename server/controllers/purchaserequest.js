@@ -131,29 +131,30 @@ async function purchaseRequest_Save(req, res) {
 
 				req.body.employee_id = oAuthResult.token_data.result_verify.employee_info.id;
 				req.body.employee_name = oAuthResult.token_data.result_verify.employee_info.name;
-				let xDepartment_id = 0;
 				if (oAuthResult.token_data.result_verify.employee_info.department.hasOwnProperty('unit')) {
 					if (oAuthResult.token_data.result_verify.employee_info.department.unit != null) {
 						req.body.department_id = oAuthResult.token_data.result_verify.employee_info.department.unit.id;
+						req.body.department_name =
+							oAuthResult.token_data.result_verify.employee_info.department.unit.name;
 					} else {
 						if (oAuthResult.token_data.result_verify.employee_info.department.section != null) {
 							req.body.department_id =
 								oAuthResult.token_data.result_verify.employee_info.department.section.id;
+							req.body.department_name =
+								oAuthResult.token_data.result_verify.employee_info.department.section.name;
 						}
 					}
 				} else {
 					if (oAuthResult.token_data.result_verify.employee_info.department.section != null) {
 						req.body.department_id =
 							oAuthResult.token_data.result_verify.employee_info.department.section.id;
+						req.body.department_name =
+							oAuthResult.token_data.result_verify.employee_info.department.section.name;
 					} else {
 						req.body.department_id = oAuthResult.token_data.result_verify.employee_info.department.id;
+						req.body.department_name = oAuthResult.token_data.result_verify.employee_info.department.name;
 					}
 				}
-				req.body.department_id = xDepartment_id;
-				req.body.department_name =
-					oAuthResult.token_data.result_verify.employee_info.department.section.name == ''
-						? oAuthResult.token_data.result_verify.employee_info.department.name
-						: oAuthResult.token_data.result_verify.employee_info.department.section.name;
 
 				req.body.token = req.headers['x-token'];
 				req.body.method = req.headers['x-method'];
