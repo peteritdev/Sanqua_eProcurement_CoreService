@@ -145,17 +145,24 @@ class ExportService {
 				// console.log(`>>> Approver 1 : ${xApprovalHeadDepartment.approver_user[0].user.name}`);
 				// console.log(`>>> Approver 2 : ${xApprovalPM.approver_user[0].user.name}`);
 
-				console.log(`>>> url 1 : ` + `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName1}`);
-				console.log(`>>> url 2 : ` + `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName2}`);
+				// console.log(`>>> url 1 : ` + `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName1}`);
+				// console.log(`>>> url 2 : ` + `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName2}`);
+
+				console.log(
+					`>>> Approver 1 : ${JSON.stringify(xApprover1.approver_user.find((el) => el.status === 1))}`
+				);
 				ejs.renderFile(
 					path.join(__dirname, '../views/', 'fpb-pdf.ejs'),
 					{
 						data: xJoResultFPB,
 						companyData: xCompanyData,
 						imagePath: config.imagePath,
-						approver1: xApprover1 != null ? xApprover1.approver_user[0].user.name : '',
-						approver2: xApprover1 != null ? xApprover2.approver_user[0].user.name : '',
-						approver3: xApprover3 != null ? xApprover3.approver_user[0].user.name : '',
+						approver1:
+							xApprover1 != null ? xApprover1.approver_user.find((el) => el.status === 1).user.name : '',
+						approver2:
+							xApprover1 != null ? xApprover2.approver_user.find((el) => el.status === 1).user.name : '',
+						approver3:
+							xApprover3 != null ? xApprover3.approver_user.find((el) => el.status === 1).user.name : '',
 						qrCode: {
 							approval1:
 								xApprover1 != null
