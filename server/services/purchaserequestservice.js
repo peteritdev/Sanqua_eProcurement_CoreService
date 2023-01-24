@@ -205,8 +205,8 @@ class PurchaseRequestService {
 				console.log(`>>> pParam : ${JSON.stringify(pParam)}`);
 				var xResultList = await _repoInstance.list(pParam);
 
-				if (xResultList.count > 0) {
-					var xRows = xResultList.rows;
+				if (xResultList.total_record > 0) {
+					var xRows = xResultList.data;
 					for (var index in xRows) {
 						xJoArrData.push({
 							id: await _utilInstance.encrypt(xRows[index].id.toString(), config.cryptoKey.hashKey),
@@ -245,7 +245,7 @@ class PurchaseRequestService {
 					xJoResult = {
 						status_code: '00',
 						status_msg: 'OK',
-						total_record: xResultList.count,
+						total_record: xResultList.total_record,
 						data: xJoArrData
 					};
 				} else {

@@ -52,6 +52,8 @@ class PurchaseRequestRepository {
 		var xWhere = [];
 		var xWhereAnd = [],
 			xWhereOr = [];
+		var xFlagFilterDepartment = false;
+		var xJoResult = {};
 
 		xInclude = [
 			{
@@ -116,44 +118,82 @@ class PurchaseRequestRepository {
 		// 	}
 		// }
 
+		let xJArrFilter = [];
+
 		if (pParam.hasOwnProperty('owned_document_no') && pParam.is_admin == 0) {
 			if (pParam.owned_document_no.length > 0) {
-				xWhereAnd.push({
+				xJArrFilter.push({
 					request_no: {
 						[Op.in]: pParam.owned_document_no
 					}
 				});
+				if (pParam.hasOwnProperty('department_id') && pParam.is_admin == 0) {
+					if (pParam.department_id != '') {
+						if (!xFlagFilterDepartment) {
+							xJArrFilter.push({
+								department_id: pParam.department_id
+							});
+							xFlagFilterDepartment = true;
+						}
+					}
+				}
+
+				xWhereAnd.push({
+					[Op.or]: xJArrFilter
+				});
 			}
 		}
 
+		xJArrFilter = [];
 		if (pParam.hasOwnProperty('keyword')) {
 			if (pParam.keyword != '') {
+				xJArrFilter.push(
+					{
+						request_no: {
+							[Op.iLike]: '%' + pParam.keyword + '%'
+						}
+					},
+					{
+						employee_name: {
+							[Op.iLike]: '%' + pParam.keyword + '%'
+						}
+					},
+					{
+						department_name: {
+							[Op.iLike]: '%' + pParam.keyword + '%'
+						}
+					}
+				);
+
 				xWhereAnd.push({
-					[Op.or]: [
-						{
-							request_no: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
-							}
-						},
-						{
-							employee_name: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
-							}
-						},
-						{
-							department_name: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
+					[Op.or]: xJArrFilter
+				});
+
+				if (!xFlagFilterDepartment) {
+					if (pParam.hasOwnProperty('department_id') && pParam.is_admin == 0) {
+						if (pParam.department_id != '') {
+							if (!xFlagFilterDepartment) {
+								xWhereAnd.push({
+									department_id: pParam.department_id
+								});
+								xFlagFilterDepartment = true;
 							}
 						}
-					]
-				});
-			} else {
-				if (pParam.hasOwnProperty('department_id') && pParam.is_admin == 0) {
-					if (pParam.department_id != '') {
-						xWhereOr.push({
-							department_id: pParam.department_id
-						});
 					}
+				}
+			}
+		}
+
+		if (!xFlagFilterDepartment) {
+			if (pParam.department_id != '') {
+				if (!xFlagFilterDepartment) {
+					xJArrFilter.push({
+						department_id: pParam.department_id
+					});
+					xFlagFilterDepartment = true;
+					xWhereAnd.push({
+						[Op.or]: xJArrFilter
+					});
 				}
 			}
 		}
@@ -175,7 +215,9 @@ class PurchaseRequestRepository {
 				[Op.or]: [ xWhereAnd, xWhereOr ]
 			},
 			include: xInclude,
-			order: [ xOrder ]
+			order: [ xOrder ],
+			subQuery: true,
+			distinct: true
 		};
 
 		if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
@@ -185,9 +227,28 @@ class PurchaseRequestRepository {
 			}
 		}
 
-		var xData = await _modelDb.findAndCountAll(xParamQuery);
+		var xData = await _modelDb.findAll(xParamQuery);
 
-		return xData;
+		xParamQuery.subQuery = false;
+		delete xParamQuery.offset;
+		delete xParamQuery.limit;
+		let xTotalRecord = await _modelDb.count(xParamQuery);
+		if (xData != null) {
+			xJoResult = {
+				status_code: '00',
+				status_msg: 'OK',
+				data: xData,
+				total_record: xTotalRecord
+			};
+		} else {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: 'Data not found',
+				data: []
+			};
+		}
+
+		return xJoResult;
 	}
 
 	async save(pParam, pAct) {
