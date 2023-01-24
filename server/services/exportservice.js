@@ -79,12 +79,15 @@ class ExportService {
 
 				let xApprover1 = null;
 				let xApprover2 = null;
+				let xApprover3 = null;
 				let xStringQRCodeApprover1 = '';
 				let xStringQRCodeApprover2 = '';
+				let xStringQRCodeApprover3 = '';
 				let xApprovalFinanceAccounting = null;
 				let xFilePathQRCodeApproval = `${config.uploadBasePath}/digital_sign_qrcode/`;
 				let xQRCodeFileName1,
-					xQRCodeFileName2 = '';
+					xQRCodeFileName2,
+					xQRCodeFileName3 = '';
 
 				xApprover1 =
 					xJoResultFPB.data.approval_matrix != null
@@ -93,6 +96,10 @@ class ExportService {
 				xApprover2 =
 					xJoResultFPB.data.approval_matrix != null
 						? xJoResultFPB.data.approval_matrix.find((el) => el.sequence === 2)
+						: null;
+				xApprover3 =
+					xJoResultFPB.data.approval_matrix != null
+						? xJoResultFPB.data.approval_matrix.find((el) => el.sequence === 3)
 						: null;
 
 				// Generate QRCode Digital Sign
@@ -120,6 +127,18 @@ class ExportService {
 					_imageDataURI.outputFile(xQRCodeApproval2, xFilePathQRCodeApproval + xQRCodeFileName2);
 				}
 
+				if (xApprover3 != null) {
+					xStringQRCodeApprover3 =
+						`VALIDATE_SIGNATURE|PROC|` +
+						(await _utilInstance.encrypt(
+							`${xFPBId}|${xApprover3.approver_user[0].user.id}`,
+							config.cryptoKey.hashKey
+						));
+					let xQRCodeApproval3 = await _qrCode.toDataURL(xStringQRCodeApprover3);
+					xQRCodeFileName3 = `approval_${xFPBId}${xApprover3.approver_user[0].user.id}.png`;
+					_imageDataURI.outputFile(xQRCodeApproval3, xFilePathQRCodeApproval + xQRCodeFileName3);
+				}
+
 				// console.log(`>>> xApprovalHeadDepartment: ${JSON.stringify(xApprovalHeadDepartment)}`);
 				// console.log(`>>> xApprovalPM: ${JSON.stringify(xApprovalPM)}`);
 
@@ -136,6 +155,7 @@ class ExportService {
 						imagePath: config.imagePath,
 						approver1: xApprover1 != null ? xApprover1.approver_user[0].user.name : '',
 						approver2: xApprover1 != null ? xApprover2.approver_user[0].user.name : '',
+						approver3: xApprover3 != null ? xApprover3.approver_user[0].user.name : '',
 						qrCode: {
 							approval1:
 								xApprover1 != null
@@ -144,6 +164,10 @@ class ExportService {
 							approval2:
 								xApprover2 != null
 									? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName2}`
+									: '',
+							approval3:
+								xApprover3 != null
+									? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName3}`
 									: ''
 						}
 					},

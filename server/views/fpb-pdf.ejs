@@ -424,14 +424,22 @@
                                 %>                                
                             </td>
                             <td></td>
-                            <td  style="border-right: none !important;"></td>
+                            <td  style="border-right: none !important;text-align: center;vertical-align: middle;">
+                                <%
+                                    if( qrCode.approval1 != '' ){
+                                %>
+                                    <img src="<%=qrCode.approval2%>" width="80">
+                                <%
+                                    }
+                                %>
+                            </td>
                         </tr>
                         <tr style="height: 20px;">
                             <td><%=data.data.employee.name%></td>
                             <td><%=approver1%></td>
                             <td><%=approver2%></td>                            
                             <td></td>
-                            <td  style="border-right: none !important;"></td>
+                            <td  style="border-right: none !important;"><%=approver2%></td>
                         </tr>
                     </table>
                 </td>
