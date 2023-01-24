@@ -91,15 +91,15 @@ class ExportService {
 
 				xApprover1 =
 					xJoResultFPB.data.approval_matrix != null
-						? xJoResultFPB.data.approval_matrix.find((el) => el.sequence === 1)
+						? xJoResultFPB.data.approval_matrix.find((el) => el.sequence === 1 && el.status === 1)
 						: null;
 				xApprover2 =
 					xJoResultFPB.data.approval_matrix != null
-						? xJoResultFPB.data.approval_matrix.find((el) => el.sequence === 2)
+						? xJoResultFPB.data.approval_matrix.find((el) => el.sequence === 2 && el.status === 1)
 						: null;
 				xApprover3 =
 					xJoResultFPB.data.approval_matrix != null
-						? xJoResultFPB.data.approval_matrix.find((el) => el.sequence === 3)
+						? xJoResultFPB.data.approval_matrix.find((el) => el.sequence === 3 && el.status === 1)
 						: null;
 
 				// Generate QRCode Digital Sign
