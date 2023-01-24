@@ -213,6 +213,16 @@ class PurchaseRequestDetailRepository {
 				}
 			}
 
+			if (pParam.hasOwnProperty('status')) {
+				if (pParam.status != null && pParam.status != '') {
+					xWhereAnd.push({
+						status: {
+							[Op.in]: pParam.status
+						}
+					});
+				}
+			}
+
 			if (pParam.hasOwnProperty('pr_no')) {
 				if (typeof pParam.pr_no === 'boolean') {
 					if (pParam.pr_no) {

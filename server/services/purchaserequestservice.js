@@ -882,7 +882,7 @@ class PurchaseRequestService {
 						// Check if all the items still in draft
 						let xItems = await _repoDetailInstance.getByParam({
 							request_id: pParam.document_id,
-							pr_no: true
+							status: [ 2, 3, 4 ]
 						});
 						if (xItems.status_code == '00') {
 							xJoResult = {
