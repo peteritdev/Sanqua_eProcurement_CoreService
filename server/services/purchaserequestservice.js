@@ -463,7 +463,8 @@ class PurchaseRequestService {
 							table_name: config.dbTables.fpb,
 							company_id: xPRDetail.company_id,
 							department_id: xPRDetail.department_id,
-							ecatalogue_fpb_category_item: xPRDetail.category_item == 7 ? xPRDetail.category_item : null
+							ecatalogue_fpb_category_item: xPRDetail.category_item == 7 ? xPRDetail.category_item : null,
+							logged_user_company_id: pParam.logged_company_id
 						};
 
 						console.log(`>>> xPRDetail.category_item: ${JSON.stringify(xParamAddApprovalMatrix)}`);

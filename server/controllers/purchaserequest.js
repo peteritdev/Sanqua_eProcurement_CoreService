@@ -319,6 +319,7 @@ async function purchaseRequest_Cancel(req, res) {
 			} else {
 				req.body.user_id = oAuthResult.token_data.result_verify.id;
 				req.body.user_name = oAuthResult.token_data.result_verify.name;
+
 				req.body.token = req.headers['x-token'];
 				req.body.method = req.headers['x-method'];
 				joResult = await _serviceInstance.cancelFPB(req.body);
