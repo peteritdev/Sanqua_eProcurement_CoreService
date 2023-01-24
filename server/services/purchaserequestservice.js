@@ -387,7 +387,12 @@ class PurchaseRequestService {
 					file: xResult.file != null ? `${config.imagePathESanQua}/eprocurement/fpb/${xResult.file}` : null,
 					category_item: xResult.category_item,
 					category_pr: xResult.category_pr,
-					created_at: xResult.createdAt != null ? moment(xResult.createdAt).format('DD MMM YYYY') : ''
+					created_at: xResult.createdAt != null ? moment(xResult.createdAt).format('DD MMM YYYY') : '',
+
+					cancel_at:
+						xResult.cancel_at != null ? moment(xResult.cancel_at).format('DD MMM YYYY HH:mm:ss') : '',
+					cancel_by_name: xResult.cancel_by_name,
+					cancel_reason: xResult.cancel_reason
 				};
 
 				xJoResult = {
@@ -893,7 +898,9 @@ class PurchaseRequestService {
 							var xUpdateResult = await _repoInstance.save(
 								{
 									id: pParam.document_id,
-									status: pParam.status
+									status: pParam.status,
+									user_id: pParam.user_id,
+									user_name: pParam.user_name
 								},
 								'cancel_fpb'
 							);
@@ -903,7 +910,9 @@ class PurchaseRequestService {
 						var xUpdateResult = await _repoInstance.save(
 							{
 								id: pParam.document_id,
-								status: pParam.status
+								status: pParam.status,
+								user_id: pParam.user_id,
+								user_name: pParam.user_name
 							},
 							'cancel_fpb'
 						);
