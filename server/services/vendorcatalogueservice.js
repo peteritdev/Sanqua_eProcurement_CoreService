@@ -641,7 +641,7 @@ class VendorCatalogueService {
 			// Check Vendor Code and Product Code
 			var xVendorCatalogue = await _vendorCatalogueRepoInstance.getByVendorCodeAndProductCode({
 				vendor_code: pParam.vendor.code,
-				product_code: xRows[index].product.default_code
+				product_code: xRows[index].code
 			});
 
 			if (xVendorCatalogue != null) {
@@ -664,7 +664,7 @@ class VendorCatalogueService {
 					purchase_uom_id: xUom != null ? xUom.id : null,
 					purchase_uom_name: xUom != null ? xUom.name : null,
 					last_price: xRows[index].price_unit,
-					last_ordered: xRows[index].createdAt,
+					last_ordered: xRows[index].created_at,
 					currency_id: xCurrency != null ? xCurrency.id : null,
 					purchase_frequency: sequelize.literal('purchase_frequency + 1'),
 					last_purchase_plant: pParam.company.name,
@@ -672,12 +672,12 @@ class VendorCatalogueService {
 				};
 				var xUpdate = await _vendorCatalogueRepoInstance.save(xParamUpdate, 'update');
 				xJoDataResult.push({
-					product_code: xRows[index].product.default_code,
+					product_code: xRows[index].code,
 					status: true
 				});
 			} else {
 				xJoDataResult.push({
-					product_code: xRows[index].product.default_code,
+					product_code: xRows[index].code,
 					status: false
 				});
 			}
