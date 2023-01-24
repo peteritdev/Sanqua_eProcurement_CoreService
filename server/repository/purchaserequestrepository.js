@@ -184,7 +184,7 @@ class PurchaseRequestRepository {
 			}
 		}
 
-		if (!xFlagFilterDepartment) {
+		if (!xFlagFilterDepartment && pParam.is_admin == 0) {
 			if (pParam.department_id != '') {
 				if (!xFlagFilterDepartment) {
 					xJArrFilter.push({
