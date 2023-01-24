@@ -440,7 +440,8 @@ class PurchaseRequestService {
 		if (xFlagProcess) {
 			// Get PR Detail
 			var xPRDetail = await _repoInstance.getById({ id: xClearId });
-			if (xPRDetail.status != 0) {
+			if (false) {
+				//xPRDetail.status != 0) {
 				xJoResult = {
 					status_code: '-99',
 					status_msg: 'You can not submit this document. Please check again.'
@@ -464,7 +465,7 @@ class PurchaseRequestService {
 							company_id: xPRDetail.company_id,
 							department_id: xPRDetail.department_id,
 							ecatalogue_fpb_category_item: xPRDetail.category_item == 7 ? xPRDetail.category_item : null,
-							logged_user_company_id: pParam.logged_company_id
+							logged_company_id: pParam.logged_company_id
 						};
 
 						console.log(`>>> xPRDetail.category_item: ${JSON.stringify(xParamAddApprovalMatrix)}`);
