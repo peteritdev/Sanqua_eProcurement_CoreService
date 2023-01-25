@@ -104,8 +104,18 @@ class PurchaseRequestService {
 									xJoArrItems[i].estimate_date_use = null;
 								}
 							}
+							// Get Last price from etalase ecatalogue
+							let xCatalogue = await _catalogueService.getByVendorCodeAndProductCode({
+								vendor_code: xJoArrItems[i].vendor_code,
+								product_code: xJoArrItems[i].product_code
+							});
+
+							if (xCatalogue.status_code == '00') {
+								xJoArrItems[i].last_price = xCatalogue.data.last_price;
+							}
 						}
 					}
+					pParam.purchase_request_detail = xJoArrItems;
 				}
 
 				var xAddResult = await _repoInstance.save(pParam, xAct);

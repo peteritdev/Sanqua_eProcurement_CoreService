@@ -32,9 +32,6 @@ const _purchaseRequestServiceInstance = new PurchaseRequestService();
 const IntegrationService = require('../services/oauthservice.js');
 const _integrationServiceInstance = new IntegrationService();
 
-const VendorCatalogueService = require('../services/vendorcatalogueservice.js');
-const _vendorCatalogueServiceInstance = new VendorCatalogueService();
-
 const _xClassName = 'PurchaseRequestDetailService';
 
 class PurchaseRequestDetailService {
@@ -232,14 +229,6 @@ class PurchaseRequestDetailService {
 
 							xAct = 'add';
 						}
-
-						// Get Last price from etalase ecatalogue
-						let xCatalogue = await _vendorCatalogueServiceInstance.getByVendorCodeAndProductCode({
-							vendor_code: xItems[i].vendor_code,
-							product_code: xItems[i].product_code
-						});
-
-						console.log(`>>> xCatalogue: ${JSON.stringify(xCatalogue)}`);
 
 						if (xCatalogue.status_code == '00') {
 							xItems[i].last_price = xCatalogue.data.last_price;
