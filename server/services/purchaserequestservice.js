@@ -912,7 +912,8 @@ class PurchaseRequestService {
 									id: pParam.document_id,
 									status: pParam.status,
 									user_id: pParam.user_id,
-									user_name: pParam.user_name
+									user_name: pParam.user_name,
+									cancel_reason: pParam.cancel_reason
 								},
 								'cancel_fpb'
 							);

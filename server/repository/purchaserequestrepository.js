@@ -374,6 +374,7 @@ class PurchaseRequestRepository {
 						pParam.cancel_by = pParam.user_id;
 						pParam.cancel_by_name = pParam.user_name;
 						xComment = 'canceled';
+						pParam.cancel_reason = pParam.cancel_reason;
 						break;
 					case 'set_to_draft_fpb':
 						pParam.set_to_draft_at = await _utilInstance.getCurrDateTime();
