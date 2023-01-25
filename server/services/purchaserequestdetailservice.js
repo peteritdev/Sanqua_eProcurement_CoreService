@@ -344,7 +344,10 @@ class PurchaseRequestDetailService {
 														break;
 													}
 												} else if (pParam.type == 'po') {
-													if (xItemInfo.data.pr_no == '' || xItemInfo.data.pr_no == null) {
+													if (
+														(xItemInfo.data.pr_no == '' || xItemInfo.data.pr_no == null) &&
+														xItemInfo.data.status == 0
+													) {
 														xLineIds.push({
 															product_code: pParam.items[i].product_code,
 															qty: pParam.items[i].qty
