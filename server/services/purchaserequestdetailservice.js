@@ -422,6 +422,7 @@ class PurchaseRequestDetailService {
 													xParamOdoo
 												);
 
+												console.log(`>>> xParamOdoo: ${JSON.stringify(xParamOdoo)}`);
 												console.log(`>>> xCreatePRResult: ${JSON.stringify(xCreatePRResult)}`);
 
 												if (xCreatePRResult.status_code == '00') {
