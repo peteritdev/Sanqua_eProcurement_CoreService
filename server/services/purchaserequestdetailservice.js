@@ -422,6 +422,8 @@ class PurchaseRequestDetailService {
 													xParamOdoo
 												);
 
+												console.log(`>>> xCreatePRResult: ${JSON.stringify(xCreatePRResult)}`);
+
 												if (xCreatePRResult.status_code == '00') {
 													if (xCreatePRResult.hasOwnProperty('name')) {
 														if (xCreatePRResult.name != '') {
