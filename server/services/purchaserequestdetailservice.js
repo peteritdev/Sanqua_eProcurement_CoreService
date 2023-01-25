@@ -360,6 +360,11 @@ class PurchaseRequestDetailService {
 												if (xItemInfo.data.status != 0) {
 													xFlagProcess = false;
 													break;
+												} else {
+													xLineIds.push({
+														product_code: pParam.items[i].product_code,
+														qty: pParam.items[i].qty
+													});
 												}
 											} else {
 												xFlagProcess = false;
