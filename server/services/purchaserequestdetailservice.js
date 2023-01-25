@@ -411,8 +411,6 @@ class PurchaseRequestDetailService {
 													line_ids: xLineIds
 												};
 
-												console.log(`>>> xParamOdoo: ${JSON.stringify(xParamOdoo)}`);
-
 												let xCreatePRResult = await _integrationServiceInstance.createPR(
 													xParamOdoo
 												);
@@ -463,7 +461,8 @@ class PurchaseRequestDetailService {
 									} else {
 										xJoResult = {
 											status_code: '-99',
-											status_msg: 'Please supply valid item id.'
+											status_msg:
+												'Please supply valid item id or maybe there is item that has been submit to PR.'
 										};
 									}
 								} else {
