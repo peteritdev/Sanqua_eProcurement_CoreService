@@ -338,24 +338,28 @@ class PurchaseRequestDetailService {
 											});
 											console.log(`>>> xItemInfo : ${JSON.stringify(xItemInfo)}`);
 											if (xItemInfo.status_code == '00') {
-												if (pParam.type == 'ca') {
-													if (xItemInfo.data.status != 0) {
-														xFlagProcess = false;
-														break;
-													}
-												} else if (pParam.type == 'po') {
-													if (
-														(xItemInfo.data.pr_no == '' || xItemInfo.data.pr_no == null) &&
-														xItemInfo.data.status == 0
-													) {
-														xLineIds.push({
-															product_code: pParam.items[i].product_code,
-															qty: pParam.items[i].qty
-														});
-													} else {
-														xFlagProcess = false;
-														break;
-													}
+												// if (pParam.type == 'ca') {
+												// 	if (xItemInfo.data.status != 0) {
+												// 		xFlagProcess = false;
+												// 		break;
+												// 	}
+												// } else if (pParam.type == 'po') {
+												// 	if (
+												// 		(xItemInfo.data.pr_no == '' || xItemInfo.data.pr_no == null) &&
+												// 		xItemInfo.data.status == 0
+												// 	) {
+												// 		xLineIds.push({
+												// 			product_code: pParam.items[i].product_code,
+												// 			qty: pParam.items[i].qty
+												// 		});
+												// 	} else {
+												// 		xFlagProcess = false;
+												// 		break;
+												// 	}
+												// }
+												if (xItemInfo.data.status != 0) {
+													xFlagProcess = false;
+													break;
 												}
 											} else {
 												xFlagProcess = false;
