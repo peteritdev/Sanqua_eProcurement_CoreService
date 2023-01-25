@@ -762,6 +762,33 @@ class VendorCatalogueService {
 
 		return xJoResult;
 	}
+
+	async getByVendorCodeAndProductCode(pParam) {
+		var xJoResult = {};
+
+		try {
+			let xData = await _vendorCatalogueRepoInstance.getByVendorCodeAndProductCode(pParam);
+			if (xData != null) {
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					data: xData
+				};
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Data not found'
+				};
+			}
+		} catch (e) {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Exception error: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
 }
 
 module.exports = VendorCatalogueService;
