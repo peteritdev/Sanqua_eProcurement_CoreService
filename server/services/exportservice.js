@@ -103,7 +103,7 @@ class ExportService {
 						: null;
 
 				// Generate QRCode Digital Sign
-				if (xApprover1 != null) {
+				if (xApprover1 != null && xApprover1.approver_user.find((el) => el.status === 1) != null) {
 					xStringQRCodeApprover1 =
 						`VALIDATE_SIGNATURE|PROC|` +
 						(await _utilInstance.encrypt(
@@ -116,7 +116,7 @@ class ExportService {
 					_imageDataURI.outputFile(xQRCodeApproval1, xFilePathQRCodeApproval + xQRCodeFileName1);
 				}
 
-				if (xApprover2 != null) {
+				if (xApprover2 != null && xApprover2.approver_user.find((el) => el.status === 1) != null) {
 					xStringQRCodeApprover2 =
 						`VALIDATE_SIGNATURE|PROC|` +
 						(await _utilInstance.encrypt(
@@ -129,7 +129,7 @@ class ExportService {
 					_imageDataURI.outputFile(xQRCodeApproval2, xFilePathQRCodeApproval + xQRCodeFileName2);
 				}
 
-				if (xApprover3 != null) {
+				if (xApprover3 != null && xApprover3.approver_user.find((el) => el.status === 1) != null) {
 					xStringQRCodeApprover3 =
 						`VALIDATE_SIGNATURE|PROC|` +
 						(await _utilInstance.encrypt(
@@ -151,9 +151,9 @@ class ExportService {
 				// console.log(`>>> url 1 : ` + `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName1}`);
 				// console.log(`>>> url 2 : ` + `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName2}`);
 
-				console.log(
-					`>>> Approver 1 : ${JSON.stringify(xApprover1.approver_user.find((el) => el.status === 1))}`
-				);
+				// console.log(
+				// 	`>>> Approver 1 : ${JSON.stringify(xApprover1.approver_user.find((el) => el.status === 1))}`
+				// );
 				ejs.renderFile(
 					path.join(__dirname, '../views/', 'fpb-pdf.ejs'),
 					{
@@ -161,11 +161,23 @@ class ExportService {
 						companyData: xCompanyData,
 						imagePath: config.imagePath,
 						approver1:
-							xApprover1 != null ? xApprover1.approver_user.find((el) => el.status === 1).user.name : '',
+							xApprover1 != null
+								? xApprover1.approver_user.find((el) => el.status === 1) == null
+									? ''
+									: xApprover1.approver_user.find((el) => el.status === 1).user.name
+								: '',
 						approver2:
-							xApprover1 != null ? xApprover2.approver_user.find((el) => el.status === 1).user.name : '',
+							xApprover1 != null
+								? xApprover2.approver_user.find((el) => el.status === 1) == null
+									? ''
+									: xApprover2.approver_user.find((el) => el.status === 1).user.name
+								: '',
 						approver3:
-							xApprover3 != null ? xApprover3.approver_user.find((el) => el.status === 1).user.name : '',
+							xApprover3 != null
+								? xApprover3.approver_user.find((el) => el.status === 1) == null
+									? ''
+									: xApprover3.approver_user.find((el) => el.status === 1).user.name
+								: '',
 						qrCode: {
 							approval1:
 								xApprover1 != null
