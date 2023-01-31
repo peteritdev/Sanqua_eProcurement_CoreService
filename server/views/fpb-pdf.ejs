@@ -212,7 +212,7 @@
                                 <tr>
                                     <td style="text-align:right;" class="col-item"><%=index%>.</td>
                                     <td style="text-align: left;" class="col-item"><%=item.product.name%></td>
-                                    <td class="col-item"></td>
+                                    <td class="col-item"><%=item.current_stock%></td>
                                     <td class="col-item"><%=item.qty%></td>
                                     <td class="col-item"><%=item.uom%></td>
                                     <td style="text-align: right;" class="col-item"><%=item.budget_price_per_unit.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')%></td>
