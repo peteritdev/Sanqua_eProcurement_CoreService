@@ -193,6 +193,7 @@
   },  
 
   "production": {
+    "applicationId": 2,
     "appPort": 1191,
     "dbTables": {
       "procurement": "tr_procurements",
