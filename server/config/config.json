@@ -5,6 +5,7 @@
       "procurement": "tr_procurements",
       "fpb": "tr_purchaserequests"
     },
+    "logging": false,
     "username": "postgres",
     "password": "P455uu0rd^^ok",
     "database": "sanqua_procurementnewdb",
@@ -92,7 +93,7 @@
 
     "statusDescription":{
       "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel"],
-      "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel"]
+      "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel", "Paid"]
     }
   },
 
@@ -187,7 +188,7 @@
     "uploadBasePath": "/var/www/esanqua_upload/eprocurement",
     "statusDescription":{
       "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel"],
-      "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel"]
+      "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel", "Paid"]
     }
   },  
 
@@ -267,6 +268,11 @@
     },
     "timezone": "+07:00",
     "imagePath": "http://10.10.20.8:8020/assets/icon/",
-    "imagePathESanQua": "http://10.10.20.8:8020"
+    "imagePathESanQua": "http://10.10.20.8:8020",
+    "uploadBasePath": "/var/www/esanqua_upload/eprocurement",
+    "statusDescription":{
+      "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel"],
+      "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel", "Paid"]
+    }
   }  
 }
