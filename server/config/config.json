@@ -275,7 +275,7 @@
     },
     "timezone": "+07:00",
     "imagePath": "http://10.10.20.8:8020/assets/icon/",
-    "imagePathESanQua": "https://e-sanqua.sanquawater.co.id/image/ecatalogue/eprocurement",
+    "imagePathESanQua": "https://e-sanqua.sanquawater.co.id/image/ecatalogue",
     "uploadBasePath": "/var/www/esanqua_upload/eprocurement",
     "statusDescription":{
       "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel"],
