@@ -278,7 +278,7 @@
     "imagePath": "http://10.10.20.8:8020/assets/icon/",
     "imagePathESanQua": "https://e-sanqua.sanquawater.co.id/image/ecatalogue",
     "imagePathESanQua_dev": "https://e-sanqua.sanquawater.co.id/image/eprocurement",
-    "uploadBasePath": "/var/www/esanqua_upload/eprocurement",
+    "uploadBasePath": "/var/www/sqa_upload_ecatalogue/eprocurement/digital_sign_qrcode",
     "statusDescription":{
       "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel"],
       "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel", "Paid"]
