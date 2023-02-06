@@ -248,16 +248,16 @@ class ExportService {
 									: xApprover4.approver_user.find((el) => el.status === 1).user.name
 								: '',
 						approver5:
-							approver5 != null
-								? approver5.approver_user.find((el) => el.status === 1) == null
+							xApprover5 != null
+								? xApprover5.approver_user.find((el) => el.status === 1) == null
 									? ''
-									: approver5.approver_user.find((el) => el.status === 1).user.name
+									: xApprover5.approver_user.find((el) => el.status === 1).user.name
 								: '',
 						approver6:
-							approver6 != null
-								? approver6.approver_user.find((el) => el.status === 1) == null
+							xApprover6 != null
+								? xApprover6.approver_user.find((el) => el.status === 1) == null
 									? ''
-									: approver6.approver_user.find((el) => el.status === 1).user.name
+									: xApprover6.approver_user.find((el) => el.status === 1).user.name
 								: '',
 						qrCode: {
 							approval1:
