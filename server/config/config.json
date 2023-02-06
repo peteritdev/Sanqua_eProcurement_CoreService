@@ -277,7 +277,7 @@
     "timezone": "+07:00",
     "imagePath": "http://10.10.20.8:8020/assets/icon/",
     "imagePathESanQua": "https://e-sanqua.sanquawater.co.id/image/ecatalogue",
-    "imagePathESanQua_dev": "https://e-sanqua.sanquawater.co.id/image/eprocurement",
+    "imagePathESanQua_dev": "https://e-sanqua.sanquawater.co.id/image/ecatalogue/eprocurement",
     "uploadBasePath": "/var/www/sqa_upload_ecatalogue/eprocurement/digital_sign_qrcode",
     "statusDescription":{
       "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel"],
