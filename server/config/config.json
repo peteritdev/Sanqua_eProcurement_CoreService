@@ -194,7 +194,7 @@
 
   "production": {
     "applicationId": 2,
-    "appPort": 1191,
+    "appPort": 9191,
     "dbTables": {
       "procurement": "tr_procurements",
       "fpb": "tr_purchaserequests"
