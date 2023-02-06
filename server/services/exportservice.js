@@ -262,27 +262,27 @@ class ExportService {
 						qrCode: {
 							approval1:
 								xApprover1 != null && xApprover1.approver_user.find((el) => el.status === 1) != null
-									? `${config.uploadBasePath}/digital_sign_qrcode/${xQRCodeFileName1}`
+									? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName1}`
 									: '',
 							approval2:
 								xApprover2 != null && xApprover2.approver_user.find((el) => el.status === 1) != null
-									? `${config.uploadBasePath}/digital_sign_qrcode/${xQRCodeFileName2}`
+									? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName2}`
 									: '',
 							approval3:
 								xApprover3 != null && xApprover3.approver_user.find((el) => el.status === 1) != null
-									? `${config.uploadBasePath}/digital_sign_qrcode/${xQRCodeFileName3}`
+									? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName3}`
 									: '',
 							approval4:
 								xApprover4 != null && xApprover4.approver_user.find((el) => el.status === 1) != null
-									? `${config.uploadBasePath}/digital_sign_qrcode/${xQRCodeFileName4}`
+									? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName4}`
 									: '',
 							approval5:
 								xApprover5 != null && xApprover5.approver_user.find((el) => el.status === 1) != null
-									? `${config.uploadBasePath}/digital_sign_qrcode/${xQRCodeFileName5}`
+									? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName5}`
 									: '',
 							approval6:
 								xApprover6 != null && xApprover6.approver_user.find((el) => el.status === 1) != null
-									? `${config.uploadBasePath}/digital_sign_qrcode/${xQRCodeFileName6}`
+									? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName6}`
 									: ''
 						}
 					},
