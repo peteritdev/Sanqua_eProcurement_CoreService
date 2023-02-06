@@ -211,7 +211,7 @@ class ExportService {
 				// console.log(`>>> Approver 1 : ${xApprovalHeadDepartment.approver_user[0].user.name}`);
 				// console.log(`>>> Approver 2 : ${xApprovalPM.approver_user[0].user.name}`);
 
-				// console.log(`>>> url 1 : ` + `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName1}`);
+				console.log(`>>> url 1 : ` + `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName1}`);
 				// console.log(`>>> url 2 : ` + `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName2}`);
 
 				// console.log(
