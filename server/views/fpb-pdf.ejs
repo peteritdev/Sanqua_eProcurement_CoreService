@@ -390,20 +390,22 @@
                     <table class="center" cellspacing="0" cellpadding="2" border="1" style="width:100%;border-width: 0.2px;font-size: 10px;">
                         <tr>
                             <td rowspan="2">
-                                Pemohon
+                                Dibuat Oleh
                             </td>
                             <td colspan="2">
                                 Mengetahui
                             </td>
-                            <td  colspan="2" style="border-right: none !important;">
+                            <td colspan="4">
                                 Disetujui
                             </td>
                         </tr>
                         <tr>
-                            <td>Head Unit / Sec. Head Unit</td>
-                            <td><strong>Head Unit/ PM / Finance & Accounting*</strong></td>
+                            <td>Head Department</td>
+                            <td>Dept. Pembelian Plant</strong></td>
+                            <td>Plant Manager</td>
+                            <td>Head F&A</td>
                             <td>Head Procurement</td>
-                            <td  style="border-right: none !important;"><strong>Direktur*</strong></td>
+                            <td>Direktur</td>
                         </tr>
                         <tr>
                             <td></td>
@@ -425,12 +427,38 @@
                                     }
                                 %>                                
                             </td>
-                            <td></td>
-                            <td  style="border-right: none !important;text-align: center;vertical-align: middle;">
+                            <td style="text-align: center;vertical-align: middle;">
                                 <%
                                     if( qrCode.approval3 != '' ){
                                 %>
                                     <img src="<%=qrCode.approval3%>" width="80">
+                                <%
+                                    }
+                                %>                                
+                            </td>
+                            <td style="text-align: center;vertical-align: middle;">
+                                <%
+                                    if( qrCode.approval4 != '' ){
+                                %>
+                                    <img src="<%=qrCode.approval4%>" width="80">
+                                <%
+                                    }
+                                %>                                
+                            </td>
+                            <td style="text-align: center;vertical-align: middle;">
+                                <%
+                                    if( qrCode.approval5 != '' ){
+                                %>
+                                    <img src="<%=qrCode.approval5%>" width="80">
+                                <%
+                                    }
+                                %>                                
+                            </td>
+                            <td  style="border-right: none !important;text-align: center;vertical-align: middle;">
+                                <%
+                                    if( qrCode.approval6 != '' ){
+                                %>
+                                    <img src="<%=qrCode.approval6%>" width="80">
                                 <%
                                     }
                                 %>
@@ -440,8 +468,10 @@
                             <td><%=data.data.employee.name%></td>
                             <td><%=approver1%></td>
                             <td><%=approver2%></td>                            
-                            <td></td>
-                            <td  style="border-right: none !important;"><%=approver3%></td>
+                            <td><%=approver3%></td>
+                            <td><%=approver4%></td>
+                            <td><%=approver5%></td>
+                            <td  style="border-right: none !important;"><%=approver6%></td>
                         </tr>
                     </table>
                 </td>

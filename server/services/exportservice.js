@@ -43,8 +43,6 @@ class ExportService {
 		var xFlagProcess = false;
 		let xFPBId = 0;
 
-		console.log(`>>> xJoResultFPB : ${JSON.stringify(xJoResultFPB)}`);
-
 		if (xJoResultFPB != null && xJoResultFPB.status_code == '00') {
 			// Decrypt ID
 			if (xJoResultFPB.data.id.length == 65) {
@@ -77,17 +75,29 @@ class ExportService {
 					}
 				}
 
+				let xCreator = null;
 				let xApprover1 = null;
 				let xApprover2 = null;
 				let xApprover3 = null;
+				let xApprover4 = null;
+				let xApprover5 = null;
+				let xApprover6 = null;
+				let xStringQRCodeCreator = '';
 				let xStringQRCodeApprover1 = '';
 				let xStringQRCodeApprover2 = '';
 				let xStringQRCodeApprover3 = '';
+				let xStringQRCodeApprover4 = '';
+				let xStringQRCodeApprover5 = '';
+				let xStringQRCodeApprover6 = '';
 				let xApprovalFinanceAccounting = null;
 				let xFilePathQRCodeApproval = `${config.uploadBasePath}/digital_sign_qrcode/`;
-				let xQRCodeFileName1,
+				let xQRCodeFileNameCreator,
+					xQRCodeFileName1,
 					xQRCodeFileName2,
-					xQRCodeFileName3 = '';
+					xQRCodeFileName3,
+					xQRCodeFileName4,
+					xQRCodeFileName5,
+					xQRCodeFileName6 = '';
 
 				xApprover1 =
 					xJoResultFPB.data.approval_matrix != null
@@ -101,8 +111,21 @@ class ExportService {
 					xJoResultFPB.data.approval_matrix != null
 						? xJoResultFPB.data.approval_matrix.find((el) => el.sequence === 3)
 						: null;
+				xApprover4 =
+					xJoResultFPB.data.approval_matrix != null
+						? xJoResultFPB.data.approval_matrix.find((el) => el.sequence === 4)
+						: null;
+				xApprover5 =
+					xJoResultFPB.data.approval_matrix != null
+						? xJoResultFPB.data.approval_matrix.find((el) => el.sequence === 5)
+						: null;
+				xApprover6 =
+					xJoResultFPB.data.approval_matrix != null
+						? xJoResultFPB.data.approval_matrix.find((el) => el.sequence === 6)
+						: null;
 
 				// Generate QRCode Digital Sign
+
 				if (xApprover1 != null && xApprover1.approver_user.find((el) => el.status === 1) != null) {
 					xStringQRCodeApprover1 =
 						`VALIDATE_SIGNATURE|PROC|` +
@@ -143,6 +166,45 @@ class ExportService {
 					_imageDataURI.outputFile(xQRCodeApproval3, xFilePathQRCodeApproval + xQRCodeFileName3);
 				}
 
+				if (xApprover4 != null && xApprover4.approver_user.find((el) => el.status === 1) != null) {
+					xStringQRCodeApprover4 =
+						`VALIDATE_SIGNATURE|PROC|` +
+						(await _utilInstance.encrypt(
+							`${xFPBId}|${xApprover4.approver_user.find((el) => el.status === 1).user.id}`,
+							config.cryptoKey.hashKey
+						));
+					let xQRCodeApproval4 = await _qrCode.toDataURL(xStringQRCodeApprover4);
+					xQRCodeFileName4 = `approval_${xFPBId}${xApprover4.approver_user.find((el) => el.status === 1).user
+						.id}.png`;
+					_imageDataURI.outputFile(xQRCodeApproval4, xFilePathQRCodeApproval + xQRCodeFileName4);
+				}
+
+				if (xApprover5 != null && xApprover5.approver_user.find((el) => el.status === 1) != null) {
+					xStringQRCodeApprover5 =
+						`VALIDATE_SIGNATURE|PROC|` +
+						(await _utilInstance.encrypt(
+							`${xFPBId}|${xApprover5.approver_user.find((el) => el.status === 1).user.id}`,
+							config.cryptoKey.hashKey
+						));
+					let xQRCodeApproval5 = await _qrCode.toDataURL(xStringQRCodeApprover5);
+					xQRCodeFileName5 = `approval_${xFPBId}${xApprover5.approver_user.find((el) => el.status === 1).user
+						.id}.png`;
+					_imageDataURI.outputFile(xQRCodeApproval5, xFilePathQRCodeApproval + xQRCodeFileName5);
+				}
+
+				if (xApprover6 != null && xApprover6.approver_user.find((el) => el.status === 1) != null) {
+					xStringQRCodeApprover6 =
+						`VALIDATE_SIGNATURE|PROC|` +
+						(await _utilInstance.encrypt(
+							`${xFPBId}|${xApprover6.approver_user.find((el) => el.status === 1).user.id}`,
+							config.cryptoKey.hashKey
+						));
+					let xQRCodeApproval6 = await _qrCode.toDataURL(xStringQRCodeApprover6);
+					xQRCodeFileName6 = `approval_${xFPBId}${xApprover6.approver_user.find((el) => el.status === 1).user
+						.id}.png`;
+					_imageDataURI.outputFile(xQRCodeApproval6, xFilePathQRCodeApproval + xQRCodeFileName6);
+				}
+
 				// console.log(`>>> xApprovalHeadDepartment: ${JSON.stringify(xApprovalHeadDepartment)}`);
 				// console.log(`>>> xApprovalPM: ${JSON.stringify(xApprovalPM)}`);
 
@@ -179,6 +241,24 @@ class ExportService {
 									? ''
 									: xApprover3.approver_user.find((el) => el.status === 1).user.name
 								: '',
+						approver4:
+							xApprover4 != null
+								? xApprover4.approver_user.find((el) => el.status === 1) == null
+									? ''
+									: xApprover4.approver_user.find((el) => el.status === 1).user.name
+								: '',
+						approver5:
+							approver5 != null
+								? approver5.approver_user.find((el) => el.status === 1) == null
+									? ''
+									: approver5.approver_user.find((el) => el.status === 1).user.name
+								: '',
+						approver6:
+							approver6 != null
+								? approver6.approver_user.find((el) => el.status === 1) == null
+									? ''
+									: approver6.approver_user.find((el) => el.status === 1).user.name
+								: '',
 						qrCode: {
 							approval1:
 								xApprover1 != null && xApprover1.approver_user.find((el) => el.status === 1) != null
@@ -191,6 +271,18 @@ class ExportService {
 							approval3:
 								xApprover3 != null && xApprover3.approver_user.find((el) => el.status === 1) != null
 									? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName3}`
+									: '',
+							approval4:
+								xApprover4 != null && xApprover4.approver_user.find((el) => el.status === 1) != null
+									? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName4}`
+									: '',
+							approval5:
+								xApprover5 != null && xApprover5.approver_user.find((el) => el.status === 1) != null
+									? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName5}`
+									: '',
+							approval6:
+								xApprover6 != null && xApprover6.approver_user.find((el) => el.status === 1) != null
+									? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName6}`
 									: ''
 						}
 					},
