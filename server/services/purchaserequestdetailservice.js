@@ -361,7 +361,7 @@ class PurchaseRequestDetailService {
 												// 		break;
 												// 	}
 												// }
-												if (xItemInfo.data.status != 0) {
+												if (xItemInfo.data.status != 0 && xItemInfo.data.status != 5) {
 													xFlagProcess = false;
 													break;
 												} else {
