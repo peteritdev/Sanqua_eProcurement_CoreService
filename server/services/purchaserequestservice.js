@@ -7,6 +7,7 @@ const dateFormat = require('dateformat');
 const Op = sequelize.Op;
 const bcrypt = require('bcrypt');
 const fs = require('fs');
+const _ = require('lodash');
 
 const env = process.env.NODE_ENV || 'localhost';
 const config = require(__dirname + '/../config/config.json')[env];
@@ -276,6 +277,7 @@ class PurchaseRequestService {
 		var xFlagProcess = false;
 		var xDecId = null;
 		var xEncId = '';
+		var xArrUserCanCancel = [];
 
 		xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
 		if (xDecId.status_code == '00') {
@@ -351,6 +353,21 @@ class PurchaseRequestService {
 					xParamApprovalMatrix
 				);
 
+				if (xResultApprovalMatrix != null) {
+					if (xResultApprovalMatrix.status_code == '00') {
+						let xListApprover = xResultApprovalMatrix.token_data.data;
+						for (var i in xListApprover) {
+							let xApproverUsers = _.filter(xListApprover[i].approver_user, { status: 1 }).map(
+								(v) => v.user.email
+							);
+							xArrUserCanCancel.push.apply(xArrUserCanCancel, xApproverUsers);
+							// console.log(`>>> xApproverUsers: ${JSON.stringify(xApproverUsers)}`);
+						}
+					}
+				}
+
+				console.log(`>>> xArrUserCanCancel: ${JSON.stringify(xArrUserCanCancel)}`);
+
 				xJoData = {
 					id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
 					request_no: xResult.request_no,
@@ -403,7 +420,9 @@ class PurchaseRequestService {
 					cancel_at:
 						xResult.cancel_at != null ? moment(xResult.cancel_at).format('DD MMM YYYY HH:mm:ss') : '',
 					cancel_by_name: xResult.cancel_by_name,
-					cancel_reason: xResult.cancel_reason
+					cancel_reason: xResult.cancel_reason,
+
+					approver_users: xArrUserCanCancel
 				};
 
 				xJoResult = {
