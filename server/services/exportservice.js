@@ -230,7 +230,7 @@ class ExportService {
 									: xApprover1.approver_user.find((el) => el.status === 1).user.name
 								: '',
 						approver2:
-							xApprover1 != null
+							xApprover2 != null
 								? xApprover2.approver_user.find((el) => el.status === 1) == null
 									? ''
 									: xApprover2.approver_user.find((el) => el.status === 1).user.name
