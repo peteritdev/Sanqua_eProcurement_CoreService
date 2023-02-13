@@ -66,8 +66,7 @@ class ExportService {
 					// console.log(`>>> Company : ${JSON.stringify(xCompanyDetail)}`);
 					if (xCompanyDetail.status_code == '00') {
 						xCompanyData = {
-							logo:
-								config.basePathESanqua + '/esanqua/company_logo/' + xCompanyDetail.token_data.data.logo,
+							logo: config.basePathESanqua + '/company_logo/' + xCompanyDetail.token_data.data.logo,
 							iso_purchase_request_no: xCompanyDetail.token_data.data.iso_purchase_request_no
 						};
 					}
