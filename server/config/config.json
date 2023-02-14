@@ -275,7 +275,7 @@
       "charset": "utf8mb4_unicode_ci"
     },
     "timezone": "+07:00",
-    "basePathESanqua": "http://10.10.20.6:8091/esanqua",
+    "basePathESanqua": "http://10.10.20.8:8020/esanqua",
     "imagePath": "http://10.10.20.6:8091/assets/icon/",    
     "imagePathESanQua": "https://e-sanqua.sanquawater.co.id/image/ecatalogue",
     "imagePathESanQua_dev": "http://10.10.20.6:8091/eprocurement",
