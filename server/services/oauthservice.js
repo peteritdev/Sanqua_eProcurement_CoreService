@@ -114,6 +114,19 @@ class OAuthService {
 
 		return xResultVerify;
 	}
+
+	async eSanQuaNotification(pMethod, pToken, pParam) {
+		var xAPIUrl = `${config.api.eSanqua}/notification/save`;
+		var xHeader = {
+			headers: {
+				'x-method': pMethod,
+				'x-token': pToken
+			}
+		};
+		var xResultVerify = await _utilInstance.axiosRequestPost(xAPIUrl, 'POST', pParam, xHeader);
+
+		return xResultVerify;
+	}
 }
 
 module.exports = OAuthService;

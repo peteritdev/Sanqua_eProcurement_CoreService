@@ -34,6 +34,9 @@ const _oAuthService = new OAuthService();
 const VendorCatalogueService = require('../services/vendorcatalogueservice.js');
 const _catalogueService = new VendorCatalogueService();
 
+const NotificationService = require('../services/notificationservice.js');
+const _notificationService = new NotificationService();
+
 class PurchaseRequestService {
 	constructor() {}
 
@@ -498,14 +501,38 @@ class PurchaseRequestService {
 							logged_company_id: pParam.logged_company_id
 						};
 
-						console.log(`>>> xPRDetail.category_item: ${JSON.stringify(xParamAddApprovalMatrix)}`);
-
 						var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
 							pParam.method,
 							pParam.token,
 							xParamAddApprovalMatrix
 						);
 						xJoResult.approval_matrix_result = xApprovalMatrixResult;
+
+						if (xApprovalMatrixResult.status_code == '00') {
+							if (xApprovalMatrixResult.approvers.length > 0) {
+								let xApproverSeq1 = xApprovalMatrixResult.approvers.find((el) => el.sequence === 1);
+								if (xApproverSeq1 != null) {
+									for (var i in xApproverSeq1.approver_user) {
+										let xInAppNotificationResult = await _notificationService.inAppNotification({
+											document_code: xPRDetail.request_no,
+											document_id: xEncId,
+											document_status: xPRDetail.status,
+											mode: 'request_approval_fpb',
+											method: pParam.method,
+											token: pParam.token,
+											employee_id: await _utilInstance.encrypt(
+												xApproverSeq1.approver_user[i].employee_id.toString(),
+												config.cryptoKey.hashKey
+											)
+										});
+
+										console.log(
+											`>>> xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`
+										);
+									}
+								}
+							}
+						}
 
 						// Active: 02-01-2023
 						// Description: After submit, it will hit api PR on odoo
@@ -721,9 +748,39 @@ class PurchaseRequestService {
 									xJoResult = xUpdateResult;
 								}
 							} else {
+								// Sort first
+								xResultApprovalMatrixDocument.approvers = xResultApprovalMatrixDocument.approvers.sort(
+									(a, b) => {
+										if (a.sequence < b.sequence) {
+											return -1;
+										}
+									}
+								);
+
+								// Send to next approver...
+								let xNextApprover = xResultApprovalMatrixDocument.approvers[0].approver_user;
+								console.log(`>>> xNextApprover : ${JSON.stringify(xNextApprover)}`);
+								if (xNextApprover != null) {
+									for (var i in xNextApprover) {
+										let xInAppNotificationResult = await _notificationService.inAppNotification({
+											document_code: xPRDetail.request_no,
+											document_id: xEncId,
+											document_status: xPRDetail.status,
+											mode: 'request_approval_fpb',
+											method: pParam.method,
+											token: pParam.token,
+											employee_id: await _utilInstance.encrypt(
+												xNextApprover[i].employee_id.toString(),
+												config.cryptoKey.hashKey
+											)
+										});
+									}
+								}
+
 								xJoResult = {
 									status_code: '00',
-									status_msg: 'FPB successfully approved. Document available for next approver'
+									status_msg: 'FPB successfully approved. Document available for next approver',
+									result_approval_matrix: xResultApprovalMatrixDocument
 								};
 							}
 						} else {
