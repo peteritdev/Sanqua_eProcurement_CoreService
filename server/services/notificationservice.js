@@ -169,6 +169,12 @@ class NotificationService {
 				};
 
 				let xAddNotifResult = await _oAuthService.eSanQuaNotification(pParam.method, pParam.token, xParam);
+
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					notification_result: xAddNotifResult
+				};
 			}
 		} catch (e) {
 			xJoResult = {

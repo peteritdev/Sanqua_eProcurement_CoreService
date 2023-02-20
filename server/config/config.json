@@ -86,6 +86,8 @@
     "timezone": "+07:00",
 
     "applicationId": 2,
+    "applicationCode": "PROC",
+    "applicationName": "eProcurement",
     "imagePath": "http://10.10.20.8:8020/assets/icon/",
     "imagePathESanQua": "http://10.10.20.8:8020",
 
@@ -181,6 +183,9 @@
     },
     "timezone": "+07:00",
     "applicationId": 2,
+    "applicationId": 2,
+    "applicationCode": "PROC",
+    "applicationName": "eProcurement",
 
     "imagePath": "http://10.10.20.8:8020/assets/icon/",
     "imagePathESanQua": "http://10.10.20.8:8020",
