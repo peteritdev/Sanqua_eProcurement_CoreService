@@ -168,7 +168,12 @@ class NotificationService {
 					employee_id: pParam.employee_id
 				};
 
-				let xAddNotifResult = await _oAuthService.eSanQuaNotification(pParam.method, pParam.token, xParam);
+				let xAddNotifResult = await _oAuthService.eSanQuaNotification(
+					pParam.method,
+					pParam.token,
+					xParam,
+					'/notification/save'
+				);
 
 				xJoResult = {
 					status_code: '00',
@@ -180,6 +185,34 @@ class NotificationService {
 			xJoResult = {
 				status_code: '-99',
 				status_msg: `Exception error ${_xClassName}: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
+
+	async sendNotification_FPBNeedApproval(pParam, pMethod, pToken) {
+		var xJoResult = {};
+
+		try {
+			if (pParam.mode == 'request_approval_fpb') {
+				let xAddNotifResult = await _oAuthService.eSanQuaNotification(
+					pMethod,
+					pToken,
+					pParam,
+					'/notification/email/fpb_approval'
+				);
+
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					notification_result: xAddNotifResult
+				};
+			}
+		} catch (e) {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Exception error ${_xClassName}.sendNotification_FPBNeedApproval: ${e.message}`
 			};
 		}
 

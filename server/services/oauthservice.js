@@ -115,8 +115,8 @@ class OAuthService {
 		return xResultVerify;
 	}
 
-	async eSanQuaNotification(pMethod, pToken, pParam) {
-		var xAPIUrl = `${config.api.eSanqua}/notification/save`;
+	async eSanQuaNotification(pMethod, pToken, pParam, pPath) {
+		var xAPIUrl = `${config.api.eSanqua}${pPath}`;
 		var xHeader = {
 			headers: {
 				'x-method': pMethod,
