@@ -287,6 +287,11 @@ async function purchaseRequest_Submit(req, res) {
 					oAuthResult.token_data.result_verify.employee_info.department.section.name;
 				req.body.token = req.headers['x-token'];
 				req.body.method = req.headers['x-method'];
+
+				req.body.notification_via_fcm = oAuthResult.token_data.result_verify.notification_via_fcm;
+				req.body.notification_via_email = oAuthResult.token_data.result_verify.notification_via_email;
+				req.body.notification_via_wa = oAuthResult.token_data.result_verify.notification_via_wa;
+				req.body.notification_via_telegram = oAuthResult.token_data.result_verify.notification_via_telegram;
 				joResult = await _serviceInstance.submitFPB(req.body);
 				joResult = JSON.stringify(joResult);
 			}
@@ -424,6 +429,11 @@ async function purchaseRequest_Confirm(req, res) {
 				req.body.user_name = oAuthResult.token_data.result_verify.name;
 				req.body.token = req.headers['x-token'];
 				req.body.method = req.headers['x-method'];
+
+				req.body.notification_via_fcm = oAuthResult.token_data.result_verify.notification_via_fcm;
+				req.body.notification_via_email = oAuthResult.token_data.result_verify.notification_via_email;
+				req.body.notification_via_wa = oAuthResult.token_data.result_verify.notification_via_wa;
+				req.body.notification_via_telegram = oAuthResult.token_data.result_verify.notification_via_telegram;
 				joResult = await _serviceInstance.confirmFPB(req.body);
 				joResult = JSON.stringify(joResult);
 			}

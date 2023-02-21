@@ -528,33 +528,48 @@ class PurchaseRequestService {
 										});
 
 										// Email Notification
-										let xParamEmailNotification = {
-											mode: 'request_approval_fpb',
-											id: xEncId,
-											request_no: xPRDetail.request_no,
-											company_name: xPRDetail.company_name,
-											department_name: xPRDetail.department_name,
-											created_by: xPRDetail.employee_name,
-											created_at:
-												xPRDetail.createdAt != null
-													? moment(xPRDetail.createdAt).format('DD MMM YYYY')
-													: '',
-											items: xPRDetail.purchase_request_detail,
-											approver_user: {
-												employee_name: xApproverSeq1.approver_user[i].name,
-												email: xApproverSeq1.approver_user[i].email
-											}
-										};
+										let xParamEmailNotification,
+											xNotificationResult = {};
+
 										console.log(
-											`>>> xParamEmailNotification: ${JSON.stringify(xParamEmailNotification)}`
-										);
-										let xNotificationResult = await _notificationService.sendNotification_FPBNeedApproval(
-											xParamEmailNotification,
-											pParam.method,
-											pParam.token
+											`>>> xApproverSeq1.approver_user[i]: ${JSON.stringify(
+												xApproverSeq1.approver_user[i]
+											)}`
 										);
 
-										console.log(`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`);
+										if (xApproverSeq1.approver_user[i].notification_via_email) {
+											xParamEmailNotification = {
+												mode: 'request_approval_fpb',
+												id: xEncId,
+												request_no: xPRDetail.request_no,
+												company_name: xPRDetail.company_name,
+												department_name: xPRDetail.department_name,
+												created_by: xPRDetail.employee_name,
+												created_at:
+													xPRDetail.createdAt != null
+														? moment(xPRDetail.createdAt).format('DD MMM YYYY')
+														: '',
+												items: xPRDetail.purchase_request_detail,
+												approver_user: {
+													employee_name: xApproverSeq1.approver_user[i].name,
+													email: xApproverSeq1.approver_user[i].email
+												}
+											};
+											console.log(
+												`>>> xParamEmailNotification: ${JSON.stringify(
+													xParamEmailNotification
+												)}`
+											);
+											xNotificationResult = await _notificationService.sendNotificationEmail_FPBNeedApproval(
+												xParamEmailNotification,
+												pParam.method,
+												pParam.token
+											);
+
+											console.log(
+												`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`
+											);
+										}
 									}
 								}
 							}
@@ -800,6 +815,44 @@ class PurchaseRequestService {
 												config.cryptoKey.hashKey
 											)
 										});
+
+										// Email Notification
+										let xParamEmailNotification,
+											xNotificationResult = {};
+
+										if (xNextApprover[i].notification_via_email) {
+											xParamEmailNotification = {
+												mode: 'request_approval_fpb',
+												id: xEncId,
+												request_no: xPRDetail.request_no,
+												company_name: xPRDetail.company_name,
+												department_name: xPRDetail.department_name,
+												created_by: xPRDetail.employee_name,
+												created_at:
+													xPRDetail.createdAt != null
+														? moment(xPRDetail.createdAt).format('DD MMM YYYY')
+														: '',
+												items: xPRDetail.purchase_request_detail,
+												approver_user: {
+													employee_name: xNextApprover[i].name,
+													email: xNextApprover[i].email
+												}
+											};
+											console.log(
+												`>>> xParamEmailNotification: ${JSON.stringify(
+													xParamEmailNotification
+												)}`
+											);
+											xNotificationResult = await _notificationService.sendNotificationEmail_FPBNeedApproval(
+												xParamEmailNotification,
+												pParam.method,
+												pParam.token
+											);
+
+											console.log(
+												`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`
+											);
+										}
 									}
 								}
 

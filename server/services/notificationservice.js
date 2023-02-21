@@ -191,7 +191,7 @@ class NotificationService {
 		return xJoResult;
 	}
 
-	async sendNotification_FPBNeedApproval(pParam, pMethod, pToken) {
+	async sendNotificationEmail_FPBNeedApproval(pParam, pMethod, pToken) {
 		var xJoResult = {};
 
 		try {
@@ -212,7 +212,7 @@ class NotificationService {
 		} catch (e) {
 			xJoResult = {
 				status_code: '-99',
-				status_msg: `Exception error ${_xClassName}.sendNotification_FPBNeedApproval: ${e.message}`
+				status_msg: `Exception error ${_xClassName}.sendNotificationEmail_FPBNeedApproval: ${e.message}`
 			};
 		}
 
