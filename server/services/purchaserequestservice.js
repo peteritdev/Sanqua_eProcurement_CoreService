@@ -551,7 +551,7 @@ class PurchaseRequestService {
 														: '',
 												items: xPRDetail.purchase_request_detail,
 												approver_user: {
-													employee_name: xApproverSeq1.approver_user[i].name,
+													employee_name: xApproverSeq1.approver_user[i].user_name,
 													email: xApproverSeq1.approver_user[i].email
 												}
 											};
@@ -834,7 +834,7 @@ class PurchaseRequestService {
 														: '',
 												items: xPRDetail.purchase_request_detail,
 												approver_user: {
-													employee_name: xNextApprover[i].name,
+													employee_name: xNextApprover[i].user_name,
 													email: xNextApprover[i].email
 												}
 											};
