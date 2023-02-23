@@ -535,6 +535,10 @@ class PurchaseRequestService {
 											'info'
 										);
 
+										console.log(
+											`>>> xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`
+										);
+
 										// Email Notification
 										let xParamEmailNotification,
 											xNotificationResult = {};
