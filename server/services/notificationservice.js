@@ -186,6 +186,8 @@ class NotificationService {
 				status_code: '-99',
 				status_msg: `Exception error ${_xClassName}: ${e.message}`
 			};
+
+			_utilInstance.writeLog(`${_xClassName}.inAppNotification`, `Exception error: ${e.message}`, 'error');
 		}
 
 		return xJoResult;

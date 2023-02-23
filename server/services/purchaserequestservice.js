@@ -37,6 +37,8 @@ const _catalogueService = new VendorCatalogueService();
 const NotificationService = require('../services/notificationservice.js');
 const _notificationService = new NotificationService();
 
+const _xClassName = 'PurchaseRequestService';
+
 class PurchaseRequestService {
 	constructor() {}
 
@@ -526,6 +528,12 @@ class PurchaseRequestService {
 												config.cryptoKey.hashKey
 											)
 										});
+
+										_utilInstance.writeLog(
+											`${_xClassName}.submitFPB`,
+											`xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`,
+											'debug'
+										);
 
 										// Email Notification
 										let xParamEmailNotification,
