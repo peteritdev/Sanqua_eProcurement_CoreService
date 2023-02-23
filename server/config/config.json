@@ -183,7 +183,6 @@
     },
     "timezone": "+07:00",
     "applicationId": 2,
-    "applicationId": 2,
     "applicationCode": "PROC",
     "applicationName": "eProcurement",
 
@@ -199,6 +198,8 @@
 
   "production": {
     "applicationId": 2,
+    "applicationCode": "PROC",
+    "applicationName": "eProcurement",
     "appPort": 9191,
     "dbTables": {
       "procurement": "tr_procurements",
