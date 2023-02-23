@@ -532,7 +532,7 @@ class PurchaseRequestService {
 										_utilInstance.writeLog(
 											`${_xClassName}.submitFPB`,
 											`xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`,
-											'debug'
+											'info'
 										);
 
 										// Email Notification
