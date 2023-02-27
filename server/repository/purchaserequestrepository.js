@@ -76,6 +76,14 @@ class PurchaseRequestRepository {
 			}
 		}
 
+		if (pParam.hasOwnProperty('company_id')) {
+			if (pParam.company_id != '') {
+				xWhereAnd.push({
+					company_id: pParam.company_id
+				});
+			}
+		}
+
 		if (pParam.hasOwnProperty('request_date_start') && pParam.hasOwnProperty('request_date_end')) {
 			if (pParam.request_date_start != '' && pParam.request_date_end != '') {
 				xWhereAnd.push({
