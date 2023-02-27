@@ -116,10 +116,10 @@ class ExportService {
 					xJoResultFPB.data.approval_matrix != null
 						? xJoResultFPB.data.approval_matrix.find((el) => el.sequence === 5)
 						: null;
-				xApprover6 =
-					xJoResultFPB.data.approval_matrix != null
-						? xJoResultFPB.data.approval_matrix.find((el) => el.sequence === 6)
-						: null;
+				// xApprover6 =
+				// 	xJoResultFPB.data.approval_matrix != null
+				// 		? xJoResultFPB.data.approval_matrix.find((el) => el.sequence === 6)
+				// 		: null;
 
 				// Generate QRCode Digital Sign
 
@@ -189,18 +189,18 @@ class ExportService {
 					_imageDataURI.outputFile(xQRCodeApproval5, xFilePathQRCodeApproval + xQRCodeFileName5);
 				}
 
-				if (xApprover6 != null && xApprover6.approver_user.find((el) => el.status === 1) != null) {
-					xStringQRCodeApprover6 =
-						`VALIDATE_SIGNATURE|PROC|` +
-						(await _utilInstance.encrypt(
-							`${xFPBId}|${xApprover6.approver_user.find((el) => el.status === 1).user.id}`,
-							config.cryptoKey.hashKey
-						));
-					let xQRCodeApproval6 = await _qrCode.toDataURL(xStringQRCodeApprover6);
-					xQRCodeFileName6 = `approval_${xFPBId}${xApprover6.approver_user.find((el) => el.status === 1).user
-						.id}.png`;
-					_imageDataURI.outputFile(xQRCodeApproval6, xFilePathQRCodeApproval + xQRCodeFileName6);
-				}
+				// if (xApprover6 != null && xApprover6.approver_user.find((el) => el.status === 1) != null) {
+				// 	xStringQRCodeApprover6 =
+				// 		`VALIDATE_SIGNATURE|PROC|` +
+				// 		(await _utilInstance.encrypt(
+				// 			`${xFPBId}|${xApprover6.approver_user.find((el) => el.status === 1).user.id}`,
+				// 			config.cryptoKey.hashKey
+				// 		));
+				// 	let xQRCodeApproval6 = await _qrCode.toDataURL(xStringQRCodeApprover6);
+				// 	xQRCodeFileName6 = `approval_${xFPBId}${xApprover6.approver_user.find((el) => el.status === 1).user
+				// 		.id}.png`;
+				// 	_imageDataURI.outputFile(xQRCodeApproval6, xFilePathQRCodeApproval + xQRCodeFileName6);
+				// }
 
 				// console.log(`>>> xApprovalHeadDepartment: ${JSON.stringify(xApprovalHeadDepartment)}`);
 				// console.log(`>>> xApprovalPM: ${JSON.stringify(xApprovalPM)}`);
@@ -250,12 +250,12 @@ class ExportService {
 									? ''
 									: xApprover5.approver_user.find((el) => el.status === 1).user.name
 								: '',
-						approver6:
-							xApprover6 != null
-								? xApprover6.approver_user.find((el) => el.status === 1) == null
-									? ''
-									: xApprover6.approver_user.find((el) => el.status === 1).user.name
-								: '',
+						// approver6:
+						// 	xApprover6 != null
+						// 		? xApprover6.approver_user.find((el) => el.status === 1) == null
+						// 			? ''
+						// 			: xApprover6.approver_user.find((el) => el.status === 1).user.name
+						// 		: '',
 						qrCode: {
 							approval1:
 								xApprover1 != null && xApprover1.approver_user.find((el) => el.status === 1) != null
@@ -276,11 +276,11 @@ class ExportService {
 							approval5:
 								xApprover5 != null && xApprover5.approver_user.find((el) => el.status === 1) != null
 									? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName5}`
-									: '',
-							approval6:
-								xApprover6 != null && xApprover6.approver_user.find((el) => el.status === 1) != null
-									? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName6}`
 									: ''
+							// approval6:
+							// 	xApprover6 != null && xApprover6.approver_user.find((el) => el.status === 1) != null
+							// 		? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName6}`
+							// 		: ''
 						}
 					},
 					(err, data) => {
