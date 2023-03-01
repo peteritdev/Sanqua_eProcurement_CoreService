@@ -312,17 +312,22 @@ class PurchaseRequestService {
 						current_stock: xDetail[index].current_stock,
 						uom: xDetail[index].vendor_catalogue != null ? xDetail[index].vendor_catalogue.uom_name : null,
 						budget_price_per_unit: xDetail[index].budget_price_per_unit,
-						pdf_budget_price_per_unit: xDetail[index].budget_price_per_unit
-							.toFixed(2)
-							.replace(/\d(?=(\d{3})+\.)/g, '$&,'),
+						pdf_budget_price_per_unit:
+							xDetail[index].budget_price_per_unit == null
+								? 0
+								: xDetail[index].budget_price_per_unit.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'),
 						budget_price_total: xDetail[index].budget_price_total,
-						pdf_budget_price_total: xDetail[index].budget_price_total
-							.toFixed(2)
-							.replace(/\d(?=(\d{3})+\.)/g, '$&,'),
+						pdf_budget_price_total:
+							xDetail[index].budget_price_total == null
+								? 0
+								: xDetail[index].budget_price_total.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'),
 						quotation_price_per_unit: xDetail[index].quotation_price_per_unit,
-						pdf_quotation_price_per_unit: xDetail[index].quotation_price_per_unit
-							.toFixed(2)
-							.replace(/\d(?=(\d{3})+\.)/g, '$&,'),
+						pdf_quotation_price_per_unit:
+							xDetail[index].quotation_price_per_unit == null
+								? 0
+								: xDetail[index].quotation_price_per_unit
+										.toFixed(2)
+										.replace(/\d(?=(\d{3})+\.)/g, '$&,'),
 						vendor: {
 							id: xDetail[index].vendor_id,
 							code: xDetail[index].vendor_code,
