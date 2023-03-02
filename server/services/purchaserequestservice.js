@@ -947,6 +947,12 @@ class PurchaseRequestService {
 						xParamApprovalMatrixDocument
 					);
 
+					await _utilInstance.writeLog(
+						`${_xClassName}.rejectFPB`,
+						`xResultApprovalMatrixDocument: ${xResultApprovalMatrixDocument}`,
+						'debug'
+					);
+
 					if (xResultApprovalMatrixDocument != null) {
 						if (xResultApprovalMatrixDocument.status_code == '00') {
 							// Update status FPB to be confirmed
