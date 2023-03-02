@@ -602,6 +602,7 @@ class VendorCatalogueRepository {
                             left join ms_vendors v on v.id = vc.vendor_id \
                     where ' +
 				xSqlWhere +
+				' AND vc.is_delete = 0 ' +
 				' order by p.name';
 
 			var xDtQuery = await sequelize.query(xSql, {
