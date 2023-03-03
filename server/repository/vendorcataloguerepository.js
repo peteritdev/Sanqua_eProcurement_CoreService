@@ -299,7 +299,9 @@ class VendorCatalogueRepository {
 			' pc.id AS "category_id", pc.name AS "category_name", ' +
 			' v.id AS "vendor_id", v.code AS "vendor_code", v.name AS "vendor_name", v.avg_rate AS "vendor_avg_rate", ' +
 			' c.id AS "currency_id", c.code AS "currency_code", c.name AS "currency_name", c.symbol AS "currency_symbol", ' +
-			' vc.id, vc.last_price, vc.last_ordered, vc.last_purchase_plant, vc.description, vc.uom_id, vc.uom_name, vc. purchase_uom_id, vc.purchase_uom_name, vc.catalogue_type, vc.merk, vc.file_brochure ' +
+			' vc.id, ' +
+			' CASE WHEN pc.is_investment = 1 THEN 0 ELSE vc.last_price END AS "last_price", ' +
+			' vc.last_ordered, vc.last_purchase_plant, vc.description, vc.uom_id, vc.uom_name, vc. purchase_uom_id, vc.purchase_uom_name, vc.catalogue_type, vc.merk, vc.file_brochure ' +
 			' FROM ms_vendorcatalogues vc INNER JOIN ms_products p ' +
 			'    ON vc.product_id = p.id ' +
 			'        INNER JOIN ms_productcategories pc ON pc.id = p.category_id ' +
