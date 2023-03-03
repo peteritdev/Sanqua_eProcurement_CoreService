@@ -306,7 +306,7 @@ class VendorCatalogueRepository {
 			'    ON vc.product_id = p.id ' +
 			'        INNER JOIN ms_productcategories pc ON pc.id = p.category_id ' +
 			'            INNER JOIN ms_vendors v ON v.id = vc.vendor_id ' +
-			'               INNER JOIN ms_currencies c ON c.id = vc.currency_id ' +
+			'               LEFT JOIN ms_currencies c ON c.id = vc.currency_id ' +
 			' WHERE ' +
 			xSqlWhere +
 			xSqlOrderBy +
