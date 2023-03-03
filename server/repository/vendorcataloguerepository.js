@@ -234,7 +234,8 @@ class VendorCatalogueRepository {
 			xTotalRecord = [];
 		var xSql = '';
 		var xObjJsonWhere = {};
-		var xSqlWhere = ' (1=1) AND vc.is_delete = 0 AND pc.is_investment = 0 ';
+		// var xSqlWhere = ' (1=1) AND vc.is_delete = 0 AND pc.is_investment = 0 ';
+		var xSqlWhere = ' (1=1) AND vc.is_delete = 0';
 		var xSqlOrderBy = '';
 		var xSqlLimit = '';
 
