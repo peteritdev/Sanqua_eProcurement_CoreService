@@ -326,7 +326,7 @@ class PurchaseRequestDetailService {
 								if (pParam.items.length > 0) {
 									let xLineIds = [];
 
-									xDecId = await _utilInstance.decrypt(xDetail.data.id.config.cryptoKey.hashKey);
+									xDecId = await _utilInstance.decrypt(xDetail.data.id, config.cryptoKey.hashKey);
 
 									if (xDecId.status_code == '00') {
 										xRequestId = xDecId.decrypted;
