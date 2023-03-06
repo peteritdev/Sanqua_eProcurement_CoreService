@@ -307,6 +307,7 @@ class PurchaseRequestDetailService {
 		var xJoResult = {};
 		var xDecId = null;
 		var xFlagProcess = false;
+		var xRequestId = null;
 
 		try {
 			// Check first if status of header is "In Progress" or not
@@ -324,169 +325,182 @@ class PurchaseRequestDetailService {
 							} else {
 								if (pParam.items.length > 0) {
 									let xLineIds = [];
-									for (var i in pParam.items) {
-										// Check if line has create PR before, can not continue.
-										xFlagProcess = false;
-										xDecId = await _utilInstance.decrypt(
-											pParam.items[i].id,
-											config.cryptoKey.hashKey
-										);
-										if (xDecId.status_code == '00') {
-											pParam.items[i].id = xDecId.decrypted;
-											xFlagProcess = true;
-										}
 
-										if (xFlagProcess) {
-											let xItemInfo = await _repoInstance.getByParam({
-												id: pParam.items[i].id
-											});
-											console.log(`>>> xItemInfo : ${JSON.stringify(xItemInfo)}`);
-											if (xItemInfo.status_code == '00') {
-												// if (pParam.type == 'ca') {
-												// 	if (xItemInfo.data.status != 0) {
-												// 		xFlagProcess = false;
-												// 		break;
-												// 	}
-												// } else if (pParam.type == 'po') {
-												// 	if (
-												// 		(xItemInfo.data.pr_no == '' || xItemInfo.data.pr_no == null) &&
-												// 		xItemInfo.data.status == 0
-												// 	) {
-												// 		xLineIds.push({
-												// 			product_code: pParam.items[i].product_code,
-												// 			qty: pParam.items[i].qty
-												// 		});
-												// 	} else {
-												// 		xFlagProcess = false;
-												// 		break;
-												// 	}
-												// }
-												if (xItemInfo.data.status != 0 && xItemInfo.data.status != 5) {
+									xDecId = await _utilInstance.decrypt(xDetail.data.id.config.cryptoKey.hashKey);
+
+									if (xDecId.status_code == '00') {
+										xRequestId = xDecId.decrypted;
+										xFlagProcess = true;
+									}
+
+									if (xFlagProcess) {
+										xFlagProcess = false;
+										for (var i in pParam.items) {
+											// Check if line has create PR before, can not continue.
+											xFlagProcess = false;
+											xDecId = await _utilInstance.decrypt(
+												pParam.items[i].id,
+												config.cryptoKey.hashKey
+											);
+											if (xDecId.status_code == '00') {
+												pParam.items[i].id = xDecId.decrypted;
+												xFlagProcess = true;
+											}
+
+											if (xFlagProcess) {
+												let xItemInfo = await _repoInstance.getByParam({
+													id: pParam.items[i].id
+												});
+												console.log(`>>> xItemInfo : ${JSON.stringify(xItemInfo)}`);
+												if (xItemInfo.status_code == '00') {
+													// if (pParam.type == 'ca') {
+													// 	if (xItemInfo.data.status != 0) {
+													// 		xFlagProcess = false;
+													// 		break;
+													// 	}
+													// } else if (pParam.type == 'po') {
+													// 	if (
+													// 		(xItemInfo.data.pr_no == '' || xItemInfo.data.pr_no == null) &&
+													// 		xItemInfo.data.status == 0
+													// 	) {
+													// 		xLineIds.push({
+													// 			product_code: pParam.items[i].product_code,
+													// 			qty: pParam.items[i].qty
+													// 		});
+													// 	} else {
+													// 		xFlagProcess = false;
+													// 		break;
+													// 	}
+													// }
+													if (xItemInfo.data.status != 0 && xItemInfo.data.status != 5) {
+														xFlagProcess = false;
+														break;
+													} else {
+														xLineIds.push({
+															product_code: pParam.items[i].product_code,
+															qty: pParam.items[i].qty
+														});
+													}
+												} else {
 													xFlagProcess = false;
 													break;
-												} else {
-													xLineIds.push({
-														product_code: pParam.items[i].product_code,
-														qty: pParam.items[i].qty
-													});
 												}
 											} else {
 												xFlagProcess = false;
 												break;
 											}
-										} else {
-											xFlagProcess = false;
-											break;
-										}
-									}
-
-									if (xFlagProcess) {
-										xFlagProcess = false;
-										xDecId = null;
-
-										if (pParam.logged_user_id != '') {
-											xDecId = await _utilInstance.decrypt(
-												pParam.logged_user_id,
-												config.cryptoKey.hashKey
-											);
-											if (xDecId.status_code == '00') {
-												xFlagProcess = true;
-												pParam.logged_user_id = xDecId.decrypted;
-											} else {
-												xJoResult = xDecId;
-											}
-										} else {
-											xFlagProcess = true;
 										}
 
 										if (xFlagProcess) {
-											if (pParam.type == 'ca') {
-												for (var i in pParam.items) {
-													let xParamUpdate = {
-														product_code: pParam.items[i].product_code,
-														user_id: pParam.logged_user_id,
-														user_name: pParam.logged_user_name,
-														status: 3
-													};
-													await _repoInstance.save(
-														xParamUpdate,
-														'update_by_product_code_and_request_id'
-													);
-												}
+											xFlagProcess = false;
+											xDecId = null;
 
-												xJoResult = {
-													status_code: '00',
-													status_msg: `You have successfully change item status to CA (Cash Advance)`
-												};
-											} else if (pParam.type == 'po') {
-												let xParamOdoo = {
-													name: 'New',
-													company_id: xDetail.data.company.id,
-													date_order: await _utilInstance.getCurrDate(),
-													status: 'waiting_approval',
-													purchase_order_type: xDetail.data.category_pr,
-													user_sanqua: pParam.logged_user_name,
-													no_fpb: xDetail.data.request_no,
-													line_ids: xLineIds
-												};
-
-												let xCreatePRResult = await _integrationServiceInstance.createPR(
-													xParamOdoo
+											if (pParam.logged_user_id != '') {
+												xDecId = await _utilInstance.decrypt(
+													pParam.logged_user_id,
+													config.cryptoKey.hashKey
 												);
+												if (xDecId.status_code == '00') {
+													xFlagProcess = true;
+													pParam.logged_user_id = xDecId.decrypted;
+												} else {
+													xJoResult = xDecId;
+												}
+											} else {
+												xFlagProcess = true;
+											}
 
-												console.log(`>>> xParamOdoo: ${JSON.stringify(xParamOdoo)}`);
-												console.log(`>>> xCreatePRResult: ${JSON.stringify(xCreatePRResult)}`);
+											if (xFlagProcess) {
+												if (pParam.type == 'ca') {
+													for (var i in pParam.items) {
+														let xParamUpdate = {
+															product_code: pParam.items[i].product_code,
+															user_id: pParam.logged_user_id,
+															user_name: pParam.logged_user_name,
+															status: 3
+														};
+														await _repoInstance.save(
+															xParamUpdate,
+															'update_by_product_code_and_request_id'
+														);
+													}
 
-												if (xCreatePRResult.status_code == '00') {
-													if (xCreatePRResult.hasOwnProperty('name')) {
-														if (xCreatePRResult.name != '') {
-															for (var i in pParam.items) {
-																let xParamUpdate = {
-																	pr_no: xCreatePRResult.name,
-																	product_code: pParam.items[i].product_code,
-																	user_id: pParam.logged_user_id,
-																	user_name: pParam.logged_user_name,
-																	status: 1,
-																	request_id: xDetail.data.id
+													xJoResult = {
+														status_code: '00',
+														status_msg: `You have successfully change item status to CA (Cash Advance)`
+													};
+												} else if (pParam.type == 'po') {
+													let xParamOdoo = {
+														name: 'New',
+														company_id: xDetail.data.company.id,
+														date_order: await _utilInstance.getCurrDate(),
+														status: 'waiting_approval',
+														purchase_order_type: xDetail.data.category_pr,
+														user_sanqua: pParam.logged_user_name,
+														no_fpb: xDetail.data.request_no,
+														line_ids: xLineIds
+													};
+
+													let xCreatePRResult = await _integrationServiceInstance.createPR(
+														xParamOdoo
+													);
+
+													console.log(`>>> xParamOdoo: ${JSON.stringify(xParamOdoo)}`);
+													console.log(
+														`>>> xCreatePRResult: ${JSON.stringify(xCreatePRResult)}`
+													);
+
+													if (xCreatePRResult.status_code == '00') {
+														if (xCreatePRResult.hasOwnProperty('name')) {
+															if (xCreatePRResult.name != '') {
+																for (var i in pParam.items) {
+																	let xParamUpdate = {
+																		pr_no: xCreatePRResult.name,
+																		product_code: pParam.items[i].product_code,
+																		user_id: pParam.logged_user_id,
+																		user_name: pParam.logged_user_name,
+																		status: 1,
+																		request_id: xRequestId
+																	};
+																	await _repoInstance.save(
+																		xParamUpdate,
+																		'update_by_product_code_and_request_id'
+																	);
+																}
+
+																xJoResult = {
+																	status_code: '00',
+																	status_msg: `You have successfully create PR with no: ${xCreatePRResult.name}`
 																};
-																await _repoInstance.save(
-																	xParamUpdate,
-																	'update_by_product_code_and_request_id'
-																);
+															} else {
+																xJoResult = {
+																	status_code: '-99',
+																	status_msg: `Failed create PR on odoo since it doesn't have PR No. Please check at Odoo System.`
+																};
 															}
-
-															xJoResult = {
-																status_code: '00',
-																status_msg: `You have successfully create PR with no: ${xCreatePRResult.name}`
-															};
 														} else {
 															xJoResult = {
 																status_code: '-99',
-																status_msg: `Failed create PR on odoo since it doesn't have PR No. Please check at Odoo System.`
+																status_msg: `Error result from Odoo. Please contact MIS`
 															};
 														}
 													} else {
-														xJoResult = {
-															status_code: '-99',
-															status_msg: `Error result from Odoo. Please contact MIS`
-														};
+														xJoResult = xCreatePRResult;
 													}
 												} else {
-													xJoResult = xCreatePRResult;
+													xJoResult = {
+														status_code: '-99',
+														status_msg: 'Please supply valid parameter type.'
+													};
 												}
-											} else {
-												xJoResult = {
-													status_code: '-99',
-													status_msg: 'Please supply valid parameter type.'
-												};
 											}
+										} else {
+											xJoResult = {
+												status_code: '-99',
+												status_msg:
+													'Please supply valid item id or maybe there is item that has been submit to PR.'
+											};
 										}
-									} else {
-										xJoResult = {
-											status_code: '-99',
-											status_msg:
-												'Please supply valid item id or maybe there is item that has been submit to PR.'
-										};
 									}
 								} else {
 									xJoResult = {
