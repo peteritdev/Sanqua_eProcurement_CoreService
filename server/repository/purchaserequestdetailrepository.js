@@ -110,6 +110,31 @@ class PurchaseRequestDetailRepository {
 					status_code: '00',
 					status_msg: 'Data has been successfully updated'
 				};
+			} else if (pAct == 'update_by_product_code_and_request_id') {
+				pParam.updatedAt = await _utilInstance.getCurrDateTime();
+				var xProductCode = pParam.product_code;
+				var xRequestId = pParam.request_id;
+				delete pParam.product_code;
+				delete pParam.request_id;
+				var xWhere = {
+					where: {
+						product_code: xProductCode,
+						request_id: xRequestId
+					},
+					transaction: xTransaction
+				};
+
+				pParam.updated_by = pParam.user_id;
+				pParam.updated_by_name = pParam.user_name;
+
+				xSaved = await _modelDb.update(pParam, xWhere);
+
+				await xTransaction.commit();
+
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'Data has been successfully updated'
+				};
 			}
 		} catch (e) {
 			if (xTransaction) await xTransaction.rollback();

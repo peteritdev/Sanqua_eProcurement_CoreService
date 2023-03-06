@@ -408,7 +408,10 @@ class PurchaseRequestDetailService {
 														user_name: pParam.logged_user_name,
 														status: 3
 													};
-													await _repoInstance.save(xParamUpdate, 'update_by_product_code');
+													await _repoInstance.save(
+														xParamUpdate,
+														'update_by_product_code_and_request_id'
+													);
 												}
 
 												xJoResult = {
@@ -443,11 +446,12 @@ class PurchaseRequestDetailService {
 																	product_code: pParam.items[i].product_code,
 																	user_id: pParam.logged_user_id,
 																	user_name: pParam.logged_user_name,
-																	status: 1
+																	status: 1,
+																	request_id: xDetail.data.id
 																};
 																await _repoInstance.save(
 																	xParamUpdate,
-																	'update_by_product_code'
+																	'update_by_product_code_and_request_id'
 																);
 															}
 
