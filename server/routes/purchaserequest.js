@@ -27,10 +27,10 @@ module.exports = (app) => {
 	arrValidate = [];
 	arrValidate = [
 		check('act').not().isEmpty().withMessage('Parameter act cannot be empty'),
-		check('employee_id').not().isEmpty().withMessage('Parameter employee_id cannot be empty'),
-		check('employee_name').not().isEmpty().withMessage('Parameter employee_name cannot be empty'),
-		check('department_id', 'Parameter department_id must be integer and cannot be empty').not().isEmpty().isInt(),
-		check('department_name').not().isEmpty().withMessage('Parameter department_name cannot be empty'),
+		// check('employee_id').not().isEmpty().withMessage('Parameter employee_id cannot be empty'),
+		// check('employee_name').not().isEmpty().withMessage('Parameter employee_name cannot be empty'),
+		// check('department_id', 'Parameter department_id must be integer and cannot be empty').not().isEmpty().isInt(),
+		// check('department_name').not().isEmpty().withMessage('Parameter department_name cannot be empty'),
 		check('reference_from_ecommerce', 'Parameter reference_from_ecommerce must be integer and cannot be empty')
 			.not()
 			.isEmpty()
