@@ -417,7 +417,8 @@ class PurchaseRequestDetailService {
 															product_code: pParam.items[i].product_code,
 															user_id: pParam.logged_user_id,
 															user_name: pParam.logged_user_name,
-															status: 3
+															status: 3,
+															request_id: xRequestId
 														};
 														await _repoInstance.save(
 															xParamUpdate,
