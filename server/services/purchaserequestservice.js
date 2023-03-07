@@ -159,6 +159,10 @@ class PurchaseRequestService {
 				}
 
 				if (xFlagProcess) {
+					delete pParam.employee_id;
+					delete pParam.employee_name;
+					delete pParam.department_id;
+					delete pParam.department_name;
 					var xAddResult = await _repoInstance.save(pParam, xAct);
 					xJoResult = xAddResult;
 				}
