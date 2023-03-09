@@ -52,6 +52,17 @@ module.exports = (app) => {
 
 	arrValidate = [];
 	arrValidate = [
+		check('id').not().isEmpty().withMessage('Parameter id cannot be empty'),
+		check('file', 'Parameter photo must be array and cannot be empty').not().isEmpty().isArray()
+	];
+	app.post(
+		rootAPIPath + 'update_file_upload',
+		arrValidate,
+		purchaseRequestController.purchaseRequest_UpdateFileUpload
+	);
+
+	arrValidate = [];
+	arrValidate = [
 		check('act').not().isEmpty().withMessage('Parameter act cannot be empty'),
 		check('id').not().isEmpty().withMessage('Parameter id cannot be empty')
 	];
