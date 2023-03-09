@@ -306,6 +306,17 @@ class PurchaseRequestService {
 				var xJoArrRequestDetailData = [];
 				var xDetail = xResult.purchase_request_detail;
 
+				let xFileArr = [];
+				for (var j in xResult.file) {
+					xFileArr.push({
+						subject: xResult.file[j].subject,
+						file:
+							xResult.file[j].file != null
+								? `${config.imagePathESanQua}/eprocurement/fpb/${xResult.file[j].file}`
+								: null
+					});
+				}
+
 				for (var index in xDetail) {
 					xJoArrRequestDetailData.push({
 						id: await _utilInstance.encrypt(xDetail[index].id, config.cryptoKey.hashKey),
@@ -430,7 +441,8 @@ class PurchaseRequestService {
 						code: xResult.company_code,
 						name: xResult.company_name
 					},
-					file: xResult.file != null ? `${config.imagePathESanQua}/eprocurement/fpb/${xResult.file}` : null,
+					// file: xResult.file != null ? `${config.imagePathESanQua}/eprocurement/fpb/${xResult.file}` : null,
+					file: xFileArr,
 					category_item: xResult.category_item,
 					category_pr: xResult.category_pr,
 					created_at: xResult.createdAt != null ? moment(xResult.createdAt).format('DD MMM YYYY') : '',
