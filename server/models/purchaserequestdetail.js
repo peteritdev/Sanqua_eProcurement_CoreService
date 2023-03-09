@@ -28,6 +28,9 @@ module.exports = (sequelize, DataTypes) => {
 		vendor_catalogue_id: DataTypes.BIGINT,
 		last_price: DataTypes.DOUBLE,
 
+		uom_id: DataTypes.INTEGER,
+		uom_name: DataTypes.STRING,
+
 		status: DataTypes.INTEGER,
 		is_delete: DataTypes.INTEGER,
 		deleted_at: DataTypes.DATE,

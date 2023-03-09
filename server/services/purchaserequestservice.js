@@ -118,6 +118,8 @@ class PurchaseRequestService {
 
 							if (xCatalogue.status_code == '00') {
 								xJoArrItems[i].last_price = xCatalogue.data.last_price;
+								xJoArrItems[i].uom_id = xCatalogue.data.uom_id;
+								xJoArrItems[i].uom_name = xCatalogue.data.uom_name;
 							}
 						}
 					}
@@ -314,7 +316,9 @@ class PurchaseRequestService {
 						},
 						qty: xDetail[index].qty,
 						current_stock: xDetail[index].current_stock,
-						uom: xDetail[index].vendor_catalogue != null ? xDetail[index].vendor_catalogue.uom_name : null,
+						// uom: xDetail[index].vendor_catalogue != null ? xDetail[index].vendor_catalogue.uom_name : null,
+						uom: xDetail[index].uom_name,
+						uom_id: xDetail[index].uom_id,
 						budget_price_per_unit: xDetail[index].budget_price_per_unit,
 						pdf_budget_price_per_unit:
 							xDetail[index].budget_price_per_unit == null
