@@ -545,6 +545,7 @@ async function purchaseRequest_UpdateFileUpload(req, res) {
 
 				req.body.token = req.headers['x-token'];
 				req.body.method = req.headers['x-method'];
+				req.body.act = 'update';
 				joResult = await _serviceInstance.save(req.body);
 				joResult = JSON.stringify(joResult);
 			}
