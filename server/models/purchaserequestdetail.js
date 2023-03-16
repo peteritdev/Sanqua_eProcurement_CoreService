@@ -37,6 +37,10 @@ module.exports = (sequelize, DataTypes) => {
 		deleted_by: DataTypes.INTEGER,
 		deleted_by_name: DataTypes.STRING,
 
+		settodraft_at: DataTypes.DATE,
+		settodraft_by: DataTypes.INTEGER,
+		settodraft_by_name: DataTypes.STRING,
+
 		createdAt: {
 			type: DataTypes.DATE,
 			defaultValue: sequelize.literal('NOW()'),

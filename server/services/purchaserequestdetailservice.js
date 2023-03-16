@@ -270,6 +270,49 @@ class PurchaseRequestDetailService {
 		return xJoResult;
 	}
 
+	async setToDraft(pParam) {
+		var xJoResult = {};
+
+		if (pParam.hasOwnProperty('logged_user_id') && pParam.hasOwnProperty('id')) {
+			if (pParam.id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.id = xDecId.decrypted;
+					xDecId = await _utilInstance.decrypt(pParam.logged_user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.logged_user_id = xDecId.decrypted;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xDecId;
+					}
+				} else {
+					xJoResult = xDecId;
+				}
+			}
+		}
+
+		if (xFlagProcess) {
+			let xParamUpdate = {
+				id: pParam.id,
+				status: 0,
+				settodraft_at: await _utilInstance.getCurrDateTime(),
+				settodraft_by: pParam.logged_user_id,
+				settodraft_by_name: pParam.logged_user_name
+			};
+			var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
+			if (xUpdateResult.status_code == '00') {
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'Data has successfully set to draft'
+				};
+			} else {
+				xJoResult = xUpdateResult;
+			}
+		}
+
+		return xJoResult;
+	}
+
 	async delete(pParam) {
 		var xJoResult = {};
 		var xFlagProcess = false;
