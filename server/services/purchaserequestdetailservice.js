@@ -272,6 +272,8 @@ class PurchaseRequestDetailService {
 
 	async setToDraft(pParam) {
 		var xJoResult = {};
+		var xDecId = null;
+		var xFlagProcess = false;
 
 		if (pParam.hasOwnProperty('logged_user_id') && pParam.hasOwnProperty('id')) {
 			if (pParam.id != '') {
@@ -292,21 +294,37 @@ class PurchaseRequestDetailService {
 		}
 
 		if (xFlagProcess) {
-			let xParamUpdate = {
-				id: pParam.id,
-				status: 0,
-				settodraft_at: await _utilInstance.getCurrDateTime(),
-				settodraft_by: pParam.logged_user_id,
-				settodraft_by_name: pParam.logged_user_name
-			};
-			var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
-			if (xUpdateResult.status_code == '00') {
-				xJoResult = {
-					status_code: '00',
-					status_msg: 'Data has successfully set to draft'
-				};
+			// Get Detail of items
+			let xDetail = await _repoInstance.getByParam({
+				id: pParam.id
+			});
+			if (xDetail.status_code == '00') {
+				if ([ 1, 2, 4, 6 ].includes(xDetail.data.status)) {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'You only can change to draft when item in CA or Cancel'
+					};
+				} else {
+					let xParamUpdate = {
+						id: pParam.id,
+						status: 0,
+						settodraft_at: await _utilInstance.getCurrDateTime(),
+						settodraft_by: pParam.logged_user_id,
+						settodraft_by_name: pParam.logged_user_name,
+						settodraft_reason: pParam.settodraft_reason
+					};
+					var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
+					if (xUpdateResult.status_code == '00') {
+						xJoResult = {
+							status_code: '00',
+							status_msg: 'Data has successfully set to draft'
+						};
+					} else {
+						xJoResult = xUpdateResult;
+					}
+				}
 			} else {
-				xJoResult = xUpdateResult;
+				xJoResult = xDetail;
 			}
 		}
 

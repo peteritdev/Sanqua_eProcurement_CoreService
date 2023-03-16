@@ -40,6 +40,7 @@ module.exports = (sequelize, DataTypes) => {
 		settodraft_at: DataTypes.DATE,
 		settodraft_by: DataTypes.INTEGER,
 		settodraft_by_name: DataTypes.STRING,
+		settodraft_reason: DataTypes.STRING,
 
 		createdAt: {
 			type: DataTypes.DATE,
