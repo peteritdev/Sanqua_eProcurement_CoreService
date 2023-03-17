@@ -58,7 +58,21 @@ class PurchaseRequestRepository {
 		xInclude = [
 			{
 				model: _modelPurchaseRequestDetail,
-				as: 'purchase_request_detail'
+				as: 'purchase_request_detail',
+				where: {
+					[Op.or]: [
+						{
+							product_code: {
+								[Op.iLike]: '%' + pParam.keyword + '%'
+							}
+						},
+						{
+							product_name: {
+								[Op.iLike]: '%' + pParam.keyword + '%'
+							}
+						}
+					]
+				}
 			}
 		];
 
@@ -168,16 +182,6 @@ class PurchaseRequestRepository {
 					},
 					{
 						department_name: {
-							[Op.iLike]: '%' + pParam.keyword + '%'
-						}
-					},
-					{
-						'$purchase_request_detail.product_code$': {
-							[Op.iLike]: '%' + pParam.keyword + '%'
-						}
-					},
-					{
-						'$purchase_request_detail.product_name$': {
 							[Op.iLike]: '%' + pParam.keyword + '%'
 						}
 					}
