@@ -381,7 +381,9 @@ class PurchaseRequestRepository {
 			}
 		}
 
-		xSqlWhere += ` AND ( ${xSqlWhereOr.join(' OR ')} ) `;
+		if (xSqlWhereOr.length > 0) {
+			xSqlWhere += ` AND ( ${xSqlWhereOr.join(' OR ')} ) `;
+		}
 
 		xSql = ` SELECT pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
 						pr.status, pr.company_id, pr.company_code, pr.company_name
