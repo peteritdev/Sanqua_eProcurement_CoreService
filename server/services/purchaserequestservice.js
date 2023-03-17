@@ -224,7 +224,7 @@ class PurchaseRequestService {
 
 			if (xFlagAPIResult) {
 				pParam.owned_document_no = xArrOwnedDocNo;
-				console.log(`>>> pParam : ${JSON.stringify(pParam)}`);
+				// console.log(`>>> pParam : ${JSON.stringify(pParam)}`);
 				var xResultList = await _repoInstance.list(pParam);
 
 				if (xResultList.total_record > 0) {

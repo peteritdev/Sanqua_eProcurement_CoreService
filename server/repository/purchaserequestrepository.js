@@ -58,7 +58,22 @@ class PurchaseRequestRepository {
 		xInclude = [
 			{
 				model: _modelPurchaseRequestDetail,
-				as: 'purchase_request_detail'
+				as: 'purchase_request_detail',
+				required: true,
+				where: {
+					[Op.or]: [
+						{
+							'$purchase_request_detail.product_code$': {
+								[Op.iLike]: '%' + pParam.keyword + '%'
+							}
+						},
+						{
+							'$purchase_request_detail.product_name$': {
+								[Op.iLike]: '%' + pParam.keyword + '%'
+							}
+						}
+					]
+				}
 			}
 		];
 
@@ -147,7 +162,7 @@ class PurchaseRequestRepository {
 				}
 
 				xWhereAnd.push({
-					[Op.or]: xJArrFilter
+					[Op.and]: xJArrFilter
 				});
 			}
 		}
@@ -178,7 +193,7 @@ class PurchaseRequestRepository {
 					}
 				);
 
-				xWhereAnd.push({
+				xWhereOr.push({
 					[Op.or]: xJArrFilter
 				});
 
