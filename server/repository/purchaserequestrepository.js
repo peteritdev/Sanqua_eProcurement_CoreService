@@ -46,237 +46,368 @@ class PurchaseRequestRepository {
 		return xData;
 	}
 
+	// async list(pParam) {
+	// 	var xOrder = [ 'requested_at', 'DESC' ];
+	// 	var xInclude = [];
+	// 	var xWhere = [];
+	// 	var xWhereAnd = [],
+	// 		xWhereOr = [];
+	// 	var xFlagFilterDepartment = false;
+	// 	var xJoResult = {};
+
+	// 	xInclude = [
+	// 		{
+	// 			model: _modelPurchaseRequestDetail,
+	// 			as: 'purchase_request_detail',
+	// 			required: true
+	// 		}
+	// 	];
+
+	// 	if (pParam.hasOwnProperty('order_by') && pParam.hasOwnProperty('order_type')) {
+	// 		if (pParam.order_by != '') {
+	// 			xOrder = [ pParam.order_by, pParam.order_type == 'desc' ? 'DESC' : 'ASC' ];
+	// 		}
+	// 	}
+
+	// 	if (pParam.hasOwnProperty('year')) {
+	// 		if (pParam.year != '') {
+	// 			xWhereAnd.push({
+	// 				category_id: pParam.year
+	// 			});
+	// 		}
+	// 	}
+
+	// 	if (pParam.hasOwnProperty('company_id')) {
+	// 		if (pParam.company_id != '') {
+	// 			xWhereAnd.push({
+	// 				company_id: pParam.company_id
+	// 			});
+	// 		}
+	// 	}
+
+	// 	if (pParam.hasOwnProperty('request_date_start') && pParam.hasOwnProperty('request_date_end')) {
+	// 		if (pParam.request_date_start != '' && pParam.request_date_end != '') {
+	// 			xWhereAnd.push({
+	// 				requested_at: {
+	// 					[Op.between]: [ request_date_start, request_date_end ]
+	// 				}
+	// 			});
+	// 		}
+	// 	}
+
+	// 	if (pParam.hasOwnProperty('is_archived')) {
+	// 		if (pParam.is_archived != '') {
+	// 			xWhereAnd.push({
+	// 				is_delete: pParam.is_archived
+	// 			});
+	// 		} else {
+	// 			xWhereAnd.push({
+	// 				is_delete: 0
+	// 			});
+	// 		}
+	// 	} else {
+	// 		xWhereAnd.push({
+	// 			is_delete: 0
+	// 		});
+	// 	}
+
+	// 	if (pParam.hasOwnProperty('status')) {
+	// 		if (pParam.status != '') {
+	// 			xWhereAnd.push({
+	// 				status: pParam.status
+	// 			});
+	// 		}
+	// 	}
+
+	// 	// if (pParam.hasOwnProperty('user_id') && pParam.is_admin == 0) {
+	// 	// 	if (pParam.user_id != '') {
+	// 	// 		xWhereAnd.push({
+	// 	// 			created_by: pParam.user_id
+	// 	// 		});
+	// 	// 	}
+	// 	// }
+
+	// 	let xJArrFilter = [];
+
+	// 	if (pParam.hasOwnProperty('owned_document_no') && pParam.is_admin == 0) {
+	// 		if (pParam.owned_document_no.length > 0) {
+	// 			xJArrFilter.push({
+	// 				request_no: {
+	// 					[Op.in]: pParam.owned_document_no
+	// 				}
+	// 			});
+	// 			if (pParam.hasOwnProperty('department_id') && pParam.is_admin == 0) {
+	// 				if (pParam.department_id != '') {
+	// 					if (!xFlagFilterDepartment) {
+	// 						xJArrFilter.push({
+	// 							department_id: pParam.department_id
+	// 						});
+	// 						xFlagFilterDepartment = true;
+	// 					}
+	// 				}
+	// 			}
+
+	// 			xWhereAnd.push({
+	// 				[Op.and]: xJArrFilter
+	// 			});
+	// 		}
+	// 	}
+
+	// 	xJArrFilter = [];
+	// 	if (pParam.hasOwnProperty('keyword')) {
+	// 		if (pParam.keyword != '') {
+	// 			xJArrFilter.push(
+	// 				{
+	// 					request_no: {
+	// 						[Op.iLike]: '%' + pParam.keyword + '%'
+	// 					}
+	// 				},
+	// 				{
+	// 					employee_name: {
+	// 						[Op.iLike]: '%' + pParam.keyword + '%'
+	// 					}
+	// 				},
+	// 				{
+	// 					department_name: {
+	// 						[Op.iLike]: '%' + pParam.keyword + '%'
+	// 					}
+	// 				},
+	// 				{
+	// 					'$purchase_request_detail.product_code$': {
+	// 						[Op.iLike]: '%' + pParam.keyword + '%'
+	// 					}
+	// 				},
+	// 				{
+	// 					'$purchase_request_detail.product_name$': {
+	// 						[Op.iLike]: '%' + pParam.keyword + '%'
+	// 					}
+	// 				}
+	// 			);
+
+	// 			xWhereAnd.push({
+	// 				[Op.or]: xJArrFilter
+	// 			});
+
+	// 			if (!xFlagFilterDepartment) {
+	// 				if (pParam.hasOwnProperty('department_id') && pParam.is_admin == 0) {
+	// 					if (pParam.department_id != '') {
+	// 						if (!xFlagFilterDepartment) {
+	// 							xWhereAnd.push({
+	// 								department_id: pParam.department_id
+	// 							});
+	// 							xFlagFilterDepartment = true;
+	// 						}
+	// 					}
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+
+	// 	if (!xFlagFilterDepartment && pParam.is_admin == 0) {
+	// 		if (pParam.department_id != '') {
+	// 			if (!xFlagFilterDepartment) {
+	// 				xJArrFilter.push({
+	// 					department_id: pParam.department_id
+	// 				});
+	// 				xFlagFilterDepartment = true;
+	// 				xWhereAnd.push({
+	// 					[Op.or]: xJArrFilter
+	// 				});
+	// 			}
+	// 		}
+	// 	}
+
+	// 	if (xWhereAnd.length > 0) {
+	// 		xWhere.push({
+	// 			[Op.and]: xWhereAnd
+	// 		});
+	// 	}
+
+	// 	if (xWhereOr.length > 0) {
+	// 		xWhere.push({
+	// 			[Op.or]: xWhereOr
+	// 		});
+	// 	}
+
+	// 	var xParamQuery = {
+	// 		where: {
+	// 			[Op.or]: [ xWhereAnd, xWhereOr ]
+	// 		},
+	// 		include: xInclude,
+	// 		order: [ xOrder ],
+	// 		subQuery: true,
+	// 		distinct: true
+	// 	};
+
+	// 	if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
+	// 		if (pParam.offset != '' && pParam.limit != '') {
+	// 			xParamQuery.offset = pParam.offset;
+	// 			xParamQuery.limit = pParam.limit;
+	// 		}
+	// 	}
+
+	// 	var xData = await _modelDb.findAll(xParamQuery);
+
+	// 	xParamQuery.subQuery = false;
+	// 	delete xParamQuery.offset;
+	// 	delete xParamQuery.limit;
+	// 	let xTotalRecord = await _modelDb.count(xParamQuery);
+	// 	if (xData != null) {
+	// 		xJoResult = {
+	// 			status_code: '00',
+	// 			status_msg: 'OK',
+	// 			data: xData,
+	// 			total_record: xTotalRecord
+	// 		};
+	// 	} else {
+	// 		xJoResult = {
+	// 			status_code: '-99',
+	// 			status_msg: 'Data not found',
+	// 			data: []
+	// 		};
+	// 	}
+
+	// 	return xJoResult;
+	// }
+
 	async list(pParam) {
-		var xOrder = [ 'requested_at', 'DESC' ];
-		var xInclude = [];
-		var xWhere = [];
-		var xWhereAnd = [],
-			xWhereOr = [];
+		var xData,
+			xTotalRecord = [];
+		var xSql,
+			xSqlCount = '';
+		var xObjJsonWhere = {};
+		var xSqlWhere = ' (1=1) ';
+		var xSqlWhereOr = [];
+		var xSqlOrderBy = '';
+		var xSqlLimit = '';
 		var xFlagFilterDepartment = false;
-		var xJoResult = {};
 
-		xInclude = [
-			{
-				model: _modelPurchaseRequestDetail,
-				as: 'purchase_request_detail',
-				required: true,
-				where: {
-					[Op.or]: [
-						{
-							'$purchase_request_detail.product_code$': {
-								[Op.iLike]: '%' + pParam.keyword + '%'
-							}
-						},
-						{
-							'$purchase_request_detail.product_name$': {
-								[Op.iLike]: '%' + pParam.keyword + '%'
-							}
-						}
-					]
-				}
-			}
-		];
-
-		if (pParam.hasOwnProperty('order_by') && pParam.hasOwnProperty('order_type')) {
+		if (pParam.hasOwnProperty('order_by')) {
 			if (pParam.order_by != '') {
-				xOrder = [ pParam.order_by, pParam.order_type == 'desc' ? 'DESC' : 'ASC' ];
+				xSqlOrderBy = ` ORDER BY pr.${pParam.order_by} ${pParam.order_type != '' ? pParam.order_type : 'ASC'}`;
+			} else {
+				xSqlOrderBy = ` ORDER BY pr.equested_at DESC`;
 			}
+		} else {
+			xSqlOrderBy = ` ORDER BY pr.requested_at DESC`;
 		}
 
-		if (pParam.hasOwnProperty('year')) {
-			if (pParam.year != '') {
-				xWhereAnd.push({
-					category_id: pParam.year
-				});
+		if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
+			if (pParam.offset != '' && pParam.limit != '') {
+				xSqlLimit = ` OFFSET ${pParam.offset} LIMIT ${pParam.limit} `;
 			}
 		}
 
 		if (pParam.hasOwnProperty('company_id')) {
-			if (pParam.company_id != '') {
-				xWhereAnd.push({
-					company_id: pParam.company_id
-				});
+			if (pParam.category_id != '') {
+				xSqlWhere += ' AND pr.company_id = :companyId ';
+				xObjJsonWhere.companyId = pParam.company_id;
 			}
 		}
 
 		if (pParam.hasOwnProperty('request_date_start') && pParam.hasOwnProperty('request_date_end')) {
 			if (pParam.request_date_start != '' && pParam.request_date_end != '') {
-				xWhereAnd.push({
-					requested_at: {
-						[Op.between]: [ request_date_start, request_date_end ]
-					}
-				});
+				xSqlWhere += ' AND pr.requested_at BETWEEN :startDate AND :endDate ';
+				xObjJsonWhere.startDate = pParam.request_date_start;
+				xObjJsonWhere.endDate = pParam.request_date_end;
 			}
 		}
 
 		if (pParam.hasOwnProperty('is_archived')) {
 			if (pParam.is_archived != '') {
-				xWhereAnd.push({
-					is_delete: pParam.is_archived
-				});
+				xSqlWhere += ' AND pr.is_delete = :isArchived ';
+				xObjJsonWhere.isArchived = pParam.is_archived;
 			} else {
-				xWhereAnd.push({
-					is_delete: 0
-				});
+				xSqlWhere += ' AND pr.is_delete = 0 ';
 			}
 		} else {
-			xWhereAnd.push({
-				is_delete: 0
-			});
+			xSqlWhere += ' AND pr.is_delete = 0 ';
 		}
 
 		if (pParam.hasOwnProperty('status')) {
 			if (pParam.status != '') {
-				xWhereAnd.push({
-					status: pParam.status
-				});
+				xSqlWhere += ' AND pr.status = :status ';
+				xObjJsonWhere.status = pParam.status;
 			}
 		}
 
-		// if (pParam.hasOwnProperty('user_id') && pParam.is_admin == 0) {
-		// 	if (pParam.user_id != '') {
-		// 		xWhereAnd.push({
-		// 			created_by: pParam.user_id
-		// 		});
-		// 	}
-		// }
-
-		let xJArrFilter = [];
+		if (pParam.hasOwnProperty('user_id') && pParam.is_admin == 0) {
+			if (pParam.user_id != '') {
+				xSqlWhereOr.push(' pr.created_by = :createdBy ');
+				xObjJsonWhere.createdBy = pParam.user_id;
+			}
+		}
 
 		if (pParam.hasOwnProperty('owned_document_no') && pParam.is_admin == 0) {
 			if (pParam.owned_document_no.length > 0) {
-				xJArrFilter.push({
-					request_no: {
-						[Op.in]: pParam.owned_document_no
-					}
-				});
+				xSqlWhereOr.push(' request_no IN (:ownedDocNo) ');
+				xObjJsonWhere.ownedDocNo = pParam.owned_document_no;
+
 				if (pParam.hasOwnProperty('department_id') && pParam.is_admin == 0) {
 					if (pParam.department_id != '') {
 						if (!xFlagFilterDepartment) {
-							xJArrFilter.push({
-								department_id: pParam.department_id
-							});
+							xSqlWhereOr.push(' pr.department_id = :departmentId ');
+							xObjJsonWhere.departmentId = pParam.department_id;
 							xFlagFilterDepartment = true;
 						}
 					}
 				}
-
-				xWhereAnd.push({
-					[Op.and]: xJArrFilter
-				});
 			}
 		}
 
-		xJArrFilter = [];
 		if (pParam.hasOwnProperty('keyword')) {
 			if (pParam.keyword != '') {
-				xJArrFilter.push(
-					{
-						request_no: {
-							[Op.iLike]: '%' + pParam.keyword + '%'
-						}
-					},
-					{
-						employee_name: {
-							[Op.iLike]: '%' + pParam.keyword + '%'
-						}
-					},
-					{
-						department_name: {
-							[Op.iLike]: '%' + pParam.keyword + '%'
-						}
-					},
-					{
-						'$purchase_request_detail.product_name$': {
-							[Op.iLike]: '%' + pParam.keyword + '%'
-						}
-					}
-				);
+				xSqlWhere += `AND (
+						pr.request_no ILIKE :keyword OR
+						pr.employee_name ILIKE :keyword OR
+						pr.department_name ILIKE :keyword OR
+						prd.product_code ILIKE :keyword OR
+						prd.product_name ILIKE :keyword
+					)`;
 
-				xWhereOr.push({
-					[Op.or]: xJArrFilter
-				});
+				xObjJsonWhere.keyword = `%${pParam.keyword}%`;
+			}
+		}
 
-				if (!xFlagFilterDepartment) {
-					if (pParam.hasOwnProperty('department_id') && pParam.is_admin == 0) {
-						if (pParam.department_id != '') {
-							if (!xFlagFilterDepartment) {
-								xWhereAnd.push({
-									department_id: pParam.department_id
-								});
-								xFlagFilterDepartment = true;
-							}
-						}
+		if (!xFlagFilterDepartment) {
+			if (pParam.hasOwnProperty('department_id') && pParam.is_admin == 0) {
+				if (pParam.department_id != '') {
+					if (!xFlagFilterDepartment) {
+						xSqlWhereOr.push(' pr.department_id = :departmentId ');
+						xObjJsonWhere.departmentId = pParam.department_id;
+						xFlagFilterDepartment = true;
 					}
 				}
 			}
 		}
 
-		if (!xFlagFilterDepartment && pParam.is_admin == 0) {
-			if (pParam.department_id != '') {
-				if (!xFlagFilterDepartment) {
-					xJArrFilter.push({
-						department_id: pParam.department_id
-					});
-					xFlagFilterDepartment = true;
-					xWhereAnd.push({
-						[Op.or]: xJArrFilter
-					});
-				}
-			}
-		}
+		xSqlWhere += ` AND ( ${xSqlWhereOr.join(' OR ')} ) `;
 
-		if (xWhereAnd.length > 0) {
-			xWhere.push({
-				[Op.and]: xWhereAnd
-			});
-		}
+		xSql = ` SELECT pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
+						pr.status, pr.company_id, pr.company_code, pr.company_name
+				 FROM tr_purchaserequests pr LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
+				 WHERE ${xSqlWhere}${xSqlOrderBy}${xSqlLimit}`;
 
-		if (xWhereOr.length > 0) {
-			xWhere.push({
-				[Op.or]: xWhereOr
-			});
-		}
+		xSqlCount = ` SELECT COUNT(0) AS total_record
+		  FROM tr_purchaserequests pr LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
+		  WHERE ${xSqlWhere}`;
 
-		var xParamQuery = {
-			where: {
-				[Op.or]: [ xWhereAnd, xWhereOr ]
-			},
-			include: xInclude,
-			order: [ xOrder ],
-			subQuery: false
-			// distinct: true
+		xData = await sequelize.query(xSql, {
+			replacements: xObjJsonWhere,
+			type: sequelize.QueryTypes.SELECT
+		});
+
+		xTotalRecord = await sequelize.query(xSqlCount, {
+			replacements: xObjJsonWhere,
+			type: sequelize.QueryTypes.SELECT
+		});
+
+		return {
+			status_code: '00',
+			status_msg: 'OK',
+			data: xData,
+			total_record: xTotalRecord[0].total_record
 		};
-
-		if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
-			if (pParam.offset != '' && pParam.limit != '') {
-				xParamQuery.offset = pParam.offset;
-				xParamQuery.limit = pParam.limit;
-			}
-		}
-
-		var xData = await _modelDb.findAll(xParamQuery);
-
-		xParamQuery.subQuery = false;
-		delete xParamQuery.offset;
-		delete xParamQuery.limit;
-		let xTotalRecord = await _modelDb.count(xParamQuery);
-		if (xData != null) {
-			xJoResult = {
-				status_code: '00',
-				status_msg: 'OK',
-				data: xData,
-				total_record: xTotalRecord
-			};
-		} else {
-			xJoResult = {
-				status_code: '-99',
-				status_msg: 'Data not found',
-				data: []
-			};
-		}
-
-		return xJoResult;
 	}
 
 	async save(pParam, pAct) {
