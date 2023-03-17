@@ -170,6 +170,16 @@ class PurchaseRequestRepository {
 						department_name: {
 							[Op.iLike]: '%' + pParam.keyword + '%'
 						}
+					},
+					{
+						'$purchase_request_detail.product_code$': {
+							[Op.iLike]: '%' + pParam.keyword + '%'
+						}
+					},
+					{
+						'$purchase_request_detail.product_name$': {
+							[Op.iLike]: '%' + pParam.keyword + '%'
+						}
 					}
 				);
 
