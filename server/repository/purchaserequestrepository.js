@@ -170,6 +170,11 @@ class PurchaseRequestRepository {
 						department_name: {
 							[Op.iLike]: '%' + pParam.keyword + '%'
 						}
+					},
+					{
+						'$purchase_request_detail.product_name$': {
+							[Op.iLike]: '%' + pParam.keyword + '%'
+						}
 					}
 				);
 
@@ -224,8 +229,8 @@ class PurchaseRequestRepository {
 			},
 			include: xInclude,
 			order: [ xOrder ],
-			subQuery: true,
-			distinct: true
+			subQuery: false
+			// distinct: true
 		};
 
 		if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
