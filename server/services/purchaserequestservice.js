@@ -37,6 +37,9 @@ const _catalogueService = new VendorCatalogueService();
 const NotificationService = require('../services/notificationservice.js');
 const _notificationService = new NotificationService();
 
+const LogService = require('../services/logservice.js');
+const _logServiceInstance = new LogService();
+
 const _xClassName = 'PurchaseRequestService';
 
 class PurchaseRequestService {
@@ -141,8 +144,25 @@ class PurchaseRequestService {
 					var xUpdate = await _repoInstance.save(xParamUpdate, 'update');
 
 					if (xUpdate.status_code == '00') {
-						delete xAddResult.clear_id;
 						xJoResult = xAddResult;
+						// ---------------- Start: Add to log ----------------
+						let xParamLog = {
+							act: 'add',
+							employee_id: pParam.employee_id,
+							employee_name: pParam.employee_name,
+							request_id: xAddResult.clear_id,
+							request_no: xFPBNo,
+							body: {
+								act: 'add',
+								msg: 'FPB created'
+							}
+						};
+						console.log(`>>> xParamLog : ${JSON.stringify(xParamLog)}`);
+						var xResultLog = await _logServiceInstance.addLog(pParam.method, pParam.token, xParamLog);
+						xJoResult.log_result = xResultLog;
+						// ---------------- End: Add to log ----------------
+
+						delete xJoResult.clear_id;
 					} else {
 						xJoResult = xUpdate;
 					}
@@ -161,12 +181,43 @@ class PurchaseRequestService {
 				}
 
 				if (xFlagProcess) {
+					// Get data before update
+					let xDataBeforeUpdate = await _repoInstance.getById({ id: pParam.id });
+					delete xDataBeforeUpdate.purchase_request_detail;
+
+					// ---------------- Start: Add to log ----------------
+					let xParamLog = {
+						act: 'add',
+						employee_id: pParam.employee_id,
+						employee_name: pParam.employee_name,
+						request_id: pParam.id,
+						request_no: xDataBeforeUpdate.request_no,
+						body: {
+							act: 'update',
+							msg: 'FPB changed',
+							before: {
+								category_item: xDataBeforeUpdate.category_item,
+								category_pr: xDataBeforeUpdate.category_pr,
+								reference_from_ecommerce: xDataBeforeUpdate.reference_from_ecommerce,
+								budget_is_approved: xDataBeforeUpdate.budget_is_approved,
+								memo_special_request: xDataBeforeUpdate.memo_special_request
+							},
+							after: pParam
+						}
+					};
+
 					delete pParam.employee_id;
 					delete pParam.employee_name;
 					delete pParam.department_id;
 					delete pParam.department_name;
 					var xAddResult = await _repoInstance.save(pParam, xAct);
 					xJoResult = xAddResult;
+
+					if (xJoResult.status_code == '00') {
+						var xResultLog = await _logServiceInstance.addLog(pParam.method, pParam.token, xParamLog);
+						xJoResult.log_result = xResultLog;
+						// ---------------- End: Add to log ----------------
+					}
 				}
 			}
 		}

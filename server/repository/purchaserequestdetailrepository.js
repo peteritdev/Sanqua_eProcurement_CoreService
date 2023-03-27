@@ -7,6 +7,7 @@ const Op = Sequelize.Op;
 
 // Model
 const _modelDb = require('../models').tr_purchaserequestdetails;
+const _modelPurchaseRequest = require('../models').tr_purchaserequests;
 
 const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
@@ -212,7 +213,13 @@ class PurchaseRequestDetailRepository {
 		var xJoResult = {};
 
 		try {
-			xInclude = [];
+			xInclude = [
+				{
+					model: _modelPurchaseRequest,
+					as: 'purchase_request',
+					attributes: [ 'id', 'request_no' ]
+				}
+			];
 
 			if (pParam.hasOwnProperty('id')) {
 				if (pParam.id != '') {
