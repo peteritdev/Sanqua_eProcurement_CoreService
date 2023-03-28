@@ -273,7 +273,11 @@ class VendorCatalogueRepository {
 			if (pParam.is_asset != '') {
 				xSqlWhere += ' AND p.is_asset = :isAsset ';
 				xObjJsonWhere.isAsset = pParam.is_asset;
+			} else {
+				xSqlWhere += ' AND ( p.is_asset = 0 OR p.is_asset IS NULL ) ';
 			}
+		} else {
+			xSqlWhere += ' AND ( p.is_asset = 0 OR p.is_asset IS NULL ) ';
 		}
 
 		if (pParam.hasOwnProperty('product_id') && pParam.hasOwnProperty('vendor_id')) {
