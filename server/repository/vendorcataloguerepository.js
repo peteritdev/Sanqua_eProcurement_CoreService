@@ -272,7 +272,7 @@ class VendorCatalogueRepository {
 		if (pParam.hasOwnProperty('is_asset')) {
 			if (pParam.is_asset != '') {
 				xSqlWhere += ' AND p.is_asset = :isAsset ';
-				xObjJsonWhere.is_asset = pParam.is_asset;
+				xObjJsonWhere.isAsset = pParam.is_asset;
 			}
 		}
 
