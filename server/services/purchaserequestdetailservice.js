@@ -177,36 +177,36 @@ class PurchaseRequestDetailService {
 				if (xAddResult.status_code == '00') {
 					// ---------------- Start: Add to log ----------------
 					// console.log(`>>> pParam : ${JSON.stringify(pParam)}`);
-					let xParamLog = {
-						act: 'add',
-						employee_id: pParam.employee_id,
-						employee_name: pParam.employee_name,
-						request_id: pParam.request_id,
-						request_no: xPurchaseRequest.data.request_no,
-						body: {
-							act: 'add',
-							msg: 'FPB Item created',
-							before: null,
-							after: {
-								qty: pParam.qty,
-								budget_price_per_unit: pParam.budget_price_per_unit,
-								quotation_price_per_unit: pParam.quotation_price_per_unit,
-								has_budget: pParam.has_budget,
-								estimate_date_use: pParam.estimate_date_use,
-								description: pParam.description,
-								product_id: pParam.product_id,
-								product_name: pParam.product_name,
-								vendor_id: pParam.vendor_id,
-								vendor_name: pParam.vendor_name,
-								vendor_code: pParam.vendor_code,
-								employee_id: pParam.employee_id,
-								employee_name: pParam.employee_name,
-								budget_price_total: pParam.budget_price_total
-							}
-						}
-					};
-					var xResultLog = await _logServiceInstance.addLog(pParam.method, pParam.token, xParamLog);
-					xJoResult.log_result = xResultLog;
+					// let xParamLog = {
+					// 	act: 'add',
+					// 	employee_id: pParam.employee_id,
+					// 	employee_name: pParam.employee_name,
+					// 	request_id: pParam.request_id,
+					// 	request_no: xPurchaseRequest.data.request_no,
+					// 	body: {
+					// 		act: 'add',
+					// 		msg: 'FPB Item created',
+					// 		before: null,
+					// 		after: {
+					// 			qty: pParam.qty,
+					// 			budget_price_per_unit: pParam.budget_price_per_unit,
+					// 			quotation_price_per_unit: pParam.quotation_price_per_unit,
+					// 			has_budget: pParam.has_budget,
+					// 			estimate_date_use: pParam.estimate_date_use,
+					// 			description: pParam.description,
+					// 			product_id: pParam.product_id,
+					// 			product_name: pParam.product_name,
+					// 			vendor_id: pParam.vendor_id,
+					// 			vendor_name: pParam.vendor_name,
+					// 			vendor_code: pParam.vendor_code,
+					// 			employee_id: pParam.employee_id,
+					// 			employee_name: pParam.employee_name,
+					// 			budget_price_total: pParam.budget_price_total
+					// 		}
+					// 	}
+					// };
+					// var xResultLog = await _logServiceInstance.addLog(pParam.method, pParam.token, xParamLog);
+					// xJoResult.log_result = xResultLog;
 				}
 			} else if (xAct == 'add_batch') {
 				if (pParam.hasOwnProperty('items')) {
@@ -307,56 +307,54 @@ class PurchaseRequestDetailService {
 					xJoResult = xUpdateResult;
 					if (xUpdateResult.status_code == '00') {
 						// ---------------- Start: Add to log ----------------
-						console.log(`>>> pParam.id : ${pParam.id}`);
-
-						if (xItem.status_code == '00') {
-							let xParamLog = {
-								act: 'add',
-								employee_id: pParam.employee_id,
-								employee_name: pParam.employee_name,
-								request_id: pParam.request_id,
-								request_no: xPurchaseRequest.data.request_no,
-								body: {
-									act: 'update',
-									msg: 'FPB item changed',
-									before: {
-										qty: xItem.data.qty,
-										budget_price_per_unit: xItem.data.budget_price_per_unit,
-										quotation_price_per_unit: xItem.data.quotation_price_per_unit,
-										has_budget: xItem.data.has_budget,
-										estimate_date_use: xItem.data.estimate_date_use,
-										description: xItem.data.description,
-										product_id: parseInt(xItem.data.product_id),
-										product_name: xItem.data.product_name,
-										vendor_id: parseInt(xItem.data.vendor_id),
-										vendor_name: xItem.data.vendor_name,
-										vendor_code: xItem.data.vendor_code,
-										employee_id: xItem.data.employee_id,
-										employee_name: xItem.data.employee_name,
-										budget_price_total: xItem.data.budget_price_total
-									},
-									after: {
-										qty: pParam.qty,
-										budget_price_per_unit: pParam.budget_price_per_unit,
-										quotation_price_per_unit: pParam.quotation_price_per_unit,
-										has_budget: pParam.has_budget,
-										estimate_date_use: pParam.estimate_date_use,
-										description: pParam.description,
-										product_id: pParam.product_id,
-										product_name: pParam.product_name,
-										vendor_id: pParam.vendor_id,
-										vendor_name: pParam.vendor_name,
-										vendor_code: pParam.vendor_code,
-										employee_id: pParam.employee_id,
-										employee_name: pParam.employee_name,
-										budget_price_total: pParam.budget_price_total
-									}
-								}
-							};
-							var xResultLog = await _logServiceInstance.addLog(pParam.method, pParam.token, xParamLog);
-							xJoResult.log_result = xResultLog;
-						}
-
+						// console.log(`>>> pParam.id : ${pParam.id}`);
+						// if (xItem.status_code == '00') {
+						// 	let xParamLog = {
+						// 		act: 'add',
+						// 		employee_id: pParam.employee_id,
+						// 		employee_name: pParam.employee_name,
+						// 		request_id: pParam.request_id,
+						// 		request_no: xPurchaseRequest.data.request_no,
+						// 		body: {
+						// 			act: 'update',
+						// 			msg: 'FPB item changed',
+						// 			before: {
+						// 				qty: xItem.data.qty,
+						// 				budget_price_per_unit: xItem.data.budget_price_per_unit,
+						// 				quotation_price_per_unit: xItem.data.quotation_price_per_unit,
+						// 				has_budget: xItem.data.has_budget,
+						// 				estimate_date_use: xItem.data.estimate_date_use,
+						// 				description: xItem.data.description,
+						// 				product_id: parseInt(xItem.data.product_id),
+						// 				product_name: xItem.data.product_name,
+						// 				vendor_id: parseInt(xItem.data.vendor_id),
+						// 				vendor_name: xItem.data.vendor_name,
+						// 				vendor_code: xItem.data.vendor_code,
+						// 				employee_id: xItem.data.employee_id,
+						// 				employee_name: xItem.data.employee_name,
+						// 				budget_price_total: xItem.data.budget_price_total
+						// 			},
+						// 			after: {
+						// 				qty: pParam.qty,
+						// 				budget_price_per_unit: pParam.budget_price_per_unit,
+						// 				quotation_price_per_unit: pParam.quotation_price_per_unit,
+						// 				has_budget: pParam.has_budget,
+						// 				estimate_date_use: pParam.estimate_date_use,
+						// 				description: pParam.description,
+						// 				product_id: pParam.product_id,
+						// 				product_name: pParam.product_name,
+						// 				vendor_id: pParam.vendor_id,
+						// 				vendor_name: pParam.vendor_name,
+						// 				vendor_code: pParam.vendor_code,
+						// 				employee_id: pParam.employee_id,
+						// 				employee_name: pParam.employee_name,
+						// 				budget_price_total: pParam.budget_price_total
+						// 			}
+						// 		}
+						// 	};
+						// 	var xResultLog = await _logServiceInstance.addLog(pParam.method, pParam.token, xParamLog);
+						// 	xJoResult.log_result = xResultLog;
+						// }
 						// ---------------- End: Add to log ----------------
 					}
 				}
