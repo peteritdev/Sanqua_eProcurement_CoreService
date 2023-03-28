@@ -206,12 +206,12 @@ class PurchaseRequestService {
 					// 	}
 					// };
 
-					// delete pParam.employee_id;
-					// delete pParam.employee_name;
-					// delete pParam.department_id;
-					// delete pParam.department_name;
-					// var xAddResult = await _repoInstance.save(pParam, xAct);
-					// xJoResult = xAddResult;
+					delete pParam.employee_id;
+					delete pParam.employee_name;
+					delete pParam.department_id;
+					delete pParam.department_name;
+					var xAddResult = await _repoInstance.save(pParam, xAct);
+					xJoResult = xAddResult;
 
 					// if (xJoResult.status_code == '00') {
 					// 	var xResultLog = await _logServiceInstance.addLog(pParam.method, pParam.token, xParamLog);
