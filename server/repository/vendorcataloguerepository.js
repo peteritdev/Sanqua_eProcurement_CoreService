@@ -269,6 +269,13 @@ class VendorCatalogueRepository {
 			}
 		}
 
+		if (pParam.hasOwnProperty('is_asset')) {
+			if (pParam.is_asset != '') {
+				xSqlWhere += ' AND p.is_asset = :isAsset ';
+				xObjJsonWhere.is_asset = pParam.is_asset;
+			}
+		}
+
 		if (pParam.hasOwnProperty('product_id') && pParam.hasOwnProperty('vendor_id')) {
 			if (pParam.product_id != '' && pParam.vendor_id != '') {
 				xSqlWhere += ' AND vc.product_id = :productId ';
