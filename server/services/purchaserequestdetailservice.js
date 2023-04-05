@@ -471,6 +471,7 @@ class PurchaseRequestDetailService {
 			if (pParam.hasOwnProperty('id')) {
 				if (pParam.id != '' && pParam.id.length == 65) {
 					let xDetail = await _purchaseRequestServiceInstance.getById(pParam);
+					console.log(`>>> xDetail : ${JSON.stringify(xDetail)}`);
 					if (xDetail.status_code == '00') {
 						if (xDetail.hasOwnProperty('data')) {
 							if (xDetail.data.status.id != 2) {
