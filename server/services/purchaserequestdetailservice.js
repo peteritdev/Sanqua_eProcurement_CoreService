@@ -464,6 +464,8 @@ class PurchaseRequestDetailService {
 		var xFlagProcess = false;
 		var xRequestId = null;
 
+		console.log(`>>> pParam: ${JSON.stringify(pParam)}`);
+
 		try {
 			// Check first if status of header is "In Progress" or not
 			if (pParam.hasOwnProperty('id')) {
