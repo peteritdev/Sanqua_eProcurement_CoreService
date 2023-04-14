@@ -470,8 +470,8 @@ async function purchaseRequest_CreatePR(req, res) {
 			} else {
 				req.body.logged_user_id = oAuthResult.token_data.result_verify.id;
 				req.body.logged_user_name = oAuthResult.token_data.result_verify.name;
-				req.body.logged_company_id = oAuthResult.token_data.result_verify.company.id;
-				req.body.logged_company_name = oAuthResult.token_data.result_verify.company.name;
+				req.body.logged_company_id = oAuthResult.token_data.result_verify.employee_info.company.id;
+				req.body.logged_company_name = oAuthResult.token_data.result_verify.employee_info.company.name;
 
 				req.body.logged_department_id =
 					oAuthResult.token_data.result_verify.employee_info.department.section.id;
