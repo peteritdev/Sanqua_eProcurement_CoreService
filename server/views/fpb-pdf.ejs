@@ -421,6 +421,11 @@
                                                 <td><img src="<%=qrCode.qrPath%><%=qrCode.approval1[i]%>" width="80"></td>
                                             <% }%>
                                         </tr>
+                                        <tr>
+                                            <% for(var i = 0; i < qrCode.approver1.length; i++ ) { %>
+                                                <td><%=approver1[i].user.name%></td>
+                                            <% }%>
+                                        </tr>
                                     </table>
                                     
                             <%

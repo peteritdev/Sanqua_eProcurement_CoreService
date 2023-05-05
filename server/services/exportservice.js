@@ -129,15 +129,15 @@ class ExportService {
 						xStringQRCodeApprover1 =
 							`VALIDATE_SIGNATURE|PROC|` +
 							(await _utilInstance.encrypt(
-								`${xFPBId}|${xApprover1.approver_user[i].user.id}`,
+								`${xFPBId}|${xApprovedUser1[i].user.id}`,
 								config.cryptoKey.hashKey
 							));
 
 						let xQRCodeApproval1 = await _qrCode.toDataURL(xStringQRCodeApprover1);
-						xQRCodeFileName1.push(`approval_${xFPBId}${xApprover1.approver_user[i].user.id}.png`);
+						xQRCodeFileName1.push(`approval_${xFPBId}${xApprovedUser1[i].user.id}.png`);
 						_imageDataURI.outputFile(
 							xQRCodeApproval1,
-							xFilePathQRCodeApproval + `approval_${xFPBId}${xApprover1.approver_user[i].user.id}.png`
+							xFilePathQRCodeApproval + `approval_${xFPBId}${xApprovedUser1[i].user.id}.png`
 						);
 					}
 					// xStringQRCodeApprover1 =
@@ -250,7 +250,7 @@ class ExportService {
 						// 		: xApprover1.approver_user.find((el) => el.status === 1).user.name
 						// 	: '',
 
-						approver1: xApprover1.approver_user.filter((el) => el.status === 1),
+						approver1: xApprovedUser1,
 						approver2:
 							xApprover2 != null
 								? xApprover2.approver_user.find((el) => el.status === 1) == null
