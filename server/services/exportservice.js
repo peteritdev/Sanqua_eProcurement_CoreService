@@ -89,12 +89,12 @@ class ExportService {
 				let xApprovalFinanceAccounting = null;
 				let xFilePathQRCodeApproval = `${config.uploadBasePath}/digital_sign_qrcode/`;
 				let xQRCodeFileNameCreator,
-					xQRCodeFileName1,
-					xQRCodeFileName2,
-					xQRCodeFileName3,
-					xQRCodeFileName4,
-					xQRCodeFileName5,
-					xQRCodeFileName6 = '';
+					xQRCodeFileName1 = [],
+					xQRCodeFileName2 = [],
+					xQRCodeFileName3 = [],
+					xQRCodeFileName4 = [],
+					xQRCodeFileName5 = [],
+					xQRCodeFileName6 = [];
 
 				xApprover1 =
 					xJoResultFPB.data.approval_matrix != null
@@ -123,18 +123,37 @@ class ExportService {
 
 				// Generate QRCode Digital Sign
 
-				if (xApprover1 != null && xApprover1.approver_user.find((el) => el.status === 1) != null) {
-					xStringQRCodeApprover1 =
-						`VALIDATE_SIGNATURE|PROC|` +
-						(await _utilInstance.encrypt(
-							`${xFPBId}|${xApprover1.approver_user.find((el) => el.status === 1).user.id}`,
-							config.cryptoKey.hashKey
-						));
-					let xQRCodeApproval1 = await _qrCode.toDataURL(xStringQRCodeApprover1);
+				let xApprovedUser1 = xApprover1.approver_user.filter((el) => el.status === 1);
+				if (xApprover1 != null && xApprovedUser1 != null) {
+					for (var i in xApprovedUser1) {
+						xStringQRCodeApprover1 =
+							`VALIDATE_SIGNATURE|PROC|` +
+							(await _utilInstance.encrypt(
+								`${xFPBId}|${xApprover1.approver_user[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
 
-					xQRCodeFileName1 = `approval_${xFPBId}${xApprover1.approver_user.find((el) => el.status === 1).user
-						.id}.png`;
-					_imageDataURI.outputFile(xQRCodeApproval1, xFilePathQRCodeApproval + xQRCodeFileName1);
+						let xQRCodeApproval1 = await _qrCode.toDataURL(xStringQRCodeApprover1);
+						xQRCodeFileName1.push(`approval_${xFPBId}${xApprover1.approver_user[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval1,
+							xFilePathQRCodeApproval + `approval_${xFPBId}${xApprover1.approver_user[i].user.id}.png`
+						);
+					}
+					// xStringQRCodeApprover1 =
+					// 	`VALIDATE_SIGNATURE|PROC|` +
+					// 	(await _utilInstance.encrypt(
+					// 		`${xFPBId}|${xApprover1.approver_user.find((el) => el.status === 1).user.id}`,
+					// 		config.cryptoKey.hashKey
+					// 	));
+					// let xQRCodeApproval1 = await _qrCode.toDataURL(xStringQRCodeApprover1);
+
+					// xQRCodeFileName1 = `approval_${xFPBId}${xApprover1.approver_user.find((el) => el.status === 1).user
+					// 	.id}.png`;
+					// _imageDataURI.outputFile(xQRCodeApproval1, xFilePathQRCodeApproval + xQRCodeFileName1);
+
+					let xUser = xApprover1.approver_user.filter((el) => el.status === 1);
+					console.log(`>>> xUser: ${JSON.stringify(xUser)}`);
 				}
 
 				if (xApprover2 != null && xApprover2.approver_user.find((el) => el.status === 1) != null) {
@@ -208,7 +227,12 @@ class ExportService {
 				// console.log(`>>> Approver 1 : ${xApprovalHeadDepartment.approver_user[0].user.name}`);
 				// console.log(`>>> Approver 2 : ${xApprovalPM.approver_user[0].user.name}`);
 
-				console.log(`>>> url 1 : ` + `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName1}`);
+				for (var i in xQRCodeFileName1) {
+					console.log(
+						`>>> url 1 : ` + `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName1[i]}`
+					);
+				}
+
 				// console.log(`>>> url 2 : ` + `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName2}`);
 
 				// console.log(
