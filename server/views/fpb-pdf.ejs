@@ -417,7 +417,9 @@
                             %>
                                     <table>
                                         <tr>
-                                            
+                                            <% for(var i = 0; i < qrCode.approval1.length; i++ ) { %>
+                                                <td><img src="<%=qrCode.qrPath%><%=qrCode.approval1[i]%>" width="80"></td>
+                                            <% }%>
                                         </tr>
                                     </table>
                                     
