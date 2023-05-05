@@ -244,12 +244,13 @@ class ExportService {
 						data: xJoResultFPB,
 						companyData: xCompanyData,
 						imagePath: config.imagePath,
-						approver1:
-							xApprover1 != null
-								? xApprover1.approver_user.find((el) => el.status === 1) == null
-									? ''
-									: xApprover1.approver_user.find((el) => el.status === 1).user.name
-								: '',
+						// xApprover1 != null
+						// 	? xApprover1.approver_user.find((el) => el.status === 1) == null
+						// 		? ''
+						// 		: xApprover1.approver_user.find((el) => el.status === 1).user.name
+						// 	: '',
+
+						approver1: xApprover1.approver_user.filter((el) => el.status === 1),
 						approver2:
 							xApprover2 != null
 								? xApprover2.approver_user.find((el) => el.status === 1) == null
@@ -281,10 +282,9 @@ class ExportService {
 						// 			: xApprover6.approver_user.find((el) => el.status === 1).user.name
 						// 		: '',
 						qrCode: {
-							approval1:
-								xApprover1 != null && xApprover1.approver_user.find((el) => el.status === 1) != null
-									? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName1}`
-									: '',
+							qrPath: `${config.imagePathESanQua_dev}/digital_sign_qrcode/`,
+							approval1: xQRCodeFileName1,
+
 							approval2:
 								xApprover2 != null && xApprover2.approver_user.find((el) => el.status === 1) != null
 									? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName2}`

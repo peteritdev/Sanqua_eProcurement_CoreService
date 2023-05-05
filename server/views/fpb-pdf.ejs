@@ -410,10 +410,19 @@
                         <tr>
                             <td></td>
                             <td style="text-align: center;vertical-align: middle;">
+                                
                             <%
-                                if( qrCode.approval1 != '' ){
+                                if( qrCode.approval1 != null ){
+
                             %>
-                                    <img src="<%=qrCode.approval1%>" width="80">
+                                    <table>
+                                        <tr>
+                                            <% qrCode.approval1.forEach( item => { %>
+                                                <td><img src="<%=qrCode.qrPath%><%=item%>" width="80"></td>
+                                            <% }%>
+                                        </tr>
+                                    </table>
+                                    
                             <%
                                 }
                             %>
