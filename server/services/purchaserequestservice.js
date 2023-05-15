@@ -276,6 +276,28 @@ class PurchaseRequestService {
 			if (xFlagAPIResult) {
 				pParam.owned_document_no = xArrOwnedDocNo;
 				// console.log(`>>> pParam : ${JSON.stringify(pParam)}`);
+
+				if (pParam.is_admin == 1) {
+					if (!pParam.hasOwnProperty('company_id')) {
+						pParam.company_id = pParam.logged_company_id;
+					} else {
+						if (pParam.company_id == '') {
+							// pParam.company_id = pParam.logged_company_id;
+						}
+					}
+
+					if (!pParam.hasOwnProperty('department_id')) {
+						pParam.department_id = pParam.logged_department_id;
+					} else {
+						if (pParam.department_id == '') {
+							// pParam.department_id = pParam.logged_department_id;
+						}
+					}
+				} else {
+					pParam.company_id = pParam.logged_company_id;
+					pParam.department_id = pParam.logged_department_id;
+				}
+
 				var xResultList = await _repoInstance.list(pParam);
 
 				if (xResultList.total_record > 0) {
