@@ -83,6 +83,9 @@ async function purchaseRequest_List(req, res) {
 							oAuthResult.token_data.result_verify.employee_info.department.name;
 					}
 				}
+
+				req.body.logged_company_id = oAuthResult.token_data.result_verify.employee_info.company.id;
+				req.body.logged_company_name = oAuthResult.token_data.result_verify.employee_info.company.name;
 				req.query.method = req.headers['x-method'];
 				req.query.token = req.headers['x-token'];
 				joResult = await _serviceInstance.list(req.query);
