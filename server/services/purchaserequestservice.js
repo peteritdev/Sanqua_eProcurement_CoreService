@@ -275,7 +275,7 @@ class PurchaseRequestService {
 
 			if (xFlagAPIResult) {
 				pParam.owned_document_no = xArrOwnedDocNo;
-				console.log(`>>> pParam : ${JSON.stringify(pParam)}`);
+				console.log(`>>> pParam 1: ${JSON.stringify(pParam)}`);
 
 				if (pParam.is_admin == 1) {
 					if (!pParam.hasOwnProperty('company_id')) {
@@ -297,6 +297,8 @@ class PurchaseRequestService {
 					pParam.company_id = pParam.logged_company_id;
 					pParam.department_id = pParam.logged_department_id;
 				}
+
+				console.log(`>>> pParam 2: ${JSON.stringify(pParam)}`);
 
 				var xResultList = await _repoInstance.list(pParam);
 
