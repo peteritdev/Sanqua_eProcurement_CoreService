@@ -279,6 +279,7 @@ class PurchaseRequestService {
 
 				if (pParam.is_admin == 1) {
 					if (!pParam.hasOwnProperty('company_id')) {
+						console.log(`>>> Not has`);
 						pParam.company_id = pParam.logged_company_id;
 					} else {
 						if (pParam.company_id == '') {
