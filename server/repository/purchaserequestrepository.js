@@ -400,7 +400,7 @@ class PurchaseRequestRepository {
 		}
 
 		xSql = ` SELECT pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
-						pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price
+						pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item
 				 FROM tr_purchaserequests pr LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
 				 WHERE ${xSqlWhere} GROUP BY pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
 				 pr.status, pr.company_id, pr.company_code, pr.company_name ${xSqlOrderBy}${xSqlLimit} `;
