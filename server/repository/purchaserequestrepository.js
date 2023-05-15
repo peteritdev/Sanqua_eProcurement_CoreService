@@ -305,6 +305,20 @@ class PurchaseRequestRepository {
 			}
 		}
 
+		if (pParam.hasOwnProperty('department_id')) {
+			if (pParam.department_id != '') {
+				xSqlWhere += ' AND pr.department_id = :departmentId ';
+				xObjJsonWhere.departmentId = pParam.department_id;
+			}
+		}
+
+		if (pParam.hasOwnProperty('category_item')) {
+			if (pParam.category_item != '') {
+				xSqlWhere += ' AND pr.category_item = :categoryItem ';
+				xObjJsonWhere.categoryItem = pParam.category_item;
+			}
+		}
+
 		if (pParam.hasOwnProperty('request_date_start') && pParam.hasOwnProperty('request_date_end')) {
 			if (pParam.request_date_start != '' && pParam.request_date_end != '') {
 				xSqlWhere += ' AND pr.requested_at BETWEEN :startDate AND :endDate ';
