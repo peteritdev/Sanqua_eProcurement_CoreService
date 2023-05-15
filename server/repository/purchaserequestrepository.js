@@ -299,7 +299,7 @@ class PurchaseRequestRepository {
 		}
 
 		if (pParam.hasOwnProperty('company_id')) {
-			if (pParam.category_id != '') {
+			if (pParam.company_id != '') {
 				xSqlWhere += ' AND pr.company_id = :companyId ';
 				xObjJsonWhere.companyId = pParam.company_id;
 			}
