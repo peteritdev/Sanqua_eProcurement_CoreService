@@ -375,8 +375,8 @@ class PurchaseRequestRepository {
 						pr.request_no ILIKE :keyword OR
 						pr.employee_name ILIKE :keyword OR
 						pr.department_name ILIKE :keyword OR
-						prd.product_code ILIKE :keyword OR
-						prd.product_name ILIKE :keyword
+						-- prd.product_code ILIKE :keyword OR
+						-- prd.product_name ILIKE :keyword
 					)`;
 
 				xObjJsonWhere.keyword = `%${pParam.keyword}%`;
@@ -401,12 +401,14 @@ class PurchaseRequestRepository {
 
 		xSql = ` SELECT pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
 						pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item
-				 FROM tr_purchaserequests pr LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
+				 FROM tr_purchaserequests pr 
+				 	-- LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
 				 WHERE ${xSqlWhere} GROUP BY pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
 				 pr.status, pr.company_id, pr.company_code, pr.company_name ${xSqlOrderBy}${xSqlLimit} `;
 
 		xSqlCount = ` SELECT COUNT(0) AS total_record
-		  FROM tr_purchaserequests pr LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
+		  FROM tr_purchaserequests pr 
+		  	-- LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
 		  WHERE ${xSqlWhere}`;
 
 		xData = await sequelize.query(xSql, {
