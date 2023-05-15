@@ -311,7 +311,15 @@ class PurchaseRequestService {
 								id: xRows[index].company_id,
 								code: xRows[index].company_code,
 								name: xRows[index].company_name
-							}
+							},
+
+							created_at:
+								xRows[index].createdAt != null
+									? moment(xRows[index].createdAt).format('DD-MM-YYYY HH:mm:ss')
+									: null,
+
+							total_price: xRows[index].total_price,
+							total_quotation_price: xRows[index].total_quotation_price
 						});
 					}
 
