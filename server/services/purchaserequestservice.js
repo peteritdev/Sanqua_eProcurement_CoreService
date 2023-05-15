@@ -275,7 +275,7 @@ class PurchaseRequestService {
 
 			if (xFlagAPIResult) {
 				pParam.owned_document_no = xArrOwnedDocNo;
-				// console.log(`>>> pParam : ${JSON.stringify(pParam)}`);
+				console.log(`>>> pParam : ${JSON.stringify(pParam)}`);
 
 				if (pParam.is_admin == 1) {
 					if (!pParam.hasOwnProperty('company_id')) {
