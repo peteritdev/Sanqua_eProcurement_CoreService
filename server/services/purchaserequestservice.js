@@ -314,7 +314,7 @@ class PurchaseRequestService {
 							},
 
 							created_at:
-								xRows[index].createdAt != null
+								xRows[index].created_at != null
 									? moment(xRows[index].createdAt).format('DD-MM-YYYY HH:mm:ss')
 									: null,
 
