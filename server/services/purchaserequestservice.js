@@ -320,7 +320,10 @@ class PurchaseRequestService {
 
 							total_price: xRows[index].total_price,
 							total_quotation_price: xRows[index].total_quotation_price,
-							category_item: config.categoryItem[xRows[index].category_item]
+							category_item: {
+								id: xRows[index].category_item,
+								name: config.categoryItem[xRows[index].category_item]
+							}
 						});
 					}
 
