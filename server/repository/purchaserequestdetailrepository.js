@@ -207,10 +207,7 @@ class PurchaseRequestDetailRepository {
 		}
 
 		var xData = await _modelDb.findOne({
-			where: {
-				product_id: pParam.product_id,
-				vendor_id: pParam.vendor_id
-			},
+			where: xWhereAnd,
 			include: xInclude
 		});
 
