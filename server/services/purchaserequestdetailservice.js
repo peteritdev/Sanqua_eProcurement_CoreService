@@ -51,13 +51,16 @@ class PurchaseRequestDetailService {
 
 		delete pParam.act;
 
+		var xMethod = pParam.method;
+		var xToken = pParam.token;
+
 		if (pParam.hasOwnProperty('user_id') && pParam.hasOwnProperty('request_id')) {
 			// Check if the FPB status already submit or still draft.
 			// If already submit, reject
 			var xPurchaseRequest = await _purchaseRequestServiceInstance.getById({
 				id: pParam.request_id,
-				method: pParam.method,
-				token: pParam.token
+				method: xMethod,
+				token: xToken
 			});
 
 			if (xPurchaseRequest != null) {
@@ -205,7 +208,7 @@ class PurchaseRequestDetailService {
 							}
 						}
 					};
-					var xResultLog = await _logServiceInstance.addLog(pParam.method, pParam.token, xParamLog);
+					var xResultLog = await _logServiceInstance.addLog(xMethod, xToken, xParamLog);
 					xJoResult.log_result = xResultLog;
 				}
 			} else if (xAct == 'add_batch') {
