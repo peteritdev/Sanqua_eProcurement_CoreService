@@ -193,6 +193,19 @@ class PurchaseRequestDetailRepository {
 		var xWhereAnd = [],
 			xWhereOr = [];
 
+		xWhereAnd.push({
+			product_id: pParam.product_id,
+			vendor_id: pParam.vendor_id
+		});
+
+		if (pParam.hasOwnProperty('request_id')) {
+			if (pParam.request_id != '') {
+				xWhereAnd.push({
+					request_id: pParam.request_id
+				});
+			}
+		}
+
 		var xData = await _modelDb.findOne({
 			where: {
 				product_id: pParam.product_id,

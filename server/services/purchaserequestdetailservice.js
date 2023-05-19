@@ -120,7 +120,8 @@ class PurchaseRequestDetailService {
 						// Check first whether product_id and vendor_id already exists in detail or not
 						xPurchaseRequestDetail = await _repoInstance.getByProductIdVendorId({
 							product_id: pParam.product_id,
-							vendor_id: pParam.vendor_id
+							vendor_id: pParam.vendor_id,
+							request_id: pParam.request_id
 						});
 					}
 				}
