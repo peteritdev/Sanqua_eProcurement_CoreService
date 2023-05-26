@@ -299,13 +299,6 @@ class PurchaseRequestRepository {
 			}
 		}
 
-		if (pParam.hasOwnProperty('company_id')) {
-			if (pParam.company_id != '') {
-				xSqlWhere += ' AND pr.company_id = :companyId ';
-				xObjJsonWhere.companyId = pParam.company_id;
-			}
-		}
-
 		if (pParam.hasOwnProperty('department_id')) {
 			if (pParam.department_id != '') {
 				xSqlWhere += ' AND pr.department_id = :departmentId ';
@@ -355,7 +348,7 @@ class PurchaseRequestRepository {
 
 		if (pParam.hasOwnProperty('owned_document_no') && (pParam.is_admin == 0 || pParam.logged_is_admin == 0)) {
 			if (pParam.owned_document_no.length > 0) {
-				xSqlWhereOrOwnedDocument.push(' request_no IN (:ownedDocNo) ');
+				xSqlWhereOr.push(' request_no IN (:ownedDocNo) ');
 				xObjJsonWhere.ownedDocNo = pParam.owned_document_no;
 
 				if (pParam.hasOwnProperty('department_id') && (pParam.is_admin == 0 || pParam.logged_is_admin == 0)) {
@@ -381,6 +374,20 @@ class PurchaseRequestRepository {
 					)`;
 
 				xObjJsonWhere.keyword = `%${pParam.keyword}%`;
+			} else {
+				if (pParam.hasOwnProperty('company_id')) {
+					if (pParam.company_id != '') {
+						xSqlWhere += ' AND pr.company_id = :companyId ';
+						xObjJsonWhere.companyId = pParam.company_id;
+					}
+				}
+			}
+		} else {
+			if (pParam.hasOwnProperty('company_id')) {
+				if (pParam.company_id != '') {
+					xSqlWhere += ' AND pr.company_id = :companyId ';
+					xObjJsonWhere.companyId = pParam.company_id;
+				}
 			}
 		}
 
@@ -400,9 +407,9 @@ class PurchaseRequestRepository {
 			xSqlWhere += ` AND ( ${xSqlWhereOr.join(' OR ')} ) `;
 		}
 
-		if (xSqlWhereOrOwnedDocument.length > 0) {
-			xSqlWhere += ` OR ( ${xSqlWhereOrOwnedDocument.join(' OR ')} ) `;
-		}
+		// if (xSqlWhereOrOwnedDocument.length > 0) {
+		// 	xSqlWhere += ` OR ( ${xSqlWhereOrOwnedDocument.join(' OR ')} ) `;
+		// }
 
 		xSql = ` SELECT pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
 						pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item
