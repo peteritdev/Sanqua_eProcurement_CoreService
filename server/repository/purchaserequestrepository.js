@@ -346,19 +346,19 @@ class PurchaseRequestRepository {
 			}
 		}
 
-		if (pParam.hasOwnProperty('user_id') && pParam.is_admin == 0) {
+		if (pParam.hasOwnProperty('user_id') && (pParam.is_admin == 0 || pParam.logged_is_admin == 0)) {
 			if (pParam.user_id != '') {
 				xSqlWhereOr.push(' pr.created_by = :createdBy ');
 				xObjJsonWhere.createdBy = pParam.user_id;
 			}
 		}
 
-		if (pParam.hasOwnProperty('owned_document_no') && pParam.is_admin == 0) {
+		if (pParam.hasOwnProperty('owned_document_no') && (pParam.is_admin == 0 || pParam.logged_is_admin == 0)) {
 			if (pParam.owned_document_no.length > 0) {
 				xSqlWhereOrOwnedDocument.push(' request_no IN (:ownedDocNo) ');
 				xObjJsonWhere.ownedDocNo = pParam.owned_document_no;
 
-				if (pParam.hasOwnProperty('department_id') && pParam.is_admin == 0) {
+				if (pParam.hasOwnProperty('department_id') && (pParam.is_admin == 0 || pParam.logged_is_admin == 0)) {
 					if (pParam.department_id != '') {
 						if (!xFlagFilterDepartment) {
 							xSqlWhereOr.push(' pr.department_id = :departmentId ');
@@ -385,7 +385,7 @@ class PurchaseRequestRepository {
 		}
 
 		if (!xFlagFilterDepartment) {
-			if (pParam.hasOwnProperty('department_id') && pParam.is_admin == 0) {
+			if (pParam.hasOwnProperty('department_id') && (pParam.is_admin == 0 || pParam.logged_is_admin == 0)) {
 				if (pParam.department_id != '') {
 					if (!xFlagFilterDepartment) {
 						xSqlWhereOr.push(' pr.department_id = :departmentId ');
