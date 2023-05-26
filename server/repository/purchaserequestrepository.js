@@ -278,6 +278,7 @@ class PurchaseRequestRepository {
 		var xObjJsonWhere = {};
 		var xSqlWhere = ' (1=1) ';
 		var xSqlWhereOr = [];
+		var xSqlWhereOrOwnedDocument = [];
 		var xSqlOrderBy = '';
 		var xSqlLimit = '';
 		var xFlagFilterDepartment = false;
@@ -354,7 +355,7 @@ class PurchaseRequestRepository {
 
 		if (pParam.hasOwnProperty('owned_document_no') && pParam.is_admin == 0) {
 			if (pParam.owned_document_no.length > 0) {
-				xSqlWhereOr.push(' request_no IN (:ownedDocNo) ');
+				xSqlWhereOrOwnedDocument.push(' request_no IN (:ownedDocNo) ');
 				xObjJsonWhere.ownedDocNo = pParam.owned_document_no;
 
 				if (pParam.hasOwnProperty('department_id') && pParam.is_admin == 0) {
@@ -397,6 +398,10 @@ class PurchaseRequestRepository {
 
 		if (xSqlWhereOr.length > 0) {
 			xSqlWhere += ` AND ( ${xSqlWhereOr.join(' OR ')} ) `;
+		}
+
+		if (xSqlWhereOrOwnedDocument.length > 0) {
+			xSqlWhere += ` OR ( ${xSqlWhereOrOwnedDocument.join(' OR ')} ) `;
 		}
 
 		xSql = ` SELECT pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
