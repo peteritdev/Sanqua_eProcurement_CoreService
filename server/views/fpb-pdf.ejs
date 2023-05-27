@@ -433,6 +433,98 @@
                             %>
                             </td>
                             <td style="text-align: center;vertical-align: middle;">
+                                
+                                <%
+                                    if( qrCode.approval2 != null ){
+    
+                                %>
+                                        <table>
+                                            <tr>
+                                                <% for(var i = 0; i < qrCode.approval2.length; i++ ) { %>
+                                                    <td><img src="<%=qrCode.qrPath%><%=qrCode.approval2[i]%>" width="80"></td>
+                                                <% }%>
+                                            </tr>
+                                            <tr>
+                                                <% for(var i = 0; i < approver2.length; i++ ) { %>
+                                                    <td><%=approver2[i].user.name%></td>
+                                                <% }%>
+                                            </tr>
+                                        </table>
+                                        
+                                <%
+                                    }
+                                %>
+                            </td>
+                            <td style="text-align: center;vertical-align: middle;">
+                                
+                                <%
+                                    if( qrCode.approval3 != null ){
+    
+                                %>
+                                        <table>
+                                            <tr>
+                                                <% for(var i = 0; i < qrCode.approval3.length; i++ ) { %>
+                                                    <td><img src="<%=qrCode.qrPath%><%=qrCode.approval3[i]%>" width="80"></td>
+                                                <% }%>
+                                            </tr>
+                                            <tr>
+                                                <% for(var i = 0; i < approver3.length; i++ ) { %>
+                                                    <td><%=approver3[i].user.name%></td>
+                                                <% }%>
+                                            </tr>
+                                        </table>
+                                        
+                                <%
+                                    }
+                                %>
+                            </td>
+                            <td style="text-align: center;vertical-align: middle;">
+                                
+                                <%
+                                    if( qrCode.approval4 != null ){
+    
+                                %>
+                                        <table>
+                                            <tr>
+                                                <% for(var i = 0; i < qrCode.approval4.length; i++ ) { %>
+                                                    <td><img src="<%=qrCode.qrPath%><%=qrCode.approval4[i]%>" width="80"></td>
+                                                <% }%>
+                                            </tr>
+                                            <tr>
+                                                <% for(var i = 0; i < approver4.length; i++ ) { %>
+                                                    <td><%=approver4[i].user.name%></td>
+                                                <% }%>
+                                            </tr>
+                                        </table>
+                                        
+                                <%
+                                    }
+                                %>
+                            </td>
+                            <td style="text-align: center;vertical-align: middle;">
+                                
+                                <%
+                                    if( qrCode.approval5 != null ){
+    
+                                %>
+                                        <table>
+                                            <tr>
+                                                <% for(var i = 0; i < qrCode.approval5.length; i++ ) { %>
+                                                    <td><img src="<%=qrCode.qrPath%><%=qrCode.approval5[i]%>" width="80"></td>
+                                                <% }%>
+                                            </tr>
+                                            <tr>
+                                                <% for(var i = 0; i < approver5.length; i++ ) { %>
+                                                    <td><%=approver5[i].user.name%></td>
+                                                <% }%>
+                                            </tr>
+                                        </table>
+                                        
+                                <%
+                                    }
+                                %>
+                            </td>
+                            <!-- <td style="text-align: center;vertical-align: middle;">
                                 <%
                                     if( qrCode.approval2 != '' ){
                                 %>
@@ -440,43 +532,8 @@
                                 <%
                                     }
                                 %>                                
-                            </td>
-                            <td style="text-align: center;vertical-align: middle;">
-                                <%
-                                    if( qrCode.approval3 != '' ){
-                                %>
-                                    <img src="<%=qrCode.approval3%>" width="80">
-                                <%
-                                    }
-                                %>                                
-                            </td>
-                            <td style="text-align: center;vertical-align: middle;">
-                                <%
-                                    if( qrCode.approval4 != '' ){
-                                %>
-                                    <img src="<%=qrCode.approval4%>" width="80">
-                                <%
-                                    }
-                                %>                                
-                            </td>
-                            <td style="text-align: center;vertical-align: middle;">
-                                <%
-                                    if( qrCode.approval5 != '' ){
-                                %>
-                                    <img src="<%=qrCode.approval5%>" width="80">
-                                <%
-                                    }
-                                %>                                
-                            </td>
-                            <!-- <td  style="border-right: none !important;text-align: center;vertical-align: middle;">
-                                <%
-                                    if( qrCode.approval6 != '' ){
-                                %>
-                                    <img src="<%=qrCode.approval6%>" width="80">
-                                <%
-                                    }
-                                %>
                             </td> -->
+                            
                         </tr>
                         <tr style="height: 20px;">
                             <td><%=data.data.employee.name%></td>

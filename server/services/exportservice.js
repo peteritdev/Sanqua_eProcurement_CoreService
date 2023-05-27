@@ -156,57 +156,132 @@ class ExportService {
 					console.log(`>>> xUser: ${JSON.stringify(xUser)}`);
 				}
 
-				if (xApprover2 != null && xApprover2.approver_user.find((el) => el.status === 1) != null) {
-					xStringQRCodeApprover2 =
-						`VALIDATE_SIGNATURE|PROC|` +
-						(await _utilInstance.encrypt(
-							`${xFPBId}|${xApprover2.approver_user.find((el) => el.status === 1).user.id}`,
-							config.cryptoKey.hashKey
-						));
-					let xQRCodeApproval2 = await _qrCode.toDataURL(xStringQRCodeApprover2);
-					xQRCodeFileName2 = `approval_${xFPBId}${xApprover2.approver_user.find((el) => el.status === 1).user
-						.id}.png`;
-					_imageDataURI.outputFile(xQRCodeApproval2, xFilePathQRCodeApproval + xQRCodeFileName2);
+				let xApprovedUser2 = xApprover2.approver_user.filter((el) => el.status === 1);
+				if (xApprover2 != null && xApprovedUser2 != null) {
+					for (var i in xApprovedUser2) {
+						xStringQRCodeApprover2 =
+							`VALIDATE_SIGNATURE|PROC|` +
+							(await _utilInstance.encrypt(
+								`${xFPBId}|${xApprovedUser2[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
+
+						let xQRCodeApproval2 = await _qrCode.toDataURL(xStringQRCodeApprover2);
+						xQRCodeFileName2.push(`approval_${xFPBId}${xApprovedUser2[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval2,
+							xFilePathQRCodeApproval + `approval_${xFPBId}${xApprovedUser2[i].user.id}.png`
+						);
+					}
+				}
+				// if (xApprover2 != null && xApprover2.approver_user.find((el) => el.status === 1) != null) {
+				// 	xStringQRCodeApprover2 =
+				// 		`VALIDATE_SIGNATURE|PROC|` +
+				// 		(await _utilInstance.encrypt(
+				// 			`${xFPBId}|${xApprover2.approver_user.find((el) => el.status === 1).user.id}`,
+				// 			config.cryptoKey.hashKey
+				// 		));
+				// 	let xQRCodeApproval2 = await _qrCode.toDataURL(xStringQRCodeApprover2);
+				// 	xQRCodeFileName2 = `approval_${xFPBId}${xApprover2.approver_user.find((el) => el.status === 1).user
+				// 		.id}.png`;
+				// 	_imageDataURI.outputFile(xQRCodeApproval2, xFilePathQRCodeApproval + xQRCodeFileName2);
+				// }
+
+				let xApprovedUser3 = xApprover3.approver_user.filter((el) => el.status === 1);
+				if (xApprover3 != null && xApprovedUser3 != null) {
+					for (var i in xApprovedUser3) {
+						xStringQRCodeApprover3 =
+							`VALIDATE_SIGNATURE|PROC|` +
+							(await _utilInstance.encrypt(
+								`${xFPBId}|${xApprovedUser3[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
+
+						let xQRCodeApproval3 = await _qrCode.toDataURL(xStringQRCodeApprover3);
+						xQRCodeFileName3.push(`approval_${xFPBId}${xApprovedUser3[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval3,
+							xFilePathQRCodeApproval + `approval_${xFPBId}${xApprovedUser3[i].user.id}.png`
+						);
+					}
 				}
 
-				if (xApprover3 != null && xApprover3.approver_user.find((el) => el.status === 1) != null) {
-					xStringQRCodeApprover3 =
-						`VALIDATE_SIGNATURE|PROC|` +
-						(await _utilInstance.encrypt(
-							`${xFPBId}|${xApprover3.approver_user.find((el) => el.status === 1).user.id}`,
-							config.cryptoKey.hashKey
-						));
-					let xQRCodeApproval3 = await _qrCode.toDataURL(xStringQRCodeApprover3);
-					xQRCodeFileName3 = `approval_${xFPBId}${xApprover3.approver_user.find((el) => el.status === 1).user
-						.id}.png`;
-					_imageDataURI.outputFile(xQRCodeApproval3, xFilePathQRCodeApproval + xQRCodeFileName3);
+				// if (xApprover3 != null && xApprover3.approver_user.find((el) => el.status === 1) != null) {
+				// 	xStringQRCodeApprover3 =
+				// 		`VALIDATE_SIGNATURE|PROC|` +
+				// 		(await _utilInstance.encrypt(
+				// 			`${xFPBId}|${xApprover3.approver_user.find((el) => el.status === 1).user.id}`,
+				// 			config.cryptoKey.hashKey
+				// 		));
+				// 	let xQRCodeApproval3 = await _qrCode.toDataURL(xStringQRCodeApprover3);
+				// 	xQRCodeFileName3 = `approval_${xFPBId}${xApprover3.approver_user.find((el) => el.status === 1).user
+				// 		.id}.png`;
+				// 	_imageDataURI.outputFile(xQRCodeApproval3, xFilePathQRCodeApproval + xQRCodeFileName3);
+				// }
+
+				let xApprovedUser4 = xApprover2.approver_user.filter((el) => el.status === 1);
+				if (xApprover4 != null && xApprovedUser4 != null) {
+					for (var i in xApprovedUser4) {
+						xStringQRCodeApprover4 =
+							`VALIDATE_SIGNATURE|PROC|` +
+							(await _utilInstance.encrypt(
+								`${xFPBId}|${xApprovedUser4[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
+
+						let xQRCodeApproval4 = await _qrCode.toDataURL(xStringQRCodeApprover4);
+						xQRCodeFileName4.push(`approval_${xFPBId}${xApprovedUser4[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval4,
+							xFilePathQRCodeApproval + `approval_${xFPBId}${xApprovedUser4[i].user.id}.png`
+						);
+					}
 				}
 
-				if (xApprover4 != null && xApprover4.approver_user.find((el) => el.status === 1) != null) {
-					xStringQRCodeApprover4 =
-						`VALIDATE_SIGNATURE|PROC|` +
-						(await _utilInstance.encrypt(
-							`${xFPBId}|${xApprover4.approver_user.find((el) => el.status === 1).user.id}`,
-							config.cryptoKey.hashKey
-						));
-					let xQRCodeApproval4 = await _qrCode.toDataURL(xStringQRCodeApprover4);
-					xQRCodeFileName4 = `approval_${xFPBId}${xApprover4.approver_user.find((el) => el.status === 1).user
-						.id}.png`;
-					_imageDataURI.outputFile(xQRCodeApproval4, xFilePathQRCodeApproval + xQRCodeFileName4);
+				// if (xApprover4 != null && xApprover4.approver_user.find((el) => el.status === 1) != null) {
+				// 	xStringQRCodeApprover4 =
+				// 		`VALIDATE_SIGNATURE|PROC|` +
+				// 		(await _utilInstance.encrypt(
+				// 			`${xFPBId}|${xApprover4.approver_user.find((el) => el.status === 1).user.id}`,
+				// 			config.cryptoKey.hashKey
+				// 		));
+				// 	let xQRCodeApproval4 = await _qrCode.toDataURL(xStringQRCodeApprover4);
+				// 	xQRCodeFileName4 = `approval_${xFPBId}${xApprover4.approver_user.find((el) => el.status === 1).user
+				// 		.id}.png`;
+				// 	_imageDataURI.outputFile(xQRCodeApproval4, xFilePathQRCodeApproval + xQRCodeFileName4);
+				// }
+
+				let xApprovedUser5 = xApprover5.approver_user.filter((el) => el.status === 1);
+				if (xApprover5 != null && xApprovedUser5 != null) {
+					for (var i in xApprovedUser2) {
+						xStringQRCodeApprover2 =
+							`VALIDATE_SIGNATURE|PROC|` +
+							(await _utilInstance.encrypt(
+								`${xFPBId}|${xApprovedUser2[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
+
+						let xQRCodeApproval2 = await _qrCode.toDataURL(xStringQRCodeApprover2);
+						xQRCodeFileName2.push(`approval_${xFPBId}${xApprovedUser2[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval2,
+							xFilePathQRCodeApproval + `approval_${xFPBId}${xApprovedUser2[i].user.id}.png`
+						);
+					}
 				}
 
-				if (xApprover5 != null && xApprover5.approver_user.find((el) => el.status === 1) != null) {
-					xStringQRCodeApprover5 =
-						`VALIDATE_SIGNATURE|PROC|` +
-						(await _utilInstance.encrypt(
-							`${xFPBId}|${xApprover5.approver_user.find((el) => el.status === 1).user.id}`,
-							config.cryptoKey.hashKey
-						));
-					let xQRCodeApproval5 = await _qrCode.toDataURL(xStringQRCodeApprover5);
-					xQRCodeFileName5 = `approval_${xFPBId}${xApprover5.approver_user.find((el) => el.status === 1).user
-						.id}.png`;
-					_imageDataURI.outputFile(xQRCodeApproval5, xFilePathQRCodeApproval + xQRCodeFileName5);
-				}
+				// if (xApprover5 != null && xApprover5.approver_user.find((el) => el.status === 1) != null) {
+				// 	xStringQRCodeApprover5 =
+				// 		`VALIDATE_SIGNATURE|PROC|` +
+				// 		(await _utilInstance.encrypt(
+				// 			`${xFPBId}|${xApprover5.approver_user.find((el) => el.status === 1).user.id}`,
+				// 			config.cryptoKey.hashKey
+				// 		));
+				// 	let xQRCodeApproval5 = await _qrCode.toDataURL(xStringQRCodeApprover5);
+				// 	xQRCodeFileName5 = `approval_${xFPBId}${xApprover5.approver_user.find((el) => el.status === 1).user
+				// 		.id}.png`;
+				// 	_imageDataURI.outputFile(xQRCodeApproval5, xFilePathQRCodeApproval + xQRCodeFileName5);
+				// }
 
 				// if (xApprover6 != null && xApprover6.approver_user.find((el) => el.status === 1) != null) {
 				// 	xStringQRCodeApprover6 =
@@ -227,11 +302,11 @@ class ExportService {
 				// console.log(`>>> Approver 1 : ${xApprovalHeadDepartment.approver_user[0].user.name}`);
 				// console.log(`>>> Approver 2 : ${xApprovalPM.approver_user[0].user.name}`);
 
-				for (var i in xQRCodeFileName1) {
-					console.log(
-						`>>> url 1 : ` + `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName1[i]}`
-					);
-				}
+				// for (var i in xQRCodeFileName1) {
+				// 	console.log(
+				// 		`>>> url 1 : ` + `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName1[i]}`
+				// 	);
+				// }
 
 				// console.log(`>>> url 2 : ` + `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName2}`);
 
@@ -251,30 +326,11 @@ class ExportService {
 						// 	: '',
 
 						approver1: xApprovedUser1,
-						approver2:
-							xApprover2 != null
-								? xApprover2.approver_user.find((el) => el.status === 1) == null
-									? ''
-									: xApprover2.approver_user.find((el) => el.status === 1).user.name
-								: '',
-						approver3:
-							xApprover3 != null
-								? xApprover3.approver_user.find((el) => el.status === 1) == null
-									? ''
-									: xApprover3.approver_user.find((el) => el.status === 1).user.name
-								: '',
-						approver4:
-							xApprover4 != null
-								? xApprover4.approver_user.find((el) => el.status === 1) == null
-									? ''
-									: xApprover4.approver_user.find((el) => el.status === 1).user.name
-								: '',
-						approver5:
-							xApprover5 != null
-								? xApprover5.approver_user.find((el) => el.status === 1) == null
-									? ''
-									: xApprover5.approver_user.find((el) => el.status === 1).user.name
-								: '',
+						approver2: xApprovedUser2,
+						approver3: xApprovedUser3,
+						approver4: xApprovedUser4,
+						approver5: xApprovedUser5,
+
 						// approver6:
 						// 	xApprover6 != null
 						// 		? xApprover6.approver_user.find((el) => el.status === 1) == null
@@ -284,23 +340,16 @@ class ExportService {
 						qrCode: {
 							qrPath: `${config.imagePathESanQua_dev}/digital_sign_qrcode/`,
 							approval1: xQRCodeFileName1,
+							approval2: xQRCodeFileName2,
+							approval3: xQRCodeFileName3,
+							approval4: xQRCodeFileName4,
+							approval5: xQRCodeFileName5
 
-							approval2:
-								xApprover2 != null && xApprover2.approver_user.find((el) => el.status === 1) != null
-									? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName2}`
-									: '',
-							approval3:
-								xApprover3 != null && xApprover3.approver_user.find((el) => el.status === 1) != null
-									? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName3}`
-									: '',
-							approval4:
-								xApprover4 != null && xApprover4.approver_user.find((el) => el.status === 1) != null
-									? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName4}`
-									: '',
-							approval5:
-								xApprover5 != null && xApprover5.approver_user.find((el) => el.status === 1) != null
-									? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName5}`
-									: ''
+							// approval2:
+							// 	xApprover2 != null && xApprover2.approver_user.find((el) => el.status === 1) != null
+							// 		? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName2}`
+							// 		: '',
+
 							// approval6:
 							// 	xApprover6 != null && xApprover6.approver_user.find((el) => el.status === 1) != null
 							// 		? `${config.imagePathESanQua_dev}/digital_sign_qrcode/${xQRCodeFileName6}`
