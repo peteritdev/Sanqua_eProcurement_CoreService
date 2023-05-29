@@ -367,7 +367,7 @@ class PurchaseRequestRepository {
 					}
 				}
 				xSqlWhere = ` (( ${xSqlWhere} ) OR (${xSqlWhereOr} ${xSqlWhereCompanyOwnedDoc != ''
-					? ' AND ' + xSqlWhereCompanyOwnedDoc
+					? xSqlWhereCompanyOwnedDoc
 					: ''} ))`;
 			}
 		}
