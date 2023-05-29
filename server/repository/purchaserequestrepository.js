@@ -366,7 +366,9 @@ class PurchaseRequestRepository {
 						xSqlWhereCompanyOwnedDoc = ' AND company_id = :companyId';
 					}
 				}
-				xSqlWhere = ` (( ${xSqlWhere} ) OR (${xSqlWhereOr}))`;
+				xSqlWhere = ` (( ${xSqlWhere} ) OR (${xSqlWhereOr} ${xSqlWhereCompanyOwnedDoc != ''
+					? ' AND ' + xSqlWhereCompanyOwnedDoc
+					: ''} ))`;
 			}
 		}
 
