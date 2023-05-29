@@ -251,7 +251,8 @@ class ExportService {
 				// 	_imageDataURI.outputFile(xQRCodeApproval4, xFilePathQRCodeApproval + xQRCodeFileName4);
 				// }
 
-				let xApprovedUser5 = xApprover5.approver_user.filter((el) => el.status === 1);
+				let xApprovedUser5 =
+					xApprover5 != null ? xApprover5.approver_user.filter((el) => el.status === 1) : null;
 				if (xApprover5 != null && xApprovedUser5 != null) {
 					for (var i in xApprovedUser2) {
 						xStringQRCodeApprover2 =
