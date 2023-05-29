@@ -123,7 +123,8 @@ class ExportService {
 
 				// Generate QRCode Digital Sign
 
-				let xApprovedUser1 = xApprover1.approver_user.filter((el) => el.status === 1);
+				let xApprovedUser1 =
+					xApprover1 != null ? xApprover1.approver_user.filter((el) => el.status === 1) : null;
 				if (xApprover1 != null && xApprovedUser1 != null) {
 					for (var i in xApprovedUser1) {
 						xStringQRCodeApprover1 =
@@ -157,7 +158,8 @@ class ExportService {
 				}
 				console.log(`>>> xApprovedUser 1: ${JSON.stringify(xApprovedUser1)}`);
 
-				let xApprovedUser2 = xApprover2.approver_user.filter((el) => el.status === 1);
+				let xApprovedUser2 =
+					xApprover2 != null ? xApprover2.approver_user.filter((el) => el.status === 1) : null;
 				if (xApprover2 != null && xApprovedUser2 != null) {
 					for (var i in xApprovedUser2) {
 						xStringQRCodeApprover2 =
@@ -189,7 +191,8 @@ class ExportService {
 				// 	_imageDataURI.outputFile(xQRCodeApproval2, xFilePathQRCodeApproval + xQRCodeFileName2);
 				// }
 
-				let xApprovedUser3 = xApprover3.approver_user.filter((el) => el.status === 1);
+				let xApprovedUser3 =
+					xApprover3 != null ? xApprover3.approver_user.filter((el) => el.status === 1) : null;
 				if (xApprover3 != null && xApprovedUser3 != null) {
 					for (var i in xApprovedUser3) {
 						xStringQRCodeApprover3 =
@@ -222,7 +225,8 @@ class ExportService {
 				// 	_imageDataURI.outputFile(xQRCodeApproval3, xFilePathQRCodeApproval + xQRCodeFileName3);
 				// }
 
-				let xApprovedUser4 = xApprover2.approver_user.filter((el) => el.status === 1);
+				let xApprovedUser4 =
+					xApprover4 != null ? xApprover4.approver_user.filter((el) => el.status === 1) : null;
 				if (xApprover4 != null && xApprovedUser4 != null) {
 					for (var i in xApprovedUser4) {
 						xStringQRCodeApprover4 =
