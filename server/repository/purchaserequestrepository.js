@@ -341,7 +341,8 @@ class PurchaseRequestRepository {
 
 		if (pParam.hasOwnProperty('user_id') && (pParam.is_admin == 0 || pParam.logged_is_admin == 0)) {
 			if (pParam.user_id != '') {
-				xSqlWhereOr.push(' pr.created_by = :createdBy ');
+				// xSqlWhereOr.push(' pr.created_by = :createdBy ');
+				xSqlWhere += ' AND pr.created_by = :createdBy ';
 				xObjJsonWhere.createdBy = pParam.user_id;
 			}
 		}
