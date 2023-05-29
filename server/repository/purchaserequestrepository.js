@@ -346,50 +346,81 @@ class PurchaseRequestRepository {
 			}
 		}
 
-		if (pParam.hasOwnProperty('owned_document_no') && (pParam.is_admin == 0 || pParam.logged_is_admin == 0)) {
+		if (pParam.hasOwnProperty('company_id')) {
+			if (pParam.company_id != '') {
+				xSqlWhere += ' AND pr.company_id = :companyId ';
+				xObjJsonWhere.companyId = pParam.company_id;
+			}
+		}
+
+		if (pParam.hasOwnProperty('owned_document_no')) {
 			if (pParam.owned_document_no.length > 0) {
 				xSqlWhereOr.push(' request_no IN (:ownedDocNo) ');
+				xSqlWhereOr.join(' OR ');
 				xObjJsonWhere.ownedDocNo = pParam.owned_document_no;
-
-				if (pParam.hasOwnProperty('department_id') && (pParam.is_admin == 0 || pParam.logged_is_admin == 0)) {
-					if (pParam.department_id != '') {
-						if (!xFlagFilterDepartment) {
-							xSqlWhereOr.push(' pr.department_id = :departmentId ');
-							xObjJsonWhere.departmentId = pParam.department_id;
-							xFlagFilterDepartment = true;
-						}
-					}
-				}
+				xSqlWhere = ` (( ${xSqlWhere} ) OR (${xSqlWhereOr}))`;
 			}
 		}
 
 		if (pParam.hasOwnProperty('keyword')) {
 			if (pParam.keyword != '') {
-				xSqlWhere += `AND (
+				let xSqlWhereKeyword = ` 
 						pr.request_no ILIKE :keyword OR
 						pr.employee_name ILIKE :keyword OR
 						pr.department_name ILIKE :keyword
 						-- prd.product_code ILIKE :keyword OR
 						-- prd.product_name ILIKE :keyword
-					)`;
+					`;
 
 				xObjJsonWhere.keyword = `%${pParam.keyword}%`;
-			} else {
-				if (pParam.hasOwnProperty('company_id')) {
-					if (pParam.company_id != '') {
-						xSqlWhere += ' AND pr.company_id = :companyId ';
-						xObjJsonWhere.companyId = pParam.company_id;
-					}
-				}
-			}
-		} else {
-			if (pParam.hasOwnProperty('company_id')) {
-				if (pParam.company_id != '') {
-					xSqlWhere += ' AND pr.company_id = :companyId ';
-					xObjJsonWhere.companyId = pParam.company_id;
-				}
+				xSqlWhere = ` ${xSqlWhere} AND (${xSqlWhereKeyword}) `;
 			}
 		}
+
+		// if (pParam.hasOwnProperty('owned_document_no') && (pParam.is_admin == 0 || pParam.logged_is_admin == 0)) {
+		// 	if (pParam.owned_document_no.length > 0) {
+		// 		xSqlWhereOr.push(' request_no IN (:ownedDocNo) ');
+		// 		xObjJsonWhere.ownedDocNo = pParam.owned_document_no;
+
+		// 		if (pParam.hasOwnProperty('department_id') && (pParam.is_admin == 0 || pParam.logged_is_admin == 0)) {
+		// 			if (pParam.department_id != '') {
+		// 				if (!xFlagFilterDepartment) {
+		// 					xSqlWhereOr.push(' pr.department_id = :departmentId ');
+		// 					xObjJsonWhere.departmentId = pParam.department_id;
+		// 					xFlagFilterDepartment = true;
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+		// }
+
+		// if (pParam.hasOwnProperty('keyword')) {
+		// 	if (pParam.keyword != '') {
+		// 		xSqlWhere += `AND (
+		// 				pr.request_no ILIKE :keyword OR
+		// 				pr.employee_name ILIKE :keyword OR
+		// 				pr.department_name ILIKE :keyword
+		// 				-- prd.product_code ILIKE :keyword OR
+		// 				-- prd.product_name ILIKE :keyword
+		// 			)`;
+
+		// 		xObjJsonWhere.keyword = `%${pParam.keyword}%`;
+		// 	} else {
+		// 		if (pParam.hasOwnProperty('company_id')) {
+		// 			if (pParam.company_id != '') {
+		// 				xSqlWhere += ' AND pr.company_id = :companyId ';
+		// 				xObjJsonWhere.companyId = pParam.company_id;
+		// 			}
+		// 		}
+		// 	}
+		// } else {
+		// 	if (pParam.hasOwnProperty('company_id')) {
+		// 		if (pParam.company_id != '') {
+		// 			xSqlWhere += ' AND pr.company_id = :companyId ';
+		// 			xObjJsonWhere.companyId = pParam.company_id;
+		// 		}
+		// 	}
+		// }
 
 		if (!xFlagFilterDepartment) {
 			if (pParam.hasOwnProperty('department_id') && (pParam.is_admin == 0 || pParam.logged_is_admin == 0)) {
