@@ -255,18 +255,18 @@ class ExportService {
 					xApprover5 != null ? xApprover5.approver_user.filter((el) => el.status === 1) : null;
 				if (xApprover5 != null && xApprovedUser5 != null) {
 					for (var i in xApprovedUser2) {
-						xStringQRCodeApprover2 =
+						xStringQRCodeApprover5 =
 							`VALIDATE_SIGNATURE|PROC|` +
 							(await _utilInstance.encrypt(
-								`${xFPBId}|${xApprovedUser2[i].user.id}`,
+								`${xFPBId}|${xApprovedUser5[i].user.id}`,
 								config.cryptoKey.hashKey
 							));
 
-						let xQRCodeApproval2 = await _qrCode.toDataURL(xStringQRCodeApprover2);
-						xQRCodeFileName2.push(`approval_${xFPBId}${xApprovedUser2[i].user.id}.png`);
+						let xQRCodeApproval5 = await _qrCode.toDataURL(xStringQRCodeApprover5);
+						xQRCodeFileName5.push(`approval_${xFPBId}${xApprovedUser5[i].user.id}.png`);
 						_imageDataURI.outputFile(
-							xQRCodeApproval2,
-							xFilePathQRCodeApproval + `approval_${xFPBId}${xApprovedUser2[i].user.id}.png`
+							xQRCodeApproval5,
+							xFilePathQRCodeApproval + `approval_${xFPBId}${xApprovedUser5[i].user.id}.png`
 						);
 					}
 				}
