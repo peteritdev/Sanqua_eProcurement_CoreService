@@ -347,6 +347,20 @@ class PurchaseRequestRepository {
 			}
 		}
 
+		if (pParam.hasOwnProperty('filter')) {
+			var xFilter = JSON.parse(pParam.filter);
+			if (xFilter.length > 0) {
+				// xWhereAnd.push( pParam.filter );
+				for (var index in xFilter) {
+					if (xFilter[0].hasOwnProperty('company_id')) {
+						if (xFilter[0].company_id != '') {
+							pParam.company_id = xFilter[0].company_id;
+						}
+					}
+				}
+			}
+		}
+
 		if (pParam.hasOwnProperty('company_id')) {
 			if (pParam.company_id != '') {
 				xSqlWhere += ' AND pr.company_id = :companyId ';
