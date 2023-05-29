@@ -359,6 +359,13 @@ class PurchaseRequestRepository {
 				xSqlWhereOr.push(' request_no IN (:ownedDocNo) ');
 				xSqlWhereOr.join(' OR ');
 				xObjJsonWhere.ownedDocNo = pParam.owned_document_no;
+
+				let xSqlWhereCompanyOwnedDoc = '';
+				if (pParam.hasOwnProperty('company_id')) {
+					if (pParam.company_id != '') {
+						xSqlWhereCompanyOwnedDoc = ' AND company_id = :companyId';
+					}
+				}
 				xSqlWhere = ` (( ${xSqlWhere} ) OR (${xSqlWhereOr}))`;
 			}
 		}
