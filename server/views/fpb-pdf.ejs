@@ -503,26 +503,7 @@
                             </td>
                             <td style="text-align: center;vertical-align: middle;">
                                 
-                                <%
-                                    if( qrCode.approval5 != null ){
-    
-                                %>
-                                        <table>
-                                            <tr>
-                                                <% for(var i = 0; i < qrCode.approval5.length; i++ ) { %>
-                                                    <td><img src="<%=qrCode.qrPath%><%=qrCode.approval5[i]%>" width="80"></td>
-                                                <% }%>
-                                            </tr>
-                                            <tr>
-                                                <% for(var i = 0; i < approver5.length; i++ ) { %>
-                                                    <td><%=approver5[i].user.name%></td>
-                                                <% }%>
-                                            </tr>
-                                        </table>
-                                        
-                                <%
-                                    }
-                                %>
+                                
                             </td>
                             <!-- <td style="text-align: center;vertical-align: middle;">
                                 <%
