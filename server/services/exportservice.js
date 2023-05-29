@@ -155,6 +155,7 @@ class ExportService {
 					let xUser = xApprover1.approver_user.filter((el) => el.status === 1);
 					console.log(`>>> xUser: ${JSON.stringify(xUser)}`);
 				}
+				console.log(`>>> xApprovedUser1: ${xApprovedUser1}`);
 
 				let xApprovedUser2 = xApprover2.approver_user.filter((el) => el.status === 1);
 				if (xApprover2 != null && xApprovedUser2 != null) {
@@ -174,6 +175,7 @@ class ExportService {
 						);
 					}
 				}
+				console.log(`>>> xApprovedUser2: ${xApprovedUser2}`);
 				// if (xApprover2 != null && xApprover2.approver_user.find((el) => el.status === 1) != null) {
 				// 	xStringQRCodeApprover2 =
 				// 		`VALIDATE_SIGNATURE|PROC|` +
@@ -205,6 +207,7 @@ class ExportService {
 						);
 					}
 				}
+				console.log(`>>> xApprovedUser3: ${xApprovedUser3}`);
 
 				// if (xApprover3 != null && xApprover3.approver_user.find((el) => el.status === 1) != null) {
 				// 	xStringQRCodeApprover3 =
@@ -237,6 +240,7 @@ class ExportService {
 						);
 					}
 				}
+				console.log(`>>> xApprovedUser4: ${xApprovedUser4}`);
 
 				// if (xApprover4 != null && xApprover4.approver_user.find((el) => el.status === 1) != null) {
 				// 	xStringQRCodeApprover4 =
@@ -270,6 +274,7 @@ class ExportService {
 						);
 					}
 				}
+				console.log(`>>> xApprovedUser5: ${xApprovedUser5}`);
 
 				// if (xApprover5 != null && xApprover5.approver_user.find((el) => el.status === 1) != null) {
 				// 	xStringQRCodeApprover5 =
