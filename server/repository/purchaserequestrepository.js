@@ -434,9 +434,9 @@ class PurchaseRequestRepository {
 			}
 		}
 
-		if (xSqlWhereOr.length > 0) {
-			xSqlWhere += ` AND ( ${xSqlWhereOr.join(' OR ')} ) `;
-		}
+		// if (xSqlWhereOr.length > 0) {
+		// 	xSqlWhere += ` AND ( ${xSqlWhereOr.join(' OR ')} ) `;
+		// }
 
 		// if (xSqlWhereOrOwnedDocument.length > 0) {
 		// 	xSqlWhere += ` OR ( ${xSqlWhereOrOwnedDocument.join(' OR ')} ) `;
