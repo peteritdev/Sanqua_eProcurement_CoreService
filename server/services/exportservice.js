@@ -262,7 +262,7 @@ class ExportService {
 				let xApprovedUser5 =
 					xApprover5 != null ? xApprover5.approver_user.filter((el) => el.status === 1) : null;
 				if (xApprover5 != null && xApprovedUser5 != null) {
-					for (var i in xApprovedUser2) {
+					for (var i in xApprovedUser5) {
 						xStringQRCodeApprover5 =
 							`VALIDATE_SIGNATURE|PROC|` +
 							(await _utilInstance.encrypt(
