@@ -477,6 +477,8 @@ class PurchaseRequestService {
 					xParamApprovalMatrix
 				);
 
+				console.log(`>>> xResultApprovalMatrix: ${JSON.stringify(xResultApprovalMatrix)}`);
+
 				if (xResultApprovalMatrix != null) {
 					if (xResultApprovalMatrix.status_code == '00') {
 						let xListApprover = xResultApprovalMatrix.token_data.data;
