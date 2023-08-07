@@ -605,7 +605,7 @@ class PurchaseRequestDetailService {
 														// company_id: xDetail.data.company.id,
 														company_id: xCompanyId,
 														date_order: await _utilInstance.getCurrDate(),
-														status: xDetail.data.category_pr != 'bahan_baku' ? 'approved' :'waiting_approval',
+														status: 'waiting_approval',
 														purchase_order_type: xDetail.data.category_pr,
 														user_sanqua: pParam.logged_user_name,
 														no_fpb: xDetail.data.request_no,
@@ -630,7 +630,7 @@ class PurchaseRequestDetailService {
 																		product_code: pParam.items[i].product_code,
 																		user_id: pParam.logged_user_id,
 																		user_name: pParam.logged_user_name,
-																		status: xDetail.data.category_pr != 'bahan_baku' ? 2 :1,
+																		status: 1,
 																		request_id: xRequestId
 																	};
 																	await _repoInstance.save(

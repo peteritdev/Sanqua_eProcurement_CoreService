@@ -5,12 +5,12 @@
       "procurement": "tr_procurements",
       "fpb": "tr_purchaserequests"
     },
-    "logging": true,
+    "logging": false,
     "username": "postgres",
     "password": "P455uu0rd^^ok",
     "database": "sanqua_procurementnewdb",
     "host": "10.10.20.5",
-    "port":5432,
+    "port": 5432,
     "dialect": "postgres",
     "dialectOptions": {
       "dateStrings": true,
@@ -32,47 +32,46 @@
       "separatorData": "Þ",
       "forgotPasswordLink": "http://localhost:8080/procurement/u/forgot_password/#VERIFICATION_CODE#"
     },
-    
 
-    "token_expire":"7",
-    "token_expire_unit":"day",
+    "token_expire": "7",
+    "token_expire_unit": "day",
     "secret": "yZh7fv62xLshZmt8LuSlI9RmstrdQ0nE",
-    
-    "cryptoKey":{
+
+    "cryptoKey": {
       "md5Key": "4B1C9E44D769C429",
       "hashKey": "51beba089ef1612152be4933ea6a9a48"
     },
 
-    "api":{
+    "api": {
       "notification": {
-        "emailVerification": "http://localhost:1190/api/notification/v1/email_verification",
-        "forgotPassword": "http://localhost:1190/api/notification/v1/forgot_password",
-        "notificationTemplate": "http://localhost:9189/api/oauth/v1/notification_template/detail/code"
+        "emailVerification": "http://10.10.20.5:1190/api/notification/v1/email_verification",
+        "forgotPassword": "http://10.10.20.5:1190/api/notification/v1/forgot_password",
+        "notificationTemplate": "http://10.10.20.5:9189/api/oauth/v1/notification_template/detail/code"
       },
 
       "oAuth": {
         "url": {
-          "verifyToken": "http://localhost:9189/api/oauth/v1/user/verify_token",
+          "verifyToken": "http://10.10.20.5:9189/api/oauth/v1/user/verify_token",
           "approval_matrix_document": {
-            "save": "http://localhost:9189/api/oauth/v1/approval_matrix/document/save",
-            "list": "http://localhost:9189/api/oauth/v1/approval_matrix/document/list",
-            "confirm": "http://localhost:9189/api/oauth/v1/approval_matrix/document/confirm",
-            "confirm_via_email": "http://localhost:9189/api/oauth/v1/approval_matrix/document/confirm_via_email"
+            "save": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/save",
+            "list": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/list",
+            "confirm": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/confirm",
+            "confirm_via_email": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/confirm_via_email"
           }
         }
       },
 
-      "eSanqua": "http://localhost:1193/api/esanqua/v1",
+      "eSanqua": "http://10.10.20.5:1193/api/esanqua/v1",
       "odoo": "http://10.10.20.6:9898/api",
       "logging": {
-        "url": "http://localhost:8191/api/esanqua/log/v1/ecatalog"
+        "url": "http://10.10.20.5:8191/api/esanqua/log/v1/ecatalog"
       }
     },
 
-    "login":{
+    "login": {
       "expireToken": "24h",
-      "oAuth2":{
-        "google":{
+      "oAuth2": {
+        "google": {
           "clientId": "166708906762-uel1grlnqjsqv47k8dvdk0htsh765lhq.apps.googleusercontent.com",
           "clientSecret": "6KAAGWF11bpB-JgWi2CvDjKr",
           "redirect": "http://sanquawater.co.id",
@@ -96,11 +95,34 @@
 
     "qrCodeImagePath": "C:\\MIS-PETER\\SanQuaApp\\eProcurement\\Sanqua_eProcurement_CoreService\\generated_files",
 
-    "statusDescription":{
-      "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel"],
-      "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel", "Paid"]
+    "statusDescription": {
+      "purchaseRequest": [
+        "Draft",
+        "Waiting Approval",
+        "In Progress",
+        "Close",
+        "Cancel"
+      ],
+      "purchaseRequestDetail": [
+        "Draft",
+        "Waiting Approval",
+        "PR",
+        "CA",
+        "Close",
+        "Cancel",
+        "Paid"
+      ]
     },
-    "categoryItem": ["", "Raw Material", "Factory Supply", "Office Supply", "Sparepart", "Jasa", "Maintenance Repair", "Investment / Asset"]
+    "categoryItem": [
+      "",
+      "Raw Material",
+      "Factory Supply",
+      "Office Supply",
+      "Sparepart",
+      "Jasa",
+      "Maintenance Repair",
+      "Investment / Asset"
+    ]
   },
 
   "development": {
