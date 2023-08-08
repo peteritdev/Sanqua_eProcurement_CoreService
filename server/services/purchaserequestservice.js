@@ -347,7 +347,7 @@ class PurchaseRequestService {
 
 							created_at:
 								xRows[index].created_at != null
-									? moment(xRows[index].createdAt).format('DD-MM-YYYY HH:mm:ss')
+									? moment(xRows[index].created_at).format('DD-MM-YYYY HH:mm:ss')
 									: null,
 
 							total_price: xRows[index].total_price,
@@ -484,14 +484,7 @@ class PurchaseRequestService {
 						let xListApprover = xResultApprovalMatrix.token_data.data;
 						for (var i in xListApprover) {
 							let xApproverUsers = _.filter(xListApprover[i].approver_user, { status: 1 }).map(
-								(v) =>
-									v.user != null
-										? v.user.email
-										: {
-												id: v.user_id,
-												name: v.user_name,
-												email: ''
-											}
+								(v) => (v.user != null ? v.user.email : null)
 							);
 							xArrUserCanCancel.push.apply(xArrUserCanCancel, xApproverUsers);
 							// console.log(`>>> xApproverUsers: ${JSON.stringify(xApproverUsers)}`);
