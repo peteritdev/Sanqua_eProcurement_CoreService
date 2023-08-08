@@ -464,7 +464,6 @@ class PurchaseRequestService {
 						last_price: xDetail[index].last_price
 					});
 				}
-
 				// Get Approval Matrix
 				var xParamApprovalMatrix = {
 					application_id: config.applicationId,
@@ -477,12 +476,15 @@ class PurchaseRequestService {
 					xParamApprovalMatrix
 				);
 
+				console.log(`>>> xResultApprovalMatrix: ${JSON.stringify(xResultApprovalMatrix)}`);
+
 				if (xResultApprovalMatrix != null) {
 					if (xResultApprovalMatrix.status_code == '00') {
 						let xListApprover = xResultApprovalMatrix.token_data.data;
 						for (var i in xListApprover) {
 							let xApproverUsers = _.filter(xListApprover[i].approver_user, { status: 1 }).map(
-								(v) => v.user.email
+								// update 08/08/2023 prevent user is null
+								(v) => (v.user != null ? v.user.email : v.user)
 							);
 							xArrUserCanCancel.push.apply(xArrUserCanCancel, xApproverUsers);
 							// console.log(`>>> xApproverUsers: ${JSON.stringify(xApproverUsers)}`);
