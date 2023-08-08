@@ -484,7 +484,7 @@ class PurchaseRequestService {
 						let xListApprover = xResultApprovalMatrix.token_data.data;
 						for (var i in xListApprover) {
 							let xApproverUsers = _.filter(xListApprover[i].approver_user, { status: 1 }).map(
-								(v) => v.user.email
+								(v) => (v.user != null ? v.user.email : null)
 							);
 							xArrUserCanCancel.push.apply(xArrUserCanCancel, xApproverUsers);
 							// console.log(`>>> xApproverUsers: ${JSON.stringify(xApproverUsers)}`);
