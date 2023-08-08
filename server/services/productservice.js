@@ -447,7 +447,7 @@ class ProductService {
 
                 xJoArrData.push({
                     id: xRows[index].id,
-                    // code: xRows[index].code,
+                    code: xRows[index].code,
                     name: xRows[index].name,
                     unit: xRows[index].unit,
                     category: xRows[index].category,
