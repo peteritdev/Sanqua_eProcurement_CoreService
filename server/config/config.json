@@ -111,7 +111,7 @@
     },
     "username": "postgres",
     "password": "P455uu0rd^^ok",
-    "database": "sanqua_procurementnewdb",
+    "database": "sanqua_procurement_03092023",
     "host": "10.10.20.5",
     "port":5432,
     "dialect": "postgres",
