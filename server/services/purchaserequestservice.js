@@ -485,7 +485,7 @@ class PurchaseRequestService {
 						for (var i in xListApprover) {
 							let xApproverUsers = _.filter(xListApprover[i].approver_user, { status: 1 }).map(
 								// update 08/08/2023 prevent user is null
-								(v) =>v.user != null ? v.user.email : v.user
+								(v) => (v.user != null ? v.user.email : v.user)
 							);
 							xArrUserCanCancel.push.apply(xArrUserCanCancel, xApproverUsers);
 							// console.log(`>>> xApproverUsers: ${JSON.stringify(xApproverUsers)}`);
