@@ -698,6 +698,73 @@ class PurchaseRequestDetailService {
 
 		return xJoResult;
 	}
+	
+	async cancelPR(pParam) {
+		console.log(`>>> pParam: ${JSON.stringify(pParam)}`);
+		var xJoResult = {};
+		var xDecId = null;
+		var xFlagProcess = false;
+
+		if (pParam.user_id != '') {
+			xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				pParam.user_id = xDecId.decrypted;
+				xFlagProcess = true;
+			} else {
+				xJoResult = xDecId;
+			}
+		}
+
+		if (xFlagProcess) {
+			let xData = await _repoInstance.getByPrNo({
+				pr_no: pParam.pr_no
+			});
+			console.log('xData hereee >>>>>', xData.length);
+			if (xData != null) {
+				if (xData.length > 0) {
+					const date = new Date()
+					const local = date.toLocaleString('id')
+					let xParamOdoo = {
+						pr_name: pParam.pr_no,
+						reason: `[${local}]\n${pParam.cancel_reason}`
+					}
+					console.log(`>>> xParamOdoo: ${JSON.stringify(xParamOdoo)}`);
+
+					let xCancelPRResult = await _integrationServiceInstance.cancelPR(
+						xParamOdoo
+					);
+
+					if (xCancelPRResult.status_code == '00') {
+						let xParamUpdate = {
+							pr_no: pParam.pr_no,
+							cancel_reason: pParam.cancel_reason,
+							status: 5
+						};
+
+						let xCancelPR = await _repoInstance.save(xParamUpdate, 'update_by_pr_no');
+						
+						xJoResult = xCancelPR;
+					}else{
+						xJoResult = xCancelPRResult;
+					}
+				}else{
+					
+					xJoResult = {
+						status_code: '-99',
+						status_msg: "Data not found"
+					};
+				}
+			} else {
+				
+				xJoResult = {
+					status_code: '-99',
+					status_msg: "Data not found"
+				};
+			}
+		}
+
+		return xJoResult;
+	}
 }
 
 module.exports = PurchaseRequestDetailService;

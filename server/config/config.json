@@ -8,7 +8,7 @@
     "logging": true,
     "username": "postgres",
     "password": "P455uu0rd^^ok",
-    "database": "sanqua_procurementnewdb",
+    "database": "sanqua_procurement_03092023",
     "host": "10.10.20.5",
     "port":5432,
     "dialect": "postgres",
@@ -45,27 +45,27 @@
 
     "api":{
       "notification": {
-        "emailVerification": "http://localhost:1190/api/notification/v1/email_verification",
-        "forgotPassword": "http://localhost:1190/api/notification/v1/forgot_password",
-        "notificationTemplate": "http://localhost:9189/api/oauth/v1/notification_template/detail/code"
+        "emailVerification": "http://10.10.20.5:1190/api/notification/v1/email_verification",
+        "forgotPassword": "http://10.10.20.5:1190/api/notification/v1/forgot_password",
+        "notificationTemplate": "http://10.10.20.5:9189/api/oauth/v1/notification_template/detail/code"
       },
 
       "oAuth": {
         "url": {
-          "verifyToken": "http://localhost:9189/api/oauth/v1/user/verify_token",
+          "verifyToken": "http://10.10.20.5:9189/api/oauth/v1/user/verify_token",
           "approval_matrix_document": {
-            "save": "http://localhost:9189/api/oauth/v1/approval_matrix/document/save",
-            "list": "http://localhost:9189/api/oauth/v1/approval_matrix/document/list",
-            "confirm": "http://localhost:9189/api/oauth/v1/approval_matrix/document/confirm",
-            "confirm_via_email": "http://localhost:9189/api/oauth/v1/approval_matrix/document/confirm_via_email"
+            "save": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/save",
+            "list": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/list",
+            "confirm": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/confirm",
+            "confirm_via_email": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/confirm_via_email"
           }
         }
       },
 
-      "eSanqua": "http://localhost:1193/api/esanqua/v1",
-      "odoo": "http://10.10.20.6:9898/api",
+      "eSanqua": "http://10.10.20.5:1193/api/esanqua/v1",
+      "odoo": "http://10.10.20.5:9898/api",
       "logging": {
-        "url": "http://localhost:8191/api/esanqua/log/v1/ecatalog"
+        "url": "http://10.10.20.5:8191/api/esanqua/log/v1/ecatalog"
       }
     },
 
@@ -165,7 +165,7 @@
         }
       },
       "eSanqua": "http://localhost:1193/api/esanqua/v1",
-      "odoo": "http://10.10.20.6:9898/api",
+      "odoo": "http://10.10.20.5:9898/api",
       "logging": {
         "url": "http://localhost:8191/api/esanqua/log/v1/ecatalog"
       }

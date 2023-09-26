@@ -287,7 +287,7 @@ class PurchaseRequestRepository {
 			if (pParam.order_by != '') {
 				xSqlOrderBy = ` ORDER BY pr.${pParam.order_by} ${pParam.order_type != '' ? pParam.order_type : 'ASC'}`;
 			} else {
-				xSqlOrderBy = ` ORDER BY pr.equested_at DESC`;
+				xSqlOrderBy = ` ORDER BY pr.requested_at DESC`;
 			}
 		} else {
 			xSqlOrderBy = ` ORDER BY pr.requested_at DESC`;

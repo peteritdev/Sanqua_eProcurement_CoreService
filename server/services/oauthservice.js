@@ -111,6 +111,14 @@ class OAuthService {
 		var xAPIUrl = `${config.api.odoo}/create_prs`;
 		var xHeader = {};
 		var xResultVerify = await _utilInstance.axiosRequestPost(xAPIUrl, 'POST', pParam, xHeader);
+		
+		return xResultVerify;
+	}
+
+	async cancelPR(pParam) {
+		var xAPIUrl = `${config.api.odoo}/cancel_prs`;
+		var xHeader = {};
+		var xResultVerify = await _utilInstance.axiosRequestPost(xAPIUrl, 'POST', pParam, xHeader);
 
 		return xResultVerify;
 	}

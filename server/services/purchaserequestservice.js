@@ -319,7 +319,7 @@ class PurchaseRequestService {
 							requested_at:
 								xRows[index].requested_at == null
 									? ''
-									: moment(xRows[index].requested_at).format('DD MMM'),
+									: moment(xRows[index].requestedAt).format('DD MMM'),
 							employee: {
 								id: await _utilInstance.encrypt(
 									xRows[index].employee_id.toString(),
@@ -347,7 +347,7 @@ class PurchaseRequestService {
 
 							created_at:
 								xRows[index].created_at != null
-									? moment(xRows[index].createdAt).format('DD-MM-YYYY HH:mm:ss')
+									? moment(xRows[index].created_at).format('DD-MM-YYYY HH:mm:ss')
 									: null,
 
 							total_price: xRows[index].total_price,
@@ -461,7 +461,8 @@ class PurchaseRequestService {
 									? 'Rejected'
 									: config.statusDescription.purchaseRequestDetail[xDetail[index].status]
 						},
-						last_price: xDetail[index].last_price
+						last_price: xDetail[index].last_price,
+						cancel_reason: xDetail[index].cancel_reason
 					});
 				}
 				// Get Approval Matrix
@@ -475,6 +476,8 @@ class PurchaseRequestService {
 					pParam.token,
 					xParamApprovalMatrix
 				);
+
+				console.log(`>>> xResultApprovalMatrix: ${JSON.stringify(xResultApprovalMatrix)}`);
 
 				if (xResultApprovalMatrix != null) {
 					if (xResultApprovalMatrix.status_code == '00') {
