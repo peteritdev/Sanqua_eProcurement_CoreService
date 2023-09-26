@@ -704,7 +704,7 @@ class PurchaseRequestDetailService {
 		var xJoResult = {};
 		var xDecId = null;
 		var xFlagProcess = false;
-
+		// Check is user data
 		if (pParam.user_id != '') {
 			xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
 			if (xDecId.status_code == '00') {
@@ -716,49 +716,100 @@ class PurchaseRequestDetailService {
 		}
 
 		if (xFlagProcess) {
-			let xData = await _repoInstance.getByPrNo({
-				pr_no: pParam.pr_no
-			});
-			console.log('xData hereee >>>>>', xData.length);
-			if (xData != null) {
-				if (xData.length > 0) {
+			try {
+				// Check is pr_no parameter is not empty
+				if (pParam.pr_no === '' || pParam.pr_no === null) {
+					
+					xJoResult = {
+						status_code: '-99',
+						status_msg: "Cancel failed, no supply pr_no"
+					};
+
+				} else {
 					const date = new Date()
 					const local = date.toLocaleString('id')
+					const updateAt = `[${local}]\n${pParam.cancel_reason}`
+					
 					let xParamOdoo = {
 						pr_name: pParam.pr_no,
-						reason: `[${local}]\n${pParam.cancel_reason}`
+						reason: updateAt
 					}
 					console.log(`>>> xParamOdoo: ${JSON.stringify(xParamOdoo)}`);
 
+					// Call cancel api pr in odoo
 					let xCancelPRResult = await _integrationServiceInstance.cancelPR(
 						xParamOdoo
 					);
 
 					if (xCancelPRResult.status_code == '00') {
-						let xParamUpdate = {
-							pr_no: pParam.pr_no,
-							cancel_reason: pParam.cancel_reason,
-							status: 5
-						};
-
-						let xCancelPR = await _repoInstance.save(xParamUpdate, 'update_by_pr_no');
 						
-						xJoResult = xCancelPR;
-					}else{
+						// split pr_no into array and looping to check each number
+						const arrPr = pParam.pr_no.split(',')
+						let xResultMSG = []
+						for (let i in arrPr) {
+							// check pr number is available in esanqua db ?
+							let xData = await _repoInstance.getByPrNo({
+								pr_no: arrPr[i]
+							});
+							if (xData != null) {
+								if (xData.length > 0) {
+									// change status each pr into cancel
+									let xParamUpdate = {
+										pr_no: arrPr[i],
+										cancel_reason: updateAt,
+										status: 5
+									};
+									let xCancelPR = await _repoInstance.save(xParamUpdate, 'update_by_pr_no');
+									
+									if (xCancelPR.status_code === '00') {
+										
+										xResultMSG.push({
+											pr_no: arrPr[i],
+											status_code: '00',
+											status_msg: xCancelPR.status_msg
+										})
+										
+									}else{
+										
+										xResultMSG.push({
+											pr_no: arrPr[i],
+											status_code: '-99',
+											status_msg: xCancelPR.status_msg
+										})
+									}
+								
+								}else{
+									xResultMSG.push({
+										pr_no: arrPr[i],
+										status_code: '-99',
+										status_msg: 'Cancel failed, Data not found'
+									})
+								}
+							} else {
+								xResultMSG.push({
+									pr_no: arrPr[i].pr_no,
+									status_code: '-99',
+									status_msg: 'Cancel failed, Data not found'
+								})
+							}
+						}
+
+						xJoResult = {
+							status_code: '00',
+							status_msg: `You have successfully update this PR`,
+							data: xResultMSG
+						}
+						console.log('xJoResult >>>>>', xJoResult);
+					} else {
+
 						xJoResult = xCancelPRResult;
+
 					}
-				}else{
-					
-					xJoResult = {
-						status_code: '-99',
-						status_msg: "Data not found"
-					};
 				}
-			} else {
-				
+			} catch (error) {
 				xJoResult = {
 					status_code: '-99',
-					status_msg: "Data not found"
+					status_msg: `Exception error <${_xClassName}.cancelPR>: ${e.message}`
 				};
 			}
 		}
