@@ -45,19 +45,19 @@
 
     "api":{
       "notification": {
-        "emailVerification": "http://10.10.20.5:1190/api/notification/v1/email_verification",
-        "forgotPassword": "http://10.10.20.5:1190/api/notification/v1/forgot_password",
-        "notificationTemplate": "http://10.10.20.5:9189/api/oauth/v1/notification_template/detail/code"
+        "emailVerification": "http://localhost:1190/api/notification/v1/email_verification",
+        "forgotPassword": "http://localhost:1190/api/notification/v1/forgot_password",
+        "notificationTemplate": "http://localhost:9189/api/oauth/v1/notification_template/detail/code"
       },
 
       "oAuth": {
         "url": {
-          "verifyToken": "http://10.10.20.5:9189/api/oauth/v1/user/verify_token",
+          "verifyToken": "http://localhost:9189/api/oauth/v1/user/verify_token",
           "approval_matrix_document": {
-            "save": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/save",
-            "list": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/list",
-            "confirm": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/confirm",
-            "confirm_via_email": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/confirm_via_email"
+            "save": "http://localhost:9189/api/oauth/v1/approval_matrix/document/save",
+            "list": "http://localhost:9189/api/oauth/v1/approval_matrix/document/list",
+            "confirm": "http://localhost:9189/api/oauth/v1/approval_matrix/document/confirm",
+            "confirm_via_email": "http://localhost:9189/api/oauth/v1/approval_matrix/document/confirm_via_email"
           }
         }
       },
