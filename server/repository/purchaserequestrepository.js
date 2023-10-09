@@ -461,8 +461,9 @@ class PurchaseRequestRepository {
 
 		xSqlCount = ` SELECT COUNT(0) AS total_record
 		  FROM tr_purchaserequests pr 
-		  	-- LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
-		  WHERE ${xSqlWhere}`;
+		  	LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
+		  WHERE ${xSqlWhere} GROUP BY pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
+		  pr.status, pr.company_id, pr.company_code, pr.company_name`;
 
 		xData = await sequelize.query(xSql, {
 			replacements: xObjJsonWhere,
