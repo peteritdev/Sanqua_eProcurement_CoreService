@@ -459,11 +459,10 @@ class PurchaseRequestRepository {
 				 WHERE ${xSqlWhere} GROUP BY pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
 				 pr.status, pr.company_id, pr.company_code, pr.company_name ${xSqlOrderBy}${xSqlLimit} `;
 
-		xSqlCount = ` SELECT COUNT(0) AS total_record
+		xSqlCount = ` SELECT count(distinct pr.request_no) AS total_record
 		  FROM tr_purchaserequests pr 
 		  	LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
-		  WHERE ${xSqlWhere} GROUP BY pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
-		  pr.status, pr.company_id, pr.company_code, pr.company_name`;
+		  WHERE ${xSqlWhere}`;
 
 		console.log(`>>> xSqlCount: ${xSqlCount}`);
 
