@@ -294,7 +294,6 @@ class PurchaseRequestDetailRepository {
 					[Op.and]: xWhereAnd
 				});
 			}
-
 			var xData = await _modelDb.findOne({
 				where: xWhere,
 				include: xInclude,
@@ -322,6 +321,32 @@ class PurchaseRequestDetailRepository {
 		}
 
 		return xJoResult;
+	}
+	
+	async getByPrNo(pParam) {
+		var xWhereAnd = [];
+		var xWhere = [];
+
+		if (pParam.hasOwnProperty('pr_no')) {
+			if (pParam.pr_no != '') {
+				xWhereAnd.push({
+					pr_no: pParam.pr_no
+				});
+			}
+		}
+
+		if (xWhereAnd.length > 0) {
+			xWhere.push({
+				[Op.and]: xWhereAnd
+			});
+		}
+		var xData = await _modelDb.findAll({
+			where: xWhere,
+			subQuery: false
+		});
+			
+
+		return xData;
 	}
 }
 

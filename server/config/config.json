@@ -8,7 +8,7 @@
     "logging": true,
     "username": "postgres",
     "password": "P455uu0rd^^ok",
-    "database": "sanqua_procurementnewdb",
+    "database": "sanqua_procurement_03092023",
     "host": "10.10.20.5",
     "port":5432,
     "dialect": "postgres",
@@ -62,10 +62,10 @@
         }
       },
 
-      "eSanqua": "http://localhost:1193/api/esanqua/v1",
-      "odoo": "http://10.10.20.6:9898/api",
+      "eSanqua": "http://10.10.20.5:1193/api/esanqua/v1",
+      "odoo": "http://10.10.20.5:9898/api",
       "logging": {
-        "url": "http://localhost:8191/api/esanqua/log/v1/ecatalog"
+        "url": "http://10.10.20.5:8191/api/esanqua/log/v1/ecatalog"
       }
     },
 
