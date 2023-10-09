@@ -465,6 +465,8 @@ class PurchaseRequestRepository {
 		  WHERE ${xSqlWhere} GROUP BY pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
 		  pr.status, pr.company_id, pr.company_code, pr.company_name`;
 
+		console.log(`>>> xSqlCount: ${xSqlCount}`);
+
 		xData = await sequelize.query(xSql, {
 			replacements: xObjJsonWhere,
 			type: sequelize.QueryTypes.SELECT
