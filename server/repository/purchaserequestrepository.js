@@ -377,7 +377,7 @@ class PurchaseRequestRepository {
 				let xSqlWhereKeyword = ` 
 						pr.request_no ILIKE :keyword OR
 						pr.employee_name ILIKE :keyword OR
-						pr.department_name ILIKE :keyword
+						pr.department_name ILIKE :keyword OR
 						prd.product_code ILIKE :keyword OR
 						prd.product_name ILIKE :keyword
 					`;
