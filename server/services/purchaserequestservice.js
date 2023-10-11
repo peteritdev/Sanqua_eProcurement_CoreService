@@ -319,7 +319,7 @@ class PurchaseRequestService {
 							requested_at:
 								xRows[index].requested_at == null
 									? ''
-									: moment(xRows[index].requestedAt).format('DD MMM'),
+									: moment(xRows[index].requested_at).format('DD MMM'),
 							employee: {
 								id: await _utilInstance.encrypt(
 									xRows[index].employee_id.toString(),
