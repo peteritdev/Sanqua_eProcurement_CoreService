@@ -294,12 +294,6 @@ class PurchaseRequestRepository {
 			xSqlOrderBy = ` ORDER BY pr.requested_at DESC`;
 		}
 
-		if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
-			if (pParam.offset != '' && pParam.limit != '') {
-				xSqlLimit = ` OFFSET ${pParam.offset} LIMIT ${pParam.limit} `;
-			}
-		}
-
 		if (pParam.hasOwnProperty('department_id')) {
 			if (pParam.department_id != '') {
 				xSqlWhere += ' AND pr.department_id = :departmentId ';
@@ -465,10 +459,27 @@ class PurchaseRequestRepository {
 						pr.company_id, 
 						pr.company_code, 
 						pr.company_name `;
+
+			if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
+				if (pParam.offset != '' && pParam.limit != '') {
+					xSqlLimit = ` OFFSET ${pParam.offset} LIMIT ${pParam.limit} `;
+				}
+			}
 		}
 
 		xSql = ` SELECT pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
-						pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item
+						pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item,
+						prd.product_code,
+						prd.product_name,
+						prd.qty,
+						prd.budget_price_per_unit,
+						prd.budget_price_total,
+						prd.quotation_price_per_unit,
+						prd.quotation_price_total,
+						prd.estimate_date_use,
+						prd.pr_no,
+						prd.last_price,
+						prd.uom_name
 				 FROM tr_purchaserequests pr 
 						LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
 				 WHERE ${xSqlWhere} ${xSqlGroupBy}
