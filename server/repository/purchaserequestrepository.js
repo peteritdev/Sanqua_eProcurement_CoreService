@@ -458,7 +458,18 @@ class PurchaseRequestRepository {
 							pr.status, 
 						pr.company_id, 
 						pr.company_code, 
-						pr.company_name `;
+						pr.company_name,
+						prd.product_code,
+						prd.product_name,
+						prd.qty,
+						prd.budget_price_per_unit,
+						prd.budget_price_total,
+						prd.quotation_price_per_unit,
+						prd.quotation_price_total,
+						prd.estimate_date_use,
+						prd.pr_no,
+						prd.last_price,
+						prd.uom_name,`;
 
 			if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
 				if (pParam.offset != '' && pParam.limit != '') {
