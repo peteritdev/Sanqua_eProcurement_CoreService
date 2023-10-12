@@ -367,7 +367,14 @@ class PurchaseRequestService {
 										product_code: xRows[index].product_code,
 										product_name: xRows[index].product_name,
 										qty: xRows[index].qty,
-										budget_price_per_unit: xRows[index].budget_price_per_unit
+										budget_price_per_unit: xRows[index].budget_price_per_unit,
+										budget_price_total: xRows[index].budget_price_total,
+										quotation_price_per_unit: xRows[index].quotation_price_per_unit,
+										quotation_price_total: xRows[index].quotation_price_total,
+										estimate_date_use: xRows[index].estimate_date_use,
+										pr_no: xRows[index].pr_no,
+										last_price: xRows[index].last_price,
+										uom_name: xRows[index].uom_name
 									}
 								});
 							}
