@@ -366,7 +366,8 @@ class PurchaseRequestService {
 									item: {
 										product_code: xRows[index].product_code,
 										product_name: xRows[index].product_name,
-										qty: xRows[index].qty
+										qty: xRows[index].qty,
+										budget_price_per_unit: xRows[index].budget_price_per_unit
 									}
 								});
 							}
@@ -420,6 +421,53 @@ class PurchaseRequestService {
 									}
 								});
 							}
+						}
+					} else {
+						for (var index in xRows) {
+							xJoArrData.push({
+								id: await _utilInstance.encrypt(xRows[index].id.toString(), config.cryptoKey.hashKey),
+								request_no: xRows[index].request_no,
+								requested_at:
+									xRows[index].requested_at == null
+										? ''
+										: moment(xRows[index].requestedAt).tz(config.timezone).format('DD MMM'),
+								employee: {
+									id: await _utilInstance.encrypt(
+										xRows[index].employee_id.toString(),
+										config.cryptoKey.hashKey
+									),
+									name: xRows[index].employee_name
+								},
+								department: {
+									id: xRows[index].department_id,
+									name: xRows[index].department_name
+								},
+								status: {
+									id: xRows[index].status,
+									name:
+										xRows[index].status == -1
+											? 'Rejected'
+											: config.statusDescription.purchaseRequest[xRows[index].status]
+								},
+
+								company: {
+									id: xRows[index].company_id,
+									code: xRows[index].company_code,
+									name: xRows[index].company_name
+								},
+
+								created_at:
+									xRows[index].created_at != null
+										? moment(xRows[index].created_at).format('DD-MM-YYYY HH:mm:ss')
+										: null,
+
+								total_price: xRows[index].total_price,
+								total_quotation_price: xRows[index].total_quotation_price,
+								category_item: {
+									id: xRows[index].category_item,
+									name: config.categoryItem[xRows[index].category_item]
+								}
+							});
 						}
 					}
 
