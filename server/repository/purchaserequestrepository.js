@@ -282,6 +282,7 @@ class PurchaseRequestRepository {
 		var xSqlOrderBy = '';
 		var xSqlLimit = '';
 		var xFlagFilterDepartment = false;
+		var xSqlGroupBy = '';
 
 		if (pParam.hasOwnProperty('order_by')) {
 			if (pParam.order_by != '') {
@@ -291,12 +292,6 @@ class PurchaseRequestRepository {
 			}
 		} else {
 			xSqlOrderBy = ` ORDER BY pr.requested_at DESC`;
-		}
-
-		if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
-			if (pParam.offset != '' && pParam.limit != '') {
-				xSqlLimit = ` OFFSET ${pParam.offset} LIMIT ${pParam.limit} `;
-			}
 		}
 
 		if (pParam.hasOwnProperty('department_id')) {
@@ -377,7 +372,7 @@ class PurchaseRequestRepository {
 				let xSqlWhereKeyword = ` 
 						pr.request_no ILIKE :keyword OR
 						pr.employee_name ILIKE :keyword OR
-						pr.department_name ILIKE :keyword
+						pr.department_name ILIKE :keyword OR
 						prd.product_code ILIKE :keyword OR
 						prd.product_name ILIKE :keyword
 					`;
@@ -452,17 +447,50 @@ class PurchaseRequestRepository {
 		// 	xSqlWhere += ` OR ( ${xSqlWhereOrOwnedDocument.join(' OR ')} ) `;
 		// }
 
-		xSql = ` SELECT pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
-						pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item
-				 FROM tr_purchaserequests pr 
-				 	-- LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
-				 WHERE ${xSqlWhere} GROUP BY pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
-				 pr.status, pr.company_id, pr.company_code, pr.company_name ${xSqlOrderBy}${xSqlLimit} `;
+		if (!pParam.hasOwnProperty('is_export')) {
+			xSqlGroupBy = ` GROUP BY pr.id, 
+						pr.request_no, 
+						pr.requested_at, 
+						pr.employee_id, 
+						pr.employee_name, 
+						pr.department_id, 
+						pr.department_name,
+							pr.status, 
+						pr.company_id, 
+						pr.company_code, 
+						pr.company_name `;
 
-		xSqlCount = ` SELECT COUNT(0) AS total_record
+			if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
+				if (pParam.offset != '' && pParam.limit != '') {
+					xSqlLimit = ` OFFSET ${pParam.offset} LIMIT ${pParam.limit} `;
+				}
+			}
+		}
+
+		xSql = ` SELECT pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
+						pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item,
+						prd.product_code,
+						prd.product_name,
+						prd.qty,
+						prd.budget_price_per_unit,
+						prd.budget_price_total,
+						prd.quotation_price_per_unit,
+						prd.quotation_price_total,
+						prd.estimate_date_use,
+						prd.pr_no,
+						prd.last_price,
+						prd.uom_name
+				 FROM tr_purchaserequests pr 
+						LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
+				 WHERE ${xSqlWhere} ${xSqlGroupBy}
+				  ${xSqlOrderBy}${xSqlLimit} `;
+
+		xSqlCount = ` SELECT count(distinct pr.request_no) AS total_record
 		  FROM tr_purchaserequests pr 
-		  	-- LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
+		  	LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
 		  WHERE ${xSqlWhere}`;
+
+		console.log(`>>> xSqlCount: ${xSqlCount}`);
 
 		xData = await sequelize.query(xSql, {
 			replacements: xObjJsonWhere,
