@@ -469,7 +469,7 @@ class PurchaseRequestRepository {
 						prd.estimate_date_use,
 						prd.pr_no,
 						prd.last_price,
-						prd.uom_name,`;
+						prd.uom_name`;
 
 			if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
 				if (pParam.offset != '' && pParam.limit != '') {
