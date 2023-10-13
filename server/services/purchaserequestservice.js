@@ -325,7 +325,7 @@ class PurchaseRequestService {
 									requested_at:
 										xRows[index].requested_at == null
 											? ''
-											: moment(xRows[index].requestedAt).tz(config.timezone).format('DD MMM'),
+											: moment(xRows[index].requested_at).tz(config.timezone).format('DD MMM'),
 									employee: {
 										id: await _utilInstance.encrypt(
 											xRows[index].employee_id.toString(),
@@ -381,7 +381,7 @@ class PurchaseRequestService {
 									requested_at:
 										xRows[index].requested_at == null
 											? ''
-											: moment(xRows[index].requestedAt).tz(config.timezone).format('DD MMM'),
+											: moment(xRows[index].requested_at).tz(config.timezone).format('DD MMM'),
 									employee: {
 										id: await _utilInstance.encrypt(
 											xRows[index].employee_id.toString(),
