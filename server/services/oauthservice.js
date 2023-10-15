@@ -135,6 +135,14 @@ class OAuthService {
 
 		return xResultVerify;
 	}
+	
+	async checkItem(pParam) {
+		var xAPIUrl = `${config.api.odoo}/cek_produk`;
+		var xHeader = {};
+		var xResultVerify = await _utilInstance.axiosRequestPost(xAPIUrl, 'POST', pParam, xHeader);
+
+		return xResultVerify;
+	}
 }
 
 module.exports = OAuthService;

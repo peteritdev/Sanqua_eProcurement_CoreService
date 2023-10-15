@@ -816,6 +816,59 @@ class PurchaseRequestDetailService {
 
 		return xJoResult;
 	}
+	
+	async checkItem(pParam) {
+		var xJoResult = {};
+		var xDecId = null;
+		var xFlagProcess = false;
+		// Check is user data
+		if (pParam.user_id != '') {
+			xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				pParam.user_id = xDecId.decrypted;
+				xFlagProcess = true;
+			} else {
+				xJoResult = xDecId;
+			}
+		}
+
+		if (xFlagProcess) {
+			try {
+				console.log(`>>> PARAM>>>>>>: ${JSON.stringify(pParam)}`);
+				if (pParam.items.length > 0) {
+					let xParamOdoo = pParam
+
+					// Call check item api in odoo
+					let xCheckItemResult = await _integrationServiceInstance.checkItem(
+						xParamOdoo
+					);
+
+					if (xCheckItemResult.status_code == '00') {
+						xJoResult = {
+							status_code: '00',
+							status_msg: xCheckItemResult.status_msg,
+							data: xCheckItemResult.data[0].eSanqua
+						}
+					} else {
+						xJoResult = xCheckItemResult;
+					}
+				} else {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'You must supply some value',
+						data: null
+					}
+				}
+			} catch (e) {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: `Exception error <${_xClassName}.checkItem>: ${e.message}`
+				};
+			}
+		}
+
+		return xJoResult;
+	}
 }
 
 module.exports = PurchaseRequestDetailService;

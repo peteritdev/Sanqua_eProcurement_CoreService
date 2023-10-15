@@ -161,4 +161,7 @@ module.exports = (app) => {
 	arrValidate = [];
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
 	app.post(rootAPIPath + 'odoo/cancel_pr', arrValidate, purchaseRequestController.purchaseRequest_CancelPR);
+
+	arrValidate = [];
+	app.post(rootAPIPath + 'odoo/check_item', arrValidate, purchaseRequestController.purchaseRequestDetail_CheckItem);
 };
