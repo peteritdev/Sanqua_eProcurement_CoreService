@@ -298,13 +298,14 @@ class PurchaseRequestService {
 
 				// }
 
-				if (!pParam.hasOwnProperty('company_id')) {
-					pParam.company_id = pParam.logged_company_id;
-				}
+				// Commented first for testing
+				// if (!pParam.hasOwnProperty('company_id')) {
+				// 	pParam.company_id = pParam.logged_company_id;
+				// }
 
-				if (!pParam.hasOwnProperty('department_id')) {
-					pParam.department_id = pParam.logged_department_id;
-				}
+				// if (!pParam.hasOwnProperty('department_id')) {
+				// 	pParam.department_id = pParam.logged_department_id;
+				// }
 
 				console.log(`>>> pParam 2: ${JSON.stringify(pParam)}`);
 
