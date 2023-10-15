@@ -241,12 +241,14 @@ class VendorCatalogueRepository {
 
 		if (pParam.hasOwnProperty('order_by')) {
 			if (pParam.order_by != '') {
-				xSqlOrderBy = ` ORDER BY ${pParam.order_by} ${pParam.order_type != '' ? pParam.order_type : 'ASC'}`;
+				xSqlOrderBy = ` ORDER BY ${pParam.order_by} ${pParam.order_type != ''
+					? pParam.order_type
+					: 'ASC'} NULLS LAST`;
 			} else {
-				xSqlOrderBy = ` ORDER BY vc.updated_at DESC`;
+				xSqlOrderBy = ` ORDER BY vc.updated_at DESC NULLS LAST`;
 			}
 		} else {
-			xSqlOrderBy = ` ORDER BY vc.updated_at DESC`;
+			xSqlOrderBy = ` ORDER BY vc.updated_at DESC NULLS LAST`;
 		}
 
 		if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
