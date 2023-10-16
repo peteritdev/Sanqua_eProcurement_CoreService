@@ -121,9 +121,8 @@ class PurchaseRequestService {
 
 							if (xCatalogue.status_code == '00') {
 								xJoArrItems[i].last_price = xCatalogue.data.last_price;
-								// 16/10/2023 now uom will use from payload
-								// xJoArrItems[i].uom_id = xCatalogue.data.uom_id;
-								// xJoArrItems[i].uom_name = xCatalogue.data.uom_name;
+								xJoArrItems[i].uom_id = xCatalogue.data.uom_id;
+								xJoArrItems[i].uom_name = xCatalogue.data.uom_name;
 							}
 						}
 					}
