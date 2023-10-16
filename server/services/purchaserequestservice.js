@@ -299,6 +299,7 @@ class PurchaseRequestService {
 
 				// }
 
+				// Commented first for testing
 				if (!pParam.hasOwnProperty('company_id')) {
 					pParam.company_id = pParam.logged_company_id;
 				}
