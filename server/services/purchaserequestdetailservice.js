@@ -869,6 +869,53 @@ class PurchaseRequestDetailService {
 
 		return xJoResult;
 	}
+	
+	async updatePo(pParam) {
+		console.log(`>>> pParam: ${JSON.stringify(pParam)}`);
+		var xJoResult = {};
+		
+		try {
+			// Check is pr_no parameter is not empty
+			if (pParam.pr_no === '' || pParam.pr_no === null) {
+				
+				xJoResult = {
+					status_code: '-99',
+					status_msg: "Update failed, no supply pr_no"
+				};
+
+			} else {
+				
+				let xParamUpdate = {
+					pr_no: pParam.pr_no,
+					is_po_created: pParam.is_po_created,
+				}
+
+				// update column with given pr
+				let xUpdateResult = await _repoInstance.save(xParamUpdate, 'update_by_pr_no');
+								
+				if (xUpdateResult.status_code === '00') {
+
+					xJoResult = {
+						status_code: '00',
+						status_msg: 'Update success'
+					};
+					
+				} else {
+					
+					xJoResult = xUpdateResult;
+				}
+
+			}
+
+		} catch (error) {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Exception error <${_xClassName}.cancelPR>: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
 }
 
 module.exports = PurchaseRequestDetailService;

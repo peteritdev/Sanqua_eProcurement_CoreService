@@ -164,4 +164,7 @@ module.exports = (app) => {
 
 	arrValidate = [];
 	app.post(rootAPIPath + 'odoo/check_item', arrValidate, purchaseRequestController.purchaseRequestDetail_CheckItem);
+	
+	arrValidate = [];
+	app.post(rootAPIPath + 'odoo/update_po', arrValidate, purchaseRequestController.purchaseRequestDetail_UpdatePo);
 };

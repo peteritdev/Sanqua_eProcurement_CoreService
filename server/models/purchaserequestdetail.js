@@ -42,6 +42,7 @@ module.exports = (sequelize, DataTypes) => {
 		settodraft_by_name: DataTypes.STRING,
 		settodraft_reason: DataTypes.STRING,
 		cancel_reason: DataTypes.STRING,
+		is_po_created: DataTypes.BOOLEAN,
 
 		createdAt: {
 			type: DataTypes.DATE,
