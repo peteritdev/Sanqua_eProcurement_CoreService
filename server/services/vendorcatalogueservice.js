@@ -501,7 +501,10 @@ class VendorCatalogueService {
 					product: {
 						id: xRows[index].product_id,
 						code: xRows[index].product_code,
-						name: xRows[index].product_name
+						name: xRows[index].product_name,
+						uom_id: xRows[index].uom_id,
+						uom_name: xRows[index].uom_name,
+						last_price: xRows[index].last_price,
 					},
 					vendor: {
 						id: xRows[index].vendor_id,
