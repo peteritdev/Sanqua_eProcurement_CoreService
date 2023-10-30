@@ -15,7 +15,7 @@ const _modelCity = require('../models').ms_cities;
 const _modelVendorDocument = require('../models').ms_vendordocuments;
 const _modelCurrency = require('../models').ms_currencies;
 
-const Utility = require('../utils/globalutility.js');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 var _xClassName = 'VendorRepository';
