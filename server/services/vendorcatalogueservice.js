@@ -2,14 +2,14 @@ const jwt = require('jsonwebtoken');
 const md5 = require('md5');
 const crypto = require('crypto');
 const moment = require('moment');
-const sequelize = require('sequelize');
+const env = process.env.NODE_ENV || 'localhost';
+const config = require(__dirname + '/../config/config.json')[env];
+var Sequelize = require('sequelize');
+var sequelize = new Sequelize(config.database, config.username, config.password, config);
 const dateFormat = require('dateformat');
 const Op = sequelize.Op;
 const bcrypt = require('bcrypt');
 const fs = require('fs');
-
-const env = process.env.NODE_ENV || 'localhost';
-const config = require(__dirname + '/../config/config.json')[env];
 
 // Utility
 const Utility = require('peters-globallib-v2');
