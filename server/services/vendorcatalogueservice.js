@@ -692,7 +692,7 @@ class VendorCatalogueService {
 					});
 					console.log(`>>> Vendor: ${JSON.stringify(xVendor)}`);
 
-					let xProduct = await _vendorRepoInstance.getByParameter({
+					let xProduct = await _productRepoInstance.getByParameter({
 						code: pParam.product.code,
 						name: pParam.product.name
 					});

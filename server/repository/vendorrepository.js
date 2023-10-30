@@ -7,6 +7,7 @@ const Op = sequelize.Op;
 
 //Model
 const _modelVendor = require('../models').ms_vendors;
+const _modelProduct = require('../models').ms_products;
 const _modelBusinessEntity = require('../models').ms_businessentities;
 const _modelClassification = require('../models').ms_classifications;
 const _modelSubClassification = require('../models').ms_subclassifications;
@@ -383,7 +384,7 @@ class VendorRepository {
 				});
 			}
 
-			var xData = await _modelDb.findOne({
+			var xData = await _modelVendor.findOne({
 				where: xWhere,
 				include: xInclude,
 				subQuery: false
