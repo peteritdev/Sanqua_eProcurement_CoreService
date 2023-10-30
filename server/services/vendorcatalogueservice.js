@@ -685,24 +685,50 @@ class VendorCatalogueService {
 				// 	status: false
 				// });
 				// Note: this feature for update price purpose when there is no vendor catalog on system
-				if (pParam.hasOwnProperty('vendor')) {
+				if (pParam.hasOwnProperty('vendor') && pParam.hasOwnProperty('product')) {
 					let xVendor = await _vendorRepoInstance.getByParameter({
 						code: pParam.vendor.code,
 						name: pParam.vendor.name
 					});
-					console.log(`>>> Vendor: ${JSON.stringify(xVendor)}`);
-				}
 
-				if (pParam.hasOwnProperty('product')) {
-					if (pParam.product.length > 0) {
-						for (var i in pParam.product) {
-							let xProduct = await _productRepoInstance.getByParameter({
-								code: pParam.product[i].code,
-								name: pParam.product[i].name.split('] ')[1]
+					if (xVendor.status_code == '00') {
+						let xProduct = await _productRepoInstance.getByParameter({
+							code: xRows[index].code,
+							name: xRows[index].name.split('] ')[1]
+						});
+
+						if (xProduct.status_code == '00') {
+							// Get uom_id
+							var xUom = await _unitRepoInstance.getByName({ name: xRows[index].uom.name });
+
+							// Get Currency
+							var xCurrency = await _currencyRepoInstance.getByCode({ code: xRows[index].currency.name });
+							var xParamAdd = {
+								uom_id: xUom != null ? xUom.id : null,
+								uom_name: xUom != null ? xUom.name : null,
+								purchase_uom_id: xUom != null ? xUom.id : null,
+								purchase_uom_name: xUom != null ? xUom.name : null,
+								last_price: xRows[index].price_unit,
+								last_ordered: xRows[index].created_at,
+								currency_id: xCurrency != null ? xCurrency.id : null,
+								purchase_frequency: sequelize.literal('purchase_frequency + 1'),
+								last_purchase_plant: pParam.company.name,
+								vendor_id: xVendor.data.id,
+								vendor_name: xVendor.data.name,
+								product_id: xProduct.data.id,
+								product_name: xProduct.data.name,
+								product_code: xProduct.data.code,
+								sync_from_odoo_at: await _utilInstance.getCurrDateTime()
+							};
+							var xAdd = await _vendorCatalogueRepoInstance.save(xAdd, 'add');
+							xJoDataResult.push({
+								product_code: xRows[index].code,
+								status: true
 							});
-							console.log(`>>> Product: ${JSON.stringify(xProduct)}`);
 						}
 					}
+
+					// console.log(`>>> Product: ${JSON.stringify(xProduct)}`);
 				}
 			}
 		}
