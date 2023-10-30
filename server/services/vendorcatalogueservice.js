@@ -720,7 +720,7 @@ class VendorCatalogueService {
 								product_code: xProduct.data.code,
 								sync_from_odoo_at: await _utilInstance.getCurrDateTime()
 							};
-							var xAdd = await _vendorCatalogueRepoInstance.save(xAdd, 'add');
+							var xAdd = await _vendorCatalogueRepoInstance.save(xParamAdd, 'add');
 							xJoDataResult.push({
 								product_code: xRows[index].code,
 								status: true
