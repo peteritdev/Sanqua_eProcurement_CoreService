@@ -691,12 +691,18 @@ class VendorCatalogueService {
 						name: pParam.vendor.name
 					});
 					console.log(`>>> Vendor: ${JSON.stringify(xVendor)}`);
+				}
 
-					let xProduct = await _productRepoInstance.getByParameter({
-						code: pParam.product.code,
-						name: pParam.product.name
-					});
-					console.log(`>>> Product: ${JSON.stringify(xProduct)}`);
+				if (pParam.hasOwnProperty('product')) {
+					if (pParam.product.length > 0) {
+						for (var i in pParam.product) {
+							let xProduct = await _productRepoInstance.getByParameter({
+								code: pParam.product[i].code,
+								name: pParam.product[i].name
+							});
+							console.log(`>>> Product: ${JSON.stringify(xProduct)}`);
+						}
+					}
 				}
 			}
 		}
