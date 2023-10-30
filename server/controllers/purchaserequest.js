@@ -31,7 +31,8 @@ module.exports = {
 	purchaseRequest_UpdateFileUpload,
 	purchaseRequestDetail_SetToDraft,
 	purchaseRequest_CancelPR,
-	purchaseRequestDetail_CheckItem
+	purchaseRequestDetail_CheckItem,
+	purchaseRequestDetail_UpdatePo
 };
 
 async function purchaseRequest_List(req, res) {
@@ -669,6 +670,26 @@ async function purchaseRequestDetail_CheckItem(req, res) {
 		}
 	} else {
 		joResult = JSON.stringify(oAuthResult);
+	}
+
+	res.setHeader('Content-Type', 'application/json');
+	res.status(200).send(joResult);
+}
+
+async function purchaseRequestDetail_UpdatePo(req, res) {
+	var joResult;
+
+	var errors = validationResult(req).array();
+
+	if (errors.length != 0) {
+		joResult = JSON.stringify({
+			status_code: '-99',
+			status_msg: 'Parameter value has problem',
+			error_msg: errors
+		});
+	} else {
+		joResult = await _serviceDetailInstance.updatePo(req.body);
+		joResult = JSON.stringify(joResult);
 	}
 
 	res.setHeader('Content-Type', 'application/json');

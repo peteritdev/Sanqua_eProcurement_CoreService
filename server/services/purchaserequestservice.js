@@ -493,7 +493,7 @@ class PurchaseRequestService {
 				}
 			}
 		}
-
+		// 24/10/2023
 		return xJoResult;
 	}
 
@@ -582,7 +582,8 @@ class PurchaseRequestService {
 									: config.statusDescription.purchaseRequestDetail[xDetail[index].status]
 						},
 						last_price: xDetail[index].last_price,
-						cancel_reason: xDetail[index].cancel_reason
+						cancel_reason: xDetail[index].cancel_reason,
+						is_po_created: xDetail[index].is_po_created
 					});
 				}
 				// Get Approval Matrix

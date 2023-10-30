@@ -610,6 +610,11 @@ class VendorCatalogueRepository {
 				'select p.id as "product_id", \
                            p.code as "product_code", \
                            p.name as "product_name", \
+						   vc.uom_id as "uom_id", \
+						   vc.uom_name as "uom_name", \
+						   vc.purchase_uom_id as "purchase_uom_id", \
+						   vc.purchase_uom_name as "purchase_uom_name", \
+						   vc.last_price as "last_price", \
                            v.id as "vendor_id", \
                            v.code as "vendor_code", \
                            v.name as "vendor_name" \
