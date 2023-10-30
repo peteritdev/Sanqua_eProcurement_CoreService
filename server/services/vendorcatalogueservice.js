@@ -698,7 +698,7 @@ class VendorCatalogueService {
 						for (var i in pParam.product) {
 							let xProduct = await _productRepoInstance.getByParameter({
 								code: pParam.product[i].code,
-								name: pParam.product[i].name
+								name: pParam.product[i].name.split('] ')[1]
 							});
 							console.log(`>>> Product: ${JSON.stringify(xProduct)}`);
 						}
