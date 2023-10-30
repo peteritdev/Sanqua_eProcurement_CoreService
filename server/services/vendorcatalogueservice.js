@@ -600,21 +600,6 @@ class VendorCatalogueService {
 			}
 		} else if (xAct == 'update_by_vendor_id_product_id') {
 			xJoResult = await _vendorCatalogueRepoInstance.save(pParam, xAct);
-		} else if (xAct == 'add_new_via_sync_price_from_odoo') {
-			// Note: this feature for update price purpose when there is no vendor catalog on system
-			if (pParam.hasOwnProperty('vendor')) {
-				let xVendor = await _vendorRepoInstance.getByParameter({
-					code: pParam.vendor.code,
-					name: pParam.vendor.name
-				});
-				console.log(`>>> Vendor: ${JSON.stringify(xVendor)}`);
-
-				let xProduct = await _vendorRepoInstance.getByParameter({
-					code: pParam.product.code,
-					name: pParam.product.name
-				});
-				console.log(`>>> Product: ${JSON.stringify(xProduct)}`);
-			}
 		}
 
 		return xJoResult;
@@ -699,6 +684,20 @@ class VendorCatalogueService {
 				// 	product_code: xRows[index].code,
 				// 	status: false
 				// });
+				// Note: this feature for update price purpose when there is no vendor catalog on system
+				if (pParam.hasOwnProperty('vendor')) {
+					let xVendor = await _vendorRepoInstance.getByParameter({
+						code: pParam.vendor.code,
+						name: pParam.vendor.name
+					});
+					console.log(`>>> Vendor: ${JSON.stringify(xVendor)}`);
+
+					let xProduct = await _vendorRepoInstance.getByParameter({
+						code: pParam.product.code,
+						name: pParam.product.name
+					});
+					console.log(`>>> Product: ${JSON.stringify(xProduct)}`);
+				}
 			}
 		}
 
