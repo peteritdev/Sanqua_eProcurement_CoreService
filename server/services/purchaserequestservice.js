@@ -811,11 +811,11 @@ class PurchaseRequestService {
 													email: xApproverSeq1.approver_user[i].email
 												}
 											};
-											console.log(
-												`>>> xParamEmailNotification: ${JSON.stringify(
-													xParamEmailNotification
-												)}`
-											);
+											// console.log(
+											// 	`>>> xParamEmailNotification: ${JSON.stringify(
+											// 		xParamEmailNotification
+											// 	)}`
+											// );
 											xNotificationResult = await _notificationService.sendNotificationEmail_FPBNeedApproval(
 												xParamEmailNotification,
 												pParam.method,
