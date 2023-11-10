@@ -365,7 +365,7 @@ class PurchaseRequestRepository {
 				let xSqlWhereCompanyOwnedDoc = '';
 				if (pParam.hasOwnProperty('company_id')) {
 					if (pParam.company_id != '') {
-						xSqlWhereCompanyOwnedDoc = ' AND company_id = :companyId';
+						xSqlWhereCompanyOwnedDoc = ' AND pr.company_id = :companyId';
 					}
 				}
 				xSqlWhere = ` (( ${xSqlWhere} ) OR (${xSqlWhereOr} ${xSqlWhereCompanyOwnedDoc != ''
