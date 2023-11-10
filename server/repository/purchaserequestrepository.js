@@ -7,6 +7,7 @@ const Op = Sequelize.Op;
 
 // Model
 const _modelDb = require('../models').tr_purchaserequests;
+const _modelProject = require('../models').ms_projects;
 const _modelPurchaseRequestDetail = require('../models').tr_purchaserequestdetails;
 const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 
@@ -33,6 +34,11 @@ class PurchaseRequestRepository {
 						as: 'vendor_catalogue'
 					}
 				]
+			},
+			{
+				model: _modelProject,
+				as: 'project',
+				attributes: [ 'id', 'code', 'name', 'odoo_project_code' ]
 			}
 		];
 
@@ -450,7 +456,8 @@ class PurchaseRequestRepository {
 
 		if (!pParam.hasOwnProperty('is_export')) {
 			xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
-			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item`;
+			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item,
+			p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 			xSqlGroupBy = ` GROUP BY pr.id, 
 						pr.request_no, 
@@ -462,7 +469,8 @@ class PurchaseRequestRepository {
 							pr.status, 
 						pr.company_id, 
 						pr.company_code, 
-						pr.company_name`;
+						pr.company_name,
+						p.code,p.name,p.odoo_project_code`;
 
 			if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
 				if (pParam.offset != '' && pParam.limit != '') {
@@ -483,12 +491,17 @@ class PurchaseRequestRepository {
 								prd.estimate_date_use,
 								prd.pr_no,
 								prd.last_price,
-								prd.uom_name`;
+								prd.uom_name,
+								
+								p.code,
+								p.name,
+								p.odoo_project_code`;
 
 				xSqlGroupBy = ` `;
 			} else {
 				xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
-			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item`;
+			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item,
+			p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 				xSqlGroupBy = ` GROUP BY pr.id, 
 						pr.request_no, 
@@ -500,7 +513,8 @@ class PurchaseRequestRepository {
 							pr.status, 
 						pr.company_id, 
 						pr.company_code, 
-						pr.company_name`;
+						pr.company_name,
+						p.code,p.name,p.odoo_project_code`;
 
 				if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
 					if (pParam.offset != '' && pParam.limit != '') {
@@ -513,12 +527,14 @@ class PurchaseRequestRepository {
 		xSql = ` SELECT ${xSqlFields}
 				 FROM tr_purchaserequests pr 
 						LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
+							LEFT JOIN ms_projects p ON p.id = pr.project_id
 				 WHERE ${xSqlWhere} ${xSqlGroupBy}
 				  ${xSqlOrderBy}${xSqlLimit} `;
 
 		xSqlCount = ` SELECT count(distinct pr.request_no) AS total_record
 		  FROM tr_purchaserequests pr 
 		  	LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
+			  LEFT JOIN ms_projects p ON p.id = pr.project_id
 		  WHERE ${xSqlWhere}`;
 
 		console.log(`>>> xSqlCount: ${xSqlCount}`);
