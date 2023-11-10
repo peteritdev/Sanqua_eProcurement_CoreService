@@ -21,11 +21,13 @@ module.exports = (sequelize, DataTypes) => {
 		printed_fpb_at: DataTypes.DATE,
 		submit_price_quotation_at: DataTypes.DATE,
 		category_item: DataTypes.SMALLINT, // 1: Raw Material, 2: Factory supply, 3: Office Supply, 4: Sparepart, 5: Jasa, 6: Maintenance Repair, 7: Investment / Asset
-		category_pr: DataTypes.STRING,
+		category_pr: DataTypes.STRING, //bahan_baku, bahan_pendukung, asset, barang_khusus, operasional, amdk, lain
 
 		total_qty: DataTypes.DOUBLE,
 		total_price: DataTypes.DOUBLE,
 		file: DataTypes.JSON,
+
+		project_id: DataTypes.INTEGER,
 
 		is_delete: DataTypes.INTEGER,
 		deleted_at: DataTypes.DATE,
@@ -71,6 +73,11 @@ module.exports = (sequelize, DataTypes) => {
 		PurchaseRequest.hasMany(models.tr_purchaserequestdetails, {
 			foreignKey: 'request_id',
 			as: 'purchase_request_detail'
+		});
+
+		PurchaseRequest.belongsTo(models.ms_projects, {
+			foreignKey: 'project_id',
+			as: 'project'
 		});
 	};
 
