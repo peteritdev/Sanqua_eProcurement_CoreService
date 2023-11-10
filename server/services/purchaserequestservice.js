@@ -102,7 +102,10 @@ class PurchaseRequestService {
 				Description: Checking when the parameter project is set, category_time must be 7 and category_pr must be 'asset'
 			*/
 			if (pParam.hasOwnProperty('project_id')) {
-				if (pParam.project_id != '' && (pParam.category_item != 7 || pParam.category_pr != 'asset')) {
+				if (
+					(pParam.project_id != '' || pParam.project_id != null) &&
+					(pParam.category_item != 7 || pParam.category_pr != 'asset')
+				) {
 					xJoResult = {
 						status_code: '-99',
 						status_msg: 'Kategori Barang dan Kategori PR tidak sesuai dengan peruntukan project.'
