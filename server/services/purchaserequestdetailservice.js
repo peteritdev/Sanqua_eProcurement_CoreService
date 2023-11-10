@@ -613,7 +613,7 @@ class PurchaseRequestDetailService {
 														user_sanqua: pParam.logged_user_name,
 														no_fpb: xDetail.data.request_no,
 														odoo_project_code: xDetail.data.hasOwnProperty('project')
-															? xDetail.data.project.hasOwnProperty('odoo_project_code')
+															? xDetail.data.project != null
 																? xDetail.data.project.odoo_project_code
 																: null
 															: null,
