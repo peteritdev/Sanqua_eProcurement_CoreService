@@ -103,7 +103,8 @@ class PurchaseRequestService {
 			*/
 			if (pParam.hasOwnProperty('project_id')) {
 				if (
-					(pParam.project_id != '' || pParam.project_id != null) &&
+					pParam.project_id != '' &&
+					pParam.project_id != null &&
 					(pParam.category_item != 7 || pParam.category_pr != 'asset')
 				) {
 					xJoResult = {
