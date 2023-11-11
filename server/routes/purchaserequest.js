@@ -107,7 +107,7 @@ module.exports = (app) => {
 	arrValidate = [
 		check('act').not().isEmpty().withMessage('Parameter act cannot be empty'),
 		check('request_id').not().isEmpty().withMessage('Parameter request_id cannot be empty'),
-		check('product_id', 'Parameter product_id must be integer and cannot be empty').not().isEmpty().isInt(),
+		// check('product_id', 'Parameter product_id must be integer and cannot be empty').not().isEmpty().isInt(),
 		check('qty', 'Parameter qty must be decimal and cannot be empty').not().isEmpty().isDecimal(),
 		check('budget_price_per_unit', 'Parameter budget_price_per_unit must be decimal and cannot be empty')
 			.not()
@@ -164,7 +164,7 @@ module.exports = (app) => {
 
 	arrValidate = [];
 	app.post(rootAPIPath + 'odoo/check_item', arrValidate, purchaseRequestController.purchaseRequestDetail_CheckItem);
-	
+
 	arrValidate = [];
 	app.post(rootAPIPath + 'odoo/update_po', arrValidate, purchaseRequestController.purchaseRequestDetail_UpdatePo);
 };

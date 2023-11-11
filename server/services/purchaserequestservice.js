@@ -40,6 +40,9 @@ const _notificationService = new NotificationService();
 const LogService = require('../services/logservice.js');
 const _logServiceInstance = new LogService();
 
+const ProjectService = require('../services/projectservice.js');
+const _projectServiceInstance = new ProjectService();
+
 const _xClassName = 'PurchaseRequestService';
 
 class PurchaseRequestService {
@@ -93,131 +96,157 @@ class PurchaseRequestService {
 		}
 
 		if (xFlagProcess) {
-			if (xAct == 'add' || xAct == 'add_batch_in_item') {
-				// Calculate the total
-				var xJoArrItems = [];
-				if (pParam.hasOwnProperty('purchase_request_detail')) {
-					xJoArrItems = pParam.purchase_request_detail;
-					if (xJoArrItems.length > 0) {
-						for (var i in xJoArrItems) {
-							if (
-								xJoArrItems[i].hasOwnProperty('qty') &&
-								xJoArrItems[i].hasOwnProperty('budget_price_per_unit')
-							) {
-								xJoArrItems[i].budget_price_total =
-									xJoArrItems[i].qty * xJoArrItems[i].budget_price_per_unit;
-							}
+			xFlagProcess = false;
+			/*
+				At: 10/11/2023
+				Description: Checking when the parameter project is set, category_time must be 7 and category_pr must be 'asset'
+			*/
+			if (pParam.hasOwnProperty('project_id')) {
+				if (
+					pParam.project_id != '' &&
+					pParam.project_id != null &&
+					(pParam.category_item != 7 || pParam.category_pr != 'asset')
+				) {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Kategori Barang dan Kategori PR tidak sesuai dengan peruntukan project.'
+					};
+				} else {
+					// Check if project_id is match with FPB company
 
-							if (xJoArrItems[i].hasOwnProperty('estimate_date_use')) {
-								if (xJoArrItems[i].estimate_date_use == '') {
-									xJoArrItems[i].estimate_date_use = null;
+					xFlagProcess = true;
+				}
+			} else {
+				xFlagProcess = true;
+			}
+
+			if (xFlagProcess) {
+				if (xAct == 'add' || xAct == 'add_batch_in_item') {
+					// Calculate the total
+					var xJoArrItems = [];
+					if (pParam.hasOwnProperty('purchase_request_detail')) {
+						xJoArrItems = pParam.purchase_request_detail;
+						if (xJoArrItems.length > 0) {
+							for (var i in xJoArrItems) {
+								if (
+									xJoArrItems[i].hasOwnProperty('qty') &&
+									xJoArrItems[i].hasOwnProperty('budget_price_per_unit')
+								) {
+									xJoArrItems[i].budget_price_total =
+										xJoArrItems[i].qty * xJoArrItems[i].budget_price_per_unit;
+								}
+
+								if (xJoArrItems[i].hasOwnProperty('estimate_date_use')) {
+									if (xJoArrItems[i].estimate_date_use == '') {
+										xJoArrItems[i].estimate_date_use = null;
+									}
+								}
+								// Get Last price from etalase ecatalogue
+								let xCatalogue = await _catalogueService.getByVendorCodeAndProductCode({
+									vendor_code: xJoArrItems[i].vendor_code,
+									product_code: xJoArrItems[i].product_code
+								});
+
+								if (xCatalogue.status_code == '00') {
+									xJoArrItems[i].last_price = xCatalogue.data.last_price;
+									xJoArrItems[i].uom_id = xCatalogue.data.uom_id;
+									xJoArrItems[i].uom_name = xCatalogue.data.uom_name;
 								}
 							}
-							// Get Last price from etalase ecatalogue
-							let xCatalogue = await _catalogueService.getByVendorCodeAndProductCode({
-								vendor_code: xJoArrItems[i].vendor_code,
-								product_code: xJoArrItems[i].product_code
-							});
-
-							if (xCatalogue.status_code == '00') {
-								xJoArrItems[i].last_price = xCatalogue.data.last_price;
-								xJoArrItems[i].uom_id = xCatalogue.data.uom_id;
-								xJoArrItems[i].uom_name = xCatalogue.data.uom_name;
-							}
 						}
+						pParam.purchase_request_detail = xJoArrItems;
 					}
-					pParam.purchase_request_detail = xJoArrItems;
-				}
 
-				var xAddResult = await _repoInstance.save(pParam, xAct);
-				if (xAddResult.status_code == '00' && xAddResult.created_id != '' && xAddResult.clear_id != '') {
-					// Generate FPB No
-					var xFPBNo = await _globalUtilInstance.generatePurchaseRequestNo(
-						xAddResult.clear_id,
-						pParam.company_code
-					);
-					var xParamUpdate = {
-						request_no: xFPBNo,
-						id: xAddResult.clear_id
-					};
+					var xAddResult = await _repoInstance.save(pParam, xAct);
+					if (xAddResult.status_code == '00' && xAddResult.created_id != '' && xAddResult.clear_id != '') {
+						// Generate FPB No
+						var xFPBNo = await _globalUtilInstance.generatePurchaseRequestNo(
+							xAddResult.clear_id,
+							pParam.company_code
+						);
+						var xParamUpdate = {
+							request_no: xFPBNo,
+							id: xAddResult.clear_id
+						};
 
-					var xUpdate = await _repoInstance.save(xParamUpdate, 'update');
+						var xUpdate = await _repoInstance.save(xParamUpdate, 'update');
 
-					if (xUpdate.status_code == '00') {
+						if (xUpdate.status_code == '00') {
+							xJoResult = xAddResult;
+							// ---------------- Start: Add to log ----------------
+							// let xParamLog = {
+							// 	act: 'add',
+							// 	employee_id: pParam.employee_id,
+							// 	employee_name: pParam.employee_name,
+							// 	request_id: xAddResult.clear_id,
+							// 	request_no: xFPBNo,
+							// 	body: {
+							// 		act: 'add',
+							// 		msg: 'FPB created'
+							// 	}
+							// };
+							// console.log(`>>> xParamLog : ${JSON.stringify(xParamLog)}`);
+							// var xResultLog = await _logServiceInstance.addLog(pParam.method, pParam.token, xParamLog);
+							// xJoResult.log_result = xResultLog;
+							// ---------------- End: Add to log ----------------
+
+							delete xJoResult.clear_id;
+						} else {
+							xJoResult = xUpdate;
+						}
+					} else {
 						xJoResult = xAddResult;
+					}
+				} else if (xAct == 'update') {
+					var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.id = xDecId.decrypted;
+						pParam.updated_by = pParam.user_id;
+						pParam.updated_by_name = pParam.user_name;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xDecId;
+					}
+
+					if (xFlagProcess) {
+						// Get data before update
+						let xDataBeforeUpdate = await _repoInstance.getById({ id: pParam.id });
+						delete xDataBeforeUpdate.purchase_request_detail;
+
 						// ---------------- Start: Add to log ----------------
 						// let xParamLog = {
 						// 	act: 'add',
 						// 	employee_id: pParam.employee_id,
 						// 	employee_name: pParam.employee_name,
-						// 	request_id: xAddResult.clear_id,
-						// 	request_no: xFPBNo,
+						// 	request_id: pParam.id,
+						// 	request_no: xDataBeforeUpdate.request_no,
 						// 	body: {
-						// 		act: 'add',
-						// 		msg: 'FPB created'
+						// 		act: 'update',
+						// 		msg: 'FPB changed',
+						// 		before: {
+						// 			category_item: xDataBeforeUpdate.category_item,
+						// 			category_pr: xDataBeforeUpdate.category_pr,
+						// 			reference_from_ecommerce: xDataBeforeUpdate.reference_from_ecommerce,
+						// 			budget_is_approved: xDataBeforeUpdate.budget_is_approved,
+						// 			memo_special_request: xDataBeforeUpdate.memo_special_request
+						// 		},
+						// 		after: pParam
 						// 	}
 						// };
-						// console.log(`>>> xParamLog : ${JSON.stringify(xParamLog)}`);
-						// var xResultLog = await _logServiceInstance.addLog(pParam.method, pParam.token, xParamLog);
-						// xJoResult.log_result = xResultLog;
-						// ---------------- End: Add to log ----------------
 
-						delete xJoResult.clear_id;
-					} else {
-						xJoResult = xUpdate;
+						delete pParam.employee_id;
+						delete pParam.employee_name;
+						delete pParam.department_id;
+						delete pParam.department_name;
+						var xAddResult = await _repoInstance.save(pParam, xAct);
+						xJoResult = xAddResult;
+
+						// if (xJoResult.status_code == '00') {
+						// 	var xResultLog = await _logServiceInstance.addLog(pParam.method, pParam.token, xParamLog);
+						// 	xJoResult.log_result = xResultLog;
+						// 	// ---------------- End: Add to log ----------------
+						// }
 					}
-				} else {
-					xJoResult = xAddResult;
-				}
-			} else if (xAct == 'update') {
-				var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
-				if (xDecId.status_code == '00') {
-					pParam.id = xDecId.decrypted;
-					pParam.updated_by = pParam.user_id;
-					pParam.updated_by_name = pParam.user_name;
-					xFlagProcess = true;
-				} else {
-					xJoResult = xDecId;
-				}
-
-				if (xFlagProcess) {
-					// Get data before update
-					let xDataBeforeUpdate = await _repoInstance.getById({ id: pParam.id });
-					delete xDataBeforeUpdate.purchase_request_detail;
-
-					// ---------------- Start: Add to log ----------------
-					// let xParamLog = {
-					// 	act: 'add',
-					// 	employee_id: pParam.employee_id,
-					// 	employee_name: pParam.employee_name,
-					// 	request_id: pParam.id,
-					// 	request_no: xDataBeforeUpdate.request_no,
-					// 	body: {
-					// 		act: 'update',
-					// 		msg: 'FPB changed',
-					// 		before: {
-					// 			category_item: xDataBeforeUpdate.category_item,
-					// 			category_pr: xDataBeforeUpdate.category_pr,
-					// 			reference_from_ecommerce: xDataBeforeUpdate.reference_from_ecommerce,
-					// 			budget_is_approved: xDataBeforeUpdate.budget_is_approved,
-					// 			memo_special_request: xDataBeforeUpdate.memo_special_request
-					// 		},
-					// 		after: pParam
-					// 	}
-					// };
-
-					delete pParam.employee_id;
-					delete pParam.employee_name;
-					delete pParam.department_id;
-					delete pParam.department_name;
-					var xAddResult = await _repoInstance.save(pParam, xAct);
-					xJoResult = xAddResult;
-
-					// if (xJoResult.status_code == '00') {
-					// 	var xResultLog = await _logServiceInstance.addLog(pParam.method, pParam.token, xParamLog);
-					// 	xJoResult.log_result = xResultLog;
-					// 	// ---------------- End: Add to log ----------------
-					// }
 				}
 			}
 		}
@@ -322,7 +351,11 @@ class PurchaseRequestService {
 										xRows[index].id.toString(),
 										config.cryptoKey.hashKey
 									),
+									project_code: xRows[index].project_code,
+									project_name: xRows[index].project_name,
+									odoo_project_code: xRows[index].odoo_project_code,
 									request_no: xRows[index].request_no,
+									project: xRows[index].c,
 									requested_at:
 										xRows[index].requested_at == null
 											? ''
@@ -386,6 +419,9 @@ class PurchaseRequestService {
 										xRows[index].id.toString(),
 										config.cryptoKey.hashKey
 									),
+									project_code: xRows[index].project_code,
+									project_name: xRows[index].project_name,
+									odoo_project_code: xRows[index].odoo_project_code,
 									request_no: xRows[index].request_no,
 									requested_at:
 										xRows[index].requested_at == null
@@ -434,6 +470,9 @@ class PurchaseRequestService {
 						for (var index in xRows) {
 							xJoArrData.push({
 								id: await _utilInstance.encrypt(xRows[index].id.toString(), config.cryptoKey.hashKey),
+								project_code: xRows[index].project_code,
+								project_name: xRows[index].project_name,
+								odoo_project_code: xRows[index].odoo_project_code,
 								request_no: xRows[index].request_no,
 								requested_at:
 									xRows[index].requested_at == null
@@ -516,6 +555,8 @@ class PurchaseRequestService {
 
 		if (xFlagProcess) {
 			var xResult = await _repoInstance.getById(pParam);
+
+			console.log(`>>> xResult: ${JSON.stringify(xResult)}`);
 
 			if (xResult != null) {
 				var xJoArrRequestDetailData = [];
@@ -618,6 +659,7 @@ class PurchaseRequestService {
 
 				xJoData = {
 					id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
+					project: xResult.project,
 					request_no: xResult.request_no,
 					requested_at: xResult.requested_at,
 					employee: {

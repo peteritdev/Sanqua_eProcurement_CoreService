@@ -26,6 +26,8 @@ const procurementEvaluation = require('./procurementevaluation');
 const purchaseRequest = require('./purchaserequest');
 const syncFromOdoo = require('./syncfromodoo');
 
+const project = require('./project');
+
 const _export = require('./export');
 
 module.exports = {
@@ -52,5 +54,7 @@ module.exports = {
 	procurementQuotationItem,
 	procurementEvaluation,
 	syncFromOdoo,
-	_export
+	_export,
+
+	project
 };
