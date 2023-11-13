@@ -40,28 +40,28 @@ class ProjectService {
 					if (xDecId.status_code == '00') {
 						pParam.user_id = xDecId.decrypted;
 						xFlagProcess = true;
-						if (pParam.hasOwnProperty('employee_id')) {
-							if (pParam.employee_id != '') {
-								if (pParam.employee_id.length == 65) {
-									xDecId = await _utilInstance.decrypt(pParam.employee_id, config.cryptoKey.hashKey);
-									if (xDecId.status_code == '00') {
-										pParam.employee_id = xDecId.decrypted;
-										xFlagProcess = true;
-									} else {
-										xJoResult = xDecId;
-									}
-								} else {
-									xFlagProcess = true;
-								}
-							} else {
-								xJoResult = {
-									status_code: '-99',
-									status_msg: 'Parameter employee_id can not be empty'
-								};
-							}
-						} else {
-							xFlagProcess = true;
-						}
+						// if (pParam.hasOwnProperty('employee_id')) {
+						// 	if (pParam.employee_id != '') {
+						// 		if (pParam.employee_id.length == 65) {
+						// 			xDecId = await _utilInstance.decrypt(pParam.employee_id, config.cryptoKey.hashKey);
+						// 			if (xDecId.status_code == '00') {
+						// 				pParam.employee_id = xDecId.decrypted;
+						// 				xFlagProcess = true;
+						// 			} else {
+						// 				xJoResult = xDecId;
+						// 			}
+						// 		} else {
+						// 			xFlagProcess = true;
+						// 		}
+						// 	} else {
+						// 		xJoResult = {
+						// 			status_code: '-99',
+						// 			status_msg: 'Parameter employee_id can not be empty'
+						// 		};
+						// 	}
+						// } else {
+						// 	xFlagProcess = true;
+						// }
 					} else {
 						xJoResult = xDecId;
 					}
