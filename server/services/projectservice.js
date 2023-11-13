@@ -34,8 +34,6 @@ class ProjectService {
 		var xFlagProcess = false;
 
 		try {
-			console.log(`>>> pParam: ${JSON.stringify(pParam)}`);
-
 			if (pParam.hasOwnProperty('user_id')) {
 				if (pParam.user_id != '') {
 					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
