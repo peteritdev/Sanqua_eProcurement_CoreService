@@ -141,8 +141,9 @@ class PurchaseRequestDetailService {
 
 					xAct = 'update';
 				} else {
+					console.log(`>>> pParam CEK CEK CEK : ${JSON.stringify(pParam)}`);
 					if (pParam.hasOwnProperty('product_id')) {
-						if (pParam.product_id != '' && pParam.product_id != null) {
+						if (pParam.product_id != null) {
 							// Get Product detail by Id
 							xProductDetail = await _productServiceInstance.getById({
 								id: await _utilInstance.encrypt(pParam.product_id.toString(), config.cryptoKey.hashKey)
@@ -156,7 +157,7 @@ class PurchaseRequestDetailService {
 					}
 
 					if (pParam.hasOwnProperty('vendor_id')) {
-						if (pParam.vendor_id != '' && pParam.vendor_id != null) {
+						if (pParam.vendor_id != null) {
 							// Get Vendor detail by id
 							xVendorDetail = await _vendorServiceInstance.getVendorById({
 								id: await _utilInstance.encrypt(pParam.vendor_id.toString(), config.cryptoKey.hashKey)
