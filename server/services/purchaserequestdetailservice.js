@@ -175,6 +175,8 @@ class PurchaseRequestDetailService {
 					pParam.estimate_date_use = null;
 				}
 
+				// Validate if product_id is null (free keyin for project), estimate_fulfillment
+
 				var xAddResult = await _repoInstance.save(pParam, xAct);
 				xJoResult = xAddResult;
 
@@ -540,8 +542,11 @@ class PurchaseRequestDetailService {
 													} else {
 														xLineIds.push({
 															product_code: pParam.items[i].product_code,
+															product_name: `[${pParam.items[i].product_code}] ${pParam
+																.items[i].product_name}`,
 															qty: pParam.items[i].qty,
-															desc: pParam.items[i].description
+															note: `${pParam.items[i].description}`,
+															uom: pParam.items[i].uom
 														});
 													}
 												} else {
