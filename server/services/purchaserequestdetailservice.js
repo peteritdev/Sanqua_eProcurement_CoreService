@@ -542,10 +542,10 @@ class PurchaseRequestDetailService {
 													} else {
 														xLineIds.push({
 															product_code: pParam.items[i].product_code,
-															product_name: pParam.items[i].product_name,
+															product_name: `[${pParam.items[i].product_code}] ${pParam
+																.items[i].product_name}`,
 															qty: pParam.items[i].qty,
-															note: `[${pParam.items[i].product_code}] ${pParam.items[i]
-																.description}`
+															note: `${pParam.items[i].description}`
 														});
 													}
 												} else {
