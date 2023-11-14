@@ -141,6 +141,7 @@ class PurchaseRequestDetailService {
 
 					xAct = 'update';
 				} else {
+					console.log(`>>> pParam CEK CEK CEK : ${JSON.stringify(pParam)}`);
 					if (pParam.hasOwnProperty('product_id')) {
 						if (pParam.product_id != '') {
 							// Get Product detail by Id
