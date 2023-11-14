@@ -612,6 +612,11 @@ class PurchaseRequestDetailService {
 														purchase_order_type: xDetail.data.category_pr,
 														user_sanqua: pParam.logged_user_name,
 														no_fpb: xDetail.data.request_no,
+														odoo_project_code: xDetail.data.hasOwnProperty('project')
+															? xDetail.data.project != null
+																? xDetail.data.project.odoo_project_code
+																: null
+															: null,
 														line_ids: xLineIds
 													};
 
