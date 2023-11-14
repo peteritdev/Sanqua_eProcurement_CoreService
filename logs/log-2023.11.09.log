@@ -1,0 +1,29 @@
+2023-11-09 10:17:03.687 ERROR <ProjectRepository.list> Exception error: column ms_projects.request_no does not exist 
+2023-11-09 10:23:30.648 ERROR <ProjectRepository.list> Exception error: zero-length delimited identifier at or near """" 
+2023-11-09 12:02:36.524 ERROR <ProjectRepository.save> Exception error: invalid input syntax for type integer: "b3a17767ecec12082220ccd59c9fe60e:dbd05d29ceb6e13c95e51db27a5edb10" 
+2023-11-09 13:05:38.801 ERROR <ProjectRepository.save> Exception error: value too long for type character varying(10) 
+2023-11-09 13:05:58.125 ERROR <ProjectRepository.save> Exception error: The "data" argument must be one of type string, Buffer, TypedArray, or DataView. Received type number 
+2023-11-09 13:12:10.207 ERROR <ProjectRepository.save> Exception error: The "data" argument must be one of type string, Buffer, TypedArray, or DataView. Received type number 
+2023-11-09 13:12:27.594 ERROR <ProjectRepository.save> Exception error: The "data" argument must be one of type string, Buffer, TypedArray, or DataView. Received type number 
+2023-11-09 13:12:37.364 ERROR <ProjectRepository.save> Exception error: The "data" argument must be one of type string, Buffer, TypedArray, or DataView. Received type number 
+2023-11-09 13:13:22.440 ERROR <ProjectRepository.save> Exception error: The "data" argument must be one of type string, Buffer, TypedArray, or DataView. Received type number 
+2023-11-09 13:13:37.132 ERROR <ProjectRepository.save> Exception error: The "data" argument must be one of type string, Buffer, TypedArray, or DataView. Received type number 
+2023-11-09 13:13:53.155 ERROR <ProjectRepository.save> Exception error: The "data" argument must be one of type string, Buffer, TypedArray, or DataView. Received type number 
+2023-11-09 13:40:23.869 ERROR <ProjectRepository.save> Exception error: Validation error 
+2023-11-09 13:44:24.137 ERROR <ProjectRepository.getByParameter> Exception error: Cannot read property 'getTableName' of undefined 
+2023-11-09 13:44:43.842 ERROR <ProjectRepository.getByParameter> Exception error: Cannot read property 'getTableName' of undefined 
+2023-11-09 13:46:47.454 ERROR <ProjectRepository.getByParameter> Exception error: Cannot read property 'getTableName' of undefined 
+2023-11-09 13:47:47.025 ERROR <ProjectRepository.getByParameter> Exception error: Cannot read property 'getTableName' of undefined 
+2023-11-09 13:48:03.765 ERROR <ProjectRepository.getByParameter> Exception error: Cannot read property 'getTableName' of undefined 
+2023-11-09 13:48:18.329 ERROR <ProjectRepository.getByParameter> Exception error: Cannot read property 'getTableName' of undefined 
+2023-11-09 14:04:05.805 ERROR <ProjectRepository.save> Exception error: Validation error 
+2023-11-09 16:40:48.419 ERROR <ProjectService.submit> Exception error: xClearId is not defined 
+2023-11-09 16:41:25.908 ERROR <ProjectService.submit> Exception error: xClearId is not defined 
+2023-11-09 16:41:27.345 ERROR <ProjectService.submit> Exception error: xClearId is not defined 
+2023-11-09 16:42:18.339 ERROR <ProjectService.submit> Exception error: xClearId is not defined 
+2023-11-09 16:44:06.932 ERROR <ProjectService.submit> Exception error: xClearId is not defined 
+2023-11-09 16:44:09.394 ERROR <ProjectService.submit> Exception error: xClearId is not defined 
+2023-11-09 16:44:18.578 ERROR <ProjectService.submit> Exception error: xClearId is not defined 
+2023-11-09 16:44:26.188 ERROR <ProjectService.submit> Exception error: xClearId is not defined 
+2023-11-09 16:44:40.209 ERROR <ProjectService.submit> Exception error: xClearId is not defined 
+

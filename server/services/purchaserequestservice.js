@@ -624,7 +624,8 @@ class PurchaseRequestService {
 						},
 						last_price: xDetail[index].last_price,
 						cancel_reason: xDetail[index].cancel_reason,
-						is_po_created: xDetail[index].is_po_created
+						is_po_created: xDetail[index].is_po_created,
+						estimate_fulfillment: xDetail[index].estimate_fulfillment
 					});
 				}
 				// Get Approval Matrix
