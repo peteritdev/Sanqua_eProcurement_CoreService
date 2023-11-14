@@ -164,7 +164,7 @@ class PurchaseRequestDetailService {
 							});
 							if (xVendorDetail != null) {
 								pParam.vendor_code = xVendorDetail.data.code;
-								pParam.vendor_name = xVendorDetail.data.name;
+								pParam.vendor_name = xVendorDetail.data.name; // test
 							}
 						}
 					}
