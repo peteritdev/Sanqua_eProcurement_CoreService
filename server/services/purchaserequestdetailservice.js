@@ -541,7 +541,7 @@ class PurchaseRequestDetailService {
 														xLineIds.push({
 															product_code: pParam.items[i].product_code,
 															qty: pParam.items[i].qty,
-															desc: pParam.items[i].description
+															desc: pParam.items[i].product_name
 														});
 													}
 												} else {
@@ -605,7 +605,10 @@ class PurchaseRequestDetailService {
 														// company_id: xDetail.data.company.id,
 														company_id: xCompanyId,
 														date_order: await _utilInstance.getCurrDate(),
-														status: xDetail.data.category_pr != 'bahan_baku' ? 'approved' :'waiting_approval',
+														status:
+															xDetail.data.category_pr != 'bahan_baku'
+																? 'approved'
+																: 'waiting_approval',
 														purchase_order_type: xDetail.data.category_pr,
 														user_sanqua: pParam.logged_user_name,
 														no_fpb: xDetail.data.request_no,
@@ -630,7 +633,10 @@ class PurchaseRequestDetailService {
 																		product_code: pParam.items[i].product_code,
 																		user_id: pParam.logged_user_id,
 																		user_name: pParam.logged_user_name,
-																		status: xDetail.data.category_pr != 'bahan_baku' ? 2 :1,
+																		status:
+																			xDetail.data.category_pr != 'bahan_baku'
+																				? 2
+																				: 1,
 																		request_id: xRequestId
 																	};
 																	await _repoInstance.save(
@@ -698,7 +704,7 @@ class PurchaseRequestDetailService {
 
 		return xJoResult;
 	}
-	
+
 	async cancelPR(pParam) {
 		console.log(`>>> pParam: ${JSON.stringify(pParam)}`);
 		var xJoResult = {};
@@ -719,33 +725,28 @@ class PurchaseRequestDetailService {
 			try {
 				// Check is pr_no parameter is not empty
 				if (pParam.pr_no === '' || pParam.pr_no === null) {
-					
 					xJoResult = {
 						status_code: '-99',
-						status_msg: "Cancel failed, no supply pr_no"
+						status_msg: 'Cancel failed, no supply pr_no'
 					};
-
 				} else {
-					const date = new Date()
-					const local = date.toLocaleString('id')
-					const updateAt = `[${local}]\n${pParam.cancel_reason}`
-					
+					const date = new Date();
+					const local = date.toLocaleString('id');
+					const updateAt = `[${local}]\n${pParam.cancel_reason}`;
+
 					let xParamOdoo = {
 						pr_name: pParam.pr_no,
 						reason: updateAt
-					}
+					};
 					console.log(`>>> xParamOdoo: ${JSON.stringify(xParamOdoo)}`);
 
 					// Call cancel api pr in odoo
-					let xCancelPRResult = await _integrationServiceInstance.cancelPR(
-						xParamOdoo
-					);
+					let xCancelPRResult = await _integrationServiceInstance.cancelPR(xParamOdoo);
 
 					if (xCancelPRResult.status_code == '00') {
-						
 						// split pr_no into array and looping to check each number
-						const arrPr = pParam.pr_no.split(',')
-						let xResultMSG = []
+						const arrPr = pParam.pr_no.split(',');
+						let xResultMSG = [];
 						for (let i in arrPr) {
 							// check pr number is available in esanqua db ?
 							let xData = await _repoInstance.getByPrNo({
@@ -760,37 +761,33 @@ class PurchaseRequestDetailService {
 										status: 5
 									};
 									let xCancelPR = await _repoInstance.save(xParamUpdate, 'update_by_pr_no');
-									
+
 									if (xCancelPR.status_code === '00') {
-										
 										xResultMSG.push({
 											pr_no: arrPr[i],
 											status_code: '00',
 											status_msg: xCancelPR.status_msg
-										})
-										
-									}else{
-										
+										});
+									} else {
 										xResultMSG.push({
 											pr_no: arrPr[i],
 											status_code: '-99',
 											status_msg: xCancelPR.status_msg
-										})
+										});
 									}
-								
-								}else{
+								} else {
 									xResultMSG.push({
 										pr_no: arrPr[i],
 										status_code: '-99',
 										status_msg: 'Cancel failed, Data not found'
-									})
+									});
 								}
 							} else {
 								xResultMSG.push({
 									pr_no: arrPr[i].pr_no,
 									status_code: '-99',
 									status_msg: 'Cancel failed, Data not found'
-								})
+								});
 							}
 						}
 
@@ -798,12 +795,10 @@ class PurchaseRequestDetailService {
 							status_code: '00',
 							status_msg: `You have successfully update this PR`,
 							data: xResultMSG
-						}
+						};
 						console.log('xJoResult >>>>>', xJoResult);
 					} else {
-
 						xJoResult = xCancelPRResult;
-
 					}
 				}
 			} catch (error) {
@@ -816,7 +811,7 @@ class PurchaseRequestDetailService {
 
 		return xJoResult;
 	}
-	
+
 	async checkItem(pParam) {
 		var xJoResult = {};
 		var xDecId = null;
@@ -836,19 +831,17 @@ class PurchaseRequestDetailService {
 			try {
 				console.log(`>>> PARAM>>>>>>: ${JSON.stringify(pParam)}`);
 				if (pParam.items.length > 0) {
-					let xParamOdoo = pParam
+					let xParamOdoo = pParam;
 
 					// Call check item api in odoo
-					let xCheckItemResult = await _integrationServiceInstance.checkItem(
-						xParamOdoo
-					);
+					let xCheckItemResult = await _integrationServiceInstance.checkItem(xParamOdoo);
 
 					if (xCheckItemResult.status_code == '00') {
 						xJoResult = {
 							status_code: '00',
 							status_msg: xCheckItemResult.status_msg,
 							data: xCheckItemResult.data[0].eSanqua
-						}
+						};
 					} else {
 						xJoResult = xCheckItemResult;
 					}
@@ -857,7 +850,7 @@ class PurchaseRequestDetailService {
 						status_code: '-99',
 						status_msg: 'You must supply some value',
 						data: null
-					}
+					};
 				}
 			} catch (e) {
 				xJoResult = {
