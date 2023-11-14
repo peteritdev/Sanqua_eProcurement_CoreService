@@ -541,7 +541,7 @@ class PurchaseRequestDetailService {
 														xLineIds.push({
 															product_code: pParam.items[i].product_code,
 															qty: pParam.items[i].qty,
-															desc: pParam.items[i].product_name
+															desc: pParam.items[i].description
 														});
 													}
 												} else {
