@@ -620,6 +620,8 @@ class PurchaseRequestDetailService {
 														line_ids: xLineIds
 													};
 
+													console.log(`>>> xParamOdoo: ${JSON.stringify(xParamOdoo)}`);
+
 													let xCreatePRResult = await _integrationServiceInstance.createPR(
 														xParamOdoo
 													);
