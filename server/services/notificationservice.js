@@ -221,16 +221,16 @@ class NotificationService {
 		return xJoResult;
 	}
 
-	async sendNotificationEmail_FPBNewIncoming(pParam, pMethod, pToken) {
+	async sendNotificationEmail(pParam, pMethod, pToken) {
 		var xJoResult = {};
 
 		try {
-			if (pParam.mode == 'request_approval_fpb') {
+			if (pParam.mode == 'new_incoming_fpb') {
 				let xAddNotifResult = await _oAuthService.eSanQuaNotification(
 					pMethod,
 					pToken,
 					pParam,
-					'/notification/email/fpb_approval'
+					'/notification/email/fpb_new_incoming'
 				);
 
 				xJoResult = {
@@ -242,7 +242,7 @@ class NotificationService {
 		} catch (e) {
 			xJoResult = {
 				status_code: '-99',
-				status_msg: `Exception error ${_xClassName}.sendNotificationEmail_FPBNeedApproval: ${e.message}`
+				status_msg: `Exception error ${_xClassName}.sendNotificationEmail: ${e.message}`
 			};
 		}
 

@@ -854,20 +854,31 @@ class PurchaseRequestService {
 													email: xApproverSeq1.approver_user[i].email
 												}
 											};
-											// console.log(
-											// 	`>>> xParamEmailNotification: ${JSON.stringify(
-											// 		xParamEmailNotification
-											// 	)}`
-											// );
+
 											xNotificationResult = await _notificationService.sendNotificationEmail_FPBNeedApproval(
 												xParamEmailNotification,
 												pParam.method,
 												pParam.token
 											);
 
-											console.log(
-												`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`
-											);
+											xParamEmailNotification.mode = 'new_incoming_fpb';
+
+											for (var i in config.notificationNewFPB) {
+												xParamEmailNotification.approver_user = {
+													employee_name: config.notificationNewFPB[i].name,
+													email: config.notificationNewFPB[i].email
+												};
+												console.log(
+													`>>> xParamEmailNotification: ${JSON.stringify(
+														xParamEmailNotification
+													)}`
+												);
+												xNotificationResult = await _notificationService.sendNotificationEmail(
+													xParamEmailNotification,
+													pParam.method,
+													pParam.token
+												);
+											}
 										}
 									}
 								}
