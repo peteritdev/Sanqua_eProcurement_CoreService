@@ -31,6 +31,8 @@ module.exports = (sequelize, DataTypes) => {
 		uom_id: DataTypes.INTEGER,
 		uom_name: DataTypes.STRING,
 
+		estimate_fulfillment: DataTypes.DATE,
+
 		status: DataTypes.INTEGER,
 		is_delete: DataTypes.INTEGER,
 		deleted_at: DataTypes.DATE,

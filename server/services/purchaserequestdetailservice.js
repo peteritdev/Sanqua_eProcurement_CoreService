@@ -141,8 +141,9 @@ class PurchaseRequestDetailService {
 
 					xAct = 'update';
 				} else {
+					console.log(`>>> pParam CEK CEK CEK : ${JSON.stringify(pParam)}`);
 					if (pParam.hasOwnProperty('product_id')) {
-						if (pParam.product_id != '' && pParam.product_id != null) {
+						if (pParam.product_id != null) {
 							// Get Product detail by Id
 							xProductDetail = await _productServiceInstance.getById({
 								id: await _utilInstance.encrypt(pParam.product_id.toString(), config.cryptoKey.hashKey)
@@ -156,14 +157,14 @@ class PurchaseRequestDetailService {
 					}
 
 					if (pParam.hasOwnProperty('vendor_id')) {
-						if (pParam.vendor_id != '' && pParam.vendor_id != null) {
+						if (pParam.vendor_id != null) {
 							// Get Vendor detail by id
 							xVendorDetail = await _vendorServiceInstance.getVendorById({
 								id: await _utilInstance.encrypt(pParam.vendor_id.toString(), config.cryptoKey.hashKey)
 							});
 							if (xVendorDetail != null) {
 								pParam.vendor_code = xVendorDetail.data.code;
-								pParam.vendor_name = xVendorDetail.data.name;
+								pParam.vendor_name = xVendorDetail.data.name; // test
 							}
 						}
 					}
@@ -174,6 +175,8 @@ class PurchaseRequestDetailService {
 				if (pParam.estimate_date_use == '') {
 					pParam.estimate_date_use = null;
 				}
+
+				// Validate if product_id is null (free keyin for project), estimate_fulfillment
 
 				var xAddResult = await _repoInstance.save(pParam, xAct);
 				xJoResult = xAddResult;
@@ -540,8 +543,11 @@ class PurchaseRequestDetailService {
 													} else {
 														xLineIds.push({
 															product_code: pParam.items[i].product_code,
+															product_name: `[${pParam.items[i].product_code}] ${pParam
+																.items[i].product_name}`,
 															qty: pParam.items[i].qty,
-															desc: pParam.items[i].description
+															note: `${pParam.items[i].description}`,
+															uom: pParam.items[i].uom
 														});
 													}
 												} else {
