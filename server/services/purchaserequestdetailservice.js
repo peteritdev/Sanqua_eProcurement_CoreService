@@ -642,6 +642,7 @@ class PurchaseRequestDetailService {
 																	let xParamUpdate = {
 																		pr_no: xCreatePRResult.name,
 																		product_code: pParam.items[i].product_code,
+																		product_name: pParam.items[i].product_name,
 																		user_id: pParam.logged_user_id,
 																		user_name: pParam.logged_user_name,
 																		status:
