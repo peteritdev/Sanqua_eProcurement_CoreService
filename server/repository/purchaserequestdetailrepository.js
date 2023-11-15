@@ -115,12 +115,15 @@ class PurchaseRequestDetailRepository {
 				pParam.updatedAt = await _utilInstance.getCurrDateTime();
 				var xProductCode = pParam.product_code;
 				var xRequestId = pParam.request_id;
+				var xProductName = pParam.product_name; // Temporary until frontend send purchase request detail id
 				delete pParam.product_code;
 				delete pParam.request_id;
+				delete pParam.product_name;
 				var xWhere = {
 					where: {
 						product_code: xProductCode,
-						request_id: xRequestId
+						request_id: xRequestId,
+						product_name: xProductName
 					},
 					transaction: xTransaction
 				};
@@ -322,7 +325,7 @@ class PurchaseRequestDetailRepository {
 
 		return xJoResult;
 	}
-	
+
 	async getByPrNo(pParam) {
 		var xWhereAnd = [];
 		var xWhere = [];
@@ -344,7 +347,6 @@ class PurchaseRequestDetailRepository {
 			where: xWhere,
 			subQuery: false
 		});
-			
 
 		return xData;
 	}
