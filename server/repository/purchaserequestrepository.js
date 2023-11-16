@@ -33,7 +33,8 @@ class PurchaseRequestRepository {
 						model: _modelVendorCatalogueDb,
 						as: 'vendor_catalogue'
 					}
-				]
+				],
+				order: [ [ 'product_name', 'ASC' ] ]
 			},
 			{
 				model: _modelProject,
