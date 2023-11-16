@@ -641,6 +641,11 @@ class PurchaseRequestDetailService {
 																for (var i in pParam.items) {
 																	// Decrypt ID
 																	let xDetailId = null;
+
+																	console.log(
+																		`>>> <createPR> pParam.items[i].id: ${pParam
+																			.items[i].id}`
+																	);
 																	let xDetailDecId = await _utilInstance.decrypt(
 																		pParam.items[i].id,
 																		config.cryptoKey.hashKey
@@ -648,6 +653,10 @@ class PurchaseRequestDetailService {
 																	if (xDetailDecId.status_code == '00') {
 																		xDetailId = xDetailDecId.decrypted;
 																	}
+
+																	console.log(
+																		`>>> <createPR> xDetailId: ${xDetailId}`
+																	);
 
 																	if (xDetailId != null) {
 																		let xParamUpdate = {
@@ -663,9 +672,15 @@ class PurchaseRequestDetailService {
 																					: 1
 																			// request_id: xRequestId
 																		};
-																		await _repoInstance.save(
+																		let xResultUpdate = await _repoInstance.save(
 																			xParamUpdate,
 																			'update'
+																		);
+
+																		console.log(
+																			`>>> <createPR> Result Update: ${JSON.stringify(
+																				xResultUpdate
+																			)}`
 																		);
 																	}
 																}
