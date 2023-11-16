@@ -116,7 +116,7 @@ class PurchaseRequestDetailService {
 					xVendorDetail = null;
 
 				if (pParam.hasOwnProperty('product_id') && pParam.hasOwnProperty('vendor_id')) {
-					if (pParam.product_id != '' && pParam.vendor_id != '') {
+					if (pParam.product_id != null && pParam.vendor_id != null) {
 						// Check first whether product_id and vendor_id already exists in detail or not
 						xPurchaseRequestDetail = await _repoInstance.getByProductIdVendorId({
 							product_id: pParam.product_id,
