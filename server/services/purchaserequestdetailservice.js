@@ -640,23 +640,7 @@ class PurchaseRequestDetailService {
 															if (xCreatePRResult.name != '') {
 																for (var i in pParam.items) {
 																	// Decrypt ID
-																	let xDetailId = null;
-
-																	console.log(
-																		`>>> <createPR> pParam.items[i].id: ${pParam
-																			.items[i].id}`
-																	);
-																	let xDetailDecId = await _utilInstance.decrypt(
-																		pParam.items[i].id,
-																		config.cryptoKey.hashKey
-																	);
-																	if (xDetailDecId.status_code == '00') {
-																		xDetailId = xDetailDecId.decrypted;
-																	}
-
-																	console.log(
-																		`>>> <createPR> xDetailId: ${xDetailId}`
-																	);
+																	let xDetailId = pParam.items[i].id;
 
 																	if (xDetailId != null) {
 																		let xParamUpdate = {
