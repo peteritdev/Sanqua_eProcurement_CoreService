@@ -583,15 +583,17 @@ class PurchaseRequestDetailService {
 												if (pParam.type == 'ca') {
 													for (var i in pParam.items) {
 														let xParamUpdate = {
-															product_code: pParam.items[i].product_code,
+															id: pParam.items[i].id,
+															// product_code: pParam.items[i].product_code,
 															user_id: pParam.logged_user_id,
 															user_name: pParam.logged_user_name,
-															status: 3,
-															request_id: xRequestId
+															status: 3
+															// request_id: xRequestId
 														};
 														await _repoInstance.save(
 															xParamUpdate,
-															'update_by_product_code_and_request_id'
+															// 'update_by_product_code_and_request_id'
+															'update'
 														);
 													}
 
