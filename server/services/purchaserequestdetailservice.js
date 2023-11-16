@@ -639,22 +639,35 @@ class PurchaseRequestDetailService {
 														if (xCreatePRResult.hasOwnProperty('name')) {
 															if (xCreatePRResult.name != '') {
 																for (var i in pParam.items) {
-																	let xParamUpdate = {
-																		pr_no: xCreatePRResult.name,
-																		product_code: pParam.items[i].product_code,
-																		product_name: pParam.items[i].product_name,
-																		user_id: pParam.logged_user_id,
-																		user_name: pParam.logged_user_name,
-																		status:
-																			xDetail.data.category_pr != 'bahan_baku'
-																				? 2
-																				: 1,
-																		request_id: xRequestId
-																	};
-																	await _repoInstance.save(
-																		xParamUpdate,
-																		'update_by_product_code_and_request_id'
+																	// Decrypt ID
+																	let xDetailId = null;
+																	let xDetailDecId = await _utilInstance.decrypt(
+																		pParam.items[i].id,
+																		config.cryptoKey.hashKey
 																	);
+																	if (xDetailDecId.status_code == '00') {
+																		xDetailId = xDetailDecId.decrypted;
+																	}
+
+																	if (xDetailId != null) {
+																		let xParamUpdate = {
+																			id: xDetailId,
+																			pr_no: xCreatePRResult.name,
+																			// product_code: pParam.items[i].product_code,
+																			// product_name: pParam.items[i].product_name,
+																			user_id: pParam.logged_user_id,
+																			user_name: pParam.logged_user_name,
+																			status:
+																				xDetail.data.category_pr != 'bahan_baku'
+																					? 2
+																					: 1
+																			// request_id: xRequestId
+																		};
+																		await _repoInstance.save(
+																			xParamUpdate,
+																			'update'
+																		);
+																	}
 																}
 
 																xJoResult = {
