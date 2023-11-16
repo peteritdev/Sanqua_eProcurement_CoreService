@@ -116,7 +116,7 @@ class PurchaseRequestDetailService {
 					xVendorDetail = null;
 
 				if (pParam.hasOwnProperty('product_id') && pParam.hasOwnProperty('vendor_id')) {
-					if (pParam.product_id != '' && pParam.vendor_id != '') {
+					if (pParam.product_id != null && pParam.vendor_id != null) {
 						// Check first whether product_id and vendor_id already exists in detail or not
 						xPurchaseRequestDetail = await _repoInstance.getByProductIdVendorId({
 							product_id: pParam.product_id,
@@ -583,15 +583,17 @@ class PurchaseRequestDetailService {
 												if (pParam.type == 'ca') {
 													for (var i in pParam.items) {
 														let xParamUpdate = {
-															product_code: pParam.items[i].product_code,
+															id: pParam.items[i].id,
+															// product_code: pParam.items[i].product_code,
 															user_id: pParam.logged_user_id,
 															user_name: pParam.logged_user_name,
-															status: 3,
-															request_id: xRequestId
+															status: 3
+															// request_id: xRequestId
 														};
 														await _repoInstance.save(
 															xParamUpdate,
-															'update_by_product_code_and_request_id'
+															// 'update_by_product_code_and_request_id'
+															'update'
 														);
 													}
 
@@ -639,21 +641,34 @@ class PurchaseRequestDetailService {
 														if (xCreatePRResult.hasOwnProperty('name')) {
 															if (xCreatePRResult.name != '') {
 																for (var i in pParam.items) {
-																	let xParamUpdate = {
-																		pr_no: xCreatePRResult.name,
-																		product_code: pParam.items[i].product_code,
-																		user_id: pParam.logged_user_id,
-																		user_name: pParam.logged_user_name,
-																		status:
-																			xDetail.data.category_pr != 'bahan_baku'
-																				? 2
-																				: 1,
-																		request_id: xRequestId
-																	};
-																	await _repoInstance.save(
-																		xParamUpdate,
-																		'update_by_product_code_and_request_id'
-																	);
+																	// Decrypt ID
+																	let xDetailId = pParam.items[i].id;
+
+																	if (xDetailId != null) {
+																		let xParamUpdate = {
+																			id: xDetailId,
+																			pr_no: xCreatePRResult.name,
+																			// product_code: pParam.items[i].product_code,
+																			// product_name: pParam.items[i].product_name,
+																			user_id: pParam.logged_user_id,
+																			user_name: pParam.logged_user_name,
+																			status:
+																				xDetail.data.category_pr != 'bahan_baku'
+																					? 2
+																					: 1
+																			// request_id: xRequestId
+																		};
+																		let xResultUpdate = await _repoInstance.save(
+																			xParamUpdate,
+																			'update'
+																		);
+
+																		console.log(
+																			`>>> <createPR> Result Update: ${JSON.stringify(
+																				xResultUpdate
+																			)}`
+																		);
+																	}
 																}
 
 																xJoResult = {

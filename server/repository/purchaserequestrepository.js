@@ -46,7 +46,8 @@ class PurchaseRequestRepository {
 			where: {
 				id: pParam.id
 			},
-			include: xInclude
+			include: xInclude,
+			order: [ [ 'purchase_request_detail', 'product_name', 'ASC' ] ]
 		});
 
 		return xData;
