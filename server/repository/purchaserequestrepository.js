@@ -356,6 +356,18 @@ class PurchaseRequestRepository {
 				xObjJsonWhere.companyId = pParam.company_id;
 			}
 		}
+		
+		// 16/11/2023 to show fpb-project with product code is null
+		if (pParam.hasOwnProperty('project_id')) {
+			if (pParam.project_id != '') {
+				xSqlWhere += ' AND pr.project_id = :projectId AND prd.product_code IS NULL ';
+				xObjJsonWhere.projectId = pParam.project_id;
+			}
+		} else {
+			
+			xSqlWhere += ' AND pr.project_id IS NOT NULL AND prd.product_code IS NULL ';
+		}
+		// ---
 
 		if (pParam.hasOwnProperty('owned_document_no')) {
 			if (pParam.owned_document_no.length > 0) {
@@ -369,9 +381,22 @@ class PurchaseRequestRepository {
 						xSqlWhereCompanyOwnedDoc = ' AND pr.company_id = :companyId';
 					}
 				}
+
+				// 16/11/2023 to show fpb-project with product code is null
+				let xSqlWhereProject = '';
+				if (pParam.hasOwnProperty('project_id')) {
+					if (pParam.project_id != '') {
+						xSqlWhereProject = ' AND pr.project_id = :projectId AND prd.product_code IS NULL';
+					}
+				} else {
+					
+					xSqlWhereProject += ' AND pr.project_id IS NOT NULL AND prd.product_code IS NULL';
+				}
+				// ---
+				
 				xSqlWhere = ` (( ${xSqlWhere} ) OR (${xSqlWhereOr} ${xSqlWhereCompanyOwnedDoc != ''
 					? xSqlWhereCompanyOwnedDoc
-					: ''} ))`;
+					: ''} ${xSqlWhereProject}))`;
 			}
 		}
 
@@ -492,11 +517,9 @@ class PurchaseRequestRepository {
 								prd.estimate_date_use,
 								prd.pr_no,
 								prd.last_price,
+								prd.estimate_fulfillment,
 								prd.uom_name,
-								
-								p.code,
-								p.name,
-								p.odoo_project_code`;
+								p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 				xSqlGroupBy = ` `;
 			} else {
@@ -532,13 +555,13 @@ class PurchaseRequestRepository {
 				 WHERE ${xSqlWhere} ${xSqlGroupBy}
 				  ${xSqlOrderBy}${xSqlLimit} `;
 
-		xSqlCount = ` SELECT count(distinct pr.request_no) AS total_record
+		xSqlCount = ` SELECT count(pr.request_no) AS total_record
 		  FROM tr_purchaserequests pr 
 		  	LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
 			  LEFT JOIN ms_projects p ON p.id = pr.project_id
 		  WHERE ${xSqlWhere}`;
 
-		console.log(`>>> xSqlCount: ${xSqlCount}`);
+		// console.log(`>>> xSqlCount: ${xSqlCount}`);
 
 		xData = await sequelize.query(xSql, {
 			replacements: xObjJsonWhere,

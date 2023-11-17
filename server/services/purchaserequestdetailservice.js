@@ -47,7 +47,7 @@ class PurchaseRequestDetailService {
 		var xDecId = null;
 		var xRequestIdClear = 0;
 
-		console.log(`>>> pParam [PurchaseRequestDetailService] : ${JSON.stringify(pParam)}`);
+		// console.log(`>>> pParam [PurchaseRequestDetailService] : ${JSON.stringify(pParam)}`);
 
 		delete pParam.act;
 
@@ -141,7 +141,7 @@ class PurchaseRequestDetailService {
 
 					xAct = 'update';
 				} else {
-					console.log(`>>> pParam CEK CEK CEK : ${JSON.stringify(pParam)}`);
+					// console.log(`>>> pParam CEK CEK CEK : ${JSON.stringify(pParam)}`);
 					if (pParam.hasOwnProperty('product_id')) {
 						if (pParam.product_id != null) {
 							// Get Product detail by Id
@@ -250,7 +250,7 @@ class PurchaseRequestDetailService {
 								)
 							});
 							if (xProductDetail != null) {
-								console.log(JSON.stringify(xProductDetail));
+								// console.log(JSON.stringify(xProductDetail));
 								xItems[i].product_code = xProductDetail.data.code;
 								xItems[i].product_name = xProductDetail.data.name;
 							}
@@ -732,7 +732,7 @@ class PurchaseRequestDetailService {
 	}
 
 	async cancelPR(pParam) {
-		console.log(`>>> pParam: ${JSON.stringify(pParam)}`);
+		// console.log(`>>> pParam: ${JSON.stringify(pParam)}`);
 		var xJoResult = {};
 		var xDecId = null;
 		var xFlagProcess = false;
@@ -764,7 +764,7 @@ class PurchaseRequestDetailService {
 						pr_name: pParam.pr_no,
 						reason: updateAt
 					};
-					console.log(`>>> xParamOdoo: ${JSON.stringify(xParamOdoo)}`);
+					// console.log(`>>> xParamOdoo: ${JSON.stringify(xParamOdoo)}`);
 
 					// Call cancel api pr in odoo
 					let xCancelPRResult = await _integrationServiceInstance.cancelPR(xParamOdoo);
@@ -822,7 +822,7 @@ class PurchaseRequestDetailService {
 							status_msg: `You have successfully update this PR`,
 							data: xResultMSG
 						};
-						console.log('xJoResult >>>>>', xJoResult);
+						// console.log('xJoResult >>>>>', xJoResult);
 					} else {
 						xJoResult = xCancelPRResult;
 					}
@@ -855,7 +855,7 @@ class PurchaseRequestDetailService {
 
 		if (xFlagProcess) {
 			try {
-				console.log(`>>> PARAM>>>>>>: ${JSON.stringify(pParam)}`);
+				// console.log(`>>> PARAM>>>>>>: ${JSON.stringify(pParam)}`);
 				if (pParam.items.length > 0) {
 					let xParamOdoo = pParam;
 
@@ -890,7 +890,7 @@ class PurchaseRequestDetailService {
 	}
 
 	async updatePo(pParam) {
-		console.log(`>>> pParam: ${JSON.stringify(pParam)}`);
+		// console.log(`>>> pParam: ${JSON.stringify(pParam)}`);
 		var xJoResult = {};
 
 		try {
