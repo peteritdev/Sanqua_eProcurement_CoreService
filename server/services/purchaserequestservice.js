@@ -336,7 +336,7 @@ class PurchaseRequestService {
 					pParam.department_id = pParam.logged_department_id;
 				}
 
-				console.log(`>>> pParam 2: ${JSON.stringify(pParam)}`);
+				// console.log(`>>> pParam 2: ${JSON.stringify(pParam)}`);
 
 				var xResultList = await _repoInstance.list(pParam);
 
@@ -408,7 +408,9 @@ class PurchaseRequestService {
 										estimate_date_use: xRows[index].estimate_date_use,
 										pr_no: xRows[index].pr_no,
 										last_price: xRows[index].last_price,
-										uom_name: xRows[index].uom_name
+										uom_name: xRows[index].uom_name,
+										// add new 16/11/2023
+										estimate_fulfillment: xRows[index].estimate_fulfillment,
 									}
 								});
 							}
@@ -556,11 +558,14 @@ class PurchaseRequestService {
 		if (xFlagProcess) {
 			var xResult = await _repoInstance.getById(pParam);
 
-			console.log(`>>> xResult: ${JSON.stringify(xResult)}`);
+			// console.log(`>>> xResult: ${JSON.stringify(xResult)}`);
 
 			if (xResult != null) {
 				var xJoArrRequestDetailData = [];
 				var xDetail = xResult.purchase_request_detail;
+				// 17/11/2023 array for send to odoo check item
+				var xOdooArrItem = [];
+				// --
 
 				let xFileArr = [];
 				for (var j in xResult.file) {
@@ -574,6 +579,15 @@ class PurchaseRequestService {
 				}
 
 				for (var index in xDetail) {
+					// 17/11/2023 array for send to odoo check item
+					xOdooArrItem.push({
+						code: xDetail[index].product_code,
+						name: xDetail[index].product_name,
+						uom: xDetail[index].uom_name,
+						index: index
+					})
+					// ----
+
 					xJoArrRequestDetailData.push({
 						id: await _utilInstance.encrypt(xDetail[index].id, config.cryptoKey.hashKey),
 						product: {
@@ -657,6 +671,21 @@ class PurchaseRequestService {
 				}
 
 				console.log(`>>> xArrUserCanCancel: ${JSON.stringify(xArrUserCanCancel)}`);
+				
+				// Call check item in odoo
+				let xCheckItemInOdoo = await _oAuthService.checkItem({items: xOdooArrItem});
+				if (xCheckItemInOdoo.status_code === '00') {
+					const xResult = xCheckItemInOdoo.data[0].eSanqua
+					for (let i = 0; i < xResult.length; i++) {
+						const xResultItem = xResult[i]
+						Object.assign(
+							xJoArrRequestDetailData[xResultItem.index],
+							{
+								check_result: xResultItem
+							}
+						)
+					}
+				}
 
 				xJoData = {
 					id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
@@ -1349,7 +1378,7 @@ class PurchaseRequestService {
 		}
 
 		if (xFlagProcess) {
-			console.log(`>>> pParam: ${JSON.stringify(pParam)}`);
+			// console.log(`>>> pParam: ${JSON.stringify(pParam)}`);
 			let xData = await _repoInstance.getById({
 				id: pParam.document_id
 			});
