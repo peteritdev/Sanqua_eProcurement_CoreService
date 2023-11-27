@@ -580,7 +580,6 @@ class PurchaseRequestService {
 
 				for (var index in xDetail) {
 					// 17/11/2023 array for send to odoo check item
-					// 17/11/2023 array for send to odoo check item
 					if (xResult.project !== null) {
 						xOdooArrItem.push({
 							code: null,
