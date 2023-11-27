@@ -388,10 +388,11 @@ class PurchaseRequestRepository {
 					if (pParam.project_id != '') {
 						xSqlWhereProject = ' AND pr.project_id = :projectId AND prd.product_code IS NULL';
 					}
-				} else {
-					
-					xSqlWhereProject += ' AND pr.project_id IS NOT NULL AND prd.product_code IS NULL';
 				}
+				// else {
+					
+				// 	xSqlWhereProject += ' AND pr.project_id IS NOT NULL AND prd.product_code IS NULL';
+				// }
 				// ---
 				
 				xSqlWhere = ` (( ${xSqlWhere} ) OR (${xSqlWhereOr} ${xSqlWhereCompanyOwnedDoc != ''
