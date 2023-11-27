@@ -358,14 +358,15 @@ class PurchaseRequestRepository {
 		}
 		
 		// 16/11/2023 to show fpb-project with product code is null
-		if (pParam.hasOwnProperty('project_id')) {
-			if (pParam.project_id != '') {
-				xSqlWhere += ' AND pr.project_id = :projectId AND prd.product_code IS NULL ';
-				xObjJsonWhere.projectId = pParam.project_id;
+		if (!pParam.hasOwnProperty('is_export')) {
+			if (pParam.hasOwnProperty('project_id')) {
+				if (pParam.project_id != '') {
+					xSqlWhere += ' AND pr.project_id = :projectId AND prd.product_code IS NULL ';
+					xObjJsonWhere.projectId = pParam.project_id;
+				}
+			} else {
+				xSqlWhere += ' AND pr.project_id IS NOT NULL AND prd.product_code IS NULL ';
 			}
-		} else {
-			
-			xSqlWhere += ' AND pr.project_id IS NOT NULL AND prd.product_code IS NULL ';
 		}
 		// ---
 
@@ -384,15 +385,16 @@ class PurchaseRequestRepository {
 
 				// 16/11/2023 to show fpb-project with product code is null
 				let xSqlWhereProject = '';
-				if (pParam.hasOwnProperty('project_id')) {
-					if (pParam.project_id != '') {
-						xSqlWhereProject = ' AND pr.project_id = :projectId AND prd.product_code IS NULL';
+				if (!pParam.hasOwnProperty('is_export')) {
+					if (pParam.hasOwnProperty('project_id')) {
+						if (pParam.project_id != '') {
+							xSqlWhereProject = ' AND pr.project_id = :projectId AND prd.product_code IS NULL';
+						}
+					}
+					else {
+						xSqlWhereProject += ' AND pr.project_id IS NOT NULL AND prd.product_code IS NULL';
 					}
 				}
-				// else {
-					
-				// 	xSqlWhereProject += ' AND pr.project_id IS NOT NULL AND prd.product_code IS NULL';
-				// }
 				// ---
 				
 				xSqlWhere = ` (( ${xSqlWhere} ) OR (${xSqlWhereOr} ${xSqlWhereCompanyOwnedDoc != ''
