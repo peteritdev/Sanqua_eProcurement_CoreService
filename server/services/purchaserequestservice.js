@@ -580,12 +580,21 @@ class PurchaseRequestService {
 
 				for (var index in xDetail) {
 					// 17/11/2023 array for send to odoo check item
-					xOdooArrItem.push({
-						code: xDetail[index].product_code,
-						name: xDetail[index].product_name,
-						uom: xDetail[index].uom_name,
-						index: index
-					})
+					if (xResult.project !== null) {
+						xOdooArrItem.push({
+							code: null,
+							name: xDetail[index].product_name,
+							uom: xDetail[index].uom_name,
+							index: index
+						})
+					} else {
+						xOdooArrItem.push({
+							code: xDetail[index].product_code,
+							name: xDetail[index].product_name,
+							uom: xDetail[index].uom_name,
+							index: index
+						})
+					}
 					// ----
 
 					xJoArrRequestDetailData.push({
