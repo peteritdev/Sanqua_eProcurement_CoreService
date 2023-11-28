@@ -584,14 +584,14 @@ class PurchaseRequestService {
 						xOdooArrItem.push({
 							code: null,
 							name: xDetail[index].product_name,
-							uom: xDetail[index].uom_name,
+							uom: xDetail[index].uom_name != null ? xDetail[index].uom_name : "",
 							index: index
 						})
 					} else {
 						xOdooArrItem.push({
 							code: xDetail[index].product_code,
 							name: xDetail[index].product_name,
-							uom: xDetail[index].uom_name,
+							uom: xDetail[index].uom_name != null ? xDetail[index].uom_name : "",
 							index: index
 						})
 					}
