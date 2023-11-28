@@ -358,7 +358,7 @@ class PurchaseRequestRepository {
 		}
 		
 		// 16/11/2023 to show fpb-project with product code is null
-		if (!pParam.hasOwnProperty('is_export')) {
+		if (pParam.hasOwnProperty('is_export')) {
 			if (pParam.hasOwnProperty('project_id')) {
 				if (pParam.project_id != '') {
 					xSqlWhere += ' AND pr.project_id = :projectId AND prd.product_code IS NULL ';
@@ -385,7 +385,7 @@ class PurchaseRequestRepository {
 
 				// 16/11/2023 to show fpb-project with product code is null
 				let xSqlWhereProject = '';
-				if (!pParam.hasOwnProperty('is_export')) {
+				if (pParam.hasOwnProperty('is_export')) {
 					if (pParam.hasOwnProperty('project_id')) {
 						if (pParam.project_id != '') {
 							xSqlWhereProject = ' AND pr.project_id = :projectId AND prd.product_code IS NULL';

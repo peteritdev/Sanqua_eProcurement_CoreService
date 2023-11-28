@@ -857,8 +857,21 @@ class PurchaseRequestDetailService {
 			try {
 				// console.log(`>>> PARAM>>>>>>: ${JSON.stringify(pParam)}`);
 				if (pParam.items.length > 0) {
-					let xParamOdoo = pParam;
+					let xParamOdoo = null;
+					let xArr = []
+					for (let i = 0; i < pParam.items.length; i++) {
+						xArr.push({
+							code: pParam.items[i].code,
+							name: pParam.items[i].name,
+							uom: pParam.items[i].uom != null ? pParam.items[i].uom : '',
+							index: 0
+						})
+					}
+					xParamOdoo = {
+						items: xArr
+					}
 
+					console.log('HERE>>>>>', xParamOdoo);
 					// Call check item api in odoo
 					let xCheckItemResult = await _integrationServiceInstance.checkItem(xParamOdoo);
 
