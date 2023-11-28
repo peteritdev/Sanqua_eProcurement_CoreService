@@ -358,16 +358,16 @@ class PurchaseRequestRepository {
 		}
 		
 		// 16/11/2023 to show fpb-project with product code is null
-		if (pParam.hasOwnProperty('is_export')) {
-			if (pParam.hasOwnProperty('project_id')) {
-				if (pParam.project_id != '') {
-					xSqlWhere += ' AND pr.project_id = :projectId AND prd.product_code IS NULL ';
-					xObjJsonWhere.projectId = pParam.project_id;
-				}
-			} else {
-				xSqlWhere += ' AND pr.project_id IS NOT NULL AND prd.product_code IS NULL ';
-			}
-		}
+		// if (pParam.hasOwnProperty('is_export')) {
+			// if (pParam.hasOwnProperty('project_id')) {
+			// 	if (pParam.project_id != '') {
+			// 		xSqlWhere += ' AND pr.project_id = :projectId AND prd.product_code IS NULL ';
+			// 		xObjJsonWhere.projectId = pParam.project_id;
+			// 	}
+			// } else {
+			// 	xSqlWhere += ' AND pr.project_id IS NOT NULL AND prd.product_code IS NULL ';
+			// }
+		// }
 		// ---
 
 		if (pParam.hasOwnProperty('owned_document_no')) {
@@ -385,16 +385,16 @@ class PurchaseRequestRepository {
 
 				// 16/11/2023 to show fpb-project with product code is null
 				let xSqlWhereProject = '';
-				if (pParam.hasOwnProperty('is_export')) {
-					if (pParam.hasOwnProperty('project_id')) {
-						if (pParam.project_id != '') {
-							xSqlWhereProject = ' AND pr.project_id = :projectId AND prd.product_code IS NULL';
-						}
-					}
-					else {
-						xSqlWhereProject += ' AND pr.project_id IS NOT NULL AND prd.product_code IS NULL';
-					}
-				}
+				// if (pParam.hasOwnProperty('is_export')) {
+					// if (pParam.hasOwnProperty('project_id')) {
+					// 	if (pParam.project_id != '') {
+					// 		xSqlWhereProject = ' AND pr.project_id = :projectId AND prd.product_code IS NULL';
+					// 	}
+					// }
+					// else {
+					// 	xSqlWhereProject += ' AND pr.project_id IS NOT NULL AND prd.product_code IS NULL';
+					// }
+				// }
 				// ---
 				
 				xSqlWhere = ` (( ${xSqlWhere} ) OR (${xSqlWhereOr} ${xSqlWhereCompanyOwnedDoc != ''
@@ -558,7 +558,7 @@ class PurchaseRequestRepository {
 				 WHERE ${xSqlWhere} ${xSqlGroupBy}
 				  ${xSqlOrderBy}${xSqlLimit} `;
 
-		xSqlCount = ` SELECT count(pr.request_no) AS total_record
+		xSqlCount = ` SELECT count(distinct pr.request_no) AS total_record
 		  FROM tr_purchaserequests pr 
 		  	LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
 			  LEFT JOIN ms_projects p ON p.id = pr.project_id
