@@ -342,6 +342,7 @@ class PurchaseRequestService {
 
 				if (xResultList.total_record > 0) {
 					var xRows = xResultList.data;
+					console.log('xRows>>>>>>>>', xRows);
 
 					if (pParam.hasOwnProperty('is_export')) {
 						if (pParam.is_export) {
@@ -351,11 +352,13 @@ class PurchaseRequestService {
 										xRows[index].id.toString(),
 										config.cryptoKey.hashKey
 									),
-									project_code: xRows[index].project_code,
-									project_name: xRows[index].project_name,
-									odoo_project_code: xRows[index].odoo_project_code,
+									project: {
+										id: xRows[index].project_id,
+										code: xRows[index].project_code,
+										name: xRows[index].project_name,
+										odoo_project_code: xRows[index].odoo_project_code,
+									},
 									request_no: xRows[index].request_no,
-									project: xRows[index].c,
 									requested_at:
 										xRows[index].requested_at == null
 											? ''
@@ -421,9 +424,12 @@ class PurchaseRequestService {
 										xRows[index].id.toString(),
 										config.cryptoKey.hashKey
 									),
-									project_code: xRows[index].project_code,
-									project_name: xRows[index].project_name,
-									odoo_project_code: xRows[index].odoo_project_code,
+									project: {
+										id: xRows[index].project_id,
+										code: xRows[index].project_code,
+										name: xRows[index].project_name,
+										odoo_project_code: xRows[index].odoo_project_code,
+									},
 									request_no: xRows[index].request_no,
 									requested_at:
 										xRows[index].requested_at == null
@@ -472,9 +478,12 @@ class PurchaseRequestService {
 						for (var index in xRows) {
 							xJoArrData.push({
 								id: await _utilInstance.encrypt(xRows[index].id.toString(), config.cryptoKey.hashKey),
-								project_code: xRows[index].project_code,
-								project_name: xRows[index].project_name,
-								odoo_project_code: xRows[index].odoo_project_code,
+								project: {
+									id: xRows[index].project_id,
+									code: xRows[index].project_code,
+									name: xRows[index].project_name,
+									odoo_project_code: xRows[index].odoo_project_code,
+								},
 								request_no: xRows[index].request_no,
 								requested_at:
 									xRows[index].requested_at == null
@@ -1445,6 +1454,154 @@ class PurchaseRequestService {
 			}
 		}
 
+		return xJoResult;
+	}
+	
+	async fpbProjectList(pParam) {
+		var xJoResult = {};
+		var xJoArrData = [];
+		var xFlagProcess = false;
+		var xDecId = {};
+		var xFlagAPIResult = false;
+		var xArrOwnedDocNo = [];
+
+		if (pParam.hasOwnProperty('user_id')) {
+			if (pParam.user_id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.user_id = xDecId.decrypted;
+					xFlagProcess = true;
+				} else {
+					xJoResult = xDecId;
+				}
+			}
+		}
+
+		if (xFlagProcess) {
+
+			let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, {
+				application_id: config.applicationId,
+				table_name: config.dbTables.fpb,
+				document_id: '',
+				user_id: pParam.user_id
+			});
+			// console.log(`>>> xOwnedDocument : ${JSON.stringify(xOwnedDocument)}`);
+
+			if (xOwnedDocument.status_code == '00') {
+				if (xOwnedDocument.hasOwnProperty('token_data')) {
+					if (xOwnedDocument.token_data.status_code == '00') {
+						xFlagAPIResult = true;
+						for (var i in xOwnedDocument.token_data.data) {
+							xArrOwnedDocNo.push(xOwnedDocument.token_data.data[i].document_no);
+						}
+					} else {
+						xFlagAPIResult = true;
+					}
+				}
+			} else {
+				xFlagAPIResult = true;
+			}
+
+			if (xFlagAPIResult) {
+				pParam.owned_document_no = xArrOwnedDocNo;
+
+				if (!pParam.hasOwnProperty('company_id')) {
+					pParam.company_id = pParam.logged_company_id;
+				}
+
+				if (!pParam.hasOwnProperty('department_id')) {
+					pParam.department_id = pParam.logged_department_id;
+				}
+
+				var xResultList = await _repoInstance.fpbProjectList(pParam);
+
+				if (xResultList.total_record > 0) {
+					var xRows = xResultList.data;
+					console.log('xRows>>>>>>>>', xRows);
+
+					for (var index in xRows) {
+						xJoArrData.push({
+							id: await _utilInstance.encrypt(xRows[index].id.toString(), config.cryptoKey.hashKey),
+							project: {
+								id: xRows[index].project_id,
+								code: xRows[index].project_code,
+								name: xRows[index].project_name,
+								odoo_project_code: xRows[index].odoo_project_code,
+							},
+							request_no: xRows[index].request_no,
+							requested_at:
+								xRows[index].requested_at == null
+									? ''
+									: moment(xRows[index].requested_at).tz(config.timezone).format('DD MMM'),
+							employee: {
+								id: await _utilInstance.encrypt(
+									xRows[index].employee_id.toString(),
+									config.cryptoKey.hashKey
+								),
+								name: xRows[index].employee_name
+							},
+							department: {
+								id: xRows[index].department_id,
+								name: xRows[index].department_name
+							},
+							status: {
+								id: xRows[index].status,
+								name:
+									xRows[index].status == -1
+										? 'Rejected'
+										: config.statusDescription.purchaseRequest[xRows[index].status]
+							},
+
+							company: {
+								id: xRows[index].company_id,
+								code: xRows[index].company_code,
+								name: xRows[index].company_name
+							},
+
+							created_at:
+								xRows[index].created_at != null
+									? moment(xRows[index].created_at).format('DD-MM-YYYY HH:mm:ss')
+									: null,
+
+							total_price: xRows[index].total_price,
+							total_quotation_price: xRows[index].total_quotation_price,
+							category_item: {
+								id: xRows[index].category_item,
+								name: config.categoryItem[xRows[index].category_item]
+							},
+							item: {
+								product_code: xRows[index].product_code,
+								product_name: xRows[index].product_name,
+								qty: xRows[index].qty,
+								budget_price_per_unit: xRows[index].budget_price_per_unit,
+								budget_price_total: xRows[index].budget_price_total,
+								quotation_price_per_unit: xRows[index].quotation_price_per_unit,
+								quotation_price_total: xRows[index].quotation_price_total,
+								estimate_date_use: xRows[index].estimate_date_use,
+								pr_no: xRows[index].pr_no,
+								last_price: xRows[index].last_price,
+								uom_name: xRows[index].uom_name,
+								// add new 16/11/2023
+								estimate_fulfillment: xRows[index].estimate_fulfillment,
+							}
+						});
+					}
+
+					xJoResult = {
+						status_code: '00',
+						status_msg: 'OK',
+						total_record: xResultList.total_record,
+						data: xJoArrData
+					};
+				} else {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Data not found'
+					};
+				}
+			}
+		}
+		// 24/10/2023
 		return xJoResult;
 	}
 }

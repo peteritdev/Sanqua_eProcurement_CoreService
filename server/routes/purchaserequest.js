@@ -167,4 +167,12 @@ module.exports = (app) => {
 
 	arrValidate = [];
 	app.post(rootAPIPath + 'odoo/update_po', arrValidate, purchaseRequestController.purchaseRequestDetail_UpdatePo);
+	
+	// List FPB Project
+	arrValidate = [];
+	arrValidate = [
+		check('offset', 'Parameter offset must be integer and cannot be empty').not().isEmpty().isInt(),
+		check('limit').not().isEmpty().withMessage('Parameter limit cannot be empty')
+	];
+	app.get(rootAPIPath + 'project/list', arrValidate, purchaseRequestController.purchaseRequestProject_List);
 };
