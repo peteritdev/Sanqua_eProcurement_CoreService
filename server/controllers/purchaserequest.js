@@ -17,6 +17,7 @@ const { check, validationResult } = require('express-validator');
 module.exports = {
 	purchaseRequest_Save,
 	purchaseRequest_List,
+	purchaseRequest_DropDown,
 	purchaseRequestDetail_Save,
 	purchaseRequest_Detail,
 	purchaseRequestDetail_Delete,
@@ -32,7 +33,8 @@ module.exports = {
 	purchaseRequestDetail_SetToDraft,
 	purchaseRequest_CancelPR,
 	purchaseRequestDetail_CheckItem,
-	purchaseRequestDetail_UpdatePo
+	purchaseRequestDetail_UpdatePo,
+	purchaseRequestDetail_DropDown
 };
 
 async function purchaseRequest_List(req, res) {
@@ -92,6 +94,74 @@ async function purchaseRequest_List(req, res) {
 				req.query.method = req.headers['x-method'];
 				req.query.token = req.headers['x-token'];
 				joResult = await _serviceInstance.list(req.query);
+				joResult = JSON.stringify(joResult);
+			}
+		} else {
+			joResult = JSON.stringify(oAuthResult);
+		}
+	} else {
+		joResult = JSON.stringify(oAuthResult);
+	}
+
+	res.setHeader('Content-Type', 'application/json');
+	res.status(200).send(joResult);
+}
+
+async function purchaseRequest_DropDown(req, res) {
+	var joResult;
+	var oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
+
+	// console.log('>>> Detail : ' + JSON.stringify(oAuthResult));
+
+	if (oAuthResult.status_code == '00') {
+		if (oAuthResult.token_data.status_code == '00') {
+			// Validate first
+			var errors = validationResult(req).array();
+
+			if (errors.length != 0) {
+				joResult = JSON.stringify({
+					status_code: '-99',
+					status_msg: 'Parameter value has problem',
+					error_msg: errors
+				});
+			} else {
+				req.query.method = req.headers['x-method'];
+				req.query.token = req.headers['x-token'];
+				joResult = await _serviceInstance.dropDown(req.query);
+				joResult = JSON.stringify(joResult);
+			}
+		} else {
+			joResult = JSON.stringify(oAuthResult);
+		}
+	} else {
+		joResult = JSON.stringify(oAuthResult);
+	}
+
+	res.setHeader('Content-Type', 'application/json');
+	res.status(200).send(joResult);
+}
+
+async function purchaseRequestDetail_DropDown(req, res) {
+	var joResult;
+	var oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
+
+	// console.log('>>> Detail : ' + JSON.stringify(oAuthResult));
+
+	if (oAuthResult.status_code == '00') {
+		if (oAuthResult.token_data.status_code == '00') {
+			// Validate first
+			var errors = validationResult(req).array();
+
+			if (errors.length != 0) {
+				joResult = JSON.stringify({
+					status_code: '-99',
+					status_msg: 'Parameter value has problem',
+					error_msg: errors
+				});
+			} else {
+				req.query.method = req.headers['x-method'];
+				req.query.token = req.headers['x-token'];
+				joResult = await _serviceDetailInstance.dropDown(req.query);
 				joResult = JSON.stringify(joResult);
 			}
 		} else {
