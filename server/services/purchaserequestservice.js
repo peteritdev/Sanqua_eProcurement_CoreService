@@ -1570,7 +1570,6 @@ class PurchaseRequestService {
 								name: config.categoryItem[xRows[index].category_item]
 							},
 							item: {
-								id: await _utilInstance.encrypt(xRows[index].id, config.cryptoKey.hashKey),
 								product_code: xRows[index].product_code,
 								product_name: xRows[index].product_name,
 								qty: xRows[index].qty,
