@@ -97,10 +97,26 @@ module.exports = (app) => {
 	];
 	app.get(rootAPIPath + 'list', arrValidate, purchaseRequestController.purchaseRequest_List);
 
+	// Dropdown FPB
+	arrValidate = [];
+	arrValidate = [
+		check('offset', 'Parameter offset must be integer and cannot be empty').not().isEmpty().isInt(),
+		check('limit').not().isEmpty().withMessage('Parameter limit cannot be empty')
+	];
+	app.get(rootAPIPath + 'dropdown', arrValidate, purchaseRequestController.purchaseRequest_DropDown);
+
 	// Detail FPB
 	arrValidate = [];
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
 	app.get(rootAPIPath + 'detail/:id', arrValidate, purchaseRequestController.purchaseRequest_Detail);
+
+	// Dropdown Item FPB
+	arrValidate = [];
+	arrValidate = [
+		check('offset', 'Parameter offset must be integer and cannot be empty').not().isEmpty().isInt(),
+		check('limit').not().isEmpty().withMessage('Parameter limit cannot be empty')
+	];
+	app.get(rootAPIPath + 'item/dropdown', arrValidate, purchaseRequestController.purchaseRequestDetail_DropDown);
 
 	// Save Detail
 	arrValidate = [];

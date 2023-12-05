@@ -14,6 +14,8 @@ const _modelCurrency = require('../models').ms_currencies;
 const _modelProvince = require('../models').ms_provinces;
 const _modelCity = require('../models').ms_cities;
 
+const _modelPurchaseRequestDetail = require('../models').tr_purchaserequestdetails;
+
 const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
@@ -390,9 +392,30 @@ class VendorCatalogueRepository {
 				var xWhere = {
 					where: {
 						id: xId
-					}
+					},
+					transaction: xTransaction
 				};
-				xSaved = await _modelDb.update(pParam, xWhere, { xTransaction });
+				xSaved = await _modelDb.update(pParam, xWhere);
+
+				// Update to tr_purchaserequestdetails
+				if (pParam.hasOwnProperty('purchase_request_detail_id')) {
+					if (pParam.purchase_request_detail_id != null && pParam.purchase_request_detail_id != '') {
+						await _modelPurchaseRequestDetail.update(
+							{
+								vendor_catalogue_id: xId,
+								updatedAt: pParam.updatedAt,
+								updated_by: pParam.updated_by,
+								updated_by_name: pParam.updated_by_name
+							},
+							{
+								where: {
+									id: purchase_request_detail_id
+								},
+								transaction: xTransaction
+							}
+						);
+					}
+				}
 
 				await xTransaction.commit();
 
