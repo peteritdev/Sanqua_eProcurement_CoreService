@@ -316,6 +316,13 @@ class PurchaseRequestRepository {
 			}
 		}
 
+		if (pParam.hasOwnProperty('project_id')) {
+			if (pParam.project_id != '') {
+				xSqlWhere += ' AND pr.project_id = :projectId ';
+				xObjJsonWhere.projectId = pParam.project_id;
+			}
+		}
+
 		if (pParam.hasOwnProperty('request_date_start') && pParam.hasOwnProperty('request_date_end')) {
 			if (pParam.request_date_start != '' && pParam.request_date_end != '') {
 				xSqlWhere += ' AND pr.requested_at BETWEEN :startDate AND :endDate ';
@@ -356,19 +363,6 @@ class PurchaseRequestRepository {
 				xObjJsonWhere.companyId = pParam.company_id;
 			}
 		}
-		
-		// 16/11/2023 to show fpb-project with product code is null
-		// if (pParam.hasOwnProperty('is_export')) {
-			// if (pParam.hasOwnProperty('project_id')) {
-			// 	if (pParam.project_id != '') {
-			// 		xSqlWhere += ' AND pr.project_id = :projectId AND prd.product_code IS NULL ';
-			// 		xObjJsonWhere.projectId = pParam.project_id;
-			// 	}
-			// } else {
-			// 	xSqlWhere += ' AND pr.project_id IS NOT NULL AND prd.product_code IS NULL ';
-			// }
-		// }
-		// ---
 
 		if (pParam.hasOwnProperty('owned_document_no')) {
 			if (pParam.owned_document_no.length > 0) {
@@ -382,24 +376,32 @@ class PurchaseRequestRepository {
 						xSqlWhereCompanyOwnedDoc = ' AND pr.company_id = :companyId';
 					}
 				}
+				// 28/11/2023 
+				let xSqlWhereDepartmentOwnedDoc = '';
+				if (pParam.hasOwnProperty('department_id')) {
+					if (pParam.department_id != '') {
+						xSqlWhereDepartmentOwnedDoc = ' AND pr.department_id = :departmentId';
+					}
+				}
+				// 28/11/2023 
+				let xSqlWhereCategoryOwnedDoc = '';
+				if (pParam.hasOwnProperty('category_item')) {
+					if (pParam.category_item != '') {
+						xSqlWhereCategoryOwnedDoc = ' AND pr.category_item = :categoryItem';
+					}
+				}
 
 				// 16/11/2023 to show fpb-project with product code is null
-				let xSqlWhereProject = '';
-				// if (pParam.hasOwnProperty('is_export')) {
-					// if (pParam.hasOwnProperty('project_id')) {
-					// 	if (pParam.project_id != '') {
-					// 		xSqlWhereProject = ' AND pr.project_id = :projectId AND prd.product_code IS NULL';
-					// 	}
-					// }
-					// else {
-					// 	xSqlWhereProject += ' AND pr.project_id IS NOT NULL AND prd.product_code IS NULL';
-					// }
-				// }
-				// ---
+				let xSqlWhereProjectOwnedDoc = '';
+				if (pParam.hasOwnProperty('project_id')) {
+					if (pParam.project_id != '') {
+						xSqlWhereProjectOwnedDoc = ' AND pr.project_id = :projectId';
+					}
+				}
 				
 				xSqlWhere = ` (( ${xSqlWhere} ) OR (${xSqlWhereOr} ${xSqlWhereCompanyOwnedDoc != ''
 					? xSqlWhereCompanyOwnedDoc
-					: ''} ${xSqlWhereProject}))`;
+					: ''} ${xSqlWhereProjectOwnedDoc} ${xSqlWhereCategoryOwnedDoc} ${xSqlWhereDepartmentOwnedDoc}))`;
 			}
 		}
 
@@ -486,7 +488,7 @@ class PurchaseRequestRepository {
 		if (!pParam.hasOwnProperty('is_export')) {
 			xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
 			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item,
-			p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
+			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 			xSqlGroupBy = ` GROUP BY pr.id, 
 						pr.request_no, 
@@ -499,7 +501,7 @@ class PurchaseRequestRepository {
 						pr.company_id, 
 						pr.company_code, 
 						pr.company_name,
-						p.code,p.name,p.odoo_project_code`;
+						p.id,p.code,p.name,p.odoo_project_code`;
 
 			if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
 				if (pParam.offset != '' && pParam.limit != '') {
@@ -522,13 +524,13 @@ class PurchaseRequestRepository {
 								prd.last_price,
 								prd.estimate_fulfillment,
 								prd.uom_name,
-								p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
+								p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 				xSqlGroupBy = ` `;
 			} else {
 				xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
 			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item,
-			p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
+			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 				xSqlGroupBy = ` GROUP BY pr.id, 
 						pr.request_no, 
@@ -541,7 +543,7 @@ class PurchaseRequestRepository {
 						pr.company_id, 
 						pr.company_code, 
 						pr.company_name,
-						p.code,p.name,p.odoo_project_code`;
+						p.id,p.code,p.name,p.odoo_project_code`;
 
 				if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
 					if (pParam.offset != '' && pParam.limit != '') {
@@ -557,8 +559,229 @@ class PurchaseRequestRepository {
 							LEFT JOIN ms_projects p ON p.id = pr.project_id
 				 WHERE ${xSqlWhere} ${xSqlGroupBy}
 				  ${xSqlOrderBy}${xSqlLimit} `;
-
+		
 		xSqlCount = ` SELECT count(distinct pr.request_no) AS total_record
+		  FROM tr_purchaserequests pr 
+		  	LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
+			  LEFT JOIN ms_projects p ON p.id = pr.project_id
+		  WHERE ${xSqlWhere}`;
+
+		// console.log(`>>> xSqlCount: ${xSqlCount}`);
+
+		xData = await sequelize.query(xSql, {
+			replacements: xObjJsonWhere,
+			type: sequelize.QueryTypes.SELECT
+		});
+
+		xTotalRecord = await sequelize.query(xSqlCount, {
+			replacements: xObjJsonWhere,
+			type: sequelize.QueryTypes.SELECT
+		});
+
+		return {
+			status_code: '00',
+			status_msg: 'OK',
+			data: xData,
+			total_record: xTotalRecord[0].total_record
+		};
+	}
+	
+	async fpbProjectList(pParam) {
+		var xData,
+			xTotalRecord = [];
+		var xSql,
+			xSqlCount = '';
+		var xObjJsonWhere = {};
+		var xSqlWhere = ' (1=1) ';
+		var xSqlWhereOr = [];
+		var xSqlWhereOrOwnedDocument = [];
+		var xSqlOrderBy = '';
+		var xSqlLimit = '';
+		var xFlagFilterDepartment = false;
+		var xSqlGroupBy = '';
+		var xSqlFields = '';
+
+		if (pParam.hasOwnProperty('order_by')) {
+			if (pParam.order_by != '') {
+				xSqlOrderBy = ` ORDER BY pr.${pParam.order_by} ${pParam.order_type != '' ? pParam.order_type : 'ASC'}`;
+			} else {
+				xSqlOrderBy = ` ORDER BY pr.requested_at DESC`;
+			}
+		} else {
+			xSqlOrderBy = ` ORDER BY pr.requested_at DESC`;
+		}
+
+		if (pParam.hasOwnProperty('department_id')) {
+			if (pParam.department_id != '') {
+				xSqlWhere += ' AND pr.department_id = :departmentId ';
+				xObjJsonWhere.departmentId = pParam.department_id;
+			}
+		}
+
+		if (pParam.hasOwnProperty('category_item')) {
+			if (pParam.category_item != '') {
+				xSqlWhere += ' AND pr.category_item = :categoryItem ';
+				xObjJsonWhere.categoryItem = pParam.category_item;
+			}
+		}
+		
+		// 16/11/2023 to show fpb-project with product code is null
+		if (pParam.hasOwnProperty('project_id')) {
+			if (pParam.project_id != '') {
+				xSqlWhere += ' AND pr.project_id = :projectId AND prd.product_code IS NULL ';
+				xObjJsonWhere.projectId = pParam.project_id;
+			}
+		} else {
+			xSqlWhere += ' AND pr.project_id IS NOT NULL AND prd.product_code IS NULL ';
+		}
+		// ---
+
+		if (pParam.hasOwnProperty('request_date_start') && pParam.hasOwnProperty('request_date_end')) {
+			if (pParam.request_date_start != '' && pParam.request_date_end != '') {
+				xSqlWhere += ' AND pr.requested_at BETWEEN :startDate AND :endDate ';
+				xObjJsonWhere.startDate = pParam.request_date_start;
+				xObjJsonWhere.endDate = pParam.request_date_end;
+			}
+		}
+
+		if (pParam.hasOwnProperty('is_archived')) {
+			if (pParam.is_archived != '') {
+				xSqlWhere += ' AND pr.is_delete = :isArchived ';
+				xObjJsonWhere.isArchived = pParam.is_archived;
+			} else {
+				xSqlWhere += ' AND pr.is_delete = 0 ';
+			}
+		} else {
+			xSqlWhere += ' AND pr.is_delete = 0 ';
+		}
+
+		if (pParam.hasOwnProperty('status')) {
+			if (pParam.status != '') {
+				xSqlWhere += ' AND pr.status = :status ';
+				xObjJsonWhere.status = pParam.status;
+			}
+		}
+
+		if (pParam.hasOwnProperty('user_id') && (pParam.is_admin == 0 || pParam.logged_is_admin == 0)) {
+			if (pParam.user_id != '') {
+				// xSqlWhereOr.push(' pr.created_by = :createdBy ');
+				xSqlWhere += ' AND pr.created_by = :createdBy ';
+				xObjJsonWhere.createdBy = pParam.user_id;
+			}
+		}
+
+		if (pParam.hasOwnProperty('company_id')) {
+			if (pParam.company_id != '') {
+				xSqlWhere += ' AND pr.company_id = :companyId ';
+				xObjJsonWhere.companyId = pParam.company_id;
+			}
+		}
+
+		if (pParam.hasOwnProperty('owned_document_no')) {
+			if (pParam.owned_document_no.length > 0) {
+				xSqlWhereOr.push(' request_no IN (:ownedDocNo) ');
+				xSqlWhereOr.join(' OR ');
+				xObjJsonWhere.ownedDocNo = pParam.owned_document_no;
+
+				let xSqlWhereCompanyOwnedDoc = '';
+				if (pParam.hasOwnProperty('company_id')) {
+					if (pParam.company_id != '') {
+						xSqlWhereCompanyOwnedDoc = ' AND pr.company_id = :companyId';
+					}
+				}
+				// 28/11/2023 
+				let xSqlWhereDepartmentOwnedDoc = '';
+				if (pParam.hasOwnProperty('department_id')) {
+					if (pParam.department_id != '') {
+						xSqlWhereDepartmentOwnedDoc = ' AND pr.department_id = :departmentId';
+					}
+				}
+				// 28/11/2023 
+				let xSqlWhereCategoryOwnedDoc = '';
+				if (pParam.hasOwnProperty('category_item')) {
+					if (pParam.category_item != '') {
+						xSqlWhereCategoryOwnedDoc = ' AND pr.category_item = :categoryItem';
+					}
+				}
+
+				// 16/11/2023 to show fpb-project with product code is null
+				let xSqlWhereProjectOwnedDoc = '';
+				if (pParam.hasOwnProperty('project_id')) {
+					if (pParam.project_id != '') {
+						xSqlWhereProjectOwnedDoc = ' AND pr.project_id = :projectId AND prd.product_code IS NULL';
+					}
+				}
+				else {
+					xSqlWhereProjectOwnedDoc = ' AND pr.project_id IS NOT NULL AND prd.product_code IS NULL';
+				}
+				// ---
+				
+				xSqlWhere = ` (( ${xSqlWhere} ) OR (${xSqlWhereOr} ${xSqlWhereCompanyOwnedDoc != ''
+					? xSqlWhereCompanyOwnedDoc
+					: ''} ${xSqlWhereProjectOwnedDoc} ${xSqlWhereCategoryOwnedDoc} ${xSqlWhereDepartmentOwnedDoc}))`;
+			}
+		}
+
+		if (pParam.hasOwnProperty('keyword')) {
+			if (pParam.keyword != '') {
+				let xSqlWhereKeyword = ` 
+						pr.request_no ILIKE :keyword OR
+						pr.employee_name ILIKE :keyword OR
+						pr.department_name ILIKE :keyword OR
+						prd.product_code ILIKE :keyword OR
+						prd.product_name ILIKE :keyword
+					`;
+
+				xObjJsonWhere.keyword = `%${pParam.keyword}%`;
+				xSqlWhere = ` ${xSqlWhere} AND (${xSqlWhereKeyword}) `;
+			}
+		}
+
+		if (!xFlagFilterDepartment) {
+			if (pParam.hasOwnProperty('department_id') && (pParam.is_admin == 0 || pParam.logged_is_admin == 0)) {
+				if (pParam.department_id != '') {
+					if (!xFlagFilterDepartment) {
+						xSqlWhereOr.push(' pr.department_id = :departmentId ');
+						xObjJsonWhere.departmentId = pParam.department_id;
+						xFlagFilterDepartment = true;
+					}
+				}
+			}
+		}
+
+		
+		xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
+			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item, 
+			prd.product_code,
+			prd.product_name,
+			prd.qty,
+			prd.budget_price_per_unit,
+			prd.budget_price_total,
+			prd.quotation_price_per_unit,
+			prd.quotation_price_total,
+			prd.estimate_date_use,
+			prd.pr_no,
+			prd.last_price,
+			prd.estimate_fulfillment,
+			prd.uom_name,
+			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
+
+		xSqlGroupBy = ` `;
+
+		if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
+			if (pParam.offset != '' && pParam.limit != '') {
+				xSqlLimit = ` OFFSET ${pParam.offset} LIMIT ${pParam.limit} `;
+			}
+		}
+
+		xSql = ` SELECT ${xSqlFields}
+				 FROM tr_purchaserequests pr 
+						LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
+							LEFT JOIN ms_projects p ON p.id = pr.project_id
+				 WHERE ${xSqlWhere} ${xSqlGroupBy}
+				  ${xSqlOrderBy}${xSqlLimit} `;
+		
+		xSqlCount = ` SELECT count(pr.request_no) AS total_record
 		  FROM tr_purchaserequests pr 
 		  	LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
 			  LEFT JOIN ms_projects p ON p.id = pr.project_id
