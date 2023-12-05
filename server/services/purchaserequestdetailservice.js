@@ -40,6 +40,41 @@ const _xClassName = 'PurchaseRequestDetailService';
 class PurchaseRequestDetailService {
 	constructor() {}
 
+	async dropDown(pParam) {
+		var xJoResult = {};
+		var xJoArrData = [];
+
+		try {
+			var xResultList = await _repoInstance.list(pParam);
+
+			console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
+
+			if (xResultList.total_record > 0) {
+				var xRows = xResultList.data.rows;
+				for (var index in xRows) {
+					xJoArrData.push({
+						id: xRows[index].id,
+						product_name: xRows[index].product_name
+					});
+				}
+
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					total_record: xResultList.total_record,
+					data: xJoArrData
+				};
+			}
+		} catch (e) {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Exception error <${_xClassName}.dropDown>: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
+
 	async save(pParam) {
 		var xJoResult;
 		var xAct = pParam.act;
@@ -858,18 +893,18 @@ class PurchaseRequestDetailService {
 				// console.log(`>>> PARAM>>>>>>: ${JSON.stringify(pParam)}`);
 				if (pParam.items.length > 0) {
 					let xParamOdoo = null;
-					let xArr = []
+					let xArr = [];
 					for (let i = 0; i < pParam.items.length; i++) {
 						xArr.push({
 							code: pParam.items[i].code,
 							name: pParam.items[i].name,
 							uom: pParam.items[i].uom != null ? pParam.items[i].uom : '',
 							index: 0
-						})
+						});
 					}
 					xParamOdoo = {
 						items: xArr
-					}
+					};
 
 					console.log('HERE>>>>>', xParamOdoo);
 					// Call check item api in odoo

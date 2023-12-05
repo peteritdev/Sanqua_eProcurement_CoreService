@@ -413,7 +413,7 @@ class PurchaseRequestService {
 										last_price: xRows[index].last_price,
 										uom_name: xRows[index].uom_name,
 										// add new 16/11/2023
-										estimate_fulfillment: xRows[index].estimate_fulfillment,
+										estimate_fulfillment: xRows[index].estimate_fulfillment
 									}
 								});
 							}
@@ -593,16 +593,16 @@ class PurchaseRequestService {
 						xOdooArrItem.push({
 							code: null,
 							name: xDetail[index].product_name,
-							uom: xDetail[index].uom_name != null ? xDetail[index].uom_name : "",
+							uom: xDetail[index].uom_name != null ? xDetail[index].uom_name : '',
 							index: index
-						})
+						});
 					} else {
 						xOdooArrItem.push({
 							code: xDetail[index].product_code,
 							name: xDetail[index].product_name,
-							uom: xDetail[index].uom_name != null ? xDetail[index].uom_name : "",
+							uom: xDetail[index].uom_name != null ? xDetail[index].uom_name : '',
 							index: index
-						})
+						});
 					}
 					// ----
 
@@ -689,19 +689,16 @@ class PurchaseRequestService {
 				}
 
 				console.log(`>>> xArrUserCanCancel: ${JSON.stringify(xArrUserCanCancel)}`);
-				
+
 				// Call check item in odoo
-				let xCheckItemInOdoo = await _oAuthService.checkItem({items: xOdooArrItem});
+				let xCheckItemInOdoo = await _oAuthService.checkItem({ items: xOdooArrItem });
 				if (xCheckItemInOdoo.status_code === '00') {
-					const xResult = xCheckItemInOdoo.data[0].eSanqua
+					const xResult = xCheckItemInOdoo.data[0].eSanqua;
 					for (let i = 0; i < xResult.length; i++) {
-						const xResultItem = xResult[i]
-						Object.assign(
-							xJoArrRequestDetailData[xResultItem.index],
-							{
-								check_result: xResultItem
-							}
-						)
+						const xResultItem = xResult[i];
+						Object.assign(xJoArrRequestDetailData[xResultItem.index], {
+							check_result: xResultItem
+						});
 					}
 				}
 
@@ -1602,6 +1599,39 @@ class PurchaseRequestService {
 			}
 		}
 		// 24/10/2023
+		return xJoResult;
+	}
+
+	async dropDown(pParam) {
+		var xJoResult = {};
+		var xJoArrData = [];
+
+		try {
+			var xResultList = await _repoInstance.list(pParam);
+
+			if (xResultList.total_record > 0) {
+				var xRows = xResultList.data;
+				for (var index in xRows) {
+					xJoArrData.push({
+						id: xRows[index].id,
+						request_no: xRows[index].request_no
+					});
+				}
+
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					total_record: xResultList.total_record,
+					data: xJoArrData
+				};
+			}
+		} catch (e) {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Exception error <${_xClassName}.dropDown>: ${e.message}`
+			};
+		}
+
 		return xJoResult;
 	}
 }
