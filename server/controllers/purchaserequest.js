@@ -34,7 +34,9 @@ module.exports = {
 	purchaseRequest_CancelPR,
 	purchaseRequestDetail_CheckItem,
 	purchaseRequestDetail_UpdatePo,
-	purchaseRequestDetail_DropDown
+	purchaseRequestDetail_DropDown,
+
+	purchaseRequestProject_List
 };
 
 async function purchaseRequest_List(req, res) {
