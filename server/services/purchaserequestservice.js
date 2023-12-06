@@ -691,7 +691,7 @@ class PurchaseRequestService {
 				// console.log(`>>> xArrUserCanCancel: ${JSON.stringify(xArrUserCanCancel)}`);
 
 				// Call check item in odoo
-				if (xResult.status != 2) {
+				if (xResult.status == 0) {
 					let xCheckItemInOdoo = await _oAuthService.checkItem({ items: xOdooArrItem });
 					if (xCheckItemInOdoo.status_code === '00') {
 						const xResult = xCheckItemInOdoo.data[0].eSanqua;
