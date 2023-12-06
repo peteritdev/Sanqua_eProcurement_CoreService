@@ -906,7 +906,7 @@ class PurchaseRequestDetailService {
 						items: xArr
 					};
 
-					console.log('HERE>>>>>', xParamOdoo);
+					// console.log('HERE>>>>>', xParamOdoo);
 					// Call check item api in odoo
 					let xCheckItemResult = await _integrationServiceInstance.checkItem(xParamOdoo);
 
