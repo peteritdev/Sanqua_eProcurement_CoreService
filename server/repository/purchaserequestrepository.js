@@ -524,6 +524,7 @@ class PurchaseRequestRepository {
 								prd.last_price,
 								prd.estimate_fulfillment,
 								prd.uom_name,
+								prd.status AS "item_detail_status",
 								p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 				xSqlGroupBy = ` `;
@@ -764,6 +765,8 @@ class PurchaseRequestRepository {
 			prd.last_price,
 			prd.estimate_fulfillment,
 			prd.uom_name,
+			prd.id AS "item_detail_id",
+			prd.status AS "item_detail_status",
 			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 		xSqlGroupBy = ` `;

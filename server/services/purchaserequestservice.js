@@ -413,7 +413,8 @@ class PurchaseRequestService {
 										last_price: xRows[index].last_price,
 										uom_name: xRows[index].uom_name,
 										// add new 16/11/2023
-										estimate_fulfillment: xRows[index].estimate_fulfillment
+										estimate_fulfillment: xRows[index].estimate_fulfillment,
+										status: xRows[index].item_detail_status,
 									}
 								});
 							}
@@ -1580,6 +1581,8 @@ class PurchaseRequestService {
 								uom_name: xRows[index].uom_name,
 								// add new 16/11/2023
 								estimate_fulfillment: xRows[index].estimate_fulfillment,
+								id: await _utilInstance.encrypt(xRows[index].item_detail_id.toString(), config.cryptoKey.hashKey),
+								status: xRows[index].item_detail_status,
 							}
 						});
 					}
