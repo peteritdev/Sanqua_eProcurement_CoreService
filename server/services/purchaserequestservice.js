@@ -708,7 +708,7 @@ class PurchaseRequestService {
 					id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
 					project: xResult.project,
 					request_no: xResult.request_no,
-					requested_at: xResult.requested_at,
+					// requested_at: xResult.requested_at,
 					employee: {
 						// id: await _utilInstance.encrypt(xResult.employee_id.toString(), config.cryptoKey.hashKey),
 						id: xResult.employee_id,
