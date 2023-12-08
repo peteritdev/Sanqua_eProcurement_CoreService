@@ -922,6 +922,7 @@ class PurchaseRequestRepository {
 						break;
 					case 'submit_fpb':
 						xComment = 'submitted';
+						pParam.requested_at = await _utilInstance.getCurrDateTime();
 						break;
 					case 'cancel_fpb':
 						pParam.cancel_at = await _utilInstance.getCurrDateTime();
