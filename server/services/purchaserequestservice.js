@@ -691,18 +691,18 @@ class PurchaseRequestService {
 				// console.log(`>>> xArrUserCanCancel: ${JSON.stringify(xArrUserCanCancel)}`);
 
 				// Call check item in odoo
-				if (xResult.status == 0) {
-					let xCheckItemInOdoo = await _oAuthService.checkItem({ items: xOdooArrItem });
-					if (xCheckItemInOdoo.status_code === '00') {
-						const xResult = xCheckItemInOdoo.data[0].eSanqua;
-						for (let i = 0; i < xResult.length; i++) {
-							const xResultItem = xResult[i];
-							Object.assign(xJoArrRequestDetailData[xResultItem.index], {
-								check_result: xResultItem
-							});
-						}
+				//if (xResult.status == 0) {
+				let xCheckItemInOdoo = await _oAuthService.checkItem({ items: xOdooArrItem });
+				if (xCheckItemInOdoo.status_code === '00') {
+					const xResult = xCheckItemInOdoo.data[0].eSanqua;
+					for (let i = 0; i < xResult.length; i++) {
+						const xResultItem = xResult[i];
+						Object.assign(xJoArrRequestDetailData[xResultItem.index], {
+							check_result: xResultItem
+						});
 					}
 				}
+				//}
 
 				xJoData = {
 					id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
