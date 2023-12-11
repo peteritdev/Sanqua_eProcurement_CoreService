@@ -198,7 +198,7 @@
     "imagePathESanQua_dev": "http://10.10.20.5:83/eprocurement",
     "uploadBasePath": "/var/www/esanqua_upload/eprocurement",
     "statusDescription":{
-      "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel"],
+      "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel", "Pending"],
       "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel", "Paid"]
     },
     "categoryItem": ["", "Raw Material", "Factory Supply", "Office Supply", "Sparepart", "Jasa", "Maintenance Repair", "Investment / Asset"]

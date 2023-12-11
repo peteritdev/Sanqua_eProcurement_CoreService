@@ -12,6 +12,7 @@ const _modelPurchaseRequestDetail = require('../models').tr_purchaserequestdetai
 const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 
 const Utility = require('peters-globallib-v2');
+const { param } = require('express-validator');
 const _utilInstance = new Utility();
 
 class PurchaseRequestRepository {
@@ -922,6 +923,7 @@ class PurchaseRequestRepository {
 						break;
 					case 'submit_fpb':
 						xComment = 'submitted';
+						pParam.requested_at = await _utilInstance.getCurrDateTime();
 						break;
 					case 'cancel_fpb':
 						pParam.cancel_at = await _utilInstance.getCurrDateTime();
