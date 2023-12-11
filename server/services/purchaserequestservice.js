@@ -1119,9 +1119,16 @@ class PurchaseRequestService {
 								// }
 
 								// Update status FPB to be confirmed
+								// At: 08/12/2023
+								// Description: After confirm (approved by last approver), the status will change to "Pending".
+								//				This status indicate that procurement must be process it, so they need press button "Take" in terms of change to "In Progress"
+								// var xParamUpdatePR = {
+								// 	id: pParam.document_id,
+								// 	status: 2
+								// };
 								var xParamUpdatePR = {
 									id: pParam.document_id,
-									status: 2
+									status: 5
 								};
 								var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
 
@@ -1634,6 +1641,70 @@ class PurchaseRequestService {
 		}
 
 		return xJoResult;
+	}
+
+	async takeFPB(pParam) {
+		var xJoResult = {};
+		var xDecId = null;
+		var xFlagProcess = false;
+		var xEncId = '';
+		var xClearId = '';
+
+		try {
+			if (pParam.id != '' && pParam.user_id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					xFlagProcess = true;
+					xEncId = pParam.id;
+					pParam.id = xDecId.decrypted;
+					xClearId = xDecId.decrypted;
+					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.user_id = xDecId.decrypted;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xDecId;
+					}
+				} else {
+					xJoResult = xDecId;
+				}
+			}
+
+			if (xFlagProcess) {
+				// Check if this request id valid or not
+				var xPRDetail = await _repoInstance.getById({ id: pParam.document_id });
+				if (xPRDetail != null) {
+					if (xPRDetail.status != 5) {
+						xJoResult = {
+							status_code: '-99',
+							status_msg: 'This document can not take since the status is not Pending.'
+						};
+					} else {
+						var xParamUpdatePR = {
+							id: pParam.document_id,
+							status: 2,
+							user_id: pParam.user_id,
+							
+						};
+						var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'take_fpb');
+
+						if (xUpdateResult.status_code == '00') {
+							xJoResult = {
+								status_code: '00',
+								status_msg: 'FPB successfully rejected'
+							};
+						} else {
+							xJoResult = xUpdateResult;
+						}
+					}
+				}
+			}
+		} catch (e) {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Exception error <${_xClassName}.takeFPB>: ${e.message}`
+			};
+		}
 	}
 }
 
