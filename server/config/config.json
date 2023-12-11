@@ -97,7 +97,7 @@
     "qrCodeImagePath": "C:\\MIS-PETER\\SanQuaApp\\eProcurement\\Sanqua_eProcurement_CoreService\\generated_files",
 
     "statusDescription":{
-      "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel"],
+      "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel", "Pending"],
       "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel", "Paid"]
     },
     "categoryItem": ["", "Raw Material", "Factory Supply", "Office Supply", "Sparepart", "Jasa", "Maintenance Repair", "Investment / Asset"]
@@ -399,7 +399,7 @@
     "imagePathESanQua_dev": "http://10.10.20.6:8091/eprocurement",
     "uploadBasePath": "/var/www/sqa_upload_ecatalogue/eprocurement",
     "statusDescription":{
-      "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel"],
+      "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel", "Pending"],
       "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel", "Paid"]
     },
     "categoryItem": ["", "Raw Material", "Factory Supply", "Office Supply", "Sparepart", "Jasa", "Maintenance Repair", "Investment / Asset"]
