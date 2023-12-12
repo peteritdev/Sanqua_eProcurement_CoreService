@@ -856,6 +856,11 @@ async function purchaseRequest_TakeFPB(req, res) {
 					error_msg: errors
 				});
 			} else {
+				let xLevel = oAuthResult.token_data.result_verify.user_level.find(
+					(el) => el.application.id === config.applicationId || el.application.id === 1
+				);
+
+				req.body.logged_is_admin = xLevel.is_admin;
 				req.body.user_id = oAuthResult.token_data.result_verify.id;
 				req.body.user_name = oAuthResult.token_data.result_verify.name;
 				req.body.token = req.headers['x-token'];

@@ -760,7 +760,10 @@ class PurchaseRequestService {
 					cancel_by_name: xResult.cancel_by_name,
 					cancel_reason: xResult.cancel_reason,
 
-					approver_users: xArrUserCanCancel
+					approver_users: xArrUserCanCancel,
+
+					took_at: xResult.took_at != null ? moment(xResult.took_at).format('DD MMM YYYY HH:mm:ss') : null,
+					took_by_name: xResult.took_by_name
 				};
 
 				xJoResult = {
@@ -1651,50 +1654,57 @@ class PurchaseRequestService {
 		var xClearId = '';
 
 		try {
-			if (pParam.id != '' && pParam.user_id != '') {
-				xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
-				if (xDecId.status_code == '00') {
-					xFlagProcess = true;
-					xEncId = pParam.id;
-					pParam.id = xDecId.decrypted;
-					xClearId = xDecId.decrypted;
-					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+			if (!pParam.logged_is_admin) {
+				xJoResult = {
+					status_msg: "You don't have permission of this access.",
+					status_code: '-99'
+				};
+			} else {
+				if (pParam.document_id != '' && pParam.user_id != '') {
+					xDecId = await _utilInstance.decrypt(pParam.document_id, config.cryptoKey.hashKey);
 					if (xDecId.status_code == '00') {
-						pParam.user_id = xDecId.decrypted;
 						xFlagProcess = true;
+						xEncId = pParam.document_id;
+						pParam.document_id = xDecId.decrypted;
+						xClearId = xDecId.decrypted;
+						xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+						if (xDecId.status_code == '00') {
+							pParam.user_id = xDecId.decrypted;
+							xFlagProcess = true;
+						} else {
+							xJoResult = xDecId;
+						}
 					} else {
 						xJoResult = xDecId;
 					}
-				} else {
-					xJoResult = xDecId;
 				}
-			}
 
-			if (xFlagProcess) {
-				// Check if this request id valid or not
-				var xPRDetail = await _repoInstance.getById({ id: pParam.document_id });
-				if (xPRDetail != null) {
-					if (xPRDetail.status != 5) {
-						xJoResult = {
-							status_code: '-99',
-							status_msg: 'This document can not take since the status is not Pending.'
-						};
-					} else {
-						var xParamUpdatePR = {
-							id: pParam.document_id,
-							status: 2,
-							user_id: pParam.user_id,
-							
-						};
-						var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'take_fpb');
-
-						if (xUpdateResult.status_code == '00') {
+				if (xFlagProcess) {
+					// Check if this request id valid or not
+					var xPRDetail = await _repoInstance.getById({ id: pParam.document_id });
+					if (xPRDetail != null) {
+						if (xPRDetail.status != 5) {
 							xJoResult = {
-								status_code: '00',
-								status_msg: 'FPB successfully rejected'
+								status_code: '-99',
+								status_msg: 'This document can not take since the status is not Pending.'
 							};
 						} else {
-							xJoResult = xUpdateResult;
+							var xParamUpdatePR = {
+								id: pParam.document_id,
+								status: 2,
+								user_id: pParam.user_id,
+								user_name: pParam.user_name
+							};
+							var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'take_fpb');
+
+							if (xUpdateResult.status_code == '00') {
+								xJoResult = {
+									status_code: '00',
+									status_msg: 'FPB successfully rejected'
+								};
+							} else {
+								xJoResult = xUpdateResult;
+							}
 						}
 					}
 				}
@@ -1705,6 +1715,8 @@ class PurchaseRequestService {
 				status_msg: `Exception error <${_xClassName}.takeFPB>: ${e.message}`
 			};
 		}
+
+		return xJoResult;
 	}
 }
 
