@@ -56,7 +56,6 @@ module.exports = (sequelize, DataTypes) => {
 		create_po_at: DataTypes.DATE,
 		create_po_by_name: DataTypes.STRING,
 		cancel_po_at: DataTypes.DATE,
-		cancel_po_by: DataTypes.INTEGER,
 		cancel_po_by_name: DataTypes.STRING,
 
 		createdAt: {
