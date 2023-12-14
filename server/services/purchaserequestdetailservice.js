@@ -310,9 +310,9 @@ class PurchaseRequestDetailService {
 							xAct = 'add';
 						}
 
-						if (xCatalogue.status_code == '00') {
-							xItems[i].last_price = xCatalogue.data.last_price;
-						}
+						// if (xCatalogue.status_code == '00') {
+						// 	xItems[i].last_price = xCatalogue.data.last_price;
+						// }
 
 						var xAddResult = await _repoInstance.save(xItems[i], xAct);
 						xJoResult = xAddResult;
