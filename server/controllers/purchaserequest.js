@@ -263,7 +263,7 @@ async function purchaseRequest_Save(req, res) {
 
 				req.body.token = req.headers['x-token'];
 				req.body.method = req.headers['x-method'];
-				// joResult = await _serviceInstance.save(req.body);
+				joResult = await _serviceInstance.save(req.body);
 				joResult = JSON.stringify(joResult);
 			}
 		} else {
@@ -273,10 +273,8 @@ async function purchaseRequest_Save(req, res) {
 		joResult = JSON.stringify(oAuthResult);
 	}
 
-	await sleep(5000);
 	res.setHeader('Content-Type', 'application/json');
-	// res.status(408).send(joResult);
-	res.status(500).send(joResult);
+	res.status(200).send(joResult);
 }
 
 async function purchaseRequestDetail_Save(req, res) {
