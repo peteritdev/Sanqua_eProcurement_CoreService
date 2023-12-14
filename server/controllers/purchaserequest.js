@@ -271,9 +271,10 @@ async function purchaseRequest_Save(req, res) {
 		joResult = JSON.stringify(oAuthResult);
 	}
 
-	await sleep(20000);
+	await sleep(5000);
 	res.setHeader('Content-Type', 'application/json');
-	res.status(408).send(joResult);
+	// res.status(408).send(joResult);
+	res.status(500).send(joResult);
 }
 
 async function purchaseRequestDetail_Save(req, res) {
