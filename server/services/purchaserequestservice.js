@@ -100,20 +100,34 @@ class PurchaseRequestService {
 			/*
 				At: 10/11/2023
 				Description: Checking when the parameter project is set, category_time must be 7 and category_pr must be 'asset'
-			*/
-			if (pParam.hasOwnProperty('project_id')) {
-				if (
-					pParam.project_id != '' &&
-					pParam.project_id != null &&
-					(pParam.category_item != 7 || pParam.category_pr != 'asset')
-				) {
-					xJoResult = {
-						status_code: '-99',
-						status_msg: 'Kategori Barang dan Kategori PR tidak sesuai dengan peruntukan project.'
-					};
-				} else {
-					// Check if project_id is match with FPB company
 
+				At: 30/12/2023
+				Description: Since for project, the category pr must be project also then in backend will force to categpry_pr become 'project'
+			*/
+			// if (pParam.hasOwnProperty('project_id')) {
+			// 	if (
+			// 		pParam.project_id != '' &&
+			// 		pParam.project_id != null &&
+			// 		(pParam.category_item != 7 || pParam.category_pr != 'asset')
+			// 	) {
+			// 		xJoResult = {
+			// 			status_code: '-99',
+			// 			status_msg: 'Kategori Barang dan Kategori PR tidak sesuai dengan peruntukan project.'
+			// 		};
+			// 	} else {
+			// 		// Check if project_id is match with FPB company
+
+			// 		xFlagProcess = true;
+			// 	}
+			// } else {
+			// 	xFlagProcess = true;
+			// }
+
+			if (pParam.hasOwnProperty('project_id')) {
+				if (pParam.project_id != '' && pParam.project_id != null) {
+					pParam.category_pr = 'project';
+					xFlagProcess = true;
+				} else {
 					xFlagProcess = true;
 				}
 			} else {
