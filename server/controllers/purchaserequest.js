@@ -36,7 +36,9 @@ module.exports = {
 	purchaseRequestDetail_UpdatePo,
 	purchaseRequestDetail_DropDown,
 
-	purchaseRequestProject_List
+	purchaseRequestProject_List,
+
+	purchaseRequest_TakeFPB
 };
 
 async function purchaseRequest_List(req, res) {
@@ -825,6 +827,45 @@ async function purchaseRequestProject_List(req, res) {
 				req.query.method = req.headers['x-method'];
 				req.query.token = req.headers['x-token'];
 				joResult = await _serviceInstance.fpbProjectList(req.query);
+				joResult = JSON.stringify(joResult);
+			}
+		} else {
+			joResult = JSON.stringify(oAuthResult);
+		}
+	} else {
+		joResult = JSON.stringify(oAuthResult);
+	}
+
+	res.setHeader('Content-Type', 'application/json');
+	res.status(200).send(joResult);
+}
+
+async function purchaseRequest_TakeFPB(req, res) {
+	var joResult;
+	var oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
+
+	if (oAuthResult.status_code == '00') {
+		if (oAuthResult.token_data.status_code == '00') {
+			// Validate first
+			var errors = validationResult(req).array();
+
+			if (errors.length != 0 && req.body.act == 'add') {
+				joResult = JSON.stringify({
+					status_code: '-99',
+					status_msg: 'Parameter value has problem',
+					error_msg: errors
+				});
+			} else {
+				let xLevel = oAuthResult.token_data.result_verify.user_level.find(
+					(el) => el.application.id === config.applicationId || el.application.id === 1
+				);
+
+				req.body.logged_is_admin = xLevel.is_admin;
+				req.body.user_id = oAuthResult.token_data.result_verify.id;
+				req.body.user_name = oAuthResult.token_data.result_verify.name;
+				req.body.token = req.headers['x-token'];
+				req.body.method = req.headers['x-method'];
+				joResult = await _serviceInstance.takeFPB(req.body);
 				joResult = JSON.stringify(joResult);
 			}
 		} else {

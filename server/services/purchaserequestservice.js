@@ -760,7 +760,10 @@ class PurchaseRequestService {
 					cancel_by_name: xResult.cancel_by_name,
 					cancel_reason: xResult.cancel_reason,
 
-					approver_users: xArrUserCanCancel
+					approver_users: xArrUserCanCancel,
+
+					took_at: xResult.took_at != null ? moment(xResult.took_at).format('DD MMM YYYY HH:mm:ss') : null,
+					took_by_name: xResult.took_by_name
 				};
 
 				xJoResult = {
@@ -1119,9 +1122,16 @@ class PurchaseRequestService {
 								// }
 
 								// Update status FPB to be confirmed
+								// At: 08/12/2023
+								// Description: After confirm (approved by last approver), the status will change to "Pending".
+								//				This status indicate that procurement must be process it, so they need press button "Take" in terms of change to "In Progress"
+								// var xParamUpdatePR = {
+								// 	id: pParam.document_id,
+								// 	status: 2
+								// };
 								var xParamUpdatePR = {
 									id: pParam.document_id,
-									status: 2
+									status: 5
 								};
 								var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
 
@@ -1630,6 +1640,79 @@ class PurchaseRequestService {
 			xJoResult = {
 				status_code: '-99',
 				status_msg: `Exception error <${_xClassName}.dropDown>: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
+
+	async takeFPB(pParam) {
+		var xJoResult = {};
+		var xDecId = null;
+		var xFlagProcess = false;
+		var xEncId = '';
+		var xClearId = '';
+
+		try {
+			if (!pParam.logged_is_admin) {
+				xJoResult = {
+					status_msg: "You don't have permission of this access.",
+					status_code: '-99'
+				};
+			} else {
+				if (pParam.document_id != '' && pParam.user_id != '') {
+					xDecId = await _utilInstance.decrypt(pParam.document_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						xFlagProcess = true;
+						xEncId = pParam.document_id;
+						pParam.document_id = xDecId.decrypted;
+						xClearId = xDecId.decrypted;
+						xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+						if (xDecId.status_code == '00') {
+							pParam.user_id = xDecId.decrypted;
+							xFlagProcess = true;
+						} else {
+							xJoResult = xDecId;
+						}
+					} else {
+						xJoResult = xDecId;
+					}
+				}
+
+				if (xFlagProcess) {
+					// Check if this request id valid or not
+					var xPRDetail = await _repoInstance.getById({ id: pParam.document_id });
+					if (xPRDetail != null) {
+						if (xPRDetail.status != 5) {
+							xJoResult = {
+								status_code: '-99',
+								status_msg: 'This document can not take since the status is not Pending.'
+							};
+						} else {
+							var xParamUpdatePR = {
+								id: pParam.document_id,
+								status: 2,
+								user_id: pParam.user_id,
+								user_name: pParam.user_name
+							};
+							var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'take_fpb');
+
+							if (xUpdateResult.status_code == '00') {
+								xJoResult = {
+									status_code: '00',
+									status_msg: 'FPB successfully rejected'
+								};
+							} else {
+								xJoResult = xUpdateResult;
+							}
+						}
+					}
+				}
+			}
+		} catch (e) {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Exception error <${_xClassName}.takeFPB>: ${e.message}`
 			};
 		}
 

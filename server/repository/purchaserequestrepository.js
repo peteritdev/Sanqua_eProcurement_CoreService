@@ -12,6 +12,7 @@ const _modelPurchaseRequestDetail = require('../models').tr_purchaserequestdetai
 const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 
 const Utility = require('peters-globallib-v2');
+const { param } = require('express-validator');
 const _utilInstance = new Utility();
 
 class PurchaseRequestRepository {
@@ -912,7 +913,8 @@ class PurchaseRequestRepository {
 				pAct == 'submit_fpb' ||
 				pAct == 'cancel_fpb' ||
 				pAct == 'set_to_draft_fpb' ||
-				pAct == 'close_fpb'
+				pAct == 'close_fpb' ||
+				pAct == 'take_fpb'
 			) {
 				var xComment = '';
 
@@ -939,6 +941,12 @@ class PurchaseRequestRepository {
 						break;
 					case 'close_fpb':
 						xComment = 'closed';
+						break;
+					case 'take_fpb':
+						xComment = 'taken';
+						pParam.took_at = await _utilInstance.getCurrDateTime();
+						pParam.took_by = pParam.user_id;
+						pParam.took_by_name = pParam.user_name;
 						break;
 					default:
 						xComment = 'changed';

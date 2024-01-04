@@ -199,7 +199,7 @@ class PurchaseRequestDetailRepository {
 					status_msg: 'Data has been successfully updated'
 				};
 			} else if (pAct == 'update_by_pr_no') {
-				pParam.updatedAt = await _utilInstance.getCurrDateTime();
+				pParam.create_po_at = await _utilInstance.getCurrDateTime();
 				var xPRNo = pParam.pr_no;
 				delete pParam.pr_no;
 				var xWhere = {
@@ -236,6 +236,28 @@ class PurchaseRequestDetailRepository {
 
 				pParam.updated_by = pParam.user_id;
 				pParam.updated_by_name = pParam.user_name;
+
+				xSaved = await _modelDb.update(pParam, xWhere);
+
+				await xTransaction.commit();
+
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'Data has been successfully updated'
+				};
+			} else if (pAct == 'update_create_pr') {
+				pParam.create_pr_at = await _utilInstance.getCurrDateTime();
+				var xId = pParam.id;
+				delete pParam.id;
+				var xWhere = {
+					where: {
+						id: xId
+					},
+					transaction: xTransaction
+				};
+
+				pParam.create_pr_by = pParam.user_id;
+				pParam.create_pr_by_name = pParam.user_name;
 
 				xSaved = await _modelDb.update(pParam, xWhere);
 
