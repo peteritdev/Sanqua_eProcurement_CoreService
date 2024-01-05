@@ -46,6 +46,18 @@ module.exports = (sequelize, DataTypes) => {
 		cancel_reason: DataTypes.STRING,
 		is_po_created: DataTypes.BOOLEAN,
 
+		create_pr_at: DataTypes.DATE,
+		create_pr_by: DataTypes.INTEGER,
+		create_pr_by_name: DataTypes.STRING,
+		cancel_pr_at: DataTypes.DATE,
+		cancel_pr_by: DataTypes.INTEGER,
+		cancel_pr_by_name: DataTypes.STRING,
+
+		create_po_at: DataTypes.DATE,
+		create_po_by_name: DataTypes.STRING,
+		cancel_po_at: DataTypes.DATE,
+		cancel_po_by_name: DataTypes.STRING,
+
 		createdAt: {
 			type: DataTypes.DATE,
 			defaultValue: sequelize.literal('NOW()'),

@@ -89,6 +89,11 @@ module.exports = (app) => {
 	];
 	app.post(rootAPIPath + 'close', arrValidate, purchaseRequestController.purchaseRequest_Close);
 
+	// Take FPB
+	arrValidate = [];
+	arrValidate = [ check('document_id').not().isEmpty().withMessage('Parameter document_id cannot be empty') ];
+	app.post(rootAPIPath + 'take', arrValidate, purchaseRequestController.purchaseRequest_TakeFPB);
+
 	// List FPB
 	arrValidate = [];
 	arrValidate = [
@@ -183,7 +188,7 @@ module.exports = (app) => {
 
 	arrValidate = [];
 	app.post(rootAPIPath + 'odoo/update_po', arrValidate, purchaseRequestController.purchaseRequestDetail_UpdatePo);
-	
+
 	// List FPB Project
 	arrValidate = [];
 	arrValidate = [

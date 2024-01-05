@@ -100,20 +100,34 @@ class PurchaseRequestService {
 			/*
 				At: 10/11/2023
 				Description: Checking when the parameter project is set, category_time must be 7 and category_pr must be 'asset'
-			*/
-			if (pParam.hasOwnProperty('project_id')) {
-				if (
-					pParam.project_id != '' &&
-					pParam.project_id != null &&
-					(pParam.category_item != 7 || pParam.category_pr != 'asset')
-				) {
-					xJoResult = {
-						status_code: '-99',
-						status_msg: 'Kategori Barang dan Kategori PR tidak sesuai dengan peruntukan project.'
-					};
-				} else {
-					// Check if project_id is match with FPB company
 
+				At: 30/12/2023
+				Description: Since for project, the category pr must be project also then in backend will force to categpry_pr become 'project'
+			*/
+			// if (pParam.hasOwnProperty('project_id')) {
+			// 	if (
+			// 		pParam.project_id != '' &&
+			// 		pParam.project_id != null &&
+			// 		(pParam.category_item != 7 || pParam.category_pr != 'asset')
+			// 	) {
+			// 		xJoResult = {
+			// 			status_code: '-99',
+			// 			status_msg: 'Kategori Barang dan Kategori PR tidak sesuai dengan peruntukan project.'
+			// 		};
+			// 	} else {
+			// 		// Check if project_id is match with FPB company
+
+			// 		xFlagProcess = true;
+			// 	}
+			// } else {
+			// 	xFlagProcess = true;
+			// }
+
+			if (pParam.hasOwnProperty('project_id')) {
+				if (pParam.project_id != '' && pParam.project_id != null) {
+					pParam.category_pr = 'project';
+					xFlagProcess = true;
+				} else {
 					xFlagProcess = true;
 				}
 			} else {
@@ -692,18 +706,18 @@ class PurchaseRequestService {
 				// console.log(`>>> xArrUserCanCancel: ${JSON.stringify(xArrUserCanCancel)}`);
 
 				// Call check item in odoo
-				// if (xResult.status == 0) {
-				let xCheckItemInOdoo = await _oAuthService.checkItem({ items: xOdooArrItem });
-				if (xCheckItemInOdoo.status_code === '00') {
-					const xResult = xCheckItemInOdoo.data[0].eSanqua;
-					for (let i = 0; i < xResult.length; i++) {
-						const xResultItem = xResult[i];
-						Object.assign(xJoArrRequestDetailData[xResultItem.index], {
-							check_result: xResultItem
-						});
+				if (xResult.status == 0) {
+					let xCheckItemInOdoo = await _oAuthService.checkItem({ items: xOdooArrItem });
+					if (xCheckItemInOdoo.status_code === '00') {
+						const xResult = xCheckItemInOdoo.data[0].eSanqua;
+						for (let i = 0; i < xResult.length; i++) {
+							const xResultItem = xResult[i];
+							Object.assign(xJoArrRequestDetailData[xResultItem.index], {
+								check_result: xResultItem
+							});
+						}
 					}
 				}
-				// }
 
 				xJoData = {
 					id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
@@ -761,7 +775,10 @@ class PurchaseRequestService {
 					cancel_by_name: xResult.cancel_by_name,
 					cancel_reason: xResult.cancel_reason,
 
-					approver_users: xArrUserCanCancel
+					approver_users: xArrUserCanCancel,
+
+					took_at: xResult.took_at != null ? moment(xResult.took_at).format('DD MMM YYYY HH:mm:ss') : null,
+					took_by_name: xResult.took_by_name
 				};
 
 				xJoResult = {
@@ -1120,9 +1137,16 @@ class PurchaseRequestService {
 								// }
 
 								// Update status FPB to be confirmed
+								// At: 08/12/2023
+								// Description: After confirm (approved by last approver), the status will change to "Pending".
+								//				This status indicate that procurement must be process it, so they need press button "Take" in terms of change to "In Progress"
+								// var xParamUpdatePR = {
+								// 	id: pParam.document_id,
+								// 	status: 2
+								// };
 								var xParamUpdatePR = {
 									id: pParam.document_id,
-									status: 2
+									status: 5
 								};
 								var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
 
@@ -1633,6 +1657,79 @@ class PurchaseRequestService {
 			xJoResult = {
 				status_code: '-99',
 				status_msg: `Exception error <${_xClassName}.dropDown>: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
+
+	async takeFPB(pParam) {
+		var xJoResult = {};
+		var xDecId = null;
+		var xFlagProcess = false;
+		var xEncId = '';
+		var xClearId = '';
+
+		try {
+			if (!pParam.logged_is_admin) {
+				xJoResult = {
+					status_msg: "You don't have permission of this access.",
+					status_code: '-99'
+				};
+			} else {
+				if (pParam.document_id != '' && pParam.user_id != '') {
+					xDecId = await _utilInstance.decrypt(pParam.document_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						xFlagProcess = true;
+						xEncId = pParam.document_id;
+						pParam.document_id = xDecId.decrypted;
+						xClearId = xDecId.decrypted;
+						xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+						if (xDecId.status_code == '00') {
+							pParam.user_id = xDecId.decrypted;
+							xFlagProcess = true;
+						} else {
+							xJoResult = xDecId;
+						}
+					} else {
+						xJoResult = xDecId;
+					}
+				}
+
+				if (xFlagProcess) {
+					// Check if this request id valid or not
+					var xPRDetail = await _repoInstance.getById({ id: pParam.document_id });
+					if (xPRDetail != null) {
+						if (xPRDetail.status != 5) {
+							xJoResult = {
+								status_code: '-99',
+								status_msg: 'This document can not take since the status is not Pending.'
+							};
+						} else {
+							var xParamUpdatePR = {
+								id: pParam.document_id,
+								status: 2,
+								user_id: pParam.user_id,
+								user_name: pParam.user_name
+							};
+							var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'take_fpb');
+
+							if (xUpdateResult.status_code == '00') {
+								xJoResult = {
+									status_code: '00',
+									status_msg: 'FPB successfully rejected'
+								};
+							} else {
+								xJoResult = xUpdateResult;
+							}
+						}
+					}
+				}
+			}
+		} catch (e) {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Exception error <${_xClassName}.takeFPB>: ${e.message}`
 			};
 		}
 
