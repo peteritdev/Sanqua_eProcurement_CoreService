@@ -174,20 +174,20 @@ class PurchaseRequestService {
 						if (xUpdate.status_code == '00') {
 							xJoResult = xAddResult;
 							// ---------------- Start: Add to log ----------------
-							// let xParamLog = {
-							// 	act: 'add',
-							// 	employee_id: pParam.employee_id,
-							// 	employee_name: pParam.employee_name,
-							// 	request_id: xAddResult.clear_id,
-							// 	request_no: xFPBNo,
-							// 	body: {
-							// 		act: 'add',
-							// 		msg: 'FPB created'
-							// 	}
-							// };
-							// console.log(`>>> xParamLog : ${JSON.stringify(xParamLog)}`);
-							// var xResultLog = await _logServiceInstance.addLog(pParam.method, pParam.token, xParamLog);
-							// xJoResult.log_result = xResultLog;
+							let xParamLog = {
+								act: 'add',
+								employee_id: pParam.employee_id,
+								employee_name: pParam.employee_name,
+								request_id: xAddResult.clear_id,
+								request_no: xFPBNo,
+								body: {
+									act: 'add',
+									msg: 'FPB created'
+								}
+							};
+							console.log(`>>> xParamLog : ${JSON.stringify(xParamLog)}`);
+							var xResultLog = await _logServiceInstance.addLog(pParam.method, pParam.token, xParamLog);
+							xJoResult.log_result = xResultLog;
 							// ---------------- End: Add to log ----------------
 
 							delete xJoResult.clear_id;
@@ -356,7 +356,7 @@ class PurchaseRequestService {
 										id: xRows[index].project_id,
 										code: xRows[index].project_code,
 										name: xRows[index].project_name,
-										odoo_project_code: xRows[index].odoo_project_code,
+										odoo_project_code: xRows[index].odoo_project_code
 									},
 									request_no: xRows[index].request_no,
 									requested_at:
@@ -429,7 +429,7 @@ class PurchaseRequestService {
 										id: xRows[index].project_id,
 										code: xRows[index].project_code,
 										name: xRows[index].project_name,
-										odoo_project_code: xRows[index].odoo_project_code,
+										odoo_project_code: xRows[index].odoo_project_code
 									},
 									request_no: xRows[index].request_no,
 									requested_at:
@@ -483,7 +483,7 @@ class PurchaseRequestService {
 									id: xRows[index].project_id,
 									code: xRows[index].project_code,
 									name: xRows[index].project_name,
-									odoo_project_code: xRows[index].odoo_project_code,
+									odoo_project_code: xRows[index].odoo_project_code
 								},
 								request_no: xRows[index].request_no,
 								requested_at:
@@ -689,9 +689,10 @@ class PurchaseRequestService {
 					}
 				}
 
-				console.log(`>>> xArrUserCanCancel: ${JSON.stringify(xArrUserCanCancel)}`);
+				// console.log(`>>> xArrUserCanCancel: ${JSON.stringify(xArrUserCanCancel)}`);
 
 				// Call check item in odoo
+				// if (xResult.status == 0) {
 				let xCheckItemInOdoo = await _oAuthService.checkItem({ items: xOdooArrItem });
 				if (xCheckItemInOdoo.status_code === '00') {
 					const xResult = xCheckItemInOdoo.data[0].eSanqua;
@@ -702,12 +703,13 @@ class PurchaseRequestService {
 						});
 					}
 				}
+				// }
 
 				xJoData = {
 					id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
 					project: xResult.project,
 					request_no: xResult.request_no,
-					requested_at: xResult.requested_at,
+					// requested_at: xResult.requested_at,
 					employee: {
 						// id: await _utilInstance.encrypt(xResult.employee_id.toString(), config.cryptoKey.hashKey),
 						id: xResult.employee_id,
@@ -1454,7 +1456,7 @@ class PurchaseRequestService {
 
 		return xJoResult;
 	}
-	
+
 	async fpbProjectList(pParam) {
 		var xJoResult = {};
 		var xJoArrData = [];
@@ -1476,7 +1478,6 @@ class PurchaseRequestService {
 		}
 
 		if (xFlagProcess) {
-
 			let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, {
 				application_id: config.applicationId,
 				table_name: config.dbTables.fpb,
@@ -1524,7 +1525,7 @@ class PurchaseRequestService {
 								id: xRows[index].project_id,
 								code: xRows[index].project_code,
 								name: xRows[index].project_name,
-								odoo_project_code: xRows[index].odoo_project_code,
+								odoo_project_code: xRows[index].odoo_project_code
 							},
 							request_no: xRows[index].request_no,
 							requested_at:
