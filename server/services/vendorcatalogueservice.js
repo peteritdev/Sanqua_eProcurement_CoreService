@@ -406,6 +406,7 @@ class VendorCatalogueService {
 							code: xRows[index].product_code,
 							name: xRows[index].product_name,
 							category: xRows[index].category_name,
+							category_id: xRows[index].category_id,
 							id: xRows[index].product_id
 						},
 						vendor: {
