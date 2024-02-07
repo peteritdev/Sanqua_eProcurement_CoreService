@@ -366,7 +366,7 @@ class PurchaseRequestDetailRepository {
 			
 			if (xDtQuery.length > 0) {
 				if (xDtQuery[0].calc_rab_item_remain_qty.status_code == "00") {
-					xFlag = false
+					xFlag = true
 				} else {
 				//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty;
 					xFlag = false
