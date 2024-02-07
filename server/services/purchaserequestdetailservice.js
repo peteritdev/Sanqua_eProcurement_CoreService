@@ -33,6 +33,7 @@ const IntegrationService = require('../services/oauthservice.js');
 const _integrationServiceInstance = new IntegrationService();
 
 const LogService = require('../services/logservice.js');
+const e = require('express');
 const _logServiceInstance = new LogService();
 
 const _xClassName = 'PurchaseRequestDetailService';
@@ -253,9 +254,11 @@ class PurchaseRequestDetailService {
 			} else if (xAct == 'add_batch') {
 				if (pParam.hasOwnProperty('items')) {
 					var xItems = pParam.items;
+					var arrMsg = []
 					for (var i in xItems) {
 						// Check first whether product_id and vendor_id already exists in detail or not
 						var xPurchaseRequestDetail = await _repoInstance.getByProductIdVendorId({
+							request_id: pParam.request_id,
 							product_id: xItems[i].product_id,
 							vendor_id: xItems[i].vendor_id
 						});
@@ -266,7 +269,8 @@ class PurchaseRequestDetailService {
 						) {
 							var xParamUpdate = {
 								id: xPurchaseRequestDetail.id,
-								qty: sequelize.literal(`qty + ${xItems[i].qty}`),
+								// qty: sequelize.literal(`qty + ${xItems[i].qty}`),
+								qty: xPurchaseRequestDetail.qty + xItems[i].qty,
 								budget_price_total:
 									(xPurchaseRequestDetail.qty + xItems[i].qty) *
 									xPurchaseRequestDetail.budget_price_per_unit
@@ -274,32 +278,38 @@ class PurchaseRequestDetailService {
 
 							xItems[i] = null;
 							xItems[i] = xParamUpdate;
+							xItems[i].request_id = xRequestIdClear;
 
 							xAct = 'update';
 						} else {
 							// Get Product detail by Id
-							var xProductDetail = await _productServiceInstance.getById({
-								id: await _utilInstance.encrypt(
-									xItems[i].product_id.toString(),
-									config.cryptoKey.hashKey
-								)
-							});
-							if (xProductDetail != null) {
-								// console.log(JSON.stringify(xProductDetail));
-								xItems[i].product_code = xProductDetail.data.code;
-								xItems[i].product_name = xProductDetail.data.name;
+							if (xItems[i].product_id !== null) {
+								var xProductDetail = await _productServiceInstance.getById({
+									id: await _utilInstance.encrypt(
+										xItems[i].product_id.toString(),
+										config.cryptoKey.hashKey
+									)
+								});
+								if (xProductDetail != null) {
+									// console.log(JSON.stringify(xProductDetail));
+									xItems[i].product_code = xProductDetail.data.code;
+									xItems[i].product_name = xProductDetail.data.name;
+								}
 							}
 
 							// Get Vendor detail by id
-							var xVendorDetail = await _vendorServiceInstance.getVendorById({
-								id: await _utilInstance.encrypt(
-									xItems[i].vendor_id.toString(),
-									config.cryptoKey.hashKey
-								)
-							});
-							if (xVendorDetail != null) {
-								xItems[i].vendor_code = xVendorDetail.data.code;
-								xItems[i].vendor_name = xVendorDetail.data.name;
+							if (xItems[i].vendor_id !== null) {
+								var xVendorDetail = await _vendorServiceInstance.getVendorById({
+									id: await _utilInstance.encrypt(
+										xItems[i].vendor_id.toString(),
+										config.cryptoKey.hashKey
+									)
+								});
+	
+								if (xVendorDetail != null) {
+									xItems[i].vendor_code = xVendorDetail.data.code;
+									xItems[i].vendor_name = xVendorDetail.data.name;
+								}
 							}
 
 							xItems[i].budget_price_total = xItems[i].qty * xItems[i].budget_price_per_unit;
@@ -313,8 +323,12 @@ class PurchaseRequestDetailService {
 						// if (xCatalogue.status_code == '00') {
 						// 	xItems[i].last_price = xCatalogue.data.last_price;
 						// }
-
 						var xAddResult = await _repoInstance.save(xItems[i], xAct);
+						arrMsg.push({
+							index: i,
+							status_code: xAddResult.status_code,
+							status_msg: xAddResult.status_msg
+						})
 						xJoResult = xAddResult;
 					}
 				}

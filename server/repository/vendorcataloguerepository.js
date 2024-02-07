@@ -27,9 +27,16 @@ class VendorCatalogueRepository {
 
 		xInclude = [
 			{
-				attributes: [ 'id', 'name', 'code' ],
+				attributes: [ 'id', 'name', 'code', 'merk', 'spesification'],
 				model: _modelProduct,
-				as: 'product'
+				as: 'product',
+				include: [
+					{
+						attributes: [ 'id', 'name' ],
+						model: _modelProductCategory,
+						as: 'category'
+					}
+				]
 			},
 			{
 				attributes: [ 'id', 'code', 'name' ],

@@ -127,7 +127,15 @@ class PurchaseRequestDetailRepository {
 
 		try {
 			var xSaved = null;
+			var xSql = "";
+			var xSqlErrMsg = ""
+			var xFlag = false
 			xTransaction = await sequelize.transaction();
+
+			xSql = `SELECT calc_rab_item_remain_qty('{
+				"pAct": "${pAct}",
+				"purchase_request_detail" : ${JSON.stringify(pParam)}
+			}'::json)`;
 
 			if (pAct == 'add') {
 				pParam.status = 0;
@@ -135,26 +143,52 @@ class PurchaseRequestDetailRepository {
 				pParam.created_by = pParam.user_id;
 				pParam.created_by_name = pParam.user_name;
 
-				xSaved = await _modelDb.create(pParam, { transaction: xTransaction });
+				var xDtQuery = await sequelize.query(xSql, {
+					type: sequelize.QueryTypes.SELECT,
+				});
+				
+				if (xDtQuery.length > 0) {
+					if (xDtQuery[0].calc_rab_item_remain_qty.status_code == "00") {
+						xFlag = true
+					} else {
+					//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty;
+						xFlag = false
+						xSqlErrMsg = `, ${xDtQuery[0].calc_rab_item_remain_qty.status_msg}`
+					}
+				} else {
+					xFlag = false
+				}
 
-				if (xSaved.id != null) {
-					xJoResult = {
-						status_code: '00',
-						status_msg: 'Data has been successfully saved',
-						created_id: await _utilInstance.encrypt(xSaved.id, config.cryptoKey.hashKey)
-						// clear_id: xSaved.id,
-					};
+				if (xFlag) {
+					xSaved = await _modelDb.create(pParam, { transaction: xTransaction });
 
-					await xTransaction.commit();
+					if (xSaved.id != null) {
+						xJoResult = {
+							status_code: '00',
+							status_msg: 'Data has been successfully saved',
+							created_id: await _utilInstance.encrypt(xSaved.id, config.cryptoKey.hashKey)
+							// clear_id: xSaved.id,
+						};
+
+						await xTransaction.commit();
+					} else {
+						if (xTransaction) await xTransaction.rollback();
+
+						xJoResult = {
+							status_code: '-99',
+							status_msg: 'Failed save to database'
+						};
+					}
 				} else {
 					if (xTransaction) await xTransaction.rollback();
 
 					xJoResult = {
 						status_code: '-99',
-						status_msg: 'Failed save to database'
+						status_msg: `Failed save to database ${xSqlErrMsg}`
 					};
 				}
 			} else if (pAct == 'update') {
+				var xFlag = false
 				pParam.updatedAt = await _utilInstance.getCurrDateTime();
 				var xId = pParam.id;
 				delete pParam.id;
@@ -167,15 +201,41 @@ class PurchaseRequestDetailRepository {
 
 				pParam.updated_by = pParam.user_id;
 				pParam.updated_by_name = pParam.user_name;
+				
+				var xDtQuery = await sequelize.query(xSql, {
+					type: sequelize.QueryTypes.SELECT,
+				});
 
-				xSaved = await _modelDb.update(pParam, xWhere);
+				
+				if (xDtQuery.length > 0) {
+					if (xDtQuery[0].calc_rab_item_remain_qty.status_code == "00") {
+						xFlag = true
+					} else {
+					//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty;
+						xFlag = false
+						xSqlErrMsg = xDtQuery[0].calc_rab_item_remain_qty.status_msg
+					}
+				} else {
+					xFlag = false
+				}
 
-				await xTransaction.commit();
+				if (xFlag) {
+					xSaved = await _modelDb.update(pParam, xWhere);
 
-				xJoResult = {
-					status_code: '00',
-					status_msg: 'Data has been successfully updated'
-				};
+					await xTransaction.commit();
+
+					xJoResult = {
+						status_code: '00',
+						status_msg: 'Data has been successfully updated'
+					};
+				} else {
+					if (xTransaction) await xTransaction.rollback();
+
+					xJoResult = {
+						status_code: '-99',
+						status_msg: `Failed save to database ${xSqlErrMsg}`
+					};
+				}
 			} else if (pAct == 'update_by_product_code') {
 				pParam.updatedAt = await _utilInstance.getCurrDateTime();
 				var xProductCode = pParam.product_code;
@@ -286,23 +346,61 @@ class PurchaseRequestDetailRepository {
 
 		try {
 			var xSaved = null;
+			var xSql = "";
+			var xSqlErrMsg = ""
+			var xFlag = false
 			xTransaction = await sequelize.transaction();
 
-			xSaved = await _modelDb.destroy(
-				{
-					where: {
-						id: pParam.id
-					}
-				},
-				{ xTransaction }
-			);
+			console.log('DELETE ITEM >>>>>', pParam);
 
-			await xTransaction.commit();
+			xSql = `SELECT calc_rab_item_remain_qty('{
+				"pAct": update,
+				"purchase_request_detail" : ${JSON.stringify(pParam)}
+			}'::json)`;
 
-			xJoResult = {
-				status_code: '00',
-				status_msg: 'Data has been successfully deleted'
-			};
+			var xDtQuery = await sequelize.query(xSql, {
+				type: sequelize.QueryTypes.SELECT,
+			});
+			console.log('xUpdateResult>>>>', xDtQuery);
+
+			
+			if (xDtQuery.length > 0) {
+				if (xDtQuery[0].calc_rab_item_remain_qty.status_code == "00") {
+					xFlag = false
+				} else {
+				//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty;
+					xFlag = false
+					xSqlErrMsg = xDtQuery[0].calc_rab_item_remain_qty.status_msg
+				}
+			} else {
+				xFlag = false
+			}
+
+			if (xFlag) {
+				xSaved = await _modelDb.destroy(
+					{
+						where: {
+							id: pParam.id
+						}
+					},
+					{ xTransaction }
+				);
+
+				await xTransaction.commit();
+
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'Data has been successfully deleted'
+				};
+			} else {
+				
+				if (xTransaction) await xTransaction.rollback();
+
+				xJoResult = {
+					status_code: '-99',
+					status_msg: `Failed save to database ${xSqlErrMsg}`
+				};
+			}
 
 			return xJoResult;
 		} catch (e) {
