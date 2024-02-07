@@ -354,7 +354,7 @@ class PurchaseRequestDetailRepository {
 			console.log('DELETE ITEM >>>>>', pParam);
 
 			xSql = `SELECT calc_rab_item_remain_qty('{
-				"pAct": update,
+				"pAct": "update",
 				"purchase_request_detail" : ${JSON.stringify(pParam)}
 			}'::json)`;
 
