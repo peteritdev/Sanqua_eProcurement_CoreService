@@ -267,7 +267,7 @@ class BudgetPlanDetailService {
 				// 		employee_id: pParam.employee_id,
 				// 		employee_name: pParam.employee_name,
 				// 		request_id: pParam.request_id,
-				// 		request_no: xBudgetPlan.data.request_no,
+				// 		request_no: xBudgetPlan.data.budget_no,
 				// 		body: {
 				// 			act: 'add',
 				// 			msg: 'RAB Item created',
@@ -422,7 +422,7 @@ class BudgetPlanDetailService {
 									//     employee_id: pParam.employee_id,
 									//     employee_name: pParam.employee_name,
 									//     request_id: pParam.request_id,
-									//     request_no: xBudgetPlan.data.request_no,
+									//     request_no: xBudgetPlan.data.budget_no,
 									//     body: {
 									//         act: 'update',
 									//         msg: 'RAB item changed',

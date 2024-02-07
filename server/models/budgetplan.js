@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
 			autoIncrement: true
 		},
 
-		request_no: DataTypes.STRING,
+		budget_no: DataTypes.STRING,
 		name: DataTypes.STRING,
 		project_id: DataTypes.INTEGER,
 		project_name: DataTypes.STRING,

@@ -35,7 +35,7 @@ class BudgetPlanDetailRepository {
         {
           model: _modelBudgetPlan,
           as: "budget_plan",
-          attributes: ["request_no", "name"],
+          attributes: ["budget_no", "name"],
         },
       ];
 

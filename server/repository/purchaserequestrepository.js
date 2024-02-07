@@ -10,6 +10,7 @@ const _modelDb = require('../models').tr_purchaserequests;
 const _modelProject = require('../models').ms_projects;
 const _modelPurchaseRequestDetail = require('../models').tr_purchaserequestdetails;
 const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
+const _modelBudgetPlan = require('../models').tr_budgetplans;
 
 const Utility = require('peters-globallib-v2');
 const { param } = require('express-validator');
@@ -40,6 +41,11 @@ class PurchaseRequestRepository {
 				model: _modelProject,
 				as: 'project',
 				attributes: [ 'id', 'code', 'name', 'odoo_project_code' ]
+			},
+			{
+				model: _modelBudgetPlan,
+				as: 'budget_plan',
+				attributes: [ 'id', 'name' ]
 			}
 		];
 
@@ -324,6 +330,13 @@ class PurchaseRequestRepository {
 			}
 		}
 
+		if (pParam.hasOwnProperty('budget_plan_id')) {
+			if (pParam.budget_plan_id != '') {
+				xSqlWhere += ' AND pr.budget_plan_id = :budgetPlanId ';
+				xObjJsonWhere.budgetPlanId = pParam.budget_plan_id;
+			}
+		}
+
 		if (pParam.hasOwnProperty('request_date_start') && pParam.hasOwnProperty('request_date_end')) {
 			if (pParam.request_date_start != '' && pParam.request_date_end != '') {
 				xSqlWhere += ' AND pr.requested_at BETWEEN :startDate AND :endDate ';
@@ -400,9 +413,16 @@ class PurchaseRequestRepository {
 					}
 				}
 
+				let xSqlWhereRabOwnedDoc = '';
+				if (pParam.hasOwnProperty('budget_plan_id')) {
+					if (pParam.budget_plan_id != '') {
+						xSqlWhereRabOwnedDoc = ' AND pr.budget_plan_id = :budgetPlanId';
+					}
+				}
+
 				xSqlWhere = ` (( ${xSqlWhere} ) OR (${xSqlWhereOr} ${xSqlWhereCompanyOwnedDoc != ''
 					? xSqlWhereCompanyOwnedDoc
-					: ''} ${xSqlWhereProjectOwnedDoc} ${xSqlWhereCategoryOwnedDoc} ${xSqlWhereDepartmentOwnedDoc}))`;
+					: ''} ${xSqlWhereProjectOwnedDoc} ${xSqlWhereRabOwnedDoc} ${xSqlWhereCategoryOwnedDoc} ${xSqlWhereDepartmentOwnedDoc}))`;
 			}
 		}
 
@@ -489,7 +509,7 @@ class PurchaseRequestRepository {
 		if (!pParam.hasOwnProperty('is_export')) {
 			xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
 			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item,
-			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
+			p.id AS "project_id", p.code AS "project_code", p.name AS "project_name", p.odoo_project_code, b.id AS "budget_plan_id", b.name AS "budget_plan_name"`;
 
 			xSqlGroupBy = ` GROUP BY pr.id, 
 						pr.request_no, 
@@ -502,7 +522,8 @@ class PurchaseRequestRepository {
 						pr.company_id, 
 						pr.company_code, 
 						pr.company_name,
-						p.id,p.code,p.name,p.odoo_project_code`;
+						p.id,p.code,p.name,p.odoo_project_code,
+						b.id,b.name`;
 
 			if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
 				if (pParam.offset != '' && pParam.limit != '') {
@@ -526,13 +547,15 @@ class PurchaseRequestRepository {
 								prd.estimate_fulfillment,
 								prd.uom_name,
 								prd.status AS "item_detail_status",
-								p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
+								p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code,
+								b.id AS "budget_plan_id", b.name AS "budget_plan_name"`;
 
 				xSqlGroupBy = ` `;
 			} else {
 				xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
 			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item,
-			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
+			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code,
+			b.id AS "budget_plan_id", b.name AS "budget_plan_name"`;
 
 				xSqlGroupBy = ` GROUP BY pr.id, 
 						pr.request_no, 
@@ -545,7 +568,8 @@ class PurchaseRequestRepository {
 						pr.company_id, 
 						pr.company_code, 
 						pr.company_name,
-						p.id,p.code,p.name,p.odoo_project_code`;
+						p.id,p.code,p.name,p.odoo_project_code,
+						b.id,b.name`;
 
 				if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
 					if (pParam.offset != '' && pParam.limit != '') {
@@ -559,6 +583,7 @@ class PurchaseRequestRepository {
 				 FROM tr_purchaserequests pr 
 						LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
 							LEFT JOIN ms_projects p ON p.id = pr.project_id
+							LEFT JOIN tr_budgetplans b ON b.id = pr.budget_plan_id
 				 WHERE ${xSqlWhere} ${xSqlGroupBy}
 				  ${xSqlOrderBy}${xSqlLimit} `;
 
@@ -566,6 +591,7 @@ class PurchaseRequestRepository {
 		  FROM tr_purchaserequests pr 
 		  	LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
 			  LEFT JOIN ms_projects p ON p.id = pr.project_id
+			  LEFT JOIN tr_budgetplans b ON b.id = pr.budget_plan_id
 		  WHERE ${xSqlWhere}`;
 
 		// console.log(`>>> xSqlCount: ${xSqlCount}`);
@@ -844,71 +870,110 @@ class PurchaseRequestRepository {
 				}
 			}
 			if (pAct == 'add_batch_in_item') {
-				pParam.status = 0;
-				pParam.is_delete = 0;
-				pParam.created_by = pParam.user_id;
-				pParam.created_by_name = pParam.user_name;
+				var xFlag = false
+				var xSql = "";
+				var xSqlErrMsg = ""
+				// SELECT calc_rab_item_remain_qty
+				if (pParam.hasOwnProperty('budget_plan_id')) {
+					xSql = `SELECT calc_rab_item_remain_qty('{
+							"pAct": "${pAct}",
+							"budget_plan_id" : ${pParam.budget_plan_id},
+							"purchase_request_detail" : ${JSON.stringify(pParam.purchase_request_detail)}
+						}'::json)`;
+					
+					var xDtQuery = await sequelize.query(xSql, {
+						type: sequelize.QueryTypes.SELECT,
+					});
 
-				// Need disable trigger first because it affect when add batch item.
-				sequelize.query(
-					'ALTER TABLE "tr_purchaserequestdetails" DISABLE TRIGGER "trg_update_total_item_afterinsert"'
-				);
-
-				xSaved = await _modelDb.create(
-					pParam,
-					{
-						include: [
-							{
-								model: _modelPurchaseRequestDetail,
-								as: 'purchase_request_detail'
-							}
-						]
-					},
-					{ transaction: xTransaction }
-				);
-
-				if (xSaved.id != null) {
-					xJoResult = {
-						status_code: '00',
-						status_msg: 'Data has been successfully saved',
-						created_id: await _utilInstance.encrypt(xSaved.id, config.cryptoKey.hashKey),
-						clear_id: xSaved.id
-					};
-
-					sequelize.query(
-						'ALTER TABLE "tr_purchaserequestdetails" ENABLE TRIGGER "trg_update_total_item_afterinsert"'
-					);
-
-					// Call update total on table tr_purchaserequest
-					sequelize.query(
-						`update tr_purchaserequests set total_qty = (
-							select sum( qty )
-							from tr_purchaserequestdetails
-							where request_id = ${xSaved.id}
-						),
-						total_price = (
-							select sum( budget_price_total )
-							from tr_purchaserequestdetails
-							where request_id = ${xSaved.id}
-						),
-						total_quotation_price = (
-							select sum( quotation_price_total )
-							from tr_purchaserequestdetails
-							where request_id = ${xSaved.id}
-						)
-						where id = ${xSaved.id};`,
-						{
-							transaction: xTransaction
+					if (xDtQuery.length > 0) {
+						if (xDtQuery[0].calc_rab_item_remain_qty.status_code == "00") {
+							xFlag = true
+						} else {
+						//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty;
+							xFlag = false
+							xSqlErrMsg = xDtQuery[0].calc_rab_item_remain_qty.status_msg
 						}
+					} else {
+						xFlag = false
+					}
+				} else {
+					xFlag = true
+				}
+
+				if (xFlag) {
+					pParam.status = 0;
+					pParam.is_delete = 0;
+					pParam.created_by = pParam.user_id;
+					pParam.created_by_name = pParam.user_name;
+
+					// Need disable trigger first because it affect when add batch item.
+					sequelize.query(
+						'ALTER TABLE "tr_purchaserequestdetails" DISABLE TRIGGER "trg_update_total_item_afterinsert"'
 					);
 
-					await xTransaction.commit();
+					xSaved = await _modelDb.create(
+						pParam,
+						{
+							include: [
+								{
+									model: _modelPurchaseRequestDetail,
+									as: 'purchase_request_detail'
+								}
+							]
+						},
+						{ transaction: xTransaction }
+					);
+
+					if (xSaved.id != null) {
+						xJoResult = {
+							status_code: '00',
+							status_msg: 'Data has been successfully saved',
+							created_id: await _utilInstance.encrypt(xSaved.id, config.cryptoKey.hashKey),
+							clear_id: xSaved.id
+						};
+
+						sequelize.query(
+							'ALTER TABLE "tr_purchaserequestdetails" ENABLE TRIGGER "trg_update_total_item_afterinsert"'
+						);
+
+						// Call update total on table tr_purchaserequest
+						sequelize.query(
+							`update tr_purchaserequests set total_qty = (
+								select sum( qty )
+								from tr_purchaserequestdetails
+								where request_id = ${xSaved.id}
+							),
+							total_price = (
+								select sum( budget_price_total )
+								from tr_purchaserequestdetails
+								where request_id = ${xSaved.id}
+							),
+							total_quotation_price = (
+								select sum( quotation_price_total )
+								from tr_purchaserequestdetails
+								where request_id = ${xSaved.id}
+							)
+							where id = ${xSaved.id};`,
+							{
+								transaction: xTransaction
+							}
+						);
+
+						await xTransaction.commit();
+					} else {
+						if (xTransaction) await xTransaction.rollback();
+
+						xJoResult = {
+							status_code: '-99',
+							status_msg: 'Failed save to database'
+						};
+					}
 				} else {
 					if (xTransaction) await xTransaction.rollback();
 
 					xJoResult = {
 						status_code: '-99',
-						status_msg: 'Failed save to database'
+						status_msg: 'Failed save to database ' + xSqlErrMsg
 					};
 				}
 			} else if (

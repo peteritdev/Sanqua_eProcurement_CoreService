@@ -254,9 +254,11 @@ class PurchaseRequestDetailService {
 			} else if (xAct == 'add_batch') {
 				if (pParam.hasOwnProperty('items')) {
 					var xItems = pParam.items;
+					var arrMsg = []
 					for (var i in xItems) {
 						// Check first whether product_id and vendor_id already exists in detail or not
 						var xPurchaseRequestDetail = await _repoInstance.getByProductIdVendorId({
+							request_id: pParam.request_id,
 							product_id: xItems[i].product_id,
 							vendor_id: xItems[i].vendor_id
 						});
@@ -267,7 +269,8 @@ class PurchaseRequestDetailService {
 						) {
 							var xParamUpdate = {
 								id: xPurchaseRequestDetail.id,
-								qty: sequelize.literal(`qty + ${xItems[i].qty}`),
+								// qty: sequelize.literal(`qty + ${xItems[i].qty}`),
+								qty: xPurchaseRequestDetail.qty + xItems[i].qty,
 								budget_price_total:
 									(xPurchaseRequestDetail.qty + xItems[i].qty) *
 									xPurchaseRequestDetail.budget_price_per_unit
@@ -275,6 +278,7 @@ class PurchaseRequestDetailService {
 
 							xItems[i] = null;
 							xItems[i] = xParamUpdate;
+							xItems[i].request_id = xRequestIdClear;
 
 							xAct = 'update';
 						} else {
@@ -320,6 +324,11 @@ class PurchaseRequestDetailService {
 						// 	xItems[i].last_price = xCatalogue.data.last_price;
 						// }
 						var xAddResult = await _repoInstance.save(xItems[i], xAct);
+						arrMsg.push({
+							index: i,
+							status_code: xAddResult.status_code,
+							status_msg: xAddResult.status_msg
+						})
 						xJoResult = xAddResult;
 					}
 				}

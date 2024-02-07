@@ -117,7 +117,7 @@ class BudgetPlanService {
                                     xJoArrData.push({
                                         id: await _utilInstance.encrypt(xRows[i].id.toString(), config.cryptoKey.hashKey),
                                         name: xRows[i].name,
-                                        request_no: xRows[i].request_no,
+                                        budget_no: xRows[i].budget_no,
                                         project: {
                                             id: xRows[i].project_id,
                                             code: xRows[i].project_code,
@@ -322,7 +322,7 @@ class BudgetPlanService {
                             // );
                             
                             var xParamUpdate = {
-                                request_no: xRABNo,
+                                budget_no: xRABNo,
                                 id: xAddResult.clear_id
                             };
 
@@ -494,7 +494,7 @@ class BudgetPlanService {
                       name: xResult.project_name,    
                     },
 					name: xResult.name,
-					request_no: xResult.request_no,
+					budget_no: xResult.budget_no,
 					employee: {
 						// id: await _utilInstance.encrypt(xResult.employee_id.toString(), config.cryptoKey.hashKey),
 						id: xResult.employee_id,
@@ -621,7 +621,7 @@ class BudgetPlanService {
                                 var xParamAddApprovalMatrix = {
                                     act: 'add',
                                     document_id: xEncId,
-                                    document_no: xRABDetail.request_no,
+                                    document_no: xRABDetail.budget_no,
                                     application_id: config.applicationId,
                                     table_name: config.dbTables.rab,
                                     company_id: xRABDetail.company_id,
@@ -645,7 +645,7 @@ class BudgetPlanService {
                                 // 			for (var i in xApproverSeq1.approver_user) {
                                 // 				// In App notification
                                 // 				let xInAppNotificationResult = await _notificationService.inAppNotification({
-                                // 					document_code: xRABDetail.request_no,
+                                // 					document_code: xRABDetail.budget_no,
                                 // 					document_id: xEncId,
                                 // 					document_status: xRABDetail.status,
                                 // 					mode: 'request_approval_rab',
@@ -681,7 +681,7 @@ class BudgetPlanService {
                                 // 					xParamEmailNotification = {
                                 // 						mode: 'request_approval_rab',
                                 // 						id: xEncId,
-                                // 						request_no: xRABDetail.request_no,
+                                // 						request_no: xRABDetail.budget_no,
                                 // 						company_name: xRABDetail.company_name,
                                 // 						department_name: xRABDetail.department_name,
                                 // 						created_by: xRABDetail.employee_name,
@@ -1128,7 +1128,7 @@ class BudgetPlanService {
 							// 	if (xNextApprover != null) {
 							// 		for (var i in xNextApprover) {
 							// 			let xInAppNotificationResult = await _notificationService.inAppNotification({
-							// 				document_code: xRABDetail.request_no,
+							// 				document_code: xRABDetail.budget_no,
 							// 				document_id: xEncId,
 							// 				document_status: xRABDetail.status,
 							// 				mode: 'request_approval_rab',
@@ -1148,7 +1148,7 @@ class BudgetPlanService {
 							// 				xParamEmailNotification = {
 							// 					mode: 'request_approval_fpb',
 							// 					id: xEncId,
-							// 					request_no: xRABDetail.request_no,
+							// 					request_no: xRABDetail.budget_no,
 							// 					company_name: xRABDetail.company_name,
 							// 					department_name: xRABDetail.department_name,
 							// 					created_by: xRABDetail.employee_name,
@@ -1313,7 +1313,7 @@ class BudgetPlanService {
                             xJoArrData.push({
                                 id: xRows[index].id,
                                 name: xRows[index].name,
-                                request_no: xRows[index].request_no
+                                budget_no: xRows[index].budget_no
                             });
                         }
 

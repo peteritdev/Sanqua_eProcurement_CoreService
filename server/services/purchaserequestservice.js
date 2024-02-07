@@ -53,6 +53,7 @@ class PurchaseRequestService {
 		var xAct = pParam.act;
 		var xFlagProcess = false;
 		var xDecId = null;
+		var bDect = null
 
 		delete pParam.act;
 
@@ -134,10 +135,18 @@ class PurchaseRequestService {
 				xFlagProcess = true;
 			}
 
+			if (pParam.hasOwnProperty('budget_plan_id')) {
+				bDect = await _utilInstance.decrypt(pParam.budget_plan_id, config.cryptoKey.hashKey);
+				if (bDect.status_code == '00') {
+					pParam.budget_plan_id = bDect.decrypted
+				}
+			}
+
 			if (xFlagProcess) {
 				if (xAct == 'add' || xAct == 'add_batch_in_item') {
 					// Calculate the total
 					var xJoArrItems = [];
+
 					if (pParam.hasOwnProperty('purchase_request_detail')) {
 						xJoArrItems = pParam.purchase_request_detail;
 						if (xJoArrItems.length > 0) {
@@ -349,9 +358,14 @@ class PurchaseRequestService {
 				if (!pParam.hasOwnProperty('department_id')) {
 					pParam.department_id = pParam.logged_department_id;
 				}
+				if (pParam.hasOwnProperty('budget_plan_id')) {
+					const bDect = await _utilInstance.decrypt(pParam.budget_plan_id, config.cryptoKey.hashKey);
+					if (bDect.status_code == '00') {
+						pParam.budget_plan_id = bDect.decrypted
+					}
+				}
 
 				// console.log(`>>> pParam 2: ${JSON.stringify(pParam)}`);
-
 				var xResultList = await _repoInstance.list(pParam);
 
 				if (xResultList.total_record > 0) {
@@ -371,6 +385,10 @@ class PurchaseRequestService {
 										code: xRows[index].project_code,
 										name: xRows[index].project_name,
 										odoo_project_code: xRows[index].odoo_project_code
+									},
+									budget_plan: {
+										id: xRows[index].budget_plan_id,
+										name: xRows[index].budget_plan_name
 									},
 									request_no: xRows[index].request_no,
 									requested_at:
@@ -499,6 +517,10 @@ class PurchaseRequestService {
 									name: xRows[index].project_name,
 									odoo_project_code: xRows[index].odoo_project_code
 								},
+								budget_plan: {
+									id: xRows[index].budget_plan_id,
+									name: xRows[index].budget_plan_name
+								},
 								request_no: xRows[index].request_no,
 								requested_at:
 									xRows[index].requested_at == null
@@ -582,7 +604,6 @@ class PurchaseRequestService {
 
 			if (xFlagProcess) {
 				var xResult = await _repoInstance.getById(pParam);
-
 				// console.log(`>>> xResult: ${JSON.stringify(xResult)}`);
 
 				if (xResult != null) {
@@ -762,6 +783,7 @@ class PurchaseRequestService {
 					xJoData = {
 						id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
 						project: xResult.project,
+						budget_plan: xResult.budget_plan,
 						request_no: xResult.request_no,
 						// requested_at: xResult.requested_at,
 						employee: {
