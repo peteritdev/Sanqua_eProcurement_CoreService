@@ -406,11 +406,13 @@ class BudgetPlanDetailService {
 								if (pParam.hasOwnProperty('budget_price_per_unit')) {
 									pParam.budget_price_total = pParam.qty * pParam.budget_price_per_unit;
 								}
+								pParam.qty_remain = pParam.qty;
 							}
 
 							if (pParam.estimate_date_use == '') {
 								pParam.estimate_date_use = null;
 							}
+
 							var xUpdateResult = await _repoInstance.save(pParam, xAct);
 							xJoResult = xUpdateResult;
 							if (xUpdateResult.status_code == '00') {
