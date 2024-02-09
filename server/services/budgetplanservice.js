@@ -106,6 +106,21 @@ class BudgetPlanService {
                     if (!pParam.hasOwnProperty('department_id')) {
                         pParam.department_id = pParam.logged_department_id;
                     }
+
+                    if (pParam.hasOwnProperty("filter")) {
+                        let filter = JSON.parse(pParam.filter)
+                        console.log('Filter raw >>>>', filter);
+                        for (let i = 0; i < filter.length; i++) {
+                            if (filter[i]['project_id'] !== undefined) {
+                                if (typeof filter[i]['project_id'] === 'string') {
+                                    const xId = await _utilInstance.decrypt(filter[i]['project_id'], config.cryptoKey.hashKey)
+                                    filter[i].project_id = Number(xId.decrypted)
+                                    break
+                                }
+                            }
+                        }
+                        pParam.filter = JSON.stringify(filter)
+                    }
                     
                     var xResultList = await _repoInstance.list(pParam);
                     if (xResultList) {
