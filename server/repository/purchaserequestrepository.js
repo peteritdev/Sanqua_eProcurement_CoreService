@@ -12,6 +12,7 @@ const _modelPurchaseRequestDetail = require('../models').tr_purchaserequestdetai
 const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 
 const Utility = require('peters-globallib-v2');
+const { param } = require('express-validator');
 const _utilInstance = new Utility();
 
 class PurchaseRequestRepository {
@@ -47,7 +48,7 @@ class PurchaseRequestRepository {
 				id: pParam.id
 			},
 			include: xInclude,
-			order: [ [ 'purchase_request_detail', 'product_name', 'ASC' ] ]
+			order: [ [ 'purchase_request_detail', 'id', 'ASC' ] ]
 		});
 
 		return xData;
@@ -294,7 +295,7 @@ class PurchaseRequestRepository {
 
 		if (pParam.hasOwnProperty('order_by')) {
 			if (pParam.order_by != '') {
-				xSqlOrderBy = ` ORDER BY pr.${pParam.order_by} ${pParam.order_type != '' ? pParam.order_type : 'ASC'}`;
+				xSqlOrderBy = ` ORDER BY ${pParam.order_by} ${pParam.order_type != '' ? pParam.order_type : 'ASC'}`;
 			} else {
 				xSqlOrderBy = ` ORDER BY pr.requested_at DESC`;
 			}
@@ -376,14 +377,14 @@ class PurchaseRequestRepository {
 						xSqlWhereCompanyOwnedDoc = ' AND pr.company_id = :companyId';
 					}
 				}
-				// 28/11/2023 
+				// 28/11/2023
 				let xSqlWhereDepartmentOwnedDoc = '';
 				if (pParam.hasOwnProperty('department_id')) {
 					if (pParam.department_id != '') {
 						xSqlWhereDepartmentOwnedDoc = ' AND pr.department_id = :departmentId';
 					}
 				}
-				// 28/11/2023 
+				// 28/11/2023
 				let xSqlWhereCategoryOwnedDoc = '';
 				if (pParam.hasOwnProperty('category_item')) {
 					if (pParam.category_item != '') {
@@ -398,7 +399,7 @@ class PurchaseRequestRepository {
 						xSqlWhereProjectOwnedDoc = ' AND pr.project_id = :projectId';
 					}
 				}
-				
+
 				xSqlWhere = ` (( ${xSqlWhere} ) OR (${xSqlWhereOr} ${xSqlWhereCompanyOwnedDoc != ''
 					? xSqlWhereCompanyOwnedDoc
 					: ''} ${xSqlWhereProjectOwnedDoc} ${xSqlWhereCategoryOwnedDoc} ${xSqlWhereDepartmentOwnedDoc}))`;
@@ -560,7 +561,7 @@ class PurchaseRequestRepository {
 							LEFT JOIN ms_projects p ON p.id = pr.project_id
 				 WHERE ${xSqlWhere} ${xSqlGroupBy}
 				  ${xSqlOrderBy}${xSqlLimit} `;
-		
+
 		xSqlCount = ` SELECT count(distinct pr.request_no) AS total_record
 		  FROM tr_purchaserequests pr 
 		  	LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
@@ -586,7 +587,7 @@ class PurchaseRequestRepository {
 			total_record: xTotalRecord[0].total_record
 		};
 	}
-	
+
 	async fpbProjectList(pParam) {
 		var xData,
 			xTotalRecord = [];
@@ -625,7 +626,7 @@ class PurchaseRequestRepository {
 				xObjJsonWhere.categoryItem = pParam.category_item;
 			}
 		}
-		
+
 		// 16/11/2023 to show fpb-project with product code is null
 		if (pParam.hasOwnProperty('project_id')) {
 			if (pParam.project_id != '') {
@@ -690,14 +691,14 @@ class PurchaseRequestRepository {
 						xSqlWhereCompanyOwnedDoc = ' AND pr.company_id = :companyId';
 					}
 				}
-				// 28/11/2023 
+				// 28/11/2023
 				let xSqlWhereDepartmentOwnedDoc = '';
 				if (pParam.hasOwnProperty('department_id')) {
 					if (pParam.department_id != '') {
 						xSqlWhereDepartmentOwnedDoc = ' AND pr.department_id = :departmentId';
 					}
 				}
-				// 28/11/2023 
+				// 28/11/2023
 				let xSqlWhereCategoryOwnedDoc = '';
 				if (pParam.hasOwnProperty('category_item')) {
 					if (pParam.category_item != '') {
@@ -711,12 +712,11 @@ class PurchaseRequestRepository {
 					if (pParam.project_id != '') {
 						xSqlWhereProjectOwnedDoc = ' AND pr.project_id = :projectId AND prd.product_code IS NULL';
 					}
-				}
-				else {
+				} else {
 					xSqlWhereProjectOwnedDoc = ' AND pr.project_id IS NOT NULL AND prd.product_code IS NULL';
 				}
 				// ---
-				
+
 				xSqlWhere = ` (( ${xSqlWhere} ) OR (${xSqlWhereOr} ${xSqlWhereCompanyOwnedDoc != ''
 					? xSqlWhereCompanyOwnedDoc
 					: ''} ${xSqlWhereProjectOwnedDoc} ${xSqlWhereCategoryOwnedDoc} ${xSqlWhereDepartmentOwnedDoc}))`;
@@ -750,7 +750,6 @@ class PurchaseRequestRepository {
 			}
 		}
 
-		
 		xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
 			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item, 
 			prd.product_code,
@@ -783,7 +782,7 @@ class PurchaseRequestRepository {
 							LEFT JOIN ms_projects p ON p.id = pr.project_id
 				 WHERE ${xSqlWhere} ${xSqlGroupBy}
 				  ${xSqlOrderBy}${xSqlLimit} `;
-		
+
 		xSqlCount = ` SELECT count(pr.request_no) AS total_record
 		  FROM tr_purchaserequests pr 
 		  	LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
@@ -917,7 +916,8 @@ class PurchaseRequestRepository {
 				pAct == 'submit_fpb' ||
 				pAct == 'cancel_fpb' ||
 				pAct == 'set_to_draft_fpb' ||
-				pAct == 'close_fpb'
+				pAct == 'close_fpb' ||
+				pAct == 'take_fpb'
 			) {
 				var xComment = '';
 
@@ -927,6 +927,7 @@ class PurchaseRequestRepository {
 						break;
 					case 'submit_fpb':
 						xComment = 'submitted';
+						pParam.requested_at = await _utilInstance.getCurrDateTime();
 						break;
 					case 'cancel_fpb':
 						pParam.cancel_at = await _utilInstance.getCurrDateTime();
@@ -943,6 +944,12 @@ class PurchaseRequestRepository {
 						break;
 					case 'close_fpb':
 						xComment = 'closed';
+						break;
+					case 'take_fpb':
+						xComment = 'taken';
+						pParam.took_at = await _utilInstance.getCurrDateTime();
+						pParam.took_by = pParam.user_id;
+						pParam.took_by_name = pParam.user_name;
 						break;
 					default:
 						xComment = 'changed';

@@ -310,9 +310,9 @@ class PurchaseRequestDetailService {
 							xAct = 'add';
 						}
 
-						if (xCatalogue.status_code == '00') {
-							xItems[i].last_price = xCatalogue.data.last_price;
-						}
+						// if (xCatalogue.status_code == '00') {
+						// 	xItems[i].last_price = xCatalogue.data.last_price;
+						// }
 
 						var xAddResult = await _repoInstance.save(xItems[i], xAct);
 						xJoResult = xAddResult;
@@ -695,7 +695,7 @@ class PurchaseRequestDetailService {
 																		};
 																		let xResultUpdate = await _repoInstance.save(
 																			xParamUpdate,
-																			'update'
+																			'update_create_pr'
 																		);
 
 																		console.log(
@@ -819,7 +819,9 @@ class PurchaseRequestDetailService {
 									let xParamUpdate = {
 										pr_no: arrPr[i],
 										cancel_reason: updateAt,
-										status: 5
+										status: 5,
+										user_id: pParam.user_id,
+										user_name: pParam.user_name
 									};
 									let xCancelPR = await _repoInstance.save(xParamUpdate, 'update_by_pr_no');
 
@@ -906,7 +908,7 @@ class PurchaseRequestDetailService {
 						items: xArr
 					};
 
-					console.log('HERE>>>>>', xParamOdoo);
+					// console.log('HERE>>>>>', xParamOdoo);
 					// Call check item api in odoo
 					let xCheckItemResult = await _integrationServiceInstance.checkItem(xParamOdoo);
 
@@ -951,7 +953,8 @@ class PurchaseRequestDetailService {
 			} else {
 				let xParamUpdate = {
 					pr_no: pParam.pr_no,
-					is_po_created: pParam.is_po_created
+					is_po_created: pParam.is_po_created,
+					create_po_by_name: pParam.user_name
 				};
 
 				// update column with given pr
