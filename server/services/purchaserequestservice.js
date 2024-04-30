@@ -41,6 +41,7 @@ const LogService = require('../services/logservice.js');
 const _logServiceInstance = new LogService();
 
 const ProjectService = require('../services/projectservice.js');
+const purchaserequestdetail = require('../models/purchaserequestdetail.js');
 const _projectServiceInstance = new ProjectService();
 
 const _xClassName = 'PurchaseRequestService';

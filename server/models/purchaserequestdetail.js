@@ -70,7 +70,8 @@ module.exports = (sequelize, DataTypes) => {
 			field: 'updated_at'
 		},
 		updated_by: DataTypes.INTEGER,
-		updated_by_name: DataTypes.STRING
+		updated_by_name: DataTypes.STRING,
+		is_item_match_with_odoo: DataTypes.INTEGER
 	});
 
 	PurchaseRequestDetail.associate = function(models) {
