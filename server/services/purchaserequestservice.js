@@ -625,34 +625,30 @@ class PurchaseRequestService {
 						});
 					}
 
+					
+					// looping detail item fpb
 					for (var index in xDetail) {
 						// 17/11/2023 array for send to odoo check item
-						if (xResult.project !== null) {
-							// 09/01/2023 filtered item by its uom
-							// if uom has similar with other uom_item, push one to array for check and one to uncheck array
-							// to optimize api check to one uom only without check other similar uom again
-							if (xOdooArrItem.find(({ uom }) => uom == xDetail[index].uom_name) === undefined) {
+						if (xDetail[index].is_item_match_with_odoo != 1) {
+							if (xResult.project !== null) {
 								xOdooArrItem.push({
+									id: xDetail[index].id,
 									code: null,
 									name: xDetail[index].product_name,
 									uom: xDetail[index].uom_name != null ? xDetail[index].uom_name : '',
-									index: index
+									index: index,
+									// request_id: xDetail[index].request_id
 								});
 							} else {
-								xUnCheckItem.push({
-									code: null,
+								xOdooArrItem.push({
+									id: xDetail[index].id,
+									code: xDetail[index].product_code,
 									name: xDetail[index].product_name,
 									uom: xDetail[index].uom_name != null ? xDetail[index].uom_name : '',
-									index: index
-								})
+									index: index,
+									// request_id: xDetail[index].request_id
+								});
 							}
-						} else {
-							xOdooArrItem.push({
-								code: xDetail[index].product_code,
-								name: xDetail[index].product_name,
-								uom: xDetail[index].uom_name != null ? xDetail[index].uom_name : '',
-								index: index
-							});
 						}
 						// ----
 
@@ -707,9 +703,14 @@ class PurchaseRequestService {
 							last_price: xDetail[index].last_price,
 							cancel_reason: xDetail[index].cancel_reason,
 							is_po_created: xDetail[index].is_po_created,
-							estimate_fulfillment: xDetail[index].estimate_fulfillment
+							estimate_fulfillment: xDetail[index].estimate_fulfillment,
+
+							updated_by: xDetail[index].updated_by,
+							updated_by_name: xDetail[index].updated_by_name,
+							is_item_match_with_odoo: xDetail[index].is_item_match_with_odoo
 						});
 					}
+
 					// Get Approval Matrix
 					var xParamApprovalMatrix = {
 						application_id: config.applicationId,
@@ -744,38 +745,28 @@ class PurchaseRequestService {
 
 					// Call check item in odoo
 					if (xResult.status == 0) {
+						// console.log(`>>>xOdooArrItem ${JSON.stringify(xOdooArrItem)}`);
+						// console.log(`>>>xResult.id ${JSON.stringify(xResult.id)}`);
 						let xCheckItemInOdoo = await _oAuthService.checkItem({ items: xOdooArrItem });
-						var xResultCheckItem = [];
 						if (xCheckItemInOdoo.status_code === '00') {
-							xResultCheckItem = xCheckItemInOdoo.data[0].eSanqua;
-							for (let i = 0; i < xResultCheckItem.length; i++) {
-								const xResultItem = xResultCheckItem[i];
+							const xResultArr = xCheckItemInOdoo.data[0].eSanqua;
+							for (let i = 0; i < xResultArr.length; i++) {
+								const xResultItem = xResultArr[i];
 								Object.assign(xJoArrRequestDetailData[xResultItem.index], {
 									check_result: xResultItem
 								});
-							}
-						}
-						// 09/01/2024 pass item with same uom and get result from checked one
-						if (xUnCheckItem.length > 0) {
-							for (let i = 0; i < xUnCheckItem.length; i++) {
-								var odooUom = xResultCheckItem.find(({ uom }) => uom == xUnCheckItem[i].uom)
-								Object.assign(xJoArrRequestDetailData[xUnCheckItem[i].index], {
-									check_result: {
-										code: xUnCheckItem[i].code,
-										name: xUnCheckItem[i].name,
-										uom: xUnCheckItem[i].uom,
-										status: odooUom.status,
-										index: xUnCheckItem[i].index,
-										message: odooUom.message,
-										odoo: [
-											{
-												code: xUnCheckItem[i].code,
-												name: xUnCheckItem[i].name,
-												uom: odooUom.odoo[0].uom
-											}
-										]
-									}
-								});
+								const xParamUpdate = {
+									// id: xOdooArrItem[parseInt(xResult[i].index)].id,
+									request_id: xResult.id,
+									// id: xResult[i].id,
+									is_item_match_with_odoo: xResultItem.status == '00' ? 1 : 0,
+									user_id: xJoArrRequestDetailData[0].updated_by,
+									user_name: xJoArrRequestDetailData[0].updated_by_name,
+									product_code: xResultItem.code,
+									product_name: xResultItem.name
+								}
+								let xUpdateParamChecking = await _repoDetailInstance.save(xParamUpdate, 'update_by_product_code_and_request_id');
+								console.log(`>>>>>>> xUpdateParamChecking: ${JSON.stringify(xUpdateParamChecking)}`);
 							}
 						}
 					}
