@@ -722,17 +722,19 @@ class PurchaseRequestService {
 					if (xCheckItemInOdoo.status_code === '00') {
 						const xResultArr = xCheckItemInOdoo.data[0].eSanqua;
 						for (let i = 0; i < xResultArr.length; i++) {
-							var xItemCode = xResultItem.code
+							var xItemCode = null
 							const xResultItem = xResultArr[i];
 							Object.assign(xJoArrRequestDetailData[xResultItem.index], {
 								check_result: xResultItem
 							});
-							
+
 							if (xResult.project !== null) {
 								if (xResultItem.code == null) {
 									const xFindCode = xDetail.find(({ product_name }) => product_name === xResultItem.name)
 									xItemCode = xFindCode.product_code
 								}
+							} else {
+								xItemCode = xResultItem.code
 							}
 							
 							const xParamUpdate = {
