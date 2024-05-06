@@ -722,10 +722,19 @@ class PurchaseRequestService {
 					if (xCheckItemInOdoo.status_code === '00') {
 						const xResultArr = xCheckItemInOdoo.data[0].eSanqua;
 						for (let i = 0; i < xResultArr.length; i++) {
+							var xItemCode = xResultItem.code
 							const xResultItem = xResultArr[i];
 							Object.assign(xJoArrRequestDetailData[xResultItem.index], {
 								check_result: xResultItem
 							});
+							
+							if (xResult.project !== null) {
+								if (xResultItem.code == null) {
+									const xFindCode = xDetail.find(({ product_name }) => product_name === xResultItem.name)
+									xItemCode = xFindCode.product_code
+								}
+							}
+							
 							const xParamUpdate = {
 								// id: xOdooArrItem[parseInt(xResult[i].index)].id,
 								request_id: xResult.id,
@@ -733,9 +742,10 @@ class PurchaseRequestService {
 								is_item_match_with_odoo: xResultItem.status == '00' ? 1 : 0,
 								user_id: xJoArrRequestDetailData[0].updated_by,
 								user_name: xJoArrRequestDetailData[0].updated_by_name,
-								product_code: xResultItem.code,
+								product_code: xItemCode,
 								product_name: xResultItem.name
 							}
+							console.log(`>>>>>>> xParamUpdate: ${JSON.stringify(xParamUpdate)}`);
 							let xUpdateParamChecking = await _repoDetailInstance.save(xParamUpdate, 'update_by_product_code_and_request_id');
 							console.log(`>>>>>>> xUpdateParamChecking: ${JSON.stringify(xUpdateParamChecking)}`);
 						}
