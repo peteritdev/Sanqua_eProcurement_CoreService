@@ -592,7 +592,6 @@ class PurchaseRequestService {
 		var xDecId = null;
 		var xEncId = '';
 		var xArrUserCanCancel = [];
-
 		try {
 			xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
 			if (xDecId.status_code == '00') {
@@ -605,6 +604,7 @@ class PurchaseRequestService {
 
 			if (xFlagProcess) {
 				var xResult = await _repoInstance.getById(pParam);
+
 				// console.log(`>>> xResult: ${JSON.stringify(xResult)}`);
 
 				if (xResult != null) {
@@ -612,7 +612,6 @@ class PurchaseRequestService {
 					var xDetail = xResult.purchase_request_detail;
 					// 17/11/2023 array for send to odoo check item
 					var xOdooArrItem = [];
-					var xUnCheckItem = []
 					// --
 
 					let xFileArr = [];
@@ -625,8 +624,6 @@ class PurchaseRequestService {
 									: null
 						});
 					}
-
-					
 					// looping detail item fpb
 					for (var index in xDetail) {
 						// 17/11/2023 array for send to odoo check item
@@ -711,7 +708,6 @@ class PurchaseRequestService {
 							is_item_match_with_odoo: xDetail[index].is_item_match_with_odoo
 						});
 					}
-
 					// Get Approval Matrix
 					var xParamApprovalMatrix = {
 						application_id: config.applicationId,
@@ -724,25 +720,21 @@ class PurchaseRequestService {
 						xParamApprovalMatrix
 					);
 
-					console.log(`>>> xResultApprovalMatrix: ${JSON.stringify(xResultApprovalMatrix)}`);
+					// console.log(`>>> xResultApprovalMatrix: ${JSON.stringify(xResultApprovalMatrix)}`);
 
 					if (xResultApprovalMatrix != null) {
 						if (xResultApprovalMatrix.status_code == '00') {
-							if (xResultApprovalMatrix.token_data.status_code == '00') {
-								let xListApprover = xResultApprovalMatrix.token_data.data;
-								for (var i in xListApprover) {
-									let xApproverUsers = _.filter(xListApprover[i].approver_user, { status: 1 }).map(
-										// update 08/08/2023 prevent user is null
-										(v) => (v.user != null ? v.user.email : v.user)
-									);
-									xArrUserCanCancel.push.apply(xArrUserCanCancel, xApproverUsers);
-									// console.log(`>>> xApproverUsers: ${JSON.stringify(xApproverUsers)}`);
-								}
+							let xListApprover = xResultApprovalMatrix.token_data.data;
+							for (var i in xListApprover) {
+								let xApproverUsers = _.filter(xListApprover[i].approver_user, { status: 1 }).map(
+									// update 08/08/2023 prevent user is null
+									(v) => (v.user != null ? v.user.email : v.user)
+								);
+								xArrUserCanCancel.push.apply(xArrUserCanCancel, xApproverUsers);
+								// console.log(`>>> xApproverUsers: ${JSON.stringify(xApproverUsers)}`);
 							}
 						}
 					}
-
-					// console.log(`>>> xArrUserCanCancel: ${JSON.stringify(xArrUserCanCancel)}`);
 
 					// Call check item in odoo
 					if (xResult.status == 0) {
@@ -752,10 +744,21 @@ class PurchaseRequestService {
 						if (xCheckItemInOdoo.status_code === '00') {
 							const xResultArr = xCheckItemInOdoo.data[0].eSanqua;
 							for (let i = 0; i < xResultArr.length; i++) {
+								var xItemCode = null
 								const xResultItem = xResultArr[i];
 								Object.assign(xJoArrRequestDetailData[xResultItem.index], {
 									check_result: xResultItem
 								});
+
+								if (xResult.project !== null) {
+									if (xResultItem.code == null) {
+										const xFindCode = xDetail.find(({ product_name }) => product_name === xResultItem.name)
+										xItemCode = xFindCode.product_code
+									}
+								} else {
+									xItemCode = xResultItem.code
+								}
+								
 								const xParamUpdate = {
 									// id: xOdooArrItem[parseInt(xResult[i].index)].id,
 									request_id: xResult.id,
@@ -763,9 +766,10 @@ class PurchaseRequestService {
 									is_item_match_with_odoo: xResultItem.status == '00' ? 1 : 0,
 									user_id: xJoArrRequestDetailData[0].updated_by,
 									user_name: xJoArrRequestDetailData[0].updated_by_name,
-									product_code: xResultItem.code,
+									product_code: xItemCode,
 									product_name: xResultItem.name
 								}
+								console.log(`>>>>>>> xParamUpdate: ${JSON.stringify(xParamUpdate)}`);
 								let xUpdateParamChecking = await _repoDetailInstance.save(xParamUpdate, 'update_by_product_code_and_request_id');
 								console.log(`>>>>>>> xUpdateParamChecking: ${JSON.stringify(xUpdateParamChecking)}`);
 							}
@@ -775,7 +779,6 @@ class PurchaseRequestService {
 					xJoData = {
 						id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
 						project: xResult.project,
-						budget_plan: xResult.budget_plan,
 						request_no: xResult.request_no,
 						// requested_at: xResult.requested_at,
 						employee: {
@@ -846,8 +849,7 @@ class PurchaseRequestService {
 						status_msg: 'Data not found'
 					};
 				}
-				}
-				
+			}
 		} catch (e) {
 			xJoResult = {
 				status_code: '-99',
@@ -856,7 +858,6 @@ class PurchaseRequestService {
 		}
 
 		return xJoResult;
-		
 	}
 
 	async submitFPB(pParam) {
