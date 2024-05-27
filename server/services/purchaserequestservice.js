@@ -41,6 +41,7 @@ const LogService = require('../services/logservice.js');
 const _logServiceInstance = new LogService();
 
 const ProjectService = require('../services/projectservice.js');
+const purchaserequestdetail = require('../models/purchaserequestdetail.js');
 const _projectServiceInstance = new ProjectService();
 
 const _xClassName = 'PurchaseRequestService';
@@ -591,7 +592,6 @@ class PurchaseRequestService {
 		var xDecId = null;
 		var xEncId = '';
 		var xArrUserCanCancel = [];
-
 		try {
 			xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
 			if (xDecId.status_code == '00') {
@@ -604,6 +604,7 @@ class PurchaseRequestService {
 
 			if (xFlagProcess) {
 				var xResult = await _repoInstance.getById(pParam);
+
 				// console.log(`>>> xResult: ${JSON.stringify(xResult)}`);
 
 				if (xResult != null) {
@@ -611,7 +612,6 @@ class PurchaseRequestService {
 					var xDetail = xResult.purchase_request_detail;
 					// 17/11/2023 array for send to odoo check item
 					var xOdooArrItem = [];
-					var xUnCheckItem = []
 					// --
 
 					let xFileArr = [];
@@ -624,35 +624,29 @@ class PurchaseRequestService {
 									: null
 						});
 					}
-
+					// looping detail item fpb
 					for (var index in xDetail) {
 						// 17/11/2023 array for send to odoo check item
-						if (xResult.project !== null) {
-							// 09/01/2023 filtered item by its uom
-							// if uom has similar with other uom_item, push one to array for check and one to uncheck array
-							// to optimize api check to one uom only without check other similar uom again
-							if (xOdooArrItem.find(({ uom }) => uom == xDetail[index].uom_name) === undefined) {
+						if (xDetail[index].is_item_match_with_odoo != 1) {
+							if (xResult.project !== null) {
 								xOdooArrItem.push({
+									id: xDetail[index].id,
 									code: null,
 									name: xDetail[index].product_name,
 									uom: xDetail[index].uom_name != null ? xDetail[index].uom_name : '',
-									index: index
+									index: index,
+									// request_id: xDetail[index].request_id
 								});
 							} else {
-								xUnCheckItem.push({
-									code: null,
+								xOdooArrItem.push({
+									id: xDetail[index].id,
+									code: xDetail[index].product_code,
 									name: xDetail[index].product_name,
 									uom: xDetail[index].uom_name != null ? xDetail[index].uom_name : '',
-									index: index
-								})
+									index: index,
+									// request_id: xDetail[index].request_id
+								});
 							}
-						} else {
-							xOdooArrItem.push({
-								code: xDetail[index].product_code,
-								name: xDetail[index].product_name,
-								uom: xDetail[index].uom_name != null ? xDetail[index].uom_name : '',
-								index: index
-							});
 						}
 						// ----
 
@@ -707,7 +701,11 @@ class PurchaseRequestService {
 							last_price: xDetail[index].last_price,
 							cancel_reason: xDetail[index].cancel_reason,
 							is_po_created: xDetail[index].is_po_created,
-							estimate_fulfillment: xDetail[index].estimate_fulfillment
+							estimate_fulfillment: xDetail[index].estimate_fulfillment,
+
+							updated_by: xDetail[index].updated_by,
+							updated_by_name: xDetail[index].updated_by_name,
+							is_item_match_with_odoo: xDetail[index].is_item_match_with_odoo
 						});
 					}
 					// Get Approval Matrix
@@ -722,60 +720,58 @@ class PurchaseRequestService {
 						xParamApprovalMatrix
 					);
 
-					console.log(`>>> xResultApprovalMatrix: ${JSON.stringify(xResultApprovalMatrix)}`);
+					// console.log(`>>> xResultApprovalMatrix: ${JSON.stringify(xResultApprovalMatrix)}`);
 
 					if (xResultApprovalMatrix != null) {
 						if (xResultApprovalMatrix.status_code == '00') {
-							if (xResultApprovalMatrix.token_data.status_code == '00') {
-								let xListApprover = xResultApprovalMatrix.token_data.data;
-								for (var i in xListApprover) {
-									let xApproverUsers = _.filter(xListApprover[i].approver_user, { status: 1 }).map(
-										// update 08/08/2023 prevent user is null
-										(v) => (v.user != null ? v.user.email : v.user)
-									);
-									xArrUserCanCancel.push.apply(xArrUserCanCancel, xApproverUsers);
-									// console.log(`>>> xApproverUsers: ${JSON.stringify(xApproverUsers)}`);
-								}
+							let xListApprover = xResultApprovalMatrix.token_data.data;
+							for (var i in xListApprover) {
+								let xApproverUsers = _.filter(xListApprover[i].approver_user, { status: 1 }).map(
+									// update 08/08/2023 prevent user is null
+									(v) => (v.user != null ? v.user.email : v.user)
+								);
+								xArrUserCanCancel.push.apply(xArrUserCanCancel, xApproverUsers);
+								// console.log(`>>> xApproverUsers: ${JSON.stringify(xApproverUsers)}`);
 							}
 						}
 					}
 
-					// console.log(`>>> xArrUserCanCancel: ${JSON.stringify(xArrUserCanCancel)}`);
-
 					// Call check item in odoo
 					if (xResult.status == 0) {
+						// console.log(`>>>xOdooArrItem ${JSON.stringify(xOdooArrItem)}`);
+						// console.log(`>>>xResult.id ${JSON.stringify(xResult.id)}`);
 						let xCheckItemInOdoo = await _oAuthService.checkItem({ items: xOdooArrItem });
-						var xResultCheckItem = [];
 						if (xCheckItemInOdoo.status_code === '00') {
-							xResultCheckItem = xCheckItemInOdoo.data[0].eSanqua;
-							for (let i = 0; i < xResultCheckItem.length; i++) {
-								const xResultItem = xResultCheckItem[i];
+							const xResultArr = xCheckItemInOdoo.data[0].eSanqua;
+							for (let i = 0; i < xResultArr.length; i++) {
+								var xItemCode = null
+								const xResultItem = xResultArr[i];
 								Object.assign(xJoArrRequestDetailData[xResultItem.index], {
 									check_result: xResultItem
 								});
-							}
-						}
-						// 09/01/2024 pass item with same uom and get result from checked one
-						if (xUnCheckItem.length > 0) {
-							for (let i = 0; i < xUnCheckItem.length; i++) {
-								var odooUom = xResultCheckItem.find(({ uom }) => uom == xUnCheckItem[i].uom)
-								Object.assign(xJoArrRequestDetailData[xUnCheckItem[i].index], {
-									check_result: {
-										code: xUnCheckItem[i].code,
-										name: xUnCheckItem[i].name,
-										uom: xUnCheckItem[i].uom,
-										status: odooUom.status,
-										index: xUnCheckItem[i].index,
-										message: odooUom.message,
-										odoo: [
-											{
-												code: xUnCheckItem[i].code,
-												name: xUnCheckItem[i].name,
-												uom: odooUom.odoo[0].uom
-											}
-										]
+
+								if (xResult.project !== null) {
+									if (xResultItem.code == null) {
+										const xFindCode = xDetail.find(({ product_name }) => product_name === xResultItem.name)
+										xItemCode = xFindCode.product_code
 									}
-								});
+								} else {
+									xItemCode = xResultItem.code
+								}
+								
+								const xParamUpdate = {
+									// id: xOdooArrItem[parseInt(xResult[i].index)].id,
+									request_id: xResult.id,
+									// id: xResult[i].id,
+									is_item_match_with_odoo: xResultItem.status == '00' ? 1 : 0,
+									user_id: xJoArrRequestDetailData[0].updated_by,
+									user_name: xJoArrRequestDetailData[0].updated_by_name,
+									product_code: xItemCode,
+									product_name: xResultItem.name
+								}
+								console.log(`>>>>>>> xParamUpdate: ${JSON.stringify(xParamUpdate)}`);
+								let xUpdateParamChecking = await _repoDetailInstance.save(xParamUpdate, 'update_by_product_code_and_request_id');
+								console.log(`>>>>>>> xUpdateParamChecking: ${JSON.stringify(xUpdateParamChecking)}`);
 							}
 						}
 					}
@@ -783,7 +779,6 @@ class PurchaseRequestService {
 					xJoData = {
 						id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
 						project: xResult.project,
-						budget_plan: xResult.budget_plan,
 						request_no: xResult.request_no,
 						// requested_at: xResult.requested_at,
 						employee: {
@@ -854,8 +849,7 @@ class PurchaseRequestService {
 						status_msg: 'Data not found'
 					};
 				}
-				}
-				
+			}
 		} catch (e) {
 			xJoResult = {
 				status_code: '-99',
@@ -864,7 +858,6 @@ class PurchaseRequestService {
 		}
 
 		return xJoResult;
-		
 	}
 
 	async submitFPB(pParam) {
