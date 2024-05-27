@@ -58,6 +58,7 @@ module.exports = (sequelize, DataTypes) => {
 		took_at: DataTypes.DATE,
 		took_by: DataTypes.INTEGER,
 		took_by_name: DataTypes.STRING,
+		fpb_type: DataTypes.INTEGER,
 
 		createdAt: {
 			type: DataTypes.DATE,
