@@ -836,7 +836,8 @@ class PurchaseRequestService {
 
 						took_at: xResult.took_at != null ? moment(xResult.took_at).format('DD MMM YYYY HH:mm:ss') : null,
 						took_by_name: xResult.took_by_name,
-						fpb_type: xResult.fpb_type
+						fpb_type: xResult.fpb_type,
+						budget_plan: xResult.budget_plan
 					};
 
 					xJoResult = {
