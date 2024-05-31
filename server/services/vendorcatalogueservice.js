@@ -384,19 +384,22 @@ class VendorCatalogueService {
 		// Decrypt vendor_id
 		if (pParam.hasOwnProperty('vendor_id')) {
 			if (pParam.vendor_id != '') {
-				var xDecId = await _utilInstance.decrypt(pParam.vendor_id, config.cryptoKey.hashKey);
-				if (xDecId.status_code == '00') {
-					pParam.vendor_id = xDecId.decrypted;
-				} else {
-					xJoResult = xDecId;
-					xFlagProcess = false;
+				if (pParam.vendor_id.length > 5) {
+					var xDecId = await _utilInstance.decrypt(pParam.vendor_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.vendor_id = xDecId.decrypted;
+					} else {
+						xJoResult = xDecId;
+						xFlagProcess = false;
+					}
 				}
 			}
 		}
 
 		if (xFlagProcess) {
+			console.log('pParam.vendor_id',pParam.vendor_id);
 			var xResultList = await _vendorCatalogueRepoInstance.list_new(pParam);
-
+			console.log('xResultList', JSON.stringify(xResultList));
 			if (xResultList.data.length > 0) {
 				var xRows = xResultList.data;
 				for (var index in xRows) {

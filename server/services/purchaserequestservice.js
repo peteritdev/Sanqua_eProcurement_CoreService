@@ -263,6 +263,15 @@ class PurchaseRequestService {
 						delete pParam.department_id;
 						delete pParam.department_name;
 						var xAddResult = await _repoInstance.save(pParam, xAct);
+						// set is_item_match_with_odoo to null if existing document project is not null and updated to null
+						if (xDataBeforeUpdate.project != null && pParam.project_id == null) {
+							const xItemParam = {
+								request_id: xDataBeforeUpdate.id,
+								is_item_match_with_odoo: null
+							}
+							const xUpdateItemStatus = await _repoDetailInstance.save(xItemParam, 'update_by_request_id')
+							console.log(`>>> xUpdateItemStatus: ${JSON.stringify(xDataBeforeUpdate.project)} `);
+						}
 						xJoResult = xAddResult;
 
 						// if (xJoResult.status_code == '00') {
