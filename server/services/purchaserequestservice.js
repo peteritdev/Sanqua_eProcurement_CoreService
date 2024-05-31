@@ -730,7 +730,7 @@ class PurchaseRequestService {
 
 							if (xResult.project !== null) {
 								if (xResultItem.code == null) {
-									const xFindCode = xDetail.find(({ product_name }) => product_name === xResultItem.name)
+									const xFindCode = xDetail.find(({ product_name, product_code }) => product_name === xResultItem.name && product_code == xResultItem.code)
 									xItemCode = xFindCode.product_code
 								}
 							} else {
