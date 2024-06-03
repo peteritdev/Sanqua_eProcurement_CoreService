@@ -1156,6 +1156,82 @@ class PurchaseRequestRepository {
 
 		return xData;
 	}
+	
+	async transaction_history(pParam) {
+		var xData,
+			xTotalRecord = [];
+		var xSql,
+			xSqlCount = '';
+		var xObjJsonWhere = {};
+		var xSqlWhere = ' (1=1) ';
+		var xSqlWhereOr = [];
+		var xSqlOrderBy = '';
+		var xSqlLimit = '';
+		var xSqlGroupBy = '';
+		var xSqlFields = '';
+
+		if (pParam.hasOwnProperty('order_by')) {
+			if (pParam.order_by != '') {
+				xSqlOrderBy = ` ORDER BY ${pParam.order_by} ${pParam.order_type != '' ? pParam.order_type : 'ASC'}`;
+			} else {
+				xSqlOrderBy = ` ORDER BY pr.requested_at DESC`;
+			}
+		} else {
+			xSqlOrderBy = ` ORDER BY pr.requested_at DESC`;
+		}
+
+		if (pParam.hasOwnProperty('product_code')) {
+			if (pParam.product_code != '') {
+				xSqlWhere += ' AND pr.product_code = :product_code ';
+				xObjJsonWhere.product_code = pParam.product_code;
+			}
+		}
+
+		if (pParam.hasOwnProperty('vendor_id')) {
+			if (pParam.vendor_id != '') {
+				xSqlWhere += ' AND pr.vendor_id = :vendor_id ';
+				xObjJsonWhere.vendor_id = pParam.vendor_id;
+			}
+		}
+
+		xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
+						pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.category_item,
+						p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
+
+		xSqlGroupBy = ` `;
+
+		if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
+			if (pParam.offset != '' && pParam.limit != '') {
+				xSqlLimit = ` OFFSET ${pParam.offset} LIMIT ${pParam.limit} `;
+			}
+		}
+
+		xSql = ` SELECT ${xSqlFields}
+				 FROM tr_purchaserequests pr 
+						LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
+							LEFT JOIN ms_projects p ON p.id = pr.project_id
+				 WHERE ${xSqlWhere} ${xSqlGroupBy}
+				  ${xSqlOrderBy}${xSqlLimit} `;
+
+		// console.log(`>>> xSqlCount: ${xSqlCount}`);
+
+		xData = await sequelize.query(xSql, {
+			replacements: xObjJsonWhere,
+			type: sequelize.QueryTypes.SELECT
+		});
+
+		// xTotalRecord = await sequelize.query(xSqlCount, {
+		// 	replacements: xObjJsonWhere,
+		// 	type: sequelize.QueryTypes.SELECT
+		// });
+
+		return {
+			status_code: '00',
+			status_msg: 'OK',
+			data: xData,
+			total_record: xTotalRecord[0].total_record
+		};
+	}
 }
 
 module.exports = PurchaseRequestRepository;

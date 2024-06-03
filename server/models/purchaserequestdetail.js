@@ -94,7 +94,7 @@ module.exports = (sequelize, DataTypes) => {
 		});
 
 		PurchaseRequestDetail.belongsTo(models.ms_vendorcatalogues, {
-			foreignKey: 'request_id',
+			foreignKey: 'vendor_catalogue_id',
 			as: 'vendor_catalogue',
 			onDelete: 'CASCADE'
 		});
