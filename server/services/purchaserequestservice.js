@@ -730,9 +730,9 @@ class PurchaseRequestService {
 
 							if (xResult.project !== null) {
 								if (xResultItem.code == null) {
-									// console.log(`>>>xDetailFind ${JSON.stringify(xResultItem)}`);
+									// console.log(`>>>xFindDuplicateName ${JSON.stringify(xDetail.find(({ product_name, is_item_match_with_odoo}) => product_name === xResultItem.name && is_item_match_with_odoo === null))}`);
 									// const xFindCode = xDetail.find(({ product_name, product_code }) => product_name === xResultItem.name && product_code == xResultItem.code)
-									const xFindCode = xDetail.find(({ product_name, product_code }) => product_name === xResultItem.name)
+									const xFindCode = xDetail.find(({ product_name}) => product_name === xResultItem.name)
 									xItemCode = xFindCode.product_code
 								}
 							} else {
