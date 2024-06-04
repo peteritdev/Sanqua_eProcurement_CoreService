@@ -1832,6 +1832,7 @@ class PurchaseRequestService {
 
 			var xResultList = await _repoInstance.transaction_history(pParam);
 
+			console.log(`>>> xResultList : ${JSON.stringify(xResultList)}`);
 			if (xResultList.total_record > 0) {
 				var xRows = xResultList.data;
 				for (var index in xRows) {
@@ -1840,22 +1841,20 @@ class PurchaseRequestService {
 							xRows[index].id.toString(),
 							config.cryptoKey.hashKey
 						),
-						project: {
+						project: xRows[index].project_id != null ? {
 							id: xRows[index].project_id,
 							code: xRows[index].project_code,
 							name: xRows[index].project_name,
 							odoo_project_code: xRows[index].odoo_project_code
-						},
+						} : null,
 						request_no: xRows[index].request_no,
+						created_at: xRows[index].created_at,
 						requested_at:
 							xRows[index].requested_at == null
 								? ''
-								: moment(xRows[index].requested_at).tz(config.timezone).format('DD MMM'),
+								: moment(xRows[index].requested_at).tz(config.timezone).format('DD-MM-YYYY HH:mm:ss'),
 						employee: {
-							id: await _utilInstance.encrypt(
-								xRows[index].employee_id.toString(),
-								config.cryptoKey.hashKey
-							),
+							id: xRows[index].employee_id,
 							name: xRows[index].employee_name
 						},
 						department: {
@@ -1883,7 +1882,8 @@ class PurchaseRequestService {
 						category_item: {
 							id: xRows[index].category_item,
 							name: config.categoryItem[xRows[index].category_item]
-						}
+						},
+						category_pr: xRows[index].category_pr
 					});
 				}
 
