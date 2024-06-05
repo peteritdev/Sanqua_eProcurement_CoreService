@@ -263,6 +263,15 @@ class PurchaseRequestService {
 						delete pParam.department_id;
 						delete pParam.department_name;
 						var xAddResult = await _repoInstance.save(pParam, xAct);
+						// set is_item_match_with_odoo to null if existing document project is not null and updated to null
+						if (xDataBeforeUpdate.project != null && pParam.project_id == null) {
+							const xItemParam = {
+								request_id: xDataBeforeUpdate.id,
+								is_item_match_with_odoo: null
+							}
+							const xUpdateItemStatus = await _repoDetailInstance.save(xItemParam, 'update_by_request_id')
+							console.log(`>>> xUpdateItemStatus: ${JSON.stringify(xDataBeforeUpdate.project)} `);
+						}
 						xJoResult = xAddResult;
 
 						// if (xJoResult.status_code == '00') {
@@ -649,7 +658,7 @@ class PurchaseRequestService {
 							}
 						}
 						// ----
-
+						console.log(`>>> xDetail[index]: ${JSON.stringify(xDetail[index])}`);
 						xJoArrRequestDetailData.push({
 							id: await _utilInstance.encrypt(xDetail[index].id, config.cryptoKey.hashKey),
 							product: {
@@ -705,7 +714,7 @@ class PurchaseRequestService {
 
 							updated_by: xDetail[index].updated_by,
 							updated_by_name: xDetail[index].updated_by_name,
-							is_item_match_with_odoo: xDetail[index].is_item_match_with_odoo
+							is_item_match_with_odoo: xDetail[index].is_item_match_with_odoo,
 						});
 					}
 					// Get Approval Matrix
@@ -836,7 +845,8 @@ class PurchaseRequestService {
 
 						took_at: xResult.took_at != null ? moment(xResult.took_at).format('DD MMM YYYY HH:mm:ss') : null,
 						took_by_name: xResult.took_by_name,
-						fpb_type: xResult.fpb_type
+						fpb_type: xResult.fpb_type,
+						budget_plan: xResult.budget_plan
 					};
 
 					xJoResult = {
@@ -1797,6 +1807,100 @@ class PurchaseRequestService {
 			};
 		}
 
+		return xJoResult;
+	}
+	
+	async transaction_history(pParam) {
+		var xJoResult = {};
+		var xJoArrData = [];
+		var xFlagProcess = false;
+		var xDecId = {};
+
+		if (pParam.hasOwnProperty('user_id')) {
+			if (pParam.user_id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.user_id = xDecId.decrypted;
+					xFlagProcess = true;
+				} else {
+					xJoResult = xDecId;
+				}
+			}
+		}
+
+		if (xFlagProcess) {
+
+			var xResultList = await _repoInstance.transaction_history(pParam);
+
+			console.log(`>>> xResultList : ${JSON.stringify(xResultList)}`);
+			if (xResultList.total_record > 0) {
+				var xRows = xResultList.data;
+				for (var index in xRows) {
+					xJoArrData.push({
+						id: await _utilInstance.encrypt(
+							xRows[index].id.toString(),
+							config.cryptoKey.hashKey
+						),
+						project: xRows[index].project_id != null ? {
+							id: xRows[index].project_id,
+							code: xRows[index].project_code,
+							name: xRows[index].project_name,
+							odoo_project_code: xRows[index].odoo_project_code
+						} : null,
+						request_no: xRows[index].request_no,
+						created_at: xRows[index].created_at,
+						requested_at:
+							xRows[index].requested_at == null
+								? ''
+								: moment(xRows[index].requested_at).tz(config.timezone).format('DD-MM-YYYY HH:mm:ss'),
+						employee: {
+							id: xRows[index].employee_id,
+							name: xRows[index].employee_name
+						},
+						department: {
+							id: xRows[index].department_id,
+							name: xRows[index].department_name
+						},
+						status: {
+							id: xRows[index].status,
+							name:
+								xRows[index].status == -1
+									? 'Rejected'
+									: config.statusDescription.purchaseRequest[xRows[index].status]
+						},
+
+						company: {
+							id: xRows[index].company_id,
+							code: xRows[index].company_code,
+							name: xRows[index].company_name
+						},
+
+						created_at:
+							xRows[index].created_at != null
+								? moment(xRows[index].created_at).format('DD-MM-YYYY HH:mm:ss')
+								: null,
+						category_item: {
+							id: xRows[index].category_item,
+							name: config.categoryItem[xRows[index].category_item]
+						},
+						category_pr: xRows[index].category_pr
+					});
+				}
+
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					total_record: xResultList.total_record,
+					data: xJoArrData
+				};
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Data not found'
+				};
+			}
+		}
+		// 24/10/2023
 		return xJoResult;
 	}
 }

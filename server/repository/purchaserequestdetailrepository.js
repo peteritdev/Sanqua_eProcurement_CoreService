@@ -327,6 +327,24 @@ class PurchaseRequestDetailRepository {
 					status_code: '00',
 					status_msg: 'Data has been successfully updated'
 				};
+			} else if (pAct == 'update_by_request_id') {
+				var xRequestId = pParam.request_id;
+				delete pParam.request_id;
+				var xWhere = {
+					where: {
+						request_id: xRequestId
+					},
+					transaction: xTransaction
+				};
+
+				xSaved = await _modelDb.update(pParam, xWhere);
+
+				await xTransaction.commit();
+
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'Data has been successfully updated'
+				};
 			}
 		} catch (e) {
 			if (xTransaction) await xTransaction.rollback();
