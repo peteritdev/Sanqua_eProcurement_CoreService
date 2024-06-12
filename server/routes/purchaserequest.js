@@ -199,4 +199,8 @@ module.exports = (app) => {
 	
 	arrValidate = [];
 	app.get(rootAPIPath + 'transaction_history', arrValidate, purchaseRequestController.purchaseRequest_TransactionHistory);
+	
+	arrValidate = [];
+	app.post(rootAPIPath + 'project/update_fulfillment', arrValidate, purchaseRequestController.purchaseRequestDetail_UpdateFulfillment);
+
 };

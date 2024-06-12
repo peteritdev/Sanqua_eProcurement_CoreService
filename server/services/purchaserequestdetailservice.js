@@ -992,6 +992,101 @@ class PurchaseRequestDetailService {
 
 		return xJoResult;
 	}
+	async updateFulfillment(pParam) {
+		var xJoResult = {};
+		var xFlagProcess = false
+		var xDecId = null;
+
+		try {
+			if (pParam.hasOwnProperty('user_id')) {
+				if (pParam.user_id != '') {
+					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.user_id = xDecId.decrypted;
+						xFlagProcess = true;
+						if (pParam.hasOwnProperty('employee_id')) {
+							if (pParam.employee_id != '') {
+								if (pParam.employee_id.length == 65) {
+									xDecId = await _utilInstance.decrypt(pParam.employee_id, config.cryptoKey.hashKey);
+									if (xDecId.status_code == '00') {
+										pParam.employee_id = xDecId.decrypted;
+										xFlagProcess = true;
+									} else {
+										xJoResult = xDecId;
+									}
+								} else {
+									xFlagProcess = true;
+								}
+							} else {
+								xJoResult = {
+									status_code: '-99',
+									status_msg: 'Parameter employee_id can not be empty'
+								};
+							}
+						} else {
+							xFlagProcess = true;
+						}
+					} else {
+						xJoResult = xDecId;
+					}
+				} else {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Parameter user_id can not be empty'
+					};
+				}
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Parameter user_id can not be empty'
+				};
+			}
+
+			// Check id parameter is not empty
+			if (pParam.hasOwnProperty('id')) {
+				if (pParam.id != null & pParam.id != '') {
+					var xItemId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+					if (xItemId.status_code == '00') {
+						pParam.id = xItemId.decrypted;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xItemId;
+					}
+				}
+			}
+
+			if (!xFlagProcess) {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Update failed, no supply item_id'
+				};
+			} else {
+				let xParamUpdate = {
+					id: pParam.id,
+					fulfillment_status: pParam.fulfillment_status
+				};
+
+				// update column with given pry
+				let xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
+
+				if (xUpdateResult.status_code === '00') {
+					xJoResult = {
+						status_code: '00',
+						status_msg: 'Update success'
+					};
+				} else {
+					xJoResult = xUpdateResult;
+				}
+			}
+		} catch (error) {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Exception error <${_xClassName}.updateStatusFulfillment>: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
 }
 
 module.exports = PurchaseRequestDetailService;

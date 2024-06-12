@@ -789,9 +789,11 @@ class PurchaseRequestRepository {
 			prd.pr_no,
 			prd.last_price,
 			prd.estimate_fulfillment,
+			prd.fulfillment_status,
 			prd.uom_name,
 			prd.id AS "item_detail_id",
 			prd.status AS "item_detail_status",
+			prd.is_po_created,
 			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 		xSqlGroupBy = ` `;
@@ -1196,8 +1198,10 @@ class PurchaseRequestRepository {
 		xSqlWhere += " AND prd.is_po_created = true AND prd.status = 4 ";
 
 		xSqlFields = ` pr.id, pr.request_no, pr.employee_id, pr.employee_name, pr.company_id, pr.company_name,
-					pr.department_id, pr.department_name, pr.category_item, pr.category_pr, pr.status,
-					p.id as "project_id", p.odoo_project_code, p.name as "project_name",
+					pr.department_id, pr.department_name, pr.category_item, pr.category_pr, pr.status as "fpb_status",
+					p.id as "project_id", p.odoo_project_code, p.name as "project_name", prd.qty, prd.uom_id, prd.uom_name,
+					prd.last_price, prd.budget_price_per_unit, prd.budget_price_total, prd.status as "item_status",
+					prd.product_id, prd.product_code, prd.product_name, prd.vendor_id, prd.vendor_code, prd.vendor_name,
 					pr.created_at, pr.requested_at`;
 
 		xSqlGroupBy = ``;
