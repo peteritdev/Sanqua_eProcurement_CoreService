@@ -624,6 +624,8 @@ class PurchaseRequestService {
 					// --
 
 					let xFileArr = [];
+					var xTotalItem = 0
+					var xTotalRealization = 0
 					for (var j in xResult.file) {
 						xFileArr.push({
 							subject: xResult.file[j].subject,
@@ -658,6 +660,11 @@ class PurchaseRequestService {
 							}
 						}
 						// ----
+						// 05/06/2024 add totalItem & realization
+						if (xDetail[index].budget_price_total != null && xDetail[index].budget_price_total != 0) {
+							xTotalItem = xTotalItem + 1
+							xTotalRealization = xTotalRealization + (xDetail[index].realization != null ? xDetail[index].realization : 0)
+						}
 						console.log(`>>> xDetail[index]: ${JSON.stringify(xDetail[index])}`);
 						xJoArrRequestDetailData.push({
 							id: await _utilInstance.encrypt(xDetail[index].id, config.cryptoKey.hashKey),
@@ -715,6 +722,7 @@ class PurchaseRequestService {
 							updated_by: xDetail[index].updated_by,
 							updated_by_name: xDetail[index].updated_by_name,
 							is_item_match_with_odoo: xDetail[index].is_item_match_with_odoo,
+							realization: xDetail[index].realization,
 						});
 					}
 					// Get Approval Matrix
@@ -846,7 +854,9 @@ class PurchaseRequestService {
 						took_at: xResult.took_at != null ? moment(xResult.took_at).format('DD MMM YYYY HH:mm:ss') : null,
 						took_by_name: xResult.took_by_name,
 						fpb_type: xResult.fpb_type,
-						budget_plan: xResult.budget_plan
+						budget_plan: xResult.budget_plan,
+						total_realization: xTotalRealization,
+						total_item_with_budget: xTotalItem,
 					};
 
 					xJoResult = {
@@ -1680,8 +1690,13 @@ class PurchaseRequestService {
 								uom_name: xRows[index].uom_name,
 								// add new 16/11/2023
 								estimate_fulfillment: xRows[index].estimate_fulfillment,
-								id: await _utilInstance.encrypt(xRows[index].item_detail_id.toString(), config.cryptoKey.hashKey),
+								fulfillment_status: xRows[index].fulfillment_status,
+								id: xRows[index].item_detail_id != null ? await _utilInstance.encrypt(
+									xRows[index].item_detail_id.toString(),
+									config.cryptoKey.hashKey
+								  ) : xRows[index].item_detail_id,
 								status: xRows[index].item_detail_status,
+								is_po_created: xRows[index].is_po_created,
 							}
 						});
 					}
@@ -1841,6 +1856,7 @@ class PurchaseRequestService {
 							xRows[index].id.toString(),
 							config.cryptoKey.hashKey
 						),
+						request_no: xRows[index].request_no,
 						project: xRows[index].project_id != null ? {
 							id: xRows[index].project_id,
 							code: xRows[index].project_code,
@@ -1861,12 +1877,12 @@ class PurchaseRequestService {
 							id: xRows[index].department_id,
 							name: xRows[index].department_name
 						},
-						status: {
-							id: xRows[index].status,
+						fpb_status: {
+							id: xRows[index].fpb_status,
 							name:
-								xRows[index].status == -1
+								xRows[index].fpb_status == -1
 									? 'Rejected'
-									: config.statusDescription.purchaseRequest[xRows[index].status]
+									: config.statusDescription.purchaseRequest[xRows[index].fpb_status]
 						},
 
 						company: {
@@ -1883,7 +1899,33 @@ class PurchaseRequestService {
 							id: xRows[index].category_item,
 							name: config.categoryItem[xRows[index].category_item]
 						},
-						category_pr: xRows[index].category_pr
+						category_pr: xRows[index].category_pr,
+						qty: xRows[index].qty,
+						uom: {
+							id: xRows[index].uom_id,
+							name: xRows[index].uom_name
+						},
+						last_price: xRows[index].last_price,
+						budget_price_per_unit: xRows[index].budget_price_per_unit,
+						budget_price_total: xRows[index].budget_price_total,
+						item_status: xRows[index].item_status,
+						product: {
+							id: xRows[index].product_id,
+							name: xRows[index].product_name,
+							code: xRows[index].product_code
+						},
+						vendor: {
+							id: xRows[index].vendor_id,
+							name: xRows[index].vendor_name,
+							code: xRows[index].vendor_code
+						},
+						item_status: {
+							id: xRows[index].item_status,
+							name:
+								xRows[index].item_status == -1
+									? 'Rejected'
+									: config.statusDescription.purchaseRequestDetail[xRows[index].item_status]
+						},
 					});
 				}
 
