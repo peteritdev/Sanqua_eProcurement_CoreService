@@ -1696,6 +1696,7 @@ class PurchaseRequestService {
 									config.cryptoKey.hashKey
 								  ) : xRows[index].item_detail_id,
 								status: xRows[index].item_detail_status,
+								status_name: config.statusDescription.purchaseRequest[xRows[index].item_detail_status],
 								is_po_created: xRows[index].is_po_created,
 							}
 						});
