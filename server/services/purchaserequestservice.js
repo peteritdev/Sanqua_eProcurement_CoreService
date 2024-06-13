@@ -1691,6 +1691,7 @@ class PurchaseRequestService {
 								// add new 16/11/2023
 								estimate_fulfillment: xRows[index].estimate_fulfillment,
 								fulfillment_status: xRows[index].fulfillment_status,
+								fulfillment_status_name: xRows[index].fulfillment_status == 1 ? 'Lengkap' : 'Belum Lengkap',
 								id: xRows[index].item_detail_id != null ? await _utilInstance.encrypt(
 									xRows[index].item_detail_id.toString(),
 									config.cryptoKey.hashKey
