@@ -10,6 +10,7 @@ const _modelDb = require('../models').tr_purchaserequests;
 const _modelProject = require('../models').ms_projects;
 const _modelPurchaseRequestDetail = require('../models').tr_purchaserequestdetails;
 const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
+// const _modelBudgetPlan = require('../models').tr_budgetplans;
 
 const Utility = require('peters-globallib-v2');
 const { param } = require('express-validator');
@@ -40,7 +41,12 @@ class PurchaseRequestRepository {
 				model: _modelProject,
 				as: 'project',
 				attributes: [ 'id', 'code', 'name', 'odoo_project_code' ]
-			}
+			},
+			// {
+			// 	model: _modelBudgetPlan,
+			// 	as: 'budget_plan',
+			// 	attributes: [ 'id', 'name' ]
+			// }
 		];
 
 		var xData = await _modelDb.findOne({
@@ -324,6 +330,13 @@ class PurchaseRequestRepository {
 			}
 		}
 
+		// if (pParam.hasOwnProperty('budget_plan_id')) {
+		// 	if (pParam.budget_plan_id != '') {
+		// 		xSqlWhere += ' AND pr.budget_plan_id = :budgetPlanId ';
+		// 		xObjJsonWhere.budgetPlanId = pParam.budget_plan_id;
+		// 	}
+		// }
+
 		if (pParam.hasOwnProperty('request_date_start') && pParam.hasOwnProperty('request_date_end')) {
 			if (pParam.request_date_start != '' && pParam.request_date_end != '') {
 				xSqlWhere += ' AND pr.requested_at BETWEEN :startDate AND :endDate ';
@@ -399,6 +412,13 @@ class PurchaseRequestRepository {
 						xSqlWhereProjectOwnedDoc = ' AND pr.project_id = :projectId';
 					}
 				}
+
+				// let xSqlWhereRabOwnedDoc = '';
+				// if (pParam.hasOwnProperty('budget_plan_id')) {
+				// 	if (pParam.budget_plan_id != '') {
+				// 		xSqlWhereRabOwnedDoc = ' AND pr.budget_plan_id = :budgetPlanId';
+				// 	}
+				// }
 
 				xSqlWhere = ` (( ${xSqlWhere} ) OR (${xSqlWhereOr} ${xSqlWhereCompanyOwnedDoc != ''
 					? xSqlWhereCompanyOwnedDoc
@@ -489,7 +509,7 @@ class PurchaseRequestRepository {
 		if (!pParam.hasOwnProperty('is_export')) {
 			xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
 			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item,
-			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
+			p.id AS "project_id", p.code AS "project_code", p.name AS "project_name", p.odoo_project_code`;
 
 			xSqlGroupBy = ` GROUP BY pr.id, 
 						pr.request_no, 
@@ -763,9 +783,11 @@ class PurchaseRequestRepository {
 			prd.pr_no,
 			prd.last_price,
 			prd.estimate_fulfillment,
+			prd.fulfillment_status,
 			prd.uom_name,
 			prd.id AS "item_detail_id",
 			prd.status AS "item_detail_status",
+			prd.is_po_created,
 			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 		xSqlGroupBy = ` `;
@@ -844,12 +866,43 @@ class PurchaseRequestRepository {
 				}
 			}
 			if (pAct == 'add_batch_in_item') {
+				// var xFlag = false
+				// var xSql = "";
+				// var xSqlErrMsg = ""
+				// // SELECT calc_rab_item_remain_qty
+				// if (pParam.hasOwnProperty('budget_plan_id')) {
+				// 	xSql = `SELECT calc_rab_item_remain_qty('{
+				// 			"pAct": "${pAct}",
+				// 			"budget_plan_id" : ${pParam.budget_plan_id},
+				// 			"purchase_request_detail" : ${JSON.stringify(pParam.purchase_request_detail)}
+				// 		}'::json)`;
+					
+				// 	var xDtQuery = await sequelize.query(xSql, {
+				// 		type: sequelize.QueryTypes.SELECT,
+				// 	});
+
+				// 	if (xDtQuery.length > 0) {
+				// 		if (xDtQuery[0].calc_rab_item_remain_qty.status_code == "00") {
+				// 			xFlag = true
+				// 		} else {
+				// 		//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty;
+				// 			xFlag = false
+				// 			xSqlErrMsg = xDtQuery[0].calc_rab_item_remain_qty.status_msg
+				// 		}
+				// 	} else {
+				// 		xFlag = false
+				// 	}
+				// } else {
+				// 	xFlag = true
+				// }
+
+				// if (xFlag) {
 				pParam.status = 0;
 				pParam.is_delete = 0;
 				pParam.created_by = pParam.user_id;
 				pParam.created_by_name = pParam.user_name;
 
-				// Need disable trigger first because it affect when add batch item.
+				//// Need disable trigger first because it affect when add batch item.
 				sequelize.query(
 					'ALTER TABLE "tr_purchaserequestdetails" DISABLE TRIGGER "trg_update_total_item_afterinsert"'
 				);
@@ -879,7 +932,7 @@ class PurchaseRequestRepository {
 						'ALTER TABLE "tr_purchaserequestdetails" ENABLE TRIGGER "trg_update_total_item_afterinsert"'
 					);
 
-					// Call update total on table tr_purchaserequest
+					//// Call update total on table tr_purchaserequest
 					sequelize.query(
 						`update tr_purchaserequests set total_qty = (
 							select sum( qty )
@@ -911,6 +964,14 @@ class PurchaseRequestRepository {
 						status_msg: 'Failed save to database'
 					};
 				}
+				// } else {
+				// 	if (xTransaction) await xTransaction.rollback();
+
+				// 	xJoResult = {
+				// 		status_code: '-99',
+				// 		status_msg: 'Failed save to database ' + xSqlErrMsg
+				// 	};
+				// }
 			} else if (
 				pAct == 'update' ||
 				pAct == 'submit_fpb' ||
@@ -1090,6 +1151,89 @@ class PurchaseRequestRepository {
 		});
 
 		return xData;
+	}
+	
+	async transaction_history(pParam) {
+		var xData,
+			xTotalRecord = [];
+		var xSql,
+			xSqlCount = '';
+		var xObjJsonWhere = {};
+		var xSqlWhere = ' (1=1) ';
+		var xSqlWhereOr = [];
+		var xSqlOrderBy = '';
+		var xSqlLimit = '';
+		var xSqlGroupBy = '';
+		var xSqlFields = '';
+
+		if (pParam.hasOwnProperty('order_by')) {
+			if (pParam.order_by != '') {
+				xSqlOrderBy = ` ORDER BY ${pParam.order_by} ${pParam.order_type != '' ? pParam.order_type : 'ASC'}`;
+			} else {
+				xSqlOrderBy = ` ORDER BY pr.requested_at DESC`;
+			}
+		} else {
+			xSqlOrderBy = ` ORDER BY pr.requested_at DESC`;
+		}
+
+		if (pParam.hasOwnProperty('product_code')) {
+			if (pParam.product_code != '') {
+				xSqlWhere += ' AND prd.product_code = :product_code ';
+				xObjJsonWhere.product_code = pParam.product_code;
+			}
+		}
+
+		if (pParam.hasOwnProperty('vendor_id')) {
+			if (pParam.vendor_id != '') {
+				xSqlWhere += ' AND prd.vendor_id = :vendor_id ';
+				xObjJsonWhere.vendor_id = pParam.vendor_id;
+			}
+		}
+		xSqlWhere += " AND prd.is_po_created = true AND prd.status = 4 ";
+
+		xSqlFields = ` pr.id, pr.request_no, pr.employee_id, pr.employee_name, pr.company_id, pr.company_name,
+					pr.department_id, pr.department_name, pr.category_item, pr.category_pr, pr.status as "fpb_status",
+					p.id as "project_id", p.odoo_project_code, p.name as "project_name", prd.qty, prd.uom_id, prd.uom_name,
+					prd.last_price, prd.budget_price_per_unit, prd.budget_price_total, prd.status as "item_status",
+					prd.product_id, prd.product_code, prd.product_name, prd.vendor_id, prd.vendor_code, prd.vendor_name,
+					pr.created_at, pr.requested_at`;
+
+		xSqlGroupBy = ``;
+
+		if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
+			if (pParam.offset != '' && pParam.limit != '') {
+				xSqlLimit = ` OFFSET ${pParam.offset} LIMIT ${pParam.limit} `;
+			}
+		}
+
+		xSql = ` SELECT ${xSqlFields}
+				 FROM tr_purchaserequests pr 
+						LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
+							LEFT JOIN ms_projects p ON p.id = pr.project_id
+				 WHERE ${xSqlWhere} ${xSqlGroupBy}
+				  ${xSqlOrderBy}${xSqlLimit} `;
+				  
+		xSqlCount = ` SELECT count(pr.request_no) AS total_record
+		FROM tr_purchaserequests pr 
+						LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
+		WHERE ${xSqlWhere}`;
+		// console.log(`>>> xSqlCount: ${xSqlCount}`);
+
+		xData = await sequelize.query(xSql, {
+			replacements: xObjJsonWhere,
+			type: sequelize.QueryTypes.SELECT
+		});
+		xTotalRecord = await sequelize.query(xSqlCount, {
+			replacements: xObjJsonWhere,
+			type: sequelize.QueryTypes.SELECT
+		});
+
+		return {
+			status_code: '00',
+			status_msg: 'OK',
+			data: xData,
+			total_record: xTotalRecord[0].total_record
+		};
 	}
 }
 

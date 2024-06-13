@@ -27,6 +27,7 @@ const purchaseRequest = require('./purchaserequest');
 const syncFromOdoo = require('./syncfromodoo');
 
 const project = require('./project');
+// const budgetPlan = require('./budgetplan');
 
 const _export = require('./export');
 
@@ -56,5 +57,6 @@ module.exports = {
 	syncFromOdoo,
 	_export,
 
-	project
+	project,
+	// budgetPlan
 };

@@ -3,7 +3,8 @@
     "appPort": 9191,
     "dbTables": {
       "procurement": "tr_procurements",
-      "fpb": "tr_purchaserequests"
+      "fpb": "tr_purchaserequests",
+      "rab": "tr_budgetplans"
     },
     "logging": true,
     "username": "postgres",
@@ -52,17 +53,17 @@
 
       "oAuth": {
         "url": {
-          "verifyToken": "http://10.10.20.5:9189/api/oauth/v1/user/verify_token",
+          "verifyToken": "http://localhost:9189/api/oauth/v1/user/verify_token",
           "approval_matrix_document": {
-            "save": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/save",
-            "list": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/list",
-            "confirm": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/confirm",
-            "confirm_via_email": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/confirm_via_email"
+            "save": "http://localhost:9189/api/oauth/v1/approval_matrix/document/save",
+            "list": "http://localhost:9189/api/oauth/v1/approval_matrix/document/list",
+            "confirm": "http://localhost:9189/api/oauth/v1/approval_matrix/document/confirm",
+            "confirm_via_email": "http://localhost:9189/api/oauth/v1/approval_matrix/document/confirm_via_email"
           }
         }
       },
 
-      "eSanqua": "http://10.10.20.5:1193/api/esanqua/v1",
+      "eSanqua": "http://localhost:1193/api/esanqua/v1",
       "odoo": "http://10.10.20.5:9898/api",
       "logging": {
         "url": "http://10.10.20.5:8191/api/esanqua/log/v1/ecatalog"
@@ -98,7 +99,8 @@
 
     "statusDescription":{
       "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel", "Pending"],
-      "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel", "Paid"]
+      "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel", "Paid"],
+      "budgetPlan":["Draft", "Waiting Approval", "Pending", "In Progress", "Done", "Cancel", "Reject"]
     },
     "categoryItem": ["", "Raw Material", "Factory Supply", "Office Supply", "Sparepart", "Jasa", "Maintenance Repair", "Investment / Asset"]
   },
@@ -208,7 +210,8 @@
     "appPort": 9191, 
     "dbTables": {
       "procurement": "tr_procurements",
-      "fpb": "tr_purchaserequests"
+      "fpb": "tr_purchaserequests",
+      "rab": "tr_budgetplans"
     },
     "username": "postgres",
     "password": "P455uu0rd^^ok",
@@ -300,7 +303,8 @@
     "uploadBasePath": "/var/www/esanqua_upload/eprocurement",
     "statusDescription":{
       "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel"],
-      "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel", "Paid"]
+      "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel", "Paid"],
+      "budgetPlan":["Draft", "Waiting Approval", "Pending", "In Progress", "Done", "Cancel", "Reject"]
     },
     "categoryItem": ["", "Raw Material", "Factory Supply", "Office Supply", "Sparepart", "Jasa", "Maintenance Repair", "Investment / Asset"]
   },
@@ -400,7 +404,8 @@
     "uploadBasePath": "/var/www/sqa_upload_ecatalogue/eprocurement",
     "statusDescription":{
       "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel", "Pending"],
-      "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel", "Paid"]
+      "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel", "Paid"],
+      "budgetPlan":["Draft", "Waiting Approval", "Pending", "In Progress", "Done", "Cancel", "Reject"]
     },
     "categoryItem": ["", "Raw Material", "Factory Supply", "Office Supply", "Sparepart", "Jasa", "Maintenance Repair", "Investment / Asset"]
   }  

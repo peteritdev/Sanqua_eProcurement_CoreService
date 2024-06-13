@@ -28,6 +28,7 @@ module.exports = (sequelize, DataTypes) => {
 		file: DataTypes.JSON,
 
 		project_id: DataTypes.INTEGER,
+		// budget_plan_id: DataTypes.INTEGER,
 
 		is_delete: DataTypes.INTEGER,
 		deleted_at: DataTypes.DATE,
@@ -84,6 +85,10 @@ module.exports = (sequelize, DataTypes) => {
 			foreignKey: 'project_id',
 			as: 'project'
 		});
+		// PurchaseRequest.belongsTo(models.tr_budgetplans, {
+		// 	foreignKey: 'budget_plan_id',
+		// 	as: 'budget_plan'
+		// });
 	};
 
 	return PurchaseRequest;

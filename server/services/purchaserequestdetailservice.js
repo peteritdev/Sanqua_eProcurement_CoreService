@@ -33,6 +33,7 @@ const IntegrationService = require('../services/oauthservice.js');
 const _integrationServiceInstance = new IntegrationService();
 
 const LogService = require('../services/logservice.js');
+const e = require('express');
 const _logServiceInstance = new LogService();
 
 const _xClassName = 'PurchaseRequestDetailService';
@@ -253,9 +254,11 @@ class PurchaseRequestDetailService {
 			} else if (xAct == 'add_batch') {
 				if (pParam.hasOwnProperty('items')) {
 					var xItems = pParam.items;
+					var arrMsg = []
 					for (var i in xItems) {
 						// Check first whether product_id and vendor_id already exists in detail or not
 						var xPurchaseRequestDetail = await _repoInstance.getByProductIdVendorId({
+							request_id: pParam.request_id,
 							product_id: xItems[i].product_id,
 							vendor_id: xItems[i].vendor_id
 						});
@@ -266,7 +269,8 @@ class PurchaseRequestDetailService {
 						) {
 							var xParamUpdate = {
 								id: xPurchaseRequestDetail.id,
-								qty: sequelize.literal(`qty + ${xItems[i].qty}`),
+								// qty: sequelize.literal(`qty + ${xItems[i].qty}`),
+								qty: xPurchaseRequestDetail.qty + xItems[i].qty,
 								budget_price_total:
 									(xPurchaseRequestDetail.qty + xItems[i].qty) *
 									xPurchaseRequestDetail.budget_price_per_unit
@@ -274,32 +278,38 @@ class PurchaseRequestDetailService {
 
 							xItems[i] = null;
 							xItems[i] = xParamUpdate;
+							xItems[i].request_id = xRequestIdClear;
 
 							xAct = 'update';
 						} else {
 							// Get Product detail by Id
-							var xProductDetail = await _productServiceInstance.getById({
-								id: await _utilInstance.encrypt(
-									xItems[i].product_id.toString(),
-									config.cryptoKey.hashKey
-								)
-							});
-							if (xProductDetail != null) {
-								// console.log(JSON.stringify(xProductDetail));
-								xItems[i].product_code = xProductDetail.data.code;
-								xItems[i].product_name = xProductDetail.data.name;
+							if (xItems[i].product_id !== null) {
+								var xProductDetail = await _productServiceInstance.getById({
+									id: await _utilInstance.encrypt(
+										xItems[i].product_id.toString(),
+										config.cryptoKey.hashKey
+									)
+								});
+								if (xProductDetail != null) {
+									// console.log(JSON.stringify(xProductDetail));
+									xItems[i].product_code = xProductDetail.data.code;
+									xItems[i].product_name = xProductDetail.data.name;
+								}
 							}
 
 							// Get Vendor detail by id
-							var xVendorDetail = await _vendorServiceInstance.getVendorById({
-								id: await _utilInstance.encrypt(
-									xItems[i].vendor_id.toString(),
-									config.cryptoKey.hashKey
-								)
-							});
-							if (xVendorDetail != null) {
-								xItems[i].vendor_code = xVendorDetail.data.code;
-								xItems[i].vendor_name = xVendorDetail.data.name;
+							if (xItems[i].vendor_id !== null) {
+								var xVendorDetail = await _vendorServiceInstance.getVendorById({
+									id: await _utilInstance.encrypt(
+										xItems[i].vendor_id.toString(),
+										config.cryptoKey.hashKey
+									)
+								});
+	
+								if (xVendorDetail != null) {
+									xItems[i].vendor_code = xVendorDetail.data.code;
+									xItems[i].vendor_name = xVendorDetail.data.name;
+								}
 							}
 
 							xItems[i].budget_price_total = xItems[i].qty * xItems[i].budget_price_per_unit;
@@ -313,8 +323,12 @@ class PurchaseRequestDetailService {
 						// if (xCatalogue.status_code == '00') {
 						// 	xItems[i].last_price = xCatalogue.data.last_price;
 						// }
-
 						var xAddResult = await _repoInstance.save(xItems[i], xAct);
+						arrMsg.push({
+							index: i,
+							status_code: xAddResult.status_code,
+							status_msg: xAddResult.status_msg
+						})
 						xJoResult = xAddResult;
 					}
 				}
@@ -973,6 +987,101 @@ class PurchaseRequestDetailService {
 			xJoResult = {
 				status_code: '-99',
 				status_msg: `Exception error <${_xClassName}.cancelPR>: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
+	async updateFulfillment(pParam) {
+		var xJoResult = {};
+		var xFlagProcess = false
+		var xDecId = null;
+
+		try {
+			if (pParam.hasOwnProperty('user_id')) {
+				if (pParam.user_id != '') {
+					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.user_id = xDecId.decrypted;
+						xFlagProcess = true;
+						if (pParam.hasOwnProperty('employee_id')) {
+							if (pParam.employee_id != '') {
+								if (pParam.employee_id.length == 65) {
+									xDecId = await _utilInstance.decrypt(pParam.employee_id, config.cryptoKey.hashKey);
+									if (xDecId.status_code == '00') {
+										pParam.employee_id = xDecId.decrypted;
+										xFlagProcess = true;
+									} else {
+										xJoResult = xDecId;
+									}
+								} else {
+									xFlagProcess = true;
+								}
+							} else {
+								xJoResult = {
+									status_code: '-99',
+									status_msg: 'Parameter employee_id can not be empty'
+								};
+							}
+						} else {
+							xFlagProcess = true;
+						}
+					} else {
+						xJoResult = xDecId;
+					}
+				} else {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Parameter user_id can not be empty'
+					};
+				}
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Parameter user_id can not be empty'
+				};
+			}
+
+			// Check id parameter is not empty
+			if (pParam.hasOwnProperty('id')) {
+				if (pParam.id != null & pParam.id != '') {
+					var xItemId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+					if (xItemId.status_code == '00') {
+						pParam.id = xItemId.decrypted;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xItemId;
+					}
+				}
+			}
+
+			if (!xFlagProcess) {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Update failed, no supply item_id'
+				};
+			} else {
+				let xParamUpdate = {
+					id: pParam.id,
+					fulfillment_status: pParam.fulfillment_status
+				};
+
+				// update column with given pry
+				let xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
+
+				if (xUpdateResult.status_code === '00') {
+					xJoResult = {
+						status_code: '00',
+						status_msg: 'Update success'
+					};
+				} else {
+					xJoResult = xUpdateResult;
+				}
+			}
+		} catch (error) {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Exception error <${_xClassName}.updateStatusFulfillment>: ${e.message}`
 			};
 		}
 

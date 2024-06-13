@@ -27,9 +27,16 @@ class VendorCatalogueRepository {
 
 		xInclude = [
 			{
-				attributes: [ 'id', 'name', 'code' ],
+				attributes: [ 'id', 'name', 'code', 'merk', 'spesification'],
 				model: _modelProduct,
-				as: 'product'
+				as: 'product',
+				include: [
+					{
+						attributes: [ 'id', 'name' ],
+						model: _modelProductCategory,
+						as: 'category'
+					}
+				]
 			},
 			{
 				attributes: [ 'id', 'code', 'name' ],
@@ -59,7 +66,7 @@ class VendorCatalogueRepository {
 		var xInclude = [];
 		xInclude = [
 			{
-				attributes: [ 'id', 'name' ],
+				attributes: [ 'id', 'name', 'photo_1', 'photo_2', 'photo_3', 'photo_4', 'photo_5' ],
 				model: _modelProduct,
 				as: 'product',
 				include: [
@@ -71,7 +78,7 @@ class VendorCatalogueRepository {
 				]
 			},
 			{
-				attributes: [ 'id', 'code', 'name', 'location_lat', 'location_long' ],
+				attributes: [ 'id', 'code', 'name', 'location_lat', 'location_long', 'avg_rate' ],
 				model: _modelVendor,
 				as: 'vendor'
 			},
@@ -314,7 +321,7 @@ class VendorCatalogueRepository {
 			' pc.id AS "category_id", pc.name AS "category_name", ' +
 			' v.id AS "vendor_id", v.code AS "vendor_code", v.name AS "vendor_name", v.avg_rate AS "vendor_avg_rate", ' +
 			' c.id AS "currency_id", c.code AS "currency_code", c.name AS "currency_name", c.symbol AS "currency_symbol", ' +
-			' vc.id, ' +
+			' vc.id, vc.purchase_frequency AS "purchase_frequency", vc.sync_from_odoo_at AS "sync_from_odoo_at", ' +
 			' CASE WHEN pc.is_investment = 1 THEN 0 ELSE vc.last_price END AS "last_price", ' +
 			' vc.last_ordered, vc.last_purchase_plant, vc.description, vc.uom_id, vc.uom_name, vc. purchase_uom_id, vc.purchase_uom_name, vc.catalogue_type, vc.merk, vc.file_brochure ' +
 			' FROM ms_vendorcatalogues vc INNER JOIN ms_products p ' +
