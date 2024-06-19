@@ -7,7 +7,7 @@ const Op = Sequelize.Op;
 
 // Model
 const _modelDb = require('../models/index.js').ms_projects;
-const _modelBudget = require('../models/index.js').tr_budgets;
+// const _modelBudget = require('../models/index.js').tr_budgets;
 
 const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
@@ -30,11 +30,11 @@ class ProjectRepository {
 
 		try {
 			xInclude = [
-				{
-					model: _modelBudget,
-					as: 'budget',
-					attributes: [ 'id', 'code', 'name', 'employee_name', 'total_budget', 'requested_at', 'approved_at' ]
-				}
+				// {
+				// 	model: _modelBudget,
+				// 	as: 'budget',
+				// 	attributes: [ 'id', 'code', 'name', 'employee_name', 'total_budget', 'requested_at', 'approved_at' ]
+				// }
 			];
 
 			if (pParam.hasOwnProperty('id')) {
