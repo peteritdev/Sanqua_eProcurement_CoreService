@@ -48,6 +48,7 @@ class ProcurementService {
     constructor() { }
 
     async list(pParam) {
+        // 
         var xJoResult = {};
         var xJoArrData = [];
         var xFlagProcess = true;
