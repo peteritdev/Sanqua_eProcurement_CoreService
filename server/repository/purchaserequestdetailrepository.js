@@ -261,7 +261,9 @@ class PurchaseRequestDetailRepository {
 			} else if (pAct == 'update_by_pr_no') {
 				pParam.create_po_at = await _utilInstance.getCurrDateTime();
 				var xPRNo = pParam.pr_no;
-				delete pParam.pr_no;
+				// delete pParam.pr_no;
+				pParam.pr_no = null;
+				pParam.is_po_created = false;
 				var xWhere = {
 					where: {
 						pr_no: xPRNo
