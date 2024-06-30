@@ -316,7 +316,8 @@
     "appPort": 9191,
     "dbTables": {
       "procurement": "tr_procurements",
-      "fpb": "tr_purchaserequests"
+      "fpb": "tr_purchaserequests",
+      "rab": "tr_budgetplans"
     },
     "username": "postgres",
     "password": "T0b3L1k3Jesus^^)ok",
