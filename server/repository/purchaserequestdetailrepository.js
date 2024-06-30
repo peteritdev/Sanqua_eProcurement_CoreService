@@ -146,7 +146,7 @@ class PurchaseRequestDetailRepository {
 				// var xDtQuery = await sequelize.query(xSql, {
 				// 	type: sequelize.QueryTypes.SELECT,
 				// });
-				
+
 				// if (xDtQuery.length > 0) {
 				// 	if (xDtQuery[0].calc_rab_item_remain_qty.status_code == "00") {
 				// 		xFlag = true
@@ -201,12 +201,11 @@ class PurchaseRequestDetailRepository {
 
 				pParam.updated_by = pParam.user_id;
 				pParam.updated_by_name = pParam.user_name;
-				
+
 				// var xDtQuery = await sequelize.query(xSql, {
 				// 	type: sequelize.QueryTypes.SELECT,
 				// });
 
-				
 				// if (xDtQuery.length > 0) {
 				// 	if (xDtQuery[0].calc_rab_item_remain_qty.status_code == "00") {
 				// 		xFlag = true
@@ -261,13 +260,19 @@ class PurchaseRequestDetailRepository {
 			} else if (pAct == 'update_by_pr_no') {
 				pParam.create_po_at = await _utilInstance.getCurrDateTime();
 				var xPRNo = pParam.pr_no;
-				delete pParam.pr_no;
+
 				var xWhere = {
 					where: {
 						pr_no: xPRNo
 					},
 					transaction: xTransaction
 				};
+
+				if (pParam.status == 5) {
+					pParam.pr_no = '';
+				} else {
+					delete pParam.pr_no;
+				}
 
 				xSaved = await _modelDb.update(pParam, xWhere);
 
@@ -381,7 +386,6 @@ class PurchaseRequestDetailRepository {
 			// });
 			// console.log('xUpdateResult>>>>', xDtQuery);
 
-			
 			// if (xDtQuery.length > 0) {
 			// 	if (xDtQuery[0].calc_rab_item_remain_qty.status_code == "00") {
 			// 		xFlag = true
@@ -411,7 +415,7 @@ class PurchaseRequestDetailRepository {
 				status_msg: 'Data has been successfully deleted'
 			};
 			// } else {
-				
+
 			// 	if (xTransaction) await xTransaction.rollback();
 
 			// 	xJoResult = {

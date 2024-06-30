@@ -254,7 +254,7 @@ class PurchaseRequestDetailService {
 			} else if (xAct == 'add_batch') {
 				if (pParam.hasOwnProperty('items')) {
 					var xItems = pParam.items;
-					var arrMsg = []
+					var arrMsg = [];
 					for (var i in xItems) {
 						// Check first whether product_id and vendor_id already exists in detail or not
 						var xPurchaseRequestDetail = await _repoInstance.getByProductIdVendorId({
@@ -305,7 +305,7 @@ class PurchaseRequestDetailService {
 										config.cryptoKey.hashKey
 									)
 								});
-	
+
 								if (xVendorDetail != null) {
 									xItems[i].vendor_code = xVendorDetail.data.code;
 									xItems[i].vendor_name = xVendorDetail.data.name;
@@ -328,7 +328,7 @@ class PurchaseRequestDetailService {
 							index: i,
 							status_code: xAddResult.status_code,
 							status_msg: xAddResult.status_msg
-						})
+						});
 						xJoResult = xAddResult;
 					}
 				}
@@ -518,6 +518,7 @@ class PurchaseRequestDetailService {
 		var xJoResult = {};
 		var xDecId = null;
 		var xFlagProcess = false;
+		var xFlagOdoo = false;
 		var xRequestId = null;
 
 		console.log(`>>> pParam: ${JSON.stringify(pParam)}`);
@@ -586,10 +587,18 @@ class PurchaseRequestDetailService {
 													// 		break;
 													// 	}
 													// }
-													if (xItemInfo.data.status != 0 && xItemInfo.data.status != 5) {
+													if (
+														xItemInfo.data.status != 0 &&
+														xItemInfo.data.status != 5 &&
+														xDetail.data.fpb_type == 'po'
+													) {
 														xFlagProcess = false;
 														break;
+													} else if (xItemInfo.data.is_item_match_with_odoo == 0) {
+														xFlagOdoo = false;
+														break;
 													} else {
+														console.log(`>>> Here submit line ids`);
 														xLineIds.push({
 															product_code: pParam.items[i].product_code,
 															product_name: `[${pParam.items[i].product_code}] ${pParam
@@ -598,6 +607,7 @@ class PurchaseRequestDetailService {
 															note: `${pParam.items[i].description}`,
 															uom: pParam.items[i].uom
 														});
+														xFlagOdoo = true;
 													}
 												} else {
 													xFlagProcess = false;
@@ -609,7 +619,7 @@ class PurchaseRequestDetailService {
 											}
 										}
 
-										if (xFlagProcess) {
+										if (xFlagProcess && xFlagOdoo) {
 											xFlagProcess = false;
 											xDecId = null;
 
@@ -747,11 +757,19 @@ class PurchaseRequestDetailService {
 												}
 											}
 										} else {
-											xJoResult = {
-												status_code: '-99',
-												status_msg:
-													'Please supply valid item id or maybe there is item that has been submit to PR.'
-											};
+											if (!xFlagOdoo) {
+												xJoResult = {
+													status_code: '-99',
+													status_msg:
+														'There is some item that not match with Odoo. Please do register before.'
+												};
+											} else {
+												xJoResult = {
+													status_code: '-99',
+													status_msg:
+														'Error System: Please supply valid item id or maybe there is item that has been submit to PR.'
+												};
+											}
 										}
 									}
 								} else {
@@ -994,7 +1012,7 @@ class PurchaseRequestDetailService {
 	}
 	async updateFulfillment(pParam) {
 		var xJoResult = {};
-		var xFlagProcess = false
+		var xFlagProcess = false;
 		var xDecId = null;
 
 		try {
@@ -1044,7 +1062,7 @@ class PurchaseRequestDetailService {
 
 			// Check id parameter is not empty
 			if (pParam.hasOwnProperty('id')) {
-				if (pParam.id != null & pParam.id != '') {
+				if ((pParam.id != null) & (pParam.id != '')) {
 					var xItemId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
 					if (xItemId.status_code == '00') {
 						pParam.id = xItemId.decrypted;
