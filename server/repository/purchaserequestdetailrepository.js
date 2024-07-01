@@ -262,6 +262,7 @@ class PurchaseRequestDetailRepository {
 				pParam.create_po_at = await _utilInstance.getCurrDateTime();
 				var xPRNo = pParam.pr_no;
 				delete pParam.pr_no;
+				pParam.is_po_created = false;
 				var xWhere = {
 					where: {
 						pr_no: xPRNo
