@@ -136,12 +136,12 @@ class PurchaseRequestService {
 				xFlagProcess = true;
 			}
 
-			if (pParam.hasOwnProperty('budget_plan_id')) {
-				bDect = await _utilInstance.decrypt(pParam.budget_plan_id, config.cryptoKey.hashKey);
-				if (bDect.status_code == '00') {
-					pParam.budget_plan_id = bDect.decrypted
-				}
-			}
+			// if (pParam.hasOwnProperty('budget_plan_id')) {
+			// 	bDect = await _utilInstance.decrypt(pParam.budget_plan_id, config.cryptoKey.hashKey);
+			// 	if (bDect.status_code == '00') {
+			// 		pParam.budget_plan_id = bDect.decrypted
+			// 	}
+			// }
 
 			if (xFlagProcess) {
 				if (xAct == 'add' || xAct == 'add_batch_in_item') {
@@ -368,12 +368,12 @@ class PurchaseRequestService {
 				if (!pParam.hasOwnProperty('department_id')) {
 					pParam.department_id = pParam.logged_department_id;
 				}
-				if (pParam.hasOwnProperty('budget_plan_id')) {
-					const bDect = await _utilInstance.decrypt(pParam.budget_plan_id, config.cryptoKey.hashKey);
-					if (bDect.status_code == '00') {
-						pParam.budget_plan_id = bDect.decrypted
-					}
-				}
+				// if (pParam.hasOwnProperty('budget_plan_id')) {
+				// 	const bDect = await _utilInstance.decrypt(pParam.budget_plan_id, config.cryptoKey.hashKey);
+				// 	if (bDect.status_code == '00') {
+				// 		pParam.budget_plan_id = bDect.decrypted
+				// 	}
+				// }
 
 				// console.log(`>>> pParam 2: ${JSON.stringify(pParam)}`);
 				var xResultList = await _repoInstance.list(pParam);
@@ -396,10 +396,10 @@ class PurchaseRequestService {
 										name: xRows[index].project_name,
 										odoo_project_code: xRows[index].odoo_project_code
 									},
-									budget_plan: {
-										id: xRows[index].budget_plan_id,
-										name: xRows[index].budget_plan_name
-									},
+									// budget_plan: {
+									// 	id: xRows[index].budget_plan_id,
+									// 	name: xRows[index].budget_plan_name
+									// },
 									request_no: xRows[index].request_no,
 									requested_at:
 										xRows[index].requested_at == null
@@ -527,10 +527,10 @@ class PurchaseRequestService {
 									name: xRows[index].project_name,
 									odoo_project_code: xRows[index].odoo_project_code
 								},
-								budget_plan: {
-									id: xRows[index].budget_plan_id,
-									name: xRows[index].budget_plan_name
-								},
+								// budget_plan: {
+								// 	id: xRows[index].budget_plan_id,
+								// 	name: xRows[index].budget_plan_name
+								// },
 								request_no: xRows[index].request_no,
 								requested_at:
 									xRows[index].requested_at == null
@@ -625,7 +625,7 @@ class PurchaseRequestService {
 
 					let xFileArr = [];
 					var xTotalItem = 0
-					var xTotalRealization = 0
+					// var xTotalRealization = 0
 					for (var j in xResult.file) {
 						xFileArr.push({
 							subject: xResult.file[j].subject,
@@ -663,7 +663,7 @@ class PurchaseRequestService {
 						// 05/06/2024 add totalItem & realization
 						if (xDetail[index].budget_price_total != null && xDetail[index].budget_price_total != 0) {
 							xTotalItem = xTotalItem + 1
-							xTotalRealization = xTotalRealization + (xDetail[index].realization != null ? xDetail[index].realization : 0)
+							// xTotalRealization = xTotalRealization + (xDetail[index].realization != null ? xDetail[index].realization : 0)
 						}
 						console.log(`>>> xDetail[index]: ${JSON.stringify(xDetail[index])}`);
 						xJoArrRequestDetailData.push({
@@ -854,8 +854,8 @@ class PurchaseRequestService {
 						took_at: xResult.took_at != null ? moment(xResult.took_at).format('DD MMM YYYY HH:mm:ss') : null,
 						took_by_name: xResult.took_by_name,
 						fpb_type: xResult.fpb_type,
-						budget_plan: xResult.budget_plan,
-						total_realization: xTotalRealization,
+						// budget_plan: xResult.budget_plan,
+						// total_realization: xTotalRealization,
 						total_item_with_budget: xTotalItem,
 					};
 

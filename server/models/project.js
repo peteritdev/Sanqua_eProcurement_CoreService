@@ -33,12 +33,12 @@ module.exports = (sequelize, DataTypes) => {
 		updated_by_name: DataTypes.STRING
 	});
 
-	Project.associate = function(models) {
-		Project.hasMany(models.tr_budgets, {
-			foreignKey: 'project_id',
-			as: 'budget'
-		});
-	};
+	// Project.associate = function(models) {
+	// 	Project.hasMany(models.tr_budgets, {
+	// 		foreignKey: 'project_id',
+	// 		as: 'budget'
+	// 	});
+	// };
 
 	return Project;
 };
