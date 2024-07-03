@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const moment = require('moment');
 const sequelize = require('sequelize');
 const dateFormat = require('dateformat');
-const Op = sequelize.Op;
+const Op = Sequelize.Op;
 const bcrypt = require('bcrypt');
 const fs = require('fs');
 
@@ -363,19 +363,22 @@ class VendorCatalogueService {
 						created_by_name: xResultList.created_by_name,
 						updated_at: xResultList.updatedAt,
 						updated_by_name: xResultList.updated_by_name,
-						
+
 						product_category: xResultList.product.category,
 						sync_from_odoo_at: xResultList.sync_from_odoo_at,
 						purchase_frequency: xResultList.purchase_frequency,
 						vendor_code: xResultList.vendor.code,
 						catalogue_type_name:
-						xResultList.catalogue_type == 1
-							? "Bahan Baku"
-							: xResultList.catalogue_type == 2
-							? "Umum"
-							: null,
-							photo: [xResultList.product_photo_1, xResultList.product_photo_2, xResultList.product_photo_3, xResultList.product_photo_4, xResultList.product_photo_5]
-					
+							xResultList.catalogue_type == 1
+								? 'Bahan Baku'
+								: xResultList.catalogue_type == 2 ? 'Umum' : null,
+						photo: [
+							xResultList.product_photo_1,
+							xResultList.product_photo_2,
+							xResultList.product_photo_3,
+							xResultList.product_photo_4,
+							xResultList.product_photo_5
+						]
 					}
 				};
 			} else {
@@ -410,7 +413,7 @@ class VendorCatalogueService {
 		}
 
 		if (xFlagProcess) {
-			console.log('pParam.vendor_id',pParam.vendor_id);
+			console.log('pParam.vendor_id', pParam.vendor_id);
 			var xResultList = await _vendorCatalogueRepoInstance.list_new(pParam);
 			console.log('xResultList', JSON.stringify(xResultList));
 			if (xResultList.data.length > 0) {
@@ -486,7 +489,7 @@ class VendorCatalogueService {
 								? 'Bahan Baku'
 								: xRows[index].catalogue_type == 2 ? 'Umum' : null,
 						sync_from_odoo_at: xRows[index].sync_from_odoo_at,
-						purchase_frequency: xRows[index].purchase_frequency,
+						purchase_frequency: xRows[index].purchase_frequency
 					});
 				}
 				xJoResult = {

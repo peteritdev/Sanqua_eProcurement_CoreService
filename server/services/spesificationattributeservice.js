@@ -4,12 +4,12 @@ const crypto = require('crypto');
 const moment = require('moment');
 const sequelize = require('sequelize');
 const dateFormat = require('dateformat');
-const Op = sequelize.Op;
+const Op = Sequelize.Op;
 const bcrypt = require('bcrypt');
 const fs = require('fs');
 
-const env         = process.env.NODE_ENV || 'localhost';
-const config      = require(__dirname + '/../config/config.json')[env];
+const env = process.env.NODE_ENV || 'localhost';
+const config = require(__dirname + '/../config/config.json')[env];
 
 //Repository
 const SpesificationAttributeRepository = require('../repository/spesificationattributerepository.js');
@@ -25,387 +25,382 @@ const _xlsxToJson = require('xlsx-to-json-lc');
 
 // Setup multer storage
 var storage = multer.diskStorage({
-    destination: function( req, file, cb ){
-      cb(null, './uploads/')
-    },
-    filename: function( req, file, cb ){
-      var dateTimeStamp = Date.now();
-      cb( null, file.fieldname + '-' + dateTimeStamp + '.' + file.originalname.split('.')[file.originalname.split('.').length -1])
-    }
+	destination: function(req, file, cb) {
+		cb(null, './uploads/');
+	},
+	filename: function(req, file, cb) {
+		var dateTimeStamp = Date.now();
+		cb(
+			null,
+			file.fieldname +
+				'-' +
+				dateTimeStamp +
+				'.' +
+				file.originalname.split('.')[file.originalname.split('.').length - 1]
+		);
+	}
 });
-  
+
 var upload = multer({
-    storage: storage,
-    fileFilter: function( req, file, callback ){
-        if (['xls', 'xlsx'].indexOf(file.originalname.split('.')[file.originalname.split('.').length-1]) === -1) {
-            return callback(new Error('Wrong extension type'));
-        }
-        callback(null, true);
-    }
+	storage: storage,
+	fileFilter: function(req, file, callback) {
+		if ([ 'xls', 'xlsx' ].indexOf(file.originalname.split('.')[file.originalname.split('.').length - 1]) === -1) {
+			return callback(new Error('Wrong extension type'));
+		}
+		callback(null, true);
+	}
 }).single('file');
 
 var upload = multer({
-    storage: storage
+	storage: storage
 }).single('file');
 
 class SpesificationAttributeService {
-    constructor(){}   
+	constructor() {}
 
-    async list(pParam){
-        var xJoResult = {};
-        var xJoArrData = [];
-        var xFlagProcess = true;
+	async list(pParam) {
+		var xJoResult = {};
+		var xJoArrData = [];
+		var xFlagProcess = true;
 
-        if( pParam.spesification_category_id != '' ){
-            var xDecId = await _utilInstance.decrypt( pParam.spesification_category_id, config.cryptoKey.hashKey );
-            if( xDecId.status_code == '00' ){
-                pParam.spesification_category_id = xDecId.decrypted;
-            }else{
-                xFlagProcess = false;
-                xJoResult = xDecId;
-            }
-        }
-        
-        if( xFlagProcess ){
-            var xResultList = await _repoInstance.list(pParam);
-            if( xResultList.count > 0 ){
-                var xRows = xResultList.rows;
-                for( var index in xRows ){
-                    xJoArrData.push({
-                        id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
-                        clear_id: xRows[index].id,
-                        name: xRows[index].name,
-                        category: xRows[index].spesification_category,
-                        created_at: xRows[index].createdAt,
-                        created_by_name: xRows[index].created_by_name,
-                        updated_at: xRows[index].updatedAt,
-                        updated_by_name: xRows[index].updated_by_name,
-                    });
-                }
-                xJoResult = {
-                    status_code: "00",
-                    status_msg: "OK",
-                    data: xJoArrData,
-                    total_record: xResultList.count,
-                }
-            }else{
-                xJoResult = {
-                    status_code: "-99",
-                    status_msg: "Data not found",
-                };
-            }
-        }         
+		if (pParam.spesification_category_id != '') {
+			var xDecId = await _utilInstance.decrypt(pParam.spesification_category_id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				pParam.spesification_category_id = xDecId.decrypted;
+			} else {
+				xFlagProcess = false;
+				xJoResult = xDecId;
+			}
+		}
 
-        return xJoResult;
-    }
+		if (xFlagProcess) {
+			var xResultList = await _repoInstance.list(pParam);
+			if (xResultList.count > 0) {
+				var xRows = xResultList.rows;
+				for (var index in xRows) {
+					xJoArrData.push({
+						id: await _utilInstance.encrypt(xRows[index].id.toString(), config.cryptoKey.hashKey),
+						clear_id: xRows[index].id,
+						name: xRows[index].name,
+						category: xRows[index].spesification_category,
+						created_at: xRows[index].createdAt,
+						created_by_name: xRows[index].created_by_name,
+						updated_at: xRows[index].updatedAt,
+						updated_by_name: xRows[index].updated_by_name
+					});
+				}
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					data: xJoArrData,
+					total_record: xResultList.count
+				};
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Data not found'
+				};
+			}
+		}
 
-    async getById( pParam ){
-        var xJoResult = {};
-        var xFlagProcess = true;
+		return xJoResult;
+	}
 
-        if( pParam.id != '' ){
-            var xDecId = await _utilInstance.decrypt( pParam.id, config.cryptoKey.hashKey );
-            if( xDecId.status_code == '00' ){
-                pParam.id = xDecId.decrypted;
-            }else{
-                xFlagProcess = false;
-                xJoResult = xDecId;
-            }
-            if( xFlagProcess ){
-                var xResult = await _repoInstance.getById( pParam );
-                if( xResult != null ){
-                    xJoResult = {
-                        status_code: '00',
-                        status_msg: 'OK',
-                        data: xResult
-                    }
-                }else{
-                    xJoResult = {
-                        status_code: "-99",
-                        status_msg: "Data not found",
-                    };
-                }
-            }
-        }else{
-            xJoResult = {
-                status_code: '-99',
-                status_msg: 'Parameter not valid'
-            }
-        }
+	async getById(pParam) {
+		var xJoResult = {};
+		var xFlagProcess = true;
 
-        return xJoResult;
-    }
+		if (pParam.id != '') {
+			var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				pParam.id = xDecId.decrypted;
+			} else {
+				xFlagProcess = false;
+				xJoResult = xDecId;
+			}
+			if (xFlagProcess) {
+				var xResult = await _repoInstance.getById(pParam);
+				if (xResult != null) {
+					xJoResult = {
+						status_code: '00',
+						status_msg: 'OK',
+						data: xResult
+					};
+				} else {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Data not found'
+					};
+				}
+			}
+		} else {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: 'Parameter not valid'
+			};
+		}
 
-    async dropDownList(pParam){
-        var xJoResult = {};
-        var xJoArrData = [];  
-        var xFlagProcess = true;     
+		return xJoResult;
+	}
 
-        if( xFlagProcess ){
+	async dropDownList(pParam) {
+		var xJoResult = {};
+		var xJoArrData = [];
+		var xFlagProcess = true;
 
-            var xResultList = await _repoInstance.list(pParam);
+		if (xFlagProcess) {
+			var xResultList = await _repoInstance.list(pParam);
 
-            if( xResultList.count > 0 ){
-                xJoResult.status_code = "00";
-                xJoResult.status_msg = "OK";
+			if (xResultList.count > 0) {
+				xJoResult.status_code = '00';
+				xJoResult.status_msg = 'OK';
 
-                var xRows = xResultList.rows;
+				var xRows = xResultList.rows;
 
-                for(var index in xRows){                
+				for (var index in xRows) {
+					xJoArrData.push({
+						id: xRows[index].id,
+						name: xRows[index].name
+					});
+				}
 
-                    xJoArrData.push({
-                        id: xRows[index].id,
-                        name: xRows[index].name,
-                    });
-                }
+				xJoResult.data = xJoArrData;
+			} else {
+				xJoResult.status_code = '00';
+				xJoResult.status_msg = 'OK';
+				xJoResult.data = xJoArrData;
+			}
+		}
 
-                xJoResult.data = xJoArrData;
-            }else{
-                xJoResult.status_code = "00";
-                xJoResult.status_msg = "OK";
-                xJoResult.data = xJoArrData;
-            }
+		return xJoResult;
+	}
 
-        }        
+	async save(pParam) {
+		var xJoResult;
+		var xAct = pParam.act;
+		var xFlagProcess = true;
 
-        return (xJoResult);
-    }
+		delete pParam.act;
 
-    async save(pParam){
-        var xJoResult;
-        var xAct = pParam.act;
-        var xFlagProcess = true;
+		if (xAct == 'add') {
+			// User Id
+			var xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				pParam.created_by = xDecId.decrypted;
+				pParam.created_by_name = pParam.user_name;
+			} else {
+				xFlagProcess = false;
+				xJoResult = xDecId;
+			}
 
-        delete pParam.act;
+			if (xFlagProcess) {
+				var xAddResult = await _repoInstance.save(pParam, xAct);
+				xJoResult = xAddResult;
+			}
+		} else if (xAct == 'update') {
+			console.log(JSON.stringify(pParam));
 
-        if( xAct == "add" ){           
+			var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				pParam.id = xDecId.decrypted;
+				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.updated_by = xDecId.decrypted;
+					pParam.updated_by_name = pParam.user_name;
+				} else {
+					xFlagProcess = false;
+					xJoResult = xDecId;
+				}
+			} else {
+				xFlagProcess = false;
+				xJoResult = xDecId;
+			}
 
-            // User Id
-            var xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
-            if( xDecId.status_code == '00' ){
-                pParam.created_by = xDecId.decrypted;
-                pParam.created_by_name = pParam.user_name;
-            }else{
-                xFlagProcess = false;
-                xJoResult = xDecId;
-            }
-            
-            if( xFlagProcess ){
-                var xAddResult = await _repoInstance.save( pParam, xAct );
-                xJoResult = xAddResult;
-            }           
+			if (xFlagProcess) {
+				var xAddResult = await _repoInstance.save(pParam, xAct);
+				xJoResult = xAddResult;
+			}
+		}
 
+		return xJoResult;
+	}
 
-        }else if( xAct == "update" ){
+	async delete(pParam) {
+		var xJoResult;
+		var xFlagProcess = true;
 
-            console.log(JSON.stringify(pParam));
+		var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+		if (xDecId.status_code == '00') {
+			pParam.id = xDecId.decrypted;
+			xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				pParam.deleted_by = xDecId.decrypted;
+				pParam.deleted_by_name = pParam.user_name;
+			} else {
+				xFlagProcess = false;
+				xJoResult = xDecId;
+			}
+		} else {
+			xFlagProcess = false;
+			xJoResult = xDecId;
+		}
 
-            var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
-            if( xDecId.status_code == "00" ){
-                pParam.id = xDecId.decrypted;                    
-                xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
-                if( xDecId.status_code == "00" ){
-                    pParam.updated_by = xDecId.decrypted;
-                    pParam.updated_by_name = pParam.user_name;
-                }else{
-                    xFlagProcess = false;
-                    xJoResult = xDecId;
-                }                
-            }else{
-                xFlagProcess = false;
-                xJoResult = xDecId;
-            }
+		if (xFlagProcess) {
+			var xDeleteResult = await _repoInstance.delete(pParam);
+			xJoResult = xDeleteResult;
+		}
 
-            if( xFlagProcess ){
-                var xAddResult = await _repoInstance.save( pParam, xAct );
-                xJoResult = xAddResult;
-            }
-            
-        }
+		return xJoResult;
+	}
 
-        return xJoResult;
-    }
+	async uploadFromExcel(pReq, pRes) {
+		var xExcelToJSON;
+		upload(pReq, pRes, function(pErr) {
+			if (pErr) {
+				var joResult = {
+					status_code: '-99',
+					status_msg: '',
+					err_msg: pErr
+				};
 
-    async delete( pParam ){
-        var xJoResult;
-        var xFlagProcess = true;  
+				try {
+					fs.unlinkSync(pReq.file.path);
+				} catch (e) {
+					//error deleting the file
+					console.log(e);
+				}
 
-        var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
-        if( xDecId.status_code == "00" ){
-            pParam.id = xDecId.decrypted;                    
-            xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
-            if( xDecId.status_code == "00" ){
-                pParam.deleted_by = xDecId.decrypted;
-                pParam.deleted_by_name = pParam.user_name;
-            }else{
-                xFlagProcess = false;
-                xJoResult = xDecId;
-            }
-        }else{
-            xFlagProcess = false;
-            xJoResult = xDecId;
-        }
+				pRes.setHeader('Content-Type', 'application/json');
+				pRes.status(200).send(joResult);
+			}
 
-        if( xFlagProcess ){        
-            var xDeleteResult = await _repoInstance.delete( pParam );
-            xJoResult = xDeleteResult;
-        }
+			console.log(pReq.file);
 
-        return xJoResult;
-    }   
+			if (!pReq.file) {
+				var joResult = {
+					status_code: '-99',
+					status_msg: '',
+					err_msg: 'No file passed'
+				};
 
-    async uploadFromExcel( pReq, pRes ){
-        var xExcelToJSON;
-        upload( pReq, pRes, function( pErr ){
-            if( pErr ){
-                var joResult =  {
-                    "status_code": "-99",
-                    "status_msg": "",
-                    "err_msg": pErr
-                }
+				try {
+					fs.unlinkSync(pReq.file.path);
+				} catch (e) {
+					//error deleting the file
+					console.log(e);
+				}
 
-                try {
-                    fs.unlinkSync(pReq.file.path);
-                } catch(e) {
-                    //error deleting the file
-                    console.log(e);
-                }
-                
-                pRes.setHeader('Content-Type','application/json');
-                pRes.status(200).send(joResult);
-            }
+				pRes.setHeader('Content-Type', 'application/json');
+				pRes.status(200).send(joResult);
+			}
 
-            console.log(pReq.file)
-
-            if( !pReq.file ){
-                var joResult = {
-                    "status_code": "-99",
-                    "status_msg": "",
-                    "err_msg": "No file passed"
-                }
-
-                try {
-                    fs.unlinkSync(pReq.file.path);
-                } catch(e) {
-                    //error deleting the file
-                    console.log(e);
-                }
-
-                pRes.setHeader('Content-Type','application/json');
-                pRes.status(200).send(joResult);
-            }
-
-            //start convert process
-            /** Check the extension of the incoming file and
+			//start convert process
+			/** Check the extension of the incoming file and
              *  use the appropriate module
              */
-            if(pReq.file.originalname.split('.')[pReq.file.originalname.split('.').length-1] === 'xlsx'){
-                xExcelToJSON = _xlsxToJson;
-            } else {
-                xExcelToJSON = _xlsToJson;
-            }
+			if (pReq.file.originalname.split('.')[pReq.file.originalname.split('.').length - 1] === 'xlsx') {
+				xExcelToJSON = _xlsxToJson;
+			} else {
+				xExcelToJSON = _xlsToJson;
+			}
 
-            try {
-                xExcelToJSON({
-                    input: pReq.file.path, //the same path where we uploaded our file
-                    output: null, //since we don't need output.json
-                    lowerCaseHeaders:true
-                }, function(err,result){
-                    if(err) {
-                        var joResult = {
-                            "status_code": "-99",
-                            "status_msg": "",
-                            "err_msg": err
-                        }
+			try {
+				xExcelToJSON(
+					{
+						input: pReq.file.path, //the same path where we uploaded our file
+						output: null, //since we don't need output.json
+						lowerCaseHeaders: true
+					},
+					function(err, result) {
+						if (err) {
+							var joResult = {
+								status_code: '-99',
+								status_msg: '',
+								err_msg: err
+							};
 
-                        try {
-                            fs.unlinkSync(pReq.file.path);
-                        } catch(e) {
-                            //error deleting the file
-                            console.log(e);
-                        }
+							try {
+								fs.unlinkSync(pReq.file.path);
+							} catch (e) {
+								//error deleting the file
+								console.log(e);
+							}
 
-                        pRes.setHeader('Content-Type','application/json');
-                        pRes.status(200).send(joResult);
-                    }
-                    var joResult = {
-                        "status_code": "00",
-                        "status_msg": "OK",
-                        "data": result,
-                        "err_msg": null
-                    }
+							pRes.setHeader('Content-Type', 'application/json');
+							pRes.status(200).send(joResult);
+						}
+						var joResult = {
+							status_code: '00',
+							status_msg: 'OK',
+							data: result,
+							err_msg: null
+						};
 
-                    try {
-                        fs.unlinkSync(pReq.file.path);
-                    } catch(e) {
-                        //error deleting the file
-                        console.log(e);
-                    }
+						try {
+							fs.unlinkSync(pReq.file.path);
+						} catch (e) {
+							//error deleting the file
+							console.log(e);
+						}
 
-                    console.log(joResult);
+						console.log(joResult);
 
-                    pRes.setHeader('Content-Type','application/json');
-                    pRes.status(200).send(joResult);
-                });
-            } catch (e){
-                var joResult = {
-                    "status_code": "-99",
-                    "status_msg": "",
-                    "err_msg": "Corupted excel file"
-                }
+						pRes.setHeader('Content-Type', 'application/json');
+						pRes.status(200).send(joResult);
+					}
+				);
+			} catch (e) {
+				var joResult = {
+					status_code: '-99',
+					status_msg: '',
+					err_msg: 'Corupted excel file'
+				};
 
-                try {
-                    fs.unlinkSync(pReq.file.path);
-                } catch(e) {
-                    //error deleting the file
-                    console.log(e);
-                }
+				try {
+					fs.unlinkSync(pReq.file.path);
+				} catch (e) {
+					//error deleting the file
+					console.log(e);
+				}
 
-                pRes.setHeader('Content-Type','application/json');
-                pRes.status(200).send(joResult);
-            }
+				pRes.setHeader('Content-Type', 'application/json');
+				pRes.status(200).send(joResult);
+			}
+		});
+	}
 
-        } );
-    }
+	async batchSave(pParam) {
+		var joResult;
+		var jaResult = [];
+		var jaDuplicateResult = [];
 
-    async batchSave( pParam ){
-        
-        var joResult;
-        var jaResult = [];
-        var jaDuplicateResult = [];
+		console.log('>>> Length : ' + pParam.data.length);
 
-        console.log(">>> Length : " + pParam.data.length);
+		if (pParam.act == 'add') {
+			for (var i = 0; i < pParam.data.length; i++) {
+				pParam.data[i].spesification_category_id = parseInt(pParam.data[i].spesification_category_id);
 
-        if( pParam.act == "add" ){
-            for( var i = 0; i < pParam.data.length; i++ ){
+				if (pParam.data[i].hasOwnProperty('id')) {
+					if (pParam.data[i].id != '') {
+						pParam.data[i].act = 'update';
+						var xAddResult = await _repoInstance.save(pParam.data[i], 'update');
+					}
+				} else {
+					var xAddResult = await _repoInstance.save(pParam.data[i], pParam.act);
+				}
+			}
 
-                pParam.data[i].spesification_category_id = parseInt(pParam.data[i].spesification_category_id);
+			// await _utilInstance.changeSequenceTable((pParam.data.length)+1, 'ms_units','id');
 
-                if( pParam.data[i].hasOwnProperty('id') ){
-                    if( pParam.data[i].id != '' ){
-                        pParam.data[i].act = "update";
-                        var xAddResult = await _repoInstance.save( pParam.data[i], "update" );
-                    }         
-                }else{
-                    var xAddResult = await _repoInstance.save( pParam.data[i], pParam.act );
-                }   
+			joResult = {
+				status_code: '00',
+				status_msg: 'Finish save to database'
+			};
+		} else if (pParam.act == 'update') {
+		}
 
-            }
-
-            // await _utilInstance.changeSequenceTable((pParam.data.length)+1, 'ms_units','id');
-
-            joResult = {
-                "status_code": "00",
-                "status_msg": "Finish save to database",
-            }
-        }else if( pParam.act == "update" ){            
-            
-        }
-
-        return joResult;
-
-    }
-
+		return joResult;
+	}
 }
 
 module.exports = SpesificationAttributeService;

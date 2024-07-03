@@ -3,7 +3,7 @@ var config = require(__dirname + '/../config/config.json')[env];
 var Sequelize = require('sequelize');
 var sequelize = new Sequelize(config.database, config.username, config.password, config);
 const { hash } = require('bcryptjs');
-const Op = sequelize.Op;
+const Op = Sequelize.Op;
 
 //Model
 const _modelDb = require('../models').ms_products;
@@ -14,339 +14,328 @@ const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 class ProductRepository {
-    constructor() { }
+	constructor() {}
 
-    async list(pParam) {
+	async list(pParam) {
+		var xWhereAnd_LastUpdated = null;
 
-        var xWhereAnd_LastUpdated = null;
+		var xOrder = [ 'name', 'ASC' ];
+		var xWhereAnd_isAsset = {};
+		var xInclude = [
+			{
+				attributes: [ 'id', 'name' ],
+				model: _modelCategory,
+				as: 'category'
+			},
+			{
+				attributes: [ 'id', 'name' ],
+				model: _modelUnit,
+				as: 'unit'
+			}
+		];
 
-        var xOrder = ['name', 'ASC'];
-        var xWhereAnd_isAsset = {};
-        var xInclude = [
-            {
-                attributes: ['id', 'name'],
-                model: _modelCategory,
-                as: 'category'
-            }, {
-                attributes: ['id', 'name'],
-                model: _modelUnit,
-                as: 'unit'
-            }
-        ]
+		if (pParam.order_by != '' && pParam.hasOwnProperty('order_by')) {
+			xOrder = [ pParam.order_by, pParam.order_type == 'desc' ? 'DESC' : 'ASC' ];
+		}
 
-        if (pParam.order_by != '' && pParam.hasOwnProperty('order_by')) {
-            xOrder = [pParam.order_by, (pParam.order_type == 'desc' ? 'DESC' : 'ASC')];
-        }
+		// This parameter for sync at ams
+		if (pParam.hasOwnProperty('last_updated')) {
+			if (pParam.last_updated != '') {
+				xWhereAnd_LastUpdated = Sequelize.where(
+					Sequelize.fn('DATE', Sequelize.col('ms_products.updated_at')),
+					'>=',
+					pParam.last_updated
+				);
+			}
+		}
 
-        // This parameter for sync at ams
-        if (pParam.hasOwnProperty('last_updated')) {
-            if (pParam.last_updated != '') {
-                xWhereAnd_LastUpdated = Sequelize.where(
-                    Sequelize.fn(
-                        'DATE', Sequelize.col('ms_products.updated_at')), '>=', pParam.last_updated
-                )
-            }
-        }
+		if (pParam.hasOwnProperty('is_asset')) {
+			if (pParam.is_asset != '') {
+				xWhereAnd_isAsset = {
+					is_asset: pParam.is_asset
+				};
+			}
+		}
 
-        if (pParam.hasOwnProperty('is_asset')) {
-            if (pParam.is_asset != '') {
-                xWhereAnd_isAsset = {
-                    is_asset: pParam.is_asset,
-                }
-            }
-        }
+		var xParamQuery = {
+			where: {
+				[Op.and]: [
+					{
+						is_delete: 0
+					},
+					xWhereAnd_LastUpdated,
+					xWhereAnd_isAsset
+				],
+				[Op.or]: [
+					{
+						name: {
+							[Op.iLike]: '%' + pParam.keyword + '%'
+						}
+					},
+					{
+						code: {
+							[Op.iLike]: '%' + pParam.keyword + '%'
+						}
+					}
+					// {
+					//     code: {
+					//         [Op.iLike]: '%' + pParam.keyword + '%'
+					//     },
+					// },
+				]
+			},
+			include: xInclude,
+			order: [ xOrder ]
+		};
 
-        var xParamQuery = {
-            where: {
-                [Op.and]: [
-                    {
-                        is_delete: 0
-                    }, xWhereAnd_LastUpdated
-                    ,
-                    xWhereAnd_isAsset,
-                ],
-                [Op.or]: [
-                    {
-                        name: {
-                            [Op.iLike]: '%' + pParam.keyword + '%'
-                        },
-                    },
-                    {
-                        code: {
-                            [Op.iLike]: '%' + pParam.keyword + '%'
-                        },
-                    },
-                    // {
-                    //     code: {
-                    //         [Op.iLike]: '%' + pParam.keyword + '%'
-                    //     },
-                    // },
-                ]
-            },
-            include: xInclude,
-            order: [xOrder],
-        };
+		if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
+			if (pParam.offset != '' && pParam.limit != '') {
+				if (pParam.limit != 'all') {
+					xParamQuery.offset = pParam.offset;
+					xParamQuery.limit = pParam.limit;
+				}
+			}
+		}
 
-        if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
-            if (pParam.offset != '' && pParam.limit != '') {
-                if (pParam.limit != 'all') {
-                    xParamQuery.offset = pParam.offset;
-                    xParamQuery.limit = pParam.limit;
-                }
-            }
-        }
+		var xData = await _modelDb.findAndCountAll(xParamQuery);
 
-        var xData = await _modelDb.findAndCountAll(xParamQuery);
+		return xData;
+	}
 
-        return xData;
-    }
+	async isDataExists(pName) {
+		var data = await _modelDb.findOne({
+			where: {
+				name: pName
+			}
+		});
 
-    async isDataExists(pName) {
-        var data = await _modelDb.findOne({
-            where: {
-                name: pName
-            }
-        });
+		return data;
+	}
 
-        return data;
-    }
+	async getProductByERPId(pParam) {
+		var data = await _modelDb.findOne({
+			where: {
+				erp_id: pParam.erp_id,
+				is_delete: 0
+			}
+		});
 
-    async getProductByERPId(pParam) {
-        var data = await _modelDb.findOne({
-            where: {
-                erp_id: pParam.erp_id,
-                is_delete: 0
-            }
-        });
+		return data;
+	}
 
-        return data;
-    }
+	async getProductByCode(pParam) {
+		var xWhere = {};
 
-    async getProductByCode(pParam) {
+		if (pParam.hasOwnProperty('id')) {
+			if (pParam.id != '') {
+				xWhere = {
+					code: pParam.code,
+					is_delete: 0,
+					id: {
+						[Op.ne]: pParam.id
+					}
+				};
+			} else {
+				xWhere = {
+					code: pParam.code,
+					is_delete: 0
+				};
+			}
+		} else {
+			xWhere = {
+				code: pParam.code,
+				is_delete: 0
+			};
+		}
 
-        var xWhere = {};
+		var data = await _modelDb.findOne({
+			where: xWhere
+		});
 
-        if (pParam.hasOwnProperty('id')) {
-            if (pParam.id != '') {
-                xWhere = {
-                    code: pParam.code,
-                    is_delete: 0,
-                    id: {
-                        [Op.ne]: pParam.id,
-                    }
-                }
-            } else {
-                xWhere = {
-                    code: pParam.code,
-                    is_delete: 0,
-                }
-            }
-        } else {
-            xWhere = {
-                code: pParam.code,
-                is_delete: 0,
-            }
-        }
+		return data;
+	}
 
-        var data = await _modelDb.findOne({
-            where: xWhere
-        });
+	async getProductByName(pParam) {
+		var xWhere = {};
 
-        return data;
-    }
+		if (pParam.hasOwnProperty('id')) {
+			if (pParam.id != '') {
+				xWhere = {
+					name: pParam.name,
+					is_delete: 0,
+					id: {
+						[Op.ne]: pParam.id
+					}
+				};
+			} else {
+				xWhere = {
+					name: pParam.name,
+					is_delete: 0
+				};
+			}
+		} else {
+			xWhere = {
+				name: pParam.name,
+				is_delete: 0
+			};
+		}
 
-    async getProductByName(pParam) {
+		var data = await _modelDb.findOne({
+			where: xWhere
+		});
 
-        var xWhere = {};
+		return data;
+	}
 
-        if (pParam.hasOwnProperty('id')) {
-            if (pParam.id != '') {
-                xWhere = {
-                    name: pParam.name,
-                    is_delete: 0,
-                    id: {
-                        [Op.ne]: pParam.id,
-                    }
-                }
-            } else {
-                xWhere = {
-                    name: pParam.name,
-                    is_delete: 0,
-                }
-            }
-        } else {
-            xWhere = {
-                name: pParam.name,
-                is_delete: 0,
-            }
-        }
+	async getProductById(pParam) {
+		var xData = await _modelDb.findOne({
+			where: {
+				id: pParam.id,
+				is_delete: 0
+			},
+			include: [
+				{
+					attributes: [ 'id', 'name' ],
+					model: _modelCategory,
+					as: 'category'
+				},
+				{
+					attributes: [ 'id', 'name' ],
+					model: _modelUnit,
+					as: 'unit'
+				}
+			]
+		});
 
-        var data = await _modelDb.findOne({
-            where: xWhere
-        });
+		return xData;
+	}
 
-        return data;
-    }
+	async save(pParam, pAct) {
+		let xTransaction;
+		var xJoResult = {};
 
-    async getProductById(pParam) {
-        var xData = await _modelDb.findOne({
-            where: {
-                id: pParam.id,
-                is_delete: 0,
-            },
-            include: [
-                {
-                    attributes: ['id', 'name'],
-                    model: _modelCategory,
-                    as: 'category'
-                },
-                {
-                    attributes: ['id', 'name'],
-                    model: _modelUnit,
-                    as: 'unit'
-                },
-            ],
-        });
+		try {
+			var xSaved = null;
+			xTransaction = await sequelize.transaction();
 
-        return xData;
-    }
+			if (pAct == 'add') {
+				pParam.status = 1;
+				pParam.is_delete = 0;
 
-    async save(pParam, pAct) {
-        let xTransaction;
-        var xJoResult = {};
+				xSaved = await _modelDb.create(pParam, { xTransaction });
 
-        try {
+				if (xSaved.id != null) {
+					await xTransaction.commit();
 
-            var xSaved = null;
-            xTransaction = await sequelize.transaction();
+					xJoResult = {
+						status_code: '00',
+						status_msg: 'Data has been successfully saved',
+						created_id: await _utilInstance.encrypt(xSaved.id.toString(), config.cryptoKey.hashKey)
+					};
+				} else {
+					if (xTransaction) await xTransaction.rollback();
 
-            if (pAct == "add") {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Failed save to database'
+					};
+				}
+			} else if (pAct == 'update') {
+				pParam.updatedAt = await _utilInstance.getCurrDateTime();
+				var xId = pParam.id;
+				delete pParam.id;
+				var xWhere = {
+					where: {
+						id: xId
+					}
+				};
+				xSaved = await _modelDb.update(pParam, xWhere, { xTransaction });
 
-                pParam.status = 1;
-                pParam.is_delete = 0;
+				await xTransaction.commit();
 
-                xSaved = await _modelDb.create(pParam, { xTransaction });
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'Data has been successfully updated'
+				};
+			} else if (pAct == 'update_by_erpid') {
+				var xErpId = pParam.erp_id;
+				delete pParam.erp_id;
 
-                if (xSaved.id != null) {
+				saved = await _modelDb.update(
+					pParam,
+					{
+						where: {
+							erp_id: xErpId
+						}
+					},
+					{ xTransaction }
+				);
 
-                    await xTransaction.commit();
+				await xTransaction.commit();
 
-                    xJoResult = {
-                        status_code: "00",
-                        status_msg: "Data has been successfully saved",
-                        created_id: await _utilInstance.encrypt((xSaved.id).toString(), config.cryptoKey.hashKey),
-                    }
+				joResult = {
+					status_code: '00',
+					status_msg: 'Data has been successfully updated'
+				};
+			}
+		} catch (e) {
+			if (xTransaction) await xTransaction.rollback();
+			xJoResult = {
+				status_code: '-99',
+				status_msg: 'Failed save or update data. Error : ' + e,
+				err_msg: e
+			};
 
+			console.log('>>> Catch : ' + JSON.stringify(xJoResult));
+		}
 
-                } else {
+		return xJoResult;
+	}
 
-                    if (xTransaction) await xTransaction.rollback();
+	async delete(pParam) {
+		let xTransaction;
+		var xJoResult = {};
 
-                    xJoResult = {
-                        status_code: "-99",
-                        status_msg: "Failed save to database",
-                    }
+		try {
+			var xSaved = null;
+			xTransaction = await sequelize.transaction();
 
-                }
+			console.log(JSON.stringify(pParam));
 
-            } else if (pAct == "update") {
+			xSaved = await _modelDb.update(
+				{
+					is_delete: 1,
+					deleted_by: pParam.deleted_by,
+					deleted_by_name: pParam.deleted_by_name,
+					deleted_at: await _utilInstance.getCurrDateTime()
+				},
+				{
+					where: {
+						id: pParam.id
+					}
+				},
+				{ xTransaction }
+			);
 
-                pParam.updatedAt = await _utilInstance.getCurrDateTime();
-                var xId = pParam.id;
-                delete pParam.id;
-                var xWhere = {
-                    where: {
-                        id: xId,
-                    }
-                };
-                xSaved = await _modelDb.update(pParam, xWhere, { xTransaction });
+			await xTransaction.commit();
 
-                await xTransaction.commit();
+			xJoResult = {
+				status_code: '00',
+				status_msg: 'Data has been successfully deleted'
+			};
 
-                xJoResult = {
-                    status_code: "00",
-                    status_msg: "Data has been successfully updated"
-                }
+			return xJoResult;
+		} catch (e) {
+			if (xTransaction) await xTransaction.rollback();
+			xJoResult = {
+				status_code: '-99',
+				status_msg: 'Failed save or update data',
+				err_msg: e
+			};
 
-            } else if (pAct == "update_by_erpid") {
-                var xErpId = pParam.erp_id;
-                delete pParam.erp_id;
-
-                saved = await _modelDb.update(pParam, {
-                    where: {
-                        erp_id: xErpId
-                    }
-                }, { xTransaction });
-
-                await xTransaction.commit();
-
-                joResult = {
-                    status_code: "00",
-                    status_msg: "Data has been successfully updated"
-                }
-            }
-
-        } catch (e) {
-            if (xTransaction) await xTransaction.rollback();
-            xJoResult = {
-                status_code: "-99",
-                status_msg: "Failed save or update data. Error : " + e,
-                err_msg: e
-            }
-
-            console.log(">>> Catch : " + JSON.stringify(xJoResult));
-
-        }
-
-        return xJoResult;
-    }
-
-    async delete(pParam) {
-        let xTransaction;
-        var xJoResult = {};
-
-        try {
-            var xSaved = null;
-            xTransaction = await sequelize.transaction();
-
-            console.log(JSON.stringify(pParam));
-
-            xSaved = await _modelDb.update(
-                {
-                    is_delete: 1,
-                    deleted_by: pParam.deleted_by,
-                    deleted_by_name: pParam.deleted_by_name,
-                    deleted_at: await _utilInstance.getCurrDateTime(),
-                },
-                {
-                    where: {
-                        id: pParam.id
-                    }
-                },
-                { xTransaction }
-            );
-
-            await xTransaction.commit();
-
-            xJoResult = {
-                status_code: "00",
-                status_msg: "Data has been successfully deleted",
-            }
-
-            return xJoResult;
-
-        } catch (e) {
-            if (xTransaction) await xTransaction.rollback();
-            xJoResult = {
-                status_code: "-99",
-                status_msg: "Failed save or update data",
-                err_msg: e
-            }
-
-            return xJoResult;
-        }
-    }
+			return xJoResult;
+		}
+	}
 }
 
 module.exports = ProductRepository;
-

@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const moment = require('moment');
 const sequelize = require('sequelize');
 const dateFormat = require('dateformat');
-const Op = sequelize.Op;
+const Op = Sequelize.Op;
 const bcrypt = require('bcrypt');
 
 const env = process.env.NODE_ENV || 'localhost';

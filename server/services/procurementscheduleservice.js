@@ -4,12 +4,12 @@ const crypto = require('crypto');
 const moment = require('moment');
 const sequelize = require('sequelize');
 const dateFormat = require('dateformat');
-const Op = sequelize.Op;
+const Op = Sequelize.Op;
 const bcrypt = require('bcrypt');
 const fs = require('fs');
 
-const env         = process.env.NODE_ENV || 'localhost';
-const config      = require(__dirname + '/../config/config.json')[env];
+const env = process.env.NODE_ENV || 'localhost';
+const config = require(__dirname + '/../config/config.json')[env];
 
 // Utility
 const Utility = require('peters-globallib-v2');
@@ -30,299 +30,282 @@ const OAuthService = require('../services/oauthservice.js');
 const _oAuthService = new OAuthService();
 
 class ProcurementScheduleService {
-    constructor(){}
+	constructor() {}
 
-    async list( pParam ){
-        var xJoResult = {};
-        var xJoArrData = [];
-        var xFlagProcess = false;
+	async list(pParam) {
+		var xJoResult = {};
+		var xJoArrData = [];
+		var xFlagProcess = false;
 
-        if( pParam.hasOwnProperty('procurement_id') ){
-            if( pParam.procurement_id != '' ){
-                var xDecId = await _utilInstance.decrypt( pParam.procurement_id, config.cryptoKey.hashKey );
-                if( xDecId.status_code == '00' ){
-                    pParam.procurement_id = xDecId.decrypted;
-                    xFlagProcess = true;
-                }else{
-                    xJoResult = xDecId;
-                }
-            }
-        }
+		if (pParam.hasOwnProperty('procurement_id')) {
+			if (pParam.procurement_id != '') {
+				var xDecId = await _utilInstance.decrypt(pParam.procurement_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.procurement_id = xDecId.decrypted;
+					xFlagProcess = true;
+				} else {
+					xJoResult = xDecId;
+				}
+			}
+		}
 
-        if( xFlagProcess ){        
+		if (xFlagProcess) {
+			var xResultList = await _repoInstance.list(pParam);
 
-            var xResultList = await _repoInstance.list(pParam);
+			if (xResultList.count > 0) {
+				var xRows = xResultList.rows;
+				for (var index in xRows) {
+					xJoArrData.push({
+						id: await _utilInstance.encrypt(xRows[index].id.toString(), config.cryptoKey.hashKey),
+						schedule_attribute: xRows[index].schedule_attribute,
+						start_date: moment(xRows[index].start_date).format('DD-MM-YYYY'),
+						end_date: moment(xRows[index].end_date).format('DD-MM-YYYY'),
 
-            if( xResultList.count > 0 ){
-                var xRows = xResultList.rows;
-                for( var index in xRows ){
-                    xJoArrData.push({
-                        id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
-                        schedule_attribute: xRows[index].schedule_attribute,
-                        start_date: moment(xRows[index].start_date).format('DD-MM-YYYY'),
-                        end_date: moment(xRows[index].end_date).format('DD-MM-YYYY'),
+						created_at: moment(xRows[index].createdAt).format('YYYY-MM-DD hh:mm:ss'),
+						created_by_name: xRows[index].created_by_name
+					});
+				}
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					total_record: xResultList.count,
+					data: xJoArrData
+				};
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Data not found'
+				};
+			}
+		}
 
-                        created_at: moment(xRows[index].createdAt).format('YYYY-MM-DD hh:mm:ss'),
-                        created_by_name: xRows[index].created_by_name,
-                    });
-                }
-                xJoResult = {
-                    status_code: '00',
-                    status_msg: 'OK',
-                    total_record: xResultList.count,
-                    data: xJoArrData,
-                }
-            }else{
-                xJoResult = {
-                    status_code: "-99",
-                    status_msg: "Data not found",
-                };
-            }
-        }
+		return xJoResult;
+	}
 
-        return xJoResult;
-    }
+	async getById(pParam) {
+		var xJoResult = {};
+		var xJoData = {};
+		var xFlagProcess = true;
+		var xEncId = '';
 
-    async getById( pParam ){
-        var xJoResult = {};
-        var xJoData = {};
-        var xFlagProcess = true;
-        var xEncId = '';
+		if (pParam.hasOwnProperty('id')) {
+			if (pParam.id != '') {
+				xEncId = pParam.id;
+				var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.id = xDecId.decrypted;
+				} else {
+					xFlagProcess = false;
+					xJoResult = xDecId;
+				}
+			}
+		}
 
-        if( pParam.hasOwnProperty('id') ){
-            if( pParam.id != '' ){
-                xEncId = pParam.id;
-                var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
-                if( xDecId.status_code == '00' ){
-                    pParam.id = xDecId.decrypted;
-                }else{
-                    xFlagProcess = false;
-                    xJoResult = xDecId;
-                }
-            }
-        }
+		if (xFlagProcess) {
+			var xResult = await _repoInstance.getById(pParam);
 
-        if( xFlagProcess ){
+			if (xResult != null) {
+				xJoData = {
+					id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
+					schedule_attribute: xResult.schedule_attribute,
+					start_date: xResult.start_date,
+					end_date: xResult.end_date,
 
-            var xResult = await _repoInstance.getById(pParam);
+					created_at: moment(xResult.createdAt).format('YYYY-mm-dd H:i:s'),
+					created_by_name: xResult.created_by_name
+				};
 
-            if( xResult != null ){
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					data: xJoData
+				};
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Data not found'
+				};
+			}
+		}
 
-                xJoData = {
-                    id: await _utilInstance.encrypt( (xResult.id).toString(), config.cryptoKey.hashKey ),
-                    schedule_attribute: xResult.schedule_attribute,
-                    start_date: xResult.start_date,
-                    end_date: xResult.end_date,
+		return xJoResult;
+	}
 
-                    created_at: moment(xResult.createdAt).format('YYYY-mm-dd H:i:s'),
-                    created_by_name: xResult.created_by_name,
-                };
-                
-                xJoResult = {
-                    status_code: '00',
-                    status_msg: 'OK',
-                    data: xJoData,
-                }
-            }else{
-                xJoResult = {
-                    status_code: "-99",
-                    status_msg: "Data not found",
-                };
-            }
+	async save(pParam) {
+		var xJoResult;
+		var xAct = pParam.act;
+		var xFlagProcess = true;
 
-        }
+		delete pParam.act;
 
-        return xJoResult;
-    }
+		if (xFlagProcess) {
+			if (xAct == 'add') {
+				// Procurement Id
+				var xDecId = await _utilInstance.decrypt(pParam.procurement_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.procurement_id = xDecId.decrypted;
+					// User Id
+					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.total = pParam.unit_price * pParam.qty;
+						pParam.created_by = xDecId.decrypted;
+						pParam.created_by_name = pParam.user_name;
+					} else {
+						xFlagProcess = false;
+						xJoResult = xDecId;
+					}
+				} else {
+					xFlagProcess = false;
+					xJoResult = xDecId;
+				}
 
-    async save( pParam ){
-        var xJoResult;
-        var xAct = pParam.act;
-        var xFlagProcess = true;
+				var xProcurementDetail = await _procurementRepoInstance.getById({ id: pParam.procurement_id });
+				if (xProcurementDetail != null) {
+					// if(true){
+					if (xProcurementDetail.status_approval == 0) {
+						var xAddResult = await _repoInstance.save(pParam, xAct);
+						xJoResult = xAddResult;
+					} else {
+						xJoResult = {
+							status_code: '-99',
+							status_msg: 'You can not add new item when procurement has been submited or approved'
+						};
+					}
+				} else {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'The ID that supplied not exist.'
+					};
+				}
+			} else if (xAct == 'update') {
+				var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.id = xDecId.decrypted;
+					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						xDecId = await _utilInstance.decrypt(pParam.procurement_id, config.cryptoKey.hashKey);
+						if (xDecId.status_code == '00') {
+							pParam.procurement_id = xDecId.decrypted;
+							pParam.total = pParam.unit_price * pParam.qty;
+							pParam.updated_by = xDecId.decrypted;
+							pParam.updated_by_name = pParam.user_name;
+						} else {
+							xFlagProcess = false;
+							xJoResult = xDecId;
+						}
+					} else {
+						xFlagProcess = false;
+						xJoResult = xDecId;
+					}
+				} else {
+					xFlagProcess = false;
+					xJoResult = xDecId;
+				}
 
-        delete pParam.act;
+				if (xFlagProcess) {
+					var xProcurementDetail = await _procurementRepoInstance.getById({ id: pParam.procurement_id });
+					if (xProcurementDetail != null) {
+						if (xProcurementDetail.status_approval == 0) {
+							var xAddResult = await _repoInstance.save(pParam, xAct);
+							xJoResult = xAddResult;
+						} else {
+							xJoResult = {
+								status_code: '-99',
+								status_msg: 'You can not update item when procurement has been submited or approved'
+							};
+						}
+					} else {
+						xJoResult = {
+							status_code: '-99',
+							status_msg: 'The Procurement ID that supplied not exist.'
+						};
+					}
+				}
+			}
+		}
 
-        if( xFlagProcess ){
+		return xJoResult;
+	}
 
-            if( xAct == "add" ){             
+	async archive(pParam) {
+		var xJoResult;
+		var xFlagProcess = true;
 
-                // Procurement Id
-                var xDecId = await _utilInstance.decrypt( pParam.procurement_id, config.cryptoKey.hashKey );
-                if( xDecId.status_code == '00' ){
-                    pParam.procurement_id = xDecId.decrypted;
-                    // User Id
-                    xDecId = await _utilInstance.decrypt(pParam.user_id,config.cryptoKey.hashKey);
-                    if( xDecId.status_code == '00' ){
-                        pParam.total = pParam.unit_price * pParam.qty;
-                        pParam.created_by = xDecId.decrypted;
-                        pParam.created_by_name = pParam.user_name;
-                    }else{
-                        xFlagProcess = false;
-                        xJoResult = xDecId;
-                    }                    
-                }else{
-                    xFlagProcess = false;
-                    xJoResult = xDecId;
-                }                
+		var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+		if (xDecId.status_code == '00') {
+			pParam.id = xDecId.decrypted;
+			xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				pParam.is_delete = 1;
+				pParam.deleted_by = xDecId.decrypted;
+				pParam.deleted_by_name = pParam.user_name;
+			} else {
+				xFlagProcess = false;
+				xJoResult = xDecId;
+			}
+		} else {
+			xFlagProcess = false;
+			xJoResult = xDecId;
+		}
 
-                var xProcurementDetail = await _procurementRepoInstance.getById( {id: pParam.procurement_id } );
-                if( xProcurementDetail != null ){
-                    // if(true){
-                    if( xProcurementDetail.status_approval == 0 ){
-                        var xAddResult = await _repoInstance.save( pParam, xAct );
-                        xJoResult = xAddResult;
-                    }else{
-                        xJoResult = {
-                            status_code: '-99',
-                            status_msg: 'You can not add new item when procurement has been submited or approved'
-                        }
-                    }
-                }else{
-                    xJoResult = {
-                        status_code: '-99',
-                        status_msg: 'The ID that supplied not exist.'
-                    }
-                }
-                
-                
-            }else if( xAct == "update" ){
-    
-                var xDecId = await _utilInstance.decrypt(pParam.id,config.cryptoKey.hashKey);
-                if( xDecId.status_code == "00" ){
-                    pParam.id = xDecId.decrypted;                    
-                    xDecId = await _utilInstance.decrypt(pParam.user_id,config.cryptoKey.hashKey);
-                    if( xDecId.status_code == "00" ){
-                        xDecId = await _utilInstance.decrypt(pParam.procurement_id, config.cryptoKey.hashKey);
-                        if( xDecId.status_code == "00" ){
-                            pParam.procurement_id = xDecId.decrypted;
-                            pParam.total = pParam.unit_price * pParam.qty;
-                            pParam.updated_by = xDecId.decrypted;
-                            pParam.updated_by_name = pParam.user_name;
-                        }else{
-                            xFlagProcess = false;
-                            xJoResult = xDecId;
-                        }
-                        
-                    }else{
-                        xFlagProcess = false;
-                        xJoResult = xDecId;
-                    }
-                }else{
-                    xFlagProcess = false;
-                    xJoResult = xDecId;
-                }
-    
-                if( xFlagProcess ){
-                    var xProcurementDetail = await _procurementRepoInstance.getById( {id: pParam.procurement_id } );
-                    if( xProcurementDetail != null ){
-                        if( xProcurementDetail.status_approval == 0 ){
-                            var xAddResult = await _repoInstance.save( pParam, xAct );
-                            xJoResult = xAddResult;
-                        }else{
-                            xJoResult = {
-                                status_code: '-99',
-                                status_msg: 'You can not update item when procurement has been submited or approved'
-                            }
-                        }
-                    }else{
-                        xJoResult = {
-                            status_code: '-99',
-                            status_msg: 'The Procurement ID that supplied not exist.'
-                        }
-                    }
-                }
-                
-            }
-            
-        }        
+		if (xFlagProcess) {
+			var xDeleteResult = await _repoInstance.archive(pParam);
+			xJoResult = xDeleteResult;
+		}
 
-        return xJoResult;
-    }
+		return xJoResult;
+	}
 
-    async archive( pParam ){
-        var xJoResult;
-        var xFlagProcess = true;  
+	async unarchive(pParam) {
+		var xJoResult;
+		var xFlagProcess = true;
 
-        var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
-        if( xDecId.status_code == "00" ){
-            pParam.id = xDecId.decrypted;                    
-            xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
-            if( xDecId.status_code == "00" ){
-                pParam.is_delete = 1;
-                pParam.deleted_by = xDecId.decrypted;
-                pParam.deleted_by_name = pParam.user_name;
-            }else{
-                xFlagProcess = false;
-                xJoResult = xDecId;
-            }
-        }else{
-            xFlagProcess = false;
-            xJoResult = xDecId;
-        }
+		var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+		if (xDecId.status_code == '00') {
+			pParam.id = xDecId.decrypted;
+			xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				pParam.is_delete = 0;
+				// pParam.deleted_by = xDecId.decrypted;
+				// pParam.deleted_by_name = pParam.user_name;
+			} else {
+				xFlagProcess = false;
+				xJoResult = xDecId;
+			}
+		} else {
+			xFlagProcess = false;
+			xJoResult = xDecId;
+		}
 
-        if( xFlagProcess ){
+		if (xFlagProcess) {
+			var xDeleteResult = await _repoInstance.archive(pParam);
+			xJoResult = xDeleteResult;
+		}
 
-            var xDeleteResult = await _repoInstance.archive( pParam );
-            xJoResult = xDeleteResult;
-            
-        }
+		return xJoResult;
+	}
 
-        return xJoResult;
-    }
+	async delete(pParam) {
+		var xJoResult;
+		var xFlagProcess = true;
 
-    async unarchive( pParam ){
-        var xJoResult;
-        var xFlagProcess = true;  
+		var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+		if (xDecId.status_code == '00') {
+			pParam.id = xDecId.decrypted;
+		} else {
+			xFlagProcess = false;
+			xJoResult = xDecId;
+		}
 
-        var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
-        if( xDecId.status_code == "00" ){
-            pParam.id = xDecId.decrypted;                    
-            xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
-            if( xDecId.status_code == "00" ){
-                pParam.is_delete = 0;
-                // pParam.deleted_by = xDecId.decrypted;
-                // pParam.deleted_by_name = pParam.user_name;
-            }else{
-                xFlagProcess = false;
-                xJoResult = xDecId;
-            }
-        }else{
-            xFlagProcess = false;
-            xJoResult = xDecId;
-        }
+		if (xFlagProcess) {
+			// Check first if there are procurement item or not
 
-        if( xFlagProcess ){
+			var xDeleteResult = await _repoInstance.delete(pParam);
+			xJoResult = xDeleteResult;
+		}
 
-            var xDeleteResult = await _repoInstance.archive( pParam );
-            xJoResult = xDeleteResult;
-            
-        }
-
-        return xJoResult;
-    }
-
-    async delete( pParam ){
-        var xJoResult;
-        var xFlagProcess = true;  
-
-        var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
-        if( xDecId.status_code == "00" ){
-            pParam.id = xDecId.decrypted;                   
-        }else{
-            xFlagProcess = false;
-            xJoResult = xDecId;
-        }
-
-        if( xFlagProcess ){      
-            
-            // Check first if there are procurement item or not             
-
-            var xDeleteResult = await _repoInstance.delete( pParam );
-            xJoResult = xDeleteResult;
-        }
-
-        return xJoResult;
-    }
+		return xJoResult;
+	}
 }
 
 module.exports = ProcurementScheduleService;

@@ -3,7 +3,7 @@ var config = require(__dirname + '/../config/config.json')[env];
 var Sequelize = require('sequelize');
 var sequelize = new Sequelize(config.database, config.username, config.password, config);
 const { hash } = require('bcryptjs');
-const Op = sequelize.Op;
+const Op = Sequelize.Op;
 
 // Model
 const _modelDb = require('../models').ms_vendorcatalogues;
@@ -27,7 +27,7 @@ class VendorCatalogueRepository {
 
 		xInclude = [
 			{
-				attributes: [ 'id', 'name', 'code', 'merk', 'spesification'],
+				attributes: [ 'id', 'name', 'code', 'merk', 'spesification' ],
 				model: _modelProduct,
 				as: 'product',
 				include: [

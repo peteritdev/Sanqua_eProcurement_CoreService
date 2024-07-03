@@ -4,11 +4,11 @@ const crypto = require('crypto');
 const moment = require('moment');
 const sequelize = require('sequelize');
 const dateFormat = require('dateformat');
-const Op = sequelize.Op;
+const Op = Sequelize.Op;
 const bcrypt = require('bcrypt');
 
-const env         = process.env.NODE_ENV || 'localhost';
-const config      = require(__dirname + '/../config/config.json')[env];
+const env = process.env.NODE_ENV || 'localhost';
+const config = require(__dirname + '/../config/config.json')[env];
 
 // Model
 const modelUser = require('../models').ms_users;
@@ -22,164 +22,151 @@ const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 class DocumentTypeService {
-    constructor(){}
+	constructor() {}
 
-    async list(pParam){
-        var xJoResult = {};
-        var xJoArrData = [];
+	async list(pParam) {
+		var xJoResult = {};
+		var xJoArrData = [];
 
-        var xResultList = await _docTypeRepoInstance.list(pParam);
+		var xResultList = await _docTypeRepoInstance.list(pParam);
 
-        if( xResultList.count > 0 ){
-            var xRows = xResultList.rows;
-            for( var index in xRows ){
-                xJoArrData.push({
-                    id: await _utilInstance.encrypt( (xRows[index].id).toString(), config.cryptoKey.hashKey ),
-                    name: xRows[index].name,
-                    created_at: xRows[index].createdAt,
-                    created_by_name: xRows[index].created_by_name,
-                    updated_at: xRows[index].updatedAt,
-                    updated_by_name: xRows[index].updated_by_name,
-                });
-            }
-            xJoResult = {
-                status_code: "00",
-                status_msg: "OK",
-                data: xJoArrData,
-                total_record: xResultList.count,
-            }
-        }else{
-            xJoResult = {
-                status_code: "-99",
-                status_msg: "Data not found",
-            };
-        }
+		if (xResultList.count > 0) {
+			var xRows = xResultList.rows;
+			for (var index in xRows) {
+				xJoArrData.push({
+					id: await _utilInstance.encrypt(xRows[index].id.toString(), config.cryptoKey.hashKey),
+					name: xRows[index].name,
+					created_at: xRows[index].createdAt,
+					created_by_name: xRows[index].created_by_name,
+					updated_at: xRows[index].updatedAt,
+					updated_by_name: xRows[index].updated_by_name
+				});
+			}
+			xJoResult = {
+				status_code: '00',
+				status_msg: 'OK',
+				data: xJoArrData,
+				total_record: xResultList.count
+			};
+		} else {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: 'Data not found'
+			};
+		}
 
-        return xJoResult;
-    }
+		return xJoResult;
+	}
 
-    async save(pParam){
-        var xJoResult;
-        var xAct = pParam.act;
-        var xFlagProcess = true;
+	async save(pParam) {
+		var xJoResult;
+		var xAct = pParam.act;
+		var xFlagProcess = true;
 
-        delete pParam.act;
+		delete pParam.act;
 
-        if( xAct == "add" ){           
+		if (xAct == 'add') {
+			// User Id
+			var xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				pParam.created_by = xDecId.decrypted;
+				pParam.created_by_name = pParam.user_name;
+			} else {
+				xFlagProcess = false;
+				xJoResult = xDecId;
+			}
 
-            // User Id
-            var xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
-            if( xDecId.status_code == '00' ){
-                pParam.created_by = xDecId.decrypted;
-                pParam.created_by_name = pParam.user_name;
-            }else{
-                xFlagProcess = false;
-                xJoResult = xDecId;
-            }
-            
-            if( xFlagProcess ){
-                var xAddResult = await _docTypeRepoInstance.save( pParam, xAct );
-                xJoResult = xAddResult;
-            }           
+			if (xFlagProcess) {
+				var xAddResult = await _docTypeRepoInstance.save(pParam, xAct);
+				xJoResult = xAddResult;
+			}
+		} else if (xAct == 'update') {
+			console.log(JSON.stringify(pParam));
 
+			var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				pParam.id = xDecId.decrypted;
+				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.updated_by = xDecId.decrypted;
+					pParam.updated_by_name = pParam.user_name;
+				} else {
+					xFlagProcess = false;
+					xJoResult = xDecId;
+				}
+			} else {
+				xFlagProcess = false;
+				xJoResult = xDecId;
+			}
 
-        }else if( xAct == "update" ){
+			if (xFlagProcess) {
+				var xAddResult = await _docTypeRepoInstance.save(pParam, xAct);
+				xJoResult = xAddResult;
+			}
+		}
 
-            console.log(JSON.stringify(pParam));
+		return xJoResult;
+	}
 
-            var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
-            if( xDecId.status_code == "00" ){
-                pParam.id = xDecId.decrypted;                    
-                xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
-                if( xDecId.status_code == "00" ){
-                    pParam.updated_by = xDecId.decrypted;
-                    pParam.updated_by_name = pParam.user_name;
-                }else{
-                    xFlagProcess = false;
-                    xJoResult = xDecId;
-                }                
-            }else{
-                xFlagProcess = false;
-                xJoResult = xDecId;
-            }
+	async delete(pParam) {
+		var xJoResult;
+		var xFlagProcess = true;
 
-            if( xFlagProcess ){
-                var xAddResult = await _docTypeRepoInstance.save( pParam, xAct );
-                xJoResult = xAddResult;
-            }
-            
-        }
+		var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+		if (xDecId.status_code == '00') {
+			pParam.id = xDecId.decrypted;
+			xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				pParam.deleted_by = xDecId.decrypted;
+				pParam.deleted_by_name = pParam.user_name;
+			} else {
+				xFlagProcess = false;
+				xJoResult = xDecId;
+			}
+		} else {
+			xFlagProcess = false;
+			xJoResult = xDecId;
+		}
 
-        return xJoResult;
-    }
+		if (xFlagProcess) {
+			var xDeleteResult = await _docTypeRepoInstance.delete(pParam);
+			xJoResult = xDeleteResult;
+		}
 
-    async delete( pParam ){
-        var xJoResult;
-        var xFlagProcess = true;  
+		return xJoResult;
+	}
 
-        var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
-        if( xDecId.status_code == "00" ){
-            pParam.id = xDecId.decrypted;                    
-            xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
-            if( xDecId.status_code == "00" ){
-                pParam.deleted_by = xDecId.decrypted;
-                pParam.deleted_by_name = pParam.user_name;
-            }else{
-                xFlagProcess = false;
-                xJoResult = xDecId;
-            }
-        }else{
-            xFlagProcess = false;
-            xJoResult = xDecId;
-        }
+	async dropDownList(pParam) {
+		var xJoResult = {};
+		var xJoArrData = [];
+		var xFlagProcess = true;
 
-        if( xFlagProcess ){
+		if (xFlagProcess) {
+			var xResultList = await _docTypeRepoInstance.list(pParam);
 
-            
+			if (xResultList.count > 0) {
+				xJoResult.status_code = '00';
+				xJoResult.status_msg = 'OK';
 
-            var xDeleteResult = await _docTypeRepoInstance.delete( pParam );
-            xJoResult = xDeleteResult;
-            
-        }
+				var xRows = xResultList.rows;
 
-        return xJoResult;
-    }
+				for (var index in xRows) {
+					xJoArrData.push({
+						id: xRows[index].id,
+						name: xRows[index].name
+					});
+				}
 
-    async dropDownList(pParam){
-        var xJoResult = {};
-        var xJoArrData = [];  
-        var xFlagProcess = true;     
+				xJoResult.data = xJoArrData;
+			} else {
+				xJoResult.status_code = '00';
+				xJoResult.status_msg = 'OK';
+				xJoResult.data = xJoArrData;
+			}
+		}
 
-        if( xFlagProcess ){
-
-            var xResultList = await _docTypeRepoInstance.list(pParam);
-
-            if( xResultList.count > 0 ){
-                xJoResult.status_code = "00";
-                xJoResult.status_msg = "OK";
-
-                var xRows = xResultList.rows;
-
-                for(var index in xRows){                
-
-                    xJoArrData.push({
-                        id: xRows[index].id,
-                        name: xRows[index].name,
-                    });
-                }
-
-                xJoResult.data = xJoArrData;
-            }else{
-                xJoResult.status_code = "00";
-                xJoResult.status_msg = "OK";
-                xJoResult.data = xJoArrData;
-            }
-
-        }        
-
-        return (xJoResult);
-    }
-
+		return xJoResult;
+	}
 }
 
 module.exports = DocumentTypeService;

@@ -4,11 +4,11 @@ const crypto = require('crypto');
 const moment = require('moment');
 const sequelize = require('sequelize');
 const dateFormat = require('dateformat');
-const Op = sequelize.Op;
+const Op = Sequelize.Op;
 const bcrypt = require('bcrypt');
 
-const env         = process.env.NODE_ENV || 'localhost';
-const config      = require(__dirname + '/../config/config.json')[env];
+const env = process.env.NODE_ENV || 'localhost';
+const config = require(__dirname + '/../config/config.json')[env];
 
 // Utility
 const Util = require('../utils/globalutility.js');
@@ -19,43 +19,39 @@ const CityRepository = require('../repository/cityrepository.js');
 const _cityRepoInstance = new CityRepository();
 
 class CityService {
-    constructor(){}
+	constructor() {}
 
-    async dropDownList(pParam){
-        var xJoResult = {};
-        var xJoArrData = [];  
-        var xFlagProcess = true;     
+	async dropDownList(pParam) {
+		var xJoResult = {};
+		var xJoArrData = [];
+		var xFlagProcess = true;
 
-        if( xFlagProcess ){
+		if (xFlagProcess) {
+			var xResultList = await _cityRepoInstance.list(pParam);
 
-            var xResultList = await _cityRepoInstance.list(pParam);
+			if (xResultList.count > 0) {
+				xJoResult.status_code = '00';
+				xJoResult.status_msg = 'OK';
 
-            if( xResultList.count > 0 ){
-                xJoResult.status_code = "00";
-                xJoResult.status_msg = "OK";
+				var xRows = xResultList.rows;
 
-                var xRows = xResultList.rows;
+				for (var index in xRows) {
+					xJoArrData.push({
+						id: xRows[index].id,
+						name: xRows[index].name
+					});
+				}
 
-                for(var index in xRows){                
+				xJoResult.data = xJoArrData;
+			} else {
+				xJoResult.status_code = '00';
+				xJoResult.status_msg = 'OK';
+				xJoResult.data = xJoArrData;
+			}
+		}
 
-                    xJoArrData.push({
-                        id: xRows[index].id,
-                        name: xRows[index].name,
-                    });
-                }
-
-                xJoResult.data = xJoArrData;
-            }else{
-                xJoResult.status_code = "00";
-                xJoResult.status_msg = "OK";
-                xJoResult.data = xJoArrData;
-            }
-
-        }        
-
-        return (xJoResult);
-    }
-    
+		return xJoResult;
+	}
 }
 
 module.exports = CityService;

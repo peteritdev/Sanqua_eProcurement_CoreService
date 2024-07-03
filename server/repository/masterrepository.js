@@ -3,7 +3,7 @@ var config = require(__dirname + '/../config/config.json')[env];
 var Sequelize = require('sequelize');
 var sequelize = new Sequelize(config.database, config.username, config.password, config);
 const { hash } = require('bcryptjs');
-const Op = sequelize.Op;
+const Op = Sequelize.Op;
 
 // Model
 const _modelCurrency = require('../models').ms_currencies;

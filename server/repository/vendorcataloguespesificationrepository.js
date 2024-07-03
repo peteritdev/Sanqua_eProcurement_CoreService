@@ -3,7 +3,7 @@ var config = require(__dirname + '/../config/config.json')[env];
 var Sequelize = require('sequelize');
 var sequelize = new Sequelize(config.database, config.username, config.password, config);
 const { hash } = require('bcryptjs');
-const Op = sequelize.Op;
+const Op = Sequelize.Op;
 
 //Model
 const _modelDb = require('../models').ms_vendorcataloguespesifications;
@@ -17,312 +17,293 @@ const _modelProduct = require('../models').ms_products;
 const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
-class VendorCatalogueSpesificationRepository{
-    constructor(){}
+class VendorCatalogueSpesificationRepository {
+	constructor() {}
 
-    async list( pParam ){
+	async list(pParam) {
+		var xOrder = [ 'id', 'ASC' ];
+		var xInclude = [
+			{
+				attributes: [ 'id', 'name' ],
+				model: _modelSpesificationCategory,
+				as: 'spesification_category'
+			},
+			{
+				attributes: [ 'id', 'name' ],
+				model: _modelSpesificationAttribute,
+				as: 'spesification_attribute'
+			},
+			{
+				attributes: [ 'id', 'name' ],
+				model: _modelUnit,
+				as: 'unit'
+			},
+			{
+				model: _modelVendorCatalogue,
+				as: 'vendor_catalogue',
+				include: [
+					{
+						attributes: [ 'id', 'code', 'name' ],
+						model: _modelVendor,
+						as: 'vendor'
+					},
+					{
+						attributes: [ 'id', 'code', 'name' ],
+						model: _modelProduct,
+						as: 'product'
+					}
+				]
+			}
+		];
+		var xWhereAnd = [];
+		var xWhereOr = [];
+		var xWhere = {};
 
-        var xOrder = ['id', 'ASC'];
-        var xInclude = [
-            {
-                attributes: ['id','name'],
-                model: _modelSpesificationCategory,
-                as: 'spesification_category'
-            },
-            {
-                attributes: ['id','name'],
-                model: _modelSpesificationAttribute,
-                as: 'spesification_attribute'
-            },
-            {
-                attributes: ['id','name'],
-                model: _modelUnit,
-                as: 'unit',
-            },
-            {
-                model: _modelVendorCatalogue,
-                as: 'vendor_catalogue',
-                include: [
-                    {
-                        attributes: ['id','code','name'],
-                        model: _modelVendor,
-                        as: 'vendor',
-                    },
-                    {
-                        attributes: ['id','code','name'],
-                        model: _modelProduct,
-                        as: 'product',
-                    }
-                ],
-            },
-        ];
-        var xWhereAnd = [];
-        var xWhereOr = [];
-        var xWhere = {};
+		// From xWhereAnd
+		xWhereAnd.push({
+			is_delete: 0
+		});
 
-        
+		if (pParam.hasOwnProperty('vendor_catalogue_id')) {
+			if (pParam.vendor_catalogue_id != '') {
+				xWhereAnd.push({
+					vendor_catalogue_id: pParam.vendor_catalogue_id
+				});
+			}
+		}
 
-        // From xWhereAnd
-        xWhereAnd.push({
-            is_delete: 0,
-        });
+		if (pParam.hasOwnProperty('spesification_type')) {
+			if (pParam.spesification_type != '') {
+				xWhereAnd.push({
+					spesification_type: pParam.spesification_type
+				});
+			}
+		}
 
+		// From xWhereOr
+		if (pParam.hasOwnProperty('keyword')) {
+			xWhereOr = [
+				{
+					description: {
+						[Op.iLike]: '%' + pParam.keyword + '%'
+					}
+				},
+				{
+					standard: {
+						[Op.iLike]: '%' + pParam.keyword + '%'
+					}
+				},
+				{
+					analysis_method: {
+						[Op.iLike]: '%' + pParam.keyword + '%'
+					}
+				},
+				{
+					min_frequency_supplier: {
+						[Op.iLike]: '%' + pParam.keyword + '%'
+					}
+				},
+				{
+					min_frequency_sanqua: {
+						[Op.iLike]: '%' + pParam.keyword + '%'
+					}
+				},
+				{
+					'$vendor_catalogue.vendor.code$': {
+						[Op.iLike]: '%' + pParam.keyword + '%'
+					}
+				},
+				{
+					'$vendor_catalogue.vendor.name$': {
+						[Op.iLike]: '%' + pParam.keyword + '%'
+					}
+				},
+				{
+					'$vendor_catalogue.product.code$': {
+						[Op.iLike]: '%' + pParam.keyword + '%'
+					}
+				},
+				{
+					'$vendor_catalogue.product.name$': {
+						[Op.iLike]: '%' + pParam.keyword + '%'
+					}
+				}
+			];
+		}
 
-        if( pParam.hasOwnProperty('vendor_catalogue_id') ){
-            if( pParam.vendor_catalogue_id != '' ){
-                xWhereAnd.push({
-                    vendor_catalogue_id: pParam.vendor_catalogue_id
-                });
-            }
-        }        
+		if (xWhereAnd.length > 0) {
+			xWhere.$and = xWhereAnd;
+		}
+		if (xWhereOr.length > 0) {
+			xWhere.$or = xWhereOr;
+		}
 
-        if( pParam.hasOwnProperty('spesification_type') ){
-            if( pParam.spesification_type != '' ){
-                xWhereAnd.push({
-                    spesification_type: pParam.spesification_type
-                });
-            }
-        }        
+		if (pParam.order_by != '' && pParam.hasOwnProperty('order_by')) {
+			xOrder = [ pParam.order_by, pParam.order_type == 'desc' ? 'DESC' : 'ASC' ];
+		}
 
-        // From xWhereOr
-        if( pParam.hasOwnProperty('keyword') ){
-            xWhereOr = [
-                {
-                    description: {
-                        [Op.iLike]: '%' + pParam.keyword + '%',
-                    }
-                },
-                {
-                    standard: {
-                        [Op.iLike]: '%' + pParam.keyword + '%',
-                    }
-                },
-                {
-                    analysis_method: {
-                        [Op.iLike]: '%' + pParam.keyword + '%',
-                    }
-                },
-                {
-                    min_frequency_supplier: {
-                        [Op.iLike]: '%' + pParam.keyword + '%',
-                    }
-                },
-                {
-                    min_frequency_sanqua: {
-                        [Op.iLike]: '%' + pParam.keyword + '%',
-                    }
-                },
-                {
-                    '$vendor_catalogue.vendor.code$': {
-                        [Op.iLike]: '%' + pParam.keyword + '%',
-                    }
-                },
-                {
-                    '$vendor_catalogue.vendor.name$': {
-                        [Op.iLike]: '%' + pParam.keyword + '%',
-                    }
-                },
-                {
-                    '$vendor_catalogue.product.code$': {
-                        [Op.iLike]: '%' + pParam.keyword + '%',
-                    }
-                },
-                {
-                    '$vendor_catalogue.product.name$': {
-                        [Op.iLike]: '%' + pParam.keyword + '%',
-                    }
-                },
-            ]
-        }
+		var xParamQuery = {
+			where: xWhere,
+			include: xInclude,
+			order: [ xOrder ]
+		};
 
-        if( xWhereAnd.length > 0 ){
-            xWhere.$and = xWhereAnd;
-        }
-        if( xWhereOr.length > 0 ){
-            xWhere.$or = xWhereOr;
-        }
+		if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
+			if (pParam.offset != '' && pParam.limit != '' && pParam.limit != 'all') {
+				xParamQuery.offset = pParam.offset;
+				xParamQuery.limit = pParam.limit;
+			}
+		}
 
-        if( pParam.order_by != '' && pParam.hasOwnProperty('order_by') ){
-            xOrder = [pParam.order_by, (pParam.order_type == 'desc' ? 'DESC' : 'ASC') ];
-        }
+		var xData = await _modelDb.findAndCountAll(xParamQuery);
 
-        var xParamQuery = {
-            where: xWhere,          
-            include: xInclude,  
-            order: [xOrder],
-        };
+		return xData;
+	}
 
-        if( pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit') ){
-            if( pParam.offset != '' && pParam.limit != '' && pParam.limit != 'all' ){
-                xParamQuery.offset = pParam.offset;
-                xParamQuery.limit = pParam.limit;
-            }
-        }
+	async isDataExists(pParam) {
+		var xData = await _modelDb.findOne({
+			where: {
+				vendor_catalogue_id: pParam.vendor_catalogue_id,
+				spesification_category_id: pParam.spesification_category_id,
+				spesification_attribute_id: pParam.spesification_attribute_id
+			}
+		});
 
-        var xData = await _modelDb.findAndCountAll(xParamQuery);
+		return xData;
+	}
 
-        return xData;
-    }
+	async getById(pParam) {
+		var xInclude = [
+			{
+				attributes: [ 'id', 'name' ],
+				model: _modelSpesificationCategory,
+				as: 'spesification_category'
+			},
+			{
+				attributes: [ 'id', 'name' ],
+				model: _modelSpesificationAttribute,
+				as: 'spesification_attribute'
+			},
+			{
+				attributes: [ 'id', 'name' ],
+				model: _modelUnit,
+				as: 'unit'
+			}
+		];
 
-    async isDataExists( pParam ){
-        var xData = await _modelDb.findOne({
-            where: {
-                vendor_catalogue_id: pParam.vendor_catalogue_id,
-                spesification_category_id: pParam.spesification_category_id,
-                spesification_attribute_id: pParam.spesification_attribute_id,
-            }
-        });
-        
-        return xData;
-    }
+		var xData = await _modelDb.findOne({
+			where: {
+				id: pParam.id,
+				is_delete: 0
+			},
+			include: xInclude
+		});
 
-    async getById( pParam ){
+		return xData;
+	}
 
-        var xInclude = [
-            {
-                attributes: ['id','name'],
-                model: _modelSpesificationCategory,
-                as: 'spesification_category'
-            },
-            {
-                attributes: ['id','name'],
-                model: _modelSpesificationAttribute,
-                as: 'spesification_attribute'
-            },
-            {
-                attributes: ['id','name'],
-                model: _modelUnit,
-                as: 'unit',
-            },
-        ];
+	async save(pParam, pAct) {
+		let xTransaction;
+		var xJoResult = {};
 
-        var xData = await _modelDb.findOne({
-            where: {
-                id: pParam.id,
-                is_delete: 0,
-            },
-            include: xInclude,
-        });
+		try {
+			var xSaved = null;
+			xTransaction = await sequelize.transaction();
 
-        return xData;
-    }
+			if (pAct == 'add') {
+				pParam.status = 1;
+				pParam.is_delete = 0;
 
-    async save(pParam, pAct){
-        let xTransaction;
-        var xJoResult = {};
-        
-        try{
+				xSaved = await _modelDb.create(pParam, { xTransaction });
 
-            var xSaved = null;
-            xTransaction = await sequelize.transaction();
+				if (xSaved.id != null) {
+					await xTransaction.commit();
 
-            if( pAct == "add" ){
+					xJoResult = {
+						status_code: '00',
+						status_msg: 'Data has been successfully saved',
+						created_id: await _utilInstance.encrypt(xSaved.id.toString(), config.cryptoKey.hashKey)
+					};
+				} else {
+					if (xTransaction) await xTransaction.rollback();
 
-                pParam.status = 1;
-                pParam.is_delete = 0;
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Failed save to database'
+					};
+				}
+			} else if (pAct == 'update') {
+				pParam.updatedAt = await _utilInstance.getCurrDateTime();
+				var xId = pParam.id;
+				delete pParam.id;
+				var xWhere = {
+					where: {
+						id: xId
+					}
+				};
+				xSaved = await _modelDb.update(pParam, xWhere, { xTransaction });
 
-                xSaved = await _modelDb.create(pParam, {xTransaction}); 
+				await xTransaction.commit();
 
-                if( xSaved.id != null ){
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'Data has been successfully updated'
+				};
+			}
+		} catch (e) {
+			if (xTransaction) await xTransaction.rollback();
+			xJoResult = {
+				status_code: '-99',
+				status_msg: 'Failed save or update data. Error : ' + e,
+				err_msg: e
+			};
+		}
 
-                    await xTransaction.commit();
+		return xJoResult;
+	}
 
-                    xJoResult = {
-                        status_code: "00",
-                        status_msg: "Data has been successfully saved",
-                        created_id: await _utilInstance.encrypt( (xSaved.id).toString(), config.cryptoKey.hashKey ),
-                    }                     
-                    
+	async delete(pParam) {
+		let xTransaction;
+		var xJoResult = {};
 
-                }else{
+		try {
+			var xSaved = null;
+			xTransaction = await sequelize.transaction();
 
-                    if( xTransaction ) await xTransaction.rollback();
+			xSaved = await _modelDb.update(
+				{
+					is_delete: 1,
+					deleted_by: pParam.deleted_by,
+					deleted_by_name: pParam.deleted_by_name,
+					deleted_at: await _utilInstance.getCurrDateTime()
+				},
+				{
+					where: {
+						id: pParam.id
+					}
+				},
+				{ xTransaction }
+			);
 
-                    xJoResult = {
-                        status_code: "-99",
-                        status_msg: "Failed save to database",
-                    }
+			await xTransaction.commit();
 
-                }                
+			xJoResult = {
+				status_code: '00',
+				status_msg: 'Data has been successfully deleted'
+			};
 
-            }else if( pAct == "update" ){
-                
-                pParam.updatedAt = await _utilInstance.getCurrDateTime();
-                var xId = pParam.id;
-                delete pParam.id;
-                var xWhere = {
-                    where : {
-                        id: xId,
-                    }
-                };
-                xSaved = await _modelDb.update( pParam, xWhere, {xTransaction} );
+			return xJoResult;
+		} catch (e) {
+			if (xTransaction) await xTransaction.rollback();
+			xJoResult = {
+				status_code: '-99',
+				status_msg: 'Failed save or update data',
+				err_msg: e
+			};
 
-                await xTransaction.commit();
-
-                xJoResult = {
-                    status_code: "00",
-                    status_msg: "Data has been successfully updated"
-                }
-
-            }
-
-        }catch(e){
-            if( xTransaction ) await xTransaction.rollback();
-            xJoResult = {
-                status_code: "-99",
-                status_msg: "Failed save or update data. Error : " + e,
-                err_msg: e
-            }
-            
-        }
-        
-        return xJoResult;
-    }
-
-    async delete( pParam ){
-        let xTransaction;
-        var xJoResult = {};
-
-        try{
-            var xSaved = null;
-            xTransaction = await sequelize.transaction();
-
-            xSaved = await _modelDb.update(
-                {
-                    is_delete: 1,
-                    deleted_by: pParam.deleted_by,
-                    deleted_by_name: pParam.deleted_by_name,
-                    deleted_at: await _utilInstance.getCurrDateTime(),
-                },
-                {
-                    where: {
-                        id: pParam.id
-                    }
-                },
-                {xTransaction}
-            );
-    
-            await xTransaction.commit();
-
-            xJoResult = {
-                status_code: "00",
-                status_msg: "Data has been successfully deleted",
-            }
-
-            return xJoResult;
-
-        }catch(e){
-            if( xTransaction ) await xTransaction.rollback();
-            xJoResult = {
-                status_code: "-99",
-                status_msg: "Failed save or update data",
-                err_msg: e
-            }
-
-            return xJoResult;
-        }
-    }
+			return xJoResult;
+		}
+	}
 }
 
 module.exports = VendorCatalogueSpesificationRepository;
-
