@@ -594,7 +594,10 @@ class PurchaseRequestDetailService {
 													) {
 														xFlagProcess = false;
 														break;
-													} else if (xItemInfo.data.is_item_match_with_odoo == 0) {
+													} else if (
+														xItemInfo.data.is_item_match_with_odoo == 0 &&
+														xDetail.data.fpb_type == 'po'
+													) {
 														xFlagOdoo = false;
 														break;
 													} else {
