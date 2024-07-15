@@ -196,11 +196,25 @@ module.exports = (app) => {
 		check('limit').not().isEmpty().withMessage('Parameter limit cannot be empty')
 	];
 	app.get(rootAPIPath + 'project/list', arrValidate, purchaseRequestController.purchaseRequestProject_List);
-	
-	arrValidate = [];
-	app.get(rootAPIPath + 'transaction_history', arrValidate, purchaseRequestController.purchaseRequest_TransactionHistory);
-	
-	arrValidate = [];
-	app.post(rootAPIPath + 'project/update_fulfillment', arrValidate, purchaseRequestController.purchaseRequestDetail_UpdateFulfillment);
 
+	arrValidate = [];
+	app.get(
+		rootAPIPath + 'transaction_history',
+		arrValidate,
+		purchaseRequestController.purchaseRequest_TransactionHistory
+	);
+
+	arrValidate = [];
+	app.post(
+		rootAPIPath + 'project/update_fulfillment',
+		arrValidate,
+		purchaseRequestController.purchaseRequestDetail_UpdateFulfillment
+	);
+
+	arrValidate = [];
+	app.post(
+		rootAPIPath + 'item/send_notification_equalization_odoo',
+		arrValidate,
+		purchaseRequestController.purchaseRequestDetail_SendNotificationEqualizationOdoo
+	);
 };

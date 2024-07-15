@@ -41,7 +41,7 @@ class PurchaseRequestRepository {
 				model: _modelProject,
 				as: 'project',
 				attributes: [ 'id', 'code', 'name', 'odoo_project_code' ]
-			},
+			}
 			// {
 			// 	model: _modelBudgetPlan,
 			// 	as: 'budget_plan',
@@ -876,7 +876,7 @@ class PurchaseRequestRepository {
 				// 			"budget_plan_id" : ${pParam.budget_plan_id},
 				// 			"purchase_request_detail" : ${JSON.stringify(pParam.purchase_request_detail)}
 				// 		}'::json)`;
-					
+
 				// 	var xDtQuery = await sequelize.query(xSql, {
 				// 		type: sequelize.QueryTypes.SELECT,
 				// 	});
@@ -1152,7 +1152,7 @@ class PurchaseRequestRepository {
 
 		return xData;
 	}
-	
+
 	async transaction_history(pParam) {
 		var xData,
 			xTotalRecord = [];
@@ -1189,7 +1189,7 @@ class PurchaseRequestRepository {
 				xObjJsonWhere.vendor_id = pParam.vendor_id;
 			}
 		}
-		xSqlWhere += " AND prd.is_po_created = true AND prd.status = 4 ";
+		xSqlWhere += ' AND prd.is_po_created = true AND prd.status = 4 ';
 
 		xSqlFields = ` pr.id, pr.request_no, pr.employee_id, pr.employee_name, pr.company_id, pr.company_name,
 					pr.department_id, pr.department_name, pr.category_item, pr.category_pr, pr.status as "fpb_status",
@@ -1212,7 +1212,7 @@ class PurchaseRequestRepository {
 							LEFT JOIN ms_projects p ON p.id = pr.project_id
 				 WHERE ${xSqlWhere} ${xSqlGroupBy}
 				  ${xSqlOrderBy}${xSqlLimit} `;
-				  
+
 		xSqlCount = ` SELECT count(pr.request_no) AS total_record
 		FROM tr_purchaserequests pr 
 						LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
