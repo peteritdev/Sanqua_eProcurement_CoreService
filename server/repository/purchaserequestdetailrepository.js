@@ -8,6 +8,7 @@ const Op = Sequelize.Op;
 // Model
 const _modelDb = require('../models').tr_purchaserequestdetails;
 const _modelPurchaseRequest = require('../models').tr_purchaserequests;
+const _modelEmployee = require('../models').ms_employees;
 
 const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
