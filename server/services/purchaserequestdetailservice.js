@@ -1246,6 +1246,66 @@ class PurchaseRequestDetailService {
 
 		return xJoResult;
 	}
+
+	// The purpose of this is refresh detail for unmatch item with Odoo
+	async refreshDetailForUnmatchOdoo(pParam) {
+		var xJoResult = {};
+		var xDecId = null;
+		var xEncId = null;
+		var xFlagProcess = false;
+
+		var xJoCheckItem = {};
+		var xJaArrCheckItem = [];
+
+		try {
+			xEncId = pParam.request_id;
+			xDecId = await _utilInstance.decrypt(pParam.request_id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				pParam.request_id = xDecId.decrypted;
+				xFlagProcess = true;
+			} else {
+				xJoResult = xDecId;
+			}
+
+			let xItems = await _purchaseRequestServiceInstance.getById({
+				id: xEncId
+			});
+
+			// console.log(`>>> xItems: ${JSON.stringify(xItems)}`);
+
+			if (xItems.status_code == '00') {
+				if (xItems.hasOwnProperty('data')) {
+					for (var i in xItems.data.purchase_request_detail) {
+						if (xItems.data.purchase_request_detail[i].is_item_match_with_odoo == 0) {
+							xJaArrCheckItem.push({
+								code: xItems.data.purchase_request_detail[i].product.code,
+								name: xItems.data.purchase_request_detail[i].product.name,
+								uom: xItems.data.purchase_request_detail[i].uom,
+								index: 0
+							});
+						}
+					}
+
+					xJoCheckItem = {
+						items: xJaArrCheckItem
+					};
+
+					let xResultCheckItem = await this.checkItem(xJoCheckItem);
+
+					if (xResultCheckItem.status_code == '00') {
+						if (xFlagProcess) {
+							Object.assign(pParam, {
+								check_item_result: xResultCheckItem.data
+							});
+							xJoResult = await _repoInstance.refreshDetailForUnmatchOdoo(pParam);
+						}
+					}
+				}
+			}
+		} catch (e) {}
+
+		return xJoResult;
+	}
 }
 
 module.exports = PurchaseRequestDetailService;

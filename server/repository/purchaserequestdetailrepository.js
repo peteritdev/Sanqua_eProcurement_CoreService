@@ -9,6 +9,8 @@ const Op = Sequelize.Op;
 const _modelDb = require('../models').tr_purchaserequestdetails;
 const _modelPurchaseRequest = require('../models').tr_purchaserequests;
 const _modelEmployee = require('../models').ms_employees;
+const _modelProduct = require('../models').ms_products;
+const _modelUnit = require('../models').ms_units;
 
 const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
@@ -31,7 +33,8 @@ class PurchaseRequestDetailRepository {
 
 			if (pParam.hasOwnProperty('filter')) {
 				if (pParam.filter != null && pParam.filter != undefined && pParam.filter != '') {
-					var xFilter = JSON.parse(pParam.filter);
+					// var xFilter = JSON.parse(pParam.filter);
+					var xFilter = pParam.filter;
 					if (xFilter.length > 0) {
 						for (var index in xFilter) {
 							xWhereAnd.push(xFilter[index]);
@@ -598,6 +601,135 @@ class PurchaseRequestDetailRepository {
 		});
 
 		return xData;
+	}
+
+	async refreshDetailForUnmatchOdoo(pParam) {
+		var xJoResult = {};
+		var xTransaction;
+		var xForceRollback = false;
+		var xIsMatchOdoo = 0;
+
+		try {
+			console.log(`>>> pParam : ${JSON.stringify(pParam)}`);
+			xTransaction = await sequelize.transaction();
+
+			// Get the unmatch detail
+			let xDetail = await this.list({
+				filter: [
+					{
+						request_id: pParam.request_id,
+						is_item_match_with_odoo: 0
+					}
+				]
+			});
+
+			// console.log(`>>> xDetail : ${JSON.stringify(xDetail)}`);
+
+			if (xDetail.status_code == '00') {
+				if (xDetail.data.hasOwnProperty('rows')) {
+					let xResultDb = null;
+					let xArrDetailId = xDetail.data.rows.map((l) => l.id);
+					// console.log(`>>> xArrDetailId : ${JSON.stringify(xArrDetailId)}`);
+
+					// Delete the item first
+					xResultDb = await _modelDb.destroy({
+						where: {
+							id: {
+								[Op.in]: xArrDetailId
+							}
+						},
+						transaction: xTransaction
+					});
+
+					console.log(`>>> xResultDb: ${xResultDb}`);
+
+					if (xResultDb > 0) {
+						// Re-add the item
+						for (var i in xDetail.data.rows) {
+							// Get the product detail from master
+							let xProductDetail = await _modelProduct.findOne({
+								where: {
+									id: xDetail.data.rows[i].product_id
+								},
+								include: [
+									{
+										attributes: [ 'id', 'name' ],
+										model: _modelUnit,
+										as: 'unit'
+									}
+								]
+							});
+							// console.log(`>>> xProductDetail: ${JSON.stringify(xProductDetail)}`);
+
+							// Get element from check item result to Odoo
+							let xResultOdoo = pParam.check_item_result.find((el) => el.code == xProductDetail.code);
+							if (xResultOdoo.status == '00') {
+								xIsMatchOdoo = 1;
+							} else {
+								xIsMatchOdoo = 0;
+							}
+
+							// Process Re-Add to detail
+							xResultDb = await _modelDb.create(
+								{
+									product_id: xProductDetail.id,
+									product_code: xProductDetail.code,
+									product_name: xProductDetail.name,
+									uom_id: xProductDetail.hasOwnProperty('unit') ? xProductDetail.unit.id : null,
+									uom_name: xProductDetail.hasOwnProperty('unit') ? xProductDetail.unit.name : null,
+
+									qty: xDetail.data.rows[i].qty,
+									budget_price_per_unit: xDetail.data.rows[i].budget_price_per_unit,
+									budget_price_total: xDetail.data.rows[i].budget_price_total,
+									vendor_id: xDetail.data.rows[i].vendor_id,
+									vendor_name: xDetail.data.rows[i].vendor_name,
+									has_budget: xDetail.data.rows[i].has_budget,
+									estimate_date_use: xDetail.data.rows[i].estimate_date_use,
+									status: xDetail.data.rows[i].status,
+									request_id: xDetail.data.rows[i].request_id,
+									quotation_price_per_unit: xDetail.data.rows[i].quotation_price_per_unit,
+									quotation_price_total: xDetail.data.rows[i].quotation_price_total,
+									last_price: xDetail.data.rows[i].last_proce,
+									current_stock: xDetail.data.rows[i].current_stock,
+									vendor_catalogue_id: xDetail.data.rows[i].vendor_catalogue_id,
+
+									is_item_match_with_odoo: xIsMatchOdoo
+								},
+								{ transaction: xTransaction }
+							);
+						}
+						await xTransaction.commit();
+						// await xTransaction.rollback();
+					} else {
+						await xTransaction.rollback();
+						xJoResult = {
+							status_code: '-99',
+							status_msg: 'No data removed'
+						};
+					}
+				} else {
+					await xTransaction.rollback();
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Data not found'
+					};
+				}
+			} else {
+				await xTransaction.rollback();
+				xJoResult = xDetail;
+			}
+
+			await xTransaction.rollback();
+		} catch (e) {
+			if (xTransaction) await xTransaction.rollback();
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Failed save or update data. Error : ${e.message}`,
+				err_msg: e
+			};
+		}
+
+		return xJoResult;
 	}
 }
 
