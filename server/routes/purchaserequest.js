@@ -217,4 +217,9 @@ module.exports = (app) => {
 		arrValidate,
 		purchaseRequestController.purchaseRequestDetail_SendNotificationEqualizationOdoo
 	);
+
+	// Detail FPB
+	arrValidate = [];
+	arrValidate = [ check('request_id').not().isEmpty().withMessage('Parameter request_id cannot be empty') ];
+	app.post(rootAPIPath + 'refresh_item', arrValidate, purchaseRequestController.purchaseRequestDetail_RefreshItem);
 };
