@@ -54,7 +54,7 @@ class PurchaseRequestService {
 		var xAct = pParam.act;
 		var xFlagProcess = false;
 		var xDecId = null;
-		var bDect = null
+		var bDect = null;
 
 		delete pParam.act;
 
@@ -268,8 +268,11 @@ class PurchaseRequestService {
 							const xItemParam = {
 								request_id: xDataBeforeUpdate.id,
 								is_item_match_with_odoo: null
-							}
-							const xUpdateItemStatus = await _repoDetailInstance.save(xItemParam, 'update_by_request_id')
+							};
+							const xUpdateItemStatus = await _repoDetailInstance.save(
+								xItemParam,
+								'update_by_request_id'
+							);
 							console.log(`>>> xUpdateItemStatus: ${JSON.stringify(xDataBeforeUpdate.project)} `);
 						}
 						xJoResult = xAddResult;
@@ -456,7 +459,7 @@ class PurchaseRequestService {
 										uom_name: xRows[index].uom_name,
 										// add new 16/11/2023
 										estimate_fulfillment: xRows[index].estimate_fulfillment,
-										status: xRows[index].item_detail_status,
+										status: xRows[index].item_detail_status
 									}
 								});
 							}
@@ -624,7 +627,7 @@ class PurchaseRequestService {
 					// --
 
 					let xFileArr = [];
-					var xTotalItem = 0
+					var xTotalItem = 0;
 					// var xTotalRealization = 0
 					for (var j in xResult.file) {
 						xFileArr.push({
@@ -645,7 +648,7 @@ class PurchaseRequestService {
 									code: null,
 									name: xDetail[index].product_name,
 									uom: xDetail[index].uom_name != null ? xDetail[index].uom_name : '',
-									index: index,
+									index: index
 									// request_id: xDetail[index].request_id
 								});
 							} else {
@@ -654,7 +657,7 @@ class PurchaseRequestService {
 									code: xDetail[index].product_code,
 									name: xDetail[index].product_name,
 									uom: xDetail[index].uom_name != null ? xDetail[index].uom_name : '',
-									index: index,
+									index: index
 									// request_id: xDetail[index].request_id
 								});
 							}
@@ -673,7 +676,7 @@ class PurchaseRequestService {
 						// ----
 						// 05/06/2024 add totalItem & realization
 						if (xDetail[index].budget_price_total != null && xDetail[index].budget_price_total != 0) {
-							xTotalItem = xTotalItem + 1
+							xTotalItem = xTotalItem + 1;
 							// xTotalRealization = xTotalRealization + (xDetail[index].realization != null ? xDetail[index].realization : 0)
 						}
 						// console.log(`>>> xDetail[index]: ${JSON.stringify(xDetail[index])}`);
@@ -693,7 +696,9 @@ class PurchaseRequestService {
 							pdf_budget_price_per_unit:
 								xDetail[index].budget_price_per_unit == null
 									? 0
-									: xDetail[index].budget_price_per_unit.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'),
+									: xDetail[index].budget_price_per_unit
+											.toFixed(2)
+											.replace(/\d(?=(\d{3})+\.)/g, '$&,'),
 							budget_price_total: xDetail[index].budget_price_total,
 							pdf_budget_price_total:
 								xDetail[index].budget_price_total == null
@@ -733,7 +738,7 @@ class PurchaseRequestService {
 							updated_by: xDetail[index].updated_by,
 							updated_by_name: xDetail[index].updated_by_name,
 							is_item_match_with_odoo: xDetail[index].is_item_match_with_odoo,
-							realization: xDetail[index].realization,
+							realization: xDetail[index].realization
 						});
 					}
 					// Get Approval Matrix
@@ -772,7 +777,7 @@ class PurchaseRequestService {
 						if (xCheckItemInOdoo.status_code === '00') {
 							const xResultArr = xCheckItemInOdoo.data[0].eSanqua;
 							for (let i = 0; i < xResultArr.length; i++) {
-								var xItemCode = null
+								var xItemCode = null;
 								const xResultItem = xResultArr[i];
 								Object.assign(xJoArrRequestDetailData[xResultItem.index], {
 									check_result: xResultItem
@@ -780,11 +785,13 @@ class PurchaseRequestService {
 
 								if (xResult.project !== null) {
 									if (xResultItem.code == null) {
-										const xFindCode = xDetail.find(({ product_name }) => product_name === xResultItem.name)
-										xItemCode = xFindCode.product_code
+										const xFindCode = xDetail.find(
+											({ product_name }) => product_name === xResultItem.name
+										);
+										xItemCode = xFindCode.product_code;
 									}
 								} else {
-									xItemCode = xResultItem.code
+									xItemCode = xResultItem.code;
 								}
 
 								var is_match = 0
@@ -803,9 +810,12 @@ class PurchaseRequestService {
 									user_name: xJoArrRequestDetailData[0].updated_by_name,
 									product_code: xItemCode,
 									product_name: xResultItem.name
-								}
+								};
 								console.log(`>>>>>>> xParamUpdate: ${JSON.stringify(xParamUpdate)}`);
-								let xUpdateParamChecking = await _repoDetailInstance.save(xParamUpdate, 'update_by_product_code_and_request_id');
+								let xUpdateParamChecking = await _repoDetailInstance.save(
+									xParamUpdate,
+									'update_by_product_code_and_request_id'
+								);
 								console.log(`>>>>>>> xUpdateParamChecking: ${JSON.stringify(xUpdateParamChecking)}`);
 							}
 						}
@@ -820,7 +830,8 @@ class PurchaseRequestService {
 						employee: {
 							// id: await _utilInstance.encrypt(xResult.employee_id.toString(), config.cryptoKey.hashKey),
 							id: xResult.employee_id,
-							name: xResult.employee_name
+							name: xResult.employee_name,
+							
 						},
 						department: {
 							id: xResult.department_id,
@@ -836,13 +847,17 @@ class PurchaseRequestService {
 						status: {
 							id: xResult.status,
 							name:
-								xResult.status == -1 ? 'Rejected' : config.statusDescription.purchaseRequest[xResult.status]
+								xResult.status == -1
+									? 'Rejected'
+									: config.statusDescription.purchaseRequest[xResult.status]
 						},
 						reject_reason: xResult.reject_reason,
 						closed_reason: xResult.closed_reason,
 						requested_at: moment(xResult.requested_at).format('DD MMM YYYY HH:mm'),
 						printed_fpb_at: moment(xResult.printed_fpb_at).format('DD MMM YYYY HH:mm'),
-						submit_price_quotation_at: moment(xResult.submit_price_quotation_at).format('DD MMM YYYY HH:mm'),
+						submit_price_quotation_at: moment(xResult.submit_price_quotation_at).format(
+							'DD MMM YYYY HH:mm'
+						),
 
 						purchase_request_detail: xJoArrRequestDetailData,
 
@@ -870,12 +885,13 @@ class PurchaseRequestService {
 
 						approver_users: xArrUserCanCancel,
 
-						took_at: xResult.took_at != null ? moment(xResult.took_at).format('DD MMM YYYY HH:mm:ss') : null,
+						took_at:
+							xResult.took_at != null ? moment(xResult.took_at).format('DD MMM YYYY HH:mm:ss') : null,
 						took_by_name: xResult.took_by_name,
 						fpb_type: xResult.fpb_type,
 						// budget_plan: xResult.budget_plan,
 						// total_realization: xTotalRealization,
-						total_item_with_budget: xTotalItem,
+						total_item_with_budget: xTotalItem
 					};
 
 					xJoResult = {
@@ -1710,14 +1726,18 @@ class PurchaseRequestService {
 								// add new 16/11/2023
 								estimate_fulfillment: xRows[index].estimate_fulfillment,
 								fulfillment_status: xRows[index].fulfillment_status,
-								fulfillment_status_name: xRows[index].fulfillment_status == 1 ? 'Lengkap' : 'Belum Lengkap',
-								id: xRows[index].item_detail_id != null ? await _utilInstance.encrypt(
-									xRows[index].item_detail_id.toString(),
-									config.cryptoKey.hashKey
-								  ) : xRows[index].item_detail_id,
+								fulfillment_status_name:
+									xRows[index].fulfillment_status == 1 ? 'Lengkap' : 'Belum Lengkap',
+								id:
+									xRows[index].item_detail_id != null
+										? await _utilInstance.encrypt(
+												xRows[index].item_detail_id.toString(),
+												config.cryptoKey.hashKey
+											)
+										: xRows[index].item_detail_id,
 								status: xRows[index].item_detail_status,
 								status_name: config.statusDescription.purchaseRequest[xRows[index].item_detail_status],
-								is_po_created: xRows[index].is_po_created,
+								is_po_created: xRows[index].is_po_created
 							}
 						});
 					}
@@ -1845,7 +1865,7 @@ class PurchaseRequestService {
 
 		return xJoResult;
 	}
-	
+
 	async transaction_history(pParam) {
 		var xJoResult = {};
 		var xJoArrData = [];
@@ -1865,7 +1885,6 @@ class PurchaseRequestService {
 		}
 
 		if (xFlagProcess) {
-
 			var xResultList = await _repoInstance.transaction_history(pParam);
 
 			console.log(`>>> xResultList : ${JSON.stringify(xResultList)}`);
@@ -1873,17 +1892,17 @@ class PurchaseRequestService {
 				var xRows = xResultList.data;
 				for (var index in xRows) {
 					xJoArrData.push({
-						id: await _utilInstance.encrypt(
-							xRows[index].id.toString(),
-							config.cryptoKey.hashKey
-						),
+						id: await _utilInstance.encrypt(xRows[index].id.toString(), config.cryptoKey.hashKey),
 						request_no: xRows[index].request_no,
-						project: xRows[index].project_id != null ? {
-							id: xRows[index].project_id,
-							code: xRows[index].project_code,
-							name: xRows[index].project_name,
-							odoo_project_code: xRows[index].odoo_project_code
-						} : null,
+						project:
+							xRows[index].project_id != null
+								? {
+										id: xRows[index].project_id,
+										code: xRows[index].project_code,
+										name: xRows[index].project_name,
+										odoo_project_code: xRows[index].odoo_project_code
+									}
+								: null,
 						request_no: xRows[index].request_no,
 						created_at: xRows[index].created_at,
 						requested_at:
@@ -1946,7 +1965,7 @@ class PurchaseRequestService {
 								xRows[index].item_status == -1
 									? 'Rejected'
 									: config.statusDescription.purchaseRequestDetail[xRows[index].item_status]
-						},
+						}
 					});
 				}
 
