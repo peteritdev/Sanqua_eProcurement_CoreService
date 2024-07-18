@@ -658,6 +658,17 @@ class PurchaseRequestService {
 									// request_id: xDetail[index].request_id
 								});
 							}
+						} else {
+							if (xResult.project == null && xDetail[index].is_item_match_with_odoo == 1 && xDetail[index].product_code == null) {
+								xOdooArrItem.push({
+									id: xDetail[index].id,
+									code: null,
+									name: xDetail[index].product_name,
+									uom: xDetail[index].uom_name != null ? xDetail[index].uom_name : '',
+									index: index,
+									// request_id: xDetail[index].request_id
+								});
+							}
 						}
 						// ----
 						// 05/06/2024 add totalItem & realization
@@ -665,7 +676,7 @@ class PurchaseRequestService {
 							xTotalItem = xTotalItem + 1
 							// xTotalRealization = xTotalRealization + (xDetail[index].realization != null ? xDetail[index].realization : 0)
 						}
-						console.log(`>>> xDetail[index]: ${JSON.stringify(xDetail[index])}`);
+						// console.log(`>>> xDetail[index]: ${JSON.stringify(xDetail[index])}`);
 						xJoArrRequestDetailData.push({
 							id: await _utilInstance.encrypt(xDetail[index].id, config.cryptoKey.hashKey),
 							product: {
@@ -775,12 +786,19 @@ class PurchaseRequestService {
 								} else {
 									xItemCode = xResultItem.code
 								}
-								
+
+								var is_match = 0
+								if (xResultItem.status == '00') {
+									is_match = 1
+									if (xResult.project == null && xItemCode == null) {
+										is_match = 0
+									}
+								}
 								const xParamUpdate = {
 									// id: xOdooArrItem[parseInt(xResult[i].index)].id,
 									request_id: xResult.id,
 									// id: xResult[i].id,
-									is_item_match_with_odoo: xResultItem.status == '00' ? 1 : 0,
+									is_item_match_with_odoo: is_match,
 									user_id: xJoArrRequestDetailData[0].updated_by,
 									user_name: xJoArrRequestDetailData[0].updated_by_name,
 									product_code: xItemCode,
@@ -792,6 +810,7 @@ class PurchaseRequestService {
 							}
 						}
 					}
+					console.log(`>>> hereee`);
 
 					xJoData = {
 						id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
