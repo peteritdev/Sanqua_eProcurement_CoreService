@@ -646,6 +646,7 @@ class PurchaseRequestDetailRepository {
 					if (xResultDb > 0) {
 						// Re-add the item
 						for (var i in xDetail.data.rows) {
+							xIsMatchOdoo = 0;
 							// Get the product detail from master
 							let xProductDetail = await _modelProduct.findOne({
 								where: {
@@ -699,6 +700,10 @@ class PurchaseRequestDetailRepository {
 							);
 						}
 						await xTransaction.commit();
+						xJoResult = {
+							status_code: '00',
+							status_msg: 'Data successfully updated'
+						};
 						// await xTransaction.rollback();
 					} else {
 						await xTransaction.rollback();
@@ -719,7 +724,7 @@ class PurchaseRequestDetailRepository {
 				xJoResult = xDetail;
 			}
 
-			await xTransaction.rollback();
+			// await xTransaction.rollback();
 		} catch (e) {
 			if (xTransaction) await xTransaction.rollback();
 			xJoResult = {

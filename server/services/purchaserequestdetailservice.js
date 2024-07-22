@@ -1268,7 +1268,9 @@ class PurchaseRequestDetailService {
 			}
 
 			let xItems = await _purchaseRequestServiceInstance.getById({
-				id: xEncId
+				id: xEncId,
+				method: pParam.method,
+				token: pParam.token
 			});
 
 			// console.log(`>>> xItems: ${JSON.stringify(xItems)}`);
@@ -1292,17 +1294,22 @@ class PurchaseRequestDetailService {
 
 					let xResultCheckItem = await this.checkItem(xJoCheckItem);
 
+					console.log(`>>> xResultCheckItem: ${JSON.stringify(xResultCheckItem)}`);
 					if (xResultCheckItem.status_code == '00') {
-						if (xFlagProcess) {
-							Object.assign(pParam, {
-								check_item_result: xResultCheckItem.data
-							});
-							xJoResult = await _repoInstance.refreshDetailForUnmatchOdoo(pParam);
-						}
+						Object.assign(pParam, {
+							check_item_result: xResultCheckItem.data
+						});
+						xJoResult = await _repoInstance.refreshDetailForUnmatchOdoo(pParam);
+						console.log(`>>> xJoResult: ${JSON.stringify(xJoResult)}`);
 					}
 				}
 			}
-		} catch (e) {}
+		} catch (e) {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Exception error <${_xClassName}.refreshDetailForUnmatchOdoo>: ${e.message}`
+			};
+		}
 
 		return xJoResult;
 	}
