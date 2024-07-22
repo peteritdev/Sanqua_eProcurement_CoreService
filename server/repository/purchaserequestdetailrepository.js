@@ -647,6 +647,7 @@ class PurchaseRequestDetailRepository {
 					if (xResultDb > 0) {
 						// Re-add the item
 						for (var i in xDetail.data.rows) {
+							xIsMatchOdoo = 0;
 							// Get the product detail from master
 							let xProductDetail = await _modelProduct.findOne({
 								where: {
