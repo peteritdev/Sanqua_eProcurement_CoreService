@@ -660,7 +660,6 @@ class PurchaseRequestDetailRepository {
 									}
 								]
 							});
-							// console.log(`>>> xProductDetail: ${JSON.stringify(xProductDetail)}`);
 
 							// Get element from check item result to Odoo
 							let xResultOdoo = pParam.check_item_result.find((el) => el.code == xProductDetail.code);
@@ -669,15 +668,14 @@ class PurchaseRequestDetailRepository {
 							} else {
 								xIsMatchOdoo = 0;
 							}
-
 							// Process Re-Add to detail
 							xResultDb = await _modelDb.create(
 								{
 									product_id: xProductDetail.id,
 									product_code: xProductDetail.code,
 									product_name: xProductDetail.name,
-									uom_id: xProductDetail.hasOwnProperty('unit') ? xProductDetail.unit.id : null,
-									uom_name: xProductDetail.hasOwnProperty('unit') ? xProductDetail.unit.name : null,
+									uom_id: xProductDetail.hasOwnProperty('unit') ? xProductDetail.unit != null ? xProductDetail.unit.id : null : null,
+									uom_name: xProductDetail.hasOwnProperty('unit') ? xProductDetail.unit != null ? xProductDetail.unit.name : null : null,
 
 									qty: xDetail.data.rows[i].qty,
 									budget_price_per_unit: xDetail.data.rows[i].budget_price_per_unit,
@@ -700,6 +698,10 @@ class PurchaseRequestDetailRepository {
 							);
 						}
 						await xTransaction.commit();
+						xJoResult = {
+							status_code: '00',
+							status_msg: 'Data successfully updated'
+						};
 						// await xTransaction.rollback();
 					} else {
 						await xTransaction.rollback();
@@ -720,7 +722,7 @@ class PurchaseRequestDetailRepository {
 				xJoResult = xDetail;
 			}
 
-			await xTransaction.rollback();
+			// await xTransaction.rollback();
 		} catch (e) {
 			if (xTransaction) await xTransaction.rollback();
 			xJoResult = {

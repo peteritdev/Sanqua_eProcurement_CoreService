@@ -1220,6 +1220,7 @@ class PurchaseRequestDetailService {
 										console.log(
 											`>>> xResultSendNotification: ${JSON.stringify(xResultSendNotification)}`
 										);
+										xJoResult = xResultSendNotification
 									}
 								} else {
 									xJoResult = {
@@ -1303,7 +1304,12 @@ class PurchaseRequestDetailService {
 					}
 				}
 			}
-		} catch (e) {}
+		} catch (e) {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Exception error <${_xClassName}.refreshDetailItem>: ${e.message}`
+			};
+		}
 
 		return xJoResult;
 	}

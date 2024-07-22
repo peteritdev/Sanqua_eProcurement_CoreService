@@ -628,7 +628,7 @@ class PurchaseRequestService {
 
 					let xFileArr = [];
 					var xTotalItem = 0;
-					// var xTotalRealization = 0
+					var xTotalRealization = 0
 					for (var j in xResult.file) {
 						xFileArr.push({
 							subject: xResult.file[j].subject,
@@ -677,7 +677,7 @@ class PurchaseRequestService {
 						// 05/06/2024 add totalItem & realization
 						if (xDetail[index].budget_price_total != null && xDetail[index].budget_price_total != 0) {
 							xTotalItem = xTotalItem + 1;
-							// xTotalRealization = xTotalRealization + (xDetail[index].realization != null ? xDetail[index].realization : 0)
+							xTotalRealization = xTotalRealization + (xDetail[index].realization != null ? xDetail[index].realization : 0)
 						}
 						// console.log(`>>> xDetail[index]: ${JSON.stringify(xDetail[index])}`);
 						xJoArrRequestDetailData.push({
@@ -890,7 +890,7 @@ class PurchaseRequestService {
 						took_by_name: xResult.took_by_name,
 						fpb_type: xResult.fpb_type,
 						// budget_plan: xResult.budget_plan,
-						// total_realization: xTotalRealization,
+						total_realization: xTotalRealization,
 						total_item_with_budget: xTotalItem
 					};
 
