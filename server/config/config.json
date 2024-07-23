@@ -31,7 +31,8 @@
         }
       },
       "separatorData": "Þ",
-      "forgotPasswordLink": "http://localhost:8080/procurement/u/forgot_password/#VERIFICATION_CODE#"
+      "forgotPasswordLink": "http://localhost:8080/procurement/u/forgot_password/#VERIFICATION_CODE#",
+      "pendingNotifDay": 3
     },
     
 
