@@ -428,8 +428,8 @@ class PurchaseRequestRepository {
 
 		if (pParam.hasOwnProperty('pending_notif')) {
 			if (pParam.pending_notif != null & pParam.pending_notif != '' && pParam.pending_notif != 0) {
-				xSqlWhere += ' AND (pr.approved_at < (now() - interval :pendingNotif day) OR pr.approved_at is null)';
-				xObjJsonWhere.pendingNotif = '3';
+				xSqlWhere += ` AND (pr.approved_at < (now() - interval ${config.pendingNotifDay} day) OR pr.approved_at is null)`;
+				// xObjJsonWhere.pendingNotif = '3' + config.pendingNotifDay;
 			}
 		}
 
