@@ -31,8 +31,7 @@
         }
       },
       "separatorData": "Þ",
-      "forgotPasswordLink": "http://localhost:8080/procurement/u/forgot_password/#VERIFICATION_CODE#",
-      "pendingNotifDay": 3
+      "forgotPasswordLink": "http://localhost:8080/procurement/u/forgot_password/#VERIFICATION_CODE#"
     },
     
 
@@ -110,7 +109,8 @@
         "accounting": "peter.susanto@sanqua.co.id,arif.0496.rahman@gmail.com,muthia.aw.ma@gmail.com"
       }
       
-    }
+    },
+    "pendingNotifDay": 3
   },
 
   "development": {
