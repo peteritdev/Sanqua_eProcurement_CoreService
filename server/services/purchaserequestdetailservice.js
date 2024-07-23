@@ -1220,7 +1220,7 @@ class PurchaseRequestDetailService {
 										console.log(
 											`>>> xResultSendNotification: ${JSON.stringify(xResultSendNotification)}`
 										);
-										xJoResult = xResultSendNotification
+										xJoResult = xResultSendNotification;
 									}
 								} else {
 									xJoResult = {
@@ -1281,12 +1281,17 @@ class PurchaseRequestDetailService {
 				if (xItems.hasOwnProperty('data')) {
 					for (var i in xItems.data.purchase_request_detail) {
 						if (xItems.data.purchase_request_detail[i].is_item_match_with_odoo == 0) {
-							xJaArrCheckItem.push({
-								code: xItems.data.purchase_request_detail[i].product.code,
-								name: xItems.data.purchase_request_detail[i].product.name,
-								uom: xItems.data.purchase_request_detail[i].uom,
-								index: 0
-							});
+							if (
+								xItems.data.purchase_request_detail[i].product.code != null &&
+								xItems.data.purchase_request_detail[i].product.code != ''
+							) {
+								xJaArrCheckItem.push({
+									code: xItems.data.purchase_request_detail[i].product.code,
+									name: xItems.data.purchase_request_detail[i].product.name,
+									uom: xItems.data.purchase_request_detail[i].uom,
+									index: 0
+								});
+							}
 						}
 					}
 
