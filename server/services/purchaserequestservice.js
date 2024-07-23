@@ -964,6 +964,7 @@ class PurchaseRequestService {
 			} else {
 				pParam.requested_at = await _utilInstance.getCurrDateTime();
 				pParam.status = 1;
+				pParam.approved_at = null;
 
 				var xUpdateResult = await _repoInstance.save(pParam, 'submit_fpb');
 				xJoResult = xUpdateResult;

@@ -106,7 +106,7 @@
 
     "notification": {
       "email": {
-        "accounting": "peter.susanto@sanqua.co.id,arif.0496.rahman@gmail.com,muthia.aw.ma@gmail.com"
+        "accounting": "peter.susanto@sanqua.co.id,a1.arifrahman.1213@gmail.com,muthia.aw.ma@gmail.com"
       }
       
     },
@@ -212,6 +212,12 @@
       "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel", "Paid"]
     },
     "categoryItem": ["", "Raw Material", "Factory Supply", "Office Supply", "Sparepart", "Jasa", "Maintenance Repair", "Investment / Asset"],
+    "notification": {
+      "email": {
+        "accounting": "peter.susanto@sanqua.co.id,a1.arifrahman.1213@gmail.com,muthia.aw.ma@gmail.com"
+      }
+      
+    },
     "pendingNotifDay": 3
   },  
 
@@ -318,7 +324,7 @@
     "categoryItem": ["", "Raw Material", "Factory Supply", "Office Supply", "Sparepart", "Jasa", "Maintenance Repair", "Investment / Asset"],
     "notification": {
       "email": {
-        "accounting": "peter.susanto@sanqua.co.id,arif.0496.rahman@gmail.com,muthia.aw.ma@gmail.com"
+        "accounting": "peter.susanto@sanqua.co.id,a1.arifrahman.1213@gmail.com,muthia.aw.ma@gmail.com"
       }
       
     },
@@ -427,7 +433,7 @@
     "categoryItem": ["", "Raw Material", "Factory Supply", "Office Supply", "Sparepart", "Jasa", "Maintenance Repair", "Investment / Asset"],
     "notification": {
       "email": {
-        "accounting": "peter.susanto@sanqua.co.id,arif.0496.rahman@gmail.com,muthia.aw.ma@gmail.com"
+        "accounting": "peter.susanto@sanqua.co.id,a1.arifrahman.1213@gmail.com,muthia.aw.ma@gmail.com"
       }
       
     },
