@@ -31,7 +31,8 @@
         }
       },
       "separatorData": "Þ",
-      "forgotPasswordLink": "http://localhost:8080/procurement/u/forgot_password/#VERIFICATION_CODE#"
+      "forgotPasswordLink": "http://localhost:8080/procurement/u/forgot_password/#VERIFICATION_CODE#",
+      "pendingNotifDay": 3
     },
     
 
@@ -63,7 +64,7 @@
         }
       },
 
-      "eSanqua": "http://localhost:1193/api/esanqua/v1",
+      "eSanqua": "http://10.10.20.5:2193/api/esanqua/v1",
       "odoo": "http://10.10.20.5:9898/api",
       "logging": {
         "url": "http://10.10.20.5:8191/api/esanqua/log/v1/ecatalog"

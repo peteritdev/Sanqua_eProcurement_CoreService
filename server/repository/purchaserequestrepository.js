@@ -426,10 +426,10 @@ class PurchaseRequestRepository {
 			}
 		}
 
-		if (pParam.hasOwnProperty('more_than_approved')) {
-			if (pParam.more_than_approved != '') {
-				xSqlWhere += ' AND (pr.approved_at < (now() - interval :more_than_approved day) OR pr.approved_at is null)';
-				xObjJsonWhere.more_than_approved = `${pParam.more_than_approved}`;
+		if (pParam.hasOwnProperty('pending_notif')) {
+			if (pParam.pending_notif != null & pParam.pending_notif != '' && pParam.pending_notif != 0) {
+				xSqlWhere += ' AND (pr.approved_at < (now() - interval :pending_notif day) OR pr.approved_at is null)';
+				xObjJsonWhere.pending_notif = `${config.frontParam.pendingNotifDay}`;
 			}
 		}
 

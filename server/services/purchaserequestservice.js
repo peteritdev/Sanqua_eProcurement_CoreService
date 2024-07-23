@@ -372,9 +372,11 @@ class PurchaseRequestService {
 					pParam.department_id = pParam.logged_department_id;
 				}
 
-				if (pParam.hasOwnProperty('more_than_approved')) {
-					delete pParam.department_id
-					delete pParam.owned_document_no
+				if (pParam.hasOwnProperty('pending_notif')) {
+					if (pParam.pending_notif != null & pParam.pending_notif != '' && pParam.pending_notif != 0) {
+						delete pParam.department_id
+						delete pParam.owned_document_no
+					}
 				}
 				// if (pParam.hasOwnProperty('budget_plan_id')) {
 				// 	const bDect = await _utilInstance.decrypt(pParam.budget_plan_id, config.cryptoKey.hashKey);

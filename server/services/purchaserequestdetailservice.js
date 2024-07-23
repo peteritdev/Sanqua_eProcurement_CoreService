@@ -1137,7 +1137,8 @@ class PurchaseRequestDetailService {
 					let xDetail = await _purchaseRequestServiceInstance.getById(pParam);
 					if (xDetail.status_code == '00') {
 						if (xDetail.hasOwnProperty('data')) {
-							if (xDetail.data.status.id != 2) {
+							// if (xDetail.data.status.id != 2) {
+							if (false) {
 								xJoResult = {
 									status_code: '-99',
 									status_msg:
