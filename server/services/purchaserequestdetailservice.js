@@ -1169,12 +1169,10 @@ class PurchaseRequestDetailService {
 											}
 											xFlagProcess = true;
 										} else {
-											console.log(`>>> Here false 1...`);
 											xFlagProcess = false;
 											break;
 										}
 									} else {
-										console.log(`>>> Here false 2...`);
 										xFlagProcess = false;
 										break;
 									}
@@ -1185,25 +1183,26 @@ class PurchaseRequestDetailService {
 										let xResultCheckItem = await this.checkItem({
 											items: xParamCheckItem
 										});
+										console.log(`>>> xResultCheckItem\n${JSON.stringify(xParamCheckItem)}\n${JSON.stringify(xResultCheckItem)}`);
 
 										if (xResultCheckItem.status_code == '00') {
 											for (var i in xParamCheckItem) {
 												let xFindOdooResult = xResultCheckItem.data.filter(
 													(d) => d.code === xParamCheckItem[i].code
 												);
+												console.log(`>>> xFindOdooResult: ${JSON.stringify(xFindOdooResult)}`);
 												xDataComparison = {
 													ecatalog: {
 														product_code: xParamCheckItem[i].code,
 														product_name: xParamCheckItem[i].name,
 														uom: xParamCheckItem[i].uom
 													},
-													odoo: xFindOdooResult[0],
+													odoo: xFindOdooResult[0].odoo[0],
 													description: xFindOdooResult[0].message
 												};
 												xArrData.push(xDataComparison);
 											}
 										}
-
 										console.log(`>>> xArrData: ${JSON.stringify(xArrData)}`);
 
 										let xResultSendNotification = await _notificationService.sendNotificationEmail_EqualizationOdoo(
