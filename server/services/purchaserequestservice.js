@@ -371,6 +371,11 @@ class PurchaseRequestService {
 				if (!pParam.hasOwnProperty('department_id')) {
 					pParam.department_id = pParam.logged_department_id;
 				}
+
+				if (pParam.hasOwnProperty('more_than_approved')) {
+					delete pParam.department_id
+					delete pParam.owned_document_no
+				}
 				// if (pParam.hasOwnProperty('budget_plan_id')) {
 				// 	const bDect = await _utilInstance.decrypt(pParam.budget_plan_id, config.cryptoKey.hashKey);
 				// 	if (bDect.status_code == '00') {
@@ -383,7 +388,7 @@ class PurchaseRequestService {
 
 				if (xResultList.total_record > 0) {
 					var xRows = xResultList.data;
-					console.log('xRows>>>>>>>>', xRows);
+					// console.log('xRows>>>>>>>>', xRows);
 
 					if (pParam.hasOwnProperty('is_export')) {
 						if (pParam.is_export) {
@@ -460,7 +465,8 @@ class PurchaseRequestService {
 										// add new 16/11/2023
 										estimate_fulfillment: xRows[index].estimate_fulfillment,
 										status: xRows[index].item_detail_status
-									}
+									},
+									approved_at: xRows[index].approved_at
 								});
 							}
 						} else {
@@ -516,7 +522,8 @@ class PurchaseRequestService {
 									category_item: {
 										id: xRows[index].category_item,
 										name: config.categoryItem[xRows[index].category_item]
-									}
+									},
+									approved_at: xRows[index].approved_at
 								});
 							}
 						}
@@ -574,7 +581,8 @@ class PurchaseRequestService {
 								category_item: {
 									id: xRows[index].category_item,
 									name: config.categoryItem[xRows[index].category_item]
-								}
+								},
+								approved_at: xRows[index].approved_at
 							});
 						}
 					}
@@ -890,7 +898,8 @@ class PurchaseRequestService {
 						fpb_type: xResult.fpb_type,
 						// budget_plan: xResult.budget_plan,
 						total_realization: xTotalRealization,
-						total_item_with_budget: xTotalItem
+						total_item_with_budget: xTotalItem,
+						approved_at: xResult.approved_at
 					};
 
 					xJoResult = {
@@ -1264,7 +1273,8 @@ class PurchaseRequestService {
 								// };
 								var xParamUpdatePR = {
 									id: pParam.document_id,
-									status: 5
+									status: 5,
+									approved_at: await _utilInstance.getCurrDateTime()
 								};
 								var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
 
@@ -1658,7 +1668,7 @@ class PurchaseRequestService {
 
 				if (xResultList.total_record > 0) {
 					var xRows = xResultList.data;
-					console.log('xRows>>>>>>>>', xRows);
+					// console.log('xRows>>>>>>>>', xRows);
 
 					for (var index in xRows) {
 						xJoArrData.push({
