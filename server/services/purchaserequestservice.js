@@ -371,6 +371,11 @@ class PurchaseRequestService {
 				if (!pParam.hasOwnProperty('department_id')) {
 					pParam.department_id = pParam.logged_department_id;
 				}
+
+				if (pParam.hasOwnProperty('more_than_approved')) {
+					delete pParam.department_id
+					delete pParam.owned_document_no
+				}
 				// if (pParam.hasOwnProperty('budget_plan_id')) {
 				// 	const bDect = await _utilInstance.decrypt(pParam.budget_plan_id, config.cryptoKey.hashKey);
 				// 	if (bDect.status_code == '00') {
@@ -383,7 +388,7 @@ class PurchaseRequestService {
 
 				if (xResultList.total_record > 0) {
 					var xRows = xResultList.data;
-					console.log('xRows>>>>>>>>', xRows);
+					// console.log('xRows>>>>>>>>', xRows);
 
 					if (pParam.hasOwnProperty('is_export')) {
 						if (pParam.is_export) {
@@ -460,7 +465,8 @@ class PurchaseRequestService {
 										// add new 16/11/2023
 										estimate_fulfillment: xRows[index].estimate_fulfillment,
 										status: xRows[index].item_detail_status
-									}
+									},
+									approved_at: xRows[index].approved_at
 								});
 							}
 						} else {
@@ -516,7 +522,8 @@ class PurchaseRequestService {
 									category_item: {
 										id: xRows[index].category_item,
 										name: config.categoryItem[xRows[index].category_item]
-									}
+									},
+									approved_at: xRows[index].approved_at
 								});
 							}
 						}
@@ -574,7 +581,8 @@ class PurchaseRequestService {
 								category_item: {
 									id: xRows[index].category_item,
 									name: config.categoryItem[xRows[index].category_item]
-								}
+								},
+								approved_at: xRows[index].approved_at
 							});
 						}
 					}
@@ -628,7 +636,7 @@ class PurchaseRequestService {
 
 					let xFileArr = [];
 					var xTotalItem = 0;
-					// var xTotalRealization = 0
+					var xTotalRealization = 0
 					for (var j in xResult.file) {
 						xFileArr.push({
 							subject: xResult.file[j].subject,
@@ -661,12 +669,23 @@ class PurchaseRequestService {
 									// request_id: xDetail[index].request_id
 								});
 							}
+						} else {
+							if (xResult.project == null && xDetail[index].is_item_match_with_odoo == 1 && xDetail[index].product_code == null) {
+								xOdooArrItem.push({
+									id: xDetail[index].id,
+									code: null,
+									name: xDetail[index].product_name,
+									uom: xDetail[index].uom_name != null ? xDetail[index].uom_name : '',
+									index: index,
+									// request_id: xDetail[index].request_id
+								});
+							}
 						}
 						// ----
 						// 05/06/2024 add totalItem & realization
 						if (xDetail[index].budget_price_total != null && xDetail[index].budget_price_total != 0) {
 							xTotalItem = xTotalItem + 1;
-							// xTotalRealization = xTotalRealization + (xDetail[index].realization != null ? xDetail[index].realization : 0)
+							xTotalRealization = xTotalRealization + (xDetail[index].realization != null ? xDetail[index].realization : 0)
 						}
 						// console.log(`>>> xDetail[index]: ${JSON.stringify(xDetail[index])}`);
 						xJoArrRequestDetailData.push({
@@ -783,11 +802,18 @@ class PurchaseRequestService {
 									xItemCode = xResultItem.code;
 								}
 
+								var is_match = 0
+								if (xResultItem.status == '00') {
+									is_match = 1
+									if (xResult.project == null && xItemCode == null) {
+										is_match = 0
+									}
+								}
 								const xParamUpdate = {
 									// id: xOdooArrItem[parseInt(xResult[i].index)].id,
 									request_id: xResult.id,
 									// id: xResult[i].id,
-									is_item_match_with_odoo: xResultItem.status == '00' ? 1 : 0,
+									is_item_match_with_odoo: is_match,
 									user_id: xJoArrRequestDetailData[0].updated_by,
 									user_name: xJoArrRequestDetailData[0].updated_by_name,
 									product_code: xItemCode,
@@ -802,6 +828,7 @@ class PurchaseRequestService {
 							}
 						}
 					}
+					console.log(`>>> hereee`);
 
 					xJoData = {
 						id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
@@ -870,8 +897,9 @@ class PurchaseRequestService {
 						took_by_name: xResult.took_by_name,
 						fpb_type: xResult.fpb_type,
 						// budget_plan: xResult.budget_plan,
-						// total_realization: xTotalRealization,
-						total_item_with_budget: xTotalItem
+						total_realization: xTotalRealization,
+						total_item_with_budget: xTotalItem,
+						approved_at: xResult.approved_at
 					};
 
 					xJoResult = {
@@ -1245,7 +1273,8 @@ class PurchaseRequestService {
 								// };
 								var xParamUpdatePR = {
 									id: pParam.document_id,
-									status: 5
+									status: 5,
+									approved_at: await _utilInstance.getCurrDateTime()
 								};
 								var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
 
@@ -1639,7 +1668,7 @@ class PurchaseRequestService {
 
 				if (xResultList.total_record > 0) {
 					var xRows = xResultList.data;
-					console.log('xRows>>>>>>>>', xRows);
+					// console.log('xRows>>>>>>>>', xRows);
 
 					for (var index in xRows) {
 						xJoArrData.push({

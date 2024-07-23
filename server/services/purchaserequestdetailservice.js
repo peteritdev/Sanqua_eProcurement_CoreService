@@ -590,6 +590,7 @@ class PurchaseRequestDetailService {
 													// }
 													if (
 														xItemInfo.data.status != 0 &&
+														// xItemInfo.data.status != 3 &&
 														xItemInfo.data.status != 5 &&
 														xDetail.data.fpb_type == 'po'
 													) {
@@ -1219,6 +1220,7 @@ class PurchaseRequestDetailService {
 										console.log(
 											`>>> xResultSendNotification: ${JSON.stringify(xResultSendNotification)}`
 										);
+										xJoResult = xResultSendNotification
 									}
 								} else {
 									xJoResult = {

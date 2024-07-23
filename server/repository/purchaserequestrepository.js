@@ -426,6 +426,13 @@ class PurchaseRequestRepository {
 			}
 		}
 
+		if (pParam.hasOwnProperty('more_than_approved')) {
+			if (pParam.more_than_approved != '') {
+				xSqlWhere += ' AND pr.approved_at < (now() - interval :more_than_approved day)';
+				xObjJsonWhere.more_than_approved = `${pParam.more_than_approved}`;
+			}
+		}
+
 		if (pParam.hasOwnProperty('keyword')) {
 			if (pParam.keyword != '') {
 				let xSqlWhereKeyword = ` 
@@ -509,7 +516,7 @@ class PurchaseRequestRepository {
 		if (!pParam.hasOwnProperty('is_export')) {
 			xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
 			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item,
-			p.id AS "project_id", p.code AS "project_code", p.name AS "project_name", p.odoo_project_code`;
+			p.id AS "project_id", p.code AS "project_code", p.name AS "project_name", p.odoo_project_code, pr.approved_at`;
 
 			xSqlGroupBy = ` GROUP BY pr.id, 
 						pr.request_no, 
@@ -532,7 +539,7 @@ class PurchaseRequestRepository {
 		} else {
 			if (pParam.is_export) {
 				xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
-								pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item, 
+								pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item, pr.approved_at, 
 								prd.product_code,
 								prd.product_name,
 								prd.qty,
@@ -552,7 +559,7 @@ class PurchaseRequestRepository {
 			} else {
 				xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
 			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item,
-			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
+			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code, pr.approved_at`;
 
 				xSqlGroupBy = ` GROUP BY pr.id, 
 						pr.request_no, 
@@ -589,7 +596,6 @@ class PurchaseRequestRepository {
 		  WHERE ${xSqlWhere}`;
 
 		// console.log(`>>> xSqlCount: ${xSqlCount}`);
-
 		xData = await sequelize.query(xSql, {
 			replacements: xObjJsonWhere,
 			type: sequelize.QueryTypes.SELECT

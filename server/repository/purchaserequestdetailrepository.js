@@ -264,7 +264,8 @@ class PurchaseRequestDetailRepository {
 			} else if (pAct == 'update_by_pr_no') {
 				pParam.create_po_at = await _utilInstance.getCurrDateTime();
 				var xPRNo = pParam.pr_no;
-
+				delete pParam.pr_no;
+				pParam.is_po_created = false;
 				var xWhere = {
 					where: {
 						pr_no: xPRNo
@@ -660,7 +661,6 @@ class PurchaseRequestDetailRepository {
 									}
 								]
 							});
-							// console.log(`>>> xProductDetail: ${JSON.stringify(xProductDetail)}`);
 
 							// Get element from check item result to Odoo
 							let xResultOdoo = pParam.check_item_result.find((el) => el.code == xProductDetail.code);
@@ -669,15 +669,14 @@ class PurchaseRequestDetailRepository {
 							} else {
 								xIsMatchOdoo = 0;
 							}
-
 							// Process Re-Add to detail
 							xResultDb = await _modelDb.create(
 								{
 									product_id: xProductDetail.id,
 									product_code: xProductDetail.code,
 									product_name: xProductDetail.name,
-									uom_id: xProductDetail.hasOwnProperty('unit') ? xProductDetail.unit.id : null,
-									uom_name: xProductDetail.hasOwnProperty('unit') ? xProductDetail.unit.name : null,
+									uom_id: xProductDetail.hasOwnProperty('unit') ? xProductDetail.unit != null ? xProductDetail.unit.id : null : null,
+									uom_name: xProductDetail.hasOwnProperty('unit') ? xProductDetail.unit != null ? xProductDetail.unit.name : null : null,
 
 									qty: xDetail.data.rows[i].qty,
 									budget_price_per_unit: xDetail.data.rows[i].budget_price_per_unit,

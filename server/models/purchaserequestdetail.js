@@ -72,7 +72,7 @@ module.exports = (sequelize, DataTypes) => {
 		updated_by: DataTypes.INTEGER,
 		updated_by_name: DataTypes.STRING,
 		is_item_match_with_odoo: DataTypes.INTEGER,
-		// realization: DataTypes.DOUBLE,
+		realization: DataTypes.DOUBLE,
 		fulfillment_status: DataTypes.INTEGER,
 	});
 

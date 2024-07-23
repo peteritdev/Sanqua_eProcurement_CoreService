@@ -72,7 +72,8 @@ module.exports = (sequelize, DataTypes) => {
 			field: 'updated_at'
 		},
 		updated_by: DataTypes.INTEGER,
-		updated_by_name: DataTypes.STRING
+		updated_by_name: DataTypes.STRING,
+		approved_at: DataTypes.DATE,
 	});
 
 	PurchaseRequest.associate = function(models) {
