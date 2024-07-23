@@ -428,7 +428,7 @@ class PurchaseRequestRepository {
 
 		if (pParam.hasOwnProperty('more_than_approved')) {
 			if (pParam.more_than_approved != '') {
-				xSqlWhere += ' AND pr.approved_at < (now() - interval :more_than_approved day)';
+				xSqlWhere += ' AND (pr.approved_at < (now() - interval :more_than_approved day) OR pr.approved_at is null)';
 				xObjJsonWhere.more_than_approved = `${pParam.more_than_approved}`;
 			}
 		}
