@@ -10,6 +10,8 @@ const _modelDb = require('../models').tr_purchaserequests;
 const _modelProject = require('../models').ms_projects;
 const _modelPurchaseRequestDetail = require('../models').tr_purchaserequestdetails;
 const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
+const _modelProduct = require('../models').ms_products;
+const _modelUnit = require('../models').ms_units;
 // const _modelBudgetPlan = require('../models').tr_budgetplans;
 
 const Utility = require('peters-globallib-v2');
@@ -34,7 +36,19 @@ class PurchaseRequestRepository {
 					{
 						model: _modelVendorCatalogueDb,
 						as: 'vendor_catalogue'
-					}
+					},
+					{
+						model: _modelProduct,
+						as: 'product',
+						attributes: [ 'id', 'code', 'name'],
+						include: [
+							{
+								model: _modelUnit,
+								as: 'unit',
+								attributes: [ 'id', 'name'],
+							}
+						]
+					},
 				]
 			},
 			{
