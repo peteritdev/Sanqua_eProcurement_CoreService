@@ -1275,20 +1275,20 @@ class PurchaseRequestDetailService {
 				token: pParam.token
 			});
 
-			// console.log(`>>> xItems: ${JSON.stringify(xItems)}`);
+			// console.log(`>>> xItems: ${JSON.stringify(xItems)} <<`);
 
 			if (xItems.status_code == '00') {
 				if (xItems.hasOwnProperty('data')) {
 					for (var i in xItems.data.purchase_request_detail) {
 						if (xItems.data.purchase_request_detail[i].is_item_match_with_odoo == 0) {
 							if (
-								xItems.data.purchase_request_detail[i].product.code != null &&
-								xItems.data.purchase_request_detail[i].product.code != ''
+								xItems.data.purchase_request_detail[i].master_product.code != null &&
+								xItems.data.purchase_request_detail[i].master_product.code != ''
 							) {
 								xJaArrCheckItem.push({
-									code: xItems.data.purchase_request_detail[i].product.code,
-									name: xItems.data.purchase_request_detail[i].product.name,
-									uom: xItems.data.purchase_request_detail[i].uom,
+									code: xItems.data.purchase_request_detail[i].master_product.code,
+									name: xItems.data.purchase_request_detail[i].master_product.name,
+									uom: xItems.data.purchase_request_detail[i].master_product.uom != null ? xItems.data.purchase_request_detail[i].master_product.uom.name : null,
 									index: 0
 								});
 							}
@@ -1301,13 +1301,13 @@ class PurchaseRequestDetailService {
 
 					let xResultCheckItem = await this.checkItem(xJoCheckItem);
 
-					console.log(`>>> xResultCheckItem: ${JSON.stringify(xResultCheckItem)}`);
+					// console.log(`>>> xResultCheckItem: ${JSON.stringify(xResultCheckItem)}`);
 					if (xResultCheckItem.status_code == '00') {
 						Object.assign(pParam, {
 							check_item_result: xResultCheckItem.data
 						});
 						xJoResult = await _repoInstance.refreshDetailForUnmatchOdoo(pParam);
-						console.log(`>>> xJoResult: ${JSON.stringify(xJoResult)}`);
+						// console.log(`>>> xJoResult: ${JSON.stringify(xJoResult)}`);
 					}
 				}
 			}

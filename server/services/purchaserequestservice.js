@@ -627,7 +627,7 @@ class PurchaseRequestService {
 			if (xFlagProcess) {
 				var xResult = await _repoInstance.getById(pParam);
 
-				// console.log(`>>> xResult: ${JSON.stringify(xResult)}`);
+				// console.log(`>>> xResultDetail: ${JSON.stringify(xResult)} <<<`);
 
 				if (xResult != null) {
 					var xJoArrRequestDetailData = [];
@@ -748,7 +748,13 @@ class PurchaseRequestService {
 							updated_by: xDetail[index].updated_by,
 							updated_by_name: xDetail[index].updated_by_name,
 							is_item_match_with_odoo: xDetail[index].is_item_match_with_odoo,
-							realization: xDetail[index].realization
+							realization: xDetail[index].realization,
+							master_product: {
+								id: xDetail[index].product.id,
+								code: xDetail[index].product.code,
+								name: xDetail[index].product.name,
+								uom: xDetail[index].product.unit
+							},
 						});
 					}
 					// Get Approval Matrix
