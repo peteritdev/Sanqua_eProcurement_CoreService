@@ -1197,7 +1197,7 @@ class PurchaseRequestDetailService {
 														product_name: xParamCheckItem[i].name,
 														uom: xParamCheckItem[i].uom
 													},
-													odoo: !xFindOdooResult[0].odoo ? xFindOdooResult[0].odoo[0] : null,
+													odoo: !xFindOdooResult[0].odoo ? null : xFindOdooResult[0].odoo[0],
 													description: xFindOdooResult[0].message
 												};
 												xArrData.push(xDataComparison);
