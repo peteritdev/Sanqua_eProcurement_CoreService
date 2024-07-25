@@ -624,8 +624,6 @@ class PurchaseRequestDetailRepository {
 				]
 			});
 
-			// console.log(`>>> xDetail : ${JSON.stringify(xDetail)}`);
-
 			if (xDetail.status_code == '00') {
 				if (xDetail.data.hasOwnProperty('rows')) {
 					let xResultDb = null;
@@ -642,7 +640,7 @@ class PurchaseRequestDetailRepository {
 						transaction: xTransaction
 					});
 
-					console.log(`>>> xResultDb: ${xResultDb}`);
+					// console.log(`>>> xResultDb: ${xResultDb}`);
 
 					if (xResultDb > 0) {
 						// Re-add the item
@@ -681,6 +679,7 @@ class PurchaseRequestDetailRepository {
 									qty: xDetail.data.rows[i].qty,
 									budget_price_per_unit: xDetail.data.rows[i].budget_price_per_unit,
 									budget_price_total: xDetail.data.rows[i].budget_price_total,
+									vendor_code: xDetail.data.rows[i].vendor_code,
 									vendor_id: xDetail.data.rows[i].vendor_id,
 									vendor_name: xDetail.data.rows[i].vendor_name,
 									has_budget: xDetail.data.rows[i].has_budget,

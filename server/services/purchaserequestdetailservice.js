@@ -1301,7 +1301,7 @@ class PurchaseRequestDetailService {
 
 					let xResultCheckItem = await this.checkItem(xJoCheckItem);
 
-					// console.log(`>>> xResultCheckItem: ${JSON.stringify(xResultCheckItem)}`);
+					// console.log(`>>> xResultCwheckItem: ${JSON.stringify(xResultCheckItem)}`);
 					if (xResultCheckItem.status_code == '00') {
 						Object.assign(pParam, {
 							check_item_result: xResultCheckItem.data
