@@ -427,6 +427,14 @@ class PurchaseRequestRepository {
 					}
 				}
 
+				// 25/07/2024
+				let xSqlWhereStatusOwnedDoc = '';
+				if (pParam.hasOwnProperty('status')) {
+					if (pParam.status != '') {
+						xSqlWhereStatusOwnedDoc = ' AND pr.status = :status';
+					}
+				}
+
 				// let xSqlWhereRabOwnedDoc = '';
 				// if (pParam.hasOwnProperty('budget_plan_id')) {
 				// 	if (pParam.budget_plan_id != '') {
@@ -436,7 +444,7 @@ class PurchaseRequestRepository {
 
 				xSqlWhere = ` (( ${xSqlWhere} ) OR (${xSqlWhereOr} ${xSqlWhereCompanyOwnedDoc != ''
 					? xSqlWhereCompanyOwnedDoc
-					: ''} ${xSqlWhereProjectOwnedDoc} ${xSqlWhereCategoryOwnedDoc} ${xSqlWhereDepartmentOwnedDoc}))`;
+					: ''} ${xSqlWhereProjectOwnedDoc} ${xSqlWhereCategoryOwnedDoc} ${xSqlWhereDepartmentOwnedDoc} ${xSqlWhereStatusOwnedDoc}))`;
 			}
 		}
 
@@ -461,7 +469,6 @@ class PurchaseRequestRepository {
 				xSqlWhere = ` ${xSqlWhere} AND (${xSqlWhereKeyword}) `;
 			}
 		}
-
 		// if (pParam.hasOwnProperty('owned_document_no') && (pParam.is_admin == 0 || pParam.logged_is_admin == 0)) {
 		// 	if (pParam.owned_document_no.length > 0) {
 		// 		xSqlWhereOr.push(' request_no IN (:ownedDocNo) ');
@@ -611,7 +618,8 @@ class PurchaseRequestRepository {
 
 		xData = await sequelize.query(xSql, {
 			replacements: xObjJsonWhere,
-			type: sequelize.QueryTypes.SELECT
+			type: sequelize.QueryTypes.SELECT,
+			// logging: console.log
 		});
 
 		xTotalRecord = await sequelize.query(xSqlCount, {
