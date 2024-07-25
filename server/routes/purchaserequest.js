@@ -222,4 +222,9 @@ module.exports = (app) => {
 	arrValidate = [];
 	arrValidate = [ check('request_id').not().isEmpty().withMessage('Parameter request_id cannot be empty') ];
 	app.post(rootAPIPath + 'refresh_item', arrValidate, purchaseRequestController.purchaseRequestDetail_RefreshItem);
+
+	// Fetch Matrix FPB
+	arrValidate = [];
+	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
+	app.post(rootAPIPath + 'fetch_matrix', arrValidate, purchaseRequestController.purchaseRequest_FetchMatrix);
 };

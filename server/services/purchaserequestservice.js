@@ -2003,6 +2003,158 @@ class PurchaseRequestService {
 		// 24/10/2023
 		return xJoResult;
 	}
+	async fetchMatrixFPB(pParam) {
+		var xJoResult = {};
+		var xDecId = null;
+		var xFlagProcess = false;
+		var xEncId = '';
+		var xClearId = '';
+
+		if (pParam.id != '' && pParam.user_id != '') {
+			xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				xFlagProcess = true;
+				xEncId = pParam.id;
+				pParam.id = xDecId.decrypted;
+				xClearId = xDecId.decrypted;
+				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.user_id = xDecId.decrypted;
+					xFlagProcess = true;
+				} else {
+					xJoResult = xDecId;
+				}
+			} else {
+				xJoResult = xDecId;
+			}
+		}
+
+		if (xFlagProcess) {
+			// Get PR Detail
+			var xPRDetail = await _repoInstance.getById({ id: xClearId });
+			console.log(`>>> xPRDetail: ${JSON.stringify(xPRDetail)}`);
+			if (xPRDetail != null) {
+				if (xPRDetail.status != 1) {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Fetch matrix cannot be processed, please check again'
+					};
+				} else {
+					pParam.approved_at = null;
+					const xUpdateParam = {
+						id: xClearId,
+						approved_at: null,
+						user_id: pParam.user_id,
+						user_name: pParam.user_name
+					}
+					var xUpdateResult = await _repoInstance.save(xUpdateParam, 'update');
+					console.log(`>>> xUpdateResult: ${JSON.stringify(xUpdateResult)}`);
+					xJoResult = xUpdateResult;
+					// Next Phase : Approval Matrix & Notification to admin
+					if (xUpdateResult.status_code == '00') {
+						// Fetch Approval Matrix
+						var xParamAddApprovalMatrix = {
+							act: 'fetch_matrix',
+							document_id: xEncId,
+							document_no: xPRDetail.request_no,
+							application_id: config.applicationId,
+							table_name: config.dbTables.fpb,
+							company_id: xPRDetail.company_id,
+							department_id: xPRDetail.department_id,
+							ecatalogue_fpb_category_item: xPRDetail.category_item == 7 ? xPRDetail.category_item : null,
+							logged_company_id: pParam.logged_company_id
+						};
+
+						var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
+							pParam.method,
+							pParam.token,
+							xParamAddApprovalMatrix
+						);
+						console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
+						xJoResult.approval_matrix_result = xApprovalMatrixResult;
+
+						if (xApprovalMatrixResult.status_code == '00') {
+							if (xApprovalMatrixResult.approvers.length > 0) {
+								let xApproverSeq1 = xApprovalMatrixResult.approvers.find((el) => el.sequence === 1);
+								if (xApproverSeq1 != null) {
+									for (var i in xApproverSeq1.approver_user) {
+										// In App notification
+										let xInAppNotificationResult = await _notificationService.inAppNotification({
+											document_code: xPRDetail.request_no,
+											document_id: xEncId,
+											document_status: xPRDetail.status,
+											mode: 'request_approval_fpb',
+											method: pParam.method,
+											token: pParam.token,
+											employee_id: await _utilInstance.encrypt(
+												xApproverSeq1.approver_user[i].employee_id.toString(),
+												config.cryptoKey.hashKey
+											)
+										});
+
+										_utilInstance.writeLog(
+											`${_xClassName}.submitFPB`,
+											`xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`,
+											'info'
+										);
+
+										// Email Notification
+										let xParamEmailNotification,
+											xNotificationResult = {};
+
+										if (xApproverSeq1.approver_user[i].notification_via_email) {
+											xParamEmailNotification = {
+												mode: 'request_approval_fpb',
+												id: xEncId,
+												request_no: xPRDetail.request_no,
+												company_name: xPRDetail.company_name,
+												department_name: xPRDetail.department_name,
+												created_by: xPRDetail.employee_name,
+												created_at:
+													xPRDetail.createdAt != null
+														? moment(xPRDetail.createdAt).format('DD MMM YYYY')
+														: '',
+												items: xPRDetail.purchase_request_detail,
+												approver_user: {
+													employee_name: xApproverSeq1.approver_user[i].user_name,
+													email: xApproverSeq1.approver_user[i].email
+												}
+											};
+											console.log(
+												`>>> xParamEmailNotification: ${JSON.stringify(
+													xParamEmailNotification
+												)}`
+											);
+											xNotificationResult = await _notificationService.sendNotificationEmail_FPBNeedApproval(
+												xParamEmailNotification,
+												pParam.method,
+												pParam.token
+											);
+
+											console.log(
+												`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`
+											);
+										}
+									}
+								}
+							}
+						}
+	
+						
+					} else {
+						xJoResult = xUpdateResult;
+					}
+				}
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Data not found. Please supply valid identifier'
+				};
+			}
+		}
+
+		return xJoResult;
+	}
 }
 
 module.exports = PurchaseRequestService;
