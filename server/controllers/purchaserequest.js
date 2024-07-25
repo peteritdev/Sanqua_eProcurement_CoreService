@@ -43,7 +43,8 @@ module.exports = {
 	purchaseRequestDetail_UpdateFulfillment,
 	purchaseRequestDetail_SendNotificationEqualizationOdoo,
 
-	purchaseRequestDetail_RefreshItem
+	purchaseRequestDetail_RefreshItem,
+	purchaseRequest_FetchMatrix
 };
 
 async function purchaseRequest_List(req, res) {
@@ -1047,6 +1048,52 @@ async function purchaseRequestDetail_RefreshItem(req, res) {
 				req.body.token = req.headers['x-token'];
 				req.body.method = req.headers['x-method'];
 				joResult = await _serviceDetailInstance.refreshDetailForUnmatchOdoo(req.body);
+				joResult = JSON.stringify(joResult);
+			}
+		} else {
+			joResult = JSON.stringify(oAuthResult);
+		}
+	} else {
+		joResult = JSON.stringify(oAuthResult);
+	}
+
+	res.setHeader('Content-Type', 'application/json');
+	res.status(200).send(joResult);
+}
+
+async function purchaseRequest_FetchMatrix(req, res) {
+	var joResult;
+	var oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
+
+	if (oAuthResult.status_code == '00') {
+		if (oAuthResult.token_data.status_code == '00') {
+			// Validate first
+			var errors = validationResult(req).array();
+
+			if (errors.length != 0 && req.body.act == 'add') {
+				joResult = JSON.stringify({
+					status_code: '-99',
+					status_msg: 'Parameter value has problem',
+					error_msg: errors
+				});
+			} else {
+				req.body.user_id = oAuthResult.token_data.result_verify.id;
+				req.body.user_name = oAuthResult.token_data.result_verify.name;
+				req.body.logged_company_id = oAuthResult.token_data.result_verify.employee_info.company.id;
+				req.body.logged_company_name = oAuthResult.token_data.result_verify.employee_info.company.name;
+
+				req.body.logged_department_id =
+					oAuthResult.token_data.result_verify.employee_info.department.section.id;
+				req.body.logged_department_name =
+					oAuthResult.token_data.result_verify.employee_info.department.section.name;
+				req.body.token = req.headers['x-token'];
+				req.body.method = req.headers['x-method'];
+
+				req.body.notification_via_fcm = oAuthResult.token_data.result_verify.notification_via_fcm;
+				req.body.notification_via_email = oAuthResult.token_data.result_verify.notification_via_email;
+				req.body.notification_via_wa = oAuthResult.token_data.result_verify.notification_via_wa;
+				req.body.notification_via_telegram = oAuthResult.token_data.result_verify.notification_via_telegram;
+				joResult = await _serviceInstance.fetchMatrixFPB(req.body);
 				joResult = JSON.stringify(joResult);
 			}
 		} else {
