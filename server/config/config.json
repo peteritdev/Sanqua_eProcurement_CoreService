@@ -433,7 +433,7 @@
     "categoryItem": ["", "Raw Material", "Factory Supply", "Office Supply", "Sparepart", "Jasa", "Maintenance Repair", "Investment / Asset"],
     "notification": {
       "email": {
-        "accounting": "peter.susanto@sanqua.co.id,ecatalog.sanqua@gmail.com,setiawan.banjar@sanqua.co.id,audit.division@sanqua.co.id,bimosanqua@gmail.com,"
+        "accounting": "peter.susanto@sanqua.co.id,ecatalog.sanqua@gmail.com,setiawan.banjar@sanqua.co.id,audit.division@sanqua.co.id"
       }
     },
     "pendingNotifDay": 3
