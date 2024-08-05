@@ -1895,7 +1895,17 @@ class PurchaseRequestService {
 				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
 				if (xDecId.status_code == '00') {
 					pParam.user_id = xDecId.decrypted;
-					xFlagProcess = true;
+					if (pParam.vendor_id != '' & pParam.vendor_id.length > 5) {
+						xDecId = await _utilInstance.decrypt(pParam.vendor_id, config.cryptoKey.hashKey);
+						if (xDecId.status_code == '00') {
+							pParam.vendor_id = xDecId.decrypted;
+							xFlagProcess = true;
+						} else {
+							xJoResult = xDecId;
+						}
+					} else {
+						xFlagProcess = true;
+					}
 				} else {
 					xJoResult = xDecId;
 				}
@@ -2003,6 +2013,7 @@ class PurchaseRequestService {
 		// 24/10/2023
 		return xJoResult;
 	}
+	
 	async fetchMatrixFPB(pParam) {
 		var xJoResult = {};
 		var xDecId = null;

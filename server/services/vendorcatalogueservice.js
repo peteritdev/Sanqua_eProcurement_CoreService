@@ -410,9 +410,9 @@ class VendorCatalogueService {
 		}
 
 		if (xFlagProcess) {
-			console.log('pParam.vendor_id',pParam.vendor_id);
+			// console.log('pParam.vendor_id',pParam.vendor_id);
 			var xResultList = await _vendorCatalogueRepoInstance.list_new(pParam);
-			console.log('xResultList', JSON.stringify(xResultList));
+			// console.log('xResultList', JSON.stringify(xResultList));
 			if (xResultList.data.length > 0) {
 				var xRows = xResultList.data;
 				for (var index in xRows) {
