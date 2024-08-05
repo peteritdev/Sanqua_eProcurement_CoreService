@@ -353,8 +353,7 @@ class VendorCatalogueRepository {
 			replacements: xObjJsonWhere,
 			type: sequelize.QueryTypes.SELECT
 		});
-
-		console.log(`>>> Data : ${JSON.stringify(xData)}`);
+		// console.log(`>>> Data : ${JSON.stringify(xData)}`);
 
 		return {
 			data: xData,

@@ -171,9 +171,10 @@ class PurchaseRequestDetailService {
 				) {
 					var xParamUpdate = {
 						id: xPurchaseRequestDetail.id,
-						qty: sequelize.literal(`qty + ${pParam.qty}`),
-						budget_price_total:
-							(xPurchaseRequestDetail.qty + pParam.qty) * xPurchaseRequestDetail.budget_price_per_unit
+						qty: Math.round((sequelize.literal(`qty + ${pParam.qty}`))*1000)/1000,
+						// qty: sequelize.literal(`qty + ${pParam.qty}`),
+						budget_price_total: Math.round(((xPurchaseRequestDetail.qty + pParam.qty) * xPurchaseRequestDetail.budget_price_per_unit)*1000)/1000
+						// (xPurchaseRequestDetail.qty + pParam.qty) * xPurchaseRequestDetail.budget_price_per_unit
 					};
 					pParam = null;
 					pParam = xParamUpdate;
@@ -208,7 +209,8 @@ class PurchaseRequestDetailService {
 						}
 					}
 
-					pParam.budget_price_total = pParam.qty * pParam.budget_price_per_unit;
+					pParam.budget_price_total = Math.round((pParam.qty * pParam.budget_price_per_unit) * 1000) / 1000
+					// pParam.budget_price_total = pParam.qty * pParam.budget_price_per_unit;
 				}
 
 				if (pParam.estimate_date_use == '') {
@@ -273,10 +275,12 @@ class PurchaseRequestDetailService {
 							var xParamUpdate = {
 								id: xPurchaseRequestDetail.id,
 								// qty: sequelize.literal(`qty + ${xItems[i].qty}`),
-								qty: xPurchaseRequestDetail.qty + xItems[i].qty,
-								budget_price_total:
-									(xPurchaseRequestDetail.qty + xItems[i].qty) *
-									xPurchaseRequestDetail.budget_price_per_unit
+								qty: Math.round((xPurchaseRequestDetail.qty + xItems[i].qty) * 1000) / 1000,
+								budget_price_total: Math.round(((xPurchaseRequestDetail.qty + xItems[i].qty) * xPurchaseRequestDetail.budget_price_per_unit) * 1000) / 1000,
+								// qty: xPurchaseRequestDetail.qty + xItems[i].qty,
+								// budget_price_total:
+								// 	(xPurchaseRequestDetail.qty + xItems[i].qty) *
+								// 	xPurchaseRequestDetail.budget_price_per_unit
 							};
 
 							xItems[i] = null;
@@ -315,7 +319,8 @@ class PurchaseRequestDetailService {
 								}
 							}
 
-							xItems[i].budget_price_total = xItems[i].qty * xItems[i].budget_price_per_unit;
+							xItems[i].budget_price_total = Math.round((xItems[i].qty * xItems[i].budget_price_per_unit) * 1000) / 1000;
+							// xItems[i].budget_price_total = xItems[i].qty * xItems[i].budget_price_per_unit;
 							xItems[i].request_id = xRequestIdClear;
 							xItems[i].user_id = pParam.user_id;
 							xItems[i].user_name = pParam.user_name;
@@ -351,17 +356,19 @@ class PurchaseRequestDetailService {
 
 					if (pParam.hasOwnProperty('qty')) {
 						if (pParam.hasOwnProperty('budget_price_per_unit')) {
-							pParam.budget_price_total = pParam.qty * pParam.budget_price_per_unit;
+							pParam.budget_price_total = Math.round((pParam.qty * pParam.budget_price_per_unit)*1000)/1000;
 						}
 
 						if (pParam.hasOwnProperty('quotation_price_per_unit')) {
-							pParam.quotation_price_total = pParam.qty * pParam.quotation_price_per_unit;
+							pParam.quotation_price_total = Math.round((pParam.qty * pParam.quotation_price_per_unit)*1000)/1000;
 						}
 					}
 
 					if (pParam.estimate_date_use == '') {
 						pParam.estimate_date_use = null;
 					}
+					
+					// console.log(`>>> editDetail : ${JSON.stringify(pParam)}`);
 					var xUpdateResult = await _repoInstance.save(pParam, xAct);
 					xJoResult = xUpdateResult;
 					if (xUpdateResult.status_code == '00') {
