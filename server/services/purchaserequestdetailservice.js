@@ -1327,6 +1327,68 @@ class PurchaseRequestDetailService {
 
 		return xJoResult;
 	}
+	
+	async cancelItem(pParam) {
+		var xJoResult = {};
+		var xDecId = null;
+		var xFlagProcess = false;
+
+		if (pParam.hasOwnProperty('logged_user_id') && pParam.hasOwnProperty('id')) {
+			if (pParam.id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.id = xDecId.decrypted;
+					xDecId = await _utilInstance.decrypt(pParam.logged_user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.logged_user_id = xDecId.decrypted;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xDecId;
+					}
+				} else {
+					xJoResult = xDecId;
+				}
+			}
+		}
+
+		if (xFlagProcess) {
+			// Get Detail of items
+			let xDetail = await _repoInstance.getByParam({
+				id: pParam.id
+			});
+			if (xDetail.status_code == '00') {
+				if (xDetail.data.status != 0) {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Item already proccessed, You cannot cancel this item'
+					};
+				} else {
+					const date = new Date();
+					const local = date.toLocaleString('id');
+					const updateAt = `[${local} | ${pParam.logged_user_name}]\n${pParam.cancel_reason}`;
+
+					let xParamUpdate = {
+						id: pParam.id,
+						status: 5,
+						cancel_reason: updateAt
+					};
+					var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
+					if (xUpdateResult.status_code == '00') {
+						xJoResult = {
+							status_code: '00',
+							status_msg: 'Data has successfully canceled'
+						};
+					} else {
+						xJoResult = xUpdateResult;
+					}
+				}
+			} else {
+				xJoResult = xDetail;
+			}
+		}
+
+		return xJoResult;
+	}
 }
 
 module.exports = PurchaseRequestDetailService;
