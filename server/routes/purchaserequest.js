@@ -227,4 +227,12 @@ module.exports = (app) => {
 	arrValidate = [];
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
 	app.post(rootAPIPath + 'fetch_matrix', arrValidate, purchaseRequestController.purchaseRequest_FetchMatrix);
+	
+	arrValidate = [];
+	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
+	app.post(
+		rootAPIPath + 'item/cancel',
+		arrValidate,
+		purchaseRequestController.purchaseRequestDetail_CancelItem
+	);
 };
