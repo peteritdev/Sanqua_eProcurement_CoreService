@@ -986,9 +986,15 @@ class PurchaseRequestService {
 							table_name: config.dbTables.fpb,
 							company_id: xPRDetail.company_id,
 							department_id: xPRDetail.department_id,
-							ecatalogue_fpb_category_item: xPRDetail.category_item >= 7 ? xPRDetail.category_item : null,
+							ecatalogue_fpb_category_item: null,
 							logged_company_id: pParam.logged_company_id
 						};
+
+						if (xPRDetail.company_id == 5 && xPRDetail.company_id == 14) {
+							xParamAddApprovalMatrix.ecatalogue_fpb_category_item = xPRDetail.category_item
+						} else {
+							xParamAddApprovalMatrix.ecatalogue_fpb_category_item = xPRDetail.category_item >= 7 ? xPRDetail.category_item : null
+						}
 
 						var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
 							pParam.method,
@@ -2072,9 +2078,15 @@ class PurchaseRequestService {
 							table_name: config.dbTables.fpb,
 							company_id: xPRDetail.company_id,
 							department_id: xPRDetail.department_id,
-							ecatalogue_fpb_category_item: xPRDetail.category_item >= 7 ? xPRDetail.category_item : null,
+							ecatalogue_fpb_category_item: null,
 							logged_company_id: pParam.logged_company_id
 						};
+						
+						if (xPRDetail.company_id == 5 && xPRDetail.company_id == 14) {
+							xParamAddApprovalMatrix.ecatalogue_fpb_category_item = xPRDetail.category_item
+						} else {
+							xParamAddApprovalMatrix.ecatalogue_fpb_category_item = xPRDetail.category_item >= 7 ? xPRDetail.category_item : null
+						}
 
 						var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
 							pParam.method,
