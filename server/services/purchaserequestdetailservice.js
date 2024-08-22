@@ -171,9 +171,14 @@ class PurchaseRequestDetailService {
 				) {
 					var xParamUpdate = {
 						id: xPurchaseRequestDetail.id,
-						qty: Math.round((sequelize.literal(`qty + ${pParam.qty}`))*1000)/1000,
+						qty: Math.round(sequelize.literal(`qty + ${pParam.qty}`) * 1000) / 1000,
 						// qty: sequelize.literal(`qty + ${pParam.qty}`),
-						budget_price_total: Math.round(((xPurchaseRequestDetail.qty + pParam.qty) * xPurchaseRequestDetail.budget_price_per_unit)*1000)/1000
+						budget_price_total:
+							Math.round(
+								(xPurchaseRequestDetail.qty + pParam.qty) *
+									xPurchaseRequestDetail.budget_price_per_unit *
+									1000
+							) / 1000
 						// (xPurchaseRequestDetail.qty + pParam.qty) * xPurchaseRequestDetail.budget_price_per_unit
 					};
 					pParam = null;
@@ -209,7 +214,7 @@ class PurchaseRequestDetailService {
 						}
 					}
 
-					pParam.budget_price_total = Math.round((pParam.qty * pParam.budget_price_per_unit) * 1000) / 1000
+					pParam.budget_price_total = Math.round(pParam.qty * pParam.budget_price_per_unit * 1000) / 1000;
 					// pParam.budget_price_total = pParam.qty * pParam.budget_price_per_unit;
 				}
 
@@ -276,7 +281,12 @@ class PurchaseRequestDetailService {
 								id: xPurchaseRequestDetail.id,
 								// qty: sequelize.literal(`qty + ${xItems[i].qty}`),
 								qty: Math.round((xPurchaseRequestDetail.qty + xItems[i].qty) * 1000) / 1000,
-								budget_price_total: Math.round(((xPurchaseRequestDetail.qty + xItems[i].qty) * xPurchaseRequestDetail.budget_price_per_unit) * 1000) / 1000,
+								budget_price_total:
+									Math.round(
+										(xPurchaseRequestDetail.qty + xItems[i].qty) *
+											xPurchaseRequestDetail.budget_price_per_unit *
+											1000
+									) / 1000
 								// qty: xPurchaseRequestDetail.qty + xItems[i].qty,
 								// budget_price_total:
 								// 	(xPurchaseRequestDetail.qty + xItems[i].qty) *
@@ -319,7 +329,8 @@ class PurchaseRequestDetailService {
 								}
 							}
 
-							xItems[i].budget_price_total = Math.round((xItems[i].qty * xItems[i].budget_price_per_unit) * 1000) / 1000;
+							xItems[i].budget_price_total =
+								Math.round(xItems[i].qty * xItems[i].budget_price_per_unit * 1000) / 1000;
 							// xItems[i].budget_price_total = xItems[i].qty * xItems[i].budget_price_per_unit;
 							xItems[i].request_id = xRequestIdClear;
 							xItems[i].user_id = pParam.user_id;
@@ -356,18 +367,20 @@ class PurchaseRequestDetailService {
 
 					if (pParam.hasOwnProperty('qty')) {
 						if (pParam.hasOwnProperty('budget_price_per_unit')) {
-							pParam.budget_price_total = Math.round((pParam.qty * pParam.budget_price_per_unit)*1000)/1000;
+							pParam.budget_price_total =
+								Math.round(pParam.qty * pParam.budget_price_per_unit * 1000) / 1000;
 						}
 
 						if (pParam.hasOwnProperty('quotation_price_per_unit')) {
-							pParam.quotation_price_total = Math.round((pParam.qty * pParam.quotation_price_per_unit)*1000)/1000;
+							pParam.quotation_price_total =
+								Math.round(pParam.qty * pParam.quotation_price_per_unit * 1000) / 1000;
 						}
 					}
 
 					if (pParam.estimate_date_use == '') {
 						pParam.estimate_date_use = null;
 					}
-					
+
 					// console.log(`>>> editDetail : ${JSON.stringify(pParam)}`);
 					var xUpdateResult = await _repoInstance.save(pParam, xAct);
 					xJoResult = xUpdateResult;
@@ -1190,7 +1203,11 @@ class PurchaseRequestDetailService {
 										let xResultCheckItem = await this.checkItem({
 											items: xParamCheckItem
 										});
-										console.log(`>>> xResultCheckItem\n${JSON.stringify(xParamCheckItem)}\n${JSON.stringify(xResultCheckItem)}`);
+										console.log(
+											`>>> xResultCheckItem\n${JSON.stringify(xParamCheckItem)}\n${JSON.stringify(
+												xResultCheckItem
+											)}`
+										);
 
 										if (xResultCheckItem.status_code == '00') {
 											for (var i in xParamCheckItem) {
@@ -1214,7 +1231,7 @@ class PurchaseRequestDetailService {
 
 										let xResultSendNotification = await _notificationService.sendNotificationEmail_EqualizationOdoo(
 											{
-												email: config.notification.email.accounting,
+												email: `${config.notification.email.accounting},${pParam.user_email}`,
 												items: xArrData,
 												request_no: xDetail.data.request_no,
 												employee_name: xDetail.data.employee.name,
@@ -1295,7 +1312,10 @@ class PurchaseRequestDetailService {
 								xJaArrCheckItem.push({
 									code: xItems.data.purchase_request_detail[i].master_product.code,
 									name: xItems.data.purchase_request_detail[i].master_product.name,
-									uom: xItems.data.purchase_request_detail[i].master_product.uom != null ? xItems.data.purchase_request_detail[i].master_product.uom.name : null,
+									uom:
+										xItems.data.purchase_request_detail[i].master_product.uom != null
+											? xItems.data.purchase_request_detail[i].master_product.uom.name
+											: null,
 									index: 0
 								});
 							}
@@ -1327,7 +1347,7 @@ class PurchaseRequestDetailService {
 
 		return xJoResult;
 	}
-	
+
 	async cancelItem(pParam) {
 		var xJoResult = {};
 		var xDecId = null;

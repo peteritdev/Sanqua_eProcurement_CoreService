@@ -1010,6 +1010,7 @@ async function purchaseRequestDetail_SendNotificationEqualizationOdoo(req, res) 
 			} else {
 				req.body.user_id = oAuthResult.token_data.result_verify.id;
 				req.body.user_name = oAuthResult.token_data.result_verify.name;
+				req.body.user_email = oAuthResult.token_data.result_verify.email;
 
 				req.body.token = req.headers['x-token'];
 				req.body.method = req.headers['x-method'];
