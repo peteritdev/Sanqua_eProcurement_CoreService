@@ -374,7 +374,9 @@ class PurchaseRequestService {
 
 				if (pParam.hasOwnProperty('pending_notif')) {
 					if (pParam.pending_notif != null & pParam.pending_notif != '' && pParam.pending_notif != 0) {
-						delete pParam.department_id
+						if (pParam.logged_department_name.includes('PURCHASING') || pParam.logged_department_name.includes('PROCUREMENT') || pParam.logged_department_name.includes('PRO/MIS/IC')) {
+							delete pParam.department_id
+						}
 						delete pParam.owned_document_no
 					}
 				}
