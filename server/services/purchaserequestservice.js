@@ -909,7 +909,9 @@ class PurchaseRequestService {
 						// budget_plan: xResult.budget_plan,
 						total_realization: xTotalRealization,
 						total_item_with_budget: xTotalItem,
-						approved_at: xResult.approved_at
+						approved_at: xResult.approved_at,
+						last_click_equalization_at: xResult.last_click_equalization_at,
+						last_click_equalization_by_name: xResult.last_click_equalization_by_name,
 					};
 
 					xJoResult = {
