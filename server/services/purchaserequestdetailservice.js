@@ -19,6 +19,9 @@ const _utilInstance = new Utility();
 const PurchaseRequestDetailRepository = require('../repository/purchaserequestdetailrepository.js');
 const _repoInstance = new PurchaseRequestDetailRepository();
 
+const PurchaseRequestRepository = require('../repository/purchaserequestrepository.js');
+const _purchaseRequestRepoInstance = new PurchaseRequestRepository();
+
 // Service
 const ProductServiceRepository = require('../services/productservice.js');
 const _productServiceInstance = new ProductServiceRepository();
@@ -1203,18 +1206,18 @@ class PurchaseRequestDetailService {
 										let xResultCheckItem = await this.checkItem({
 											items: xParamCheckItem
 										});
-										console.log(
-											`>>> xResultCheckItem\n${JSON.stringify(xParamCheckItem)}\n${JSON.stringify(
-												xResultCheckItem
-											)}`
-										);
+										// console.log(
+										// 	`>>> xResultCheckItem\n${JSON.stringify(xParamCheckItem)}\n${JSON.stringify(
+										// 		xResultCheckItem
+										// 	)}`
+										// );
 
 										if (xResultCheckItem.status_code == '00') {
 											for (var i in xParamCheckItem) {
 												let xFindOdooResult = xResultCheckItem.data.filter(
 													(d) => d.code === xParamCheckItem[i].code
 												);
-												console.log(`>>> xFindOdooResult: ${JSON.stringify(xFindOdooResult)}`);
+												// console.log(`>>> xFindOdooResult: ${JSON.stringify(xFindOdooResult)}`);
 												xDataComparison = {
 													ecatalog: {
 														product_code: xParamCheckItem[i].code,
@@ -1227,7 +1230,7 @@ class PurchaseRequestDetailService {
 												xArrData.push(xDataComparison);
 											}
 										}
-										console.log(`>>> xArrData: ${JSON.stringify(xArrData)}`);
+										// console.log(`>>> xArrData: ${JSON.stringify(xArrData)}`);
 
 										let xResultSendNotification = await _notificationService.sendNotificationEmail_EqualizationOdoo(
 											{
@@ -1244,6 +1247,13 @@ class PurchaseRequestDetailService {
 										console.log(
 											`>>> xResultSendNotification: ${JSON.stringify(xResultSendNotification)}`
 										);
+										// update last clicked
+										if (xResultSendNotification.status_code == '00') {
+											var xUdateLastClickResult = await _purchaseRequestRepoInstance.updateLastClickPendingNotif({ id: pParam.id, user_name: pParam.user_name}, 'update')
+											// console.log(
+											// 	`>>> xUdateLastClickResult: ${JSON.stringify(xUdateLastClickResult)}`
+											// );
+										}
 										xJoResult = xResultSendNotification;
 									}
 								} else {

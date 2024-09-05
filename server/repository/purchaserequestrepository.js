@@ -1262,6 +1262,51 @@ class PurchaseRequestRepository {
 			total_record: xTotalRecord[0].total_record
 		};
 	}
+	
+	async updateLastClickPendingNotif(pParam, pAct) {
+		let xTransaction;
+		var xJoResult = {};
+
+		try {
+			var xSaved = null;
+			xTransaction = await sequelize.transaction();
+
+			if (
+				pAct == 'update'
+			) {
+				pParam.last_click_equalization_at = await _utilInstance.getCurrDateTime();
+				pParam.last_click_equalization_by_name = pParam.user_name;
+				var xId = pParam.id;
+				delete pParam.id;
+				var xWhere = {
+					where: {
+						id: xId
+					}
+				};
+
+				console.log('>>>> here 1');
+				xSaved = await _modelDb.update(pParam, xWhere, { xTransaction });
+				console.log('>>>> here 2');
+
+				await xTransaction.commit();
+
+				console.log('>>>> here 1');
+				xJoResult = {
+					status_code: '00',
+					status_msg: `Data has been successfully`
+				};
+			}
+		} catch (e) {
+			if (xTransaction) await xTransaction.rollback();
+			xJoResult = {
+				status_code: '-99',
+				status_msg: 'Failed save or update data. Error : ' + e,
+				err_msg: e
+			};
+		}
+
+		return xJoResult;
+	}
 }
 
 module.exports = PurchaseRequestRepository;

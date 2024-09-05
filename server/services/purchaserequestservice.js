@@ -374,7 +374,9 @@ class PurchaseRequestService {
 
 				if (pParam.hasOwnProperty('pending_notif')) {
 					if (pParam.pending_notif != null & pParam.pending_notif != '' && pParam.pending_notif != 0) {
-						delete pParam.department_id
+						if (pParam.logged_department_name.includes('PURCHASING') || pParam.logged_department_name.includes('PROCUREMENT') || pParam.logged_department_name.includes('PRO/MIS/IC')) {
+							delete pParam.department_id
+						}
 						delete pParam.owned_document_no
 					}
 				}
@@ -907,7 +909,9 @@ class PurchaseRequestService {
 						// budget_plan: xResult.budget_plan,
 						total_realization: xTotalRealization,
 						total_item_with_budget: xTotalItem,
-						approved_at: xResult.approved_at
+						approved_at: xResult.approved_at,
+						last_click_equalization_at: xResult.last_click_equalization_at,
+						last_click_equalization_by_name: xResult.last_click_equalization_by_name,
 					};
 
 					xJoResult = {

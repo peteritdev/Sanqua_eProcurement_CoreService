@@ -106,11 +106,11 @@
 
     "notification": {
       "email": {
-        "accounting": "peter.susanto@sanqua.co.id,a1.arifrahman.1213@gmail.com,muthia.aw.ma@gmail.com"
+        "accounting": "a1.arifrahman.1213@gmail.com"
       }
       
     },
-    "pendingNotifDay": 3
+    "pendingNotifDay": 1
   },
 
   "development": {
@@ -218,7 +218,7 @@
       }
       
     },
-    "pendingNotifDay": 3
+    "pendingNotifDay": 1
   },  
 
   "staging": {
@@ -328,7 +328,7 @@
       }
       
     },
-    "pendingNotifDay": 3
+    "pendingNotifDay": 1
   },
 
   "production": {
@@ -436,6 +436,6 @@
         "accounting": "peter.susanto@sanqua.co.id,ecatalog.sanqua@gmail.com,setiawan.banjar@sanqua.co.id,audit.division@sanqua.co.id"
       }
     },
-    "pendingNotifDay": 3
+    "pendingNotifDay": 1
   }  
 }
