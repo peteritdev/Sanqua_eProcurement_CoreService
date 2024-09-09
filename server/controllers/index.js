@@ -28,6 +28,9 @@ const syncFromOdoo = require('./syncfromodoo');
 
 const project = require('./project');
 // const budgetPlan = require('./budgetplan');
+const paymentRequest = require('./paymentrequest');
+const goodsReceipt = require('./goodsreceipt');
+const cashadvanceresponsibility = require('./cashadvanceresponsibility');
 
 const _export = require('./export');
 
@@ -58,5 +61,8 @@ module.exports = {
 	_export,
 
 	project,
-	// budgetPlan
+	// budgetPlan,
+	paymentRequest,
+	goodsReceipt,
+	cashadvanceresponsibility
 };
