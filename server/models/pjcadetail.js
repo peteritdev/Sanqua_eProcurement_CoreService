@@ -1,13 +1,13 @@
 'use strict';
 
 module.exports = (sequelize, DataTypes) => {
-	const CashAdvanceResponsibilityDetail = sequelize.define('tr_cashadvanceresponsibilitydetails', {
+	const PJCADetail = sequelize.define('tr_pjcadetails', {
 		id: {
 			type: DataTypes.INTEGER,
 			primaryKey: true,
 			autoIncrement: true
 		},
-		cash_advance_responsibility_id: DataTypes.INTEGER,
+		pjca_id: DataTypes.INTEGER,
 		product_id: DataTypes.INTEGER,
 		product_code: DataTypes.STRING,
 		product_name: DataTypes.STRING,
@@ -43,19 +43,19 @@ module.exports = (sequelize, DataTypes) => {
 		updated_by_name: DataTypes.STRING,
 	});
 
-	CashAdvanceResponsibilityDetail.associate = function(models) {
-		CashAdvanceResponsibilityDetail.belongsTo(models.ms_products, {
+	PJCADetail.associate = function(models) {
+		PJCADetail.belongsTo(models.ms_products, {
 			foreignKey: 'product_id',
 			as: 'product',
 			onDelete: 'CASCADE'
 		});
 
-		CashAdvanceResponsibilityDetail.belongsTo(models.tr_CashAdvanceResponsibilitys, {
-			foreignKey: 'cash_advance_responsibility_id',
-			as: 'cash_advance_responsibility',
+		PJCADetail.belongsTo(models.tr_pjcas, {
+			foreignKey: 'pjca_id',
+			as: 'pjca',
 			onDelete: 'CASCADE'
 		});
 	};
 
-	return CashAdvanceResponsibilityDetail;
+	return PJCADetail;
 };

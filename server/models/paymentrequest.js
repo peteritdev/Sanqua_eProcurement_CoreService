@@ -23,12 +23,14 @@ module.exports = (sequelize, DataTypes) => {
 		source_of_funds: DataTypes.STRING,
 		vendor_id: DataTypes.INTEGER,
 		vendor_name: DataTypes.STRING,
-		tax: DataTypes.DOUBLE,
+		ppn: DataTypes.DOUBLE,
+		pph: DataTypes.DOUBLE,
 		global_discount: DataTypes.DOUBLE,
 		bank_name: DataTypes.STRING,
 		total_qty: DataTypes.DOUBLE,
 		total_price: DataTypes.DOUBLE,
 		status: DataTypes.INTEGER,
+		payment_desc: DataTypes.STRING,
 
 		is_delete: DataTypes.INTEGER,
 		deleted_at: DataTypes.DATE,
@@ -57,6 +59,10 @@ module.exports = (sequelize, DataTypes) => {
 		PaymentRequest.hasMany(models.tr_paymentrequestdetails, {
 			foreignKey: 'payment_request_id',
 			as: 'payment_request_detail'
+		});
+		PaymentRequest.belongsTo(models.tr_purchaserequests, {
+			foreignKey: 'purchase_request_id',
+			as: 'purchase_request'
 		});
 	};
 

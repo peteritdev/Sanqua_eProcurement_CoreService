@@ -1,4 +1,4 @@
-const cashAdvanceResponsibilityController = require('../controllers').cashAdvanceResponsibility;
+const pjcaController = require('../controllers').pjca;
 
 const { check, validationResult } = require('express-validator');
 
@@ -29,31 +29,31 @@ module.exports = (app) => {
 		check('act').not().isEmpty().withMessage('Parameter act cannot be empty'),
 		check('purchase_request_id').not().isEmpty().withMessage('Parameter purchase_request_id cannot be empty')
 	];
-	app.post(rootAPIPath + 'save', arrValidate, cashAdvanceResponsibilityController.cashAdvanceResponsibility_Save);
+	app.post(rootAPIPath + 'save', arrValidate, pjcaController.PJCA_Save);
 
 	arrValidate = [];
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
-	app.post(rootAPIPath + 'submit', arrValidate, cashAdvanceResponsibilityController.cashAdvanceResponsibility_Submit);
+	app.post(rootAPIPath + 'submit', arrValidate, pjcaController.PJCA_Submit);
 
 	arrValidate = [];
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
-	app.post(rootAPIPath + 'set_to_draft', arrValidate, cashAdvanceResponsibilityController.cashAdvanceResponsibility_SetToDraft);
+	app.post(rootAPIPath + 'set_to_draft', arrValidate, pjcaController.PJCA_SetToDraft);
 
 	arrValidate = [];
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
 	arrValidate = [ check('cancel_reason').not().isEmpty().withMessage('Parameter cancel_reason cannot be empty') ];
-	app.post(rootAPIPath + 'cancel', arrValidate, cashAdvanceResponsibilityController.cashAdvanceResponsibility_Cancel);
+	app.post(rootAPIPath + 'cancel', arrValidate, pjcaController.PJCA_Cancel);
 
 	arrValidate = [];
 	arrValidate = [
 		check('offset', 'Parameter offset must be integer and cannot be empty').not().isEmpty().isInt(),
 		check('limit').not().isEmpty().withMessage('Parameter limit cannot be empty')
 	];
-	app.get(rootAPIPath + 'list', arrValidate, cashAdvanceResponsibilityController.cashAdvanceResponsibility_List);
+	app.get(rootAPIPath + 'list', arrValidate, pjcaController.PJCA_List);
 
 	arrValidate = [];
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
-	app.get(rootAPIPath + 'detail/:id', arrValidate, cashAdvanceResponsibilityController.cashAdvanceResponsibility_Detail);
+	app.get(rootAPIPath + 'detail/:id', arrValidate, pjcaController.PJCA_Detail);
 
 	// GR DETAIL
 	arrValidate = [];
@@ -61,6 +61,6 @@ module.exports = (app) => {
 		check('act').not().isEmpty().withMessage('Parameter act cannot be empty'),
 		check('qty_done', 'Parameter qty_done must be decimal and cannot be empty').not().isEmpty().isDecimal()
 	];
-	app.post(rootAPIPath + 'detail/save', arrValidate, cashAdvanceResponsibilityController.cashAdvanceResponsibilityDetail_Save);
+	app.post(rootAPIPath + 'detail/save', arrValidate, pjcaController.PJCADetail_Save);
 
 };

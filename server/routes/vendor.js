@@ -60,6 +60,9 @@ module.exports = (app) => {
 	arrValidate = [];
 	app.get(rootAPIPath + 'vendor/list', arrValidate, vendorController.list);
 
+	arrValidate = [];
+	app.get(rootAPIPath + 'vendor/dropdown', arrValidate, vendorController.dropdown);
+
 	// Delete
 	arrValidate = [];
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];

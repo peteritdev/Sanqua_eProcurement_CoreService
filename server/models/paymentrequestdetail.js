@@ -18,8 +18,9 @@ module.exports = (sequelize, DataTypes) => {
 		qty_request: DataTypes.DOUBLE,
 		price_request: DataTypes.DOUBLE,
 		price_total: DataTypes.DOUBLE,
+		qty_left: DataTypes.DOUBLE,
 		tax: DataTypes.DOUBLE,
-		discount: DataTypes.DOUBLE,
+		discount_amount: DataTypes.DOUBLE,
 		discount_percent: DataTypes.DOUBLE,
 		description: DataTypes.STRING,
 

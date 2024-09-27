@@ -4,10 +4,12 @@ var Sequelize = require('sequelize');
 var sequelize = new Sequelize(config.database, config.username, config.password, config);
 const { hash } = require('bcryptjs');
 const Op = Sequelize.Op;
+const moment = require('moment');
 
 // Model
 const _modelDb = require('../models').tr_paymentrequests;
 const _modelPaymentRequestDetail = require('../models').tr_paymentrequestdetails;
+const _modelPurchaseRequest = require('../models').tr_purchaserequests;
 const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
@@ -32,6 +34,11 @@ class PaymentRequestRepository {
 		try {
 			
 			xInclude = [
+				{
+					model: _modelPurchaseRequest,
+					as: 'purchase_request',
+					attributes: [ 'id', 'request_no' ]
+				},
 				{
 					model: _modelPaymentRequestDetail,
 					as: 'payment_request_detail',
@@ -96,7 +103,7 @@ class PaymentRequestRepository {
 	}
 
 	async list(pParam) {
-		var xOrder = [ 'name', 'ASC' ];
+		var xOrder = [ 'created_at', 'ASC' ];
 		var xWhere = [];
 		var xWhereOr = [];
 		var xWhereAnd = [];
@@ -106,6 +113,14 @@ class PaymentRequestRepository {
 		try {
 			xInclude = [];
 
+			if (pParam.hasOwnProperty('purchase_request_id')) {
+				if (pParam.purchase_request_id != '') {
+					xWhereAnd.push({
+						purchase_request_id: pParam.purchase_request_id
+					});
+				}
+			}
+
 			if (pParam.hasOwnProperty('company_id')) {
 				if (pParam.company_id != '') {
 					xWhereAnd.push({
@@ -113,15 +128,49 @@ class PaymentRequestRepository {
 					});
 				}
 			}
+			
+			if (pParam.hasOwnProperty('department_id')) {
+				if (pParam.department_id != '') {
+					xWhereAnd.push({
+						department_id: pParam.department_id
+					});
+				}
+			}
+			
+			if (pParam.hasOwnProperty('status')) {
+				if (pParam.status != '') {
+					xWhereAnd.push({
+						status: pParam.status
+					});
+				}
+			}
 
-			if (pParam.hasOwnProperty('filter')) {
-				if (pParam.filter != null && pParam.filter != undefined && pParam.filter != '') {
-					var xFilter = JSON.parse(pParam.filter);
-					if (xFilter.length > 0) {
-						for (var index in xFilter) {
-							xWhereAnd.push(xFilter[index]);
+			// if (pParam.hasOwnProperty('filter')) {
+			// 	if (pParam.filter != null && pParam.filter != undefined && pParam.filter != '') {
+			// 		var xFilter = JSON.parse(pParam.filter);
+			// 		if (xFilter.length > 0) {
+			// 			for (var index in xFilter) {
+			// 				xWhereAnd.push(xFilter[index]);
+			// 			}
+			// 		}
+			// 	}
+			// }
+			if (pParam.hasOwnProperty('start_date') && pParam.hasOwnProperty('end_date')) {
+				if (pParam.start_date != '' && pParam.end_date != '') {
+					xWhereAnd.push({
+						created_at: {
+							[Op.between]: [ pParam.start_date + ' 00:00:00', pParam.end_date + ' 23:59:59' ]
 						}
-					}
+					});
+					// xWhereOr.push(
+					// 	{
+					// 		[Op.and]: {
+					// 			created_at: {
+					// 				[Op.between]: [ pParam.start_time + ' 00:00:00', pParam.end_time + ' 23:59:59' ]
+					// 			}
+					// 		}
+					// 	}
+					// );
 				}
 			}
 
@@ -133,16 +182,16 @@ class PaymentRequestRepository {
 								[Op.iLike]: '%' + pParam.keyword + '%'
 							}
 						},
-						{
-							product_name: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
-							}
-						},
-						{
-							code: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
-							}
-						},
+						// {
+						// 	product_name: {
+						// 		[Op.iLike]: '%' + pParam.keyword + '%'
+						// 	}
+						// },
+						// {
+						// 	code: {
+						// 		[Op.iLike]: '%' + pParam.keyword + '%'
+						// 	}
+						// },
 						{
 							employee_name: {
 								[Op.iLike]: '%' + pParam.keyword + '%'
@@ -194,7 +243,6 @@ class PaymentRequestRepository {
 			var xData = await _modelDb.findAndCountAll(xParamQuery);
 
 			// console.log(`>>> xData: ${JSON.stringify(xData)}`);
-
 			xJoResult = {
 				status_code: '00',
 				status_msg: 'OK',
@@ -208,7 +256,6 @@ class PaymentRequestRepository {
 				status_msg: `${_xClassName}.list: Exception error: ${e.message}`
 			};
 		}
-
 		return xJoResult;
 	}
 
@@ -228,13 +275,13 @@ class PaymentRequestRepository {
 				// console.log(`>>> xSave: ${JSON.stringify(pParam)}`);
 				
 				xSaved = await _modelDb.create(pParam, { transaction: xTransaction });
-				// console.log(`>>> xSave:end ${JSON.stringify(xSaved)}`);
+				console.log(`>>> xSave:end ${JSON.stringify(xSaved)}`);
 
 				if (xSaved.id != null) {
 					xJoResult = {
 						status_code: '00',
 						status_msg: 'Data has been successfully saved',
-						created_id: await _utilInstance.encrypt(toString(xSaved.id), config.cryptoKey.hashKey),
+						created_id: await _utilInstance.encrypt(xSaved.id, config.cryptoKey.hashKey),
 						clear_id: xSaved.id
 					};
 					await xTransaction.commit();
@@ -255,10 +302,11 @@ class PaymentRequestRepository {
 				pParam.created_by_name = pParam.user_name;
 
 				//// Need disable trigger first because it affect when add batch item.
-				sequelize.query(
-					'ALTER TABLE "tr_paymentrequestdetails" DISABLE TRIGGER "trg_update_total_item_afterinsert"'
-				);
+				// sequelize.query(
+				// 	'ALTER TABLE "tr_paymentrequestdetails" DISABLE TRIGGER "trg_update_total_item_afterinsert"'
+				// );
 
+				console.log(`>>> before xSave:end ${JSON.stringify(pParam)}`, pAct);
 				xSaved = await _modelDb.create(
 					pParam,
 					{
@@ -271,36 +319,37 @@ class PaymentRequestRepository {
 					},
 					{ transaction: xTransaction }
 				);
+				console.log(`>>> after xSave:end ${JSON.stringify(xSaved)}`);
 
-				if (xSaved.id != null) {
+				if (xSaved != null && xSaved.id != null) {
 					xJoResult = {
 						status_code: '00',
 						status_msg: 'Data has been successfully saved',
-						created_id: await _utilInstance.encrypt(toString(xSaved.id), config.cryptoKey.hashKey),
+						created_id: await _utilInstance.encrypt(xSaved.id, config.cryptoKey.hashKey),
 						clear_id: xSaved.id
 					};
 
-					sequelize.query(
-						'ALTER TABLE "tr_paymentrequestdetails" ENABLE TRIGGER "trg_update_total_item_afterinsert"'
-					);
+					// sequelize.query(
+					// 	'ALTER TABLE "tr_paymentrequestdetails" ENABLE TRIGGER "trg_update_total_item_afterinsert"'
+					// );
 
-					//// Call update total on table tr_purchaserequest
-					sequelize.query(
-						`update tr_paymentrequests set total_qty = (
-							select sum( qty_request )
-							from tr_paymentrequestdetails
-							where payment_request_id = ${xSaved.id}
-						),
-						total_price = (
-							select sum( price_request )
-							from tr_paymentrequestdetails
-							where payment_request_id = ${xSaved.id}
-						),
-						where id = ${xSaved.id};`,
-						{
-							transaction: xTransaction
-						}
-					);
+					// //// Call update total on table tr_purchaserequest
+					// sequelize.query(
+					// 	`update tr_paymentrequests set total_qty = (
+					// 		select sum( qty_request )
+					// 		from tr_paymentrequestdetails
+					// 		where payment_request_id = ${xSaved.id}
+					// 	),
+					// 	total_price = (
+					// 		select sum( price_request )
+					// 		from tr_paymentrequestdetails
+					// 		where payment_request_id = ${xSaved.id}
+					// 	),
+					// 	where id = ${xSaved.id};`,
+					// 	{
+					// 		transaction: xTransaction
+					// 	}
+					// );
 
 					await xTransaction.commit();
 				} else {
@@ -313,12 +362,8 @@ class PaymentRequestRepository {
 				}
 			} else if (
 				pAct == 'update' ||
-				pAct == 'submit' ||
-				pAct == 'cancel' ||
-				pAct == 'close' ||
-				pAct == 'set_to_draft'
+				pAct == 'submit'
 			) {
-				var xComment = '';
 
 				switch (pAct) {
 					case 'update':
@@ -328,27 +373,10 @@ class PaymentRequestRepository {
 						xComment = 'submitted';
 						pParam.requested_at = await _utilInstance.getCurrDateTime();
 						break;
-					case 'cancel':
-						pParam.canceled_at = await _utilInstance.getCurrDateTime();
-						// pParam.cancel_by = pParam.user_id;
-						// pParam.cancel_by_name = pParam.user_name;
-						xComment = 'canceled';
-						pParam.canceled_reason = pParam.cancel_reason;
-						break;
-					case 'set_to_draft':
-						pParam.set_to_draft_at = await _utilInstance.getCurrDateTime();
-						// pParam.set_to_draft_by = pParam.user_id;
-						// pParam.set_to_draft_by_name = pParam.user_name;
-						xComment = 'set to draft';
-						break;
-					case 'close':
-						xComment = 'closed';
-						break;
 					default:
 						xComment = 'changed';
 				}
 
-				pParam.updatedAt = await _utilInstance.getCurrDateTime();
 				var xId = pParam.id;
 				delete pParam.id;
 				var xWhere = {
@@ -357,17 +385,21 @@ class PaymentRequestRepository {
 					}
 				};
 
-				pParam.updated_by = pParam.user_id;
-				pParam.updated_by_name = pParam.user_name;
-
 				xSaved = await _modelDb.update(pParam, xWhere, { xTransaction });
+				if (xSaved.length > 0) {
+					await xTransaction.commit();
 
-				await xTransaction.commit();
-
-				xJoResult = {
-					status_code: '00',
-					status_msg: `Data has been successfully ${xComment}`
-				};
+					xJoResult = {
+						status_code: '00',
+						status_msg: `Data has been successfully ${pAct}`
+					};
+				} else {
+					await xTransaction.rollback();
+					xJoResult = {
+						status_code: '-99',
+						status_msg: `Data Failed ${pAct}`
+					};
+				}
 			}
 		} catch (e) {
 			if (xTransaction) await xTransaction.rollback();

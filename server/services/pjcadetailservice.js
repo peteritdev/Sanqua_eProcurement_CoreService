@@ -16,11 +16,11 @@ const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 // Repository
-const CashAdvanceResponsibilityDetailRepository = require('../repository/CashAdvanceResponsibilitydetailrepository.js');
-const _repoInstance = new CashAdvanceResponsibilityDetailRepository();
+const PJCADetailRepository = require('../repository/pjcadetailrepository.js');
+const _repoInstance = new PJCADetailRepository();
 
-const CashAdvanceResponsibilityRepository = require('../repository/CashAdvanceResponsibilityrepository.js');
-const _CashAdvanceResponsibilityRepoInstance = new CashAdvanceResponsibilityRepository();
+const PJCARepository = require('../repository/pjcarepository.js');
+const _PJCARepoInstance = new PJCARepository();
 
 // Service
 const ProductServiceRepository = require('./productservice.js');
@@ -39,9 +39,9 @@ const _logServiceInstance = new LogService();
 // const NotificationService = require('./notificationservice.js');
 // const _notificationService = new NotificationService();
 
-const _xClassName = 'CashAdvanceResponsibilityDetailService';
+const _xClassName = 'PJCADetailService';
 
-class CashAdvanceResponsibilityDetailService {
+class PJCADetailService {
 	constructor() {}
 	async save(pParam) {
 		var xJoResult;
@@ -50,29 +50,29 @@ class CashAdvanceResponsibilityDetailService {
 		var xDecId = null;
 		var xRequestIdClear = 0;
 
-		// console.log(`>>> pParam [CashAdvanceResponsibilityDetailService] : ${JSON.stringify(pParam)}`);
+		// console.log(`>>> pParam [PJCADetailService] : ${JSON.stringify(pParam)}`);
 
 		delete pParam.act;
 
 		var xMethod = pParam.method;
 		var xToken = pParam.token;
 
-		if (pParam.hasOwnProperty('user_id') && pParam.hasOwnProperty('cash_advance_responsibility_id')) {
+		if (pParam.hasOwnProperty('user_id') && pParam.hasOwnProperty('pjca_id')) {
 			if (pParam.user_id != '') {
 				
-				xDecId = await _utilInstance.decrypt(pParam.cash_advance_responsibility_id, config.cryptoKey.hashKey);
+				xDecId = await _utilInstance.decrypt(pParam.pjca_id, config.cryptoKey.hashKey);
 				if (xDecId.status_code == '00') {
-					pParam.cash_advance_responsibility_id = xDecId.decrypted;
-					var xCashAdvanceResponsibility = await _CashAdvanceResponsibilityRepoInstance.getByParameter({
-						id: pParam.cash_advance_responsibility_id,
+					pParam.pjca_id = xDecId.decrypted;
+					var xPJCA = await _PJCARepoInstance.getByParameter({
+						id: pParam.pjca_id,
 						method: xMethod,
 						token: xToken
 					});
-					console.log(`>>> xCashAdvanceResponsibility : ${JSON.stringify(xCashAdvanceResponsibility)}`);
+					console.log(`>>> xPJCA : ${JSON.stringify(xPJCA)}`);
 		
-					if (xCashAdvanceResponsibility != null) {
-						if (xCashAdvanceResponsibility.status_code == '00') {
-							if (xCashAdvanceResponsibility.data.status == 0) {
+					if (xPJCA != null) {
+						if (xPJCA.status_code == '00') {
+							if (xPJCA.data.status == 0) {
 								xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
 								if (xDecId.status_code == '00') {
 									pParam.user_id = xDecId.decrypted;
@@ -96,7 +96,7 @@ class CashAdvanceResponsibilityDetailService {
 								};
 							}
 						} else {
-							xJoResult = xCashAdvanceResponsibility;
+							xJoResult = xPJCA;
 						}
 					} else {
 						xJoResult = {
@@ -110,7 +110,7 @@ class CashAdvanceResponsibilityDetailService {
 			} else {
 				xJoResult = {
 					status_code: '-99',
-					status_msg: 'Parameter user_id and cash_advance_responsibility_id can not be empty'
+					status_msg: 'Parameter user_id and pjca_id can not be empty'
 				};
 			}
 		} else {
@@ -122,26 +122,26 @@ class CashAdvanceResponsibilityDetailService {
 
 		if (xFlagProcess) {
 			if (xAct == 'add') {
-				var xCashAdvanceResponsibilityDetail = null,
+				var xPJCADetail = null,
 					xProductDetail = null,
 					xVendorDetail = null;
 
 				if (pParam.hasOwnProperty('product_id')) {
 					if (pParam.product_id != null) {
 						// Check first whether product_id and vendor_id already exists in detail or not
-						xCashAdvanceResponsibilityDetail = await _repoInstance.getByProductId({
+						xPJCADetail = await _repoInstance.getByProductId({
 							product_id: pParam.product_id,	
-							cash_advance_responsibility_id: pParam.cash_advance_responsibility_id
+							pjca_id: pParam.pjca_id
 						});
 					}
 				}
 
 				if (
-					xCashAdvanceResponsibilityDetail != null
+					xPJCADetail != null
 				) {
 					var xParamUpdate = {
-						id: xCashAdvanceResponsibilityDetail.id,
-						// qty_done: Math.round((xCashAdvanceResponsibilityDetail.qty_done + pParam.qty_done) * 1000) / 1000
+						id: xPJCADetail.id,
+						// qty_done: Math.round((xPJCADetail.qty_done + pParam.qty_done) * 1000) / 1000
 					};
 					pParam = null;
 					pParam = xParamUpdate;
@@ -175,22 +175,22 @@ class CashAdvanceResponsibilityDetailService {
 					var arrMsg = [];
 					for (var i in xItems) {
 						// Check first whether product_id and vendor_id already exists in detail or not
-						var xCashAdvanceResponsibilityDetail = await _repoInstance.getByProductId({
-							cash_advance_responsibility_id: pParam.cash_advance_responsibility_id,
+						var xPJCADetail = await _repoInstance.getByProductId({
+							pjca_id: pParam.pjca_id,
 							product_id: xItems[i].product_id
 						});
 
 						if (
-							xCashAdvanceResponsibilityDetail != null
+							xPJCADetail != null
 						) {
 							var xParamUpdate = {
-								id: xCashAdvanceResponsibilityDetail.id,
-								// qty: Math.round((xCashAdvanceResponsibilityDetail.qty_request + xItems[i].qty_request) * 1000) / 1000
+								id: xPJCADetail.id,
+								// qty: Math.round((xPJCADetail.qty_request + xItems[i].qty_request) * 1000) / 1000
 							};
 
 							xItems[i] = null;
 							xItems[i] = xParamUpdate;
-							xItems[i].cash_advance_responsibility_id = xRequestIdClear;
+							xItems[i].pjca_id = xRequestIdClear;
 
 							xAct = 'update';
 						} else {
@@ -211,7 +211,7 @@ class CashAdvanceResponsibilityDetailService {
 
 							// xItems[i].price_total =
 							// 	Math.round(xItems[i].qty_request * xItems[i].price_request * 1000) / 1000;
-							xItems[i].cash_advance_responsibility_id = xRequestIdClear;
+							xItems[i].pjca_id = xRequestIdClear;
 							xItems[i].user_id = pParam.user_id;
 							xItems[i].user_name = pParam.user_name;
 
@@ -260,4 +260,4 @@ class CashAdvanceResponsibilityDetailService {
 	}
 }
 
-module.exports = CashAdvanceResponsibilityDetailService;
+module.exports = PJCADetailService;

@@ -135,8 +135,8 @@ class PaymentRequestDetailService {
 						});
 					}
 				}
-				console.log(`>>> xPaymentRequestDetail : ${JSON.stringify(xPaymentRequestDetail)}`);
-				console.log(Math.round((xPaymentRequestDetail.qty_request + pParam.qty_request) * 1000) / 1000);
+				// console.log(`>>> xPaymentRequestDetail : ${JSON.stringify(xPaymentRequestDetail)}`);
+				// console.log(Math.round((xPaymentRequestDetail.qty_request + pParam.qty_request) * 1000) / 1000);
 
 				if (
 					xPaymentRequestDetail != null &&
@@ -157,7 +157,7 @@ class PaymentRequestDetailService {
 
 					xAct = 'update';
 				} else {
-					// console.log(`>>> pParam CEK CEK CEK : ${JSON.stringify(pParam)}`);
+					console.log(`>>> pParam CEK CEK CEK : ${JSON.stringify(pParam)}`);
 					if (pParam.hasOwnProperty('product_id')) {
 						if (pParam.product_id != null) {
 							// Get Product detail by Id
@@ -274,6 +274,100 @@ class PaymentRequestDetailService {
 
 		return xJoResult;
 	}
+	
+	async dropdown(pParam) {
+		var xJoResult = {};
+		var xJoArrData = [];
+
+		try {
+			if (pParam.hasOwnProperty('purchase_request_id')) {
+				if (pParam.purchase_request_id != '') {
+					// xEncId = pParam.purchase_request_id;
+					let xDecId = await _utilInstance.decrypt(pParam.purchase_request_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.purchase_request_id = xDecId.decrypted;
+					}
+				}
+			}
+
+			var xResultList = await _repoInstance.dropdown(pParam);
+			if (xResultList) {
+				// console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
+				if (xResultList.status_code == '00') {
+					var xRows = xResultList.data;
+					if (xRows.length > 0) {
+						for (var i in xRows) {
+							xJoArrData.push({
+								id: await _utilInstance.encrypt(xRows[i].id.toString(), config.cryptoKey.hashKey),
+								product_id: xRows[i].product_id,
+								product_code: xRows[i].product_code,
+								product_name: xRows[i].product_name,
+								qty_demand: xRows[i].qty_demand,
+								qty_request: xRows[i].qty_request,
+								qty_left: xRows[i].qty_left,
+								price_demand: xRows[i].price_demand,
+								qty_left: xRows[i].qty_left,
+								price_request: xRows[i].price_request,
+								uom_id: xRows[i].uom_id,
+								uom_name: xRows[i].uom_name,
+								payment_request_id: xRows[i].payment_request_id,
+								document_no: xRows[i].document_no,
+								vendor_name: xRows[i].vendor_name
+							});
+						}
+
+						xJoResult = {
+							status_code: '00',
+							status_msg: 'OK',
+							data: xJoArrData
+						};
+					} else {
+						xJoResult = {
+							status_code: '-99',
+							status_msg: 'Data not found'
+						};
+					}
+				} else {
+					xJoResult = xResultList;
+				}
+			} else {
+				xJoResult = xResultList;
+			}
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.list`, `Exception error: ${e.message}`, 'error');
+
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.list: Exception error: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
+
+	async delete(pParam) {
+		var xJoResult = {};
+		var xFlagProcess = false;
+		var xDecId = null;
+
+		if (pParam.id != '') {
+			xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				xFlagProcess = true;
+				pParam.id = xDecId.decrypted;
+			} else {
+				xJoResult = xDecId;
+			}
+		}
+
+		if (xFlagProcess) {
+			var xDeleteResult = await _repoInstance.delete(pParam);
+			xJoResult = xDeleteResult;
+		}
+
+		return xJoResult;
+	}
+
 }
 
 module.exports = PaymentRequestDetailService;

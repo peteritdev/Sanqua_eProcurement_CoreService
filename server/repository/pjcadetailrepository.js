@@ -6,8 +6,8 @@ const { hash } = require('bcryptjs');
 const Op = Sequelize.Op;
 
 // Model
-const _modelDb = require('../models').tr_cashadvanceresponsibilitydetails;
-const _modelCashAdvanceResponsibility = require('../models').tr_cashadvanceresponsibilities;
+const _modelDb = require('../models').tr_pjcadetails;
+const _modelPJCA = require('../models').tr_pjcas;
 const _modelEmployee = require('../models').ms_employees;
 const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
@@ -15,9 +15,9 @@ const _modelUnit = require('../models').ms_units;
 const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
-const _xClassName = 'cashadvanceresponsibilityDetailRepository';
+const _xClassName = 'PJCADetailRepository';
 
-class cashadvanceresponsibilityDetailRepository {
+class PJCADetailRepository {
 	constructor() {}
 
 	async save(pParam, pAct) {
@@ -152,4 +152,4 @@ class cashadvanceresponsibilityDetailRepository {
 	}
 }
 
-module.exports = cashadvanceresponsibilityDetailRepository;
+module.exports = PJCADetailRepository;

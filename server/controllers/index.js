@@ -30,7 +30,7 @@ const project = require('./project');
 // const budgetPlan = require('./budgetplan');
 const paymentRequest = require('./paymentrequest');
 const goodsReceipt = require('./goodsreceipt');
-const cashadvanceresponsibility = require('./cashadvanceresponsibility');
+const pjca = require('./pjca');
 
 const _export = require('./export');
 
@@ -64,5 +64,5 @@ module.exports = {
 	// budgetPlan,
 	paymentRequest,
 	goodsReceipt,
-	cashadvanceresponsibility
+	pjca
 };

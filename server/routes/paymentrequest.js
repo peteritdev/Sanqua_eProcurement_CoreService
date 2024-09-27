@@ -67,4 +67,29 @@ module.exports = (app) => {
 	];
 	app.post(rootAPIPath + 'detail/save', arrValidate, paymentRequestController.paymentRequestDetail_Save);
 
+	arrValidate = [];
+	arrValidate = [ check('document_id').not().isEmpty().withMessage('Parameter document_id cannot be empty') ];
+	app.post(rootAPIPath + 'confirm', arrValidate, paymentRequestController.paymentRequest_Confirm);
+
+	arrValidate = [];
+	arrValidate = [ check('document_id').not().isEmpty().withMessage('Parameter document_id cannot be empty') ];
+	app.post(rootAPIPath + 'reject', arrValidate, paymentRequestController.paymentRequest_Reject);
+	
+	arrValidate = [];
+	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
+	app.post(rootAPIPath + 'paid', arrValidate, paymentRequestController.paymentRequest_Paid);
+
+	arrValidate = [];
+	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
+	app.post(rootAPIPath + 'done', arrValidate, paymentRequestController.paymentRequest_Done);
+
+	arrValidate = [];
+	app.get(rootAPIPath + 'dropdown', arrValidate, paymentRequestController.paymentRequest_Dropdown);
+
+	arrValidate = [];
+	app.get(rootAPIPath + 'dropdown_detail', arrValidate, paymentRequestController.paymentRequestDetail_Dropdown);
+
+	arrValidate = [];
+	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
+	app.delete(rootAPIPath + 'delete_detail/:id', arrValidate, paymentRequestController.paymentRequestDetail_Delete);
 };

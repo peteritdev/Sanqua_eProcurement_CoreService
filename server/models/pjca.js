@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = (sequelize, DataTypes) => {
-	const CashAdvanceResponsibility = sequelize.define('tr_cashadvanceresponsibilities', {
+	const PJCA = sequelize.define('tr_pjcas', {
 		id: {
 			type: DataTypes.INTEGER,
 			primaryKey: true,
@@ -43,12 +43,12 @@ module.exports = (sequelize, DataTypes) => {
 		updated_by_name: DataTypes.STRING
 	});
 
-	CashAdvanceResponsibility.associate = function(models) {
-		CashAdvanceResponsibility.hasMany(models.tr_cashadvanceresponsibilitydetails, {
-			foreignKey: 'cash_advance_responsibility_id',
-			as: 'cash_advance_responsibility_detail'
+	PJCA.associate = function(models) {
+		PJCA.hasMany(models.tr_pjcadetails, {
+			foreignKey: 'pjca_id',
+			as: 'pjca_detail'
 		});
 	};
 
-	return CashAdvanceResponsibility;
+	return PJCA;
 };

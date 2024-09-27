@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const moment = require('moment');
 const sequelize = require('sequelize');
 const dateFormat = require('dateformat');
+const dateTime = require("node-datetime");
 const Op = sequelize.Op;
 const bcrypt = require('bcrypt');
 const fs = require('fs');
@@ -69,33 +70,41 @@ class GoodsReceiptService {
 					xDetail = await _utilInstance.changeIdToEncryptedId(xDetail, config.cryptoKey.hashKey);
 					console.log(`>>> pParam: ${JSON.stringify(xDetail)}`);
 					if (xDetail != null) {
+						if (xDetail.status_code == '00') {
 						
-						var xJoArrRequestDetailData = [];
-						// var xTotalItem = 0;
-						var xGrDetail = xDetail.goods_receipt_detail;
-							
-						// looping detail item
-						for (var index in xGrDetail) {
-							// if (xGrDetail[index].price_total != null && xGrDetail[index].price_total != 0) {
-							// 	xTotalItem = xTotalItem + 1;
-							// }
-							// console.log(`>>> xDetail[index]: ${JSON.stringify(xDetail[index])}`);
-							xJoArrRequestDetailData.push({
-								// id: await _utilInstance.encrypt(xGrDetail[index].id, config.cryptoKey.hashKey),
-								product: {
-									id: xGrDetail[index].product_id,
-									code: xGrDetail[index].product_code,
-									name: xGrDetail[index].product_name
-								},
-								uom: xGrDetail[index].uom_name,
-								uom_id: xGrDetail[index].uom_id,
-								qty_demand: xGrDetail[index].qty_demand,
-								qty_done: xGrDetail[index].qty_done,
-								qty_return: xGrDetail[index].qty_return,
-								description: xGrDetail[index].description,
-								payment_request_detail_id: xGrDetail[index].payment_request_detail_id,
-								status: xGrDetail[index].status,
-							});
+							var xJoArrRequestDetailData = [];
+							// var xTotalItem = 0;
+							var xGrDetail = xDetail.data.goods_receipt_detail;
+							delete xDetail.data.goods_receipt_detail;
+							delete xDetail.data.purchase_request_id;
+								
+							// looping detail item
+							for (var index in xGrDetail) {
+								// if (xGrDetail[index].price_total != null && xGrDetail[index].price_total != 0) {
+								// 	xTotalItem = xTotalItem + 1;
+								// }
+								// console.log(`>>> xDetail[index]: ${JSON.stringify(xDetail[index])}`);
+								xJoArrRequestDetailData.push({
+									id: xGrDetail[index].id,
+									product: {
+										id: xGrDetail[index].product_id,
+										code: xGrDetail[index].product_code,
+										name: xGrDetail[index].product_name
+									},
+									uom_name: xGrDetail[index].uom_name,
+									uom_id: xGrDetail[index].uom_id,
+									qty_demand: xGrDetail[index].qty_demand,
+									qty_request: xGrDetail[index].qty_request,
+									qty_done: xGrDetail[index].qty_done,
+									qty_return: xGrDetail[index].qty_return,
+									description: xGrDetail[index].description,
+									// payment_request_id: xGrDetail[index].payment_request_id,
+									payment_request: xGrDetail[index].payment_request,
+									// payment_request_detail_id: xGrDetail[index].payment_request_detail_id,
+									status: xGrDetail[index].status,
+								});
+							}
+							xDetail.data.goods_receipt_detail = xJoArrRequestDetailData
 						}
 					} else {
 						
@@ -219,7 +228,7 @@ class GoodsReceiptService {
 										} else {
 											xJoResult = {
 												status_code: '-99',
-												status_msg: 'This .'
+												status_msg: 'This fpb cannot ready for payreq yet.'
 											};
 										}
 									} else {
@@ -246,30 +255,40 @@ class GoodsReceiptService {
 
 		if (xFlagProcess) {
 			if (xAct == 'add' || xAct == 'add_batch_in_item') {
-				// var xJoArrItems = [];
+				var xJoArrItems = [];
 
-				// if (pParam.hasOwnProperty('payment_request_detail')) {
-				// 	xJoArrItems = pParam.payment_request_detail;
+				// if (pParam.hasOwnProperty('goods_receipt_detail')) {
+				// 	xJoArrItems = pParam.goods_receipt_detail;
 				// 	if (xJoArrItems.length > 0) {
 				// 		for (var i in xJoArrItems) {
-				// 			if (
-				// 				xJoArrItems[i].hasOwnProperty('qty_request') &&
-				// 				xJoArrItems[i].hasOwnProperty('price_request')
-				// 			) {
-				// 				xJoArrItems[i].price_total =
-				// 					xJoArrItems[i].qty_request * xJoArrItems[i].price_request;
-				// 			}
+				// 			// doo something here
 				// 		}
 				// 	}
-				// 	pParam.purchase_request_detail = xJoArrItems;
+				// 	pParam.goods_receipt_detail = xJoArrItems;
 				// }
 
 				let xResult = await _repoInstance.save(pParam, xAct);
+				
+				console.log(`>>> xResult ${JSON.stringify(xResult)}`);
+				if (xResult.status_code == '00') {
+					var dt = dateTime.create();
+					var xDate = dt.format('ym');
+					var xGrNo = `${pParam.company_code}/GR/${xDate}/` + xResult.clear_id.toString().padStart(5,'0');
+
+					var xParamUpdate = {
+						document_no: xGrNo,
+						id: xResult.clear_id
+					};
+
+					var xUpdate = await _repoInstance.save(xParamUpdate, 'update');
+				}
+
 				xJoResult = xResult;
 			} else if (xAct == 'update') {
 				var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
 				if (xDecId.status_code == '00') {
 					pParam.id = xDecId.decrypted;
+					pParam.updatedAt = await _utilInstance.getCurrDateTime();
 					pParam.updated_by = pParam.user_id;
 					pParam.updated_by_name = pParam.user_name;
 					xFlagProcess = true;
@@ -317,24 +336,29 @@ class GoodsReceiptService {
 				var xDetail = await _repoInstance.getByParameter({
 					id: pParam.id
 				});
-				console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`,pParam.id);
 				
 
 				if (xDetail != null) {
-					if (xDetail.status == 0) {
-						pParam.status = 1;
-						var xUpdate = await _repoInstance.save(pParam, 'submit');
-						xJoResult = xUpdate;
+					console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`, pParam.id);
+					if (xDetail.status_code == '00') {
+						if (xDetail.data.status == 0) {
+							pParam.status = 1;
+							pParam.requested_at = await _utilInstance.getCurrDateTime();
+							var xUpdate = await _repoInstance.save(pParam, 'update');
+							xJoResult = xUpdate;
+						} else {
+							xJoResult = {
+								status_code: '-99',
+								status_msg: `Dokumen request already in process`
+							};
+						}
 					} else {
-						xJoResult = {
-							status_code: '-99',
-							status_msg: `GR already in process`
-						};
+						xJoResult = xDetail;
 					}
 				} else {
 					xJoResult = {
 						status_code: '-99',
-						status_msg: `GR id not found`
+						status_msg: `Dokumen request id not found`
 					};
 				}
 			}
@@ -377,25 +401,41 @@ class GoodsReceiptService {
 			}
 
 			if (xFlagProcess) {
-				var xDetail = await _repoInstance.getByParameter({
-					id: pParam.id
-				});
+				var xGrDetail = await _repoInstance.getByParameter({ id: pParam.id });
+				if (xGrDetail != null) {
+					if (xGrDetail.status_code == '00') {
+						if (xGrDetail.data.status == 0) {
+							xJoResult = {
+								status_code: '-99',
+								status_msg: 'This document already draft'
+							};
+						} else {
+							var xParamUpdate = {
+								id: pParam.id,
+								status: 0,
+								set_to_draft_at: await _utilInstance.getCurrDateTime(),
+								set_to_draft_by: pParam.user_id,
+								set_to_draft_by_name: pParam.user_name,
+							};
+							var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
 
-				if (xDetail != null) {
-					if (xDetail.status != 0) {
-						pParam.status = 0;
-						var xUpdate = await _repoInstance.save(pParam, 'set_to_draft');
-						xJoResult = xUpdate;
+							if (xUpdateResult.status_code == '00') {
+								xJoResult = {
+									status_code: '00',
+									status_msg: 'Payreq successfully set to draft'
+								};
+							} else {
+								xJoResult = xUpdateResult;
+							}
+						}
+					
 					} else {
-						xJoResult = {
-							status_code: '-99',
-							status_msg: `GR already draft`
-						};
+						xJoResult = xGrDetail
 					}
 				} else {
 					xJoResult = {
 						status_code: '-99',
-						status_msg: `GR id not found`
+						status_msg: 'Data not found'
 					};
 				}
 			}
@@ -438,25 +478,41 @@ class GoodsReceiptService {
 			}
 
 			if (xFlagProcess) {
-				var xDetail = await _repoInstance.getByParameter({
-					id: pParam.id
-				});
+				var xGrDetail = await _repoInstance.getByParameter({ id: pParam.id });
+				if (xGrDetail != null) {
+					if (xGrDetail.status_code == '00') {
+						if (xGrDetail.data.status == 5) {
+							xJoResult = {
+								status_code: '-99',
+								status_msg: 'This document already cancel'
+							};
+						} else {
+							var xParamUpdate = {
+								id: pParam.id,
+								status: 2,
+								canceled_at: await _utilInstance.getCurrDateTime(),
+								canceled_reason: pParam.cancel_reason,
+								// approved_at: await _utilInstance.getCurrDateTime()
+							};
+							var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
 
-				if (xDetail != null) {
-					if (xDetail.status != 4) {
-						pParam.status = 4;
-						var xUpdate = await _repoInstance.save(pParam, 'cancel');
-						xJoResult = xUpdate;
+							if (xUpdateResult.status_code == '00') {
+								xJoResult = {
+									status_code: '00',
+									status_msg: 'Dokumen successfully canceled'
+								};
+							} else {
+								xJoResult = xUpdateResult;
+							}
+						}
+					
 					} else {
-						xJoResult = {
-							status_code: '-99',
-							status_msg: `GR already cancel`
-						};
+						xJoResult = xGrDetail
 					}
 				} else {
 					xJoResult = {
 						status_code: '-99',
-						status_msg: `GR id not found`
+						status_msg: 'Data not found'
 					};
 				}
 			}

@@ -20,6 +20,83 @@ const _xClassName = 'PaymentRequestDetailRepository';
 class PaymentRequestDetailRepository {
 	constructor() {}
 
+	async dropdown(pParam) {
+		var xJoResult = {};
+		var xSql = '';
+		var xObjJsonWhere = {};
+		var xSqlWhere = ' (1=1) ';
+		var xSqlWhereOr = [];
+		var xSqlOrderBy = '';
+		var xSqlLimit = '';
+		var xSqlGroupBy = '';
+		var xSqlFields = '';
+
+		try {
+			if (pParam.hasOwnProperty('purchase_request_id')) {
+				if (pParam.purchase_request_id != '') {
+					xSqlWhere += ' AND b.purchase_request_id = :purchaseRequestId ';
+					xObjJsonWhere.purchaseRequestId = pParam.purchase_request_id;
+				}
+			}
+
+			if (pParam.hasOwnProperty('vendor_name')) {
+				if (pParam.vendor_name != '') {
+					xSqlWhere += ' AND b.vendor_name = :vendorName ';
+					xObjJsonWhere.vendorName = pParam.vendor_name;
+				}
+			}
+
+			if (pParam.hasOwnProperty('keyword')) {
+				if (pParam.keyword != '') {
+					let xSqlWhereKeyword = ` 
+							a.product_code ILIKE :keyword OR
+							a.product_name ILIKE :keyword
+						`;
+					xObjJsonWhere.keyword = `%${pParam.keyword}%`;
+					xSqlWhere = ` ${xSqlWhere} AND (${xSqlWhereKeyword}) `;
+				}
+			}
+
+			xSqlFields = ` a.id, a.product_id, a.product_code, a.product_name,
+			a.qty_demand, a.price_demand, a.qty_request, a.qty_left, a.price_request,
+			a.uom_id, a.uom_name,
+			a.payment_request_id, b.document_no, b.vendor_name`;
+
+			xSql = ` SELECT ${xSqlFields}
+			FROM tr_paymentrequestdetails as a
+				LEFT JOIN tr_paymentrequests as b on a.payment_request_id = b.id
+			WHERE ${xSqlWhere}`;
+  
+			let xData = await sequelize.query(xSql, {
+				replacements: xObjJsonWhere,
+				type: sequelize.QueryTypes.SELECT,
+				// logging: console.log
+			});
+
+			console.log(`>>> xData: ${JSON.stringify(xData)}`);
+			if (xData != null && xData.length > 0) {
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					data: xData,
+				};
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Data Not Found'
+				};
+			}
+
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.list`, `Exception error: ${e.message}`, 'error');
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.list: Exception error: ${e.message}`
+			};
+		}
+		return xJoResult;
+	}
+
 	async save(pParam, pAct) {
 		let xTransaction;
 		var xJoResult;

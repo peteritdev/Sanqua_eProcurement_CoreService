@@ -29,31 +29,31 @@ module.exports = (app) => {
 		check('act').not().isEmpty().withMessage('Parameter act cannot be empty'),
 		check('purchase_request_id').not().isEmpty().withMessage('Parameter purchase_request_id cannot be empty')
 	];
-	app.post(rootAPIPath + 'save', arrValidate, goodsReceiptController.goodsReceipt_Save);
+	app.post(rootAPIPath + 'save', arrValidate, goodsReceiptController.GoodsReceipt_Save);
 
 	arrValidate = [];
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
-	app.post(rootAPIPath + 'submit', arrValidate, goodsReceiptController.goodsReceipt_Submit);
+	app.post(rootAPIPath + 'submit', arrValidate, goodsReceiptController.GoodsReceipt_Submit);
 
 	arrValidate = [];
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
-	app.post(rootAPIPath + 'set_to_draft', arrValidate, goodsReceiptController.goodsReceipt_SetToDraft);
+	app.post(rootAPIPath + 'set_to_draft', arrValidate, goodsReceiptController.GoodsReceipt_SetToDraft);
 
 	arrValidate = [];
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
 	arrValidate = [ check('cancel_reason').not().isEmpty().withMessage('Parameter cancel_reason cannot be empty') ];
-	app.post(rootAPIPath + 'cancel', arrValidate, goodsReceiptController.goodsReceipt_Cancel);
+	app.post(rootAPIPath + 'cancel', arrValidate, goodsReceiptController.GoodsReceipt_Cancel);
 
 	arrValidate = [];
 	arrValidate = [
 		check('offset', 'Parameter offset must be integer and cannot be empty').not().isEmpty().isInt(),
 		check('limit').not().isEmpty().withMessage('Parameter limit cannot be empty')
 	];
-	app.get(rootAPIPath + 'list', arrValidate, goodsReceiptController.goodsReceipt_List);
+	app.get(rootAPIPath + 'list', arrValidate, goodsReceiptController.GoodsReceipt_List);
 
 	arrValidate = [];
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
-	app.get(rootAPIPath + 'detail/:id', arrValidate, goodsReceiptController.goodsReceipt_Detail);
+	app.get(rootAPIPath + 'detail/:id', arrValidate, goodsReceiptController.GoodsReceipt_Detail);
 
 	// GR DETAIL
 	arrValidate = [];
@@ -61,6 +61,9 @@ module.exports = (app) => {
 		check('act').not().isEmpty().withMessage('Parameter act cannot be empty'),
 		check('qty_done', 'Parameter qty_done must be decimal and cannot be empty').not().isEmpty().isDecimal()
 	];
-	app.post(rootAPIPath + 'detail/save', arrValidate, goodsReceiptController.goodsReceiptDetail_Save);
-
+	app.post(rootAPIPath + 'detail/save', arrValidate, goodsReceiptController.GoodsReceiptDetail_Save);
+	
+	arrValidate = [];
+	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
+	app.delete(rootAPIPath + 'delete_detail/:id', arrValidate, goodsReceiptController.GoodsReceiptDetail_Delete);
 };

@@ -8,6 +8,8 @@ const Op = Sequelize.Op;
 // Model
 const _modelDb = require('../models').tr_goodsreceipts;
 const _modelGoodsReceiptDetail = require('../models').tr_goodsreceiptdetails;
+const _modelPaymentRequest = require('../models').tr_paymentrequests;
+const _modelPurchaseRequest = require('../models').tr_purchaserequests;
 const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
@@ -33,22 +35,27 @@ class GoodsReceiptRepository {
 			
 			xInclude = [
 				{
+					model: _modelPurchaseRequest,
+					as: 'purchase_request',
+					attributes: [ 'id', 'request_no'],
+				},
+				{
 					model: _modelGoodsReceiptDetail,
 					as: 'goods_receipt_detail',
-					// include: [
-					// 	{
-					// 		model: _modelProduct,
-					// 		as: 'product',
-					// 		attributes: [ 'id', 'code', 'name'],
-					// 		include: [
-					// 			{
-					// 				model: _modelUnit,
-					// 				as: 'unit',
-					// 				attributes: [ 'id', 'name'],
-					// 			}
-					// 		]
-					// 	},
-					// ]
+					include: [
+						{
+							model: _modelPaymentRequest,
+							as: 'payment_request',
+							attributes: [ 'id', 'document_no'],
+							// include: [
+							// 	{
+							// 		model: _modelUnit,
+							// 		as: 'unit',
+							// 		attributes: [ 'id', 'name'],
+							// 	}
+							// ]
+						},
+					]
 				},
 			]
 
@@ -114,6 +121,22 @@ class GoodsReceiptRepository {
 				}
 			}
 
+			if (pParam.hasOwnProperty('department_id')) {
+				if (pParam.department_id != '') {
+					xWhereAnd.push({
+						department_id: pParam.department_id
+					});
+				}
+			}
+
+			if (pParam.hasOwnProperty('status')) {
+				if (pParam.status != '') {
+					xWhereAnd.push({
+						status: pParam.status
+					});
+				}
+			}
+
 			if (pParam.hasOwnProperty('filter')) {
 				if (pParam.filter != null && pParam.filter != undefined && pParam.filter != '') {
 					var xFilter = JSON.parse(pParam.filter);
@@ -125,21 +148,21 @@ class GoodsReceiptRepository {
 				}
 			}
 
+			if (pParam.hasOwnProperty('start_date') && pParam.hasOwnProperty('end_date')) {
+				if (pParam.start_date != '' && pParam.end_date != '') {
+					xWhereAnd.push({
+						created_at: {
+							[Op.between]: [ pParam.start_date + ' 00:00:00', pParam.end_date + ' 23:59:59' ]
+						}
+					});
+				}
+			}
+
 			if (pParam.hasOwnProperty('keyword')) {
 				if (pParam.keyword != '') {
 					xWhereOr.push(
 						{
 							document_no: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
-							}
-						},
-						{
-							product_name: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
-							}
-						},
-						{
-							payreq_no: {
 								[Op.iLike]: '%' + pParam.keyword + '%'
 							}
 						},
@@ -159,7 +182,7 @@ class GoodsReceiptRepository {
 							}
 						},
 						{
-							received_by_vendor_name: {
+							received_from_vendor_name: {
 								[Op.iLike]: '%' + pParam.keyword + '%'
 							}
 						},
@@ -264,7 +287,7 @@ class GoodsReceiptRepository {
 					xJoResult = {
 						status_code: '00',
 						status_msg: 'Data has been successfully saved',
-						created_id: await _utilInstance.encrypt(toString(xSaved.id), config.cryptoKey.hashKey),
+						created_id: await _utilInstance.encrypt(xSaved.id, config.cryptoKey.hashKey),
 						clear_id: xSaved.id
 					};
 					await xTransaction.commit();
@@ -306,7 +329,7 @@ class GoodsReceiptRepository {
 					xJoResult = {
 						status_code: '00',
 						status_msg: 'Data has been successfully saved',
-						created_id: await _utilInstance.encrypt(toString(xSaved.id), config.cryptoKey.hashKey),
+						created_id: await _utilInstance.encrypt(xSaved.id, config.cryptoKey.hashKey),
 						clear_id: xSaved.id
 					};
 
@@ -341,44 +364,8 @@ class GoodsReceiptRepository {
 						status_msg: 'Failed save to database'
 					};
 				}
-			} else if (
-				pAct == 'update' ||
-				pAct == 'submit' ||
-				pAct == 'cancel' ||
-				pAct == 'close' ||
-				pAct == 'set_to_draft'
-			) {
-				var xComment = '';
+			} else if (pAct == 'update') {
 
-				switch (pAct) {
-					case 'update':
-						xComment = 'changed';
-						break;
-					case 'submit':
-						xComment = 'submitted';
-						pParam.requested_at = await _utilInstance.getCurrDateTime();
-						break;
-					case 'cancel':
-						pParam.canceled_at = await _utilInstance.getCurrDateTime();
-						// pParam.cancel_by = pParam.user_id;
-						// pParam.cancel_by_name = pParam.user_name;
-						xComment = 'canceled';
-						pParam.canceled_reason = pParam.cancel_reason;
-						break;
-					case 'set_to_draft':
-						pParam.set_to_draft_at = await _utilInstance.getCurrDateTime();
-						// pParam.set_to_draft_by = pParam.user_id;
-						// pParam.set_to_draft_by_name = pParam.user_name;
-						xComment = 'set to draft';
-						break;
-					case 'close':
-						xComment = 'closed';
-						break;
-					default:
-						xComment = 'changed';
-				}
-
-				pParam.updatedAt = await _utilInstance.getCurrDateTime();
 				var xId = pParam.id;
 				delete pParam.id;
 				var xWhere = {
@@ -387,17 +374,22 @@ class GoodsReceiptRepository {
 					}
 				};
 
-				pParam.updated_by = pParam.user_id;
-				pParam.updated_by_name = pParam.user_name;
-
 				xSaved = await _modelDb.update(pParam, xWhere, { xTransaction });
+				console.log(`>>> xSaved: ${JSON.stringify(xSaved)}`);
+				if (xSaved.length > 0) {
+					await xTransaction.commit();
 
-				await xTransaction.commit();
-
-				xJoResult = {
-					status_code: '00',
-					status_msg: `Data has been successfully ${xComment}`
-				};
+					xJoResult = {
+						status_code: '00',
+						status_msg: `Data has been successfully ${pAct}`
+					};
+				} else {
+					await xTransaction.rollback();
+					xJoResult = {
+						status_code: '-99',
+						status_msg: `Data Failed ${pAct}`
+					};
+				}
 			}
 		} catch (e) {
 			if (xTransaction) await xTransaction.rollback();

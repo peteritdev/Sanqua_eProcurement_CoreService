@@ -6,8 +6,8 @@ const { hash } = require('bcryptjs');
 const Op = Sequelize.Op;
 
 // Model
-const _modelDb = require('../models').tr_cashadvanceresponsibilities;
-const _modelCashAdvanceResponsibilityDetail = require('../models').tr_cashadvanceresponsibilitiedetails;
+const _modelDb = require('../models').tr_pjcas;
+const _modelPJCADetail = require('../models').tr_pjcadetails;
 const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
@@ -16,9 +16,9 @@ const _modelUnit = require('../models').ms_units;
 const Utility = require('peters-globallib-v2');
 const { param } = require('express-validator');
 const _utilInstance = new Utility();
-const _xClassName = 'cashadvanceresponsibilitieRepository';
+const _xClassName = 'pjcaRepository';
 
-class CashAdvanceResponsibilityRepository {
+class PJCARepository {
 	constructor() {}
 
 	async getByParameter(pParam) {
@@ -33,8 +33,8 @@ class CashAdvanceResponsibilityRepository {
 			
 			xInclude = [
 				{
-					model: _modelCashAdvanceResponsibilityDetail,
-					as: 'cash_advance_responsibility_detail',
+					model: _modelPJCADetail,
+					as: 'pjca_detail',
 					// include: [
 					// 	{
 					// 		model: _modelProduct,
@@ -69,7 +69,7 @@ class CashAdvanceResponsibilityRepository {
 			var xData = await _modelDb.findOne({
 				where: xWhere,
 				include: xInclude,
-				order: [ [ 'cash_advance_responsibility_detail', 'id', 'ASC' ] ]
+				order: [ [ 'pjca_detail', 'id', 'ASC' ] ]
 			});
 
 			if (xData) {
@@ -264,8 +264,8 @@ class CashAdvanceResponsibilityRepository {
 					{
 						include: [
 							{
-								model: _modelCashAdvanceResponsibilitieDetail,
-								as: 'cash_advance_responsibility_detail'
+								model: _modelPJCADetail,
+								as: 'pjca_detail'
 							}
 						]
 					},
@@ -469,4 +469,4 @@ class CashAdvanceResponsibilityRepository {
 	}
 }
 
-module.exports = CashAdvanceResponsibilityRepository;
+module.exports = PJCARepository;

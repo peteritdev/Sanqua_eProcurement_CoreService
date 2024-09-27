@@ -176,6 +176,8 @@ class PurchaseRequestService {
 									xJoArrItems[i].uom_id = xCatalogue.data.uom_id;
 									xJoArrItems[i].uom_name = xCatalogue.data.uom_name;
 								}
+								xJoArrItems[i].qty_left = xJoArrItems[i].qty;
+								// xJoArrItems[i].qty_done = 0;
 							}
 						}
 						pParam.purchase_request_detail = xJoArrItems;
@@ -757,6 +759,8 @@ class PurchaseRequestService {
 								name: xDetail[index].product.name,
 								uom: xDetail[index].product.unit
 							} : null,
+							qty_left: xDetail[index].qty_left,
+							qty_done: xDetail[index].qty_done
 						});
 					}
 					// Get Approval Matrix

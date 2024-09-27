@@ -20,28 +20,28 @@ const GlobalUtility = require('../utils/globalutility.js');
 const _globalUtilInstance = new GlobalUtility();
 
 // Repository
-const CashAdvanceResponsibilityRepository = require('../repository/cashadvanceresponsibilityrepository.js');
-const _repoInstance = new CashAdvanceResponsibilityRepository();
+const PJCARepository = require('../repository/pjcarepository.js');
+const _repoInstance = new PJCARepository();
 
 const PaymentRequestRepository = require('../repository/paymentrequestrepository.js');
 const _paymentRequestRepoInstance = new PaymentRequestRepository();
 
-// const CashAdvanceResponsibilityDetailRepository = require('../repository/CashAdvanceResponsibilitydetailrepository.js');
-// const _repoDetailInstance = new CashAdvanceResponsibilityDetailRepository();
+// const PJCADetailRepository = require('../repository/PJCAdetailrepository.js');
+// const _repoDetailInstance = new PJCADetailRepository();
 
 // OAuth Service
-const OAuthService = require('../services/oauthservice.js');
+const OAuthService = require('./oauthservice.js');
 const _oAuthService = new OAuthService();
 
-const VendorCatalogueService = require('../services/vendorcatalogueservice.js');
+const VendorCatalogueService = require('./vendorcatalogueservice.js');
 const _catalogueService = new VendorCatalogueService();
 
-const PaymentRequestService = require('../services/paymentrequestservice.js');
+const PaymentRequestService = require('./paymentrequestservice.js');
 const _paymentRequestServiceInstance = new PaymentRequestService();
 
-const _xClassName = 'CashAdvanceResponsibilityService';
+const _xClassName = 'PJCAService';
 
-class CashAdvanceResponsibilityService {
+class PJCAService {
 	constructor() {}
 
 	async detail(pParam) {
@@ -72,7 +72,7 @@ class CashAdvanceResponsibilityService {
 						
 						var xJoArrRequestDetailData = [];
 						// var xTotalItem = 0;
-						var xPjcaDetail = xDetail.cash_advance_responsibility_detail;
+						var xPjcaDetail = xDetail.pjca_detail;
 							
 						// looping detail item
 						for (var index in xPjcaDetail) {
@@ -476,4 +476,4 @@ class CashAdvanceResponsibilityService {
 	}
 }
 
-module.exports = CashAdvanceResponsibilityService;
+module.exports = PJCAService;

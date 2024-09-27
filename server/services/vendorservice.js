@@ -655,6 +655,36 @@ class VendorService {
 
     }
 
+    async dropdown(pParam){
+        var xJoResult = {};
+        var xJoArrData = [];       
+
+        var xResultList = await _vendorRepoInstance.list(pParam);
+
+        if( xResultList.count > 0 ){
+            xJoResult.status_code = "00";
+            xJoResult.status_msg = "OK";
+
+            var xRows = xResultList.rows;
+
+            for(var index in xRows){                
+
+                xJoArrData.push({
+                    id: xRows[index].id,
+                    code: xRows[index].code,
+                    name: xRows[index].name
+                });
+            }
+
+            xJoResult.data = xJoArrData;
+        }else{
+            xJoResult.status_code = "00";
+            xJoResult.status_msg = "OK";
+            xJoResult.data = xJoArrData;
+        }
+
+        return (xJoResult);
+    } 
 }
 
 module.exports = VendorService;

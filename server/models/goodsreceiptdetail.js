@@ -14,10 +14,12 @@ module.exports = (sequelize, DataTypes) => {
 		uom_id: DataTypes.INTEGER,
 		uom_name: DataTypes.STRING,
 		qty_demand: DataTypes.DOUBLE,
+		qty_request: DataTypes.DOUBLE,
 		qty_done: DataTypes.DOUBLE,
 		qty_return: DataTypes.DOUBLE,
 		description: DataTypes.STRING,
-		payment_request_detail_id: DataTypes.INTEGER,
+		// payment_request_detail_id: DataTypes.INTEGER,
+		payment_request_id: DataTypes.INTEGER,
 		status: DataTypes.INTEGER,
 		is_delete: DataTypes.INTEGER,
 		deleted_at: DataTypes.DATE,
@@ -49,6 +51,12 @@ module.exports = (sequelize, DataTypes) => {
 		GoodsReceiptDetail.belongsTo(models.tr_goodsreceipts, {
 			foreignKey: 'goods_receipt_id',
 			as: 'goods_receipt',
+			onDelete: 'CASCADE'
+		});
+
+		GoodsReceiptDetail.belongsTo(models.tr_paymentrequests, {
+			foreignKey: 'payment_request_id',
+			as: 'payment_request',
 			onDelete: 'CASCADE'
 		});
 	};

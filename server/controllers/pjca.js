@@ -3,11 +3,11 @@ const OAuthService = require('../services/oauthservice.js');
 const _oAuthServiceInstance = new OAuthService();
 
 // Service
-const CashAdvanceResponsibilityService = require('../services/cashadvanceresponsibilityservice.js');
-const _serviceInstance = new CashAdvanceResponsibilityService();
+const PJCAService = require('../services/pjcaservice.js');
+const _serviceInstance = new PJCAService();
 
-const CashAdvanceResponsibilityDetailService = require('../services/cashadvanceresponsibilitydetailservice.js');
-const _serviceDetailInstance = new CashAdvanceResponsibilityDetailService();
+const PJCADetailService = require('../services/pjcadetailservice.js');
+const _serviceDetailInstance = new PJCADetailService();
 
 const env = process.env.NODE_ENV || 'localhost';
 const config = require(__dirname + '/../config/config.json')[env];
@@ -15,17 +15,17 @@ const config = require(__dirname + '/../config/config.json')[env];
 const { check, validationResult } = require('express-validator');
 
 module.exports = {
-	CashAdvanceResponsibility_List,
-	CashAdvanceResponsibility_Detail,
-	CashAdvanceResponsibility_Save,
-	CashAdvanceResponsibility_Submit,
-	CashAdvanceResponsibility_SetToDraft,
-	CashAdvanceResponsibility_Cancel,
+	PJCA_List,
+	PJCA_Detail,
+	PJCA_Save,
+	PJCA_Submit,
+	PJCA_SetToDraft,
+	PJCA_Cancel,
 
-	CashAdvanceResponsibilityDetail_Save
+	PJCADetail_Save
 };
 
-async function CashAdvanceResponsibility_Detail(req, res) {
+async function PJCA_Detail(req, res) {
 	var joResult;
 	var oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
 
@@ -57,7 +57,7 @@ async function CashAdvanceResponsibility_Detail(req, res) {
 	res.status(200).send(joResult);
 }
 
-async function CashAdvanceResponsibility_List(req, res) {
+async function PJCA_List(req, res) {
 	var joResult;
 	var oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
 
@@ -98,7 +98,7 @@ async function CashAdvanceResponsibility_List(req, res) {
 	res.status(200).send(joResult);
 }
 
-async function CashAdvanceResponsibility_Save(req, res) {
+async function PJCA_Save(req, res) {
 	var joResult;
 	var oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
 
@@ -164,7 +164,7 @@ async function CashAdvanceResponsibility_Save(req, res) {
 	res.status(200).send(joResult);
 }
 
-async function CashAdvanceResponsibility_Submit(req, res) {
+async function PJCA_Submit(req, res) {
 	var joResult;
 	var oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
 
@@ -202,7 +202,7 @@ async function CashAdvanceResponsibility_Submit(req, res) {
 	res.status(200).send(joResult);
 }
 
-async function CashAdvanceResponsibility_SetToDraft(req, res) {
+async function PJCA_SetToDraft(req, res) {
 	var joResult;
 	var oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
 
@@ -240,7 +240,7 @@ async function CashAdvanceResponsibility_SetToDraft(req, res) {
 	res.status(200).send(joResult);
 }
 
-async function CashAdvanceResponsibility_Cancel(req, res) {
+async function PJCA_Cancel(req, res) {
 	var joResult;
 	var oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
 
@@ -278,7 +278,7 @@ async function CashAdvanceResponsibility_Cancel(req, res) {
 	res.status(200).send(joResult);
 }
 
-async function CashAdvanceResponsibilityDetail_Save(req, res) {
+async function PJCADetail_Save(req, res) {
 	var joResult;
 	var oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
 

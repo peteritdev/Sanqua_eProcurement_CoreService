@@ -77,14 +77,14 @@ class GoodsReceiptDetailService {
 								if (xDecId.status_code == '00') {
 									pParam.user_id = xDecId.decrypted;
 									xFlagProcess = true;
-									xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
-									if (xDecId.status_code == '00') {
-										pParam.id = xDecId.decrypted;
-										xRequestIdClear = xDecId.decrypted;
-										xFlagProcess = true;
-									} else {
-										xJoResult = xDecId;
-									}
+									// xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+									// if (xDecId.status_code == '00') {
+									// 	pParam.id = xDecId.decrypted;
+									// 	xRequestIdClear = xDecId.decrypted;
+									// 	xFlagProcess = true;
+									// } else {
+									// 	xJoResult = xDecId;
+									// }
 								} else {
 									xJoResult = xDecId;
 								}
@@ -92,7 +92,7 @@ class GoodsReceiptDetailService {
 							} else {
 								xJoResult = {
 									status_code: '-99',
-									status_msg: 'This GR submitted. You can not take an action now.'
+									status_msg: 'This GR already submitted. You can not take an action now.'
 								};
 							}
 						} else {
@@ -141,7 +141,7 @@ class GoodsReceiptDetailService {
 				) {
 					var xParamUpdate = {
 						id: xGoodsReceiptDetail.id,
-						// qty_done: Math.round((xGoodsReceiptDetail.qty_done + pParam.qty_done) * 1000) / 1000
+						qty_done: Math.round((xGoodsReceiptDetail.qty_done + pParam.qty_done) * 1000) / 1000
 					};
 					pParam = null;
 					pParam = xParamUpdate;
@@ -254,6 +254,29 @@ class GoodsReceiptDetailService {
 					xJoResult = xUpdateResult;
 				}
 			}
+		}
+
+		return xJoResult;
+	}
+
+	async delete(pParam) {
+		var xJoResult = {};
+		var xFlagProcess = false;
+		var xDecId = null;
+
+		if (pParam.id != '') {
+			xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				xFlagProcess = true;
+				pParam.id = xDecId.decrypted;
+			} else {
+				xJoResult = xDecId;
+			}
+		}
+
+		if (xFlagProcess) {
+			var xDeleteResult = await _repoInstance.delete(pParam);
+			xJoResult = xDeleteResult;
 		}
 
 		return xJoResult;
