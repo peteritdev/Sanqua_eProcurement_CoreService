@@ -51,6 +51,7 @@ class PaymentRequestService {
 		var xDecId = null;
 		var xEncId = null;
 		var xJoData = {};
+		var xArrUserCanCancel = [];
 
 		try {
 			if (pParam.hasOwnProperty('id')) {
@@ -72,7 +73,7 @@ class PaymentRequestService {
 					if (xDetail != null) {
 						if (xDetail.status_code == '00') {
 								
-							var xJoArrRequestDetailData = [];
+							// var xJoArrRequestDetailData = [];
 							// var xTotalItem = 0;
 							// var xPayreqDetail = xDetail.data.payment_request_detail;
 								
@@ -111,6 +112,39 @@ class PaymentRequestService {
 							// 	xDetail.data.fpb_no = xFpbDetail.request_no
 							// }
 							
+							// Get Approval Matrix
+							var xParamApprovalMatrix = {
+								application_id: 8,
+								table_name: config.dbTables.payreq,
+								document_id: xEncId
+							};
+							var xResultApprovalMatrix = await _oAuthService.getApprovalMatrix(
+								pParam.method,
+								pParam.token,
+								xParamApprovalMatrix
+							);
+
+							console.log(`>>> xResultApprovalMatrix: ${JSON.stringify(xResultApprovalMatrix)}`);
+
+							if (xResultApprovalMatrix != null) {
+								if (xResultApprovalMatrix.status_code == '00') {
+									let xListApprover = xResultApprovalMatrix.token_data.data;
+									console.log(`>>> xListApprover: ${JSON.stringify(xListApprover)}`);
+									for (var i in xListApprover) {
+										console.log(`>>> approver_user[${i}]: ${JSON.stringify(xListApprover[i].approver_user)}`);
+										let xApproverUsers = _.filter(xListApprover[i].approver_user, { status: 0 }).map(
+											// update 08/08/2023 prevent user is null
+											(v) => (v.user != null ? v.user.email : v.user)
+										);
+										console.log(`>>> xApproverUsers: ${JSON.stringify(xApproverUsers)}`);
+										xArrUserCanCancel.push.apply(xArrUserCanCancel, xApproverUsers);
+									}
+								}
+							}
+							console.log(`>>> xArrUserCanCancel: ${JSON.stringify(xArrUserCanCancel)}`);
+							xDetail.data.approver_users = xArrUserCanCancel
+							xDetail.data.approval_matrix = xResultApprovalMatrix.status_code == '00' && xResultApprovalMatrix.token_data.status_code == '00' ? xResultApprovalMatrix.token_data.data : null
+
 						}
 					} else {
 						
@@ -377,6 +411,7 @@ class PaymentRequestService {
 	}
 
 	async submit(pParam) {
+		console.log(`>>> submit payreq>>>`);
 		var xJoResult = {};
 		var xFlagProcess = false;
 		var xDecId = null;
@@ -406,15 +441,42 @@ class PaymentRequestService {
 				var xDetail = await _repoInstance.getByParameter({
 					id: pParam.id
 				});
+				console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`);
 				
 
 				if (xDetail != null) {
-					console.log(`>>> xDetail: ${JSON.stringify(xDetail.status)}`, pParam.id);
 					if (xDetail.status_code == '00') {
 						if (xDetail.data.status == 0) {
 							pParam.status = 1;
+							pParam.requested_at = await _utilInstance.getCurrDateTime();
 							var xUpdate = await _repoInstance.save(pParam, 'submit');
 							xJoResult = xUpdate;
+							
+							// Next Phase : Approval Matrix & Notification to admin
+							if (xUpdate.status_code == '00') {
+								var xParamAddApprovalMatrix = {
+									act: 'add',
+									document_id: xEncId,
+									document_no: xDetail.data.document_no,
+									application_id: 8,
+									table_name: config.dbTables.payreq,
+									company_id: xDetail.data.company_id,
+									department_id: xDetail.data.department_id,
+									ecatalogue_fpb_category_item: null,
+									logged_company_id: pParam.logged_company_id
+								};
+
+								var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
+									pParam.method,
+									pParam.token,
+									xParamAddApprovalMatrix
+								);
+								console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
+
+								xJoResult.approval_matrix_result = xApprovalMatrixResult;
+							} else {
+								xJoResult = xUpdate;
+							}
 						} else {
 							xJoResult = {
 								status_code: '-99',
@@ -626,29 +688,53 @@ class PaymentRequestService {
 			var xPayreqDetail = await _repoInstance.getByParameter({ id: pParam.document_id });
 			if (xPayreqDetail != null) {
 				if (xPayreqDetail.status_code == '00') {
-					if (xPayreqDetail.data.status == 1) {
-						var xParamUpdate = {
-							id: pParam.document_id,
-							status: 2,
-							// approved_at: await _utilInstance.getCurrDateTime()
-						};
-						var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
-
-						if (xUpdateResult.status_code == '00') {
-							xJoResult = {
-								status_code: '00',
-								status_msg: 'Payreq successfully approved'
-							};
-						} else {
-							xJoResult = xUpdateResult;
-						}
-					} else {
+					if (xPayreqDetail.data.status != 1) {
 						xJoResult = {
 							status_code: '-99',
 							status_msg: 'This document already confirmed before.'
 						};
+					} else {
+						var xParamApprovalMatrixDocument = {
+							document_id: xEncId,
+							status: 1,
+							application_id: 8,
+							table_name: config.dbTables.payreq
+						};
+	
+						var xResultApprovalMatrixDocument = await _oAuthService.confirmApprovalMatrix(
+							pParam.method,
+							pParam.token,
+							xParamApprovalMatrixDocument
+						);
+	
+						if (xResultApprovalMatrixDocument != null) {
+							if (xResultApprovalMatrixDocument.status_code == '00') {
+								// Update status Pjca to be confirmed
+								var xParamUpdatePR = {
+									id: pParam.document_id,
+									status: 2,
+									reject_reason: pParam.reject_reason
+								};
+								var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
+	
+								if (xUpdateResult.status_code == '00') {
+									xJoResult = {
+										status_code: '00',
+										status_msg: 'Payreq successfully confirmed'
+									};
+								} else {
+									xJoResult = xUpdateResult;
+								}
+							} else {
+								xJoResult = xResultApprovalMatrixDocument;
+							}
+						} else {
+							xJoResult = {
+								status_code: '-99',
+								status_msg: 'There is problem on approval matrix processing. Please try again'
+							};
+						}
 					}
-				
 				} else {
 					xJoResult = xPayreqDetail
 				}
@@ -691,27 +777,58 @@ class PaymentRequestService {
 			// Check if this request id valid or not
 			var xPayreqDetail = await _repoInstance.getByParameter({ id: pParam.document_id });
 			if (xPayreqDetail != null) {
-				if ( xPayreqDetail.status == 1) {
-					var xParamUpdate = {
-						id: pParam.document_id,
-						status: 6,
-						// approved_at: await _utilInstance.getCurrDateTime()
-					};
-					var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
-
-					if (xUpdateResult.status_code == '00') {
-						xJoResult = {
-							status_code: '00',
-							status_msg: 'Payreq successfully rejected'
-						};
-					} else {
-						xJoResult = xUpdateResult;
-					}
-				} else {
+				if (xPayreqDetail.data.status != 1) {
 					xJoResult = {
 						status_code: '-99',
-						status_msg: 'This document already rejected before.'
+						status_msg: 'This document already confirmed before.'
 					};
+				} else {
+					var xParamApprovalMatrixDocument = {
+						document_id: xEncId,
+						status: -1,
+						application_id: 8,
+						table_name: config.dbTables.payreq
+					};
+
+					var xResultApprovalMatrixDocument = await _oAuthService.confirmApprovalMatrix(
+						pParam.method,
+						pParam.token,
+						xParamApprovalMatrixDocument
+					);
+
+					// await _utilInstance.writeLog(
+					// 	`${_xClassName}.rejectPayreq`,
+					// 	`xResultApprovalMatrixDocument: ${xResultApprovalMatrixDocument}`,
+					// 	'debug'
+					// );
+
+					if (xResultApprovalMatrixDocument != null) {
+						if (xResultApprovalMatrixDocument.status_code == '00') {
+							// Update status Payreq to be confirmed
+							var xParamUpdatePR = {
+								id: pParam.document_id,
+								status: 6,
+								reject_reason: pParam.reject_reason
+							};
+							var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
+
+							if (xUpdateResult.status_code == '00') {
+								xJoResult = {
+									status_code: '00',
+									status_msg: 'Payreq successfully rejected'
+								};
+							} else {
+								xJoResult = xUpdateResult;
+							}
+						} else {
+							xJoResult = xResultApprovalMatrixDocument;
+						}
+					} else {
+						xJoResult = {
+							status_code: '-99',
+							status_msg: 'There is problem on approval matrix processing. Please try again'
+						};
+					}
 				}
 			} else {
 				xJoResult = {
@@ -869,6 +986,91 @@ class PaymentRequestService {
 				status_code: '-99',
 				status_msg: `${_xClassName}.cancel: Exception error: ${e.message}`
 			};
+		}
+
+		return xJoResult;
+	}
+	
+	async fetchMatrixPayreq(pParam) {
+		var xJoResult = {};
+		var xDecId = null;
+		var xFlagProcess = false;
+		var xEncId = '';
+		var xClearId = '';
+
+		if (pParam.id != '' && pParam.user_id != '') {
+			xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				xFlagProcess = true;
+				xEncId = pParam.id;
+				pParam.id = xDecId.decrypted;
+				xClearId = xDecId.decrypted;
+				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.user_id = xDecId.decrypted;
+					xFlagProcess = true;
+				} else {
+					xJoResult = xDecId;
+				}
+			} else {
+				xJoResult = xDecId;
+			}
+		}
+
+		if (xFlagProcess) {
+			// Get PR Detail
+			var xPayreqDetail = await _repoInstance.getByParameter({ id: xClearId });
+			console.log(`>>> xFetchPayreqDetail: ${JSON.stringify(xPayreqDetail)}`);
+			if (xPayreqDetail != null) {
+				if (xPayreqDetail.data.status != 1) {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Fetch matrix cannot be processed, please check again'
+					};
+				} else {
+					pParam.approved_at = null;
+					const xUpdateParam = {
+						id: xClearId,
+						approved_at: null,
+						user_id: pParam.user_id,
+						user_name: pParam.user_name
+					}
+					var xUpdateResult = await _repoInstance.save(xUpdateParam, 'update');
+					console.log(`>>> xUpdateResult: ${JSON.stringify(xUpdateResult)}`);
+					xJoResult = xUpdateResult;
+					// Next Phase : Approval Matrix & Notification to admin
+					if (xUpdateResult.status_code == '00') {
+						// Fetch Approval Matrix
+						var xParamAddApprovalMatrix = {
+							act: 'fetch_matrix',
+							document_id: xEncId,
+							document_no: xPayreqDetail.data.document_no,
+							application_id: 8,
+							table_name: config.dbTables.payreq,
+							company_id: xPayreqDetail.data.company_id,
+							department_id: xPayreqDetail.data.department_id,
+							ecatalogue_fpb_category_item: null,
+							logged_company_id: pParam.logged_company_id
+						};
+
+						var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
+							pParam.method,
+							pParam.token,
+							xParamAddApprovalMatrix
+						);
+						console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
+						xJoResult.approval_matrix_result = xApprovalMatrixResult;
+	
+					} else {
+						xJoResult = xUpdateResult;
+					}
+				}
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Data not found. Please supply valid identifier'
+				};
+			}
 		}
 
 		return xJoResult;

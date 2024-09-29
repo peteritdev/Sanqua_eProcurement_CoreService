@@ -92,4 +92,9 @@ module.exports = (app) => {
 	arrValidate = [];
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
 	app.delete(rootAPIPath + 'delete_detail/:id', arrValidate, paymentRequestController.paymentRequestDetail_Delete);
+
+	// Fetch Matrix payreq
+	arrValidate = [];
+	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
+	app.post(rootAPIPath + 'fetch_matrix', arrValidate, paymentRequestController.paymentRequest_FetchMatrix);
 };

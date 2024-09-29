@@ -48,6 +48,10 @@ module.exports = (sequelize, DataTypes) => {
 			foreignKey: 'pjca_id',
 			as: 'pjca_detail'
 		});
+		PJCA.belongsTo(models.tr_paymentrequests, {
+			foreignKey: 'payment_request_id',
+			as: 'payment_request'
+		});
 	};
 
 	return PJCA;

@@ -55,7 +55,19 @@ module.exports = (app) => {
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
 	app.get(rootAPIPath + 'detail/:id', arrValidate, pjcaController.PJCA_Detail);
 
-	// GR DETAIL
+	arrValidate = [];
+	arrValidate = [ check('document_id').not().isEmpty().withMessage('Parameter document_id cannot be empty') ];
+	app.post(rootAPIPath + 'confirm', arrValidate, pjcaController.PJCA_Confirm);
+
+	arrValidate = [];
+	arrValidate = [ check('document_id').not().isEmpty().withMessage('Parameter document_id cannot be empty') ];
+	app.post(rootAPIPath + 'reject', arrValidate, pjcaController.PJCA_Reject);
+
+	arrValidate = [];
+	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
+	app.post(rootAPIPath + 'done', arrValidate, pjcaController.PJCA_Done);
+
+	// pjca DETAIL
 	arrValidate = [];
 	arrValidate = [
 		check('act').not().isEmpty().withMessage('Parameter act cannot be empty'),
@@ -63,4 +75,12 @@ module.exports = (app) => {
 	];
 	app.post(rootAPIPath + 'detail/save', arrValidate, pjcaController.PJCADetail_Save);
 
+	arrValidate = [];
+	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
+	app.delete(rootAPIPath + 'delete_detail/:id', arrValidate, pjcaController.PJCADetail_Delete);
+	
+	// Fetch Matrix payreq
+	arrValidate = [];
+	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
+	app.post(rootAPIPath + 'fetch_matrix', arrValidate, pjcaController.PJCA_FetchMatrix);
 };

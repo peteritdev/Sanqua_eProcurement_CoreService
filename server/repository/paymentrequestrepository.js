@@ -364,19 +364,17 @@ class PaymentRequestRepository {
 				pAct == 'update' ||
 				pAct == 'submit'
 			) {
-
-				switch (pAct) {
-					case 'update':
-						xComment = 'changed';
-						break;
-					case 'submit':
-						xComment = 'submitted';
-						pParam.requested_at = await _utilInstance.getCurrDateTime();
-						break;
-					default:
-						xComment = 'changed';
-				}
-
+				// switch (pAct) {
+				// 	case 'update':
+				// 		xComment = 'changed';
+				// 		break;
+				// 	case 'submit':
+				// 		xComment = 'submitted';
+				// 		pParam.requested_at = await _utilInstance.getCurrDateTime();
+				// 		break;
+				// 	default:
+				// 		xComment = 'changed';
+				// }
 				var xId = pParam.id;
 				delete pParam.id;
 				var xWhere = {

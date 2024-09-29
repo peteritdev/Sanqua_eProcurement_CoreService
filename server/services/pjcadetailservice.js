@@ -137,11 +137,18 @@ class PJCADetailService {
 				}
 
 				if (
-					xPJCADetail != null
+					xPJCADetail != null &&
+					xPJCADetail.price_done == pParam.price_done
 				) {
 					var xParamUpdate = {
 						id: xPJCADetail.id,
-						// qty_done: Math.round((xPJCADetail.qty_done + pParam.qty_done) * 1000) / 1000
+						qty_done: Math.round((xPaymentRequestDetail.qty_done + pParam.qty_done) * 1000) / 1000,
+						price_total:
+							Math.round(
+								(xPaymentRequestDetail.qty_done + pParam.qty_done) *
+									xPaymentRequestDetail.price_done *
+									1000
+							) / 1000
 					};
 					pParam = null;
 					pParam = xParamUpdate;
@@ -163,7 +170,7 @@ class PJCADetailService {
 						}
 					}
 
-					// pParam.price_total = Math.round(pParam.qty_request * pParam.price_request * 1000) / 1000;
+					pParam.price_total = Math.round(pParam.qty_done * pParam.price_done * 1000) / 1000;
 				}
 				// Validate if product_id is null (free keyin for project), estimate_fulfillment
 
@@ -242,18 +249,42 @@ class PJCADetailService {
 				}
 
 				if (xFlagProcess) {
-					// if (pParam.hasOwnProperty('qty_request')) {
-					// 	if (pParam.hasOwnProperty('price_request')) {
-					// 		pParam.price_total =
-					// 			Math.round(pParam.qty_request * pParam.price_request * 1000) / 1000;
-					// 	}
-					// }
+					if (pParam.hasOwnProperty('qty_done')) {
+						if (pParam.hasOwnProperty('price_done')) {
+							pParam.price_total =
+								Math.round(pParam.qty_done * pParam.price_done * 1000) / 1000;
+						}
+					}
+
 
 					// console.log(`>>> editDetail : ${JSON.stringify(pParam)}`);
 					var xUpdateResult = await _repoInstance.save(pParam, xAct);
 					xJoResult = xUpdateResult;
 				}
 			}
+		}
+
+		return xJoResult;
+	}
+	
+	async delete(pParam) {
+		var xJoResult = {};
+		var xFlagProcess = false;
+		var xDecId = null;
+
+		if (pParam.id != '') {
+			xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				xFlagProcess = true;
+				pParam.id = xDecId.decrypted;
+			} else {
+				xJoResult = xDecId;
+			}
+		}
+
+		if (xFlagProcess) {
+			var xDeleteResult = await _repoInstance.delete(pParam);
+			xJoResult = xDeleteResult;
 		}
 
 		return xJoResult;

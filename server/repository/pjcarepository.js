@@ -8,6 +8,7 @@ const Op = Sequelize.Op;
 // Model
 const _modelDb = require('../models').tr_pjcas;
 const _modelPJCADetail = require('../models').tr_pjcadetails;
+const _modelPaymentRequest = require('../models').tr_paymentrequests;
 const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
@@ -33,22 +34,13 @@ class PJCARepository {
 			
 			xInclude = [
 				{
+					model: _modelPaymentRequest,
+					as: 'payment_request',
+					attributes: [ 'id', 'document_no' ]
+				},
+				{
 					model: _modelPJCADetail,
-					as: 'pjca_detail',
-					// include: [
-					// 	{
-					// 		model: _modelProduct,
-					// 		as: 'product',
-					// 		attributes: [ 'id', 'code', 'name'],
-					// 		include: [
-					// 			{
-					// 				model: _modelUnit,
-					// 				as: 'unit',
-					// 				attributes: [ 'id', 'name'],
-					// 			}
-					// 		]
-					// 	},
-					// ]
+					as: 'pjca_detail'
 				},
 			]
 
@@ -104,12 +96,34 @@ class PJCARepository {
 		var xJoResult = {};
 
 		try {
-			xInclude = [];
+			xInclude = [
+				{
+					model: _modelPaymentRequest,
+					as: 'payment_request',
+					attributes: [ 'id', 'document_no'],
+				},
+			];
 
 			if (pParam.hasOwnProperty('company_id')) {
 				if (pParam.company_id != '') {
 					xWhereAnd.push({
 						company_id: pParam.company_id
+					});
+				}
+			}
+
+			if (pParam.hasOwnProperty('department_id')) {
+				if (pParam.department_id != '') {
+					xWhereAnd.push({
+						department_id: pParam.department_id
+					});
+				}
+			}
+
+			if (pParam.hasOwnProperty('status')) {
+				if (pParam.status != '') {
+					xWhereAnd.push({
+						status: pParam.status
 					});
 				}
 			}
@@ -125,11 +139,26 @@ class PJCARepository {
 				}
 			}
 
+			if (pParam.hasOwnProperty('start_date') && pParam.hasOwnProperty('end_date')) {
+				if (pParam.start_date != '' && pParam.end_date != '') {
+					xWhereAnd.push({
+						created_at: {
+							[Op.between]: [ pParam.start_date + ' 00:00:00', pParam.end_date + ' 23:59:59' ]
+						}
+					});
+				}
+			}
+
 			if (pParam.hasOwnProperty('keyword')) {
 				if (pParam.keyword != '') {
 					xWhereOr.push(
 						{
 							document_no: {
+								[Op.iLike]: '%' + pParam.keyword + '%'
+							}
+						},
+						{
+							company_name: {
 								[Op.iLike]: '%' + pParam.keyword + '%'
 							}
 						},
@@ -228,13 +257,13 @@ class PJCARepository {
 				// console.log(`>>> xSave: ${JSON.stringify(pParam)}`);
 				
 				xSaved = await _modelDb.create(pParam, { transaction: xTransaction });
-				// console.log(`>>> xSave:end ${JSON.stringify(xSaved)}`);
+				console.log(`>>> xSave:end ${JSON.stringify(xSaved)}`);
 
 				if (xSaved.id != null) {
 					xJoResult = {
 						status_code: '00',
 						status_msg: 'Data has been successfully saved',
-						created_id: await _utilInstance.encrypt(toString(xSaved.id), config.cryptoKey.hashKey),
+						created_id: await _utilInstance.encrypt(xSaved.id, config.cryptoKey.hashKey),
 						clear_id: xSaved.id
 					};
 					await xTransaction.commit();
@@ -254,11 +283,7 @@ class PJCARepository {
 				pParam.created_by = pParam.user_id;
 				pParam.created_by_name = pParam.user_name;
 
-				//// Need disable trigger first because it affect when add batch item.
-				// sequelize.query(
-				// 	'ALTER TABLE "tr_cashadvanceresponsibilitiedetails" DISABLE TRIGGER "trg_update_total_item_afterinsert"'
-				// );
-
+				console.log(`>>> before xSave:end ${JSON.stringify(pParam)}`, pAct);
 				xSaved = await _modelDb.create(
 					pParam,
 					{
@@ -271,36 +296,15 @@ class PJCARepository {
 					},
 					{ transaction: xTransaction }
 				);
+				console.log(`>>> after xSave:end ${JSON.stringify(xSaved)}`);
 
-				if (xSaved.id != null) {
+				if (xSaved != null && xSaved.id != null) {
 					xJoResult = {
 						status_code: '00',
 						status_msg: 'Data has been successfully saved',
-						created_id: await _utilInstance.encrypt(toString(xSaved.id), config.cryptoKey.hashKey),
+						created_id: await _utilInstance.encrypt(xSaved.id, config.cryptoKey.hashKey),
 						clear_id: xSaved.id
 					};
-
-					// sequelize.query(
-					// 	'ALTER TABLE "tr_cashadvanceresponsibilitiedetails" ENABLE TRIGGER "trg_update_total_item_afterinsert"'
-					// );
-
-					// //// Call update total on table tr_purchaserequest
-					// sequelize.query(
-					// 	`update tr_cashadvanceresponsibilities set total_qty = (
-					// 		select sum( qty_request )
-					// 		from tr_cashadvanceresponsibilitiedetails
-					// 		where payment_request_id = ${xSaved.id}
-					// 	),
-					// 	total_price = (
-					// 		select sum( price_request )
-					// 		from tr_cashadvanceresponsibilitiedetails
-					// 		where payment_request_id = ${xSaved.id}
-					// 	),
-					// 	where id = ${xSaved.id};`,
-					// 	{
-					// 		transaction: xTransaction
-					// 	}
-					// );
 
 					await xTransaction.commit();
 				} else {
@@ -313,42 +317,8 @@ class PJCARepository {
 				}
 			} else if (
 				pAct == 'update' ||
-				pAct == 'submit' ||
-				pAct == 'cancel' ||
-				pAct == 'close' ||
-				pAct == 'set_to_draft'
+				pAct == 'submit'
 			) {
-				var xComment = '';
-
-				switch (pAct) {
-					case 'update':
-						xComment = 'changed';
-						break;
-					case 'submit':
-						xComment = 'submitted';
-						pParam.requested_at = await _utilInstance.getCurrDateTime();
-						break;
-					case 'cancel':
-						pParam.canceled_at = await _utilInstance.getCurrDateTime();
-						// pParam.cancel_by = pParam.user_id;
-						// pParam.cancel_by_name = pParam.user_name;
-						xComment = 'canceled';
-						pParam.canceled_reason = pParam.cancel_reason;
-						break;
-					case 'set_to_draft':
-						pParam.set_to_draft_at = await _utilInstance.getCurrDateTime();
-						// pParam.set_to_draft_by = pParam.user_id;
-						// pParam.set_to_draft_by_name = pParam.user_name;
-						xComment = 'set to draft';
-						break;
-					case 'close':
-						xComment = 'closed';
-						break;
-					default:
-						xComment = 'changed';
-				}
-
-				pParam.updatedAt = await _utilInstance.getCurrDateTime();
 				var xId = pParam.id;
 				delete pParam.id;
 				var xWhere = {
@@ -357,17 +327,21 @@ class PJCARepository {
 					}
 				};
 
-				pParam.updated_by = pParam.user_id;
-				pParam.updated_by_name = pParam.user_name;
-
 				xSaved = await _modelDb.update(pParam, xWhere, { xTransaction });
+				if (xSaved.length > 0) {
+					await xTransaction.commit();
 
-				await xTransaction.commit();
-
-				xJoResult = {
-					status_code: '00',
-					status_msg: `Data has been successfully ${xComment}`
-				};
+					xJoResult = {
+						status_code: '00',
+						status_msg: `Data has been successfully ${pAct}`
+					};
+				} else {
+					await xTransaction.rollback();
+					xJoResult = {
+						status_code: '-99',
+						status_msg: `Data Failed ${pAct}`
+					};
+				}
 			}
 		} catch (e) {
 			if (xTransaction) await xTransaction.rollback();
