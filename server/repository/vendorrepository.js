@@ -47,96 +47,211 @@ class VendorRepository{
         return xData;
     }
 
-    async list( pParam ){
-        var xOrder = ['name', 'ASC'];
-        var xWhere = {};
-        var xWhereVendorStatus = {};
-        var xQuery = {};
+	async list(pParam) {
+		var xOrder = [ 'name', 'ASC' ];
+		var xWhere = [];
+		var xWhereOr = [];
+		var xWhereAnd = [];
+		var xInclude = [];
+		var xJoResult = {};
 
-        if( pParam.hasOwnProperty('status') ){
-            if( pParam.status != '' ){
-                xWhereVendorStatus = {
-                    status: pParam.status,
-                }
-            }
-        }
-
-        var xWhereAnd = [
-            {
-                is_delete: 0,
-            }, xWhereVendorStatus,
-        ];
-
-        xWhere.$and = xWhereAnd;
-
-        var xWhereOr = [];
-        if( pParam.keyword != '' && pParam.hasOwnProperty('keyword') ){
-            xWhereOr = [
+		try {
+            xInclude = [
                 {
-                    code: {
-                        [Op.iLike]: '%' + pParam.keyword + '%',
-                    },
+                    model: _modelBusinessEntity,
+                    as: 'business_entity',
                 },
-                {                    
-                    name: {
-                        [Op.iLike]: '%' + pParam.keyword + '%',
-                    },
+                {
+                    model: _modelProvince,
+                    as: 'province',
                 },
-                {                    
-                    email: {
-                        [Op.iLike]: '%' + pParam.keyword + '%',
-                    },
+                {
+                    model: _modelCity,
+                    as: 'city',
+                },
+                {
+                    model: _modelClassification,
+                    as: 'classification',
+                },
+                {
+                    attributes: ['id','name','code'],
+                    model: _modelCurrency,
+                    as: 'currency',
                 }
-            ]
-            xWhere.$or = xWhereOr;
-        }
+            ];
 
-        var xJoinedTable = [
-            {
-                model: _modelBusinessEntity,
-                as: 'business_entity',
-            },
-            {
-                model: _modelProvince,
-                as: 'province',
-            },
-            {
-                model: _modelCity,
-                as: 'city',
-            },
-            {
-                model: _modelClassification,
-                as: 'classification',
-            },
-            {
-                attributes: ['id','name','code'],
-                model: _modelCurrency,
-                as: 'currency',
-            }
-        ];
+			if (pParam.hasOwnProperty('status')) {
+				if (pParam.status != '') {
+					xWhereAnd.push({
+						status: pParam.status
+					});
+				}
+			}
 
-        if( pParam.order_by != '' ){
-            xOrder = [pParam.order_by, (pParam.order_type == 'desc' ? 'DESC' : 'ASC') ];
-        }
+			if (pParam.hasOwnProperty('keyword')) {
+				if (pParam.keyword != '') {
+					xWhereOr.push(
+						{
+							name: {
+								[Op.iLike]: '%' + pParam.keyword + '%'
+							}
+						},
+						{
+							code: {
+								[Op.iLike]: '%' + pParam.keyword + '%'
+							}
+						},
+						{
+							email: {
+								[Op.iLike]: '%' + pParam.keyword + '%'
+							}
+						}
+					);
+				}
+			}
 
-        xQuery.where = xWhere;
-        xQuery.include = xJoinedTable;
-        
-        if( pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')  ){
-            if( pParam.offset != '' && pParam.limit != '' ){
-                if( pParam.limit != 'all' ){
-                    xQuery.limit = pParam.limit;
-                    xQuery.offset = pParam.offset;
-                }
-            }
-        }
+			if (xWhereAnd.length > 0) {
+				xWhere.push({
+					[Op.and]: xWhereAnd
+				});
+			}
 
-        xQuery.order = [ xOrder ];
+			if (pParam.hasOwnProperty('order_by')) {
+				if (pParam.order_by != '') {
+					xOrder = [ pParam.order_by, pParam.order_type == 'desc' ? 'DESC' : 'ASC' ];
+				}
+			}
 
-        var xData = await _modelVendor.findAndCountAll(xQuery);
+			if (xWhereOr.length > 0) {
+				xWhere.push({
+					[Op.or]: xWhereOr
+				});
+			}
 
-        return xData;
+			var xParamQuery = {
+				where: xWhere,
+				order: [ xOrder ],
+				include: xInclude,
+				subQuery: false
+			};
+
+			// var xCountDataWithoutLimit = await _modelDb.count(xParamQuery);
+
+			if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
+				if (pParam.offset != '' && pParam.limit != '' && pParam.limit != 'all') {
+					xParamQuery.offset = pParam.offset;
+					xParamQuery.limit = pParam.limit;
+				}
+			}
+
+			var xData = await _modelVendor.findAndCountAll(xParamQuery);
+
+			// console.log(`>>> xData: ${JSON.stringify(xData)}`);
+
+			xJoResult = xData;
+		} catch (e) {
+			_utilInstance.writeLog(`vendor.list`, `Exception error: ${e.message}`, 'error');
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `vendor.list: Exception error: ${e.message}`
+			};
+		}
+        console.log(`xJoResult>>>>, ${JSON.stringify(xJoResult)}`);
+
+		return xJoResult;
     }
+    
+    // async list2( pParam ){
+    //     var xOrder = ['name', 'ASC'];
+    //     var xWhere = {};
+    //     var xWhereVendorStatus = {};
+    //     var xQuery = {};
+
+    //     if( pParam.hasOwnProperty('status') ){
+    //         if( pParam.status != '' ){
+    //             xWhereVendorStatus = {
+    //                 status: pParam.status,
+    //             }
+    //         }
+    //     }
+
+    //     var xWhereAnd = [
+    //         {
+    //             is_delete: 0,
+    //         }, xWhereVendorStatus,
+    //     ];
+
+    //     xWhere.$and = xWhereAnd;
+
+    //     var xWhereOr = [];
+    //     if( pParam.keyword != '' && pParam.hasOwnProperty('keyword') ){
+    //         xWhereOr = [
+    //             {
+    //                 code: {
+    //                     [Op.iLike]: '%' + pParam.keyword + '%',
+    //                 },
+    //             },
+    //             {                    
+    //                 name: {
+    //                     [Op.iLike]: '%' + pParam.keyword + '%',
+    //                 },
+    //             },
+    //             {                    
+    //                 email: {
+    //                     [Op.iLike]: '%' + pParam.keyword + '%',
+    //                 },
+    //             }
+    //         ]
+    //         xWhere.$or = xWhereOr;
+    //     }
+
+    //     var xJoinedTable = [
+    //         {
+    //             model: _modelBusinessEntity,
+    //             as: 'business_entity',
+    //         },
+    //         {
+    //             model: _modelProvince,
+    //             as: 'province',
+    //         },
+    //         {
+    //             model: _modelCity,
+    //             as: 'city',
+    //         },
+    //         {
+    //             model: _modelClassification,
+    //             as: 'classification',
+    //         },
+    //         {
+    //             attributes: ['id','name','code'],
+    //             model: _modelCurrency,
+    //             as: 'currency',
+    //         }
+    //     ];
+
+    //     if( pParam.order_by != '' ){
+    //         xOrder = [pParam.order_by, (pParam.order_type == 'desc' ? 'DESC' : 'ASC') ];
+    //     }
+
+    //     xQuery.where = xWhere;
+    //     xQuery.include = xJoinedTable;
+        
+    //     if( pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')  ){
+    //         if( pParam.offset != '' && pParam.limit != '' ){
+    //             if( pParam.limit != 'all' ){
+    //                 xQuery.limit = pParam.limit;
+    //                 xQuery.offset = pParam.offset;
+    //             }
+    //         }
+    //     }
+
+    //     xQuery.order = [ xOrder ];
+
+    //     var xData = await _modelVendor.findAndCountAll(xQuery);
+    //     console.log(`xData>>>>, ${JSON.stringify(xData)}`);
+
+    //     return xData;
+    // }
 
     async getVendorById( pId ){
         var xData = await _modelVendor.findOne({
