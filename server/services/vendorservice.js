@@ -497,174 +497,197 @@ class VendorService {
 			/** Check the extension of the incoming file and
              *  use the appropriate module
              */
-			if (pReq.file.originalname.split('.')[pReq.file.originalname.split('.').length - 1] === 'xlsx') {
-				xExcelToJSON = _xlsxToJson;
-			} else {
-				xExcelToJSON = _xlsToJson;
-			}
+            if(pReq.file.originalname.split('.')[pReq.file.originalname.split('.').length-1] === 'xlsx'){
+                xExcelToJSON = _xlsxToJson;
+            } else {
+                xExcelToJSON = _xlsToJson;
+            }
 
-			try {
-				xExcelToJSON(
-					{
-						input: pReq.file.path, //the same path where we uploaded our file
-						output: null, //since we don't need output.json
-						lowerCaseHeaders: true
-					},
-					function(err, result) {
-						if (err) {
-							var joResult = {
-								status_code: '-99',
-								status_msg: '',
-								err_msg: err
-							};
+            try {
+                xExcelToJSON({
+                    input: pReq.file.path, //the same path where we uploaded our file
+                    output: null, //since we don't need output.json
+                    lowerCaseHeaders:true
+                }, function(err,result){
+                    if(err) {
+                        var joResult = {
+                            "status_code": "-99",
+                            "status_msg": "",
+                            "err_msg": err
+                        }
 
-							try {
-								fs.unlinkSync(pReq.file.path);
-							} catch (e) {
-								//error deleting the file
-								console.log(e);
-							}
+                        try {
+                            fs.unlinkSync(pReq.file.path);
+                        } catch(e) {
+                            //error deleting the file
+                            console.log(e);
+                        }
 
-							pRes.setHeader('Content-Type', 'application/json');
-							pRes.status(200).send(joResult);
-						}
-						var joResult = {
-							status_code: '00',
-							status_msg: 'OK',
-							data: result,
-							err_msg: null
-						};
+                        pRes.setHeader('Content-Type','application/json');
+                        pRes.status(200).send(joResult);
+                    }
+                    var joResult = {
+                        "status_code": "00",
+                        "status_msg": "OK",
+                        "data": result,
+                        "err_msg": null
+                    }
 
-						try {
-							fs.unlinkSync(pReq.file.path);
-						} catch (e) {
-							//error deleting the file
-							console.log(e);
-						}
+                    try {
+                        fs.unlinkSync(pReq.file.path);
+                    } catch(e) {
+                        //error deleting the file
+                        console.log(e);
+                    }
 
-						console.log(joResult);
+                    console.log(joResult);
 
-						pRes.setHeader('Content-Type', 'application/json');
-						pRes.status(200).send(joResult);
-					}
-				);
-			} catch (e) {
-				var joResult = {
-					status_code: '-99',
-					status_msg: '',
-					err_msg: 'Corupted excel file'
-				};
+                    pRes.setHeader('Content-Type','application/json');
+                    pRes.status(200).send(joResult);
+                });
+            } catch (e){
+                var joResult = {
+                    "status_code": "-99",
+                    "status_msg": "",
+                    "err_msg": "Corupted excel file"
+                }
 
-				try {
-					fs.unlinkSync(pReq.file.path);
-				} catch (e) {
-					//error deleting the file
-					console.log(e);
-				}
+                try {
+                    fs.unlinkSync(pReq.file.path);
+                } catch(e) {
+                    //error deleting the file
+                    console.log(e);
+                }
 
-				pRes.setHeader('Content-Type', 'application/json');
-				pRes.status(200).send(joResult);
-			}
-		});
-	}
+                pRes.setHeader('Content-Type','application/json');
+                pRes.status(200).send(joResult);
+            }
 
-	async batchSaveVendor(pParam) {
-		var joResult;
-		var jaResult = [];
-		var xMessageResult = '';
-		var xFlagProcess = true;
+        } );
+    }
 
-		console.log('>>> Length : ' + pParam.data.length);
+    async batchSaveVendor( pParam ){
+        
+        var joResult;
+        var jaResult = [];
+        var xMessageResult = "";
+        var xFlagProcess = true;
 
-		if (pParam.act == 'add') {
-			for (var i = 0; i < pParam.data.length; i++) {
-				if (pParam.data[i].hasOwnProperty('business_entity_id')) {
-					pParam.data[i].business_entity_id = parseInt(pParam.data[i].business_entity_id);
-				}
-				if (pParam.data[i].hasOwnProperty('classification_id')) {
-					pParam.data[i].classification_id = parseInt(pParam.data[i].classification_id);
-				}
-				if (pParam.data[i].hasOwnProperty('sub_classification_id')) {
-					pParam.data[i].sub_classification_id = parseInt(pParam.data[i].sub_classification_id);
-				}
-				if (pParam.data[i].hasOwnProperty('province_id')) {
-					pParam.data[i].province_id = parseInt(pParam.data[i].province_id);
-				}
-				if (pParam.data[i].hasOwnProperty('city_id')) {
-					pParam.data[i].city_id = parseInt(pParam.data[i].city_id);
-				}
+        console.log(">>> Length : " + pParam.data.length);
 
-				if (pParam.data[i].code == '') {
-					xMessageResult +=
-						'Vendor name <strong>' +
-						pParam.data[i].name +
-						'</strong> must have code. Please fill valid code <br>';
-				} else {
-					// If row has id meaning update based on id
-					if (pParam.data[i].hasOwnProperty('id')) {
-						if (pParam.data[i].id != '') {
-							// Decrypt the value first
-							var xDecId = await _utilInstance.decrypt(pParam.data[i].id, config.cryptoKey.hashKey);
-							if (xDecId.status_code == '00') {
-								pParam.data[i].id = xDecId.decrypted;
-							} else {
-								xFlagProcess = false;
-							}
+        if( pParam.act == "add" ){
+            for( var i = 0; i < pParam.data.length; i++ ){
 
-							if (xFlagProcess) {
-								// Check vendor code is duplicate or not
-								// var xCheckData = await _vendorRepoInstance.getVendorByCode( pParam.data[i].code, pParam.data[i].id );
-								// if( xCheckData != null ){
-								//     xMessageResult += "Vendor code <strong>" + pParam.data[i].code + "</strong> already exists. Please use another code <br>";
-								// }else{
-								//     // Do update based on id
-								//     pParam.data[i].act = "update";
-								//     var xAddResult = await _vendorRepoInstance.save( pParam.data[i] );
-								// }
+                if( pParam.data[i].hasOwnProperty('business_entity_id') ){
+                    pParam.data[i].business_entity_id = parseInt( pParam.data[i].business_entity_id );
+                }
+                if( pParam.data[i].hasOwnProperty('classification_id') ){
+                    pParam.data[i].classification_id = parseInt( pParam.data[i].classification_id );
+                }
+                if( pParam.data[i].hasOwnProperty('sub_classification_id') ){
+                    pParam.data[i].sub_classification_id = parseInt( pParam.data[i].sub_classification_id );
+                }
+                if( pParam.data[i].hasOwnProperty('province_id') ){
+                    pParam.data[i].province_id = parseInt( pParam.data[i].province_id );
+                }
+                if( pParam.data[i].hasOwnProperty('city_id') ){
+                    pParam.data[i].city_id = parseInt( pParam.data[i].city_id );
+                }
 
-								// Temporary not use this
-								// Do update based on id
-								pParam.data[i].act = 'update';
-								var xAddResult = await _vendorRepoInstance.save(pParam.data[i]);
-							}
-						}
-					} else {
-						var xCheckData = await _vendorRepoInstance.getVendorByCode(pParam.data[i].code, null);
-						if (xCheckData != null) {
-							xMessageResult +=
-								'Vendor code <strong>' +
-								pParam.data[i].code +
-								'</strong> already exists. Please use another code <br>';
-						} else {
-							// Do update based on id
-							pParam.data[i].act = 'add';
-							var xAddResult = await _vendorRepoInstance.save(pParam.data[i]);
-						}
-					}
-				}
-			}
+                if( pParam.data[i].code == '' ){
+                    xMessageResult += "Vendor name <strong>" + pParam.data[i].name + "</strong> must have code. Please fill valid code <br>";
+                }else{
+                    // If row has id meaning update based on id
+                    if( pParam.data[i].hasOwnProperty('id') ){
+                        if( pParam.data[i].id != '' ){
+                            // Decrypt the value first
+                            var xDecId = await _utilInstance.decrypt( pParam.data[i].id, config.cryptoKey.hashKey );
+                            if( xDecId.status_code == '00' ){
+                                pParam.data[i].id = xDecId.decrypted;
+                            }else{
+                                xFlagProcess = false;
+                            }
 
-			// await _utilInstance.changeSequenceTable((pParam.data.length)+1, 'ms_vendors','id');
+                            if( xFlagProcess ){
+                                // Check vendor code is duplicate or not
+                                // var xCheckData = await _vendorRepoInstance.getVendorByCode( pParam.data[i].code, pParam.data[i].id );
+                                // if( xCheckData != null ){
+                                //     xMessageResult += "Vendor code <strong>" + pParam.data[i].code + "</strong> already exists. Please use another code <br>";
+                                // }else{
+                                //     // Do update based on id
+                                //     pParam.data[i].act = "update";
+                                //     var xAddResult = await _vendorRepoInstance.save( pParam.data[i] );
+                                // }   
 
-			joResult = {
-				status_code: '00',
-				status_msg: 'Finish save to database',
-				line_saved: jaResult,
-				err_msg: xMessageResult
-			};
-		} else if (pParam.act == 'update') {
-			joResult = {
-				status_code: '-99',
-				status_msg: 'Wrong value for parameter act'
-			};
-		}
+                                // Temporary not use this 
+                                // Do update based on id
+                                pParam.data[i].act = "update";
+                                var xAddResult = await _vendorRepoInstance.save( pParam.data[i] );
+                            }                            
+                        }
+                    }else{
+                        var xCheckData = await _vendorRepoInstance.getVendorByCode( pParam.data[i].code, null );
+                        if( xCheckData != null ){
+                            xMessageResult += "Vendor code <strong>" + pParam.data[i].code + "</strong> already exists. Please use another code <br>";
+                        }else{
+                            // Do update based on id
+                            pParam.data[i].act = "add";
+                            var xAddResult = await _vendorRepoInstance.save( pParam.data[i] );
+                        }
+                    }
+                }                         
 
-		return joResult;
-	}
+            }
 
-	async getByParameter(pParam) {
-		await _vendorRepoInstance.getByParameter(pParam);
-	}
+            // await _utilInstance.changeSequenceTable((pParam.data.length)+1, 'ms_vendors','id');
+
+            joResult = {
+                "status_code": "00",
+                "status_msg": "Finish save to database",
+                "line_saved": jaResult,
+                "err_msg": xMessageResult,
+            }
+        }else if( pParam.act == "update" ){
+            joResult = {
+                "status_code": "-99",
+                "status_msg": "Wrong value for parameter act",
+            }
+        }
+
+        return joResult;
+
+    }
+
+    async dropdown(pParam){
+        var xJoResult = {};
+        var xJoArrData = [];       
+
+        var xResultList = await _vendorRepoInstance.list(pParam);
+
+        if( xResultList.count > 0 ){
+            xJoResult.status_code = "00";
+            xJoResult.status_msg = "OK";
+
+            var xRows = xResultList.rows;
+
+            for(var index in xRows){                
+
+                xJoArrData.push({
+                    id: xRows[index].id,
+                    code: xRows[index].code,
+                    name: xRows[index].name
+                });
+            }
+
+            xJoResult.data = xJoArrData;
+        }else{
+            xJoResult.status_code = "00";
+            xJoResult.status_msg = "OK";
+            xJoResult.data = xJoArrData;
+        }
+
+        return (xJoResult);
+    } 
 }
 
 module.exports = VendorService;
