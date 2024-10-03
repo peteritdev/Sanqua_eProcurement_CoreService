@@ -364,7 +364,7 @@ class PaymentRequestService {
 							var xPrdId = await _utilInstance.decrypt(xJoArrItems[i].prd_id, config.cryptoKey.hashKey);
 							if (xPrdId.status_code == '00') {
 								xJoArrItems[i].prd_id = xPrdId.decrypted;
-								delete xJoArrItems[i].prd_id
+								// delete xJoArrItems[i].prd_id
 							}
 							console.log(`>>> xPrdId ${JSON.stringify(xPrdId)}`);
 							if (
@@ -381,7 +381,7 @@ class PaymentRequestService {
 					pParam.purchase_request_detail = xJoArrItems;
 				}
 
-				let xResult = await _repoInstance.save(pParam, xAct);
+				// let xResult = await _repoInstance.save(pParam, xAct);
 				if (xResult.status_code == '00') {
 					var dt = dateTime.create();
 					var xDate = dt.format('ym');
