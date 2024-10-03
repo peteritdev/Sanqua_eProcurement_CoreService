@@ -22,6 +22,9 @@ const _repoInstance = new PaymentRequestDetailRepository();
 const PaymentRequestRepository = require('../repository/paymentrequestrepository.js');
 const _paymentRequestRepoInstance = new PaymentRequestRepository();
 
+const PurchaseRequestDetailRepository = require('../repository/purchaserequestdetailrepository.js');
+const _purchaseRequestDetailRepoInstance = new PurchaseRequestDetailRepository();
+
 // Service
 const ProductServiceRepository = require('./productservice.js');
 const _productServiceInstance = new ProductServiceRepository();
@@ -49,6 +52,7 @@ class PaymentRequestDetailService {
 		var xFlagProcess = false;
 		var xDecId = null;
 		var xRequestIdClear = 0;
+		var xPrDetailItem = null
 
 		// console.log(`>>> pParam [PaymentRequestDetailService] : ${JSON.stringify(pParam)}`);
 
@@ -119,12 +123,34 @@ class PaymentRequestDetailService {
 				status_msg: 'You need to supply correct parameter'
 			};
 		}
+		
+		// console.log(`>>> pParam.prd_id : ${JSON.stringify(pParam.prd_id)}`);
+		if (pParam.hasOwnProperty('prd_id')) {
+			if (pParam.prd_id != null) {
+				if (pParam.prd_id.length >= 65) {
+					var xPrdId = await _utilInstance.decrypt(pParam.prd_id, config.cryptoKey.hashKey);
+					if (xPrdId.status_code == '00') {
+						pParam.prd_id = xPrdId.decrypted;
+					}
+				}
+				
+				// var xPrDetailItem = await _purchaseRequestDetailRepoInstance.getByParam({id: pParam.prd_id})
+				// if (xPrDetailItem.status_code == '00') {
+				// 	xFlagProcess = true;
+				// } else {
+				// 	xJoResult = xPaymentRequest;
+				// 	xFlagProcess = false;
+				// }
+			}
+		}
 
+		// console.log(`>>> xPrDetailItem : ${JSON.stringify(xPrDetailItem)}`);
+		// xFlagProcess = false;
 		if (xFlagProcess) {
 			if (xAct == 'add') {
-				var xPaymentRequestDetail = null,
-					xProductDetail = null,
-					xVendorDetail = null;
+				var xPaymentRequestDetail = null;
+				var	xProductDetail = null;
+				var	xVendorDetail = null;
 
 				if (pParam.hasOwnProperty('product_id')) {
 					if (pParam.product_id != null) {
@@ -140,7 +166,7 @@ class PaymentRequestDetailService {
 
 				if (
 					xPaymentRequestDetail != null &&
-					xPaymentRequestDetail.price_request == pParam.price_request
+					xPaymentRequestDetail.prd_id == pParam.prd_id
 				) {
 					var xParamUpdate = {
 						id: xPaymentRequestDetail.id,
@@ -292,7 +318,7 @@ class PaymentRequestDetailService {
 
 			var xResultList = await _repoInstance.dropdown(pParam);
 			if (xResultList) {
-				// console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
+				console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
 				if (xResultList.status_code == '00') {
 					var xRows = xResultList.data;
 					if (xRows.length > 0) {
@@ -302,17 +328,17 @@ class PaymentRequestDetailService {
 								product_id: xRows[i].product_id,
 								product_code: xRows[i].product_code,
 								product_name: xRows[i].product_name,
-								qty_demand: xRows[i].qty_demand,
+								// qty_demand: xRows[i].qty_demand,
 								qty_request: xRows[i].qty_request,
 								qty_left: xRows[i].qty_left,
-								price_demand: xRows[i].price_demand,
-								qty_left: xRows[i].qty_left,
+								// price_demand: xRows[i].price_demand,
 								price_request: xRows[i].price_request,
 								uom_id: xRows[i].uom_id,
 								uom_name: xRows[i].uom_name,
 								payment_request_id: xRows[i].payment_request_id,
 								document_no: xRows[i].document_no,
-								vendor_name: xRows[i].vendor_name
+								vendor_name: xRows[i].vendor_name,
+								prd_id: xRows[i].prd_id
 							});
 						}
 

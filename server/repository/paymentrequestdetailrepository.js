@@ -58,9 +58,9 @@ class PaymentRequestDetailRepository {
 			}
 
 			xSqlFields = ` a.id, a.product_id, a.product_code, a.product_name,
-			a.qty_demand, a.price_demand, a.qty_request, a.qty_left, a.price_request,
+			a.qty_request, a.qty_left, a.price_request,
 			a.uom_id, a.uom_name,
-			a.payment_request_id, b.document_no, b.vendor_name`;
+			a.payment_request_id, a.prd_id, b.document_no, b.vendor_name`;
 
 			xSql = ` SELECT ${xSqlFields}
 			FROM tr_paymentrequestdetails as a

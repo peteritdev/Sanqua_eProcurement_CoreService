@@ -120,6 +120,17 @@ class GoodsReceiptDetailService {
 			};
 		}
 
+		if (pParam.hasOwnProperty('prd_id')) {
+			if (pParam.prd_id != null) {
+				if (pParam.prd_id.length >= 65) {
+					var xPrdId = await _utilInstance.decrypt(pParam.prd_id, config.cryptoKey.hashKey);
+					if (xPrdId.status_code == '00') {
+						pParam.prd_id = xPrdId.decrypted;
+					}
+				}
+			}
+		}
+
 		if (xFlagProcess) {
 			if (xAct == 'add') {
 				var xGoodsReceiptDetail = null,
@@ -137,7 +148,8 @@ class GoodsReceiptDetailService {
 				}
 
 				if (
-					xGoodsReceiptDetail != null
+					xGoodsReceiptDetail != null &&
+					xGoodsReceiptDetail.prd_id == pParam.prd_id
 				) {
 					var xParamUpdate = {
 						id: xGoodsReceiptDetail.id,
@@ -181,11 +193,12 @@ class GoodsReceiptDetailService {
 						});
 
 						if (
-							xGoodsReceiptDetail != null
+							xGoodsReceiptDetail != null &&
+							xGoodsReceiptDetail.prd_id == xItems[i].prd_id
 						) {
 							var xParamUpdate = {
 								id: xGoodsReceiptDetail.id,
-								// qty: Math.round((xGoodsReceiptDetail.qty_request + xItems[i].qty_request) * 1000) / 1000
+								qty_done: Math.round((xGoodsReceiptDetail.qty_done + xItems[i].qty_done) * 1000) / 1000
 							};
 
 							xItems[i] = null;

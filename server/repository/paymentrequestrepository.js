@@ -10,6 +10,7 @@ const moment = require('moment');
 const _modelDb = require('../models').tr_paymentrequests;
 const _modelPaymentRequestDetail = require('../models').tr_paymentrequestdetails;
 const _modelPurchaseRequest = require('../models').tr_purchaserequests;
+const _modelPurchaseRequestDetail = require('../models').tr_purchaserequestdetails;
 const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
@@ -42,20 +43,13 @@ class PaymentRequestRepository {
 				{
 					model: _modelPaymentRequestDetail,
 					as: 'payment_request_detail',
-					// include: [
-					// 	{
-					// 		model: _modelProduct,
-					// 		as: 'product',
-					// 		attributes: [ 'id', 'code', 'name'],
-					// 		include: [
-					// 			{
-					// 				model: _modelUnit,
-					// 				as: 'unit',
-					// 				attributes: [ 'id', 'name'],
-					// 			}
-					// 		]
-					// 	},
-					// ]
+					include: [
+						{
+							model: _modelPurchaseRequestDetail,
+							as: 'purchase_request_detail',
+							attributes: ['id', 'request_id', 'product_id', 'product_code', 'product_name', 'qty', 'qty_done', 'qty_left', ['budget_price_per_unit', 'unit_price'], 'uom_name', 'uom_id', ],
+						},
+					]
 				},
 			]
 

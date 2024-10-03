@@ -27,6 +27,8 @@ const _repoInstance = new PaymentRequestRepository();
 const PurchaseRequestRepository = require('../repository/purchaserequestrepository.js');
 const _purchaseRequestRepoInstance = new PurchaseRequestRepository();
 
+const PurchaseRequestDetailRepository = require('../repository/purchaserequestdetailrepository.js');
+const _purchaseRequestDetailRepoInstance = new PurchaseRequestDetailRepository();
 // const PaymentRequestDetailRepository = require('../repository/paymentrequestdetailrepository.js');
 // const _repoDetailInstance = new PaymentRequestDetailRepository();
 
@@ -359,6 +361,12 @@ class PaymentRequestService {
 					xJoArrItems = pParam.payment_request_detail;
 					if (xJoArrItems.length > 0) {
 						for (var i in xJoArrItems) {
+							var xPrdId = await _utilInstance.decrypt(xJoArrItems[i].prd_id, config.cryptoKey.hashKey);
+							if (xPrdId.status_code == '00') {
+								xJoArrItems[i].prd_id = xPrdId.decrypted;
+								delete xJoArrItems[i].prd_id
+							}
+							console.log(`>>> xPrdId ${JSON.stringify(xPrdId)}`);
 							if (
 								xJoArrItems[i].hasOwnProperty('qty_request') &&
 								xJoArrItems[i].hasOwnProperty('price_request')
@@ -368,11 +376,12 @@ class PaymentRequestService {
 							}
 						}
 					}
+
+					console.log(`>>> xJoArrItems ${JSON.stringify(xJoArrItems)}`);
 					pParam.purchase_request_detail = xJoArrItems;
 				}
 
 				let xResult = await _repoInstance.save(pParam, xAct);
-				console.log(`>>> xResult ${JSON.stringify(xResult)}`);
 				if (xResult.status_code == '00') {
 					var dt = dateTime.create();
 					var xDate = dt.format('ym');
@@ -411,7 +420,6 @@ class PaymentRequestService {
 	}
 
 	async submit(pParam) {
-		console.log(`>>> submit payreq>>>`);
 		var xJoResult = {};
 		var xFlagProcess = false;
 		var xDecId = null;
@@ -449,33 +457,62 @@ class PaymentRequestService {
 						if (xDetail.data.status == 0) {
 							pParam.status = 1;
 							pParam.requested_at = await _utilInstance.getCurrDateTime();
-							var xUpdate = await _repoInstance.save(pParam, 'submit');
-							xJoResult = xUpdate;
-							
-							// Next Phase : Approval Matrix & Notification to admin
-							if (xUpdate.status_code == '00') {
-								var xParamAddApprovalMatrix = {
-									act: 'add',
-									document_id: xEncId,
-									document_no: xDetail.data.document_no,
-									application_id: 8,
-									table_name: config.dbTables.payreq,
-									company_id: xDetail.data.company_id,
-									department_id: xDetail.data.department_id,
-									ecatalogue_fpb_category_item: null,
-									logged_company_id: pParam.logged_company_id
-								};
+							// check total qty is not exceed qty_left in detail fpb
+							let xArrPrdId = []
+							let xPyrDetail = xDetail.data.payment_request_detail
+							console.log(`>>> xPyrDetail: ${JSON.stringify(xPyrDetail)}`);
+							for (let i = 0; i < xPyrDetail.length; i++) {
+								xArrPrdId.push(xPyrDetail[i].prd_id)
+							}
+							let xUniq = [...new Set(xArrPrdId)];
+							for (let i = 0; i < xUniq.length; i++) {
+								let xPrDetailItem = await _purchaseRequestDetailRepoInstance.getByParam({id: xUniq[i]})
+								if (xPrDetailItem.status_code = '00') {
+									let xPrdQtyLeft = xPrDetailItem.data.qty_left
+									let xArrPyrd = xPyrDetail.filter(({ prd_id }) => prd_id == xUniq[i])
+									let xPyrdTotalQty = xArrPyrd.reduce((accum, item) => accum + item.qty_request, 0)
+									if ( xPyrdTotalQty > xPrdQtyLeft) {
+										xFlagProcess = false
+										xJoResult = {
+											status_code: '-99',
+											status_msg: `Total qty of item ${xArrPyrd[0].product_code} (${xPyrdTotalQty}) is exceed Left Qty on FPB (${xPrdQtyLeft})`
+										};
+										break;
+									}
+								}
+							}
 
-								var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
-									pParam.method,
-									pParam.token,
-									xParamAddApprovalMatrix
-								);
-								console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
-
-								xJoResult.approval_matrix_result = xApprovalMatrixResult;
-							} else {
+							if (xFlagProcess) {
+								var xUpdate = await _repoInstance.save(pParam, 'submit');
 								xJoResult = xUpdate;
+								
+								// Next Phase : Approval Matrix & Notification to admin
+								if (xUpdate.status_code == '00') {
+									this.updatePrdItemQtyLeft(xDetail.data, 'submit')
+									
+									var xParamAddApprovalMatrix = {
+										act: 'add',
+										document_id: xEncId,
+										document_no: xDetail.data.document_no,
+										application_id: 8,
+										table_name: config.dbTables.payreq,
+										company_id: xDetail.data.company_id,
+										department_id: xDetail.data.department_id,
+										ecatalogue_fpb_category_item: null,
+										logged_company_id: pParam.logged_company_id
+									};
+
+									var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
+										pParam.method,
+										pParam.token,
+										xParamAddApprovalMatrix
+									);
+									console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
+
+									xJoResult.approval_matrix_result = xApprovalMatrixResult;
+								} else {
+									xJoResult = xUpdate;
+								}
 							}
 						} else {
 							xJoResult = {
@@ -628,6 +665,10 @@ class PaymentRequestService {
 							var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
 
 							if (xUpdateResult.status_code == '00') {
+								if (xPayreqDetail.data.status != 0) {
+									this.updatePrdItemQtyLeft(xPayreqDetail.data, 'cancel')
+								}
+								
 								xJoResult = {
 									status_code: '00',
 									status_msg: 'Payreq successfully canceled'
@@ -813,6 +854,8 @@ class PaymentRequestService {
 							var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
 
 							if (xUpdateResult.status_code == '00') {
+								this.updatePrdItemQtyLeft(xPayreqDetail.data, 'reject')
+
 								xJoResult = {
 									status_code: '00',
 									status_msg: 'Payreq successfully rejected'
@@ -1074,6 +1117,31 @@ class PaymentRequestService {
 		}
 
 		return xJoResult;
+	}
+
+	async updatePrdItemQtyLeft(pParam, pAct){
+		let xPaymentRequestDetail = pParam.payment_request_detail
+		console.log(`>>> xPaymentRequestDetail: ${JSON.stringify(xPaymentRequestDetail)}`);
+		for (let i = 0; i < xPaymentRequestDetail.length; i++) {
+			var xPrDetailItem = await _purchaseRequestDetailRepoInstance.getByParam({id: xPaymentRequestDetail[i].prd_id})
+			console.log(`>>> xPrDetailItem: ${JSON.stringify(xPrDetailItem)}`);
+			if (xPrDetailItem.status_code == '00') {
+				let xQtyLeft = xPrDetailItem.data.qty_left || 0
+				let xCalculatedQty = 0
+				if (pAct == 'submit') {
+					xCalculatedQty = xQtyLeft - xPaymentRequestDetail[i].qty_request
+				} else if (pAct == 'reject' || pAct == 'cancel' ){
+					xCalculatedQty = xQtyLeft + xPaymentRequestDetail[i].qty_request
+				}
+				let xPrdUpdateParam = {
+					id: xPaymentRequestDetail[i].prd_id,
+					qty_left: xCalculatedQty
+				}
+				
+				let xUpdatePrdItem = await _purchaseRequestDetailRepoInstance.save(xPrdUpdateParam, 'update')
+				console.log(`>>> xUpdatePrdItem: ${JSON.stringify(xUpdatePrdItem)}`);
+			}
+		}
 	}
 }
 

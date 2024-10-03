@@ -9,7 +9,9 @@ const Op = Sequelize.Op;
 const _modelDb = require('../models').tr_goodsreceipts;
 const _modelGoodsReceiptDetail = require('../models').tr_goodsreceiptdetails;
 const _modelPaymentRequest = require('../models').tr_paymentrequests;
+// const _modelPaymentRequestDetail = require('../models').tr_paymentrequestdetails;
 const _modelPurchaseRequest = require('../models').tr_purchaserequests;
+const _modelPurchaseRequestDetail = require('../models').tr_purchaserequestdetails;
 const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
@@ -43,6 +45,16 @@ class GoodsReceiptRepository {
 					model: _modelGoodsReceiptDetail,
 					as: 'goods_receipt_detail',
 					include: [
+						// {
+						// 	model: _modelPaymentRequestDetail,
+						// 	as: 'payment_request_detail',
+						// 	attributes: [ 'id', 'prd_id'],
+						// },
+						{
+							model: _modelPurchaseRequestDetail,
+							as: 'purchase_request_detail',
+							attributes: ['id', 'request_id', 'product_id', 'product_code', 'product_name', 'qty', 'qty_done', 'qty_left','uom_name', 'uom_id'],
+						},
 						{
 							model: _modelPaymentRequest,
 							as: 'payment_request',

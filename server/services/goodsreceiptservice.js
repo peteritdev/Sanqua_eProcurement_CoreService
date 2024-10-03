@@ -27,6 +27,12 @@ const _repoInstance = new GoodsReceiptRepository();
 const PurchaseRequestRepository = require('../repository/purchaserequestrepository.js');
 const _purchaseRequestRepoInstance = new PurchaseRequestRepository();
 
+const PurchaseRequestDetailRepository = require('../repository/purchaserequestdetailrepository.js');
+const _purchaseRequestDetailRepoInstance = new PurchaseRequestDetailRepository();
+
+const PaymentRequestRepository = require('../repository/paymentrequestrepository.js');
+const _paymentRequestRepoInstance = new PaymentRequestRepository();
+
 // const GoodsReceiptDetailRepository = require('../repository/GoodsReceiptdetailrepository.js');
 // const _repoDetailInstance = new GoodsReceiptDetailRepository();
 
@@ -99,9 +105,11 @@ class GoodsReceiptService {
 									qty_return: xGrDetail[index].qty_return,
 									description: xGrDetail[index].description,
 									// payment_request_id: xGrDetail[index].payment_request_id,
+									purchase_request_detail: xGrDetail[index].purchase_request_detail,
 									payment_request: xGrDetail[index].payment_request,
 									// payment_request_detail_id: xGrDetail[index].payment_request_detail_id,
 									status: xGrDetail[index].status,
+									prd_id: xGrDetail[index].prd_id,
 								});
 							}
 							xDetail.data.goods_receipt_detail = xJoArrRequestDetailData
@@ -257,15 +265,21 @@ class GoodsReceiptService {
 			if (xAct == 'add' || xAct == 'add_batch_in_item') {
 				var xJoArrItems = [];
 
-				// if (pParam.hasOwnProperty('goods_receipt_detail')) {
-				// 	xJoArrItems = pParam.goods_receipt_detail;
-				// 	if (xJoArrItems.length > 0) {
-				// 		for (var i in xJoArrItems) {
-				// 			// doo something here
-				// 		}
-				// 	}
-				// 	pParam.goods_receipt_detail = xJoArrItems;
-				// }
+				if (pParam.hasOwnProperty('goods_receipt_detail')) {
+					xJoArrItems = pParam.goods_receipt_detail;
+					if (xJoArrItems.length > 0) {
+						for (var i in xJoArrItems) {
+							// doo something here
+							var xPrdId = await _utilInstance.decrypt(xJoArrItems[i].prd_id, config.cryptoKey.hashKey);
+							if (xPrdId.status_code == '00') {
+								xJoArrItems[i].prd_id = xPrdId.decrypted;
+								// delete xJoArrItems[i].prd_id
+							}
+							console.log(`>>> xPrdId ${JSON.stringify(xPrdId)}`);
+						}
+					}
+					pParam.goods_receipt_detail = xJoArrItems;
+				}
 
 				let xResult = await _repoInstance.save(pParam, xAct);
 				
@@ -342,10 +356,34 @@ class GoodsReceiptService {
 					console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`, pParam.id);
 					if (xDetail.status_code == '00') {
 						if (xDetail.data.status == 0) {
-							pParam.status = 1;
-							pParam.requested_at = await _utilInstance.getCurrDateTime();
-							var xUpdate = await _repoInstance.save(pParam, 'update');
-							xJoResult = xUpdate;
+							if (xDetail.data.goods_receipt_detail != null) {
+								var xPayreqDetail = await _paymentRequestRepoInstance.getByParameter({
+									id: xDetail.data.goods_receipt_detail[0].payment_request_id
+								});
+								if (xPayreqDetail.status_code == '00') {
+									if (xPayreqDetail.data.status == 3) {
+										pParam.status = 1;
+										pParam.requested_at = await _utilInstance.getCurrDateTime();
+										var xUpdate = await _repoInstance.save(pParam, 'update');
+										xJoResult = xUpdate;
+										if (xUpdate.status_code == '00') {
+											this.updatePrdItemQtyReceived(xDetail.data, 'submit')
+										}
+									} else {
+										xJoResult = {
+											status_code: '-99',
+											status_msg: `Payment request (${xPayreqDetail.data.document_no}) not paid yet, please pay first`
+										};
+									}
+								} else {
+									xJoResult = xDetail;
+								}
+							} else {
+								xJoResult = {
+									status_code: '-99',
+									status_msg: `Detail item cannot be empty`
+								};
+							}
 						} else {
 							xJoResult = {
 								status_code: '-99',
@@ -497,6 +535,9 @@ class GoodsReceiptService {
 							var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
 
 							if (xUpdateResult.status_code == '00') {
+								if (xGrDetail.data.status != 0) {
+									this.updatePrdItemQtyReceived(xGrDetail.data, 'cancel')
+								}
 								xJoResult = {
 									status_code: '00',
 									status_msg: 'Dokumen successfully canceled'
@@ -526,6 +567,31 @@ class GoodsReceiptService {
 		}
 
 		return xJoResult;
+	}
+	
+	async updatePrdItemQtyReceived(pParam, pAct){
+		let xGoodsReceiptDetail = pParam.goods_receipt_detail
+		console.log(`>>> xGoodsReceiptDetail: ${JSON.stringify(xGoodsReceiptDetail)}`);
+		for (let i = 0; i < xGoodsReceiptDetail.length; i++) {
+			var xPrDetailItem = await _purchaseRequestDetailRepoInstance.getByParam({id: xGoodsReceiptDetail[i].prd_id})
+			console.log(`>>> xPrDetailItem: ${JSON.stringify(xPrDetailItem)}`);
+			if (xPrDetailItem.status_code == '00') {
+				let xQtyDone = xPrDetailItem.data.qty_done || 0
+				let xCalculatedQty = 0
+				if (pAct == 'submit') {
+					xCalculatedQty = xQtyDone + xGoodsReceiptDetail[i].qty_done
+				} else if (pAct == 'cancel' ){
+					xCalculatedQty = xQtyDone - xGoodsReceiptDetail[i].qty_done
+				}
+				let xPrdUpdateParam = {
+					id: xPrDetailItem.data.id,
+					qty_done: xCalculatedQty
+				}
+				
+				let xUpdatePrdItem = await _purchaseRequestDetailRepoInstance.save(xPrdUpdateParam, 'update')
+				console.log(`>>> xUpdatePrdItem: ${JSON.stringify(xUpdatePrdItem)}`);
+			}
+		}
 	}
 }
 
