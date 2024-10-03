@@ -177,6 +177,16 @@ class PaymentRequestService {
 		var xFlagProccess = false;
 
 		try {
+			if (pParam.hasOwnProperty('purchase_request_id')) {
+				if (pParam.purchase_request_id != '') {
+					// xEncId = pParam.purchase_request_id;
+					let xDecId = await _utilInstance.decrypt(pParam.purchase_request_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.purchase_request_id = xDecId.decrypted;
+					}
+				}
+			}
+
 			var xResultList = await _repoInstance.list(pParam);
 			if (xResultList) {
 				// console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
@@ -381,7 +391,7 @@ class PaymentRequestService {
 					pParam.purchase_request_detail = xJoArrItems;
 				}
 
-				// let xResult = await _repoInstance.save(pParam, xAct);
+				let xResult = await _repoInstance.save(pParam, xAct);
 				if (xResult.status_code == '00') {
 					var dt = dateTime.create();
 					var xDate = dt.format('ym');
