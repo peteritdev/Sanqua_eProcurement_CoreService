@@ -8,18 +8,19 @@ module.exports = (sequelize, DataTypes) => {
 			autoIncrement: true
 		},
 		payment_request_id: DataTypes.INTEGER,
+		prd_id: DataTypes.INTEGER,
 		product_id: DataTypes.INTEGER,
 		product_code: DataTypes.STRING,
 		product_name: DataTypes.STRING,
 		uom_id: DataTypes.INTEGER,
 		uom_name: DataTypes.STRING,
-		qty_demand: DataTypes.DOUBLE,
-		price_demand: DataTypes.DOUBLE,
+		// qty_demand: DataTypes.DOUBLE,
+		// price_demand: DataTypes.DOUBLE,
 		qty_request: DataTypes.DOUBLE,
 		price_request: DataTypes.DOUBLE,
 		price_total: DataTypes.DOUBLE,
 		qty_left: DataTypes.DOUBLE,
-		tax: DataTypes.DOUBLE,
+		tax_type: DataTypes.INTEGER,
 		discount_amount: DataTypes.DOUBLE,
 		discount_percent: DataTypes.DOUBLE,
 		description: DataTypes.STRING,
@@ -58,6 +59,11 @@ module.exports = (sequelize, DataTypes) => {
 			onDelete: 'CASCADE'
 		});
 
+		PaymentRequestDetail.belongsTo(models.tr_purchaserequestdetails, {
+			foreignKey: 'prd_id',
+			as: 'purchase_request_detail',
+			onDelete: 'CASCADE'
+		});
 		// PaymentRequestDetail.belongsTo(models.ms_vendorcatalogues, {
 		// 	foreignKey: 'vendor_catalogue_id',
 		// 	as: 'vendor_catalogue',

@@ -696,6 +696,7 @@ class PurchaseRequestService {
 						// console.log(`>>> xDetail[index]: ${JSON.stringify(xDetail[index])}`);
 						xJoArrRequestDetailData.push({
 							id: await _utilInstance.encrypt(xDetail[index].id, config.cryptoKey.hashKey),
+							clear_id: xDetail[index].id,
 							product: {
 								id: xDetail[index].product_id,
 								code: xDetail[index].product_code,
