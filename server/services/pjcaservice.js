@@ -161,6 +161,15 @@ class PJCAService {
 		var xFlagProccess = false;
 
 		try {
+			if (pParam.hasOwnProperty('payment_request_id')) {
+				if (pParam.payment_request_id != '') {
+					// xEncId = pParam.payment_request_id;
+					let xDecId = await _utilInstance.decrypt(pParam.payment_request_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.payment_request_id = xDecId.decrypted;
+					}
+				}
+			}
 			var xResultList = await _repoInstance.list(pParam);
 			if (xResultList) {
 				console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
