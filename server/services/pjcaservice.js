@@ -27,6 +27,8 @@ const _repoInstance = new PJCARepository();
 const PaymentRequestRepository = require('../repository/paymentrequestrepository.js');
 const _paymentRequestRepoInstance = new PaymentRequestRepository();
 
+const PaymentRequestDetailRepository = require('../repository/paymentrequestdetailrepository.js');
+const _paymentRequestDetailRepoInstance = new PaymentRequestDetailRepository();
 // const PJCADetailRepository = require('../repository/PJCAdetailrepository.js');
 // const _repoDetailInstance = new PJCADetailRepository();
 
@@ -293,23 +295,31 @@ class PJCAService {
 
 		if (xFlagProcess) {
 			if (xAct == 'add' || xAct == 'add_batch_in_item') {
-				// var xJoArrItems = [];
+				var xJoArrItems = [];
 
-				// if (pParam.hasOwnProperty('payment_request_detail')) {
-				// 	xJoArrItems = pParam.payment_request_detail;
-				// 	if (xJoArrItems.length > 0) {
-				// 		for (var i in xJoArrItems) {
-				// 			if (
-				// 				xJoArrItems[i].hasOwnProperty('qty_request') &&
-				// 				xJoArrItems[i].hasOwnProperty('price_request')
-				// 			) {
-				// 				xJoArrItems[i].price_total =
-				// 					xJoArrItems[i].qty_request * xJoArrItems[i].price_request;
-				// 			}
-				// 		}
-				// 	}
-				// 	pParam.purchase_request_detail = xJoArrItems;
-				// }
+				if (pParam.hasOwnProperty('pjca_detail')) {
+					xJoArrItems = pParam.pjca_detail;
+					if (xJoArrItems.length > 0) {
+						for (var i in xJoArrItems) {
+							var xPrdId = await _utilInstance.decrypt(xJoArrItems[i].prd_id, config.cryptoKey.hashKey);
+							if (xPrdId.status_code == '00') {
+								xJoArrItems[i].prd_id = xPrdId.decrypted;
+								// delete xJoArrItems[i].prd_id
+							}
+							console.log(`>>> xPrdId ${JSON.stringify(xPrdId)}`);
+							if (
+								xJoArrItems[i].hasOwnProperty('price_done') &&
+								xJoArrItems[i].hasOwnProperty('qty_done')
+							) {
+								xJoArrItems[i].price_total =
+									xJoArrItems[i].qty_done * xJoArrItems[i].price_done;
+							}
+						}
+					}
+
+					console.log(`>>> xJoArrItems ${JSON.stringify(xJoArrItems)}`);
+					pParam.pjca_detail = xJoArrItems;
+				}
 
 				let xResult = await _repoInstance.save(pParam, xAct);
 				if (xResult.status_code == '00') {
@@ -547,7 +557,7 @@ class PJCAService {
 				var xPJCADetail = await _repoInstance.getByParameter({ id: pParam.id });
 				if (xPJCADetail != null) {
 					if (xPJCADetail.status_code == '00') {
-						if (xPJCADetail.data.status == 5) {
+						if (xPJCADetail.data.status == 4) {
 							xJoResult = {
 								status_code: '-99',
 								status_msg: 'This document already cancel'
@@ -806,7 +816,7 @@ class PJCAService {
 				var xPJCADetail = await _repoInstance.getByParameter({ id: pParam.id });
 				if (xPJCADetail != null) {
 					if (xPJCADetail.status_code == '00') {
-						if (xPJCADetail.data.status != 3) {
+						if (xPJCADetail.data.status != 2) {
 							xJoResult = {
 								status_code: '-99',
 								status_msg: 'This document cannot be processed'
@@ -814,16 +824,38 @@ class PJCAService {
 						} else {
 							var xParamUpdate = {
 								id: pParam.id,
-								status: 4
+								status: 3
 								// approved_at: await _utilInstance.getCurrDateTime()
 							};
 							var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
 
 							if (xUpdateResult.status_code == '00') {
-								xJoResult = {
-									status_code: '00',
-									status_msg: 'PJCA successfully done'
+								var xPayreqUpdate = {
+									id: xPJCADetail.data.payment_request_id,
+									status: 4
+									// approved_at: await _utilInstance.getCurrDateTime()
 								};
+								var xUpdateResult = await _paymentRequestRepoInstance.save(xPayreqUpdate, 'update');
+								if (xUpdateResult.status_code == '00') {
+									this.updatePyrdItemQtyRelease(xPJCADetail.data, 'done')
+									xJoResult = {
+										status_code: '00',
+										status_msg: 'PJCA successfully done'
+									};
+								} else {
+									
+									var xParamUpdate = {
+										id: pParam.id,
+										status: 2
+										// approved_at: await _utilInstance.getCurrDateTime()
+									};
+									var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
+									
+									xJoResult = {
+										status_code: '-99',
+										status_msg: 'Failed update status'
+									};
+								}
 							} else {
 								xJoResult = xUpdateResult;
 							}
@@ -934,6 +966,36 @@ class PJCAService {
 		}
 
 		return xJoResult;
+	}
+	
+	async updatePyrdItemQtyRelease(pParam, pAct){
+		let xPjcaDetail = pParam.pjca_detail
+		console.log(`>>> xPjcaDetail: ${JSON.stringify(xPjcaDetail)}`);
+		for (let i = 0; i < xPjcaDetail.length; i++) {
+			var xPyrDetailItem = await _paymentRequestDetailRepoInstance.getByParam(
+				{
+					payment_request_id: pParam.payment_request_id,
+					prd_id: xPjcaDetail[i].prd_id
+				}
+			)
+			console.log(`>>> xPyrDetailItem: ${JSON.stringify(xPyrDetailItem)}`);
+			if (xPyrDetailItem.status_code == '00') {
+				let xQtyRelease = xPyrDetailItem.data.qty_done || 0
+				let xCalculatedQty = 0
+				if (pAct == 'done') {
+					xCalculatedQty = xQtyRelease + xPjcaDetail[i].qty_done
+				} else if (pAct == 'reject' || pAct == 'cancel' ){
+					xCalculatedQty = xQtyRelease - xPjcaDetail[i].qty_done
+				}
+				let xPyrdUpdateParam = {
+					id: xPyrDetailItem.data.id,
+					qty_done: xCalculatedQty
+				}
+				
+				let xUpdatePyrdItem = await _paymentRequestDetailRepoInstance.save(xPyrdUpdateParam, 'update')
+				console.log(`>>> xUpdatePyrdItem: ${JSON.stringify(xUpdatePyrdItem)}`);
+			}
+		}
 	}
 }
 

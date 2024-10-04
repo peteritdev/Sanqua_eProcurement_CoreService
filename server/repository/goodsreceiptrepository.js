@@ -123,7 +123,13 @@ class GoodsReceiptRepository {
 		var xJoResult = {};
 
 		try {
-			xInclude = [];
+			xInclude = [
+				{
+					model: _modelPurchaseRequest,
+					as: 'purchase_request',
+					attributes: [ 'id', 'request_no' ]
+				}
+			];
 
 			if (pParam.hasOwnProperty('company_id')) {
 				if (pParam.company_id != '') {
@@ -173,6 +179,11 @@ class GoodsReceiptRepository {
 			if (pParam.hasOwnProperty('keyword')) {
 				if (pParam.keyword != '') {
 					xWhereOr.push(
+						{
+							'$purchase_request.request_no$': {
+								[Op.iLike]: '%' + pParam.keyword + '%'
+							}
+						},
 						{
 							document_no: {
 								[Op.iLike]: '%' + pParam.keyword + '%'
