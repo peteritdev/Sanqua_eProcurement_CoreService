@@ -58,7 +58,7 @@ class PaymentRequestDetailRepository {
 			}
 
 			xSqlFields = ` a.id, a.product_id, a.product_code, a.product_name,
-			a.qty_request, a.qty_left, a.price_request,
+			a.qty_request, a.qty_done, a.price_request,
 			a.uom_id, a.uom_name,
 			a.payment_request_id, a.prd_id, b.document_no, b.vendor_name`;
 
