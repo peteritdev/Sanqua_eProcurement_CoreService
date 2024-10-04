@@ -122,31 +122,29 @@ class PJCADetailService {
 
 		if (xFlagProcess) {
 			if (xAct == 'add') {
-				var xPJCADetail = null,
-					xProductDetail = null,
-					xVendorDetail = null;
+				var xPjcaDetail = null;
+				var	xProductDetail = null;
 
 				if (pParam.hasOwnProperty('product_id')) {
 					if (pParam.product_id != null) {
 						// Check first whether product_id and vendor_id already exists in detail or not
-						xPJCADetail = await _repoInstance.getByProductId({
+						xPjcaDetail = await _repoInstance.getByProductId({
 							product_id: pParam.product_id,	
 							pjca_id: pParam.pjca_id
 						});
 					}
 				}
-
 				if (
-					xPJCADetail != null &&
-					xPJCADetail.price_done == pParam.price_done
+					xPjcaDetail != null &&
+					xPjcaDetail.prd_id == pParam.prd_id
 				) {
 					var xParamUpdate = {
-						id: xPJCADetail.id,
-						qty_done: Math.round((xPaymentRequestDetail.qty_done + pParam.qty_done) * 1000) / 1000,
+						id: xPjcaDetail.id,
+						qty_done: Math.round((xPjcaDetail.qty_done + pParam.qty_done) * 1000) / 1000,
 						price_total:
 							Math.round(
-								(xPaymentRequestDetail.qty_done + pParam.qty_done) *
-									xPaymentRequestDetail.price_done *
+								(xPjcaDetail.qty_done + pParam.qty_done) *
+									xPjcaDetail.price_done *
 									1000
 							) / 1000
 					};
@@ -155,7 +153,6 @@ class PJCADetailService {
 
 					xAct = 'update';
 				} else {
-					// console.log(`>>> pParam CEK CEK CEK : ${JSON.stringify(pParam)}`);
 					if (pParam.hasOwnProperty('product_id')) {
 						if (pParam.product_id != null) {
 							// Get Product detail by Id
@@ -182,17 +179,24 @@ class PJCADetailService {
 					var arrMsg = [];
 					for (var i in xItems) {
 						// Check first whether product_id and vendor_id already exists in detail or not
-						var xPJCADetail = await _repoInstance.getByProductId({
+						var xPjcaDetail = await _repoInstance.getByProductId({
 							pjca_id: pParam.pjca_id,
 							product_id: xItems[i].product_id
 						});
 
 						if (
-							xPJCADetail != null
+							xPjcaDetail != null &&
+							xPjcaDetail.price_done == xItems[i].price_done
 						) {
 							var xParamUpdate = {
-								id: xPJCADetail.id,
-								// qty: Math.round((xPJCADetail.qty_request + xItems[i].qty_request) * 1000) / 1000
+								id: xPjcaDetail.id,
+								qty_done: Math.round((xPjcaDetail.qty_done + xItems[i].qty_done) * 1000) / 1000,
+								price_total:
+									Math.round(
+										(xPjcaDetail.qty_done + xItems[i].qty_done) *
+											xPjcaDetail.price_done *
+											1000
+									) / 1000
 							};
 
 							xItems[i] = null;
@@ -216,8 +220,8 @@ class PJCADetailService {
 								}
 							}
 
-							// xItems[i].price_total =
-							// 	Math.round(xItems[i].qty_request * xItems[i].price_request * 1000) / 1000;
+							xItems[i].price_total =
+								Math.round(xItems[i].qty_done * xItems[i].price_done * 1000) / 1000;
 							xItems[i].pjca_id = xRequestIdClear;
 							xItems[i].user_id = pParam.user_id;
 							xItems[i].user_name = pParam.user_name;
@@ -255,7 +259,6 @@ class PJCADetailService {
 								Math.round(pParam.qty_done * pParam.price_done * 1000) / 1000;
 						}
 					}
-
 
 					// console.log(`>>> editDetail : ${JSON.stringify(pParam)}`);
 					var xUpdateResult = await _repoInstance.save(pParam, xAct);

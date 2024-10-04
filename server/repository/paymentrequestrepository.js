@@ -105,7 +105,13 @@ class PaymentRequestRepository {
 		var xJoResult = {};
 
 		try {
-			xInclude = [];
+			xInclude = [
+				{
+					model: _modelPurchaseRequest,
+					as: 'purchase_request',
+					attributes: [ 'id', 'request_no' ]
+				}
+			];
 
 			if (pParam.hasOwnProperty('purchase_request_id')) {
 				if (pParam.purchase_request_id != '') {
@@ -171,6 +177,11 @@ class PaymentRequestRepository {
 			if (pParam.hasOwnProperty('keyword')) {
 				if (pParam.keyword != '') {
 					xWhereOr.push(
+						{
+							'$purchase_request.request_no$': {
+								[Op.iLike]: '%' + pParam.keyword + '%'
+							}
+						},
 						{
 							document_no: {
 								[Op.iLike]: '%' + pParam.keyword + '%'
@@ -358,17 +369,6 @@ class PaymentRequestRepository {
 				pAct == 'update' ||
 				pAct == 'submit'
 			) {
-				// switch (pAct) {
-				// 	case 'update':
-				// 		xComment = 'changed';
-				// 		break;
-				// 	case 'submit':
-				// 		xComment = 'submitted';
-				// 		pParam.requested_at = await _utilInstance.getCurrDateTime();
-				// 		break;
-				// 	default:
-				// 		xComment = 'changed';
-				// }
 				var xId = pParam.id;
 				delete pParam.id;
 				var xWhere = {

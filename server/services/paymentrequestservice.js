@@ -211,7 +211,8 @@ class PaymentRequestService {
 								created_at: moment(xRows[i].createdAt).format('DD MMM YYYY HH:mm:ss'),
 								created_by_name: xRows[i].created_by_name,
 								updated_at: moment(xRows[i].updatedAt).format('DD MMM YYYY HH:mm:ss'),
-								updated_by_name: xRows[i].updated_by_name
+								updated_by_name: xRows[i].updated_by_name,
+								purchase_request: xRows[i].purchase_request,
 							});
 						}
 

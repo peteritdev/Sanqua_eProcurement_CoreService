@@ -41,6 +41,7 @@ module.exports = (sequelize, DataTypes) => {
 		},
 		updated_by: DataTypes.INTEGER,
 		updated_by_name: DataTypes.STRING,
+		prd_id: DataTypes.INTEGER
 	});
 
 	PJCADetail.associate = function(models) {
@@ -53,6 +54,12 @@ module.exports = (sequelize, DataTypes) => {
 		PJCADetail.belongsTo(models.tr_pjcas, {
 			foreignKey: 'pjca_id',
 			as: 'pjca',
+			onDelete: 'CASCADE'
+		});
+		
+		PJCADetail.belongsTo(models.tr_purchaserequestdetails, {
+			foreignKey: 'prd_id',
+			as: 'purchase_request_detail',
 			onDelete: 'CASCADE'
 		});
 	};
