@@ -104,6 +104,14 @@ class PJCARepository {
 				},
 			];
 
+			if (pParam.hasOwnProperty('payment_request_id')) {
+				if (pParam.payment_request_id != '') {
+					xWhereAnd.push({
+						payment_request_id: pParam.payment_request_id
+					});
+				}
+			}
+			
 			if (pParam.hasOwnProperty('company_id')) {
 				if (pParam.company_id != '') {
 					xWhereAnd.push({
