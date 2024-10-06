@@ -62,6 +62,12 @@ module.exports = (sequelize, DataTypes) => {
 			as: 'purchase_request_detail',
 			onDelete: 'CASCADE'
 		});
+
+		PJCADetail.belongsTo(models.ms_taxes, {
+			foreignKey: 'tax_type',
+			as: 'tax',
+			onDelete: 'CASCADE'
+		});
 	};
 
 	return PJCADetail;

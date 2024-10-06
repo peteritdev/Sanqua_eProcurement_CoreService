@@ -26,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
 		// ppn: DataTypes.DOUBLE,
 		// pph: DataTypes.DOUBLE,
 		global_discount: DataTypes.DOUBLE,
+		global_discount_percent: DataTypes.DOUBLE,
 		bank_name: DataTypes.STRING,
 		// total_qty: DataTypes.DOUBLE,
 		total_price: DataTypes.DOUBLE,

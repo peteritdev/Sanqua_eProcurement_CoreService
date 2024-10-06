@@ -75,39 +75,98 @@ class PaymentRequestService {
 					if (xDetail != null) {
 						if (xDetail.status_code == '00') {
 								
-							// var xJoArrRequestDetailData = [];
-							// var xTotalItem = 0;
-							// var xPayreqDetail = xDetail.data.payment_request_detail;
+							var xPayreqDetail = xDetail.data.payment_request_detail;
+							var xGlobalAmount = xDetail.data.global_discount 
+							var xGlobalPercent = xDetail.data.global_discount_percent
+							var xTotalBasePrice = 0;
+							var xTotalDiscItem = 0;
+							var xDisc = 0;
+							var yDisc = 0;
+							// var xGlobalDiscAmount = 0;
+							// var xGlobalDiscPercent = 0;
+							// var xUntaxedAmount = 0;
+							var xTaxes = 0;
+							// var xTotal = 0;
 								
 							// // looping detail item
-							// // for (var index in xPayreqDetail) {
-							// // 	// if (xPayreqDetail[index].price_total != null && xPayreqDetail[index].price_total != 0) {
-							// // 	// 	xTotalItem = xTotalItem + 1;
-							// // 	// }
-							// // 	// console.log(`>>> xDetail[index]: ${JSON.stringify(xDetail[index])}`);
-							// // 	xJoArrRequestDetailData.push({
-							// // 		id: await _utilInstance.encrypt(xPayreqDetail[index].id, config.cryptoKey.hashKey),
-							// // 		product: {
-							// // 			id: xPayreqDetail[index].product_id,
-							// // 			code: xPayreqDetail[index].product_code,
-							// // 			name: xPayreqDetail[index].product_name
-							// // 		},
-							// // 		uom: xPayreqDetail[index].uom_name,
-							// // 		uom_id: xPayreqDetail[index].uom_id,
-							// // 		qty_demand: xPayreqDetail[index].qty_demand,
-							// // 		price_demand: xPayreqDetail[index].price_demand,
-							// // 		qty_request: xPayreqDetail[index].qty_request,
-							// // 		price_request: xPayreqDetail[index].price_request,
-							// // 		tax: xPayreqDetail[index].tax,
-							// // 		discount: xPayreqDetail[index].discount,
-							// // 		discount_percent: xPayreqDetail[index].discount_percent,
-							// // 		price_total: xPayreqDetail[index].price_total,
-							// // 		description: xPayreqDetail[index].description,
-							// // 		status: xPayreqDetail[index].status,
-							// // 	});
-							// // }
+							for (var i in xPayreqDetail) {
+								delete xPayreqDetail[i].price_total
+								var xTotalPrice = Math.round((xPayreqDetail[i].price_request * xPayreqDetail[i].qty_request) * 1000) / 1000
+								var xDiscAmount = xPayreqDetail[i].discount_amount || 0
+								var xDiscPercent = xPayreqDetail[i].discount_percent || 0
+								var xTotalDisc = 0
+								var xTax = 0
+								var xTotalPriceWithDisc = 0
+								// var xTotalPriceWithTax = 0
+								var xSubtotal = 0
+
+								// calc discount
+								if (xPayreqDetail[i].discount_percent != null && xPayreqDetail[i].discount_percent != 0) {
+									xDiscAmount = Math.round((xPayreqDetail[i].price_request * (xPayreqDetail[i].discount_percent / 100)) * 1000) / 1000
+									xPayreqDetail[i].discount_amount = Math.round(xDiscAmount * 1000) / 1000
+								}
+								if (xPayreqDetail[i].discount_amount != null && xPayreqDetail[i].discount_amount != 0) {
+									xDiscPercent = (xPayreqDetail[i].discount_amount / xPayreqDetail[i].price_request) * 100
+									xPayreqDetail[i].discount_percent = Math.round(xDiscPercent * 1000) / 1000
+								}
+								
+								xDisc = Math.round((xTotalPrice * (xDiscPercent / 100)) * 1000) / 1000
+
+								xTotalPriceWithDisc = Math.round((xTotalPrice - xDisc) * 1000) / 1000
+								
+								// calc price after tax
+								if (xPayreqDetail[i].tax != null) {
+									xTax = Math.round((xTotalPriceWithDisc * (xPayreqDetail[i].tax.value / 100)) * 1000) / 1000
+									if (xPayreqDetail[i].tax.type == 1) {
+										// xTotalPriceWithTax = Math.round((xTotalPrice - xTax) * 1000) / 1000
+										if (xDiscPercent != 0) {
+											xTotalDisc = xTax
+										}
+										xSubtotal = Math.round((xTotalPriceWithDisc - xTax) * 1000) / 1000
+									}else{
+										xTotalDisc = xDisc
+										xSubtotal = xTotalPriceWithDisc
+									}
+								} else {
+									xTotalDisc = xDisc
+									xSubtotal = xTotalPriceWithDisc
+								}
+								yDisc += xDisc
+								xTotalDiscItem += xTotalDisc
+								xTaxes += xTax
+								xTotalBasePrice += xSubtotal
+
+								xPayreqDetail[i].total_discount = xTotalDisc
+								xPayreqDetail[i].tax_amount = xTax
+								xPayreqDetail[i].subtotal = xSubtotal
+							}
 							
 							delete xDetail.data.purchase_request_id;
+							xDetail.data.discount = yDisc
+							xDetail.data.total_base_price = xTotalBasePrice + xTotalDiscItem || 0
+							xDetail.data.total_discount = xTotalDiscItem || 0
+
+							if (xDetail.data.global_discount != null & xDetail.data.global_discount != 0) {
+								if (xTotalDiscItem != 0) {
+									xGlobalPercent = (xDetail.data.global_discount / xTotalDiscItem) * 100
+								} else {
+									xGlobalPercent = (xDetail.data.global_discount / xTotalBasePrice) * 100
+								}
+							}
+							
+							if (xDetail.data.global_discount_percent != null & xDetail.data.global_discount_percent != 0) {
+								if (xTotalDiscItem != 0) {
+									xGlobalAmount = (xDetail.data.global_discount_percent * yDisc ) / 100
+								} else {
+									xGlobalAmount = (xDetail.data.global_discount_percent * xTotalBasePrice) / 100
+								}
+							}
+							xDetail.data.global_discount_percent = Math.round(xGlobalPercent * 1000) / 1000
+							xDetail.data.global_discount = Math.round(xGlobalAmount * 1000) / 1000
+
+							xDetail.data.untaxed_amount = xDetail.data.total_base_price - xGlobalAmount || 0
+							xDetail.data.total_tax_amount = xTaxes || 0
+							xDetail.data.total_price = xDetail.data.untaxed_amount + xDetail.data.total_tax_amount || 0
 							// get Detail FPB
 							// let xFpbDetail = await _purchaseRequestRepoInstance.getById({ id: xDetail.data.purchase_request_id })
 							// if (xFpbDetail != null) {

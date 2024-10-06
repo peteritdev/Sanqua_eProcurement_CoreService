@@ -226,7 +226,7 @@ class PurchaseRequestDetailService {
 				}
 
 				// Validate if product_id is null (free keyin for project), estimate_fulfillment
-
+				pParam.qty_left = pParam.qty
 				var xAddResult = await _repoInstance.save(pParam, xAct);
 				xJoResult = xAddResult;
 
@@ -345,6 +345,7 @@ class PurchaseRequestDetailService {
 						// if (xCatalogue.status_code == '00') {
 						// 	xItems[i].last_price = xCatalogue.data.last_price;
 						// }
+						xItems[i].qty_left = xItems[i].qty
 						var xAddResult = await _repoInstance.save(xItems[i], xAct);
 						arrMsg.push({
 							index: i,
@@ -378,6 +379,7 @@ class PurchaseRequestDetailService {
 							pParam.quotation_price_total =
 								Math.round(pParam.qty * pParam.quotation_price_per_unit * 1000) / 1000;
 						}
+						pParam.qty_left = pParam.qty
 					}
 
 					if (pParam.estimate_date_use == '') {

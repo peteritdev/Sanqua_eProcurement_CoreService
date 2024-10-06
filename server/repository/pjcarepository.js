@@ -12,6 +12,7 @@ const _modelPaymentRequest = require('../models').tr_paymentrequests;
 const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
+const _modelTax = require('../models').ms_taxes;
 // const _modelBudgetPlan = require('../models').tr_budgetplans;
 
 const Utility = require('peters-globallib-v2');
@@ -40,7 +41,14 @@ class PJCARepository {
 				},
 				{
 					model: _modelPJCADetail,
-					as: 'pjca_detail'
+					as: 'pjca_detail',
+					include: [
+						{
+							model: _modelTax,
+							as: 'tax',
+							attributes: [['id', 'tax_id'], 'name', 'type', 'value'],
+						}
+					]
 				},
 			]
 
