@@ -19,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
 		to_department_id: DataTypes.INTEGER,
 		to_department_name: DataTypes.STRING,
 		global_discount: DataTypes.DOUBLE,
+		global_discount_percent: DataTypes.DOUBLE,
 		tax: DataTypes.DOUBLE,
 		total_qty_released: DataTypes.DOUBLE,
 		total_price_released: DataTypes.DOUBLE,

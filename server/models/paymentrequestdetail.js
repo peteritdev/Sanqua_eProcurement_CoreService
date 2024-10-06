@@ -64,6 +64,12 @@ module.exports = (sequelize, DataTypes) => {
 			as: 'purchase_request_detail',
 			onDelete: 'CASCADE'
 		});
+		
+		PaymentRequestDetail.belongsTo(models.ms_taxes, {
+			foreignKey: 'tax_type',
+			as: 'tax',
+			onDelete: 'CASCADE'
+		});
 		// PaymentRequestDetail.belongsTo(models.ms_vendorcatalogues, {
 		// 	foreignKey: 'vendor_catalogue_id',
 		// 	as: 'vendor_catalogue',

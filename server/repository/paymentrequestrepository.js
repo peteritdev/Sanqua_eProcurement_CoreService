@@ -14,6 +14,7 @@ const _modelPurchaseRequestDetail = require('../models').tr_purchaserequestdetai
 const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
+const _modelTax = require('../models').ms_taxes;
 // const _modelBudgetPlan = require('../models').tr_budgetplans;
 
 const Utility = require('peters-globallib-v2');
@@ -45,9 +46,14 @@ class PaymentRequestRepository {
 					as: 'payment_request_detail',
 					include: [
 						{
+							model: _modelTax,
+							as: 'tax',
+							attributes: [['id', 'tax_id'], 'name', 'type', 'value'],
+						},
+						{
 							model: _modelPurchaseRequestDetail,
 							as: 'purchase_request_detail',
-							attributes: ['id', 'request_id', 'product_id', 'product_code', 'product_name', 'qty', 'qty_done', 'qty_left', ['budget_price_per_unit', 'unit_price'], 'uom_name', 'uom_id', ],
+							attributes: ['id', 'request_id', 'product_id', 'product_code', 'product_name', 'qty', 'qty_done', 'qty_left', ['budget_price_per_unit', 'unit_price'], 'uom_name', 'uom_id'],
 						},
 					]
 				},

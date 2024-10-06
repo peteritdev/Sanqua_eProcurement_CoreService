@@ -5,6 +5,7 @@ const unitController = require('../controllers').unit;
 const spesificationCategoryController = require('../controllers').spesificationCategory;
 const spesificationAttributeController = require('../controllers').spesificationAttribute;
 const currencyController = require('../controllers').currency;
+const taxController = require('../controllers').tax;
 
 const { check, validationResult } = require('express-validator');
 
@@ -275,4 +276,27 @@ module.exports = (app) => {
 	xArrValidateProduct = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
 	app.delete(rootAPIPath + 'master/currency/delete/:id', currencyController.currency_Delete);
 	app.get(rootAPIPath + 'master/currency/drop_down', currencyController.currency_DropDown);
+
+	// 04/10/2024
+	
+	// List
+	arrValidate = [];
+	arrValidate = [
+		check('offset', 'Parameter offset must be integer and cannot be empty').not().isEmpty().isInt(),
+		check('limit', 'Parameter limit must be integer and cannot be empty').not().isEmpty().isInt()
+	];
+	app.get(rootAPIPath + 'master/tax/list', arrValidate, taxController.tax_List);
+
+	arrValidate = [];
+	app.get(rootAPIPath + 'master/tax/drop_down', arrValidate, taxController.tax_DropDown);
+	
+	arrValidate = [];
+	arrValidate = [ check('name').not().isEmpty().withMessage('Parameter name cannot be empty') ];
+	arrValidate = [ check('type').not().isEmpty().withMessage('Parameter type cannot be empty') ];
+	arrValidate = [ check('value').not().isEmpty().withMessage('Parameter value cannot be empty') ];
+	app.post(rootAPIPath + 'master/tax/save', arrValidate, taxController.tax_Save);
+	
+	arrValidate = [];
+	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
+	app.delete(rootAPIPath + 'master/tax/delete/:id', taxController.tax_Delete);
 };

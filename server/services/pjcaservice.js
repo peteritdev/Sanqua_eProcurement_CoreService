@@ -73,67 +73,128 @@ class PJCAService {
 					xDetail = await _utilInstance.changeIdToEncryptedId(xDetail, config.cryptoKey.hashKey);
 					console.log(`>>> pParam: ${JSON.stringify(xDetail)}`);
 					if (xDetail != null) {
-						
-						// var xJoArrRequestDetailData = [];
-						// var xTotalItem = 0;
-						// var xPjcaDetail = xDetail.pjca_detail;
-							
-						// looping detail item
-						// for (var index in xPjcaDetail) {
-						// 	// if (xPjcaDetail[index].price_total != null && xPjcaDetail[index].price_total != 0) {
-						// 	// 	xTotalItem = xTotalItem + 1;
-						// 	// }
-						// 	// console.log(`>>> xDetail[index]: ${JSON.stringify(xDetail[index])}`);
-						// 	// xJoArrRequestDetailData.push({
-						// 	// 	// id: await _utilInstance.encrypt(xPjcaDetail[index].id, config.cryptoKey.hashKey),
-						// 	// 	product: {
-						// 	// 		id: xPjcaDetail[index].product_id,
-						// 	// 		code: xPjcaDetail[index].product_code,
-						// 	// 		name: xPjcaDetail[index].product_name
-						// 	// 	},
-						// 	// 	uom: xPjcaDetail[index].uom_name,
-						// 	// 	uom_id: xPjcaDetail[index].uom_id,
-						// 	// 	qty_request: xPjcaDetail[index].qty_request,
-						// 	// 	price_request: xPjcaDetail[index].price_request,
-						// 	// 	qty_done: xPjcaDetail[index].qty_done,
-						// 	// 	price_done: xPjcaDetail[index].price_done,
-						// 	// 	description: xPjcaDetail[index].description,
-						// 	// 	discount_amount: xPjcaDetail[index].discount_amount,
-						// 	// 	discount_percent: xPjcaDetail[index].discount_percent,
-						// 	// 	tax: xPjcaDetail[index].tax,
-						// 	// 	price_total: xPjcaDetail[index].price_total,
-						// 	// 	status: xPjcaDetail[index].status,
-						// 	// });
-							
-						// }
-						delete xDetail.data.payment_request_id;
-						// Get Approval Matrix
-						var xParamApprovalMatrix = {
-							application_id: 8,
-							table_name: config.dbTables.pjca,
-							document_id: xEncId
-						};
-						var xResultApprovalMatrix = await _oAuthService.getApprovalMatrix(
-							pParam.method,
-							pParam.token,
-							xParamApprovalMatrix
-						);
+						if (xDetail.status_code == '00') {
+								
+							var xPjcaDetail = xDetail.data.pjca_detail;
+							var xGlobalAmount = xDetail.data.global_discount 
+							var xGlobalPercent = xDetail.data.global_discount_percent
+							var xTotalBasePrice = 0;
+							var xTotalDiscItem = 0;
+							var xDisc = 0;
+							var yDisc = 0;
+							// var xGlobalDiscAmount = 0;
+							// var xGlobalDiscPercent = 0;
+							// var xUntaxedAmount = 0;
+							var xTaxes = 0;
+							// var xTotal = 0;
+								
+							// // looping detail item
+							for (var i in xPjcaDetail) {
+								delete xPjcaDetail[i].price_total
+								var xTotalPrice = Math.round((xPjcaDetail[i].price_done * xPjcaDetail[i].qty_done) * 1000) / 1000
+								var xDiscAmount = xPjcaDetail[i].discount_amount || 0
+								var xDiscPercent = xPjcaDetail[i].discount_percent || 0
+								var xTotalDisc = 0
+								var xTax = 0
+								var xTotalPriceWithDisc = 0
+								// var xTotalPriceWithTax = 0
+								var xSubtotal = 0
 
-						if (xResultApprovalMatrix != null) {
-							if (xResultApprovalMatrix.status_code == '00') {
-								let xListApprover = xResultApprovalMatrix.token_data.data;
-								for (var i in xListApprover) {
-									let xApproverUsers = _.filter(xListApprover[i].approver_user, { status: 0 }).map(
-										// update 08/08/2023 prevent user is null
-										(v) => (v.user != null ? v.user.email : v.user)
-									);
-									xArrUserCanCancel.push.apply(xArrUserCanCancel, xApproverUsers);
+								// calc discount
+								if (xPjcaDetail[i].discount_percent != null && xPjcaDetail[i].discount_percent != 0) {
+									xDiscAmount = Math.round((xPjcaDetail[i].price_done * (xPjcaDetail[i].discount_percent / 100)) * 1000) / 1000
+									xPjcaDetail[i].discount_amount = Math.round(xDiscAmount * 1000) / 1000
+								}
+								if (xPjcaDetail[i].discount_amount != null && xPjcaDetail[i].discount_amount != 0) {
+									xDiscPercent = (xPjcaDetail[i].discount_amount / xPjcaDetail[i].price_done) * 100
+									xPjcaDetail[i].discount_percent = Math.round(xDiscPercent * 1000) / 1000
+								}
+								
+								xDisc = Math.round((xTotalPrice * (xDiscPercent / 100)) * 1000) / 1000
+
+								xTotalPriceWithDisc = Math.round((xTotalPrice - xDisc) * 1000) / 1000
+								
+								// calc price after tax
+								if (xPjcaDetail[i].tax != null) {
+									xTax = Math.round((xTotalPriceWithDisc * (xPjcaDetail[i].tax.value / 100)) * 1000) / 1000
+									if (xPjcaDetail[i].tax.type == 1) {
+										// xTotalPriceWithTax = Math.round((xTotalPrice - xTax) * 1000) / 1000
+										if (xDiscPercent != 0) {
+											xTotalDisc = xTax
+										}
+										xSubtotal = Math.round((xTotalPriceWithDisc - xTax) * 1000) / 1000
+									}else{
+										xTotalDisc = xDisc
+										xSubtotal = xTotalPriceWithDisc
+									}
+								} else {
+									xTotalDisc = xDisc
+									xSubtotal = xTotalPriceWithDisc
+								}
+								yDisc += xDisc
+								xTotalDiscItem += xTotalDisc
+								xTaxes += xTax
+								xTotalBasePrice += xSubtotal
+
+								xPjcaDetail[i].total_discount = xTotalDisc
+								xPjcaDetail[i].tax_amount = xTax
+								xPjcaDetail[i].subtotal = xSubtotal
+							}
+							
+							delete xDetail.data.payment_request_id;
+							xDetail.data.discount = yDisc
+							xDetail.data.total_base_price = xTotalBasePrice + xTotalDiscItem || 0
+							xDetail.data.total_discount = xTotalDiscItem || 0
+
+							if (xDetail.data.global_discount != null & xDetail.data.global_discount != 0) {
+								if (xTotalDiscItem != 0) {
+									xGlobalPercent = (xDetail.data.global_discount / xTotalDiscItem) * 100
+								} else {
+									xGlobalPercent = (xDetail.data.global_discount / xTotalBasePrice) * 100
 								}
 							}
-						}
-						xDetail.data.approver_users = xArrUserCanCancel
-						xDetail.data.approval_matrix = xResultApprovalMatrix.status_code == '00' && xResultApprovalMatrix.token_data.status_code == '00' ? xResultApprovalMatrix.token_data.data : null
+							
+							if (xDetail.data.global_discount_percent != null & xDetail.data.global_discount_percent != 0) {
+								if (xTotalDiscItem != 0) {
+									xGlobalAmount = (xDetail.data.global_discount_percent * yDisc ) / 100
+								} else {
+									xGlobalAmount = (xDetail.data.global_discount_percent * xTotalBasePrice) / 100
+								}
+							}
+							xDetail.data.global_discount_percent = Math.round(xGlobalPercent * 1000) / 1000
+							xDetail.data.global_discount = Math.round(xGlobalAmount * 1000) / 1000
 
+							xDetail.data.untaxed_amount = xDetail.data.total_base_price - xGlobalAmount || 0
+							xDetail.data.total_tax_amount = xTaxes || 0
+							xDetail.data.total_price = xDetail.data.untaxed_amount + xDetail.data.total_tax_amount || 0
+							
+							// Get Approval Matrix
+							var xParamApprovalMatrix = {
+								application_id: 8,
+								table_name: config.dbTables.pjca,
+								document_id: xEncId
+							};
+							var xResultApprovalMatrix = await _oAuthService.getApprovalMatrix(
+								pParam.method,
+								pParam.token,
+								xParamApprovalMatrix
+							);
+
+							if (xResultApprovalMatrix != null) {
+								if (xResultApprovalMatrix.status_code == '00') {
+									let xListApprover = xResultApprovalMatrix.token_data.data;
+									for (var i in xListApprover) {
+										let xApproverUsers = _.filter(xListApprover[i].approver_user, { status: 0 }).map(
+											// update 08/08/2023 prevent user is null
+											(v) => (v.user != null ? v.user.email : v.user)
+										);
+										xArrUserCanCancel.push.apply(xArrUserCanCancel, xApproverUsers);
+									}
+								}
+							}
+							xDetail.data.approver_users = xArrUserCanCancel
+							xDetail.data.approval_matrix = xResultApprovalMatrix.status_code == '00' && xResultApprovalMatrix.token_data.status_code == '00' ? xResultApprovalMatrix.token_data.data : null
+						}
 					} else {
 						
 						xJoResult = {
