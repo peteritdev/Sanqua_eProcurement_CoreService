@@ -559,7 +559,7 @@ class PaymentRequestService {
 									let xPrdQtyPaid = xPrDetailItem.data.qty_paid
 									let xArrPyrd = xPyrDetail.filter(({ prd_id }) => prd_id == xUniq[i])
 									let xPyrdTotalQty = xArrPyrd.reduce((accum, item) => accum + item.qty_request, 0)
-									if ( xPyrdTotalQty > xPrdQtyPaid) {
+									if ( xPyrdTotalQty > xPrDetailItem.data.qty - xPrdQtyPaid) {
 										xFlagProcess = false
 										xJoResult = {
 											status_code: '-99',
