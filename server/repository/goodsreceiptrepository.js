@@ -53,7 +53,7 @@ class GoodsReceiptRepository {
 						{
 							model: _modelPurchaseRequestDetail,
 							as: 'purchase_request_detail',
-							attributes: ['id', 'request_id', 'product_id', 'product_code', 'product_name', 'qty', 'qty_done', 'qty_left','uom_name', 'uom_id'],
+							attributes: ['id', 'request_id', 'product_id', 'product_code', 'product_name', 'qty', 'qty_done', 'qty_left', 'qty_paid', 'uom_name', 'uom_id'],
 						},
 						{
 							model: _modelPaymentRequest,
