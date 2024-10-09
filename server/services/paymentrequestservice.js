@@ -80,69 +80,75 @@ class PaymentRequestService {
 							var xGlobalPercent = xDetail.data.global_discount_percent
 							var xTotalBasePrice = 0;
 							var xTotalDiscItem = 0;
-							var xDisc = 0;
-							var yDisc = 0;
-							// var xGlobalDiscAmount = 0;
-							// var xGlobalDiscPercent = 0;
-							// var xUntaxedAmount = 0;
+							var xTotalDiscWoTax = 0;
 							var xTaxes = 0;
-							// var xTotal = 0;
 								
 							// // looping detail item
 							for (var i in xPayreqDetail) {
 								delete xPayreqDetail[i].price_total
-								var xTotalPrice = Math.round((xPayreqDetail[i].price_request * xPayreqDetail[i].qty_request) * 1000) / 1000
+								var xPricePerItem = xPayreqDetail[i].price_request
+								// var xTotalPrice = Math.round((xPayreqDetail[i].price_request * xPayreqDetail[i].qty_request) * 1000) / 1000
 								var xDiscAmount = xPayreqDetail[i].discount_amount || 0
 								var xDiscPercent = xPayreqDetail[i].discount_percent || 0
+								var xDiscWoTax = 0
 								var xTotalDisc = 0
 								var xTax = 0
-								var xTotalPriceWithDisc = 0
-								// var xTotalPriceWithTax = 0
+								var xPriceWithDisc = 0
+								var xPriceBeforeTax = 0
+								var xTotalPrice = 0
 								var xSubtotal = 0
 
 								// calc discount
 								if (xPayreqDetail[i].discount_percent != null && xPayreqDetail[i].discount_percent != 0) {
-									xDiscAmount = Math.round((xPayreqDetail[i].price_request * (xPayreqDetail[i].discount_percent / 100)) * 1000) / 1000
+									xDiscAmount = Math.round((xPricePerItem * (xPayreqDetail[i].discount_percent / 100)) * 1000) / 1000
 									xPayreqDetail[i].discount_amount = Math.round(xDiscAmount * 1000) / 1000
 								}
 								if (xPayreqDetail[i].discount_amount != null && xPayreqDetail[i].discount_amount != 0) {
-									xDiscPercent = (xPayreqDetail[i].discount_amount / xPayreqDetail[i].price_request) * 100
+									xDiscPercent = (xPayreqDetail[i].discount_amount / xPricePerItem) * 100
 									xPayreqDetail[i].discount_percent = Math.round(xDiscPercent * 1000) / 1000
 								}
 								
-								xDisc = Math.round((xTotalPrice * (xDiscPercent / 100)) * 1000) / 1000
+								xDiscWoTax = Math.round((xPricePerItem * (xDiscPercent / 100)) * 1000) / 1000
 
-								xTotalPriceWithDisc = Math.round((xTotalPrice - xDisc) * 1000) / 1000
+								xPriceWithDisc = Math.round((xPricePerItem - xDiscWoTax) * 1000) / 1000
 								
 								// calc price after tax
 								if (xPayreqDetail[i].tax != null) {
-									xTax = Math.round((xTotalPriceWithDisc * (xPayreqDetail[i].tax.value / 100)) * 1000) / 1000
+									var taxValue = 1 + (xPayreqDetail[i].tax.value / 100)
+									xPriceBeforeTax = Math.round((xPriceWithDisc / taxValue) * 1000) / 1000
+									xTax = Math.round((xPriceWithDisc - xPriceBeforeTax) * 1000) / 1000
 									if (xPayreqDetail[i].tax.type == 1) {
 										// xTotalPriceWithTax = Math.round((xTotalPrice - xTax) * 1000) / 1000
 										if (xDiscPercent != 0) {
-											xTotalDisc = xTax
+											xTotalDisc = Math.round((xDiscWoTax / taxValue) * 1000) / 1000
 										}
-										xSubtotal = Math.round((xTotalPriceWithDisc - xTax) * 1000) / 1000
+										xTotalPrice = Math.round((xPriceWithDisc - xTax) * 1000) / 1000
 									}else{
-										xTotalDisc = xDisc
-										xSubtotal = xTotalPriceWithDisc
+										xTotalDisc = xDiscWoTax
+										xTotalPrice = xPriceWithDisc
 									}
 								} else {
-									xTotalDisc = xDisc
-									xSubtotal = xTotalPriceWithDisc
+									xTotalDisc = xDiscWoTax
+									xTotalPrice = xPriceWithDisc
 								}
-								yDisc += xDisc
-								xTotalDiscItem += xTotalDisc
-								xTaxes += xTax
+
+								// xTotalDisc = 
+								xSubtotal = Math.round((xTotalPrice * xPayreqDetail[i].qty_request) * 1000) / 1000
+								xPayreqDetail[i].subtotal = xSubtotal
+
+								xTotalDiscWoTax += Math.round((xDiscWoTax * xPayreqDetail[i].qty_request) * 1000) / 1000
+								xTotalDiscItem += Math.round((xTotalDisc * xPayreqDetail[i].qty_request) * 1000) / 1000
+								xPayreqDetail[i].total_discount = Math.round((xTotalDisc * xPayreqDetail[i].qty_request) * 1000) / 1000
+
+								xTaxes += Math.round((xTax * xPayreqDetail[i].qty_request) * 1000) / 1000
+
 								xTotalBasePrice += xSubtotal
 
-								xPayreqDetail[i].total_discount = xTotalDisc
 								xPayreqDetail[i].tax_amount = xTax
-								xPayreqDetail[i].subtotal = xSubtotal
 							}
 							
 							delete xDetail.data.purchase_request_id;
-							xDetail.data.discount = yDisc
+							xDetail.data.total_discount_wo_tax = xTotalDiscWoTax
 							xDetail.data.total_base_price = xTotalBasePrice + xTotalDiscItem || 0
 							xDetail.data.total_discount = xTotalDiscItem || 0
 
@@ -156,16 +162,23 @@ class PaymentRequestService {
 							
 							if (xDetail.data.global_discount_percent != null & xDetail.data.global_discount_percent != 0) {
 								if (xTotalDiscItem != 0) {
-									xGlobalAmount = (xDetail.data.global_discount_percent * yDisc ) / 100
+									xGlobalAmount = (xDetail.data.global_discount_percent * xTotalDiscWoTax ) / 100
 								} else {
 									xGlobalAmount = (xDetail.data.global_discount_percent * xTotalBasePrice) / 100
 								}
 							}
+							
 							xDetail.data.global_discount_percent = Math.round(xGlobalPercent * 1000) / 1000
 							xDetail.data.global_discount = Math.round(xGlobalAmount * 1000) / 1000
 
-							xDetail.data.untaxed_amount = xDetail.data.total_base_price - xGlobalAmount || 0
-							xDetail.data.total_tax_amount = xTaxes || 0
+							if (xGlobalAmount == 0) {
+								xDetail.data.untaxed_amount = Math.round((xDetail.data.total_base_price - xDetail.data.total_discount || 0 ) * 1000) / 1000
+								xDetail.data.total_tax_amount = Math.round(( xTaxes || 0 ) * 1000) / 1000
+							} else { 
+								xDetail.data.untaxed_amount = Math.round((xDetail.data.total_base_price - xGlobalAmount || 0) * 1000) / 1000
+								xDetail.data.total_tax_amount = (Math.round((xTaxes - (xTaxes * (xDetail.data.global_discount_percent / 100))) * 1000 )  / 1000) || 0
+							}
+
 							xDetail.data.total_price = xDetail.data.untaxed_amount + xDetail.data.total_tax_amount || 0
 							// get Detail FPB
 							// let xFpbDetail = await _purchaseRequestRepoInstance.getById({ id: xDetail.data.purchase_request_id })
@@ -265,6 +278,7 @@ class PaymentRequestService {
 								status: xRows[i].status,
 								vendor_id: xRows[i].vendor_id,
 								vendor_name: xRows[i].vendor_name,
+								vendor_code: xRows[i].vendor_code,
 								payreq_type: xRows[i].payreq_type,
 								payment_type: xRows[i].payment_type,
 								created_at: moment(xRows[i].createdAt).format('DD MMM YYYY HH:mm:ss'),
@@ -326,12 +340,15 @@ class PaymentRequestService {
 					var xRows = xResultList.data.rows;
 					if (xRows.length > 0) {
 						for (var i in xRows) {
-							xJoArrData.push({
-								id: await _utilInstance.encrypt(xRows[i].id.toString(), config.cryptoKey.hashKey),
-								document_no: xRows[i].document_no,
-								vendor_id: xRows[i].vendor_id,
-								vendor_name: xRows[i].vendor_name
-							});
+							if (xJoArrData.find(({ vendor_id, vendor_name }) => vendor_id == xRows[i].vendor_id && vendor_name == xRows[i].vendor_name) == undefined) {
+								xJoArrData.push({
+									// id: await _utilInstance.encrypt(xRows[i].id.toString(), config.cryptoKey.hashKey),
+									// document_no: xRows[i].document_no,
+									vendor_id: xRows[i].vendor_id,
+									vendor_name: xRows[i].vendor_name,
+									vendor_code: xRows[i].vendor_code
+								});
+							}
 						}
 
 						xJoResult = {

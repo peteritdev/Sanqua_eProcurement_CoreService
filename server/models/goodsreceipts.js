@@ -21,6 +21,8 @@ module.exports = (sequelize, DataTypes) => {
     sj_no: DataTypes.STRING,
     received_no: DataTypes.STRING,
     form_no: DataTypes.STRING,
+    received_from_vendor_id: DataTypes.STRING,
+    received_from_vendor_code: DataTypes.STRING,
     received_from_vendor_name: DataTypes.STRING,
     submitted_by_name: DataTypes.STRING,
     received_by_name: DataTypes.STRING,

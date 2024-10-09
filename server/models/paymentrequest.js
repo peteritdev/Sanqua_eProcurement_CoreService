@@ -23,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
 		source_of_funds: DataTypes.STRING,
 		vendor_id: DataTypes.INTEGER,
 		vendor_name: DataTypes.STRING,
+		vendor_code: DataTypes.STRING,
 		// ppn: DataTypes.DOUBLE,
 		// pph: DataTypes.DOUBLE,
 		global_discount: DataTypes.DOUBLE,
@@ -32,6 +33,7 @@ module.exports = (sequelize, DataTypes) => {
 		total_price: DataTypes.DOUBLE,
 		status: DataTypes.INTEGER,
 		payment_desc: DataTypes.STRING,
+		description: DataTypes.STRING,
 
 		is_delete: DataTypes.INTEGER,
 		deleted_at: DataTypes.DATE,
