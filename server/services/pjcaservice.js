@@ -75,74 +75,80 @@ class PJCAService {
 					if (xDetail != null) {
 						if (xDetail.status_code == '00') {
 								
-							var xPjcaDetail = xDetail.data.pjca_detail;
+							var xPjcaDetail = xDetail.data.payment_request_detail;
 							var xGlobalAmount = xDetail.data.global_discount 
 							var xGlobalPercent = xDetail.data.global_discount_percent
 							var xTotalBasePrice = 0;
 							var xTotalDiscItem = 0;
-							var xDisc = 0;
-							var yDisc = 0;
-							// var xGlobalDiscAmount = 0;
-							// var xGlobalDiscPercent = 0;
-							// var xUntaxedAmount = 0;
+							var xTotalDiscWoTax = 0;
 							var xTaxes = 0;
-							// var xTotal = 0;
 								
 							// // looping detail item
 							for (var i in xPjcaDetail) {
 								delete xPjcaDetail[i].price_total
-								var xTotalPrice = Math.round((xPjcaDetail[i].price_done * xPjcaDetail[i].qty_done) * 1000) / 1000
+								var xPricePerItem = xPjcaDetail[i].price_done
+								// var xTotalPrice = Math.round((xPjcaDetail[i].price_request * xPjcaDetail[i].qty_request) * 1000) / 1000
 								var xDiscAmount = xPjcaDetail[i].discount_amount || 0
 								var xDiscPercent = xPjcaDetail[i].discount_percent || 0
+								var xDiscWoTax = 0
 								var xTotalDisc = 0
 								var xTax = 0
-								var xTotalPriceWithDisc = 0
-								// var xTotalPriceWithTax = 0
+								var xPriceWithDisc = 0
+								var xPriceBeforeTax = 0
+								var xTotalPrice = 0
 								var xSubtotal = 0
 
 								// calc discount
 								if (xPjcaDetail[i].discount_percent != null && xPjcaDetail[i].discount_percent != 0) {
-									xDiscAmount = Math.round((xPjcaDetail[i].price_done * (xPjcaDetail[i].discount_percent / 100)) * 1000) / 1000
+									xDiscAmount = Math.round((xPricePerItem * (xPjcaDetail[i].discount_percent / 100)) * 1000) / 1000
 									xPjcaDetail[i].discount_amount = Math.round(xDiscAmount * 1000) / 1000
 								}
 								if (xPjcaDetail[i].discount_amount != null && xPjcaDetail[i].discount_amount != 0) {
-									xDiscPercent = (xPjcaDetail[i].discount_amount / xPjcaDetail[i].price_done) * 100
+									xDiscPercent = (xPjcaDetail[i].discount_amount / xPricePerItem) * 100
 									xPjcaDetail[i].discount_percent = Math.round(xDiscPercent * 1000) / 1000
 								}
 								
-								xDisc = Math.round((xTotalPrice * (xDiscPercent / 100)) * 1000) / 1000
+								xDiscWoTax = Math.round((xPricePerItem * (xDiscPercent / 100)) * 1000) / 1000
 
-								xTotalPriceWithDisc = Math.round((xTotalPrice - xDisc) * 1000) / 1000
+								xPriceWithDisc = Math.round((xPricePerItem - xDiscWoTax) * 1000) / 1000
 								
 								// calc price after tax
 								if (xPjcaDetail[i].tax != null) {
-									xTax = Math.round((xTotalPriceWithDisc * (xPjcaDetail[i].tax.value / 100)) * 1000) / 1000
+									var taxValue = 1 + (xPjcaDetail[i].tax.value / 100)
+									xPriceBeforeTax = Math.round((xPriceWithDisc / taxValue) * 1000) / 1000
+									xTax = Math.round((xPriceWithDisc - xPriceBeforeTax) * 1000) / 1000
 									if (xPjcaDetail[i].tax.type == 1) {
 										// xTotalPriceWithTax = Math.round((xTotalPrice - xTax) * 1000) / 1000
 										if (xDiscPercent != 0) {
-											xTotalDisc = xTax
+											xTotalDisc = Math.round((xDiscWoTax / taxValue) * 1000) / 1000
 										}
-										xSubtotal = Math.round((xTotalPriceWithDisc - xTax) * 1000) / 1000
+										xTotalPrice = Math.round((xPriceWithDisc - xTax) * 1000) / 1000
 									}else{
-										xTotalDisc = xDisc
-										xSubtotal = xTotalPriceWithDisc
+										xTotalDisc = xDiscWoTax
+										xTotalPrice = xPriceWithDisc
 									}
 								} else {
-									xTotalDisc = xDisc
-									xSubtotal = xTotalPriceWithDisc
+									xTotalDisc = xDiscWoTax
+									xTotalPrice = xPriceWithDisc
 								}
-								yDisc += xDisc
-								xTotalDiscItem += xTotalDisc
-								xTaxes += xTax
+								
+								// xTotalDisc = 
+								xSubtotal = Math.round((xTotalPrice * xPjcaDetail[i].qty_done) * 1000) / 1000
+								xPjcaDetail[i].subtotal = xSubtotal
+
+								xTotalDiscWoTax += Math.round((xDiscWoTax * xPjcaDetail[i].qty_done) * 1000) / 1000
+								xTotalDiscItem += Math.round((xTotalDisc * xPjcaDetail[i].qty_done) * 1000) / 1000
+								xPjcaDetail[i].total_discount = Math.round((xTotalDisc * xPjcaDetail[i].qty_done) * 1000) / 1000
+
+								xTaxes += Math.round((xTax * xPjcaDetail[i].qty_done) * 1000) / 1000
+
 								xTotalBasePrice += xSubtotal
 
-								xPjcaDetail[i].total_discount = xTotalDisc
 								xPjcaDetail[i].tax_amount = xTax
-								xPjcaDetail[i].subtotal = xSubtotal
 							}
 							
 							delete xDetail.data.payment_request_id;
-							xDetail.data.discount = yDisc
+							xDetail.data.total_discount_wo_tax = xTotalDiscWoTax
 							xDetail.data.total_base_price = xTotalBasePrice + xTotalDiscItem || 0
 							xDetail.data.total_discount = xTotalDiscItem || 0
 
@@ -156,16 +162,23 @@ class PJCAService {
 							
 							if (xDetail.data.global_discount_percent != null & xDetail.data.global_discount_percent != 0) {
 								if (xTotalDiscItem != 0) {
-									xGlobalAmount = (xDetail.data.global_discount_percent * yDisc ) / 100
+									xGlobalAmount = (xDetail.data.global_discount_percent * xTotalDiscWoTax ) / 100
 								} else {
 									xGlobalAmount = (xDetail.data.global_discount_percent * xTotalBasePrice) / 100
 								}
 							}
+							
 							xDetail.data.global_discount_percent = Math.round(xGlobalPercent * 1000) / 1000
 							xDetail.data.global_discount = Math.round(xGlobalAmount * 1000) / 1000
 
-							xDetail.data.untaxed_amount = xDetail.data.total_base_price - xGlobalAmount || 0
-							xDetail.data.total_tax_amount = xTaxes || 0
+							if (xGlobalAmount == 0) {
+								xDetail.data.untaxed_amount = Math.round((xDetail.data.total_base_price - xDetail.data.total_discount || 0 ) * 1000) / 1000
+								xDetail.data.total_tax_amount = Math.round(( xTaxes || 0 ) * 1000) / 1000
+							} else { 
+								xDetail.data.untaxed_amount = Math.round((xDetail.data.total_base_price - xGlobalAmount || 0) * 1000) / 1000
+								xDetail.data.total_tax_amount = (Math.round((xTaxes - (xTaxes * (xDetail.data.global_discount_percent / 100))) * 1000 )  / 1000) || 0
+							}
+
 							xDetail.data.total_price = xDetail.data.untaxed_amount + xDetail.data.total_tax_amount || 0
 							
 							// Get Approval Matrix

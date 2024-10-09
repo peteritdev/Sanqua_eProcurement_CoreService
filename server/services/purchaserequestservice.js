@@ -761,7 +761,8 @@ class PurchaseRequestService {
 								uom: xDetail[index].product.unit
 							} : null,
 							qty_left: xDetail[index].qty_left,
-							qty_done: xDetail[index].qty_done
+							qty_done: xDetail[index].qty_done,
+							qty_paid: xDetail[index].qty_paid
 						});
 					}
 					// Get Approval Matrix
