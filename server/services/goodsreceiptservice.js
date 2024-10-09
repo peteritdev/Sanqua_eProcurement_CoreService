@@ -358,26 +358,52 @@ class GoodsReceiptService {
 					if (xDetail.status_code == '00') {
 						if (xDetail.data.status == 0) {
 							if (xDetail.data.goods_receipt_detail != null) {
-								var xPayreqDetail = await _paymentRequestRepoInstance.getByParameter({
-									id: xDetail.data.goods_receipt_detail[0].payment_request_id
-								});
-								if (xPayreqDetail.status_code == '00') {
-									if (xPayreqDetail.data.status == 3) {
-										pParam.status = 1;
-										pParam.requested_at = await _utilInstance.getCurrDateTime();
-										var xUpdate = await _repoInstance.save(pParam, 'update');
-										xJoResult = xUpdate;
-										if (xUpdate.status_code == '00') {
-											this.updatePrdItemQtyReceived(xDetail.data, 'submit')
-										}
-									} else {
+
+								
+								// var xPayreqDetail = await _paymentRequestRepoInstance.getByParameter({
+								// 	id: xDetail.data.goods_receipt_detail[0].payment_request_id
+								// });
+								// if (xPayreqDetail.status_code == '00') {
+								// 	if (xPayreqDetail.data.status == 3) {
+								// 		pParam.status = 1;
+								// 		pParam.requested_at = await _utilInstance.getCurrDateTime();
+								// 		var xUpdate = await _repoInstance.save(pParam, 'update');
+								// 		xJoResult = xUpdate;
+								// 		if (xUpdate.status_code == '00') {
+								// 			this.updatePrdItemQtyReceived(xDetail.data, 'submit')
+								// 		}
+								// 	} else {
+								// 		xJoResult = {
+								// 			status_code: '-99',
+								// 			status_msg: `Payment request (${xPayreqDetail.data.document_no}) not paid yet, please pay first`
+								// 		};
+								// 	}
+								// } else {
+								// 	xJoResult = xDetail;
+								// }
+
+								// 09/10/2024 now gr not linked by payreq
+								
+								var xArrGrItem = xDetail.data.goods_receipt_detail
+								console.log(`>>> xDetail.items 2: ${JSON.stringify(xDetail.data.goods_receipt_detail)}`);
+								for (let i = 0; i < xArrGrItem.length; i++) {
+									if (xArrGrItem[i].qty_done > xArrGrItem[i].purchase_request_detail.qty_paid) {
 										xJoResult = {
 											status_code: '-99',
-											status_msg: `Payment request (${xPayreqDetail.data.document_no}) not paid yet, please pay first`
+											status_msg: `(${xArrGrItem[i].product_code}) insufficient Balance.\n Qty received = ${xArrGrItem[i].qty_done} exceeded qty paid on FPB = ${xArrGrItem[i].purchase_request_detail.qty_paid}`
 										};
+										xFlagProcess = false
 									}
-								} else {
-									xJoResult = xDetail;
+								}
+
+								if (xFlagProcess) {
+									pParam.status = 1;
+									pParam.requested_at = await _utilInstance.getCurrDateTime();
+									var xUpdate = await _repoInstance.save(pParam, 'update');
+									xJoResult = xUpdate;
+									if (xUpdate.status_code == '00') {
+										this.updatePrdItemQtyReceived(xDetail.data, 'submit')
+									}
 								}
 							} else {
 								xJoResult = {

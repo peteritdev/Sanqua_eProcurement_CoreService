@@ -149,8 +149,8 @@ class PaymentRequestService {
 							
 							delete xDetail.data.purchase_request_id;
 							xDetail.data.total_discount_wo_tax = xTotalDiscWoTax
-							xDetail.data.total_base_price = xTotalBasePrice + xTotalDiscItem || 0
-							xDetail.data.total_discount = xTotalDiscItem || 0
+							xDetail.data.total_base_price = Math.round((xTotalBasePrice + xTotalDiscItem || 0) * 1000) / 1000
+							xDetail.data.total_discount = Math.round((xTotalDiscItem || 0) * 1000) / 1000
 
 							if (xDetail.data.global_discount != null & xDetail.data.global_discount != 0) {
 								if (xTotalDiscItem != 0) {
@@ -176,10 +176,11 @@ class PaymentRequestService {
 								xDetail.data.total_tax_amount = Math.round(( xTaxes || 0 ) * 1000) / 1000
 							} else { 
 								xDetail.data.untaxed_amount = Math.round((xDetail.data.total_base_price - xGlobalAmount || 0) * 1000) / 1000
-								xDetail.data.total_tax_amount = (Math.round((xTaxes - (xTaxes * (xDetail.data.global_discount_percent / 100))) * 1000 )  / 1000) || 0
+								xDetail.data.total_tax_amount = (Math.round((xTaxes) * 1000 )  / 1000) || 0
+								// xDetail.data.total_tax_amount = (Math.round((xTaxes - (xTaxes * (xDetail.data.global_discount_percent / 100))) * 1000 )  / 1000) || 0
 							}
 
-							xDetail.data.total_price = xDetail.data.untaxed_amount + xDetail.data.total_tax_amount || 0
+							xDetail.data.total_price = Math.round((xDetail.data.untaxed_amount + xDetail.data.total_tax_amount || 0) * 1000) / 1000
 							// get Detail FPB
 							// let xFpbDetail = await _purchaseRequestRepoInstance.getById({ id: xDetail.data.purchase_request_id })
 							// if (xFpbDetail != null) {
@@ -544,7 +545,7 @@ class PaymentRequestService {
 						if (xDetail.data.status == 0) {
 							pParam.status = 1;
 							pParam.requested_at = await _utilInstance.getCurrDateTime();
-							// check total qty is not exceed qty_left in detail fpb
+							// check total qty is not exceed qty_paid in detail fpb
 							let xArrPrdId = []
 							let xPyrDetail = xDetail.data.payment_request_detail
 							console.log(`>>> xPyrDetail: ${JSON.stringify(xPyrDetail)}`);
@@ -555,14 +556,14 @@ class PaymentRequestService {
 							for (let i = 0; i < xUniq.length; i++) {
 								let xPrDetailItem = await _purchaseRequestDetailRepoInstance.getByParam({id: xUniq[i]})
 								if (xPrDetailItem.status_code = '00') {
-									let xPrdQtyLeft = xPrDetailItem.data.qty_left
+									let xPrdQtyPaid = xPrDetailItem.data.qty_paid
 									let xArrPyrd = xPyrDetail.filter(({ prd_id }) => prd_id == xUniq[i])
 									let xPyrdTotalQty = xArrPyrd.reduce((accum, item) => accum + item.qty_request, 0)
-									if ( xPyrdTotalQty > xPrdQtyLeft) {
+									if ( xPyrdTotalQty > xPrdQtyPaid) {
 										xFlagProcess = false
 										xJoResult = {
 											status_code: '-99',
-											status_msg: `Total qty of item ${xArrPyrd[0].product_code} (${xPyrdTotalQty}) is exceed Left Qty on FPB (${xPrdQtyLeft})`
+											status_msg: `Total qty of item ${xArrPyrd[0].product_code} (${xPyrdTotalQty}) is exceed Paid Qty on FPB (${xPrdQtyPaid})`
 										};
 										break;
 									}
@@ -575,7 +576,7 @@ class PaymentRequestService {
 								
 								// Next Phase : Approval Matrix & Notification to admin
 								if (xUpdate.status_code == '00') {
-									this.updatePrdItemQtyLeft(xDetail.data, 'submit')
+									// this.updatePrdItemQtyLeft(xDetail.data, 'submit')
 									
 									var xParamAddApprovalMatrix = {
 										act: 'add',
@@ -1015,6 +1016,7 @@ class PaymentRequestService {
 							var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
 
 							if (xUpdateResult.status_code == '00') {
+								this.updatePrdItemQtyLeft(xPayreqDetail.data, 'paid')
 								xJoResult = {
 									status_code: '00',
 									status_msg: 'Payreq successfully paid'
@@ -1213,16 +1215,16 @@ class PaymentRequestService {
 			var xPrDetailItem = await _purchaseRequestDetailRepoInstance.getByParam({id: xPaymentRequestDetail[i].prd_id})
 			console.log(`>>> xPrDetailItem: ${JSON.stringify(xPrDetailItem)}`);
 			if (xPrDetailItem.status_code == '00') {
-				let xQtyLeft = xPrDetailItem.data.qty_left || 0
+				let xQtyLeft = xPrDetailItem.data.qty_paid || 0
 				let xCalculatedQty = 0
-				if (pAct == 'submit') {
-					xCalculatedQty = xQtyLeft - xPaymentRequestDetail[i].qty_request
-				} else if (pAct == 'reject' || pAct == 'cancel' ){
+				if (pAct == 'paid') {
 					xCalculatedQty = xQtyLeft + xPaymentRequestDetail[i].qty_request
+				} else if (pAct == 'reject' || pAct == 'cancel' ){
+					xCalculatedQty = xQtyLeft - xPaymentRequestDetail[i].qty_request
 				}
 				let xPrdUpdateParam = {
 					id: xPaymentRequestDetail[i].prd_id,
-					qty_left: xCalculatedQty
+					qty_paid: xCalculatedQty
 				}
 				
 				let xUpdatePrdItem = await _purchaseRequestDetailRepoInstance.save(xPrdUpdateParam, 'update')

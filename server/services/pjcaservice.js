@@ -75,7 +75,7 @@ class PJCAService {
 					if (xDetail != null) {
 						if (xDetail.status_code == '00') {
 								
-							var xPjcaDetail = xDetail.data.payment_request_detail;
+							var xPjcaDetail = xDetail.data.pjca_detail;
 							var xGlobalAmount = xDetail.data.global_discount 
 							var xGlobalPercent = xDetail.data.global_discount_percent
 							var xTotalBasePrice = 0;
@@ -85,7 +85,7 @@ class PJCAService {
 								
 							// // looping detail item
 							for (var i in xPjcaDetail) {
-								delete xPjcaDetail[i].price_total
+								// delete xPjcaDetail[i].price_total
 								var xPricePerItem = xPjcaDetail[i].price_done
 								// var xTotalPrice = Math.round((xPjcaDetail[i].price_request * xPjcaDetail[i].qty_request) * 1000) / 1000
 								var xDiscAmount = xPjcaDetail[i].discount_amount || 0
@@ -149,8 +149,8 @@ class PJCAService {
 							
 							delete xDetail.data.payment_request_id;
 							xDetail.data.total_discount_wo_tax = xTotalDiscWoTax
-							xDetail.data.total_base_price = xTotalBasePrice + xTotalDiscItem || 0
-							xDetail.data.total_discount = xTotalDiscItem || 0
+							xDetail.data.total_base_price = Math.round((xTotalBasePrice + xTotalDiscItem || 0) * 1000) / 1000
+							xDetail.data.total_discount = Math.round((xTotalDiscItem || 0) * 1000) / 1000
 
 							if (xDetail.data.global_discount != null & xDetail.data.global_discount != 0) {
 								if (xTotalDiscItem != 0) {
@@ -176,10 +176,11 @@ class PJCAService {
 								xDetail.data.total_tax_amount = Math.round(( xTaxes || 0 ) * 1000) / 1000
 							} else { 
 								xDetail.data.untaxed_amount = Math.round((xDetail.data.total_base_price - xGlobalAmount || 0) * 1000) / 1000
-								xDetail.data.total_tax_amount = (Math.round((xTaxes - (xTaxes * (xDetail.data.global_discount_percent / 100))) * 1000 )  / 1000) || 0
+								xDetail.data.total_tax_amount = (Math.round((xTaxes) * 1000 )  / 1000) || 0
+								// xDetail.data.total_tax_amount = (Math.round((xTaxes - (xTaxes * (xDetail.data.global_discount_percent / 100))) * 1000 )  / 1000) || 0
 							}
 
-							xDetail.data.total_price = xDetail.data.untaxed_amount + xDetail.data.total_tax_amount || 0
+							xDetail.data.total_price = Math.round((xDetail.data.untaxed_amount + xDetail.data.total_tax_amount || 0) * 1000) / 1000
 							
 							// Get Approval Matrix
 							var xParamApprovalMatrix = {
