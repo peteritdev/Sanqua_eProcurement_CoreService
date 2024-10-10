@@ -114,16 +114,19 @@ class PaymentRequestService {
 								
 								// calc price after tax
 								if (xPayreqDetail[i].tax != null) {
-									var taxValue = 1 + (xPayreqDetail[i].tax.value / 100)
-									xPriceBeforeTax = Math.round((xPriceWithDisc / taxValue) * 1000) / 1000
-									xTax = Math.round((xPriceWithDisc - xPriceBeforeTax) * 1000) / 1000
+									var taxValue = xPayreqDetail[i].tax.value / 100
 									if (xPayreqDetail[i].tax.type == 1) {
+										taxValue = 1 + (xPayreqDetail[i].tax.value / 100)
+										xPriceBeforeTax = Math.round((xPriceWithDisc / taxValue) * 1000) / 1000
+										xTax = Math.round((xPriceWithDisc - xPriceBeforeTax) * 1000) / 1000
 										// xTotalPriceWithTax = Math.round((xTotalPrice - xTax) * 1000) / 1000
 										if (xDiscPercent != 0) {
 											xTotalDisc = Math.round((xDiscWoTax / taxValue) * 1000) / 1000
 										}
 										xTotalPrice = Math.round((xPriceWithDisc - xTax) * 1000) / 1000
 									}else{
+										xPriceBeforeTax = Math.round((xPriceWithDisc / taxValue) * 1000) / 1000
+										xTax = Math.round((xPriceWithDisc - xPriceBeforeTax) * 1000) / 1000
 										xTotalDisc = xDiscWoTax
 										xTotalPrice = xPriceWithDisc
 									}
