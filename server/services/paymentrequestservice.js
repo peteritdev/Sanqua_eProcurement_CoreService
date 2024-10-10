@@ -125,8 +125,10 @@ class PaymentRequestService {
 										}
 										xTotalPrice = Math.round((xPriceWithDisc - xTax) * 1000) / 1000
 									}else{
-										xPriceBeforeTax = Math.round((xPriceWithDisc / taxValue) * 1000) / 1000
-										xTax = Math.round((xPriceWithDisc - xPriceBeforeTax) * 1000) / 1000
+										// xPriceBeforeTax = Math.round((xPriceWithDisc * taxValue) * 1000) / 1000
+										xTax = Math.round((xPriceWithDisc * taxValue) * 1000) / 1000
+										// console.log(`>>> xPriceBeforeTax: ${JSON.stringify(xPriceBeforeTax)}`);
+										// console.log(`>>> xTax: ${JSON.stringify(xTax)}`);
 										xTotalDisc = xDiscWoTax
 										xTotalPrice = xPriceWithDisc
 									}
