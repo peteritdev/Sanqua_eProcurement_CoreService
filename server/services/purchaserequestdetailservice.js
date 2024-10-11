@@ -1419,6 +1419,76 @@ class PurchaseRequestDetailService {
 
 		return xJoResult;
 	}
+
+	async outstandingItem_list(pParam) {
+		var xJoResult = {};
+		var xJoArrData = [];
+
+		try {
+			var xResultList = await _repoInstance.outstandingItemList(pParam);
+
+			if (xResultList.total_record > 0) {
+				var xRows = xResultList.data;
+				for (var index in xRows) {
+					xJoArrData.push({
+						id: await _utilInstance.encrypt(xRows[index].pr_id.toString(), config.cryptoKey.hashKey),
+						prd_id: xRows[index].prd_id,
+						request_no: xRows[index].request_no,
+						employee_id: xRows[index].employee_id,
+						employee_name: xRows[index].employee_name,
+						company_id: xRows[index].company_id,
+						company_name: xRows[index].company_name,
+						company_code: xRows[index].company_code,
+						department_id: xRows[index].department_id,
+						department_name: xRows[index].department_name,
+						prd_status: {
+							id: xRows[index].prd_status,
+							name:
+								xRows[index].prd_status == -1
+									? 'Rejected'
+									: config.statusDescription.purchaseRequestDetail[xRows[index].prd_status]
+						},
+						product_id: xRows[index].product_id,
+						product_name: xRows[index].product_name,
+						product_code: xRows[index].product_code,
+						qty: xRows[index].qty,
+						qty_paid: xRows[index].qty_paid,
+						qty_done: xRows[index].qty_done,
+						uom_id: xRows[index].uom_id,
+						uom_name: xRows[index].uom_name,
+						budget_price_per_unit: xRows[index].budget_price_per_unit,
+						budget_price_total: xRows[index].budget_price_total,
+						pr_status: xRows[index].pr_status,
+						category_item: {
+							id: xRows[index].category_item,
+							name: config.categoryItem[xRows[index].category_item]
+						},
+						category_pr: xRows[index].category_pr,
+						fpb_type: xRows[index].fpb_type,
+						prj_id: xRows[index].prj_id,
+						prj_name: xRows[index].prj_name,
+						created_at: xRows[index].created_at,
+						is_po_created: xRows[index].is_po_created
+					});
+				}
+				console.log(`>>> xJoArrData: ${JSON.stringify(xJoArrData)}`);
+
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					total_record: xResultList.total_record,
+					data: xJoArrData
+				};
+			}
+		} catch (e) {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Exception error <${_xClassName}.dropDown>: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
 }
 
 module.exports = PurchaseRequestDetailService;
