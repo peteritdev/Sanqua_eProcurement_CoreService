@@ -19,4 +19,7 @@ module.exports = (app) => {
 	});
 
 	app.get(`${_rootAPIPath}fpb/export_to_pdf/:id`, exportController.generateFPB);
+	app.get(`${_rootAPIPath}payreq/export_to_pdf/:id`, exportController.generatePayreq);
+	app.get(`${_rootAPIPath}gr/export_to_pdf/:id`, exportController.generateGR);
+	app.get(`${_rootAPIPath}pjca/export_to_pdf/:id`, exportController.generatePJCA);
 };

@@ -734,6 +734,144 @@ class PurchaseRequestDetailRepository {
 
 		return xJoResult;
 	}
+	
+	async outstandingItemList(pParam) {var xJoResult = {};
+		var xSql = '';
+		var xSqlCount = '';
+		var xTotalRecord = [];
+		var xObjJsonWhere = {};
+		var xSqlWhere = ' (1=1) ';
+		var xSqlWhereOr = [];
+		var xSqlOrderBy = '';
+		var xSqlLimit = '';
+		var xSqlGroupBy = '';
+		var xSqlFields = '';
+
+		try {
+			if (pParam.hasOwnProperty('order_by')) {
+				if (pParam.order_by != '') {
+					xSqlOrderBy = ` ORDER BY ${pParam.order_by} ${pParam.order_type != '' ? pParam.order_type : 'ASC'}`;
+				} else {
+					xSqlOrderBy = ` ORDER BY pr.created_at DESC`;
+				}
+			} else {
+				xSqlOrderBy = ` ORDER BY pr.created_at DESC`;
+			}
+
+			xSqlWhere += ' AND prd.status = 3 AND prd.qty_done < prd.qty_paid ';
+
+			if (pParam.hasOwnProperty('company_id')) {
+				if (pParam.company_id != '') {
+					xSqlWhere += ' AND pr.company_id = :companyId ';
+					xObjJsonWhere.companyId = pParam.company_id;
+				}
+			}
+
+			if (pParam.hasOwnProperty('department_id')) {
+				if (pParam.department_id != '') {
+					xSqlWhere += ' AND pr.department_id = :departmentId ';
+					xObjJsonWhere.departmentId = pParam.department_id;
+				}
+			}
+
+			if (pParam.hasOwnProperty('project_id')) {
+				if (pParam.project_id != '') {
+					xSqlWhere += ' AND pr.project_id = :projectId ';
+					xObjJsonWhere.projectId = pParam.project_id;
+				}
+			}
+
+			if (pParam.hasOwnProperty('category_item')) {
+				if (pParam.category_item != '') {
+					xSqlWhere += ' AND pr.category_item = :categoryItem ';
+					xObjJsonWhere.categoryItem = pParam.category_item;
+				}
+			}
+
+			// if (pParam.hasOwnProperty('pr_status')) {
+			// 	if (pParam.pr_status != '') {
+			// 		xSqlWhere += ' AND pr.status = :prStatus ';
+			// 		xObjJsonWhere.prStatus = pParam.pr_status;
+			// 	}
+			// }
+
+			if (pParam.hasOwnProperty('keyword')) {
+				if (pParam.keyword != '') {
+					let xSqlWhereKeyword = ` 
+							pr.request_no ILIKE :keyword OR
+							prd.product_code ILIKE :keyword OR
+							prd.product_name ILIKE :keyword OR
+							pr.company_name ILIKE :keyword OR
+							pr.company_code ILIKE :keyword OR
+							pr.department_name ILIKE :keyword OR
+							pr.employee_name ILIKE :keyword OR
+							prj.name ILIKE :keyword
+						`;
+					xObjJsonWhere.keyword = `%${pParam.keyword}%`;
+					xSqlWhere = ` ${xSqlWhere} AND (${xSqlWhereKeyword}) `;
+				}
+			}
+
+			if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
+				if (pParam.offset != '' && pParam.limit != '') {
+					xSqlLimit = ` OFFSET ${pParam.offset} LIMIT ${pParam.limit} `;
+				}
+			}
+
+			xSqlFields = ` prd.id as "prd_id", pr.id as "pr_id", pr.request_no, pr.employee_id, pr.employee_name,
+			pr.company_id, pr.company_name, pr.company_code, pr.department_id, pr.department_name, 
+			prd.status as "prd_status", prd.product_id, prd.product_code, prd.product_name,
+			prd.qty, prd.qty_paid, prd.qty_done, prd.uom_id, prd.uom_name, prd.budget_price_per_unit, 
+			prd.budget_price_total, prd.estimate_date_use, pr.created_at, pr.created_by, pr.created_by_name,
+			pr.status as "pr_status", pr.category_item, pr.category_pr, pr.fpb_type,
+			pr.project_id as "prj_id", prj.name as "prj_name", prd.is_po_created`;
+
+			xSql = ` SELECT ${xSqlFields}
+			FROM tr_purchaserequestdetails as prd
+			LEFT JOIN tr_purchaserequests as pr on pr.id = prd.request_id
+			LEFT JOIN ms_projects as prj on prj.id = pr.project_id
+			WHERE ${xSqlWhere} ${xSqlOrderBy} ${xSqlLimit} `;
+
+			xSqlCount = ` SELECT count(distinct pr.request_no) AS total_record
+			FROM tr_purchaserequestdetails as prd
+			LEFT JOIN tr_purchaserequests as pr on pr.id = prd.request_id
+			LEFT JOIN ms_projects as prj on prj.id = pr.project_id
+			WHERE ${xSqlWhere} `;
+
+			let xData = await sequelize.query(xSql, {
+				replacements: xObjJsonWhere,
+				type: sequelize.QueryTypes.SELECT,
+				// logging: console.log
+			});
+
+			xTotalRecord = await sequelize.query(xSqlCount, {
+				replacements: xObjJsonWhere,
+				type: sequelize.QueryTypes.SELECT
+			});
+			console.log(`>>> xData: ${JSON.stringify(xData)}`);
+			if (xData != null && xData.length > 0) {
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					total_record: xTotalRecord[0].total_record,
+					data: xData
+				};
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Data Not Found'
+				};
+			}
+
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.outstandingItemList`, `Exception error: ${e.message}`, 'error');
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.outstandingItemList: Exception error: ${e.message}`
+			};
+		}
+		return xJoResult;
+	}
 }
 
 module.exports = PurchaseRequestDetailRepository;

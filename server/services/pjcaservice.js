@@ -111,7 +111,6 @@ class PJCAService {
 								xDiscWoTax = Math.round((xPricePerItem * (xDiscPercent / 100)) * 1000) / 1000
 
 								xPriceWithDisc = Math.round((xPricePerItem - xDiscWoTax) * 1000) / 1000
-								
 								// calc price after tax
 								if (xPjcaDetail[i].tax != null) {
 									var taxValue = xPjcaDetail[i].tax.value / 100

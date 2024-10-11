@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      /*html {
+                  zoom: 0.75; style="width: 95%; border-width: thin; border-spacing: 0px;font-size: 9px;border-color: grey;" border="1" 
+                }*/
+      html {
+        zoom: 0.8;
+      }
+      .center {
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 15px;
+        width: 99%;
+        /* border-collapse:collapse; */
+        text-align: center;
+        font-size: 8px;
+        font-family: "Arial";
+        border-style: solid;
+        border-color: #000000;
+      }
+
+      .center th,
+      .center td {
+        border-left: none;
+        border-bottom: none;
+      }
+
+      .col-item {
+        border-bottom: none;
+        border-top: none;
+      }
+
+      th.col-header-item {
+        border-bottom: 1px solid #000000;
+        border-right: 1px solid #000000;
+      }
+    </style>
+  </head>
+  <body>
+    <table
+      class="center"
+      cellspacing="0"
+      cellpadding="2"
+      style="border: 1px solid #000000"
+    >
+      <tr>
+        <td
+          style="
+            width: 30%;
+            text-align: left;
+            padding-left: 10px;
+            border-right: 1px solid black;
+          "
+        >
+          <img
+            src="https://img.freepik.com/free-vector/bird-colorful-logo-gradient-vector_343694-1365.jpg?t=st=1728547256~exp=1728550856~hmac=e6a33416dc3892290122d9521e4513e6318960d34f1267102626b08b9055f99b&w=740"
+            height="45"
+          />
+        </td>
+        <td style="text-align: center; width: 40%">
+          <span
+            style="
+              font-size: 18px;
+              text-align: center;
+              border: 1px solid #000000;
+              padding: 0px 15px 0px 15px;
+              border-radius: 5px;
+            "
+            ><strong>PAYMENT REQUEST</strong></span
+          >
+        </td>
+        <td style="width: 30%; padding: 3px; text-align: left">
+          <table>
+            <tr>
+              <th>No.</th>
+            </tr>
+            <tr>
+              <th>Tanggal.</th>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td
+          style="
+            text-align: left;
+            border-top: 1px solid #000000 !important;
+            border-right: 1px solid #000000 !important;
+          "
+        >
+          <table>
+            <tr>
+              <th style="text-align: left; width: 90px">Nama Pemohon</th>
+              <th style="text-align: left; width: 10px">:</th>
+              <td style="text-align: left; width: 50%">MIS</td>
+            </tr>
+          </table>
+        </td>
+        <td
+          colspan="2"
+          rowspan="5"
+          style="text-align: left; border-top: 1px solid #000000 !important"
+        >
+          <table style="width: 100%">
+            <tr>
+              <th style="text-align: left; width: 35%">Jenis Pembayaran</th>
+              <th style="text-align: left; width: 65%">:</th>
+            </tr>
+            <tr>
+              <td
+                style="
+                  text-align: left;
+                  display: flex;
+                  justify-content: space-evenly;
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                  "
+                >
+                  <img
+                    src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
+                    width="15"
+                  />
+                  <span style="margin-left: 5px"> Tunai </span>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    margin-left: 15px;
+                  "
+                >
+                  <img
+                    src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
+                    width="15"
+                  />
+                  <span style="margin-left: 5px"> Bank </span>
+                </div>
+              </td>
+              <th style="text-align: left">
+                <div
+                  style="
+                    display: flex;
+                    justify-content: start;
+                    align-items: center;
+                    margin-left: 15px;
+                  "
+                >
+                  <img
+                    src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
+                    width="15"
+                  />
+                  <div style="margin-left: 5px; width: 40px">Giro</div>
+                  <div style="margin-left: 15px; width: 120px">An.</div>
+                </div>
+              </th>
+            </tr>
+            <tr>
+              <td colspan="1" style="text-align: left"></td>
+              <th style="text-align: left">
+                <div
+                  style="
+                    display: flex;
+                    justify-content: start;
+                    align-items: center;
+                    margin-left: 15px;
+                  "
+                >
+                  <img
+                    src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
+                    width="15"
+                  />
+                  <div style="margin-left: 5px; width: 40px">Check</div>
+                  <div style="margin-left: 15px; width: 120px">An.</div>
+                </div>
+              </th>
+            </tr>
+            <tr>
+              <td colspan="1" style="text-align: left"></td>
+              <th style="text-align: left">
+                <div
+                  style="
+                    display: flex;
+                    justify-content: start;
+                    align-items: center;
+                    margin-left: 15px;
+                  "
+                >
+                  <img
+                    src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
+                    width="15"
+                  />
+                  <td style="margin-left: 5px; width: 40px">Transfer</td>
+                  <td style="margin-left: 15px; width: 120px">An.</td>
+                </div>
+              </th>
+            </tr>
+            <tr>
+              <td colspan="1" style="text-align: left"></td>
+              <th style="text-align: left">
+                <div
+                  style="
+                    display: flex;
+                    justify-content: start;
+                    align-items: start;
+                    margin-left: 15px;
+                  "
+                >
+                  <span style="margin-left: 5px; width: 60px"> Nama Bank </span>
+                  <span>: </span>
+                  <span style="margin-left: 5px; font-weight: normal"
+                    >Lorem ipsum
+                  </span>
+                </div>
+              </th>
+            </tr>
+            <tr>
+              <td colspan="1" style="text-align: left"></td>
+              <th style="text-align: left">
+                <div
+                  style="
+                    display: flex;
+                    justify-content: start;
+                    align-items: center;
+                    margin-left: 15px;
+                  "
+                >
+                  <span style="margin-left: 5px; width: 60px">
+                    No. Rekening
+                  </span>
+                  <span>: </span>
+                  <span style="margin-left: 5px; font-weight: normal"
+                    >Lorem ipsum
+                  </span>
+                </div>
+              </th>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td
+          style="
+            text-align: left;
+            border-top: 1px solid #000000 !important;
+            border-right: 1px solid #000000 !important;
+          "
+        >
+          <table>
+            <tr>
+              <th style="text-align: left; width: 90px">Department</th>
+              <th style="text-align: left; width: 10px">:</th>
+              <td style="text-align: left; width: 50%">MIS</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td
+          style="
+            text-align: left;
+            border-top: 1px solid #000000 !important;
+            border-right: 1px solid #000000 !important;
+          "
+        >
+          <table>
+            <tr>
+              <th style="text-align: left; width: 90px">Jabatan</th>
+              <th style="text-align: left; width: 10px">:</th>
+              <td style="text-align: left; width: 50%">MIS</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <th
+          style="
+            text-align: left;
+            border-top: 1px solid #000000 !important;
+            border-right: 1px solid #000000 !important;
+          "
+        >
+          Mohon Dibayarkan kepada :
+        </th>
+      </tr>
+      <tr>
+        <td
+          style="text-align: left; border-right: 1px solid #000000 !important"
+        >
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Illo repellat
+          soluta optio placeat error corrupti.
+        </td>
+      </tr>
+      <tr>
+        <td
+          colspan="3"
+          style="text-align: left; border-top: 1px solid #000000 !important"
+        >
+          <span style="font-weight: bold"> Permintaan Departement </span>
+          <span style="font-weight: bold; margin: 0 5px">: </span>
+          <span
+            >Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quas,
+            adipisci?
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td
+          colspan="3"
+          style="
+            padding: 0px;
+            margin: 0px;
+            border-top: 1px solid #000000 !important;
+          "
+        >
+          <table
+            cellspacing="0"
+            cellpadding="5"
+            style="width: 100%; text-align: center"
+          >
+            <thead>
+              <tr>
+                <th class="col-header-item">No Akun</th>
+                <th class="col-header-item">Uraian</th>
+                <th class="col-header-item">Qty</th>
+                <th class="col-header-item">Uom</th>
+                <th class="col-header-item">Jumlah</th>
+                <th
+                  style="border-right: none !important"
+                  class="col-header-item"
+                >
+                  Keterangan
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <% var index = 1; [1,2,3,4,5,7,8,9,10].forEach( item => { %>
+              <tr>
+                <td style="text-align: center" class="col-item">1</td>
+                <td style="text-align: left">
+                  Lorem ipsum dolor, sit amet consectetur adipisicing elit.
+                  Sequi, libero!
+                </td>
+                <td style="text-align: center">10</td>
+                <td style="text-align: center">Pcs</td>
+                <td style="text-align: right">550.000</td>
+                <td style="text-align: center">Lorem ipsum dolor sit amet.</td>
+              </tr>
+              <% index++; } ) %>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
