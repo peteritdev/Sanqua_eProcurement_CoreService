@@ -1,553 +1,269 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <style>
-                /*html {
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      /*html {
                   zoom: 0.75; style="width: 95%; border-width: thin; border-spacing: 0px;font-size: 9px;border-color: grey;" border="1" 
                 }*/
-                html {
-                    zoom: 0.80;
-                }
-                .center {
-                    margin-left: auto;
-                    margin-right: auto;
-                    margin-top: 15px;
-                    width:99%;
-                    /* border-collapse:collapse; */
-                    text-align:center;
-                    font-size: 8px;
-                    font-family: 'Arial';
-                    border-style: solid;
-                    border-color: #000000;
-                }
+      html {
+        zoom: 0.8;
+      }
+      .center {
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 15px;
+        width: 99%;
+        /* border-collapse:collapse; */
+        text-align: center;
+        font-size: 8px;
+        font-family: "Arial";
+        border-style: solid;
+        border-color: #000000;
+      }
 
-                .center th, .center td {
-                    border-left: none;
-                    border-bottom: none;
-                }
+      .center th,
+      .center td {
+        border-left: none;
+        border-bottom: none;
+      }
 
-                .col-item {
-                    border-bottom: none;
-                    border-top: none;
-                }
+      .col-item {
+        border-bottom: none;
+        border-top: none;
+      }
 
-                th.col-header-item {
-                    border-bottom: 1px solid #000000;
-                }
-        </style>
-    </head>
-    <body>
-        <table class="center" cellspacing="0" cellpadding="5" style="border:1px solid #000000;">
+      .border-b {
+        border-bottom: 1px solid #000000 !important;
+      }
+      .border-t {
+        border-top: 1px solid #000000;
+      }
+
+      .border-tr {
+        border-top: 1px solid #000000;
+        border-right: 1px solid #000000;
+      }
+      .border-r {
+        border-right: 1px solid #000000;
+      }
+
+      .border-rb {
+        border-right: 1px solid #000000;
+        border-bottom: 1px solid black !important;
+      }
+
+      th.col-header-item {
+        border-bottom: 1px solid #000000;
+        border-right: 1px solid #000000;
+      }
+    </style>
+  </head>
+  <body>
+    <table
+      class="center"
+      cellspacing="0"
+      cellpadding="2"
+      style="border: 1px solid #000000"
+    >
+      <tr>
+        <td style="width: 20%; text-align: left; padding-left: 10px">
+          <img
+            src="https://img.freepik.com/free-vector/bird-colorful-logo-gradient-vector_343694-1365.jpg?t=st=1728547256~exp=1728550856~hmac=e6a33416dc3892290122d9521e4513e6318960d34f1267102626b08b9055f99b&w=740"
+            height="45"
+          />
+        </td>
+        <td style="text-align: center; width: 60%">
+          <span
+            style="
+              font-size: 18px;
+              text-align: center;
+              padding: 0px 15px 0px 15px;
+              border-radius: 5px;
+            "
+            ><strong>PENERIMAAN BARANG</strong></span
+          >
+        </td>
+        <th
+          style="
+            width: 20%;
+            padding: 3px;
+            text-align: left;
+            vertical-align: bottom;
+          "
+        >
+          <span>Doc No. FRM ACC.03.02.rev.01</span>
+        </th>
+      </tr>
+      <tr>
+        <td colspan="3" style="padding: 0px; margin: 0px" class="border-t">
+          <table
+            cellspacing="0"
+            cellpadding="5"
+            style="width: 100%; text-align: left"
+          >
             <tr>
-                <td style="width:25%;text-align: left;padding-left: 10px;" colspan="2">
-                    <img src="<%=companyData.logo%>" height="45">
-                </td>
-                <td style="text-align: center;width:50%;">
-                    <span style="font-size: 10px;text-align: center;border:1px solid #000000;padding: 0px 50px 0px 50px; border-radius: 10px;"><strong>PERMINTAAN BARANG DAN JASA</strong></span>
-                </td>
-                <td style="width:25%;padding: 3px; text-align: left;">
-                    Doc No. <%=companyData.iso_purchase_request_no%>
-                </td> 
-            </tr> 
-            <tr>
-                <td style="width:25%;text-align: left;padding-left: 10px;" colspan="2">&nbsp;
-                </td>
-                <td style="text-align: center;width:50%;">
-                    <span style="font-size: 10px;text-align: center;padding: 1px 0px 0px 0px;"><strong><%=data.data.request_no%></strong></span>
-                </td>
-                <td style="width:25%;padding: 3px; text-align: left;">
-                    &nbsp;
-                </td>
-            </tr>
-            <tr>
-                <td style="text-align: left;">Permintaan Departement</td>
-                <td>:</td>
-                <td style="text-align: left;" colspan="2"><span><%=data.data.department.name%></span>&nbsp;&nbsp;<span style="padding-left:100px;">Tanggal : <%=data.data.created_at%></span></td>
-            </tr>
-            <tr>
-                <td style="text-align: left;vertical-align: top;">Kategori Barang</td>
-                <td style="text-align: left;vertical-align: top;">:</td>
-                <td colspan="2" style="padding-left:100px;">
-                    <table style="text-align: left;" cellpadding="2" cellspacing="2"> 
-                        <tr>
-                            <td>
-                                <%
-                                    if( data.data.category_item == 1 ){
-                                %>
-                                        <img src="<%=imagePath%>box_checklist.png" width="15">
-                                <%
-
-                                    }else{
-                                %>
-                                        <img src="<%=imagePath%>blank_checklist.png" width="15">
-                                <%
-                                    }
-                                %>
-                            </td>
-                            <td>Raw Material</td>
-                            <td>
-                                <%
-                                    if( data.data.category_item == 3 ){
-                                %>
-                                        <img src="<%=imagePath%>box_checklist.png" width="15">
-                                <%
-
-                                    }else{
-                                %>
-                                        <img src="<%=imagePath%>blank_checklist.png" width="15">
-                                <%
-                                    }
-                                %>
-                            </td>
-                            <td>Office Supply</td>
-                            <td>
-                                <%
-                                    if( data.data.category_item == 5 ){
-                                %>
-                                        <img src="<%=imagePath%>box_checklist.png" width="15">
-                                <%        
-
-                                    }else{
-                                %>
-                                        <img src="<%=imagePath%>blank_checklist.png" width="15">
-                                <%
-                                    }
-                                %>
-                            </td>
-                            <td>Jasa</td>
-                            <td rowspan="2" style="padding-left:30px;">
-                                <%
-                                    if( data.data.category_item == 7 ){
-                                %>
-                                        <img src="<%=imagePath%>box_checklist.png" width="15">
-                                <%
-
-                                    }else{
-                                %>
-                                        <img src="<%=imagePath%>blank_checklist.png" width="15">
-                                <%
-                                    }
-                                %>
-                                
-                            </td>
-                            <td rowspan="2" ><strong style="font-size: 10px;">Investment / Asset*</strong></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <%
-                                    if( data.data.category_item == 2 ){
-                                %>
-                                        <img src="<%=imagePath%>box_checklist.png" width="15">
-                                <%
-
-                                    }else{
-                                %>
-                                        <img src="<%=imagePath%>blank_checklist.png" width="15">
-                                <%
-                                    }
-                                %>                                
-                            </td>
-                            <td>Factory Supply</td>
-                            <td>
-                                <%
-                                    if( data.data.category_item == 4 ){
-                                %>
-                                        <img src="<%=imagePath%>box_checklist.png" width="15">
-                                <%
-
-                                    }else{
-                                %>
-                                        <img src="<%=imagePath%>blank_checklist.png" width="15">
-                                <%
-                                    }
-                                %>
-                            </td>
-                            <td>Sparepart</td>
-                            <td>
-                                <%
-                                    if( data.data.category_item == 6 ){
-                                %>
-                                        <img src="<%=imagePath%>box_checklist.png" width="15">
-                                <%
-
-                                    }else{
-                                %>
-                                        <img src="<%=imagePath%>blank_checklist.png" width="15">
-                                <%
-                                    }
-                                %>
-                            </td>
-                            <td>Maintenance Repair</td>
-                        </tr>
-                    </table>
-                </td>
+              <td style="width: 10%">
+                <span style="display: flex; justify-content: space-between"
+                  >Diterima Dari <span>:</span></span
+                >
+              </td>
+              <td style="width: 56.65%" class="border-r">
+                <!-- ............................. -->
+              </td>
+              <td style="width: 33.35%">
+                <span
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    width: 60px;
+                  "
+                  >No PO <span>: </span></span
+                >
+              </td>
             </tr>
             <tr>
-                <td colspan="4" style="padding:0px;margin:0px;">
-                    <table class="center" cellspacing="0" cellpadding="5" border="1" style="width:100%;border-width: 0.2px;">
-                        <thead>                            
-                            <tr>
-                                <th rowspan="2" style="text-align:center;width:3%;" class="col-header-item">No</th>
-                                <th rowspan="2" style="text-align:center;width:30%;" class="col-header-item">Deskripsi</th>
-                                <th rowspan="2" style="text-align:center;width:5%;" class="col-header-item">Stock</th>
-                                <th rowspan="2" style="text-align:center;width:5%;" class="col-header-item">Qty</th>
-                                <th rowspan="2" style="text-align:center;width:4%;" class="col-header-item">Sat.</th>
-                                <th rowspan="2" style="text-align:center;width:10%;" class="col-header-item">Harga</th>
-                                <th rowspan="2" style="text-align:center;width:10%;" class="col-header-item">Supplier</th>
-                                <th colspan="2" style="text-align:center;width:10%;" >Budget</th>
-                                <th rowspan="2" style="text-align:center;width:7%;" class="col-header-item">Tgl. Diperlukan</th>
-                                <th rowspan="2" style="border-right: none !important; width: 16%;" class="col-header-item">Alasan Permintaan</th>
-                            </tr>
-                            <tr>
-                                <th class="col-header-item">Ada</th>
-                                <th class="col-header-item">Tidak</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <%
-                                var index = 1;
-                                data.data.purchase_request_detail.forEach( item => {
-                            %>
-                                <tr>
-                                    <td style="text-align:right;" class="col-item"><%=index%>.</td>
-                                    <td style="text-align: left;" class="col-item"><%=item.product.name%></td>
-                                    <td class="col-item"><%=item.current_stock%></td>
-                                    <td class="col-item"><%=item.qty%></td>
-                                    <td class="col-item"><%=item.uom%></td>
-                                    <td style="text-align: right;" class="col-item"><%=item.budget_price_per_unit != null ? item.budget_price_per_unit.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
-                                    <td style="text-align: left;" class="col-item"><%=item.vendor.name%></td>
-                                    <td class="col-item">
-                                        <%
-                                            if( item.has_budget == 1 ){
-                                        %>
-                                                <img src="<%=imagePath%>checklist.png" width="30">
-                                        <%
-                                            }
-                                        %>
-                                    </td>
-                                    <td class="col-item">
-                                        <%
-                                            if( item.has_budget == 0 ){
-                                        %>
-                                                <img src="<%=imagePath%>checklist.png" width="30">
-                                        <%
-                                            }
-                                        %>
-                                    </td>
-                                    <td nowrap="nowrap" class="col-item"><%=item.estimate_date_use%></td>
-                                    <td style="border-right: none !important;text-align: left;" class="col-item"><%=item.description%></td>
-                                </tr>
-                            <%
-                                    index++;
-                                } )
-                            %>
-                            
-                        </tbody>
-                    </table>
-                </td>
-            </tr>
-            <tr >
-                <td colspan="4" style="text-align: left;border-top: 1px solid #000000 !important;">Harap mengisi keterangan dengan lengkap dan jelas</td>
-            </tr>
-            <tr >
-                <td colspan="4" style="text-align: left;">Data Pendukung</td>
-            </tr>
-            <tr >
-                <td colspan="4" style="text-align: left;">
-                    <table style="width:100%;">
-                        <tr>
-                            <td style="width: 2%;text-align: left;">(1)</td>
-                            <td style="width: 40%;text-align: left;">Referensi penawaran vendor atau referensi harga barang dari e-commerce</td>
-                            <td style="width: 1%;text-align: left;">Ada</td>
-                            <td style="width: 1%;text-align: center;">
-                                <%
-                                    if( data.data.reference_from_ecommerce == 0 ){
-                                %>
-                                    <img src="<%=imagePath%>blank_checklist.png" width="15">
-                                <%
-                                    }
-                                %>
-
-                                <%
-                                    if( data.data.reference_from_ecommerce == 1 ){
-                                %>
-                                    <img src="<%=imagePath%>box_checklist.png" width="15">
-                                <%
-                                    }
-                                %>
-                            </td>
-                            <td style="width: 1%;text-align: left;">Tidak</td>
-                            <td style="width: 20%;text-align: left;">
-                                <%
-                                    if( data.data.reference_from_ecommerce == 1 ){
-                                %>
-                                    <img src="<%=imagePath%>blank_checklist.png" width="15">
-                                <%
-                                    }
-                                %>
-
-                                <%
-                                    if( data.data.reference_from_ecommerce == 0 ){
-                                %>
-                                    <img src="<%=imagePath%>box_checklist.png" width="15">
-                                <%
-                                    }
-                                %>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 2%;text-align: left;">(2)</td>
-                            <td style="width: 40%;text-align: left;">Budget yang sudah di approve</td>
-                            <td style="width: 1%;text-align: left;">Ada</td>
-                            <td style="width: 1%;text-align: center;">
-                                <%
-                                    if( data.data.budget_is_approved == 0 ){
-                                %>
-                                    <img src="<%=imagePath%>blank_checklist.png" width="15">
-                                <%
-                                    }
-                                %>
-
-                                <%
-                                    if( data.data.budget_is_approved == 1 ){
-                                %>
-                                    <img src="<%=imagePath%>box_checklist.png" width="15">
-                                <%
-                                    }
-                                %>
-                            </td>
-                            <td style="width: 1%;text-align: left;">Tidak</td>
-                            <td style="width: 20%;text-align: left;">
-                                <%
-                                    if( data.data.budget_is_approved == 1 ){
-                                %>
-                                    <img src="<%=imagePath%>blank_checklist.png" width="15">
-                                <%
-                                    }
-                                %>
-
-                                <%
-                                    if( data.data.budget_is_approved == 0 ){
-                                %>
-                                    <img src="<%=imagePath%>box_checklist.png" width="15">
-                                <%
-                                    }
-                                %>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 2%;text-align: left;">(3)</td>
-                            <td style="width: 40%;text-align: left;">Memo atau Berita Acara dengan permintaan kondisi khusus</td>
-                            <td style="width: 1%;text-align: left;">Ada</td>
-                            <td style="width: 1%;text-align: center;">
-                                <%
-                                    if( data.data.memo_special_request == 0 ){
-                                %>
-                                    <img src="<%=imagePath%>blank_checklist.png" width="15">
-                                <%
-                                    }
-                                %>
-
-                                <%
-                                    if( data.data.memo_special_request == 1 ){
-                                %>
-                                    <img src="<%=imagePath%>box_checklist.png" width="15">
-                                <%
-                                    }
-                                %>
-                            </td>
-                            <td style="width: 1%;text-align: left;">Tidak</td>
-                            <td style="width: 20%;text-align: left;">
-                                <%
-                                    if( data.data.memo_special_request == 1 ){
-                                %>
-                                    <img src="<%=imagePath%>blank_checklist.png" width="15">
-                                <%
-                                    }
-                                %>
-
-                                <%
-                                    if( data.data.memo_special_request == 0 ){
-                                %>
-                                    <img src="<%=imagePath%>box_checklist.png" width="15">
-                                <%
-                                    }
-                                %>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 2%;text-align: left;">*</td>
-                            <td style="width: 40%;text-align: left;" colspan="4">
-                                Pembelian kategori barang <strong>"Investment / Asset"</strong> wajib diketahui oleh <strong>Finance & Accounting</strong> dan approval <strong>Direktur</strong>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
+              <td style="width: 10%">
+                <span style="display: flex; justify-content: space-between"
+                  >No. Surat Jalan <span>:</span></span
+                >
+              </td>
+              <td style="width: 56.65%" class="border-r">
+                <!-- ............................. -->
+              </td>
+              <td style="width: 33.35%">
+                <span
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    width: 60px;
+                  "
+                  >No FPB <span>:</span></span
+                >
+              </td>
             </tr>
             <tr>
-                <td colspan="4" style="padding:0px;margin:0px;">
-                    <table class="center" cellspacing="0" cellpadding="2" border="1" style="width:100%;border-width: 0.2px;font-size: 10px;">
-                        <tr>
-                            <td rowspan="2">
-                                Dibuat Oleh
-                            </td>
-                            <td colspan="2">
-                                Mengetahui
-                            </td>
-                            <td colspan="3">
-                                Disetujui
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Head Department</td>
-                            <td>Dept. Pembelian Plant</strong></td>
-                            <td>PM / Head HCGS</td>
-                            <td>Head F&A</td>
-                            <!-- <td>Head Procurement</td> -->
-                            <td>Direktur</td>
-                        </tr>
-                        <tr>
-                            <td style="text-align: center;vertical-align: middle;" width="10">
-                                <%=data.data.employee.name%>
-                            </td>
-                            <td style="text-align: center;vertical-align: middle;">
-                                
-                            <%
-                                if( qrCode.approval1.length > 0 ){
-
-                            %>
-                                    <table>
-                                        <tr>
-                                            <% for(var i = 0; i < qrCode.approval1.length; i++ ) { %>
-                                                <td><img src="<%=qrCode.qrPath%><%=qrCode.approval1[i]%>" width="80"></td>
-                                            <% }%>
-                                        </tr>
-                                        <tr>
-                                            <% for(var i = 0; i < approver1.length; i++ ) { %>
-                                                <td><%=approver1[i].user.name%></td>
-                                            <% }%>
-                                        </tr>
-                                    </table>
-                                    
-                            <%
-                                }
-                            %>
-                            </td>
-                            <td style="text-align: center;vertical-align: middle;">
-                                
-                                <%
-                                    if( qrCode.approval2.length > 0 ){
-    
-                                %>
-                                        <table>
-                                            <tr>
-                                                <% for(var i = 0; i < qrCode.approval2.length; i++ ) { %>
-                                                    <td><img src="<%=qrCode.qrPath%><%=qrCode.approval2[i]%>" width="80"></td>
-                                                <% }%>
-                                            </tr>
-                                            <tr>
-                                                <% for(var i = 0; i < approver2.length; i++ ) { %>
-                                                    <td><%=approver2[i].user.name%></td>
-                                                <% }%>
-                                            </tr>
-                                        </table>
-                                        
-                                <%
-                                    }
-                                %>
-                            </td>
-                            <td style="text-align: center;vertical-align: middle;">
-                                
-                                <%
-                                    if( qrCode.approval3.length > 0 ){
-    
-                                %>
-                                        <table>
-                                            <tr>
-                                                <% for(var i = 0; i < qrCode.approval3.length; i++ ) { %>
-                                                    <td><img src="<%=qrCode.qrPath%><%=qrCode.approval3[i]%>" width="80"></td>
-                                                <% }%>
-                                            </tr>
-                                            <tr>
-                                                <% for(var i = 0; i < approver3.length; i++ ) { %>
-                                                    <td><%=approver3[i].user.name%></td>
-                                                <% }%>
-                                            </tr>
-                                        </table>
-                                        
-                                <%
-                                    }
-                                %>
-                            </td>
-                            <td style="text-align: center;vertical-align: middle;">
-                                
-                                <%
-                                    if( qrCode.approval4.length > 0 ){
-    
-                                %>
-                                        <table>
-                                            <tr>
-                                                <% for(var i = 0; i < qrCode.approval4.length; i++ ) { %>
-                                                    <td><img src="<%=qrCode.qrPath%><%=qrCode.approval4[i]%>" width="80"></td>
-                                                <% }%>
-                                            </tr>
-                                            <tr>
-                                                <% for(var i = 0; i < approver4.length; i++ ) { %>
-                                                    <td><%=approver4[i].user.name%></td>
-                                                <% }%>
-                                            </tr>
-                                        </table>
-                                        
-                                <%
-                                    }
-                                %>
-                            </td>
-                            <td style="text-align: center;vertical-align: middle;">
-                                
-                                <%
-                                    if( qrCode.approval5.length > 0 ){
-    
-                                %>
-                                        <table>
-                                            <tr>
-                                                <% for(var i = 0; i < qrCode.approval5.length; i++ ) { %>
-                                                    <td><img src="<%=qrCode.qrPath%><%=qrCode.approval5[i]%>" width="80"></td>
-                                                <% }%>
-                                            </tr>
-                                            <tr>
-                                                <% for(var i = 0; i < approver5.length; i++ ) { %>
-                                                    <td><%=approver5[i].user.name%></td>
-                                                <% }%>
-                                            </tr>
-                                        </table>
-                                        
-                                <%
-                                    }
-                                %>
-                            </td>
-                            <!-- <td style="text-align: center;vertical-align: middle;">
-                                <%
-                                    if( qrCode.approval2 != '' ){
-                                %>
-                                    <img src="<%=qrCode.approval2%>" width="80">
-                                <%
-                                    }
-                                %>                                
-                            </td> -->
-                            
-                        </tr>
-                        <!-- <tr style="height: 20px;">
-                            <td><%=data.data.employee.name%></td>
-                            <td><%=approver1%></td>
-                            <td><%=approver2%></td>                            
-                            <td><%=approver3%></td>
-                            <td><%=approver4%></td>
-                            <td  style="border-right: none !important;"><%=approver5%></td>
-                        </tr> -->
-                    </table>
-                </td>
+              <td style="width: 10%">
+                <!-- <span style="display: flex; justify-content: space-between"
+                  >Diterima Oleh <span>:</span></span
+                > -->
+              </td>
+              <td style="width: 56.65%" class="border-r">
+                <!-- ............................. -->
+              </td>
+              <td style="width: 33.35%">
+                <span
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    width: 60px;
+                  "
+                  >Tanggal Terima <span>:</span></span
+                >
+              </td>
             </tr>
-        </table>
-    </body>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3" style="padding: 0px; margin: 0px" class="border-t">
+          <table
+            cellspacing="0"
+            cellpadding="5"
+            style="width: 100%; text-align: center"
+          >
+            <thead>
+              <tr>
+                <th style="width: 3%" class="col-header-item">No</th>
+                <th style="width: 52%" class="col-header-item">Uraian</th>
+                <th class="col-header-item">Qty</th>
+                <th class="col-header-item">Uom</th>
+                <th colspan="2" style="width: 33.35%; border-right:none;" class="col-header-item">Keterangan</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- <% var index = 1; [1,2,3,4,5,7,8,9,10].forEach( item => { %> -->
+              <tr>
+                <td style="text-align: center" class="border-rb">1</td>
+                <td style="text-align: left" class="border-rb">
+                  Lorem ipsum dolor, sit amet consectetur adipisicing elit.
+                  Sequi, libero!
+                </td>
+                <td style="text-align: center" class="border-rb">10</td>
+                <td style="text-align: center" class="border-rb">Pcs</td>
+                <td colspan="2"
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                  Lorem ipsum dolor sit amet.
+                </td>
+              </tr>
+              <!-- <% index++; } ) %> -->
+            </tbody>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3" style="padding: 0px; margin: 0px">
+          <table
+            cellspacing="0"
+            cellpadding="7"
+            style="width: 100%; text-align: center"
+          >
+            <tr>
+              <th style="width: 25%">Diserahkan Oleh</th>
+              <th style="width: 30%">Diterima Oleh</th>
+            </tr>
+            <tr>
+              <td>
+                <!-- <%
+                        if( qrCode.approval1.length > 0 ){
+
+                    %> -->
+                <table style="width: 100%; height: 50px;">
+                  <tr>
+                    <!-- <% for(var i = 0; i < approver1.length; i++ ) { %> -->
+                    <!-- <td><%=approver1[i].user.name%></td> -->
+                    <td>(...........................................)</td>
+                    <!-- <% }%> -->
+                  </tr>
+                </table>
+
+                <!-- <%
+                        }
+                    %> -->
+              </td>
+              <td >
+                <!-- <%
+                        if( qrCode.approval1.length > 0 ){
+
+                    %> -->
+                <table style="width: 100%; height: 50px">
+                  <tr>
+                    <!-- <% for(var i = 0; i < approver1.length; i++ ) { %> -->
+                    <!-- <td><%=approver1[i].user.name%></td> -->
+                    <td>(...........................................)</td>
+                    <!-- <% }%> -->
+                  </tr>
+                </table>
+
+                <!-- <%
+                        }
+                    %> -->
+              </td>
+              <!-- <td style="text-align: center;vertical-align: middle;">
+                        <%
+                            if( qrCode.approval2 != '' ){
+                        %>
+                            <img src="<%=qrCode.approval2%>" width="80">
+                        <%
+                            }
+                        %>                                
+                    </td> -->
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
 </html>
