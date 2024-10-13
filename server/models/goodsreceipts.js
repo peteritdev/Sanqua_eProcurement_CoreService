@@ -30,6 +30,7 @@ module.exports = (sequelize, DataTypes) => {
     receipt_type: DataTypes.INTEGER, //1:receive, 2:return
     description: DataTypes.STRING,
     status: DataTypes.INTEGER,
+		file: DataTypes.JSON,
 
     is_delete: DataTypes.INTEGER,
     deleted_at: DataTypes.DATE,

@@ -34,6 +34,7 @@ module.exports = (sequelize, DataTypes) => {
 		status: DataTypes.INTEGER,
 		payment_desc: DataTypes.STRING,
 		description: DataTypes.STRING,
+		file: DataTypes.JSON,
 
 		is_delete: DataTypes.INTEGER,
 		deleted_at: DataTypes.DATE,
