@@ -24,6 +24,7 @@ module.exports = (sequelize, DataTypes) => {
 		total_qty_released: DataTypes.DOUBLE,
 		total_price_released: DataTypes.DOUBLE,
 		status: DataTypes.INTEGER,
+		file: DataTypes.JSON,
 
 		is_delete: DataTypes.INTEGER,
 		deleted_at: DataTypes.DATE,
