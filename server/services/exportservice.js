@@ -630,7 +630,7 @@ class ExportService {
 			if (xFlagProcess) {
 				// Get Company Detail
 				var xEncCompanyId = await _utilInstance.encrypt(
-					xJoResultGR.data.company.id.toString(),
+					xJoResultGR.data.company_id.toString(),
 					config.cryptoKey.hashKey
 				);
 				var xCompanyDetail = await _oAuthService.getCompanyDetail(pToken, pMethod, xEncCompanyId);
@@ -826,7 +826,7 @@ class ExportService {
 			if (xFlagProcess) {
 				// Get Company Detail
 				var xEncCompanyId = await _utilInstance.encrypt(
-					xJoResultPJCA.data.company.id.toString(),
+					xJoResultPJCA.data.company_id.toString(),
 					config.cryptoKey.hashKey
 				);
 				var xCompanyDetail = await _oAuthService.getCompanyDetail(pToken, pMethod, xEncCompanyId);
