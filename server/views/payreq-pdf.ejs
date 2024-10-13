@@ -33,6 +33,26 @@
         border-top: none;
       }
 
+      .border-b {
+        border-bottom: 1px solid #000000 !important;
+      }
+      .border-t {
+        border-top: 1px solid #000000;
+      }
+
+      .border-tr {
+        border-top: 1px solid #000000;
+        border-right: 1px solid #000000;
+      }
+      .border-r {
+        border-right: 1px solid #000000;
+      }
+
+      .border-rb {
+        border-right: 1px solid #000000;
+        border-bottom: 1px solid black !important;
+      }
+
       th.col-header-item {
         border-bottom: 1px solid #000000;
         border-right: 1px solid #000000;
@@ -47,14 +67,7 @@
       style="border: 1px solid #000000"
     >
       <tr>
-        <td
-          style="
-            width: 30%;
-            text-align: left;
-            padding-left: 10px;
-            border-right: 1px solid black;
-          "
-        >
+        <td style="width: 30%; text-align: left; padding-left: 10px">
           <img
             src="https://img.freepik.com/free-vector/bird-colorful-logo-gradient-vector_343694-1365.jpg?t=st=1728547256~exp=1728550856~hmac=e6a33416dc3892290122d9521e4513e6318960d34f1267102626b08b9055f99b&w=740"
             height="45"
@@ -65,7 +78,6 @@
             style="
               font-size: 18px;
               text-align: center;
-              border: 1px solid #000000;
               padding: 0px 15px 0px 15px;
               border-radius: 5px;
             "
@@ -117,130 +129,108 @@
                   justify-content: space-evenly;
                 "
               >
-                <div
-                  style="
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                  "
-                >
-                  <img
-                    src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
-                    width="15"
-                  />
-                  <span style="margin-left: 5px"> Tunai </span>
-                </div>
-                <div
-                  style="
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    margin-left: 15px;
-                  "
-                >
-                  <img
-                    src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
-                    width="15"
-                  />
-                  <span style="margin-left: 5px"> Bank </span>
-                </div>
+                <table style="width: 100%">
+                  <tr>
+                    <td style="width: 50%; text-align: center">
+                      <span
+                        style="
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                        "
+                      >
+                        <img
+                          src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
+                          width="15"
+                        />
+                        <span style="margin-left: 5px"> Tunai </span>
+                      </span>
+                    </td>
+                    <td style="width: 50%; text-align: center">
+                      <span
+                        style="
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                        "
+                      >
+                        <img
+                          src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
+                          width="15"
+                        />
+                        <span style="margin-left: 5px"> Bank </span>
+                      </span>
+                    </td>
+                  </tr>
+                </table>
               </td>
               <th style="text-align: left">
-                <div
-                  style="
-                    display: flex;
-                    justify-content: start;
-                    align-items: center;
-                    margin-left: 15px;
-                  "
+                <span
+                  style="display: flex; align-items: center; margin-left: 15px"
                 >
                   <img
                     src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
                     width="15"
                   />
-                  <div style="margin-left: 5px; width: 40px">Giro</div>
-                  <div style="margin-left: 15px; width: 120px">An.</div>
-                </div>
+                  <span style="margin-left: 5px; width: 40px">Giro</span>
+                  <span style="margin-left: 15px; width: 120px">An.</span>
+                </span>
               </th>
             </tr>
             <tr>
               <td colspan="1" style="text-align: left"></td>
               <th style="text-align: left">
-                <div
-                  style="
-                    display: flex;
-                    justify-content: start;
-                    align-items: center;
-                    margin-left: 15px;
-                  "
+                <span
+                  style="display: flex; align-items: center; margin-left: 15px"
                 >
                   <img
                     src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
                     width="15"
                   />
-                  <div style="margin-left: 5px; width: 40px">Check</div>
-                  <div style="margin-left: 15px; width: 120px">An.</div>
-                </div>
+                  <span style="margin-left: 5px; width: 40px">Check</span>
+                  <span style="margin-left: 15px; width: 120px">An.</span>
+                </span>
               </th>
             </tr>
             <tr>
               <td colspan="1" style="text-align: left"></td>
               <th style="text-align: left">
-                <div
-                  style="
-                    display: flex;
-                    justify-content: start;
-                    align-items: center;
-                    margin-left: 15px;
-                  "
+                <span
+                  style="display: flex; align-items: center; margin-left: 15px"
                 >
                   <img
                     src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
                     width="15"
                   />
-                  <td style="margin-left: 5px; width: 40px">Transfer</td>
-                  <td style="margin-left: 15px; width: 120px">An.</td>
-                </div>
+                  <span style="margin-left: 5px; width: 40px">Transfer</span>
+                  <span style="margin-left: 15px; width: 120px">An.</span>
+                </span>
               </th>
             </tr>
             <tr>
               <td colspan="1" style="text-align: left"></td>
               <th style="text-align: left">
-                <div
-                  style="
-                    display: flex;
-                    justify-content: start;
-                    align-items: start;
-                    margin-left: 15px;
-                  "
-                >
+                <span style="display: flex; margin-left: 15px">
                   <span style="margin-left: 5px; width: 60px"> Nama Bank </span>
                   <span>: </span>
-                  <span style="margin-left: 5px; font-weight: normal"
-                    >Lorem ipsum
+                  <span style="margin-left: 5px; font-weight: normal">
+                    (...........................................)
                   </span>
-                </div>
+                </span>
               </th>
             </tr>
             <tr>
               <td colspan="1" style="text-align: left"></td>
               <th style="text-align: left">
-                <div
-                  style="
-                    display: flex;
-                    justify-content: start;
-                    align-items: center;
-                    margin-left: 15px;
-                  "
-                >
+                <span style="display: flex; margin-left: 15px">
                   <span style="margin-left: 5px; width: 60px">
                     No. Rekening
                   </span>
                   <span>: </span>
-                  <span style="margin-left: 5px; font-weight: normal"
-                    >Lorem ipsum
+                  <span style="margin-left: 5px; font-weight: normal">
+                    (...........................................)
                   </span>
-                </div>
+                </span>
               </th>
             </tr>
           </table>
@@ -328,13 +318,13 @@
           >
             <thead>
               <tr>
-                <th class="col-header-item">No Akun</th>
-                <th class="col-header-item">Uraian</th>
+                <th style="width: 10%" class="col-header-item">No Akun</th>
+                <th style="width: 45%" class="col-header-item">Uraian</th>
                 <th class="col-header-item">Qty</th>
                 <th class="col-header-item">Uom</th>
-                <th class="col-header-item">Jumlah</th>
+                <th style="width: 13.35%" class="col-header-item">Jumlah</th>
                 <th
-                  style="border-right: none !important"
+                  style="width: 20%; border-right: none !important"
                   class="col-header-item"
                 >
                   Keterangan
@@ -342,20 +332,409 @@
               </tr>
             </thead>
             <tbody>
-              <% var index = 1; [1,2,3,4,5,7,8,9,10].forEach( item => { %>
+              <!-- <% var index = 1; [1,2,3,4,5,7,8,9,10].forEach( item => { %> -->
               <tr>
-                <td style="text-align: center" class="col-item">1</td>
-                <td style="text-align: left">
+                <td style="text-align: center" class="border-rb">1</td>
+                <td style="text-align: left" class="border-rb">
                   Lorem ipsum dolor, sit amet consectetur adipisicing elit.
                   Sequi, libero!
                 </td>
-                <td style="text-align: center">10</td>
-                <td style="text-align: center">Pcs</td>
-                <td style="text-align: right">550.000</td>
-                <td style="text-align: center">Lorem ipsum dolor sit amet.</td>
+                <td style="text-align: center" class="border-rb">10</td>
+                <td style="text-align: center" class="border-rb">Pcs</td>
+                <td style="text-align: right" class="border-rb">550.000</td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                  Lorem ipsum dolor sit amet.
+                </td>
               </tr>
-              <% index++; } ) %>
+              <!-- <% index++; } ) %> -->
+
+              <tr>
+                <th colspan="4" style="text-align: left" class="border-rb">
+                  TOTAL
+                </th>
+                <td style="text-align: right" class="border-rb">550.000</td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                  Lorem ipsum dolor sit amet.
+                </td>
+              </tr>
+              <tr>
+                <td colspan="6" style="text-align: left" class="border-b">
+                  <span style="font-weight: bold"> Terbilang </span>
+                  <span style="font-weight: bold; margin: 0 5px">: </span>
+                </td>
+              </tr>
             </tbody>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3" style="padding: 0px; margin: 0px">
+          <table
+            cellspacing="0"
+            cellpadding="2"
+            style="width: 100%; border-width: 0.2px"
+          >
+            <tr>
+              <td colspan="2" class="border-r"></td>
+              <th style="font-size: 9px" class="border-b">Kolom Persetujuan</th>
+            </tr>
+            <tr>
+              <th>Pemohon</th>
+              <th class="border-r">Ka. Department</th>
+              <th class="border-b">Plant Manager / Direktur</th>
+            </tr>
+            <tr>
+              <td>
+                <!-- <%
+                        if( qrCode.approval1.length > 0 ){
+
+                    %> -->
+                <table style="width: 100%">
+                  <tr>
+                    <!-- <% for(var i = 0; i < qrCode.approval1.length; i++ ) { %> -->
+                    <td>
+                      <img
+                        src="<%=qrCode.qrPath%><%=qrCode.approval1[i]%>"
+                        width="80"
+                      />
+                    </td>
+                    <!-- <% }%> -->
+                  </tr>
+                  <tr>
+                    <!-- <% for(var i = 0; i < approver1.length; i++ ) { %> -->
+                    <!-- <td><%=approver1[i].user.name%></td> -->
+                    <td>(...........................................)</td>
+                    <!-- <% }%> -->
+                  </tr>
+                </table>
+
+                <!-- <%
+                        }
+                    %> -->
+              </td>
+              <td style="text-align: center" class="border-r">
+                <!-- <%
+                            if( qrCode.approval2.length > 0 ){
+
+                        %> -->
+                <table style="width: 100%">
+                  <tr>
+                    <!-- <% for(var i = 0; i < qrCode.approval2.length; i++ ) { %> -->
+                    <td>
+                      <img
+                        src="<%=qrCode.qrPath%><%=qrCode.approval2[i]%>"
+                        width="80"
+                      />
+                    </td>
+                    <!-- <% }%> -->
+                  </tr>
+                  <tr>
+                    <!-- <% for(var i = 0; i < approver2.length; i++ ) { %> -->
+                    <!-- <td><%=approver2[i].user.name%></td> -->
+                    <td>(...........................................)</td>
+                    <!-- <% }%> -->
+                  </tr>
+                </table>
+
+                <!-- <%
+                            }
+                        %> -->
+              </td>
+              <td style="text-align: center">
+                <!-- <%
+                            if( qrCode.approval3.length > 0 ){
+
+                        %> -->
+                <table style="width: 100%">
+                  <tr>
+                    <!-- <% for(var i = 0; i < qrCode.approval3.length; i++ ) { %> -->
+                    <td>
+                      <img
+                        src="<%=qrCode.qrPath%><%=qrCode.approval3[i]%>"
+                        width="80"
+                      />
+                    </td>
+                    <!-- <% }%> -->
+                  </tr>
+                  <tr>
+                    <!-- <% for(var i = 0; i < approver3.length; i++ ) { %> -->
+                    <!-- <td><%=approver3[i].user.name%></td> -->
+                    <td>(...........................................)</td>
+                    <!-- <% }%> -->
+                  </tr>
+                </table>
+
+                <!-- <%
+                            }
+                        %> -->
+              </td>
+              <!-- <td style="text-align: center;vertical-align: middle;">
+                        <%
+                            if( qrCode.approval2 != '' ){
+                        %>
+                            <img src="<%=qrCode.approval2%>" width="80">
+                        <%
+                            }
+                        %>                                
+                    </td> -->
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3" style="padding: 0px; margin: 0px">
+          <table
+            cellspacing="0"
+            cellpadding="2"
+            style="width: 100%; border-width: 0.2px"
+          >
+            <tr>
+              <th style="text-align: left" colspan="4" class="border-t">
+                Diisi Oleh Bagian Finance
+              </th>
+            </tr>
+            <tr>
+              <th style="text-align: left; width: 20%">
+                Jenis Payment Request :
+              </th>
+              <th style="text-align: left; width: 40%">
+                <span
+                  style="display: flex; align-items: center; margin-left: 3.5px"
+                >
+                  <img
+                    src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
+                    width="15"
+                  />
+                  <span style="margin-left: 5px">Cash Advance</span>
+                </span>
+              </th>
+              <th
+                rowspan="2"
+                style="text-align: right; vertical-align: top; width: 15%"
+              >
+                Sumber Dana :
+              </th>
+              <th style="text-align: left; width: 25%">
+                <span
+                  style="display: flex; align-items: center; margin-left: 3.5px"
+                >
+                  <img
+                    src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
+                    width="15"
+                  />
+                  <span style="margin-left: 5px">Kas Kecil</span>
+                </span>
+              </th>
+            </tr>
+            <tr>
+              <td>
+                <table>
+                  <tr>
+                    <td>
+                      <img
+                        src="<%=qrCode.qrPath%><%=qrCode.approval1[i]%>"
+                        width="80"
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>(...........................................)</td>
+                  </tr>
+                </table>
+              </td>
+              <td style="text-align: center">
+                <table style="width: 100%">
+                  <tr>
+                    <th style="text-align: left">
+                      <span style="display: flex; align-items: center">
+                        <img
+                          src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
+                          width="15"
+                        />
+                        <span style="margin-left: 5px">Reimbursement</span>
+                      </span>
+                    </th>
+                  </tr>
+                  <tr>
+                    <th style="text-align: left">
+                      <span style="display: flex; align-items: center">
+                        <img
+                          src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
+                          width="15"
+                        />
+                        <span style="margin-left: 5px"
+                          >Pelunasan Purchase Order</span
+                        >
+                      </span>
+                    </th>
+                  </tr>
+                  <tr>
+                    <th style="text-align: left">
+                      <span style="display: flex; align-items: center">
+                        <img
+                          src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
+                          width="15"
+                        />
+                        <span style="margin-left: 5px">
+                          .............................................</span
+                        >
+                      </span>
+                    </th>
+                  </tr>
+                </table>
+              </td>
+              <td style="text-align: center; vertical-align: top">
+                <table style="width: 100%">
+                  <tr>
+                    <th style="text-align: left">
+                      <span style="display: flex; align-items: center">
+                        <img
+                          src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
+                          width="15"
+                        />
+                        <span style="margin-left: 5px">
+                          .............................................</span
+                        >
+                      </span>
+                    </th>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3" style="padding: 0px; margin: 0px">
+          <table
+            cellspacing="0"
+            cellpadding="2"
+            style="width: 100%; border-width: 0.2px"
+          >
+            <tr>
+              <th style="text-align: left; width: 20%" class="border-tr">
+                Serah Terima Kas
+              </th>
+              <th style="text-align: left; width: 40%" class="border-tr">
+                Diserahkan Oleh Kasir:
+              </th>
+              <th style="text-align: left; width: 30%" class="border-t">
+                Diterima Oleh:
+              </th>
+            </tr>
+            <tr>
+              <td class="border-r"></td>
+              <td class="border-r">
+                <table cellspacing="0" cellpadding="0" style="width: 100%">
+                  <tr>
+                    <th style="height: 30px; vertical-align: top" colspan="2">
+                      <span
+                        style="
+                          display: flex;
+                          align-items: center;
+                          justify-content: end;
+                        "
+                      >
+                        Tgl :
+                        <span style="margin: 0 5px">
+                          ...................................</span
+                        >
+                      </span>
+                    </th>
+                  </tr>
+                  <tr>
+                    <th>
+                      <span
+                        style="
+                          margin-bottom: 5px;
+                          display: flex;
+                          align-items: center;
+                          justify-content: start;
+                        "
+                      >
+                        Nama :
+                        <span style="margin: 0 5px">
+                          ...................................</span
+                        >
+                      </span>
+                    </th>
+                    <th>
+                      <span
+                        style="
+                          margin-bottom: 5px;
+                          display: flex;
+                          align-items: center;
+                          justify-content: end;
+                        "
+                      >
+                        TTD :
+                        <span style="margin: 0 5px">
+                          ...................................</span
+                        >
+                      </span>
+                    </th>
+                  </tr>
+                </table>
+              </td>
+              <td>
+                <table cellspacing="0" cellpadding="0" style="width: 100%">
+                  <tr>
+                    <th style="height: 30px; vertical-align: top" colspan="2">
+                      <span
+                        style="
+                          display: flex;
+                          align-items: center;
+                          justify-content: end;
+                        "
+                      >
+                        Tgl :
+                        <span style="margin: 0 5px">
+                          ...................................</span
+                        >
+                      </span>
+                    </th>
+                  </tr>
+                  <tr>
+                    <th>
+                      <span
+                        style="
+                          margin-bottom: 5px;
+                          display: flex;
+                          align-items: center;
+                          justify-content: start;
+                        "
+                      >
+                        Nama :
+                        <span style="margin: 0 5px">
+                          ...................................</span
+                        >
+                      </span>
+                    </th>
+                    <th>
+                      <span
+                        style="
+                          margin-bottom: 5px;
+                          display: flex;
+                          align-items: center;
+                          justify-content: end;
+                        "
+                      >
+                        TTD :
+                        <span style="margin: 0 5px">
+                          ...................................</span
+                        >
+                      </span>
+                    </th>
+                  </tr>
+                </table>
+              </td>
+            </tr>
           </table>
         </td>
       </tr>
