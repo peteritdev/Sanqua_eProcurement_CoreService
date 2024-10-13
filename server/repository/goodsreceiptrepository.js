@@ -131,6 +131,14 @@ class GoodsReceiptRepository {
 				}
 			];
 
+			if (pParam.hasOwnProperty('purchase_request_id')) {
+				if (pParam.purchase_request_id != '') {
+					xWhereAnd.push({
+						purchase_request_id: pParam.purchase_request_id
+					});
+				}
+			}
+
 			if (pParam.hasOwnProperty('company_id')) {
 				if (pParam.company_id != '') {
 					xWhereAnd.push({
