@@ -178,7 +178,12 @@ class PJCAService {
 								xDetail.data.total_tax_amount = Math.round(( xTaxes || 0 ) * 1000) / 1000
 							} else { 
 								xDetail.data.untaxed_amount = Math.round((xDetail.data.total_base_price - xGlobalAmount || 0) * 1000) / 1000
-								xDetail.data.total_tax_amount = (Math.round((xTaxes) * 1000 )  / 1000) || 0
+								
+								if (xPjcaDetail.every( ({ tax_type }) => tax_type == 3 || tax_type == 4)) {
+									xDetail.data.total_tax_amount = (Math.round((xDetail.data.untaxed_amount * 0.11) * 1000 )  / 1000) || 0
+								} else {
+									xDetail.data.total_tax_amount = (Math.round((xTaxes) * 1000 )  / 1000) || 0
+								}
 								// xDetail.data.total_tax_amount = (Math.round((xTaxes - (xTaxes * (xDetail.data.global_discount_percent / 100))) * 1000 )  / 1000) || 0
 							}
 
