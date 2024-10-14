@@ -75,6 +75,17 @@ class PaymentRequestService {
 					if (xDetail != null) {
 						if (xDetail.status_code == '00') {
 								
+							let xFileArr = [];
+							for (var j in xDetail.file) {
+								xFileArr.push({
+									subject: xDetail.file[j].subject,
+									file:
+										xDetail.file[j].file != null
+											? `${config.imagePathESanQua}/eprocurement/payreq/${xDetail.file[j].file}`
+											: null
+								});
+							}
+								
 							var xPayreqDetail = xDetail.data.payment_request_detail;
 							var xGlobalAmount = xDetail.data.global_discount 
 							var xGlobalPercent = xDetail.data.global_discount_percent

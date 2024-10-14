@@ -77,6 +77,17 @@ class GoodsReceiptService {
 					console.log(`>>> pParam: ${JSON.stringify(xDetail)}`);
 					if (xDetail != null) {
 						if (xDetail.status_code == '00') {
+								
+							let xFileArr = [];
+							for (var j in xDetail.file) {
+								xFileArr.push({
+									subject: xDetail.file[j].subject,
+									file:
+										xDetail.file[j].file != null
+											? `${config.imagePathESanQua}/eprocurement/gr/${xDetail.file[j].file}`
+											: null
+								});
+							}
 						
 							var xJoArrRequestDetailData = [];
 							// var xTotalItem = 0;
