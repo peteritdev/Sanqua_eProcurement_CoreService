@@ -76,16 +76,16 @@ class PJCAService {
 						if (xDetail.status_code == '00') {
 								
 							let xFileArr = [];
-							for (var j in xDetail.file) {
+							for (var j in xDetail.data.file) {
 								xFileArr.push({
-									subject: xDetail.file[j].subject,
+									subject: xDetail.data.file[j].subject,
 									file:
-										xDetail.file[j].file != null
-											? `${config.imagePathESanQua}/eprocurement/pjca/${xDetail.file[j].file}`
+										xDetail.data.file[j].file != null
+											? `${config.imagePathESanQua}/eprocurement/pjca/${xDetail.data.file[j].file}`
 											: null
 								});
 							}
-							xDetail.file = xFileArr
+							xDetail.data.file = xFileArr
 							var xPjcaDetail = xDetail.data.pjca_detail;
 							var xGlobalAmount = xDetail.data.global_discount 
 							var xGlobalPercent = xDetail.data.global_discount_percent
