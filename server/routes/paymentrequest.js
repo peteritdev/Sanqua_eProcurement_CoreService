@@ -97,4 +97,15 @@ module.exports = (app) => {
 	arrValidate = [];
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
 	app.post(rootAPIPath + 'fetch_matrix', arrValidate, paymentRequestController.paymentRequest_FetchMatrix);
+
+	arrValidate = [];
+	arrValidate = [
+		check('id').not().isEmpty().withMessage('Parameter id cannot be empty'),
+		check('file', 'Parameter photo must be array and cannot be empty').not().isEmpty().isArray()
+	];
+	app.post(
+		rootAPIPath + 'update_file_upload',
+		arrValidate,
+		paymentRequestController.paymentRequest_UpdateFileUpload
+	);
 };
