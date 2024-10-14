@@ -85,7 +85,8 @@ class PaymentRequestService {
 											: null
 								});
 							}
-								
+							xDetail.file = xFileArr
+							
 							var xPayreqDetail = xDetail.data.payment_request_detail;
 							var xGlobalAmount = xDetail.data.global_discount 
 							var xGlobalPercent = xDetail.data.global_discount_percent

@@ -88,6 +88,7 @@ class GoodsReceiptService {
 											: null
 								});
 							}
+							xDetail.file = xFileArr
 						
 							var xJoArrRequestDetailData = [];
 							// var xTotalItem = 0;

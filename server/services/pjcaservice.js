@@ -85,7 +85,7 @@ class PJCAService {
 											: null
 								});
 							}
-
+							xDetail.file = xFileArr
 							var xPjcaDetail = xDetail.data.pjca_detail;
 							var xGlobalAmount = xDetail.data.global_discount 
 							var xGlobalPercent = xDetail.data.global_discount_percent
