@@ -439,11 +439,12 @@ class ExportService {
 					config.cryptoKey.hashKey
 				);
 				var xCompanyDetail = await _oAuthService.getCompanyDetail(pToken, pMethod, xEncCompanyId);
+				console.log(`>>> xCompanyDetail: ${JSON.stringify(xCompanyDetail)}`);
 				if (xCompanyDetail != null) {
 					if (xCompanyDetail.status_code == '00') {
 						xCompanyData = {
 							logo: config.basePathESanqua + '/company_logo/' + xCompanyDetail.token_data.data.logo,
-							iso_purchase_request_no: xCompanyDetail.token_data.data.iso_purchase_request_no
+							// iso_purchase_request_no: xCompanyDetail.token_data.data.iso_purchase_request_no
 						};
 					}
 				}

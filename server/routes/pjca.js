@@ -63,9 +63,9 @@ module.exports = (app) => {
 	arrValidate = [ check('document_id').not().isEmpty().withMessage('Parameter document_id cannot be empty') ];
 	app.post(rootAPIPath + 'reject', arrValidate, pjcaController.PJCA_Reject);
 
-	arrValidate = [];
-	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
-	app.post(rootAPIPath + 'done', arrValidate, pjcaController.PJCA_Done);
+	// arrValidate = [];
+	// arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
+	// app.post(rootAPIPath + 'done', arrValidate, pjcaController.PJCA_Done);
 
 	// pjca DETAIL
 	arrValidate = [];

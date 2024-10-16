@@ -79,12 +79,12 @@ module.exports = (app) => {
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
 	app.post(rootAPIPath + 'paid', arrValidate, paymentRequestController.paymentRequest_Paid);
 
-	arrValidate = [];
-	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
-	app.post(rootAPIPath + 'done', arrValidate, paymentRequestController.paymentRequest_Done);
+	// arrValidate = [];
+	// arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
+	// app.post(rootAPIPath + 'done', arrValidate, paymentRequestController.paymentRequest_Done);
 
 	arrValidate = [];
-	app.get(rootAPIPath + 'dropdown', arrValidate, paymentRequestController.paymentRequest_Dropdown);
+	app.get(rootAPIPath + 'dropdown_vendor', arrValidate, paymentRequestController.paymentRequest_Dropdown);
 
 	arrValidate = [];
 	app.get(rootAPIPath + 'dropdown_detail', arrValidate, paymentRequestController.paymentRequestDetail_Dropdown);

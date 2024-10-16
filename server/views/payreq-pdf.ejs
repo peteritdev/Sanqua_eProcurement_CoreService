@@ -68,10 +68,7 @@
     >
       <tr>
         <td style="width: 30%; text-align: left; padding-left: 10px">
-          <img
-            src="https://img.freepik.com/free-vector/bird-colorful-logo-gradient-vector_343694-1365.jpg?t=st=1728547256~exp=1728550856~hmac=e6a33416dc3892290122d9521e4513e6318960d34f1267102626b08b9055f99b&w=740"
-            height="45"
-          />
+          <img src="<%=companyData.logo%>" height="45" />
         </td>
         <td style="text-align: center; width: 40%">
           <span
@@ -85,12 +82,12 @@
           >
         </td>
         <td style="width: 30%; padding: 3px; text-align: left">
-          <table>
+          <table cellspacing="0" cellpadding="5">
             <tr>
-              <th>No.</th>
+              <th>No. <%=data.data.document_no%></th>
             </tr>
             <tr>
-              <th>Tanggal.</th>
+              <th>Tanggal: <%=data.data.createdAt%></th>
             </tr>
           </table>
         </td>
@@ -107,7 +104,7 @@
             <tr>
               <th style="text-align: left; width: 90px">Nama Pemohon</th>
               <th style="text-align: left; width: 10px">:</th>
-              <td style="text-align: left; width: 50%">MIS</td>
+              <td style="text-align: left"><%=data.data.employee_name%></td>
             </tr>
           </table>
         </td>
@@ -116,10 +113,10 @@
           rowspan="5"
           style="text-align: left; border-top: 1px solid #000000 !important"
         >
-          <table style="width: 100%">
+          <table style="width: 100%; padding-bottom: 5px">
             <tr>
-              <th style="text-align: left; width: 35%">Jenis Pembayaran</th>
-              <th style="text-align: left; width: 65%">:</th>
+              <th style="text-align: left">Jenis Pembayaran</th>
+              <th style="text-align: left">:</th>
             </tr>
             <tr>
               <td
@@ -131,7 +128,7 @@
               >
                 <table style="width: 100%">
                   <tr>
-                    <td style="width: 50%; text-align: center">
+                    <td style="width: 40%; text-align: center">
                       <span
                         style="
                           display: flex;
@@ -139,14 +136,26 @@
                           justify-content: center;
                         "
                       >
+                        <% if( data.data.payment_type == 1 ){ %>
+                        <img src="<%=imagePath%>box_checklist.png" width="15" />
+                        <% }else{ %>
                         <img
-                          src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
+                          src="<%=imagePath%>blank_checklist.png"
                           width="15"
                         />
-                        <span style="margin-left: 5px"> Tunai </span>
+                        <% } %>
+                        <span
+                          style="
+                            margin-left: 5px;
+                            position: relative;
+                            top: -5px;
+                          "
+                        >
+                          Tunai
+                        </span>
                       </span>
                     </td>
-                    <td style="width: 50%; text-align: center">
+                    <td style="width: 60%; text-align: center">
                       <span
                         style="
                           display: flex;
@@ -154,83 +163,102 @@
                           justify-content: center;
                         "
                       >
+                        <% if( data.data.payment_type > 1 ){ %>
+                        <img src="<%=imagePath%>box_checklist.png" width="15" />
+                        <% }else{ %>
                         <img
-                          src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
+                          src="<%=imagePath%>blank_checklist.png"
                           width="15"
                         />
-                        <span style="margin-left: 5px"> Bank </span>
+                        <% } %>
+                        <span
+                          style="
+                            margin-left: 5px;
+                            position: relative;
+                            top: -5px;
+                          "
+                        >
+                          Bank
+                        </span>
                       </span>
                     </td>
                   </tr>
                 </table>
               </td>
               <th style="text-align: left">
-                <span
-                  style="display: flex; align-items: center; margin-left: 15px"
-                >
-                  <img
-                    src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
-                    width="15"
-                  />
-                  <span style="margin-left: 5px; width: 40px">Giro</span>
-                  <span style="margin-left: 15px; width: 120px">An.</span>
-                </span>
+                <table style="margin-left: 15px">
+                  <tr>
+                    <td>
+                      <% if( data.data.payment_type == 3 ){ %>
+                      <img src="<%=imagePath%>box_checklist.png" width="15" />
+                      <% }else{ %>
+                      <img src="<%=imagePath%>blank_checklist.png" width="15" />
+                      <% } %>
+                    </td>
+                    <td style="width: 75px">Giro</td>
+                    <td>An. <%=data.data.account_name%></td>
+                  </tr>
+                </table>
               </th>
             </tr>
             <tr>
               <td colspan="1" style="text-align: left"></td>
               <th style="text-align: left">
-                <span
-                  style="display: flex; align-items: center; margin-left: 15px"
-                >
-                  <img
-                    src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
-                    width="15"
-                  />
-                  <span style="margin-left: 5px; width: 40px">Check</span>
-                  <span style="margin-left: 15px; width: 120px">An.</span>
-                </span>
+                <table style="margin-left: 15px">
+                  <tr>
+                    <td>
+                      <% if( data.data.payment_type == 4 ){ %>
+                      <img src="<%=imagePath%>box_checklist.png" width="15" />
+                      <% }else{ %>
+                      <img src="<%=imagePath%>blank_checklist.png" width="15" />
+                      <% } %>
+                    </td>
+                    <td style="width: 75px">Check</td>
+                    <td>An. <%=data.data.account_name%></td>
+                  </tr>
+                </table>
               </th>
             </tr>
             <tr>
               <td colspan="1" style="text-align: left"></td>
               <th style="text-align: left">
-                <span
-                  style="display: flex; align-items: center; margin-left: 15px"
-                >
-                  <img
-                    src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
-                    width="15"
-                  />
-                  <span style="margin-left: 5px; width: 40px">Transfer</span>
-                  <span style="margin-left: 15px; width: 120px">An.</span>
-                </span>
+                <table style="margin-left: 15px">
+                  <tr>
+                    <td>
+                      <% if( data.data.payment_type == 5 ){ %>
+                      <img src="<%=imagePath%>box_checklist.png" width="15" />
+                      <% }else{ %>
+                      <img src="<%=imagePath%>blank_checklist.png" width="15" />
+                      <% } %>
+                    </td>
+                    <td style="width: 75px">Transfer</td>
+                    <td>An. <%=data.data.account_name%></td>
+                  </tr>
+                </table>
               </th>
             </tr>
             <tr>
               <td colspan="1" style="text-align: left"></td>
               <th style="text-align: left">
-                <span style="display: flex; margin-left: 15px">
-                  <span style="margin-left: 5px; width: 60px"> Nama Bank </span>
-                  <span>: </span>
-                  <span style="margin-left: 5px; font-weight: normal">
-                    (...........................................)
-                  </span>
-                </span>
+                <table style="margin: 5px 0 5px 15px">
+                  <tr>
+                    <td style="width: 50px">Nama Bank</td>
+                    <td>:</td>
+                    <td><%=data.data.bank_name%></td>
+                  </tr>
+                </table>
               </th>
             </tr>
             <tr>
               <td colspan="1" style="text-align: left"></td>
               <th style="text-align: left">
-                <span style="display: flex; margin-left: 15px">
-                  <span style="margin-left: 5px; width: 60px">
-                    No. Rekening
-                  </span>
-                  <span>: </span>
-                  <span style="margin-left: 5px; font-weight: normal">
-                    (...........................................)
-                  </span>
-                </span>
+                <table style="margin-left: 15px">
+                  <tr>
+                    <td style="width: 50px">No. Rek</td>
+                    <td>:</td>
+                    <td><%=data.data.account_number%></td>
+                  </tr>
+                </table>
               </th>
             </tr>
           </table>
@@ -248,7 +276,7 @@
             <tr>
               <th style="text-align: left; width: 90px">Department</th>
               <th style="text-align: left; width: 10px">:</th>
-              <td style="text-align: left; width: 50%">MIS</td>
+              <td style="text-align: left"><%=data.data.department_name%></td>
             </tr>
           </table>
         </td>
@@ -265,7 +293,7 @@
             <tr>
               <th style="text-align: left; width: 90px">Jabatan</th>
               <th style="text-align: left; width: 10px">:</th>
-              <td style="text-align: left; width: 50%">MIS</td>
+              <td style="text-align: left">-</td>
             </tr>
           </table>
         </td>
@@ -283,10 +311,9 @@
       </tr>
       <tr>
         <td
-          style="text-align: left; border-right: 1px solid #000000 !important"
+          style="text-align: center; border-right: 1px solid #000000 !important"
         >
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Illo repellat
-          soluta optio placeat error corrupti.
+          <%=data.data.vendor_name%>
         </td>
       </tr>
       <tr>
@@ -294,12 +321,9 @@
           colspan="3"
           style="text-align: left; border-top: 1px solid #000000 !important"
         >
-          <span style="font-weight: bold"> Permintaan Departement </span>
+          <span style="font-weight: bold"> Untuk Pembayaran </span>
           <span style="font-weight: bold; margin: 0 5px">: </span>
-          <span
-            >Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quas,
-            adipisci?
-          </span>
+          <span> <%=data.data.payment_desc%> </span>
         </td>
       </tr>
       <tr>
@@ -381,28 +405,35 @@
             style="width: 100%; border-width: 0.2px"
           >
             <tr>
-              <td colspan="2" class="border-r"></td>
-              <th style="font-size: 9px" class="border-b">Kolom Persetujuan</th>
+              <td style="width: 10%" class="border-r" rowspan="2">Pemohon</td>
+              <th
+                style="width: 90%"
+                colspan="3"
+                style="font-size: 9px"
+                class="border-b"
+              >
+                Kolom Persetujuan
+              </th>
             </tr>
             <tr>
-              <th>Pemohon</th>
-              <th class="border-r">Ka. Department</th>
-              <th class="border-b">Plant Manager / Direktur</th>
+              <th style="width: 32%" class="border-r">Ka. Department</th>
+              <th style="width: 36%" class="border-r">Finance</th>
+              <th style="width: 32%">Plant Manager / Direktur</th>
             </tr>
             <tr>
-              <td>
+              <td class="border-r">
                 <!-- <%
                         if( qrCode.approval1.length > 0 ){
 
                     %> -->
-                <table style="width: 100%">
+                <table>
                   <tr>
                     <!-- <% for(var i = 0; i < qrCode.approval1.length; i++ ) { %> -->
                     <td>
-                      <img
+                      <!-- <img
                         src="<%=qrCode.qrPath%><%=qrCode.approval1[i]%>"
                         width="80"
-                      />
+                      /> -->
                     </td>
                     <!-- <% }%> -->
                   </tr>
@@ -418,19 +449,22 @@
                         }
                     %> -->
               </td>
-              <td style="text-align: center" class="border-r">
+              <td
+                style="text-align: center; margin-bottom: 5px"
+                class="border-r"
+              >
                 <!-- <%
                             if( qrCode.approval2.length > 0 ){
 
                         %> -->
-                <table style="width: 100%">
+                <table>
                   <tr>
                     <!-- <% for(var i = 0; i < qrCode.approval2.length; i++ ) { %> -->
                     <td>
-                      <img
+                      <!-- <img
                         src="<%=qrCode.qrPath%><%=qrCode.approval2[i]%>"
                         width="80"
-                      />
+                      /> -->
                     </td>
                     <!-- <% }%> -->
                   </tr>
@@ -446,19 +480,22 @@
                             }
                         %> -->
               </td>
-              <td style="text-align: center">
+              <td
+                style="text-align: center; margin-bottom: 5px"
+                class="border-r"
+              >
                 <!-- <%
                             if( qrCode.approval3.length > 0 ){
 
                         %> -->
-                <table style="width: 100%">
+                <table>
                   <tr>
                     <!-- <% for(var i = 0; i < qrCode.approval3.length; i++ ) { %> -->
                     <td>
-                      <img
+                      <!-- <img
                         src="<%=qrCode.qrPath%><%=qrCode.approval3[i]%>"
                         width="80"
-                      />
+                      /> -->
                     </td>
                     <!-- <% }%> -->
                   </tr>
@@ -474,15 +511,40 @@
                             }
                         %> -->
               </td>
-              <!-- <td style="text-align: center;vertical-align: middle;">
-                        <%
-                            if( qrCode.approval2 != '' ){
-                        %>
-                            <img src="<%=qrCode.approval2%>" width="80">
-                        <%
+              <td
+                style="
+                  text-align: center;
+                  margin-bottom: 5px;
+                  vertical-align: middle;
+                "
+              >
+                <!-- <%
+                            if( qrCode.approval3.length > 0 ){
+
+                        %> -->
+                <table>
+                  <tr>
+                    <!-- <% for(var i = 0; i < qrCode.approval3.length; i++ ) { %> -->
+                    <td>
+                      <!-- <img
+                        src="<%=qrCode.qrPath%><%=qrCode.approval3[i]%>"
+                        width="80"
+                      /> -->
+                    </td>
+                    <!-- <% }%> -->
+                  </tr>
+                  <tr>
+                    <!-- <% for(var i = 0; i < approver3.length; i++ ) { %> -->
+                    <!-- <td><%=approver3[i].user.name%></td> -->
+                    <td>(...........................................)</td>
+                    <!-- <% }%> -->
+                  </tr>
+                </table>
+
+                <!-- <%
                             }
-                        %>                                
-                    </td> -->
+                        %> -->
+              </td>
             </tr>
           </table>
         </td>

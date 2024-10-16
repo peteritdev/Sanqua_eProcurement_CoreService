@@ -96,7 +96,7 @@ class PJCARepository {
 	}
 
 	async list(pParam) {
-		var xOrder = [ 'name', 'ASC' ];
+		var xOrder = [ 'id', 'ASC' ];
 		var xWhere = [];
 		var xWhereOr = [];
 		var xWhereAnd = [];
@@ -138,9 +138,17 @@ class PJCARepository {
 
 			if (pParam.hasOwnProperty('status')) {
 				if (pParam.status != '') {
-					xWhereAnd.push({
-						status: pParam.status
-					});
+					if (Array.isArray(pParam.status)) {
+						xWhereAnd.push({
+							status: {
+								[Op.in]: pParam.status
+							}
+						});
+					} else {
+						xWhereAnd.push({
+							status: pParam.status
+						});
+					}
 				}
 			}
 
