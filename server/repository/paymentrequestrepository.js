@@ -119,6 +119,26 @@ class PaymentRequestRepository {
 				}
 			];
 
+			if (pParam.hasOwnProperty('product_id')) {
+				if (pParam.product_id != null && pParam.product_id != undefined && pParam.product_id != '') {
+					var xProduct = JSON.parse(pParam.product_id);
+					if (xProduct.length > 0) {
+						xInclude.push(
+							{
+								model: _modelPaymentRequestDetail,
+								as: 'payment_request_detail'
+							}
+						)
+
+						xWhereAnd.push({
+							'$payment_request_detail.product_id$': {
+								[Op.in]: xProduct
+							}
+						});
+					}
+				}
+			}
+
 			if (pParam.hasOwnProperty('purchase_request_id')) {
 				if (pParam.purchase_request_id != '') {
 					xWhereAnd.push({
@@ -151,7 +171,6 @@ class PaymentRequestRepository {
 					});
 				}
 			}
-
 			// if (pParam.hasOwnProperty('filter')) {
 			// 	if (pParam.filter != null && pParam.filter != undefined && pParam.filter != '') {
 			// 		var xFilter = JSON.parse(pParam.filter);
@@ -162,6 +181,7 @@ class PaymentRequestRepository {
 			// 		}
 			// 	}
 			// }
+
 			if (pParam.hasOwnProperty('start_date') && pParam.hasOwnProperty('end_date')) {
 				if (pParam.start_date != '' && pParam.end_date != '') {
 					xWhereAnd.push({
@@ -251,6 +271,7 @@ class PaymentRequestRepository {
 					xParamQuery.limit = pParam.limit;
 				}
 			}
+			
 
 			var xData = await _modelDb.findAndCountAll(xParamQuery);
 

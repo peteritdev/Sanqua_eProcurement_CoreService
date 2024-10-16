@@ -29,6 +29,12 @@ const _purchaseRequestRepoInstance = new PurchaseRequestRepository();
 
 const PurchaseRequestDetailRepository = require('../repository/purchaserequestdetailrepository.js');
 const _purchaseRequestDetailRepoInstance = new PurchaseRequestDetailRepository();
+
+const GoodsReceiptRepository = require('../repository/goodsreceiptrepository.js');
+const _goodsReceiptRepoInstance = new GoodsReceiptRepository();
+
+const PJCARepository = require('../repository/pjcarepository.js');
+const _pjcaRepoInstance = new PJCARepository();
 // const PaymentRequestDetailRepository = require('../repository/paymentrequestdetailrepository.js');
 // const _repoDetailInstance = new PaymentRequestDetailRepository();
 
@@ -86,6 +92,7 @@ class PaymentRequestService {
 								});
 							}
 							xDetail.data.file = xFileArr
+							xDetail.data.createdAt = xDetail.data.createdAt != null ? moment(xDetail.data.createdAt).format('DD MMM YYYY') : ''
 
 							var xPayreqDetail = xDetail.data.payment_request_detail;
 							var xGlobalAmount = xDetail.data.global_discount 
@@ -362,7 +369,7 @@ class PaymentRequestService {
 					var xRows = xResultList.data.rows;
 					if (xRows.length > 0) {
 						for (var i in xRows) {
-							if (xJoArrData.find(({ vendor_id, vendor_name }) => vendor_id == xRows[i].vendor_id && vendor_name == xRows[i].vendor_name) == undefined) {
+							// if (xJoArrData.find(({ vendor_id, vendor_name }) => vendor_id == xRows[i].vendor_id && vendor_name == xRows[i].vendor_name) == undefined) {
 								xJoArrData.push({
 									// id: await _utilInstance.encrypt(xRows[i].id.toString(), config.cryptoKey.hashKey),
 									// document_no: xRows[i].document_no,
@@ -370,7 +377,7 @@ class PaymentRequestService {
 									vendor_name: xRows[i].vendor_name,
 									vendor_code: xRows[i].vendor_code
 								});
-							}
+							// }
 						}
 
 						xJoResult = {
@@ -756,35 +763,69 @@ class PaymentRequestService {
 
 			if (xFlagProcess) {
 				var xPayreqDetail = await _repoInstance.getByParameter({ id: pParam.id });
+				console.log(`>>> xPayreqDetail: ${JSON.stringify(xPayreqDetail)}`);
 				if (xPayreqDetail != null) {
 					if (xPayreqDetail.status_code == '00') {
-						if (xPayreqDetail.data.status == 5) {
+						if (xPayreqDetail.data.status == 4) {
 							xJoResult = {
 								status_code: '-99',
 								status_msg: 'This document already cancel'
 							};
 						} else {
-							var xParamUpdate = {
-								id: pParam.id,
-								status: 5,
-								canceled_at: await _utilInstance.getCurrDateTime(),
-								canceled_reason: pParam.cancel_reason,
-								// approved_at: await _utilInstance.getCurrDateTime()
-							};
-							var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
-
-							if (xUpdateResult.status_code == '00') {
-								if (xPayreqDetail.data.status != 0) {
-									this.updatePrdItemQtyLeft(xPayreqDetail.data, 'cancel')
-								}
-								
+							// check if payreq have submited PJCA
+							const xParamPjca = {
+								payment_request_id: xPayreqDetail.data.id,
+								status: [1,2]
+							}
+							var xPJCAResult = await _pjcaRepoInstance.list(xParamPjca);
+							console.log(`>>> xPJCAResult: ${JSON.stringify(xPJCAResult)}`);
+							if (xPJCAResult.status_code == '00') {
 								xJoResult = {
-									status_code: '00',
-									status_msg: 'Payreq successfully canceled'
+									status_code: '-99',
+									status_msg: "You cannot cancel this document, There is already processed PJCA "
 								};
 							} else {
-								xJoResult = xUpdateResult;
+								// check if product have submited GR
+								const xArrId = []
+								for (let i = 0; i < xPayreqDetail.data.payment_request_detail.length; i++) {
+									xArrId.push(xPayreqDetail.data.payment_request_detail[i].product_id)
+								}
+								const xParamGr = {
+									purchase_request_id: xPayreqDetail.data.purchase_request_id,
+									product_id: xArrId,
+									status: 1
+								}
+								var xGrResultList = await _goodsReceiptRepoInstance.list(xParamGr);
+								if (xGrResultList.status_code == '00') {
+									xJoResult = {
+										status_code: '-99',
+										status_msg: "Cancel failed, this document already have some processed receipt"
+									};
+								} else {
+									// var xParamUpdate = {
+									// 	id: pParam.id,
+									// 	status: 4,
+									// 	canceled_at: await _utilInstance.getCurrDateTime(),
+									// 	canceled_reason: pParam.cancel_reason,
+									// 	// approved_at: await _utilInstance.getCurrDateTime()
+									// };
+									// var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
+		
+									// if (xUpdateResult.status_code == '00') {
+									// 	if (xPayreqDetail.data.status != 0) {
+									// 		this.updatePrdItemQtyLeft(xPayreqDetail.data, 'cancel')
+									// 	}
+										
+									// 	xJoResult = {
+									// 		status_code: '00',
+									// 		status_msg: 'Payreq successfully canceled'
+									// 	};
+									// } else {
+									// 	xJoResult = xUpdateResult;
+									// }
+								}
 							}
+
 						}
 					
 					} else {
@@ -1068,81 +1109,80 @@ class PaymentRequestService {
 
 		return xJoResult;
 	}
-	
-	async done(pParam) {
-		var xJoResult = {};
-		var xFlagProcess = false;
-		var xDecId = null;
-		var xEncId = null;
-		var xJoData = {};
+	// async done(pParam) {
+	// 	var xJoResult = {};
+	// 	var xFlagProcess = false;
+	// 	var xDecId = null;
+	// 	var xEncId = null;
+	// 	var xJoData = {};
 
-		try {
-			if (pParam.id != '' && pParam.user_id != '') {
-				xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
-				if (xDecId.status_code == '00') {
-					xFlagProcess = true;
-					xEncId = pParam.id;
-					pParam.id = xDecId.decrypted;
-					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
-					if (xDecId.status_code == '00') {
-						pParam.user_id = xDecId.decrypted;
-						xFlagProcess = true;
-					} else {
-						xJoResult = xDecId;
-					}
-				} else {
-					xJoResult = xDecId;
-				}
-			}
+	// 	try {
+	// 		if (pParam.id != '' && pParam.user_id != '') {
+	// 			xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+	// 			if (xDecId.status_code == '00') {
+	// 				xFlagProcess = true;
+	// 				xEncId = pParam.id;
+	// 				pParam.id = xDecId.decrypted;
+	// 				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+	// 				if (xDecId.status_code == '00') {
+	// 					pParam.user_id = xDecId.decrypted;
+	// 					xFlagProcess = true;
+	// 				} else {
+	// 					xJoResult = xDecId;
+	// 				}
+	// 			} else {
+	// 				xJoResult = xDecId;
+	// 			}
+	// 		}
 
-			if (xFlagProcess) {
-				var xPayreqDetail = await _repoInstance.getByParameter({ id: pParam.id });
-				if (xPayreqDetail != null) {
-					if (xPayreqDetail.status_code == '00') {
-						if (xPayreqDetail.data.status != 3) {
-							xJoResult = {
-								status_code: '-99',
-								status_msg: 'This document cannot be processed'
-							};
-						} else {
-							var xParamUpdate = {
-								id: pParam.id,
-								status: 4
-								// approved_at: await _utilInstance.getCurrDateTime()
-							};
-							var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
+	// 		if (xFlagProcess) {
+	// 			var xPayreqDetail = await _repoInstance.getByParameter({ id: pParam.id });
+	// 			if (xPayreqDetail != null) {
+	// 				if (xPayreqDetail.status_code == '00') {
+	// 					if (xPayreqDetail.data.status != 3) {
+	// 						xJoResult = {
+	// 							status_code: '-99',
+	// 							status_msg: 'This document cannot be processed'
+	// 						};
+	// 					} else {
+	// 						var xParamUpdate = {
+	// 							id: pParam.id,
+	// 							status: 4
+	// 							// approved_at: await _utilInstance.getCurrDateTime()
+	// 						};
+	// 						var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
 
-							if (xUpdateResult.status_code == '00') {
-								xJoResult = {
-									status_code: '00',
-									status_msg: 'Payreq successfully done'
-								};
-							} else {
-								xJoResult = xUpdateResult;
-							}
-						}
+	// 						if (xUpdateResult.status_code == '00') {
+	// 							xJoResult = {
+	// 								status_code: '00',
+	// 								status_msg: 'Payreq successfully done'
+	// 							};
+	// 						} else {
+	// 							xJoResult = xUpdateResult;
+	// 						}
+	// 					}
 					
-					} else {
-						xJoResult = xPayreqDetail
-					}
-				} else {
-					xJoResult = {
-						status_code: '-99',
-						status_msg: 'Data not found'
-					};
-				}
-			}
-		} catch (e) {
-			_utilInstance.writeLog(`${_xClassName}.cancel`, `Exception error: ${e.message}`, 'error');
+	// 				} else {
+	// 					xJoResult = xPayreqDetail
+	// 				}
+	// 			} else {
+	// 				xJoResult = {
+	// 					status_code: '-99',
+	// 					status_msg: 'Data not found'
+	// 				};
+	// 			}
+	// 		}
+	// 	} catch (e) {
+	// 		_utilInstance.writeLog(`${_xClassName}.cancel`, `Exception error: ${e.message}`, 'error');
 
-			xJoResult = {
-				status_code: '-99',
-				status_msg: `${_xClassName}.cancel: Exception error: ${e.message}`
-			};
-		}
+	// 		xJoResult = {
+	// 			status_code: '-99',
+	// 			status_msg: `${_xClassName}.cancel: Exception error: ${e.message}`
+	// 		};
+	// 	}
 
-		return xJoResult;
-	}
+	// 	return xJoResult;
+	// }
 	
 	async fetchMatrixPayreq(pParam) {
 		var xJoResult = {};

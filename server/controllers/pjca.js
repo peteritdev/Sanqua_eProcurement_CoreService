@@ -23,7 +23,7 @@ module.exports = {
 	PJCA_Cancel,
 	PJCA_Confirm,
 	PJCA_Reject,
-	PJCA_Done,
+	// PJCA_Done,
 	PJCA_FetchMatrix,
 
 	PJCADetail_Save,
@@ -359,44 +359,43 @@ async function PJCA_Reject(req, res) {
 	res.setHeader('Content-Type', 'application/json');
 	res.status(200).send(joResult);
 }
+// async function PJCA_Done(req, res) {
+// 	var joResult;
+// 	var oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
 
-async function PJCA_Done(req, res) {
-	var joResult;
-	var oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
+// 	if (oAuthResult.status_code == '00') {
+// 		if (oAuthResult.token_data.status_code == '00') {
+// 			// Validate first
+// 			var errors = validationResult(req).array();
 
-	if (oAuthResult.status_code == '00') {
-		if (oAuthResult.token_data.status_code == '00') {
-			// Validate first
-			var errors = validationResult(req).array();
+// 			if (errors.length != 0 && req.body.act == 'add') {
+// 				joResult = JSON.stringify({
+// 					status_code: '-99',
+// 					status_msg: 'Parameter value has problem',
+// 					error_msg: errors
+// 				});
+// 			} else {
+// 				req.body.user_id = oAuthResult.token_data.result_verify.id;
+// 				req.body.user_name = oAuthResult.token_data.result_verify.name;
 
-			if (errors.length != 0 && req.body.act == 'add') {
-				joResult = JSON.stringify({
-					status_code: '-99',
-					status_msg: 'Parameter value has problem',
-					error_msg: errors
-				});
-			} else {
-				req.body.user_id = oAuthResult.token_data.result_verify.id;
-				req.body.user_name = oAuthResult.token_data.result_verify.name;
+// 				req.body.logged_employee_id = oAuthResult.token_data.result_verify.employee_info.id;
+// 				req.body.logged_employee_name = oAuthResult.token_data.result_verify.employee_info.name;
 
-				req.body.logged_employee_id = oAuthResult.token_data.result_verify.employee_info.id;
-				req.body.logged_employee_name = oAuthResult.token_data.result_verify.employee_info.name;
+// 				req.body.token = req.headers['x-token'];
+// 				req.body.method = req.headers['x-method'];
+// 				joResult = await _serviceInstance.done(req.body);
+// 				joResult = JSON.stringify(joResult);
+// 			}
+// 		} else {
+// 			joResult = JSON.stringify(oAuthResult);
+// 		}
+// 	} else {
+// 		joResult = JSON.stringify(oAuthResult);
+// 	}
 
-				req.body.token = req.headers['x-token'];
-				req.body.method = req.headers['x-method'];
-				joResult = await _serviceInstance.done(req.body);
-				joResult = JSON.stringify(joResult);
-			}
-		} else {
-			joResult = JSON.stringify(oAuthResult);
-		}
-	} else {
-		joResult = JSON.stringify(oAuthResult);
-	}
-
-	res.setHeader('Content-Type', 'application/json');
-	res.status(200).send(joResult);
-}
+// 	res.setHeader('Content-Type', 'application/json');
+// 	res.status(200).send(joResult);
+// }
 
 async function PJCADetail_Save(req, res) {
 	var joResult;

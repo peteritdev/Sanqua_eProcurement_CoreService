@@ -258,7 +258,7 @@ class GoodsReceiptService {
 										} else {
 											xJoResult = {
 												status_code: '-99',
-												status_msg: 'This fpb cannot ready for payreq yet.'
+												status_msg: 'This fpb cannot ready for receipt yet.'
 											};
 										}
 									} else {
@@ -567,7 +567,7 @@ class GoodsReceiptService {
 				var xGrDetail = await _repoInstance.getByParameter({ id: pParam.id });
 				if (xGrDetail != null) {
 					if (xGrDetail.status_code == '00') {
-						if (xGrDetail.data.status == 5) {
+						if (xGrDetail.data.status == 2) {
 							xJoResult = {
 								status_code: '-99',
 								status_msg: 'This document already cancel'

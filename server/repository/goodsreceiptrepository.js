@@ -115,7 +115,7 @@ class GoodsReceiptRepository {
 	}
 
 	async list(pParam) {
-		var xOrder = [ 'name', 'ASC' ];
+		var xOrder = [ 'id', 'DESC' ];
 		var xWhere = [];
 		var xWhereOr = [];
 		var xWhereAnd = [];
@@ -130,7 +130,27 @@ class GoodsReceiptRepository {
 					attributes: [ 'id', 'request_no' ]
 				}
 			];
+			
+			if (pParam.hasOwnProperty('product_id')) {
+				if (pParam.product_id != null && pParam.product_id != undefined && pParam.product_id != '') {
+					var xProduct = JSON.parse(pParam.product_id);
+					if (xProduct.length > 0) {
+						xInclude.push(
+							{
+								model: _modelPaymentRequestDetail,
+								as: 'payment_request_detail'
+							}
+						)
 
+						xWhereAnd.push({
+							'$payment_request_detail.product_id$': {
+								[Op.in]: xProduct
+							}
+						});
+					}
+				}
+			}
+			
 			if (pParam.hasOwnProperty('purchase_request_id')) {
 				if (pParam.purchase_request_id != '') {
 					xWhereAnd.push({

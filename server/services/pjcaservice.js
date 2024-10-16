@@ -650,7 +650,7 @@ class PJCAService {
 				var xPJCADetail = await _repoInstance.getByParameter({ id: pParam.id });
 				if (xPJCADetail != null) {
 					if (xPJCADetail.status_code == '00') {
-						if (xPJCADetail.data.status == 4) {
+						if (xPJCADetail.data.status == 3) {
 							xJoResult = {
 								status_code: '-99',
 								status_msg: 'This document already cancel'
@@ -658,7 +658,7 @@ class PJCAService {
 						} else {
 							var xParamUpdate = {
 								id: pParam.id,
-								status: 4,
+								status: 3,
 								canceled_at: await _utilInstance.getCurrDateTime(),
 								canceled_reason: pParam.cancel_reason,
 								// approved_at: await _utilInstance.getCurrDateTime()
@@ -756,6 +756,8 @@ class PJCAService {
 								var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
 	
 								if (xUpdateResult.status_code == '00') {
+									
+									this.updatePyrdItemQtyRelease(xPjcaDetail.data, 'confirm')
 									xJoResult = {
 										status_code: '00',
 										status_msg: 'PJCA successfully confirmed'
@@ -845,7 +847,7 @@ class PJCAService {
 							// Update status Pjca to be confirmed
 							var xParamUpdatePR = {
 								id: pParam.document_id,
-								status: 5,
+								status: 4,
 								reject_reason: pParam.reject_reason
 							};
 							var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
@@ -878,104 +880,103 @@ class PJCAService {
 
 		return xJoResult;
 	}
-	
-	async done(pParam) {
-		var xJoResult = {};
-		var xFlagProcess = false;
-		var xDecId = null;
-		var xEncId = null;
-		var xJoData = {};
+	// async done(pParam) {
+	// 	var xJoResult = {};
+	// 	var xFlagProcess = false;
+	// 	var xDecId = null;
+	// 	var xEncId = null;
+	// 	var xJoData = {};
 
-		try {
-			if (pParam.id != '' && pParam.user_id != '') {
-				xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
-				if (xDecId.status_code == '00') {
-					xFlagProcess = true;
-					xEncId = pParam.id;
-					pParam.id = xDecId.decrypted;
-					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
-					if (xDecId.status_code == '00') {
-						pParam.user_id = xDecId.decrypted;
-						xFlagProcess = true;
-					} else {
-						xJoResult = xDecId;
-					}
-				} else {
-					xJoResult = xDecId;
-				}
-			}
+	// 	try {
+	// 		if (pParam.id != '' && pParam.user_id != '') {
+	// 			xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+	// 			if (xDecId.status_code == '00') {
+	// 				xFlagProcess = true;
+	// 				xEncId = pParam.id;
+	// 				pParam.id = xDecId.decrypted;
+	// 				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+	// 				if (xDecId.status_code == '00') {
+	// 					pParam.user_id = xDecId.decrypted;
+	// 					xFlagProcess = true;
+	// 				} else {
+	// 					xJoResult = xDecId;
+	// 				}
+	// 			} else {
+	// 				xJoResult = xDecId;
+	// 			}
+	// 		}
 
-			if (xFlagProcess) {
-				var xPJCADetail = await _repoInstance.getByParameter({ id: pParam.id });
-				if (xPJCADetail != null) {
-					if (xPJCADetail.status_code == '00') {
-						if (xPJCADetail.data.status != 2) {
-							xJoResult = {
-								status_code: '-99',
-								status_msg: 'This document cannot be processed'
-							};
-						} else {
-							var xParamUpdate = {
-								id: pParam.id,
-								status: 3
-								// approved_at: await _utilInstance.getCurrDateTime()
-							};
-							var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
+	// 		if (xFlagProcess) {
+	// 			var xPJCADetail = await _repoInstance.getByParameter({ id: pParam.id });
+	// 			if (xPJCADetail != null) {
+	// 				if (xPJCADetail.status_code == '00') {
+	// 					if (xPJCADetail.data.status != 2) {
+	// 						xJoResult = {
+	// 							status_code: '-99',
+	// 							status_msg: 'This document cannot be processed'
+	// 						};
+	// 					} else {
+	// 						var xParamUpdate = {
+	// 							id: pParam.id,
+	// 							status: 3
+	// 							// approved_at: await _utilInstance.getCurrDateTime()
+	// 						};
+	// 						var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
 
-							if (xUpdateResult.status_code == '00') {
-								var xPayreqUpdate = {
-									id: xPJCADetail.data.payment_request_id,
-									status: 4
-									// approved_at: await _utilInstance.getCurrDateTime()
-								};
-								var xUpdateResult = await _paymentRequestRepoInstance.save(xPayreqUpdate, 'update');
-								if (xUpdateResult.status_code == '00') {
-									this.updatePyrdItemQtyRelease(xPJCADetail.data, 'done')
-									xJoResult = {
-										status_code: '00',
-										status_msg: 'PJCA successfully done'
-									};
-								} else {
+	// 						if (xUpdateResult.status_code == '00') {
+	// 							this.updatePyrdItemQtyRelease(xPJCADetail.data, 'done')
+	// 							var xPayreqUpdate = {
+	// 								id: xPJCADetail.data.payment_request_id,
+	// 								status: 4
+	// 								// approved_at: await _utilInstance.getCurrDateTime()
+	// 							};
+	// 							var xUpdateResult = await _paymentRequestRepoInstance.save(xPayreqUpdate, 'update');
+	// 							if (xUpdateResult.status_code == '00') {
+	// 								this.updatePyrdItemQtyRelease(xPJCADetail.data, 'done')
+	// 								xJoResult = {
+	// 									status_code: '00',
+	// 									status_msg: 'PJCA successfully done'
+	// 								};
+	// 							} else {
 									
-									var xParamUpdate = {
-										id: pParam.id,
-										status: 2
-										// approved_at: await _utilInstance.getCurrDateTime()
-									};
-									var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
+	// 								var xParamUpdate = {
+	// 									id: pParam.id,
+	// 									status: 2
+	// 									// approved_at: await _utilInstance.getCurrDateTime()
+	// 								};
+	// 								var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
 									
-									xJoResult = {
-										status_code: '-99',
-										status_msg: 'Failed update status'
-									};
-								}
-							} else {
-								xJoResult = xUpdateResult;
-							}
-						}
+	// 								xJoResult = {
+	// 									status_code: '-99',
+	// 									status_msg: 'Failed update status'
+	// 								};
+	// 							}
+	// 						} else {
+	// 							xJoResult = xUpdateResult;
+	// 						}
+	// 					}
 					
-					} else {
-						xJoResult = xPJCADetail
-					}
-				} else {
-					xJoResult = {
-						status_code: '-99',
-						status_msg: 'Data not found'
-					};
-				}
-			}
-		} catch (e) {
-			_utilInstance.writeLog(`${_xClassName}.cancel`, `Exception error: ${e.message}`, 'error');
+	// 				} else {
+	// 					xJoResult = xPJCADetail
+	// 				}
+	// 			} else {
+	// 				xJoResult = {
+	// 					status_code: '-99',
+	// 					status_msg: 'Data not found'
+	// 				};
+	// 			}
+	// 		}
+	// 	} catch (e) {
+	// 		_utilInstance.writeLog(`${_xClassName}.cancel`, `Exception error: ${e.message}`, 'error');
 
-			xJoResult = {
-				status_code: '-99',
-				status_msg: `${_xClassName}.cancel: Exception error: ${e.message}`
-			};
-		}
+	// 		xJoResult = {
+	// 			status_code: '-99',
+	// 			status_msg: `${_xClassName}.cancel: Exception error: ${e.message}`
+	// 		};
+	// 	}
 
-		return xJoResult;
-	}
-
+	// 	return xJoResult;
+	// }
 	async fetchMatrixPjca(pParam) {
 		var xJoResult = {};
 		var xDecId = null;
@@ -1075,7 +1076,7 @@ class PJCAService {
 			if (xPyrDetailItem.status_code == '00') {
 				let xQtyRelease = xPyrDetailItem.data.qty_done || 0
 				let xCalculatedQty = 0
-				if (pAct == 'done') {
+				if (pAct == 'confirm') {
 					xCalculatedQty = xQtyRelease + xPjcaDetail[i].qty_done
 				} else if (pAct == 'reject' || pAct == 'cancel' ){
 					xCalculatedQty = xQtyRelease - xPjcaDetail[i].qty_done
