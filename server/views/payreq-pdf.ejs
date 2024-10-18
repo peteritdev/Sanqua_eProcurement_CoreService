@@ -196,7 +196,13 @@
                       <% } %>
                     </td>
                     <td style="width: 75px">Giro</td>
-                    <td>An. <%=data.data.account_name%></td>
+                    <td>
+                      <% if( data.data.payment_type == 3 ){ %>
+                        <span>An. <%=data.data.account_name%></span>
+                      <% }else{ %>
+                        <span>An. </span>
+                      <% } %>
+                    </td>
                   </tr>
                 </table>
               </th>
@@ -214,7 +220,13 @@
                       <% } %>
                     </td>
                     <td style="width: 75px">Check</td>
-                    <td>An. <%=data.data.account_name%></td>
+                    <td>
+                      <% if( data.data.payment_type == 4 ){ %>
+                        <span>An. <%=data.data.account_name%></span>
+                      <% }else{ %>
+                        <span>An. </span>
+                      <% } %>
+                    </td>
                   </tr>
                 </table>
               </th>
@@ -225,14 +237,20 @@
                 <table style="margin-left: 15px">
                   <tr>
                     <td>
-                      <% if( data.data.payment_type == 5 ){ %>
+                      <% if( data.data.payment_type == 2 ){ %>
                       <img src="<%=imagePath%>box_checklist.png" width="15" />
                       <% }else{ %>
                       <img src="<%=imagePath%>blank_checklist.png" width="15" />
                       <% } %>
                     </td>
                     <td style="width: 75px">Transfer</td>
-                    <td>An. <%=data.data.account_name%></td>
+                    <td>
+                      <% if( data.data.payment_type == 2 ){ %>
+                        <span>An. <%=data.data.account_name%></span>
+                      <% }else{ %>
+                        <span>An. </span>
+                      <% } %>
+                    </td>
                   </tr>
                 </table>
               </th>
@@ -356,35 +374,37 @@
               </tr>
             </thead>
             <tbody>
-              <!-- <% var index = 1; [1,2,3,4,5,7,8,9,10].forEach( item => { %> -->
+              <%
+                  var index = 1;
+                  data.data.payment_request_detail.forEach( item => {
+              %>
               <tr>
-                <td style="text-align: center" class="border-rb">1</td>
-                <td style="text-align: left" class="border-rb">
-                  Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                  Sequi, libero!
-                </td>
-                <td style="text-align: center" class="border-rb">10</td>
-                <td style="text-align: center" class="border-rb">Pcs</td>
-                <td style="text-align: right" class="border-rb">550.000</td>
+                <td style="text-align: center" class="border-rb"><%=index%>.</td>
+                <td style="text-align: left" class="border-rb"><%=item.product_name%></td>
+                <td style="text-align: center" class="border-rb"><%=item.qty_request%></td>
+                <td style="text-align: center" class="border-rb"><%=item.uom_name%></td>
+                <td style="text-align: right" class="border-rb"><%=item.subtotal%></td>
                 <td
                   style="text-align: center; border-right: none"
                   class="border-rb"
                 >
-                  Lorem ipsum dolor sit amet.
+                  <%=item.description%>
                 </td>
               </tr>
-              <!-- <% index++; } ) %> -->
+              <%
+                      index++;
+                  } )
+              %>
 
               <tr>
                 <th colspan="4" style="text-align: left" class="border-rb">
                   TOTAL
                 </th>
-                <td style="text-align: right" class="border-rb">550.000</td>
+                <td style="text-align: right" class="border-rb"><%=data.data.total_price%></td>
                 <td
                   style="text-align: center; border-right: none"
                   class="border-rb"
                 >
-                  Lorem ipsum dolor sit amet.
                 </td>
               </tr>
               <tr>
@@ -405,9 +425,9 @@
             style="width: 100%; border-width: 0.2px"
           >
             <tr>
-              <td style="width: 10%" class="border-r" rowspan="2">Pemohon</td>
+              <th style="width: 7%" class="border-r" rowspan="2">Pemohon</td>
               <th
-                style="width: 90%"
+                style="width: 93%"
                 colspan="3"
                 style="font-size: 9px"
                 class="border-b"
@@ -422,128 +442,86 @@
             </tr>
             <tr>
               <td class="border-r">
-                <!-- <%
+                <%=data.data.employee_name%>
+              </td>
+              <td class="border-r">
+                
+                <%
                         if( qrCode.approval1.length > 0 ){
 
-                    %> -->
-                <table>
+                    %>
+                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 50px;">
                   <tr>
-                    <!-- <% for(var i = 0; i < qrCode.approval1.length; i++ ) { %> -->
+                    <% for(var i = 0; i < qrCode.approval1.length; i++ ) { %>
                     <td>
-                      <!-- <img
+                      <img
                         src="<%=qrCode.qrPath%><%=qrCode.approval1[i]%>"
                         width="80"
-                      /> -->
+                      />
                     </td>
-                    <!-- <% }%> -->
+                    <% }%>
                   </tr>
                   <tr>
-                    <!-- <% for(var i = 0; i < approver1.length; i++ ) { %> -->
-                    <!-- <td><%=approver1[i].user.name%></td> -->
-                    <td>(...........................................)</td>
-                    <!-- <% }%> -->
+                    <% for(var i = 0; i < approver1.length; i++ ) { %>
+                    <td><%=approver1[i].user.name%></td>
+                    <% }%>
                   </tr>
                 </table>
-
-                <!-- <%
+                <%
                         }
-                    %> -->
+                    %>
               </td>
-              <td
-                style="text-align: center; margin-bottom: 5px"
-                class="border-r"
-              >
-                <!-- <%
-                            if( qrCode.approval2.length > 0 ){
+              <td class="border-r">
+                
+                <%
+                        if( qrCode.approval2.length > 0 ){
 
-                        %> -->
-                <table>
+                    %>
+                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 50px;">
                   <tr>
-                    <!-- <% for(var i = 0; i < qrCode.approval2.length; i++ ) { %> -->
+                    <% for(var i = 0; i < qrCode.approval2.length; i++ ) { %>
                     <td>
-                      <!-- <img
+                      <img
                         src="<%=qrCode.qrPath%><%=qrCode.approval2[i]%>"
                         width="80"
-                      /> -->
+                      />
                     </td>
-                    <!-- <% }%> -->
+                    <% }%>
                   </tr>
                   <tr>
-                    <!-- <% for(var i = 0; i < approver2.length; i++ ) { %> -->
-                    <!-- <td><%=approver2[i].user.name%></td> -->
-                    <td>(...........................................)</td>
-                    <!-- <% }%> -->
+                    <% for(var i = 0; i < approver2.length; i++ ) { %>
+                    <td><%=approver2[i].user.name%></td>
+                    <% }%>
                   </tr>
                 </table>
-
-                <!-- <%
-                            }
-                        %> -->
+                <%
+                        }
+                    %>
               </td>
-              <td
-                style="text-align: center; margin-bottom: 5px"
-                class="border-r"
-              >
-                <!-- <%
-                            if( qrCode.approval3.length > 0 ){
-
-                        %> -->
-                <table>
+              <td>
+                <%
+                        if( qrCode.approval3.length > 0 ){
+                    %>
+                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 50px;">
                   <tr>
-                    <!-- <% for(var i = 0; i < qrCode.approval3.length; i++ ) { %> -->
+                    <% for(var i = 0; i < qrCode.approval3.length; i++ ) { %>
                     <td>
-                      <!-- <img
+                      <img
                         src="<%=qrCode.qrPath%><%=qrCode.approval3[i]%>"
                         width="80"
-                      /> -->
+                      />
                     </td>
-                    <!-- <% }%> -->
+                    <% }%>
                   </tr>
                   <tr>
-                    <!-- <% for(var i = 0; i < approver3.length; i++ ) { %> -->
-                    <!-- <td><%=approver3[i].user.name%></td> -->
-                    <td>(...........................................)</td>
-                    <!-- <% }%> -->
+                    <% for(var i = 0; i < approver3.length; i++ ) { %>
+                    <td><%=approver3[i].user.name%></td>
+                    <% }%>
                   </tr>
                 </table>
-
-                <!-- <%
-                            }
-                        %> -->
-              </td>
-              <td
-                style="
-                  text-align: center;
-                  margin-bottom: 5px;
-                  vertical-align: middle;
-                "
-              >
-                <!-- <%
-                            if( qrCode.approval3.length > 0 ){
-
-                        %> -->
-                <table>
-                  <tr>
-                    <!-- <% for(var i = 0; i < qrCode.approval3.length; i++ ) { %> -->
-                    <td>
-                      <!-- <img
-                        src="<%=qrCode.qrPath%><%=qrCode.approval3[i]%>"
-                        width="80"
-                      /> -->
-                    </td>
-                    <!-- <% }%> -->
-                  </tr>
-                  <tr>
-                    <!-- <% for(var i = 0; i < approver3.length; i++ ) { %> -->
-                    <!-- <td><%=approver3[i].user.name%></td> -->
-                    <td>(...........................................)</td>
-                    <!-- <% }%> -->
-                  </tr>
-                </table>
-
-                <!-- <%
-                            }
-                        %> -->
+                <%
+                        }
+                    %>
               </td>
             </tr>
           </table>
@@ -566,15 +544,19 @@
                 Jenis Payment Request :
               </th>
               <th style="text-align: left; width: 40%">
-                <span
-                  style="display: flex; align-items: center; margin-left: 3.5px"
-                >
-                  <img
-                    src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
-                    width="15"
-                  />
-                  <span style="margin-left: 5px">Cash Advance</span>
-                </span>
+                
+                <table style="margin-left: 17.5px">
+                  <tr>
+                    <td>
+                      <% if( data.data.payreq_type == 1 ){ %>
+                      <img src="<%=imagePath%>box_checklist.png" width="15" />
+                      <% }else{ %>
+                      <img src="<%=imagePath%>blank_checklist.png" width="15" />
+                      <% } %>
+                    </td>
+                    <td style="width: 75px">Cash Advance</td>
+                  </tr>
+                </table>
               </th>
               <th
                 rowspan="2"
@@ -583,70 +565,74 @@
                 Sumber Dana :
               </th>
               <th style="text-align: left; width: 25%">
-                <span
-                  style="display: flex; align-items: center; margin-left: 3.5px"
-                >
-                  <img
-                    src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
-                    width="15"
-                  />
-                  <span style="margin-left: 5px">Kas Kecil</span>
-                </span>
+                
+                <table style="margin-left: 17.5px">
+                  <tr>
+                    <td>
+                      <% if( data.data.payreq_type == 2 ){ %>
+                      <img src="<%=imagePath%>box_checklist.png" width="15" />
+                      <% }else{ %>
+                      <img src="<%=imagePath%>blank_checklist.png" width="15" />
+                      <% } %>
+                    </td>
+                    <td style="width: 75px">Kas Kecil</td>
+                  </tr>
+                </table>
               </th>
             </tr>
             <tr>
               <td>
-                <table>
-                  <tr>
-                    <td>
-                      <img
-                        src="<%=qrCode.qrPath%><%=qrCode.approval1[i]%>"
-                        width="80"
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>(...........................................)</td>
-                  </tr>
-                </table>
               </td>
               <td style="text-align: center">
                 <table style="width: 100%">
                   <tr>
                     <th style="text-align: left">
-                      <span style="display: flex; align-items: center">
-                        <img
-                          src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
-                          width="15"
-                        />
-                        <span style="margin-left: 5px">Reimbursement</span>
-                      </span>
+                      <table style="margin-left: 15px">
+                        <tr>
+                          <td>
+                            <% if( data.data.payreq_type == 2 ){ %>
+                            <img src="<%=imagePath%>box_checklist.png" width="15" />
+                            <% }else{ %>
+                            <img src="<%=imagePath%>blank_checklist.png" width="15" />
+                            <% } %>
+                          </td>
+                          <td style="width: 75px">Reimburst</td>
+                        </tr>
+                      </table>
                     </th>
                   </tr>
                   <tr>
                     <th style="text-align: left">
-                      <span style="display: flex; align-items: center">
-                        <img
-                          src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
-                          width="15"
-                        />
-                        <span style="margin-left: 5px"
-                          >Pelunasan Purchase Order</span
-                        >
-                      </span>
+                     
+                      <table style="margin-left: 15px">
+                        <tr>
+                          <td>
+                            <% if( data.data.payreq_type == 3 ){ %>
+                            <img src="<%=imagePath%>box_checklist.png" width="15" />
+                            <% }else{ %>
+                            <img src="<%=imagePath%>blank_checklist.png" width="15" />
+                            <% } %>
+                          </td>
+                          <td style="width: 75px">Pelunasan Purchase Order</td>
+                        </tr>
+                      </table>
                     </th>
                   </tr>
                   <tr>
                     <th style="text-align: left">
-                      <span style="display: flex; align-items: center">
-                        <img
-                          src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
-                          width="15"
-                        />
-                        <span style="margin-left: 5px">
-                          .............................................</span
-                        >
-                      </span>
+                      
+                      <table style="margin-left: 15px">
+                        <tr>
+                          <td>
+                            <% if( data.data.payreq_type == 4){ %>
+                            <img src="<%=imagePath%>box_checklist.png" width="15" />
+                            <% }else{ %>
+                            <img src="<%=imagePath%>blank_checklist.png" width="15" />
+                            <% } %>
+                          </td>
+                          <td style="width: 75px">Lain-lain</td>
+                        </tr>
+                      </table>
                     </th>
                   </tr>
                 </table>
@@ -655,15 +641,25 @@
                 <table style="width: 100%">
                   <tr>
                     <th style="text-align: left">
-                      <span style="display: flex; align-items: center">
-                        <img
-                          src="http://10.10.20.8:8020/assets/icon/blank_checklist.png"
-                          width="15"
-                        />
-                        <span style="margin-left: 5px">
-                          .............................................</span
-                        >
-                      </span>
+                      
+                      <table style="margin-left: 15px">
+                        <tr>
+                          <td>
+                            <% if( data.data.source_of_funds != null &&  data.data.source_of_funds != ''){ %>
+                            <img src="<%=imagePath%>box_checklist.png" width="15" />
+                            <% }else{ %>
+                            <img src="<%=imagePath%>blank_checklist.png" width="15" />
+                            <% } %>
+                          </td>
+                          <td style="width: 75px">
+                            <% if( data.data.source_of_funds != null &&  data.data.source_of_funds != ''){ %>
+                            <span><%=data.data.source_of_funds%></span>
+                            <% }else{ %>
+                            <span>........................</span>
+                            <% } %>
+                          </td>
+                        </tr>
+                      </table>
                     </th>
                   </tr>
                 </table>

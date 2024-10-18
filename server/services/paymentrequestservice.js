@@ -780,49 +780,64 @@ class PaymentRequestService {
 							var xPJCAResult = await _pjcaRepoInstance.list(xParamPjca);
 							console.log(`>>> xPJCAResult: ${JSON.stringify(xPJCAResult)}`);
 							if (xPJCAResult.status_code == '00') {
-								xJoResult = {
-									status_code: '-99',
-									status_msg: "You cannot cancel this document, There is already processed PJCA "
-								};
-							} else {
-								// check if product have submited GR
-								const xArrId = []
-								for (let i = 0; i < xPayreqDetail.data.payment_request_detail.length; i++) {
-									xArrId.push(xPayreqDetail.data.payment_request_detail[i].product_id)
-								}
-								const xParamGr = {
-									purchase_request_id: xPayreqDetail.data.purchase_request_id,
-									product_id: xArrId,
-									status: 1
-								}
-								var xGrResultList = await _goodsReceiptRepoInstance.list(xParamGr);
-								if (xGrResultList.status_code == '00') {
+								if (xPJCAResult.data.rows.length > 0) {
 									xJoResult = {
 										status_code: '-99',
-										status_msg: "Cancel failed, this document already have some processed receipt"
+										status_msg: "You cannot cancel this document, There is already processed PJCA "
+									};
+									xFlagProcess = false
+								} else {
+									// check if product have submited GR
+									const xArrId = []
+									for (let i = 0; i < xPayreqDetail.data.payment_request_detail.length; i++) {
+										xArrId.push(xPayreqDetail.data.payment_request_detail[i].product_id)
+									}
+									const xParamGr = {
+										purchase_request_id: xPayreqDetail.data.purchase_request_id,
+										product_id: xArrId,
+										status: 1
+									}
+									var xGrResultList = await _goodsReceiptRepoInstance.list(xParamGr);
+									console.log(`>>> xGrResultList: ${JSON.stringify(xGrResultList)}`);
+									if (xGrResultList.status_code == '00') {
+										if (xGrResultList.data.rows.length > 0) {
+											xJoResult = {
+												status_code: '-99',
+												status_msg: "Cancel failed, this document already have some processed receipt"
+											};
+											xFlagProcess = false
+										}
+									} else {
+										xFlagProcess = false
+										xJoResult = xGrResultList
+									}
+								}
+							} else {
+								xFlagProcess = false
+								xJoResult = xPJCAResult
+							}
+
+							if (xFlagProcess) {
+								var xParamUpdate = {
+									id: pParam.id,
+									status: 4,
+									canceled_at: await _utilInstance.getCurrDateTime(),
+									canceled_reason: pParam.cancel_reason,
+									// approved_at: await _utilInstance.getCurrDateTime()
+								};
+								var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
+	
+								if (xUpdateResult.status_code == '00') {
+									if (xPayreqDetail.data.status != 0) {
+										this.updatePrdItemQtyLeft(xPayreqDetail.data, 'cancel')
+									}
+									
+									xJoResult = {
+										status_code: '00',
+										status_msg: 'Payreq successfully canceled'
 									};
 								} else {
-									// var xParamUpdate = {
-									// 	id: pParam.id,
-									// 	status: 4,
-									// 	canceled_at: await _utilInstance.getCurrDateTime(),
-									// 	canceled_reason: pParam.cancel_reason,
-									// 	// approved_at: await _utilInstance.getCurrDateTime()
-									// };
-									// var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
-		
-									// if (xUpdateResult.status_code == '00') {
-									// 	if (xPayreqDetail.data.status != 0) {
-									// 		this.updatePrdItemQtyLeft(xPayreqDetail.data, 'cancel')
-									// 	}
-										
-									// 	xJoResult = {
-									// 		status_code: '00',
-									// 		status_msg: 'Payreq successfully canceled'
-									// 	};
-									// } else {
-									// 	xJoResult = xUpdateResult;
-									// }
+									xJoResult = xUpdateResult;
 								}
 							}
 
@@ -909,6 +924,7 @@ class PaymentRequestService {
 								var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
 	
 								if (xUpdateResult.status_code == '00') {
+									this.updatePrdItemQtyLeft(xPayreqDetail.data, 'submit')
 									xJoResult = {
 										status_code: '00',
 										status_msg: 'Payreq successfully confirmed'
@@ -998,13 +1014,13 @@ class PaymentRequestService {
 							// Update status Payreq to be confirmed
 							var xParamUpdatePR = {
 								id: pParam.document_id,
-								status: 6,
+								status: 5,
 								reject_reason: pParam.reject_reason
 							};
 							var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
 
 							if (xUpdateResult.status_code == '00') {
-								this.updatePrdItemQtyLeft(xPayreqDetail.data, 'reject')
+								// this.updatePrdItemQtyLeft(xPayreqDetail.data, 'reject')
 
 								xJoResult = {
 									status_code: '00',
@@ -1078,7 +1094,7 @@ class PaymentRequestService {
 							var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
 
 							if (xUpdateResult.status_code == '00') {
-								this.updatePrdItemQtyLeft(xPayreqDetail.data, 'paid')
+								// this.updatePrdItemQtyLeft(xPayreqDetail.data, 'paid')
 								xJoResult = {
 									status_code: '00',
 									status_msg: 'Payreq successfully paid'
@@ -1099,11 +1115,11 @@ class PaymentRequestService {
 				}
 			}
 		} catch (e) {
-			_utilInstance.writeLog(`${_xClassName}.cancel`, `Exception error: ${e.message}`, 'error');
+			_utilInstance.writeLog(`${_xClassName}.paid`, `Exception error: ${e.message}`, 'error');
 
 			xJoResult = {
 				status_code: '-99',
-				status_msg: `${_xClassName}.cancel: Exception error: ${e.message}`
+				status_msg: `${_xClassName}.paid: Exception error: ${e.message}`
 			};
 		}
 
@@ -1278,7 +1294,7 @@ class PaymentRequestService {
 			if (xPrDetailItem.status_code == '00') {
 				let xQtyLeft = xPrDetailItem.data.qty_paid || 0
 				let xCalculatedQty = 0
-				if (pAct == 'paid') {
+				if (pAct == 'submit') {
 					xCalculatedQty = xQtyLeft + xPaymentRequestDetail[i].qty_request
 				} else if (pAct == 'reject' || pAct == 'cancel' ){
 					xCalculatedQty = xQtyLeft - xPaymentRequestDetail[i].qty_request

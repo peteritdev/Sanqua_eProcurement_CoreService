@@ -549,22 +549,9 @@ class ExportService {
 						data: xJoResultPayreq,
 						companyData: xCompanyData,
 						imagePath: config.imagePath,
-						// xApprover1 != null
-						// 	? xApprover1.approver_user.find((el) => el.status === 1) == null
-						// 		? ''
-						// 		: xApprover1.approver_user.find((el) => el.status === 1).user.name
-						// 	: '',
-
 						approver1: xApprovedUser1,
 						approver2: xApprovedUser2,
 						approver3: xApprovedUser3,
-
-						// approver6:
-						// 	xApprover6 != null
-						// 		? xApprover6.approver_user.find((el) => el.status === 1) == null
-						// 			? ''
-						// 			: xApprover6.approver_user.find((el) => el.status === 1).user.name
-						// 		: '',
 						qrCode: {
 							qrPath: `${config.imagePathESanQua_dev}/digital_sign_qrcode/`,
 							approval1: xQRCodeFileName1,
