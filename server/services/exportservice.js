@@ -476,7 +476,6 @@ class ExportService {
 					xJoResultPayreq.data.approval_matrix != null
 						? xJoResultPayreq.data.approval_matrix.find((el) => el.sequence === 3)
 						: null;
-
 				// Generate QRCode Digital Sign
 
 				let xApprovedUser1 =

@@ -68,10 +68,7 @@
     >
       <tr>
         <td style="width: 20%; text-align: left; padding-left: 10px">
-          <img
-            src="https://img.freepik.com/free-vector/bird-colorful-logo-gradient-vector_343694-1365.jpg?t=st=1728547256~exp=1728550856~hmac=e6a33416dc3892290122d9521e4513e6318960d34f1267102626b08b9055f99b&w=740"
-            height="45"
-          />
+          <img src="<%=companyData.logo%>" height="45" />
         </td>
         <td style="text-align: center; width: 60%">
           <span
@@ -92,7 +89,7 @@
             vertical-align: bottom;
           "
         >
-          <span>Doc No. FRM ACC.03.02.rev.01</span>
+          <span>Doc No. <%=data.data.document_no%></span>
         </th>
       </tr>
       <tr>
@@ -108,7 +105,7 @@
                   >Kepada <span>:</span></span
                 >
               </td>
-              <td style="width: 56.65%" class="border-r">Department Finance</td>
+              <td style="width: 56.65%" class="border-r">DEPARTMENT FINANCE</td>
               <td style="width: 33.35%">Untuk Payment Request</td>
             </tr>
             <tr>
@@ -118,7 +115,7 @@
                 >
               </td>
               <td style="width: 56.65%" class="border-r">
-                Department .............................
+                DEPARTMENT <%=data.data.department_name%>
               </td>
               <td style="width: 33.35%">
                 <span
@@ -127,7 +124,7 @@
                     justify-content: space-between;
                     width: 60px;
                   "
-                  >Nomor <span>:</span></span
+                  >Nomor <span>:</span> <%=data.data.document_no%></span
                 >
               </td>
             </tr>
@@ -138,7 +135,7 @@
                 >
               </td>
               <td style="width: 56.65%" class="border-r">
-                .................................................
+                <%=data.data.createdAt%>
               </td>
               <td style="width: 33.35%">
                 <span
@@ -147,7 +144,8 @@
                     justify-content: space-between;
                     width: 60px;
                   "
-                  >Tanggal CA <span>:</span></span
+                  >Tanggal CA <span>:</span>
+                  <%=data.data.payment_request.created_at%></span
                 >
               </td>
             </tr>
@@ -177,37 +175,38 @@
               </tr>
             </thead>
             <tbody>
-              <!-- <% var index = 1; [1,2,3,4,5,7,8,9,10].forEach( item => { %> -->
+              <%
+                  var index = 1;
+                  data.data.pjca_detail.forEach( item => {
+              %>
               <tr>
-                <td style="text-align: center" class="border-rb">1</td>
-                <td style="text-align: left" class="border-rb">
-                  Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                  Sequi, libero!
-                </td>
-                <td style="text-align: center" class="border-rb">10</td>
-                <td style="text-align: center" class="border-rb">Pcs</td>
-                <td style="text-align: right" class="border-rb">550.000</td>
+                <td style="text-align: center" class="border-rb"><%=index%>.</td>
+                <td style="text-align: left" class="border-rb"><%=item.product_name%></td>
+                <td style="text-align: center" class="border-rb"><%=item.qty_request%></td>
+                <td style="text-align: center" class="border-rb"><%=item.uom_name%></td>
+                <td style="text-align: center" class="border-rb"><%=item.subtotal%></td>
                 <td
                   style="text-align: center; border-right: none"
                   class="border-rb"
                 >
-                  Lorem ipsum dolor sit amet.
+                  <%=item.description%>
                 </td>
               </tr>
-              <!-- <% index++; } ) %> -->
+              <%
+                      index++;
+                  } )
+              %>
 
               <tr>
                 <th colspan="2" style="text-align: left" class="border-rb">
                   TOTAL
                 </th>
-                <td colspan="3" style="text-align: right" class="border-rb">
-                  550.000
-                </td>
+                <td style="text-align: right" class="border-rb"><%=data.data.total_price%></td>
                 <td
                   style="text-align: center; border-right: none"
                   class="border-rb"
                 >
-                  Lorem ipsum dolor sit amet.
+                  <!-- Lorem ipsum dolor sit amet. -->
                 </td>
               </tr>
               <tr>

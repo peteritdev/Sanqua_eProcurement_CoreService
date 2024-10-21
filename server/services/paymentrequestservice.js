@@ -207,8 +207,8 @@ class PaymentRequestService {
 								}
 								// xDetail.data.total_tax_amount = (Math.round((xTaxes - (xTaxes * (xDetail.data.global_discount_percent / 100))) * 1000 )  / 1000) || 0
 							}
-
-							xDetail.data.total_price = Math.round((xDetail.data.untaxed_amount + xDetail.data.total_tax_amount || 0) * 1000) / 1000
+							var xPreTotalPrice = xDetail.data.untaxed_amount + xDetail.data.total_tax_amount + xDetail.data.delivery_costs + xDetail.data.service_costs + xDetail.data.other_costs
+							xDetail.data.total_price = Math.round((xPreTotalPrice || 0) * 1000) / 1000
 							// get Detail FPB
 							// let xFpbDetail = await _purchaseRequestRepoInstance.getById({ id: xDetail.data.purchase_request_id })
 							// if (xFpbDetail != null) {
@@ -775,7 +775,7 @@ class PaymentRequestService {
 							// check if payreq have submited PJCA
 							const xParamPjca = {
 								payment_request_id: xPayreqDetail.data.id,
-								status: [1,2]
+								status: [0, 1, 2]
 							}
 							var xPJCAResult = await _pjcaRepoInstance.list(xParamPjca);
 							console.log(`>>> xPJCAResult: ${JSON.stringify(xPJCAResult)}`);

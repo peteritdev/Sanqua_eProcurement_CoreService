@@ -198,7 +198,8 @@ class PJCAService {
 								// xDetail.data.total_tax_amount = (Math.round((xTaxes - (xTaxes * (xDetail.data.global_discount_percent / 100))) * 1000 )  / 1000) || 0
 							}
 
-							xDetail.data.total_price = Math.round((xDetail.data.untaxed_amount + xDetail.data.total_tax_amount || 0) * 1000) / 1000
+							var xPreTotalPrice = xDetail.data.untaxed_amount + xDetail.data.total_tax_amount + xDetail.data.delivery_costs + xDetail.data.service_costs + xDetail.data.other_costs
+							xDetail.data.total_price = Math.round((xPreTotalPrice || 0) * 1000) / 1000
 							
 							// Get Approval Matrix
 							var xParamApprovalMatrix = {
@@ -388,47 +389,61 @@ class PJCAService {
 
 		if (xFlagProcess) {
 			if (xAct == 'add' || xAct == 'add_batch_in_item') {
-				var xJoArrItems = [];
+				
+				var xPjcaDetail = await _repoInstance.list({payment_request_id: xDecId.decrypted,});
+				console.log(`>>> xPjcaDetail ${JSON.stringify(xPjcaDetail)}`);
+				if (xPjcaDetail.data.rows.length > 0) {
+					if (xPjcaDetail.data.rows.find(({ status }) => status < 3) != undefined) {
+						xJoResult = {
+							status_code: '-99',
+							status_msg: 'PJCA Already created, You cannot create PJCA from this document again'
+						};
+						xFlagProcess = false
+					}
+				}
+				
+				if (xFlagProcess) {
+					var xJoArrItems = [];
 
-				if (pParam.hasOwnProperty('pjca_detail')) {
-					xJoArrItems = pParam.pjca_detail;
-					if (xJoArrItems.length > 0) {
-						for (var i in xJoArrItems) {
-							var xPrdId = await _utilInstance.decrypt(xJoArrItems[i].prd_id, config.cryptoKey.hashKey);
-							if (xPrdId.status_code == '00') {
-								xJoArrItems[i].prd_id = xPrdId.decrypted;
-								// delete xJoArrItems[i].prd_id
-							}
-							console.log(`>>> xPrdId ${JSON.stringify(xPrdId)}`);
-							if (
-								xJoArrItems[i].hasOwnProperty('price_done') &&
-								xJoArrItems[i].hasOwnProperty('qty_done')
-							) {
-								xJoArrItems[i].price_total =
-									xJoArrItems[i].qty_done * xJoArrItems[i].price_done;
+					if (pParam.hasOwnProperty('pjca_detail')) {
+						xJoArrItems = pParam.pjca_detail;
+						if (xJoArrItems.length > 0) {
+							for (var i in xJoArrItems) {
+								var xPrdId = await _utilInstance.decrypt(xJoArrItems[i].prd_id, config.cryptoKey.hashKey);
+								if (xPrdId.status_code == '00') {
+									xJoArrItems[i].prd_id = xPrdId.decrypted;
+									// delete xJoArrItems[i].prd_id
+								}
+								console.log(`>>> xPrdId ${JSON.stringify(xPrdId)}`);
+								if (
+									xJoArrItems[i].hasOwnProperty('price_done') &&
+									xJoArrItems[i].hasOwnProperty('qty_done')
+								) {
+									xJoArrItems[i].price_total =
+										xJoArrItems[i].qty_done * xJoArrItems[i].price_done;
+								}
 							}
 						}
+
+						console.log(`>>> xJoArrItems ${JSON.stringify(xJoArrItems)}`);
+						pParam.pjca_detail = xJoArrItems;
 					}
 
-					console.log(`>>> xJoArrItems ${JSON.stringify(xJoArrItems)}`);
-					pParam.pjca_detail = xJoArrItems;
+					let xResult = await _repoInstance.save(pParam, xAct);
+					if (xResult.status_code == '00') {
+						var dt = dateTime.create();
+						var xDate = dt.format('ym');
+						var xPJCANo = `${pParam.company_code}/PJCA/${xDate}/` + xResult.clear_id.toString().padStart(5,'0');
+
+						var xParamUpdate = {
+							document_no: xPJCANo,
+							id: xResult.clear_id
+						};
+
+						var xUpdate = await _repoInstance.save(xParamUpdate, 'update');
+					}
+					xJoResult = xResult;
 				}
-
-				let xResult = await _repoInstance.save(pParam, xAct);
-				if (xResult.status_code == '00') {
-					var dt = dateTime.create();
-					var xDate = dt.format('ym');
-					var xPJCANo = `${pParam.company_code}/PJCA/${xDate}/` + xResult.clear_id.toString().padStart(5,'0');
-
-					var xParamUpdate = {
-						document_no: xPJCANo,
-						id: xResult.clear_id
-					};
-
-					var xUpdate = await _repoInstance.save(xParamUpdate, 'update');
-				}
-
-				xJoResult = xResult;
 			} else if (xAct == 'update') {
 				var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
 				if (xDecId.status_code == '00') {
