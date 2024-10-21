@@ -37,7 +37,7 @@ class PJCARepository {
 				{
 					model: _modelPaymentRequest,
 					as: 'payment_request',
-					attributes: [ 'id', 'document_no' ]
+					attributes: [ 'id', 'document_no', 'created_at' ]
 				},
 				{
 					model: _modelPJCADetail,
