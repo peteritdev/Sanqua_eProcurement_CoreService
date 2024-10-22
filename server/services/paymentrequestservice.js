@@ -604,6 +604,9 @@ class PaymentRequestService {
 								
 								// Next Phase : Approval Matrix & Notification to admin
 								if (xUpdate.status_code == '00') {
+									if (xDetail.data.payreq_type == 2) {
+										this.updatePrdItemQtyLeft(xDetail.data, 'submit')
+									}
 									// this.updatePrdItemQtyLeft(xDetail.data, 'submit')
 									
 									var xParamAddApprovalMatrix = {
@@ -924,7 +927,9 @@ class PaymentRequestService {
 								var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
 	
 								if (xUpdateResult.status_code == '00') {
-									this.updatePrdItemQtyLeft(xPayreqDetail.data, 'submit')
+									if (xPayreqDetail.data.payreq_type != 2) {
+										this.updatePrdItemQtyLeft(xPayreqDetail.data, 'submit')
+									}
 									xJoResult = {
 										status_code: '00',
 										status_msg: 'Payreq successfully confirmed'
@@ -1020,7 +1025,9 @@ class PaymentRequestService {
 							var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
 
 							if (xUpdateResult.status_code == '00') {
-								// this.updatePrdItemQtyLeft(xPayreqDetail.data, 'reject')
+								if (xPayreqDetail.data.payreq_type == 2) {
+									this.updatePrdItemQtyLeft(xPayreqDetail.data, 'reject')
+								}
 
 								xJoResult = {
 									status_code: '00',
