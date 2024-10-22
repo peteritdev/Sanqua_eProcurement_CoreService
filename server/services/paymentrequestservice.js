@@ -832,7 +832,9 @@ class PaymentRequestService {
 	
 								if (xUpdateResult.status_code == '00') {
 									if (xPayreqDetail.data.status != 0) {
-										this.updatePrdItemQtyLeft(xPayreqDetail.data, 'cancel')
+										if (xPayreqDetail.data.payreq_type != 2) {
+											this.updatePrdItemQtyLeft(xPayreqDetail.data, 'cancel')
+										}
 									}
 									
 									xJoResult = {
