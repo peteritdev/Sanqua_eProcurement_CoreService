@@ -200,7 +200,7 @@ class PJCAService {
 
 							var xPreTotalPrice = xDetail.data.untaxed_amount + xDetail.data.total_tax_amount + xDetail.data.delivery_costs + xDetail.data.service_costs + xDetail.data.other_costs
 							xDetail.data.total_price = Math.round((xPreTotalPrice || 0) * 1000) / 1000
-							
+
 							// Get Approval Matrix
 							var xParamApprovalMatrix = {
 								application_id: 8,
