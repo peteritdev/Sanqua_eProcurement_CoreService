@@ -562,9 +562,9 @@ class ExportService {
 						var xOptions = {};
 
 						xOptions = {
-							width: '165mm',
+							height: '212mm',
 							// height: '148.5mm',
-							height: '297mm',
+							width: '162mm',
 							borders: '0.3cm'
 						};
 
@@ -954,9 +954,9 @@ class ExportService {
 						var xOptions = {};
 
 						xOptions = {
-							width: '210mm',
+							width: '212mm',
 							// height: '148.5mm',
-							height: '297mm',
+							height: '162mm',
 							borders: '0.3cm'
 						};
 

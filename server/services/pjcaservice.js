@@ -492,6 +492,7 @@ class PJCAService {
 			}
 
 			if (xFlagProcess) {
+				
 				var xDetail = await _repoInstance.getByParameter({
 					id: pParam.id
 				});
@@ -500,41 +501,59 @@ class PJCAService {
 				if (xDetail != null) {
 					console.log(`>>> xDetail: ${JSON.stringify(xDetail.status)}`, pParam.id);
 					if (xDetail.status_code == '00') {
-						if (xDetail.data.status == 0) {
-							pParam.status = 1;
-							pParam.created_at = await _utilInstance.getCurrDateTime();
-							var xUpdate = await _repoInstance.save(pParam, 'submit');
-							xJoResult = xUpdate;
-
-							// Next Phase : Approval Matrix & Notification to admin
-							if (xUpdate.status_code == '00') {
-								var xParamAddApprovalMatrix = {
-									act: 'add',
-									document_id: xEncId,
-									document_no: xDetail.data.document_no,
-									application_id: 8,
-									table_name: config.dbTables.pjca,
-									company_id: xDetail.data.company_id,
-									department_id: xDetail.data.department_id,
-									ecatalogue_fpb_category_item: null,
-									logged_company_id: pParam.logged_company_id
+						// check if Payreq already paid ?
+						const xParamPayreq = {
+							id: xDetail.data.payment_request.id
+						}
+						var xPayreqResult = await _paymentRequestRepoInstance.getByParameter(xParamPayreq);
+						console.log(`>>> xPayreqResult: ${JSON.stringify(xPayreqResult)}`);
+						if (xPayreqResult.status_code == '00') {
+							if (xPayreqResult.data.status != 3) {
+								xJoResult = {
+									status_code: '-99',
+									status_msg: "Invalid action, Payreq not paid yet"
 								};
-
-								var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
-									pParam.method,
-									pParam.token,
-									xParamAddApprovalMatrix
-								);
-
-								xJoResult.approval_matrix_result = xApprovalMatrixResult;
-							} else {
-								xJoResult = xUpdate;
+								xFlagProcess = false
 							}
-						} else {
-							xJoResult = {
-								status_code: '-99',
-								status_msg: `PJCA already in process`
-							};
+						}
+
+						if (xFlagProcess) {
+							if (xDetail.data.status == 0) {
+								pParam.status = 1;
+								pParam.created_at = await _utilInstance.getCurrDateTime();
+								var xUpdate = await _repoInstance.save(pParam, 'submit');
+								xJoResult = xUpdate;
+
+								// Next Phase : Approval Matrix & Notification to admin
+								if (xUpdate.status_code == '00') {
+									var xParamAddApprovalMatrix = {
+										act: 'add',
+										document_id: xEncId,
+										document_no: xDetail.data.document_no,
+										application_id: 8,
+										table_name: config.dbTables.pjca,
+										company_id: xDetail.data.company_id,
+										department_id: xDetail.data.department_id,
+										ecatalogue_fpb_category_item: null,
+										logged_company_id: pParam.logged_company_id
+									};
+
+									var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
+										pParam.method,
+										pParam.token,
+										xParamAddApprovalMatrix
+									);
+
+									xJoResult.approval_matrix_result = xApprovalMatrixResult;
+								} else {
+									xJoResult = xUpdate;
+								}
+							} else {
+								xJoResult = {
+									status_code: '-99',
+									status_msg: `PJCA already in process`
+								};
+							}
 						}
 					} else {
 						xJoResult = xDetail;
@@ -588,28 +607,57 @@ class PJCAService {
 				var xPJCADetail = await _repoInstance.getByParameter({ id: pParam.id });
 				if (xPJCADetail != null) {
 					if (xPJCADetail.status_code == '00') {
-						if (xPJCADetail.data.status == 0) {
-							xJoResult = {
-								status_code: '-99',
-								status_msg: 'This document already draft'
-							};
-						} else {
-							var xParamUpdate = {
-								id: pParam.id,
-								status: 0,
-								set_to_draft_at: await _utilInstance.getCurrDateTime(),
-								set_to_draft_by: pParam.user_id,
-								set_to_draft_by_name: pParam.user_name,
-							};
-							var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
-
-							if (xUpdateResult.status_code == '00') {
+						// check if Payreq already paid ?
+						const xParamPayreq = {
+							id: xPJCADetail.data.payment_request.id
+						}
+						var xPayreqResult = await _paymentRequestRepoInstance.getByParameter(xParamPayreq);
+						console.log(`>>> xPayreqResult: ${JSON.stringify(xPayreqResult)}`);
+						if (xPayreqResult.status_code == '00') {
+							if (xPayreqResult.data.status != 3) {
 								xJoResult = {
-									status_code: '00',
-									status_msg: 'PJCA successfully set to draft'
+									status_code: '-99',
+									status_msg: "Invalid action, Payreq not paid"
+								};
+								xFlagProcess = false
+							} else {
+								var xPJCAList = await _repoInstance.list({payment_request_id: xPJCADetail.data.payment_request.id,});
+								console.log(`>>> xPJCAList ${JSON.stringify(xPJCAList)}`);
+								if (xPJCAList.data.rows.length > 0) {
+									if (xPJCAList.data.rows.find(({ status }) => status < 3) != undefined) {
+										xJoResult = {
+											status_code: '-99',
+											status_msg: 'Invalid action, there is already another active PJCA linked to same Payment Request'
+										};
+										xFlagProcess = false
+									}
+								}
+							}
+						}
+						if (xFlagProcess) {
+							if (xPJCADetail.data.status == 0) {
+								xJoResult = {
+									status_code: '-99',
+									status_msg: 'This document already draft'
 								};
 							} else {
-								xJoResult = xUpdateResult;
+								var xParamUpdate = {
+									id: pParam.id,
+									status: 0,
+									set_to_draft_at: await _utilInstance.getCurrDateTime(),
+									set_to_draft_by: pParam.user_id,
+									set_to_draft_by_name: pParam.user_name,
+								};
+								var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
+
+								if (xUpdateResult.status_code == '00') {
+									xJoResult = {
+										status_code: '00',
+										status_msg: 'PJCA successfully set to draft'
+									};
+								} else {
+									xJoResult = xUpdateResult;
+								}
 							}
 						}
 					
@@ -681,6 +729,9 @@ class PJCAService {
 							var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
 
 							if (xUpdateResult.status_code == '00') {
+								if (xPJCADetail.data.status != 0) {
+									this.updatePyrdItemQtyRelease(xPJCADetail.data, 'delete')
+								}
 								xJoResult = {
 									status_code: '00',
 									status_msg: 'PJCA successfully canceled'
@@ -772,7 +823,7 @@ class PJCAService {
 	
 								if (xUpdateResult.status_code == '00') {
 									
-									this.updatePyrdItemQtyRelease(xPjcaDetail.data, 'confirm')
+									this.updatePyrdItemQtyRelease(xPjcaDetail.data, 'add')
 									xJoResult = {
 										status_code: '00',
 										status_msg: 'PJCA successfully confirmed'
@@ -1091,9 +1142,9 @@ class PJCAService {
 			if (xPyrDetailItem.status_code == '00') {
 				let xQtyRelease = xPyrDetailItem.data.qty_done || 0
 				let xCalculatedQty = 0
-				if (pAct == 'confirm') {
+				if (pAct == 'add') {
 					xCalculatedQty = xQtyRelease + xPjcaDetail[i].qty_done
-				} else if (pAct == 'reject' || pAct == 'cancel' ){
+				} else if (pAct == 'delete'){
 					xCalculatedQty = xQtyRelease - xPjcaDetail[i].qty_done
 				}
 				let xPyrdUpdateParam = {

@@ -24,6 +24,9 @@ const _globalUtilInstance = new GlobalUtility();
 const PaymentRequestRepository = require('../repository/paymentrequestrepository.js');
 const _repoInstance = new PaymentRequestRepository();
 
+const PaymentRequestDetailRepository = require('../repository/paymentrequestdetailrepository.js');
+const _paymentRequestDetailRepoInstance = new PaymentRequestDetailRepository();
+
 const PurchaseRequestRepository = require('../repository/purchaserequestrepository.js');
 const _purchaseRequestRepoInstance = new PurchaseRequestRepository();
 
@@ -42,11 +45,14 @@ const _pjcaRepoInstance = new PJCARepository();
 const OAuthService = require('../services/oauthservice.js');
 const _oAuthService = new OAuthService();
 
-const VendorCatalogueService = require('../services/vendorcatalogueservice.js');
-const _catalogueService = new VendorCatalogueService();
+// const PJCAService = require('../services/pjcaservice.js');
+// const _pjcaServiceInstance = new PJCAService();
 
-const PurchaseRequestService = require('../services/purchaserequestservice.js');
-const _purchaseRequestServiceInstance = new PurchaseRequestService();
+// const VendorCatalogueService = require('../services/vendorcatalogueservice.js');
+// const _catalogueService = new VendorCatalogueService();
+
+// const PurchaseRequestService = require('../services/purchaserequestservice.js');
+// const _purchaseRequestServiceInstance = new PurchaseRequestService();
 
 const _xClassName = 'PaymentRequestService';
 
@@ -604,8 +610,10 @@ class PaymentRequestService {
 								
 								// Next Phase : Approval Matrix & Notification to admin
 								if (xUpdate.status_code == '00') {
+
 									if (xDetail.data.payreq_type == 2) {
-										this.updatePrdItemQtyLeft(xDetail.data, 'submit')
+										// if payreq is reimburst then divide qty_paid on fpb
+										this.updatePrdItemQtyLeft(xDetail.data, 'add')
 									}
 									// this.updatePrdItemQtyLeft(xDetail.data, 'submit')
 									
@@ -626,7 +634,7 @@ class PaymentRequestService {
 										pParam.token,
 										xParamAddApprovalMatrix
 									);
-									console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
+									// console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
 
 									xJoResult.approval_matrix_result = xApprovalMatrixResult;
 								} else {
@@ -832,9 +840,22 @@ class PaymentRequestService {
 	
 								if (xUpdateResult.status_code == '00') {
 									if (xPayreqDetail.data.status != 0) {
-										if (xPayreqDetail.data.payreq_type != 2) {
-											this.updatePrdItemQtyLeft(xPayreqDetail.data, 'cancel')
+										this.updatePrdItemQtyLeft(xPayreqDetail.data, 'delete')
+										if (xPayreqDetail.data.payreq_type == 2) { //reimburst
+											let xDetailItem = xPayreqDetail.data.payment_request_detail
+											for (let i = 0; i < xDetailItem.length; i++) {
+												let xQtyRelease = xDetailItem[i].qty_done || 0
+												let xCalculatedQty = 0
+												xCalculatedQty = xQtyRelease - xDetailItem[i].qty_request
+												let xPyrdUpdateParam = {
+													id: xDetailItem[i].id,
+													qty_done: xCalculatedQty
+												}
+												
+												let xUpdatePyrdItem = await _paymentRequestDetailRepoInstance.save(xPyrdUpdateParam, 'update')
+											}
 										}
+										
 									}
 									
 									xJoResult = {
@@ -899,6 +920,7 @@ class PaymentRequestService {
 			var xPayreqDetail = await _repoInstance.getByParameter({ id: pParam.document_id });
 			if (xPayreqDetail != null) {
 				if (xPayreqDetail.status_code == '00') {
+					// console.log(`>>> xPayreqDetail: ${JSON.stringify(xPayreqDetail)}`);
 					if (xPayreqDetail.data.status != 1) {
 						xJoResult = {
 							status_code: '-99',
@@ -930,7 +952,20 @@ class PaymentRequestService {
 	
 								if (xUpdateResult.status_code == '00') {
 									if (xPayreqDetail.data.payreq_type != 2) {
-										this.updatePrdItemQtyLeft(xPayreqDetail.data, 'submit')
+										this.updatePrdItemQtyLeft(xPayreqDetail.data, 'add')
+									} else {
+										let xDetailItem = xPayreqDetail.data.payment_request_detail
+										for (let i = 0; i < xDetailItem.length; i++) {
+											let xQtyRelease = xDetailItem[i].qty_done || 0
+											let xCalculatedQty = 0
+											xCalculatedQty = xQtyRelease + xDetailItem[i].qty_request
+											let xPyrdUpdateParam = {
+												id: xDetailItem[i].id,
+												qty_done: xCalculatedQty
+											}
+											
+											let xUpdatePyrdItem = await _paymentRequestDetailRepoInstance.save(xPyrdUpdateParam, 'update')
+										}
 									}
 									xJoResult = {
 										status_code: '00',
@@ -1028,7 +1063,7 @@ class PaymentRequestService {
 
 							if (xUpdateResult.status_code == '00') {
 								if (xPayreqDetail.data.payreq_type == 2) {
-									this.updatePrdItemQtyLeft(xPayreqDetail.data, 'reject')
+									this.updatePrdItemQtyLeft(xPayreqDetail.data, 'delete')
 								}
 
 								xJoResult = {
@@ -1303,9 +1338,9 @@ class PaymentRequestService {
 			if (xPrDetailItem.status_code == '00') {
 				let xQtyLeft = xPrDetailItem.data.qty_paid || 0
 				let xCalculatedQty = 0
-				if (pAct == 'submit') {
+				if (pAct == 'add') {
 					xCalculatedQty = xQtyLeft + xPaymentRequestDetail[i].qty_request
-				} else if (pAct == 'reject' || pAct == 'cancel' ){
+				} else if (pAct == 'delete'){
 					xCalculatedQty = xQtyLeft - xPaymentRequestDetail[i].qty_request
 				}
 				let xPrdUpdateParam = {
