@@ -7,7 +7,7 @@
                   zoom: 0.75; style="width: 95%; border-width: thin; border-spacing: 0px;font-size: 9px;border-color: grey;" border="1" 
                 }*/
       html {
-        zoom: 0.8;
+        zoom: 1;
       }
       .center {
         margin-left: auto;
@@ -16,7 +16,7 @@
         width: 99%;
         /* border-collapse:collapse; */
         text-align: center;
-        font-size: 8px;
+        font-size: 12px;
         font-family: "Arial";
         border-style: solid;
         border-color: #000000;
@@ -59,41 +59,44 @@
       }
     </style>
   </head>
-  <body>
+  <body style="padding: 10px">
     <table
       class="center"
       cellspacing="0"
-      cellpadding="2"
-      style="border: 1px solid #000000"
+      cellpadding="5"
+      style="border: 1px solid #000000;"
     >
       <tr>
-        <td style="width: 20%; text-align: left; padding-left: 10px">
+        <td style="width: 10%; text-align: left; padding-left: 10px">
           <img src="<%=companyData.logo%>" height="45" />
         </td>
-        <td style="text-align: center; width: 60%">
+        <!-- <td style="text-align: center; width: 5%"></td> -->
+        <td style="text-align: right; width: 65%;">
           <span
             style="
               font-size: 18px;
               text-align: center;
-              padding: 0px 15px 0px 15px;
+              padding: 7px 25px 7px 25px;
               border-radius: 5px;
+              border:1px solid black;
             "
             ><strong>PERTANGGUNGJAWABAN CASH ADVANCE</strong></span
           >
         </td>
+        <!-- <td style="text-align: center; width: 5%"></td> -->
         <th
           style="
-            width: 20%;
+            width: 25%;
             padding: 3px;
-            text-align: left;
+            text-align: right;
             vertical-align: bottom;
           "
         >
-          <span>Doc No. <%=data.data.document_no%></span>
+          <span>Doc No. FRM ACC.03.02 rev.01</span>
         </th>
       </tr>
       <tr>
-        <td colspan="3" style="padding: 0px; margin: 0px" class="border-t">
+        <td colspan="5" style="padding: 0px; margin: 0px" class="border-t">
           <table
             cellspacing="0"
             cellpadding="5"
@@ -105,19 +108,19 @@
                   >Kepada <span>:</span></span
                 >
               </td>
-              <td style="width: 56.65%" class="border-r">DEPARTMENT FINANCE</td>
-              <td style="width: 33.35%">Untuk Payment Request</td>
+              <td style="width: 60%" class="border-r">DEPARTMENT FINANCE</td>
+              <td style="width: 30%">Untuk Payment Request</td>
             </tr>
             <tr>
-              <td style="width: 10%">
+              <td style="width: 15%">
                 <span style="display: flex; justify-content: space-between"
                   >Dari <span>:</span></span
                 >
               </td>
-              <td style="width: 56.65%" class="border-r">
+              <td style="width: 46.65%" class="border-r">
                 DEPARTMENT <%=data.data.department_name%>
               </td>
-              <td style="width: 33.35%">
+              <td style="width: 38.35%">
                 <span
                   style="
                     display: flex;
@@ -129,23 +132,23 @@
               </td>
             </tr>
             <tr>
-              <td style="width: 10%">
+              <td style="width: 15%">
                 <span style="display: flex; justify-content: space-between"
                   >Tanggal PJCA <span>:</span></span
                 >
               </td>
-              <td style="width: 56.65%" class="border-r">
-                <%=data.data.createdAt%>
+              <td style="width: 46.65%" class="border-r">
+                <%=new Date(data.data.createdAt).toLocaleDateString('id')%>
               </td>
-              <td style="width: 33.35%">
+              <td style="width: 38.35%">
                 <span
                   style="
                     display: flex;
                     justify-content: space-between;
                     width: 60px;
                   "
-                  >Tanggal CA <span>:</span>
-                  <%=data.data.payment_request.created_at%></span
+                  >Tanggal CA
+                  <span>:</span> <%=new Date(data.data.payment_request.created_at).toLocaleDateString('id')%></span
                 >
               </td>
             </tr>
@@ -153,7 +156,7 @@
         </td>
       </tr>
       <tr>
-        <td colspan="3" style="padding: 0px; margin: 0px" class="border-t">
+        <td colspan="5" style="padding: 0px; margin: 0px" class="border-t">
           <table
             cellspacing="0"
             cellpadding="5"
@@ -162,12 +165,12 @@
             <thead>
               <tr>
                 <th style="width: 3%" class="col-header-item">No</th>
-                <th style="width: 52%" class="col-header-item">Uraian</th>
+                <th style="width: 60%" class="col-header-item">Uraian</th>
                 <th class="col-header-item">Qty</th>
                 <th class="col-header-item">Uom</th>
-                <th style="width: 13.35%" class="col-header-item">Jumlah</th>
+                <th style="width: 12.5%" class="col-header-item">Jumlah</th>
                 <th
-                  style="width: 20%; border-right: none !important"
+                  style="width: 12.6%; border-right: none !important"
                   class="col-header-item"
                 >
                   Keterangan
@@ -175,33 +178,165 @@
               </tr>
             </thead>
             <tbody>
-              <%
-                  var index = 1;
-                  data.data.pjca_detail.forEach( item => {
-              %>
+              <% var index = 1; data.data.pjca_detail.forEach( item => { %>
               <tr>
-                <td style="text-align: center" class="border-rb"><%=index%>.</td>
-                <td style="text-align: left" class="border-rb"><%=item.product_name%></td>
-                <td style="text-align: center" class="border-rb"><%=item.qty_request%></td>
-                <td style="text-align: center" class="border-rb"><%=item.uom_name%></td>
-                <td style="text-align: center" class="border-rb"><%=item.subtotal%></td>
+                <td style="text-align: center" class="border-rb">
+                  <%=index%>.
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  <%=item.product_name%>
+                </td>
+                <td style="text-align: center" class="border-rb">
+                  <%=item.qty_request%>
+                </td>
+                <td style="text-align: center" class="border-rb">
+                  <%=item.uom_name%>
+                </td>
+                <td style="text-align: right" class="border-rb">
+                  <%=item.subtotal%>
+                </td>
                 <td
-                  style="text-align: center; border-right: none"
+                  style="text-align: center; border-right: none; font-size: 10px;"
                   class="border-rb"
                 >
-                  <%=item.description%>
+                  <%
+                  if(item.tax != null){
+                  %>
+                    <%=item.tax.name%>
+                  <%
+                      }
+                  %>
+
+                  <%
+                  if(item.tax == null){
+                  %>
+                    <%=item.description%>
+                  <%
+                      }
+                  %>
                 </td>
               </tr>
+              <% index++; } ) %>
+              
+              <!-- Biaya Pengiriman -->
               <%
-                      index++;
-                  } )
+              if(data.data.delivery_costs != null && data.data.delivery_costs > 0){
+              %>
+                <tr>
+                  <td style="text-align: center" class="border-rb">
+                  </td>
+                  <td style="text-align: left" class="border-rb">
+                    Biaya Pengiriman
+                  </td>
+                  <td style="text-align: center" class="border-rb">
+                  </td>
+                  <td style="text-align: center" class="border-rb">
+                  </td>
+                  <td style="text-align: right" class="border-rb">
+                    <%=data.data.delivery_costs%>
+                  </td>
+                  <td
+                    style="text-align: center; border-right: none"
+                    class="border-rb"
+                  >
+                  </td>
+                </tr>
+              <%
+                  }
               %>
 
+              <!-- Biaya admin / aplikasi -->
+              <%
+              if(data.data.service_costs != null && data.data.service_costs > 0){
+              %>
+                <tr>
+                  <td style="text-align: center" class="border-rb">
+                  </td>
+                  <td style="text-align: left" class="border-rb">
+                    Biaya Layanan
+                  </td>
+                  <td style="text-align: center" class="border-rb">
+                  </td>
+                  <td style="text-align: center" class="border-rb">
+                  </td>
+                  <td style="text-align: right" class="border-rb">
+                    <%=data.data.service_costs%>
+                  </td>
+                  <td
+                    style="text-align: center; border-right: none"
+                    class="border-rb"
+                  >
+                  </td>
+                </tr>
+              <%
+                  }
+              %>
+
+              <!-- Biaya Lain-lain -->
+              <%
+              if(data.data.other_costs != null && data.data.other_costs > 0){
+              %>
+                <tr>
+                  <td style="text-align: center" class="border-rb">
+                  </td>
+                  <td style="text-align: left" class="border-rb">
+                    Biaya lain-lain
+                  </td>
+                  <td style="text-align: center" class="border-rb">
+                  </td>
+                  <td style="text-align: center" class="border-rb">
+                  </td>
+                  <td style="text-align: right" class="border-rb">
+                    <%=data.data.other_costs%>
+                  </td>
+                  <td
+                    style="text-align: center; border-right: none"
+                    class="border-rb"
+                  >
+                  </td>
+                </tr>
+              <%
+                  }
+              %>
+              
+              <%
+              if(data.data.pjca_detail.length < 7 ){
+              %>
+                <% for (let i = 0; i < 7 - data.data.pjca_detail.length; i++) { %>
+                  <tr style="height: 20px;">
+                    <td style="text-align: center" class="border-rb">
+                      <!-- <%=i%>. -->
+                    </td>
+                    <td style="text-align: left" class="border-rb">
+                      <!-- <%=i%> -->
+                    </td>
+                    <td style="text-align: center" class="border-rb">
+                      <!-- <%=i%> -->
+                    </td>
+                    <td style="text-align: center" class="border-rb">
+                      <!-- <%=i%> -->
+                    </td>
+                    <td style="text-align: center" class="border-rb">
+                      <!-- <%=i%> -->
+                    </td>
+                    <td
+                      style="text-align: center; border-right: none"
+                      class="border-rb"
+                    >
+                      <!-- <%=i%> -->
+                    </td>
+                  </tr>
+                <% } %>
+              <%
+                  }
+              %>
               <tr>
-                <th colspan="2" style="text-align: left" class="border-rb">
+                <th colspan="4" style="text-align: left" class="border-rb">
                   TOTAL
                 </th>
-                <td style="text-align: right" class="border-rb"><%=data.data.total_price%></td>
+                <td style="text-align: right" class="border-rb">
+                  <%=data.data.total_price%>
+                </td>
                 <td
                   style="text-align: center; border-right: none"
                   class="border-rb"
@@ -220,144 +355,155 @@
         </td>
       </tr>
       <tr>
-        <td colspan="3" style="padding: 0px; margin: 0px">
+        <td colspan="5" style="padding: 0px; margin: 0px">
           <table
             cellspacing="0"
-            cellpadding="5"
-            style="width: 100%; text-align: center"
+            cellpadding="2"
+            style="width: 100%; border-width: 0.2px"
           >
             <tr>
-              <td colspan="2" class="border-r"></td>
-              <th colspan="2">Kolom Persetujuan</th>
+              <th style="width: 25%" rowspan="2">Penanggung Jawab</td>
+              <th style="width: 25%" class="border-r" rowspan="2">Ka. Department</td>
+              <th
+                style="width: 50%"
+                colspan="3"
+                style="font-size: 14px"
+                class="border-b"
+              >
+                Kolom Persetujuan
+              </th>
             </tr>
             <tr>
-              <th style="width: 25%" class="border-t">Penanggung Jawab</th>
-              <th style="width: 30%" class="border-tr">Ka. Department</th>
-              <th class="border-t">Finance</th>
-              <th class="border-t">Plant Manager / Direktur</th>
+              <th style="width: 28%" class="border-r">Finance</th>
+              <th style="width: 50%">Plant Manager / Direktur</th>
             </tr>
             <tr>
               <td>
-                <!-- <%
-                        if( qrCode.approval1.length > 0 ){
-
-                    %> -->
-                <table style="width: 100%">
-                  <tr>
-                    <!-- <% for(var i = 0; i < qrCode.approval1.length; i++ ) { %> -->
+                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 80px;">
+                  <!-- <tr>
                     <td>
                       <img
                         src="<%=qrCode.qrPath%><%=qrCode.approval1[i]%>"
                         width="80"
                       />
                     </td>
-                    <!-- <% }%> -->
+                  </tr> -->
+                  <tr>
+                    <td></td>
                   </tr>
                   <tr>
-                    <!-- <% for(var i = 0; i < approver1.length; i++ ) { %> -->
-                    <!-- <td><%=approver1[i].user.name%></td> -->
-                    <td>(...........................................)</td>
-                    <!-- <% }%> -->
+                    <%
+                    if(data.data.employee_name != null && data.data.employee_name != '' ){
+                    %>
+                      <td><%=data.data.employee_name%></td>
+                    <%
+                        }
+                    %>
+                    <%
+                    if(data.data.employee_name == null || data.data.employee_name == '' ){
+                    %>
+                    <td>(.............................)</td>
+                    <%
+                        }
+                    %>
                   </tr>
                 </table>
-
-                <!-- <%
-                        }
-                    %> -->
               </td>
               <td class="border-r">
-                <!-- <%
+                
+                <%
                         if( qrCode.approval1.length > 0 ){
 
-                    %> -->
-                <table style="width: 100%">
+                    %>
+                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 80px;">
                   <tr>
-                    <!-- <% for(var i = 0; i < qrCode.approval1.length; i++ ) { %> -->
+                    <% for(var i = 0; i < qrCode.approval1.length; i++ ) { %>
                     <td>
                       <img
                         src="<%=qrCode.qrPath%><%=qrCode.approval1[i]%>"
                         width="80"
                       />
                     </td>
-                    <!-- <% }%> -->
+                    <% }%>
                   </tr>
                   <tr>
-                    <!-- <% for(var i = 0; i < approver1.length; i++ ) { %> -->
-                    <!-- <td><%=approver1[i].user.name%></td> -->
-                    <td>(...........................................)</td>
-                    <!-- <% }%> -->
+                    <% for(var i = 0; i < approver1.length; i++ ) { %>
+                    <td><%=approver1[i].user.name%></td>
+                    <% }%>
                   </tr>
                 </table>
-
-                <!-- <%
+                <%
                         }
-                    %> -->
-              </td>
-              <td style="text-align: center">
-                <!-- <%
-                            if( qrCode.approval2.length > 0 ){
+                    %>
+                    
+                <%
 
-                        %> -->
-                <table style="width: 100%">
+                if( qrCode.approval1.length == 0 ){
+                %>
+                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 80px;">
                   <tr>
-                    <!-- <% for(var i = 0; i < qrCode.approval2.length; i++ ) { %> -->
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td>(.............................)</td>
+                  </tr>
+                </table>
+                <%
+                    }
+                %>
+              </td>
+              <td class="border-r">
+                
+                <%
+                        if( qrCode.approval2.length > 0 ){
+
+                    %>
+                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 80px;">
+                  <tr>
+                    <% for(var i = 0; i < qrCode.approval2.length; i++ ) { %>
                     <td>
                       <img
                         src="<%=qrCode.qrPath%><%=qrCode.approval2[i]%>"
                         width="80"
                       />
                     </td>
-                    <!-- <% }%> -->
+                    <% }%>
                   </tr>
                   <tr>
-                    <!-- <% for(var i = 0; i < approver2.length; i++ ) { %> -->
-                    <!-- <td><%=approver2[i].user.name%></td> -->
-                    <td>(...........................................)</td>
-                    <!-- <% }%> -->
+                    <% for(var i = 0; i < approver2.length; i++ ) { %>
+                    <td><%=approver2[i].user.name%></td>
+                    <% }%>
                   </tr>
                 </table>
-
-                <!-- <%
-                            }
-                        %> -->
+                <%
+                        }
+                    %>
               </td>
-              <td style="text-align: center">
-                <!-- <%
-                            if( qrCode.approval3.length > 0 ){
-
-                        %> -->
-                <table style="width: 100%">
+              <td>
+                <%
+                        if( qrCode.approval3.length > 0 ){
+                    %>
+                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 80px;">
                   <tr>
-                    <!-- <% for(var i = 0; i < qrCode.approval3.length; i++ ) { %> -->
+                    <% for(var i = 0; i < qrCode.approval3.length; i++ ) { %>
                     <td>
                       <img
                         src="<%=qrCode.qrPath%><%=qrCode.approval3[i]%>"
                         width="80"
                       />
                     </td>
-                    <!-- <% }%> -->
+                    <% }%>
                   </tr>
                   <tr>
-                    <!-- <% for(var i = 0; i < approver3.length; i++ ) { %> -->
-                    <!-- <td><%=approver3[i].user.name%></td> -->
-                    <td>(...........................................)</td>
-                    <!-- <% }%> -->
+                    <% for(var i = 0; i < approver3.length; i++ ) { %>
+                    <td><%=approver3[i].user.name%></td>
+                    <% }%>
                   </tr>
                 </table>
-
-                <!-- <%
-                            }
-                        %> -->
+                <%
+                        }
+                    %>
               </td>
-              <!-- <td style="text-align: center;vertical-align: middle;">
-                        <%
-                            if( qrCode.approval2 != '' ){
-                        %>
-                            <img src="<%=qrCode.approval2%>" width="80">
-                        <%
-                            }
-                        %>                                
-                    </td> -->
             </tr>
           </table>
         </td>
