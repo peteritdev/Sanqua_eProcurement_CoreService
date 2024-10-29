@@ -21,7 +21,7 @@
       "typeCast": true
     },
     "timezone": "Asia/Jakarta",
-
+    "basePathESanqua": "http://10.10.20.6:8091/esanqua",
     "frontParam": {
       "photoPath": {
         "logo": "http://localhost/uploads/vendors/logo/",
@@ -139,6 +139,7 @@
       "typeCast": true
     },
     "timezone": "Asia/Jakarta",
+    "basePathESanqua": "http://10.10.20.6:8091/esanqua",
 
     "frontParam": {
       "photoPath": {
@@ -254,6 +255,7 @@
       "typeCast": true
     },
     "timezone": "Asia/Jakarta",
+    "basePathESanqua": "http://10.10.20.6:8091/esanqua",
 
     "frontParam": {
       "photoPath": {

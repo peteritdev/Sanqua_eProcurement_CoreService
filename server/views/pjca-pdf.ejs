@@ -19,7 +19,7 @@
         font-size: 12px;
         font-family: "Arial";
         border-style: solid;
-        border-color: #000000;
+        border-color: #696969;
       }
 
       .center th,
@@ -34,28 +34,28 @@
       }
 
       .border-b {
-        border-bottom: 1px solid #000000 !important;
+        border-bottom: 1px solid #696969 !important;
       }
       .border-t {
-        border-top: 1px solid #000000;
+        border-top: 1px solid #696969;
       }
 
       .border-tr {
-        border-top: 1px solid #000000;
-        border-right: 1px solid #000000;
+        border-top: 1px solid #696969;
+        border-right: 1px solid #696969;
       }
       .border-r {
-        border-right: 1px solid #000000;
+        border-right: 1px solid #696969;
       }
 
       .border-rb {
-        border-right: 1px solid #000000;
-        border-bottom: 1px solid black !important;
+        border-right: 1px solid #696969;
+        border-bottom: 1px solid #696969 !important;
       }
 
       th.col-header-item {
-        border-bottom: 1px solid #000000;
-        border-right: 1px solid #000000;
+        border-bottom: 1px solid #696969;
+        border-right: 1px solid #696969;
       }
     </style>
   </head>
@@ -64,7 +64,7 @@
       class="center"
       cellspacing="0"
       cellpadding="5"
-      style="border: 1px solid #000000;"
+      style="border: 1px solid #696969;"
     >
       <tr>
         <td style="width: 10%; text-align: left; padding-left: 10px">
@@ -193,31 +193,39 @@
                   <%=item.uom_name%>
                 </td>
                 <td style="text-align: right" class="border-rb">
-                  <%=item.subtotal%>
+                  <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td>Rp </td>
+                      <td style="text-align: right; width: 100%;"><%=item.subtotal%></td>
+                    </tr>
+                  </table>
                 </td>
                 <td
                   style="text-align: center; border-right: none; font-size: 10px;"
                   class="border-rb"
                 >
+                  <%=item.description%>
                   <%
                   if(item.tax != null){
                   %>
+                    <br/>
                     <%=item.tax.name%>
                   <%
                       }
                   %>
-
+                  
                   <%
-                  if(item.tax == null){
+                  if(item.discount_amount != null && item.discount_amount > 0){
                   %>
-                    <%=item.description%>
+                    <br/>
+                    <%='Disc: Rp' + item.discount_amount%>
                   <%
                       }
                   %>
                 </td>
               </tr>
               <% index++; } ) %>
-              
+
               <!-- Biaya Pengiriman -->
               <%
               if(data.data.delivery_costs != null && data.data.delivery_costs > 0){
@@ -233,7 +241,12 @@
                   <td style="text-align: center" class="border-rb">
                   </td>
                   <td style="text-align: right" class="border-rb">
-                    <%=data.data.delivery_costs%>
+                    <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                      <tr>
+                        <td>Rp </td>
+                        <td style="text-align: right; width: 100%;"><%=data.data.delivery_costs%></td>
+                      </tr>
+                    </table>
                   </td>
                   <td
                     style="text-align: center; border-right: none"
@@ -260,7 +273,12 @@
                   <td style="text-align: center" class="border-rb">
                   </td>
                   <td style="text-align: right" class="border-rb">
-                    <%=data.data.service_costs%>
+                    <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                      <tr>
+                        <td>Rp </td>
+                        <td style="text-align: right; width: 100%;"><%=data.data.service_costs%></td>
+                      </tr>
+                    </table>
                   </td>
                   <td
                     style="text-align: center; border-right: none"
@@ -287,7 +305,12 @@
                   <td style="text-align: center" class="border-rb">
                   </td>
                   <td style="text-align: right" class="border-rb">
-                    <%=data.data.other_costs%>
+                    <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                      <tr>
+                        <td>Rp </td>
+                        <td style="text-align: right; width: 100%;"><%=data.data.other_costs%></td>
+                      </tr>
+                    </table>
                   </td>
                   <td
                     style="text-align: center; border-right: none"
@@ -299,43 +322,145 @@
                   }
               %>
               
+              <!-- Discount -->
               <%
-              if(data.data.pjca_detail.length < 7 ){
+              if(data.data.global_discount != null && data.data.global_discount > 0){
               %>
-                <% for (let i = 0; i < 7 - data.data.pjca_detail.length; i++) { %>
-                  <tr style="height: 20px;">
-                    <td style="text-align: center" class="border-rb">
-                      <!-- <%=i%>. -->
+                <tr>
+                  <td style="text-align: center" class="border-rb">
+                  </td>
+                  <td style="text-align: left" class="border-rb">
+                    Discount Global (<%=data.data.global_discount_percent%>%)
+                  </td>
+                  <td style="text-align: center" class="border-rb">
+                  </td>
+                  <td style="text-align: center" class="border-rb">
+                  </td>
+                  <td style="text-align: right" class="border-rb">
+                    <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                      <tr>
+                        <td>Rp </td>
+                        <td style="text-align: right; width: 100%;"><%=data.data.global_discount%></td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td
+                    style="text-align: center; border-right: none"
+                    class="border-rb"
+                  >
+                  </td>
+                </tr>
+              <%
+                  }
+              %>
+
+              <%
+              if(data.data.difference_price != null && data.data.difference_price > 0){
+              %>
+                <% for (let i = 0; i < 5; i++) { %>
+                  <tr>
+                    <td style="text-align: center; color:white;" class="border-rb">
+                      |
                     </td>
-                    <td style="text-align: left" class="border-rb">
-                      <!-- <%=i%> -->
+                    <%if(i == 0 || i == 4){%>
+                      <td style="text-align: left" class="border-rb">
+                      </td>
+                    <% } %>
+                    <%if(i == 1){%>
+                      <td class="border-rb">
+                        <table style="margin-left: auto;" cellspacing="0" cellpadding="0">
+                          <tr>
+                            <td style="width: 50px; text-align: right; padding-right: 5px;">CA: </td>
+                            <td style="width: 10px; text-align: right;">Rp </td>
+                            <td style="width: 120px; text-align: right;"><%=data.data.payment_request.total_price%> </td>
+                          </tr>
+                        </table>
+                      </td>
+                    <% } %>
+                    <%if(i == 2){%>
+                      <td style="text-align: right" class="border-rb">
+                        <table style="margin-left: auto;" cellspacing="0" cellpadding="0">
+                          <tr>
+                            <td style="width: 50px; text-align: right; padding-right: 5px;">Realisasi: </td>
+                            <td style="width: 10px; text-align: right;" class="border-b">Rp </td>
+                            <td style="width: 120px; text-align: right;" class="border-b"><%=data.data.total_price%> </td>
+                          </tr>
+                        </table>
+                      </td>
+                    <% } %>
+                    <%if(i == 3){%>
+                      <td class="border-rb">
+                        <table style="margin-left: auto;" cellspacing="0" cellpadding="0">
+                          <tr>
+                            <td style="width: 50px; text-align: right; padding-right: 5px;">Selisih: </td>
+                            <td >Rp </td>
+                            <td style="width: 120px; text-align: right;"><%=data.data.difference_price%> </td>
+                          </tr>
+                        </table>
+                      </td>
+                    <% } %>
+                    <td style="text-align: center" class="border-rb">
                     </td>
                     <td style="text-align: center" class="border-rb">
-                      <!-- <%=i%> -->
                     </td>
-                    <td style="text-align: center" class="border-rb">
-                      <!-- <%=i%> -->
-                    </td>
-                    <td style="text-align: center" class="border-rb">
-                      <!-- <%=i%> -->
+                    <td style="text-align: right" class="border-rb">
                     </td>
                     <td
                       style="text-align: center; border-right: none"
                       class="border-rb"
                     >
-                      <!-- <%=i%> -->
                     </td>
                   </tr>
                 <% } %>
               <%
-                  }
+                  } else {
               %>
+                <%
+                  if(data.data.pjca_detail.length < 6 ){
+                  %>
+                    <% for (let i = 0; i < 6 - data.data.pjca_detail.length; i++) { %>
+                      <tr style="height: 20px;">
+                        <td style="text-align: center" class="border-rb">
+                          <!-- <%=i%>. -->
+                        </td>
+                        <td style="text-align: left" class="border-rb">
+                          <!-- <%=i%> -->
+                        </td>
+                        <td style="text-align: center" class="border-rb">
+                          <!-- <%=i%> -->
+                        </td>
+                        <td style="text-align: center" class="border-rb">
+                          <!-- <%=i%> -->
+                        </td>
+                        <td style="text-align: center" class="border-rb">
+                          <!-- <%=i%> -->
+                        </td>
+                        <td
+                          style="text-align: center; border-right: none"
+                          class="border-rb"
+                        >
+                          <!-- <%=i%> -->
+                        </td>
+                      </tr>
+                    <% } %>
+                  <%
+                      }
+                  %>
+                <%
+                    }
+                %>
+                
               <tr>
                 <th colspan="4" style="text-align: left" class="border-rb">
                   TOTAL
                 </th>
                 <td style="text-align: right" class="border-rb">
-                  <%=data.data.total_price%>
+                  <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td>Rp </td>
+                      <td style="text-align: right; width: 100%;"><%=data.data.total_price%></td>
+                    </tr>
+                  </table>
                 </td>
                 <td
                   style="text-align: center; border-right: none"

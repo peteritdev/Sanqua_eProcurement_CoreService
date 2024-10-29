@@ -165,10 +165,20 @@ class PaymentRequestRepository {
 			}
 			
 			if (pParam.hasOwnProperty('status')) {
-				if (pParam.status != '') {
-					xWhereAnd.push({
-						status: pParam.status
-					});
+				if (pParam.status != null && pParam.status != undefined && pParam.status != '') {
+					var xStatus = JSON.parse(pParam.status);
+					// console.log(`>>> xStatus: ${Array.isArray(xStatus)}`);
+					if (Array.isArray(xStatus) && xStatus.length > 0) {
+						xWhereAnd.push({
+							status: {
+								[Op.in]: xStatus
+							}
+						});
+					} else {
+						xWhereAnd.push({
+							status: pParam.status
+						});
+					}
 				}
 			}
 			// if (pParam.hasOwnProperty('filter')) {

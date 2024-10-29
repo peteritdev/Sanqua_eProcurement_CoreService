@@ -446,6 +446,7 @@ class ExportService {
 							logo: config.basePathESanqua + '/company_logo/' + xCompanyDetail.token_data.data.logo,
 							// iso_purchase_request_no: xCompanyDetail.token_data.data.iso_purchase_request_no
 						};
+						console.log(`>>> xCompanyData: ${JSON.stringify(xCompanyData)}`);
 					}
 				}
 
@@ -579,7 +580,7 @@ class ExportService {
 								var xDirectoryPath = path.resolve(xPathFile);
 								pRes.download(xDirectoryPath, xFileName, (err) => {
 									if (err) {
-										res.status(500).send({
+										pRes.status(500).send({
 											message: `Could not download the file. ${err}`
 										});
 									}
@@ -758,9 +759,9 @@ class ExportService {
 						var xOptions = {};
 
 						xOptions = {
-							width: '210mm',
+							width: '212mm',
 							// height: '148.5mm',
-							height: '297mm',
+							height: '210mm',
 							borders: '0.3cm'
 						};
 
@@ -956,7 +957,7 @@ class ExportService {
 						xOptions = {
 							width: '212mm',
 							// height: '148.5mm',
-							height: '162mm',
+							height: '210mm',
 							borders: '0.3cm'
 						};
 
