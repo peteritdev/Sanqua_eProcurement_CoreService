@@ -70,10 +70,10 @@
         <td style="width: 30%; text-align: left; padding-left: 10px">
           <img src="<%=companyData.logo%>" height="45" />
         </td>
-        <td style="text-align: left; width: 45%; font-size: 16px; padding-left: 25px;">
+        <td style="text-align: left; width: 45%; font-size: 16px; padding-left: 15px;">
           <strong>PAYMENT REQUEST</strong>
         </td>
-        <td style="width: 25%; padding: 3px; text-align: left">
+        <td style="width: 25%; padding: 3px 0 3px 3px; text-align: right">
           <table cellspacing="0" cellpadding="5">
             <tr>
               <th>No. <%=data.data.document_no%></th>
@@ -105,7 +105,7 @@
           rowspan="5"
           style="text-align: left; border-top: 1px solid #000000 !important"
         >
-          <table style="width: 100%; padding-bottom: 5px">
+          <table style="width: 100%; ">
             <tr>
               <th style="text-align: left">Jenis Pembayaran</th>
               <th style="text-align: left">:</th>
@@ -187,7 +187,7 @@
                       <img src="<%=imagePath%>blank_checklist.png" width="15" />
                       <% } %>
                     </td>
-                    <td style="width: 75px">Giro</td>
+                    <td style="width: 45px">Giro</td>
                     <td>
                       <% if( data.data.payment_type == 3 ){ %>
                         <span>An. <%=data.data.account_name%></span>
@@ -211,7 +211,7 @@
                       <img src="<%=imagePath%>blank_checklist.png" width="15" />
                       <% } %>
                     </td>
-                    <td style="width: 75px">Check</td>
+                    <td style="width: 45px">Check</td>
                     <td>
                       <% if( data.data.payment_type == 4 ){ %>
                         <span>An. <%=data.data.account_name%></span>
@@ -235,7 +235,7 @@
                       <img src="<%=imagePath%>blank_checklist.png" width="15" />
                       <% } %>
                     </td>
-                    <td style="width: 75px">Transfer</td>
+                    <td style="width: 45px">Transfer</td>
                     <td>
                       <% if( data.data.payment_type == 2 ){ %>
                         <span>An. <%=data.data.account_name%></span>
@@ -352,8 +352,8 @@
           >
             <thead>
               <tr>
-                <th style="width: 10%" class="col-header-item">No Akun</th>
-                <th style="width: 45%" class="col-header-item">Uraian</th>
+                <th style="width: 7%" class="col-header-item">No Akun</th>
+                <th style="width: 48%" class="col-header-item">Uraian</th>
                 <th class="col-header-item">Qty</th>
                 <th class="col-header-item">Uom</th>
                 <th style="width: 13.35%" class="col-header-item">Jumlah</th>
@@ -392,7 +392,7 @@
                 if(data.data.payment_request_detail.length < 9 ){
               %>
                 <% for (let i = 0; i < 9 - data.data.payment_request_detail.length; i++) { %>
-                  <tr style="height: 25px;">
+                  <tr style="height: 20px;">
                     <td style="text-align: center" class="border-rb"></td>
                     <td style="text-align: left" class="border-rb"></td>
                     <td style="text-align: center" class="border-rb"></td>
@@ -575,7 +575,7 @@
         <td colspan="3" style="padding: 0px; margin: 0px">
           <table
             cellspacing="0"
-            cellpadding="2"
+            cellpadding="0"
             style="width: 100%; border-width: 0.2px"
           >
             <tr>
@@ -657,7 +657,7 @@
                             <img src="<%=imagePath%>blank_checklist.png" width="15" />
                             <% } %>
                           </td>
-                          <td style="width: 75px">Pelunasan Purchase Order</td>
+                          <td style="width: 100px">Pelunasan Purchase Order</td>
                         </tr>
                       </table>
                     </th>
@@ -674,7 +674,7 @@
                             <img src="<%=imagePath%>blank_checklist.png" width="15" />
                             <% } %>
                           </td>
-                          <td style="width: 75px">Lain-lain</td>
+                          <td style="width: 75px">...........................................</td>
                         </tr>
                       </table>
                     </th>
