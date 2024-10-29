@@ -70,7 +70,7 @@
         <td style="width: 30%; text-align: left; padding-left: 10px">
           <img src="<%=companyData.logo%>" height="45" />
         </td>
-        <td style="text-align: left; width: 45%; font-size: 16px; padding-left: 35px;">
+        <td style="text-align: left; width: 45%; font-size: 16px; padding-left: 25px;">
           <strong>PAYMENT REQUEST</strong>
         </td>
         <td style="width: 25%; padding: 3px; text-align: left">
@@ -387,6 +387,25 @@
                       index++;
                   } )
               %>
+              
+              <%
+                if(data.data.payment_request_detail.length < 9 ){
+              %>
+                <% for (let i = 0; i < 9 - data.data.payment_request_detail.length; i++) { %>
+                  <tr style="height: 25px;">
+                    <td style="text-align: center" class="border-rb"></td>
+                    <td style="text-align: left" class="border-rb"></td>
+                    <td style="text-align: center" class="border-rb"></td>
+                    <td style="text-align: center" class="border-rb"></td>
+                    <td style="text-align: right" class="border-rb"></td>
+                    <td
+                      style="text-align: center; border-right: none"
+                      class="border-rb"
+                    >
+                    </td>
+                  </tr>
+                <% } %>
+              <% } %>
 
               <tr>
                 <th colspan="4" style="text-align: left" class="border-rb">
@@ -439,7 +458,7 @@
               <td class="border-r">
                 
                 <%
-                        if( qrCode.approval1.length > 0 ){
+                        if( qrCode.approval1 != null && qrCode.approval1.length > 0 ){
 
                     %>
                 <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 50px;">
@@ -460,13 +479,24 @@
                   </tr>
                 </table>
                 <%
+                        } else {
+                    %>
+                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 80px;">
+                  <tr>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td>(.............................)</td>
+                  </tr>
+                </table>
+                <%
                         }
                     %>
               </td>
               <td class="border-r">
                 
                 <%
-                        if( qrCode.approval2.length > 0 ){
+                        if( qrCode.approval2 != null && qrCode.approval2.length > 0 ){
 
                     %>
                 <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 50px;">
@@ -484,6 +514,17 @@
                     <% for(var i = 0; i < approver2.length; i++ ) { %>
                     <td><%=approver2[i].user.name%></td>
                     <% }%>
+                  </tr>
+                </table>
+                <%
+                        } else {
+                    %>
+                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 80px;">
+                  <tr>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td>(.............................)</td>
                   </tr>
                 </table>
                 <%
@@ -509,6 +550,17 @@
                     <% for(var i = 0; i < approver3.length; i++ ) { %>
                     <td><%=approver3[i].user.name%></td>
                     <% }%>
+                  </tr>
+                </table>
+                <%
+                        } else {
+                    %>
+                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 80px;">
+                  <tr>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td>(.............................)</td>
                   </tr>
                 </table>
                 <%
