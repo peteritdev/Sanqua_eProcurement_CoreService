@@ -959,7 +959,7 @@ class ExportService {
 							width: '212mm',
 							// height: '148.5mm',
 							height: '210mm',
-							borders: '0.3cm'
+							borders: '0.2cm'
 						};
 
 						var xPJCANo = xJoResultPJCA.data.document_no.replace(/\//g, '-');
