@@ -756,6 +756,7 @@ class ExportService {
 						}
 					},
 					(err, data) => {
+						console.log(`>>> error pdf 0: ${err}`);
 						var xOptions = {};
 
 						xOptions = {
