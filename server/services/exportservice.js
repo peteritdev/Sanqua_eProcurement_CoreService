@@ -922,7 +922,6 @@ class ExportService {
 					}
 				}
 				console.log(`>>> xApprovedUser 3: ${JSON.stringify(xApprovedUser3)}`);
-
 				ejs.renderFile(
 					path.join(__dirname, '../views/', 'PJCA-pdf.ejs'),
 					{
@@ -953,6 +952,7 @@ class ExportService {
 						}
 					},
 					(err, data) => {
+						console.log(`>>> error pdf 0: ${err}`);
 						var xOptions = {};
 
 						xOptions = {
@@ -968,11 +968,13 @@ class ExportService {
 
 						pdf.create(data, xOptions).toFile(xPathFile, function(err, data) {
 							if (err) {
+								console.log(`>>> error pdf 1: ${err}`);
 								pRes.send(err);
 							} else {
 								var xDirectoryPath = path.resolve(xPathFile);
 								pRes.download(xDirectoryPath, xFileName, (err) => {
 									if (err) {
+										console.log(`>>> error pdf 2: ${err}`);
 										pRes.status(500).send({
 											message: `Could not download the file. ${err}`
 										});
