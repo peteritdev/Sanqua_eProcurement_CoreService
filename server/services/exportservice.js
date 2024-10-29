@@ -923,7 +923,7 @@ class ExportService {
 				}
 				console.log(`>>> xApprovedUser 3: ${JSON.stringify(xApprovedUser3)}`);
 				ejs.renderFile(
-					path.join(__dirname, '../views/', 'PJCA-pdf.ejs'),
+					path.join(__dirname, '../views/', 'pjca-pdf.ejs'),
 					{
 						data: xJoResultPJCA,
 						companyData: xCompanyData,
