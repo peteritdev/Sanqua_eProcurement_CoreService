@@ -73,7 +73,7 @@
         <td style="text-align: left; width: 45%; font-size: 16px; padding-left: 15px;">
           <strong>PAYMENT REQUEST</strong>
         </td>
-        <td style="width: 25%; padding: 3px 0 3px 3px; text-align: right">
+        <td style="width: 25%; padding: 3px 0 3px 3px; text-align: left">
           <table cellspacing="0" cellpadding="5">
             <tr>
               <th>No. <%=data.data.document_no%></th>
@@ -392,7 +392,7 @@
                 if(data.data.payment_request_detail.length < 9 ){
               %>
                 <% for (let i = 0; i < 9 - data.data.payment_request_detail.length; i++) { %>
-                  <tr style="height: 20px;">
+                  <tr style="height: 23px;">
                     <td style="text-align: center" class="border-rb"></td>
                     <td style="text-align: left" class="border-rb"></td>
                     <td style="text-align: center" class="border-rb"></td>
@@ -657,7 +657,7 @@
                             <img src="<%=imagePath%>blank_checklist.png" width="15" />
                             <% } %>
                           </td>
-                          <td style="width: 100px">Pelunasan Purchase Order</td>
+                          <td style="width: 120px">Pelunasan Purchase Order</td>
                         </tr>
                       </table>
                     </th>
