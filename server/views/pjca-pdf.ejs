@@ -7,7 +7,7 @@
                   zoom: 0.75; style="width: 95%; border-width: thin; border-spacing: 0px;font-size: 9px;border-color: grey;" border="1" 
                 }*/
       html {
-        zoom: 0.70;
+        zoom: 1;
       }
       .center {
         margin-left: auto;
@@ -59,7 +59,7 @@
       }
     </style>
   </head>
-  <body style="padding: 10px">
+  <body style="padding: 10px;">
     <table
       class="center"
       cellspacing="0"
@@ -418,7 +418,7 @@
                 <%
                   if(data.data.pjca_detail.length < 6 ){
                 %>
-                    <% for (let i = 0; i < 6 - data.data.pjca_detail.length; i++) { %>
+                    <% for (let i = 0; i < 8 - data.data.pjca_detail.length; i++) { %>
                     <tr style="height: 25px;">
                       <td style="text-align: center" class="border-rb">
                         <!-- <%=i%>. -->
