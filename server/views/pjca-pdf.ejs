@@ -532,31 +532,6 @@
                 </table>
               </td>
               <td class="border-r">
-                
-                <%
-                        if( qrCode.approval1 != null && qrCode.approval1.length > 0 ){
-
-                    %>
-                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 80px;">
-                  <tr>
-                    <% for(var i = 0; i < qrCode.approval1.length; i++ ) { %>
-                    <td>
-                      <img
-                        src="<%=qrCode.qrPath%><%=qrCode.approval1[i]%>"
-                        width="80"
-                      />
-                    </td>
-                    <% }%>
-                  </tr>
-                  <tr>
-                    <% for(var i = 0; i < approver1.length; i++ ) { %>
-                    <td><%=approver1[i].user.name%></td>
-                    <% }%>
-                  </tr>
-                </table>
-                <%
-                        } else {
-                    %>
                 <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 80px;">
                   <tr>
                     <td></td>
@@ -565,35 +540,8 @@
                     <td>(.............................)</td>
                   </tr>
                 </table>
-                <%
-                        }
-                    %>
               </td>
               <td class="border-r">
-                <%
-                        if( qrCode.approval2 != null && qrCode.approval2.length > 0 ){
-
-                    %>
-                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 80px;">
-                  <tr>
-                    <% for(var i = 0; i < qrCode.approval2.length; i++ ) { %>
-                    <td>
-                      <img
-                        src="<%=qrCode.qrPath%><%=qrCode.approval2[i]%>"
-                        width="80"
-                      />
-                    </td>
-                    <% }%>
-                  </tr>
-                  <tr>
-                    <% for(var i = 0; i < approver2.length; i++ ) { %>
-                    <td><%=approver2[i].user.name%></td>
-                    <% }%>
-                  </tr>
-                </table>
-                <%
-                        } else {
-                    %>
                 <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 55px;">
                   <tr>
                     <td></td>
@@ -602,34 +550,8 @@
                     <td>(.............................)</td>
                   </tr>
                 </table>
-                <%
-                        }
-                    %>
               </td>
               <td>
-                <%
-                        if( qrCode.approval3 != null && qrCode.approval3.length > 0 ){
-                    %>
-                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 80px;">
-                  <tr>
-                    <% for(var i = 0; i < qrCode.approval3.length; i++ ) { %>
-                    <td>
-                      <img
-                        src="<%=qrCode.qrPath%><%=qrCode.approval3[i]%>"
-                        width="80"
-                      />
-                    </td>
-                    <% }%>
-                  </tr>
-                  <tr>
-                    <% for(var i = 0; i < approver3.length; i++ ) { %>
-                    <td><%=approver3[i].user.name%></td>
-                    <% }%>
-                  </tr>
-                </table>
-                <%
-                        } else {
-                    %>
                 <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 55px;">
                   <tr>
                     <td></td>
@@ -638,9 +560,6 @@
                     <td>(.............................)</td>
                   </tr>
                 </table>
-                <%
-                        }
-                    %>
               </td>
             </tr>
           </table>
