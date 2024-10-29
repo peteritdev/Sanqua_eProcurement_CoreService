@@ -36,8 +36,8 @@ const _paymentRequestDetailRepoInstance = new PaymentRequestDetailRepository();
 const OAuthService = require('./oauthservice.js');
 const _oAuthService = new OAuthService();
 
-const VendorCatalogueService = require('./vendorcatalogueservice.js');
-const _catalogueService = new VendorCatalogueService();
+// const VendorCatalogueService = require('./vendorcatalogueservice.js');
+// const _catalogueService = new VendorCatalogueService();
 
 const PaymentRequestService = require('./paymentrequestservice.js');
 const _paymentRequestServiceInstance = new PaymentRequestService();
@@ -200,6 +200,20 @@ class PJCAService {
 
 							var xPreTotalPrice = xDetail.data.untaxed_amount + xDetail.data.total_tax_amount + xDetail.data.delivery_costs + xDetail.data.service_costs + xDetail.data.other_costs
 							xDetail.data.total_price = Math.round((xPreTotalPrice || 0) * 1000) / 1000
+
+							// Get Payreq Total and find difference
+							let xPayreqDetail = await _paymentRequestServiceInstance.detail({
+								id: xDetail.data.payment_request.id
+							});
+							if (xPayreqDetail.status_code == '00') {
+								xDetail.data.payment_request.total_price = xPayreqDetail.data.total_price || 0
+								xDetail.data.difference_price = (Math.round(
+									Math.abs(
+									  xDetail.data.total_price - xPayreqDetail.data.total_price
+									) * 1000
+								  ) / 1000) || 0
+							}
+							console.log(`>>> xPayreqDetail: ${JSON.stringify(xPayreqDetail)}`);
 
 							// Get Approval Matrix
 							var xParamApprovalMatrix = {
