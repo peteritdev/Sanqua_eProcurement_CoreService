@@ -824,6 +824,7 @@ class ExportService {
 							logo: config.basePathESanqua + '/company_logo/' + xCompanyDetail.token_data.data.logo,
 							iso_purchase_request_no: xCompanyDetail.token_data.data.iso_purchase_request_no
 						};
+						console.log(`>>> xCompanyData: ${JSON.stringify(xCompanyData)}`);
 					}
 				}
 
