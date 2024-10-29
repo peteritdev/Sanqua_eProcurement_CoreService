@@ -522,21 +522,19 @@
                     %>
                       <td><%=data.data.employee_name%></td>
                     <%
-                        } else {
+                      } else {
                     %>
                     <td>(.............................)</td>
                     <%
-                        }
+                      }
                     %>
                   </tr>
                 </table>
               </td>
               <td class="border-r">
-                
                 <%
-                        if( qrCode.approval1 != null && qrCode.approval1.length > 0 ){
-
-                    %>
+                  if( qrCode.approval1 != null && qrCode.approval1.length > 0 ){
+                %>
                 <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 80px;">
                   <tr>
                     <% for(var i = 0; i < qrCode.approval1.length; i++ ) { %>
@@ -555,8 +553,8 @@
                   </tr>
                 </table>
                 <%
-                        } else {
-                    %>
+                  } else {
+                %>
                 <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 80px;">
                   <tr>
                     <td></td>
@@ -566,14 +564,13 @@
                   </tr>
                 </table>
                 <%
-                        }
-                    %>
+                  }
+                %>
               </td>
               <td class="border-r">
                 <%
-                        if( qrCode.approval2 != null && qrCode.approval2.length > 0 ){
-
-                    %>
+                  if( qrCode.approval2 != null && qrCode.approval2.length > 0 ){
+                %>
                 <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 80px;">
                   <tr>
                     <% for(var i = 0; i < qrCode.approval2.length; i++ ) { %>
@@ -592,8 +589,8 @@
                   </tr>
                 </table>
                 <%
-                        } else {
-                    %>
+                  } else {
+                %>
                 <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 55px;">
                   <tr>
                     <td></td>
@@ -603,13 +600,13 @@
                   </tr>
                 </table>
                 <%
-                        }
-                    %>
+                  }
+                %>
               </td>
               <td>
                 <%
-                        if( qrCode.approval3 != null && qrCode.approval3.length > 0 ){
-                    %>
+                  if( qrCode.approval3 != null && qrCode.approval3.length > 0 ){
+                %>
                 <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 80px;">
                   <tr>
                     <% for(var i = 0; i < qrCode.approval3.length; i++ ) { %>
@@ -628,8 +625,8 @@
                   </tr>
                 </table>
                 <%
-                        } else {
-                    %>
+                  } else {
+                %>
                 <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 55px;">
                   <tr>
                     <td></td>
@@ -639,8 +636,8 @@
                   </tr>
                 </table>
                 <%
-                        }
-                    %>
+                  }
+                %>
               </td>
             </tr>
           </table>
