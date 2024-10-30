@@ -67,10 +67,10 @@
       style="border: 1px solid #000000; width: 100%;"
     >
       <tr>
-        <td style="width: 45%; text-align: left; padding-left: 20px">
+        <td style="width: 40%; text-align: left; padding-left: 20px">
           <img src="<%=companyData.logo%>" height="60" />
         </td>
-        <td style="text-align: left; width: 45%;">
+        <td style="text-align: left; width: 40%;">
           
           <span
             style="
@@ -85,13 +85,16 @@
             ><strong>PAYMENT REQUEST</strong></span
           >
         </td>
-        <td style="width: 10%; padding: 3px 0 3px 3px; text-align: left">
-          <table cellspacing="0" cellpadding="5" style="width: 140px; ">
+        <td style="width: 20%; padding: 3px 0 3px 3px; text-align: left">
+          <table cellspacing="0" cellpadding="2" style="width: 140px; ">
             <tr>
-              <th>No.</th>
+              <th style="font-size: 10px;">No. <span style="font-size: 14px; color: #646464;"><%=data.data.document_no.slice(data.data.document_no.lastIndexOf('/') + 1)%></span></th>
             </tr>
-            <tr>
-              <th>Tanggal: <%=data.data.createdAt%></th>
+            <tr style="font-size: 10px;">
+              <th>Tanggal: <span><%=data.data.createdAt%></th></span>
+            </tr>
+            <tr style="font-size: 8px; font-style: italic;">
+              <th style="color: white;">Tanggal: <span style="color: #000000;">Doc No. FRM ACC.03.01 rev.01</th></span>
             </tr>
           </table>
         </td>
@@ -383,8 +386,15 @@
               %>
               <tr>
                 <td style="text-align: center" class="border-rb"><%=index%>.</td>
-                <td style="text-align: left" class="border-rb"><%=item.product_name + "(" + item.qty_request + " " + item.uom_name + ")"%> </td>
-                <td style="text-align: right" class="border-rb"><%=item.subtotal%></td>
+                <td style="text-align: left" class="border-rb"><%=item.product_name + " ( " + item.qty_request + "-" + item.uom_name + " ) "%> </td>
+                <td style="text-align: right" class="border-rb">
+                  <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td>Rp </td>
+                      <td style="text-align: right; width: 100%;"><%=item.subtotal != null ? item.subtotal.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                    </tr>
+                  </table>
+                </td>
                 <td
                   style="text-align: center; border-right: none"
                   class="border-rb"
@@ -397,10 +407,202 @@
                   } )
               %>
               
+              <!-- Biaya Pengiriman -->
+              <%
+              if(data.data.delivery_costs != null && data.data.delivery_costs > 0){
+              %>
+              <tr>
+                <td style="text-align: center" class="border-rb">
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  Biaya Pengiriman
+                </td>
+                <td style="text-align: right" class="border-rb">
+                  <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td>Rp </td>
+                      <td style="text-align: right; width: 100%;"><%=data.data.delivery_costs != null ? data.data.delivery_costs.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                    </tr>
+                  </table>
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                </td>
+              </tr>
+              <%
+                  } else {
+              %>
+              <tr style="height: 25px;">
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%>. -->
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                  <!-- <%=i%> -->
+                </td>
+              </tr>
+              <%
+                  }
+              %>
+              
+              <!-- Biaya admin / aplikasi -->
+              <%
+              if(data.data.service_costs != null && data.data.service_costs > 0){
+              %>
+              <tr>
+                <td style="text-align: center" class="border-rb">
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  Biaya Layanan
+                </td>
+                <td style="text-align: right" class="border-rb">
+                  <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td>Rp </td>
+                      <td style="text-align: right; width: 100%;"><%=data.data.service_costs != null ? data.data.service_costs.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                    </tr>
+                  </table>
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                </td>
+              </tr>
+              <%
+                  } else {
+              %>
+              <tr style="height: 25px;">
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%>. -->
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                  <!-- <%=i%> -->
+                </td>
+              </tr>
+              <%
+                  }
+              %>
+
+              <!-- Biaya Lain-lain -->
+              <%
+              if(data.data.other_costs != null && data.data.other_costs > 0){
+              %>
+              <tr>
+                <td style="text-align: center" class="border-rb">
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  Biaya Lain-lain
+                </td>
+                <td style="text-align: right" class="border-rb">
+                  <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td>Rp </td>
+                      <td style="text-align: right; width: 100%;"><%=data.data.other_costs != null ? data.data.other_costs.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                    </tr>
+                  </table>
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                </td>
+              </tr>
+              <%
+                  } else {
+              %>
+              <tr style="height: 25px;">
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%>. -->
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                  <!-- <%=i%> -->
+                </td>
+              </tr>
+              <%
+                  }
+              %>
+
+              <!-- Discount -->
+              <%
+              if(data.data.global_discount != null && data.data.global_discount > 0){
+              %>
+              <tr>
+                <td style="text-align: center" class="border-rb">
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  Biaya Lain-lain
+                </td>
+                <td style="text-align: right" class="border-rb">
+                  <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td>Rp </td>
+                      <td style="text-align: right; width: 100%;"><%=data.data.global_discount != null ? data.data.global_discount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                    </tr>
+                  </table>
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                </td>
+              </tr>
+              <%
+                  } else {
+              %>
+              <tr style="height: 25px;">
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%>. -->
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                  <!-- <%=i%> -->
+                </td>
+              </tr>
+              <%
+                  }
+              %>
+
               <%
                 if(data.data.payment_request_detail.length < 9 ){
               %>
-                <% for (let i = 0; i < 9 - data.data.payment_request_detail.length; i++) { %>
+                <% for (let i = 0; i < 5 - data.data.payment_request_detail.length; i++) { %>
                   <tr style="height: 23px;">
                     <td style="text-align: center" class="border-rb"></td>
                     <td style="text-align: left" class="border-rb"></td>
@@ -415,10 +617,17 @@
               <% } %>
 
               <tr>
-                <th colspan="4" style="text-align: left" class="border-rb">
+                <th colspan="2" style="text-align: left" class="border-rb">
                   TOTAL
                 </th>
-                <td style="text-align: right" class="border-rb"><%=data.data.total_price%></td>
+                <td style="text-align: right" class="border-rb">
+                  <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td>Rp </td>
+                      <td style="text-align: right; width: 100%;"><%=data.data.total_price != null ? data.data.total_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                    </tr>
+                  </table>
+                </td>
                 <td
                   style="text-align: center; border-right: none"
                   class="border-rb"
@@ -443,27 +652,41 @@
             style="width: 100%; border-width: 0.2px"
           >
             <tr>
-              <th style="width: 7%" class="border-r" rowspan="2">Pemohon</td>
               <th
-                style="width: 93%"
-                colspan="3"
-                style="font-size: 9px"
+                colspan="2"
+              >
+              </th>
+              <th
                 class="border-b"
+              >
+              </th>
+            </tr>
+            <tr>
+              <th
+                colspan="2" class="border-r" style="width: 50%;"
+              >
+              </th>
+              <th
+                class="border-b" style="width: 50%;"
               >
                 Kolom Persetujuan
               </th>
             </tr>
             <tr>
-              <th style="width: 32%" class="border-r">Ka. Department</th>
-              <th style="width: 36%" class="border-r">Finance</th>
-              <th style="width: 32%">Plant Manager / Direktur</th>
+              <th style="width: 25%;">Pemohon</th>
+              <th class="border-r" style="width: 25%;">Ka. Department</th>
+              <th class="border-b" style="width: 50%;">Plant Manager / Direktur</th>
             </tr>
             <tr>
-              <td class="border-r">
-                <%=data.data.employee_name%>
+              <td>
+                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 55px;">
+                  <tr>
+                    <td>
+                    </td>
+                  </tr>
+                </table>
               </td>
               <td class="border-r">
-                
                 <%
                         if( qrCode.approval1 != null && qrCode.approval1.length > 0 ){
 
@@ -479,29 +702,12 @@
                     </td>
                     <% }%>
                   </tr>
-                  <tr>
-                    <% for(var i = 0; i < approver1.length; i++ ) { %>
-                    <td><%=approver1[i].user.name%></td>
-                    <% }%>
-                  </tr>
-                </table>
-                <%
-                        } else {
-                    %>
-                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 55px;">
-                  <tr>
-                    <td></td>
-                  </tr>
-                  <tr>
-                    <td>(.............................)</td>
-                  </tr>
                 </table>
                 <%
                         }
                     %>
               </td>
-              <td class="border-r">
-                
+              <td class="border-b">
                 <%
                         if( qrCode.approval2 != null && qrCode.approval2.length > 0 ){
 
@@ -517,63 +723,80 @@
                     </td>
                     <% }%>
                   </tr>
-                  <tr>
-                    <% for(var i = 0; i < approver2.length; i++ ) { %>
-                    <td><%=approver2[i].user.name%></td>
-                    <% }%>
-                  </tr>
-                </table>
-                <%
-                        } else {
-                    %>
-                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 55px;">
-                  <tr>
-                    <td></td>
-                  </tr>
-                  <tr>
-                    <td>(.............................)</td>
-                  </tr>
                 </table>
                 <%
                         }
                     %>
               </td>
-              <td>
-                <%
-                        if( qrCode.approval3.length > 0 ){
-                    %>
-                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 55px;">
+            </tr>
+            <tr>
+              <td style="padding: 3px 0;">
+                <table style="margin: auto; text-align: center;">
                   <tr>
-                    <% for(var i = 0; i < qrCode.approval3.length; i++ ) { %>
                     <td>
-                      <img
-                        src="<%=qrCode.qrPath%><%=qrCode.approval3[i]%>"
-                        width="80"
-                      />
                     </td>
-                    <% }%>
                   </tr>
                   <tr>
-                    <% for(var i = 0; i < approver3.length; i++ ) { %>
-                    <td><%=approver3[i].user.name%></td>
-                    <% }%>
+                    <td><%=data.data.employee_name%></td>
                   </tr>
                 </table>
-                <%
-                        } else {
-                    %>
-                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 55px;">
-                  <tr>
-                    <td></td>
-                  </tr>
-                  <tr>
-                    <td>(.............................)</td>
-                  </tr>
-                </table>
-                <%
-                        }
-                    %>
               </td>
+              <th style="padding: 3px 0;"
+                class="border-r"
+              >
+              <%
+                      if( qrCode.approval1 != null && qrCode.approval1.length > 0 ){
+
+                  %>
+              <table style="margin: auto; text-align: center;">
+                <tr>
+                  <% for(var i = 0; i < approver1.length; i++ ) { %>
+                  <td><%=approver1[i].user.name%></td>
+                  <% }%>
+                </tr>
+              </table>
+              <%
+                      } else {
+                  %>
+              <table style="margin: auto; text-align: center;">
+                <tr>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>(.............................)</td>
+                </tr>
+              </table>
+              <%
+                      }
+                  %>
+              </th>
+              <th style="padding: 3px 0;"
+                class="border-b" style="width: 50%;"
+              >
+              <%
+                      if( qrCode.approval2 != null && qrCode.approval2.length > 0 ){
+
+                  %>
+              <table style="margin: auto; text-align: center;">
+                <tr>
+                  <% for(var i = 0; i < approver2.length; i++ ) { %>
+                  <td><%=approver2[i].user.name%></td>
+                  <% }%>
+                </tr>
+              </table>
+              <%
+                      }
+                  %>
+              </th>
+            </tr>
+            <tr>
+              <th
+                colspan="2"
+              >
+              </th>
+              <th
+              >
+              </th>
             </tr>
           </table>
         </td>
@@ -706,7 +929,7 @@
                             <% if( data.data.source_of_funds != null &&  data.data.source_of_funds != ''){ %>
                             <span><%=data.data.source_of_funds%></span>
                             <% }else{ %>
-                            <span>........................</span>
+                            <span>.............................................</span>
                             <% } %>
                           </td>
                         </tr>
@@ -745,7 +968,7 @@
                     <th style="height: 30px; vertical-align: top; text-align: right;" colspan="2">
                       <span>
                         Tgl :
-                        <span style="margin: 0 5px">.........................</span>
+                        <span style="margin: 0 5px">........................................</span>
                       </span>
                     </th>
                   </tr>
@@ -760,20 +983,13 @@
                         "
                       >
                         Nama :
-                        <span style="margin: 0 5px">.........................</span>
+                        <span style="margin: 0 5px">........................................</span>
                       </span>
                     </th>
-                    <th>
-                      <span
-                        style="
-                          margin-bottom: 5px;
-                          display: flex;
-                          align-items: center;
-                          justify-content: end;
-                        "
-                      >
+                    <th style="text-align: right !important;">
+                      <span>
                         TTD :
-                        <span style="margin: 0 5px">.........................</span>
+                        <span style="margin: 0 5px">........................................</span>
                       </span>
                     </th>
                   </tr>
@@ -785,7 +1001,7 @@
                     <th style="height: 30px; vertical-align: top; text-align: right;" colspan="2">
                       <span>
                         Tgl :
-                        <span style="margin: 0 5px">.........................</span>
+                        <span style="margin: 0 5px">........................................</span>
                       </span>
                     </th>
                   </tr>
@@ -800,20 +1016,14 @@
                         "
                       >
                         Nama :
-                        <span style="margin: 0 5px">.........................</span>
+                        <span style="margin: 0 5px">........................................</span>
                       </span>
                     </th>
-                    <th>
+                    <th style="text-align: right !important;">
                       <span
-                        style="
-                          margin-bottom: 5px;
-                          display: flex;
-                          align-items: center;
-                          justify-content: end;
-                        "
                       >
                         TTD :
-                        <span style="margin: 0 5px">.........................</span>
+                        <span style="margin: 0 5px">........................................</span>
                       </span>
                     </th>
                   </tr>
