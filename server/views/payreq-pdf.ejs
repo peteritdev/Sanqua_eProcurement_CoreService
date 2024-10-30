@@ -88,7 +88,7 @@
         <td style="width: 10%; padding: 3px 0 3px 3px; text-align: left">
           <table cellspacing="0" cellpadding="5" style="width: 140px; ">
             <tr>
-              <th>No. <%=data.data.document_no%></th>
+              <th>No.</th>
             </tr>
             <tr>
               <th>Tanggal: <%=data.data.createdAt%></th>
@@ -365,10 +365,8 @@
           >
             <thead style="height: 30px;">
               <tr>
-                <th style="width: 10%" class="col-header-item">No Akun</th>
-                <th style="width: 45%" class="col-header-item">Uraian</th>
-                <th class="col-header-item">Qty</th>
-                <th class="col-header-item">Uom</th>
+                <th style="width: 5%" class="col-header-item">No</th>
+                <th style="width: 61.65%" class="col-header-item">Uraian</th>
                 <th style="width: 13.35%" class="col-header-item">Jumlah</th>
                 <th
                   style="width: 20%; border-right: none !important"
@@ -385,9 +383,7 @@
               %>
               <tr>
                 <td style="text-align: center" class="border-rb"><%=index%>.</td>
-                <td style="text-align: left" class="border-rb"><%=item.product_name%></td>
-                <td style="text-align: center" class="border-rb"><%=item.qty_request%></td>
-                <td style="text-align: center" class="border-rb"><%=item.uom_name%></td>
+                <td style="text-align: left" class="border-rb"><%=item.product_name + "(" + item.qty_request + " " + item.uom_name + ")"%> </td>
                 <td style="text-align: right" class="border-rb"><%=item.subtotal%></td>
                 <td
                   style="text-align: center; border-right: none"
@@ -408,8 +404,6 @@
                   <tr style="height: 23px;">
                     <td style="text-align: center" class="border-rb"></td>
                     <td style="text-align: left" class="border-rb"></td>
-                    <td style="text-align: center" class="border-rb"></td>
-                    <td style="text-align: center" class="border-rb"></td>
                     <td style="text-align: right" class="border-rb"></td>
                     <td
                       style="text-align: center; border-right: none"
@@ -653,7 +647,7 @@
                             <img src="<%=imagePath%>blank_checklist.png" width="15" />
                             <% } %>
                           </td>
-                          <td style="width: 75px">Reimburst</td>
+                          <td style="width: 75px">Reimbursement</td>
                         </tr>
                       </table>
                     </th>
@@ -687,7 +681,7 @@
                             <img src="<%=imagePath%>blank_checklist.png" width="15" />
                             <% } %>
                           </td>
-                          <td style="width: 75px">...........................................</td>
+                          <td style="width: 75px">Lainnya</td>
                         </tr>
                       </table>
                     </th>
@@ -737,7 +731,7 @@
                 Serah Terima Kas
               </th>
               <th style="text-align: left; width: 42.5%" class="border-tr">
-                Diserahkan Oleh Kasir:
+                Diserahkan Oleh Finance:
               </th>
               <th style="text-align: left; width: 42.5%" class="border-t">
                 Diterima Oleh:
@@ -748,14 +742,8 @@
               <td class="border-r">
                 <table cellspacing="0" cellpadding="0" style="width: 100%">
                   <tr>
-                    <th style="height: 30px; vertical-align: top" colspan="2">
-                      <span
-                        style="
-                          display: flex;
-                          align-items: left;
-                          justify-content: end;
-                        "
-                      >
+                    <th style="height: 30px; vertical-align: top; text-align: right;" colspan="2">
+                      <span>
                         Tgl :
                         <span style="margin: 0 5px">.........................</span>
                       </span>
@@ -794,14 +782,8 @@
               <td>
                 <table cellspacing="0" cellpadding="0" style="width: 100%">
                   <tr>
-                    <th style="height: 30px; vertical-align: top" colspan="2">
-                      <span
-                        style="
-                          display: flex;
-                          align-items: left;
-                          justify-content: end;
-                        "
-                      >
+                    <th style="height: 30px; vertical-align: top; text-align: right;" colspan="2">
+                      <span>
                         Tgl :
                         <span style="margin: 0 5px">.........................</span>
                       </span>
