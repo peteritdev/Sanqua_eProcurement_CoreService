@@ -90,7 +90,7 @@
             vertical-align: bottom;
           "
         >
-          <span>Doc No: FRM.WHM.01.01</span>
+          <span style="width: 240px; margin-left: -20px; font-size: 10px;">Doc No: FRM.WHM.01.01</span>
         </th>
       </tr>
       <tr>
@@ -101,55 +101,44 @@
             style="width: 100%; text-align: left"
           >
             <tr>
-              <td style="width: 10%">
+              <td colspan="2" style="width: 66.65%">
                 <span style="display: flex; justify-content: space-between"
                   >Diterima Dari </span
-                >
-              </td>
-              <td style="width: 56.65%" class="border-r">
-                <span style="margin-right: 2px;">:</span> <%=data.data.received_from_vendor_name%>
+                ><span style="margin-right: 2px;">:</span>
               </td>
               <td style="width: 33.35%">
                 <table style="width: 100%;">
                   <tr>
-                    <td style="width: 80px;">No PO</td>
+                    <td style="width: 70px;">No PO</td>
                     <td > <span style="margin-right: 2px;">:</span> <%=data.data.po_no%></td>
                   </tr>
                 </table>
               </td>
             </tr>
             <tr>
-              <td style="width: 10%">
-                <span style="display: flex; justify-content: space-between"
-                  >No. SJ</span
-                >
-              </td>
-              <td style="width: 56.65%" class="border-r">
-                <span style="margin-right: 2px;">:</span> <%=data.data.sj_no%>
+              <td colspan="2" style="width: 66.65%">
+                <span style="position: relative; top: -10px;"><%=data.data.received_from_vendor_name%></span>
               </td>
               <td style="width: 33.35%">
                 <table style="width: 100%;">
                   <tr>
-                    <td style="width: 80px;">No FPB</td>
+                    <td style="width: 70px;">No Form</td>
                     <td > <span style="margin-right: 2px;">:</span> <%=data.data.purchase_request.request_no%></td>
                   </tr>
                 </table>
               </td>
             </tr>
             <tr>
-              <td style="width: 10%">
-                <!-- <span style="display: flex; justify-content: space-between"
-                  >Diterima Oleh <span>:</span></span
-                > -->
-              </td>
-              <td style="width: 56.65%" class="border-r">
-                <!-- ............................. -->
+              <td colspan="2" style="width: 66.65%;">
+                <span style="display: flex; justify-content: space-between"
+                >No. Terima</span
+              ><span style="margin-right: 2px;">:</span>  <%=data.data.document_no%>
               </td>
               <td style="width: 33.35%">
                 
                 <table style="width: 100%;">
                   <tr>
-                    <td style="width: 80px;">Tgl. Terima</td>
+                    <td style="width: 70px;">Tgl. Terima</td>
                     <td > <span style="margin-right: 2px;">:</span><%=new Date(data.data.createdAt).toLocaleDateString('id')%></td>
                   </tr>
                 </table>
@@ -168,10 +157,10 @@
             <thead>
               <tr>
                 <th style="width: 3%" class="col-header-item">No</th>
-                <th style="width: 52%" class="col-header-item">Uraian</th>
+                <th style="width: 62%" class="col-header-item">Uraian</th>
                 <th class="col-header-item">Qty</th>
                 <th class="col-header-item">Uom</th>
-                <th colspan="2" style="width: 33.35%; border-right:none;" class="col-header-item">Keterangan</th>
+                <th colspan="2" style="width: 23.35%; border-right:none;" class="col-header-item">Keterangan</th>
               </tr>
             </thead>
             <tbody>
@@ -225,22 +214,23 @@
             style="width: 100%; border-width: 0.2px"
           >
             <tr>
-              <th style="width: 25%" rowspan="2">Diserahkan Oleh,</td>
-              <th style="width: 25%" class="border-r" rowspan="2">Diterima Oleh,</td>
+              <th rowspan="4" style="width: 40%; font-weight: 400; vertical-align: top; text-align: left;" class="border-r">Notes:</td>
               <th
-                style="width: 50%"
-                colspan="3"
-                style="font-size: 14px"
+                style="width: 60%"
+                colspan="4"
+                style="font-size: 14px; font-weight: 400 !important; text-align: left !important;"
                 class="border-b"
               >
-                Mengetahui
+                *Validasi disertai ttd & nama jelas
               </th>
             </tr>
             <tr>
-              <th style="width: 78%" class="border-r">QC</th>
+              <th class="border-rb" style="font-weight: 400;">Diserahkan oleh,</th>
+              <th class="border-rb" style="font-weight: 400;">Diterima oleh,</th>
+              <th class="border-b" style="font-weight: 400;">Mengetahui,</th>
             </tr>
             <tr>
-              <td>
+              <td class="border-rb">
                 <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 80px;">
                   <tr>
                     <td></td>
@@ -249,22 +239,14 @@
                     <%
                     if(data.data.submitted_by_name != null && data.data.submitted_by_name != '' ){
                     %>
-                      <td><%=data.data.submitted_by_name%></td>
-                    <%
-                        }
-                    %>
-                    <%
-                    if(data.data.submitted_by_name == null || data.data.submitted_by_name == '' ){
-                    %>
-                    <td>(.............................)</td>
+                      <td style="vertical-align: bottom;"><%=data.data.submitted_by_name%></td>
                     <%
                         }
                     %>
                   </tr>
                 </table>
               </td>
-              <td class="border-r">
-                
+              <td class="border-rb">
                 <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 80px;">
                   <tr>
                     <td></td>
@@ -273,44 +255,28 @@
                     <%
                     if(data.data.received_by_name != null && data.data.received_by_name != '' ){
                     %>
-                      <td><%=data.data.received_by_name%></td>
-                    <%
-                        }
-                    %>
-                    <%
-                    if(data.data.received_by_name == null || data.data.received_by_name == '' ){
-                    %>
-                    <td>(.............................)</td>
+                      <td style="vertical-align: bottom;"><%=data.data.received_by_name%></td>
                     <%
                         }
                     %>
                   </tr>
                 </table>
               </td>
-              <td class="border-r">
-                
+              <td class="border-b">
                 <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 80px;">
                   <tr>
                     <td></td>
                   </tr>
                   <tr>
-                    <%
-                    if(data.data.received_by_name != null && data.data.received_by_name != '' ){
-                    %>
-                      <td><%=data.data.received_by_name%></td>
-                    <%
-                        }
-                    %>
-                    <%
-                    if(data.data.received_by_name == null || data.data.received_by_name == '' ){
-                    %>
-                    <td>(.............................)</td>
-                    <%
-                        }
-                    %>
+                    <td style="vertical-align: bottom;"></td>
                   </tr>
                 </table>
               </td>
+            </tr>
+            <tr>
+              <th class="border-r" style="font-weight: 400;">Vendor</th>
+              <th class="border-r" style="font-weight: 400;">Gudang</th>
+              <th style="font-weight: 400;">QC</th>
             </tr>
           </table>
         </td>
