@@ -166,18 +166,17 @@
             <tbody>
               <% var index = 1; data.data.goods_receipt_detail.forEach( item => { %>
                 <tr>
-                  <td style="text-align: center" class="border-rb">1</td>
+                  <td style="text-align: center" class="border-rb"><%=index%>.</td>
                   <td style="text-align: left" class="border-rb">
-                    Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                    Sequi, libero!
+                    <%=item.product.name%>
                   </td>
-                  <td style="text-align: center" class="border-rb">10</td>
-                  <td style="text-align: center" class="border-rb">Pcs</td>
+                  <td style="text-align: center" class="border-rb"><%=item.qty_done%></td>
+                  <td style="text-align: center" class="border-rb"><%=item.uom_name%></td>
                   <td colspan="2"
                     style="text-align: center; border-right: none"
                     class="border-rb"
                   >
-                    Lorem ipsum dolor sit amet.
+                    <%=item.description%>
                   </td>
                 </tr>
               <% index++; } ) %>
@@ -218,10 +217,10 @@
               <th
                 style="width: 60%"
                 colspan="4"
-                style="font-size: 14px; font-weight: 400 !important; text-align: left !important;"
+                style="font-size: 14px;"
                 class="border-b"
               >
-                *Validasi disertai ttd & nama jelas
+                <span style="font-weight: 400; text-align: left; margin-right: auto;">*Validasi disertai ttd & nama jelas</span>
               </th>
             </tr>
             <tr>
