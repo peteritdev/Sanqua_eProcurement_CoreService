@@ -121,14 +121,13 @@
                 <span style="margin-right: 2px; margin-left: -20px;">:</span>DEPARTMENT <%=data.data.department_name%>
               </td>
               <td style="width: 38.35%">
-                <span
-                  style="
-                    display: flex;
-                    justify-content: space-between;
-
-                  "
-                  >Nomor <span>:</span> <span style="width: 210px;"><%=data.data.payment_request.document_no%></span></span
-                >
+                <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td>Nomor </td>
+                    <td>: </td>
+                    <td style="width: 210px;"><%=data.data.payment_request.document_no%></td>
+                  </tr>
+                </table>
               </td>
             </tr>
             <tr>
@@ -141,15 +140,13 @@
                 <span style="margin-right: 2px; margin-left: -20px;">:</span> <%=new Date(data.data.createdAt).toLocaleDateString('id')%>
               </td>
               <td style="width: 38.35%">
-                <span
-                  style="
-                    display: flex;
-                    justify-content: space-between;
-                    width: 60px;
-                  "
-                  >Tanggal CA
-                  <span>:</span> <%=new Date(data.data.payment_request.created_at).toLocaleDateString('id')%></span
-                >
+                <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td style="width: 60px;">Tanggal CA </td>
+                    <td>: </td>
+                    <td><%=new Date(data.data.payment_request.created_at).toLocaleDateString('id')%></td>
+                  </tr>
+                </table>
               </td>
             </tr>
           </table>
