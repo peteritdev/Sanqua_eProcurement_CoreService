@@ -399,6 +399,23 @@
                   class="border-rb"
                 >
                   <%=item.description%>
+                  <%
+                  if(item.tax != null){
+                  %>
+                    <br/>
+                    <%=item.tax.name%>
+                  <%
+                      }
+                  %>
+                  
+                  <%
+                  if(item.discount_amount != null && item.discount_amount > 0){
+                  %>
+                    <br/>
+                    <%='Disc: Rp' + item.discount_amount%>
+                  <%
+                      }
+                  %>
                 </td>
               </tr>
               <%
@@ -558,7 +575,7 @@
                 <td style="text-align: center" class="border-rb">
                 </td>
                 <td style="text-align: left" class="border-rb">
-                  Biaya Lain-lain
+                  Discount Global (<%=data.data.global_discount_percent%>%)
                 </td>
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
