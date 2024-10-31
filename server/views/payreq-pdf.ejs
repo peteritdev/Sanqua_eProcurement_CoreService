@@ -386,7 +386,7 @@
               %>
               <tr>
                 <td style="text-align: center" class="border-rb"><%=index%>.</td>
-                <td style="text-align: left" class="border-rb"><%=item.product_name + " ( " + item.qty_request + "-" + item.uom_name + " ) "%> </td>
+                <td style="text-align: left" class="border-rb"><%=item.product_name + " (" + item.qty_request + " " + item.uom_name + ") "%> </td>
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
@@ -679,7 +679,7 @@
             </tr>
             <tr>
               <td>
-                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 55px;">
+                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 45px;">
                   <tr>
                     <td>
                     </td>
@@ -691,7 +691,7 @@
                         if( qrCode.approval1 != null && qrCode.approval1.length > 0 ){
 
                     %>
-                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 55px;">
+                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 45px;">
                   <tr>
                     <% for(var i = 0; i < qrCode.approval1.length; i++ ) { %>
                     <td>
@@ -712,7 +712,7 @@
                         if( qrCode.approval2 != null && qrCode.approval2.length > 0 ){
 
                     %>
-                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 55px;">
+                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 45px;">
                   <tr>
                     <% for(var i = 0; i < qrCode.approval2.length; i++ ) { %>
                     <td>
