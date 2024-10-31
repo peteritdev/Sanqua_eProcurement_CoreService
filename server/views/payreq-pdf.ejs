@@ -9,6 +9,9 @@
       html {
         zoom: 0.8;
       }
+      .body {
+        font-family: "Arial" !important;
+      }
       .center {
         margin-left: auto;
         margin-right: auto;
@@ -16,10 +19,9 @@
         width: 99%;
         /* border-collapse:collapse; */
         text-align: center;
-        font-size: 8px;
-        font-family: "Arial";
+        font-size: 10px;
         border-style: solid;
-        border-color: #000000;
+        border-color: #252525;
       }
 
       .center th,
@@ -34,37 +36,37 @@
       }
 
       .border-b {
-        border-bottom: 1px solid #000000 !important;
+        border-bottom: 1px solid #252525 !important;
       }
       .border-t {
-        border-top: 1px solid #000000;
+        border-top: 1px solid #252525;
       }
 
       .border-tr {
-        border-top: 1px solid #000000;
-        border-right: 1px solid #000000;
+        border-top: 1px solid #252525;
+        border-right: 1px solid #252525;
       }
       .border-r {
-        border-right: 1px solid #000000;
+        border-right: 1px solid #252525;
       }
 
       .border-rb {
-        border-right: 1px solid #000000;
-        border-bottom: 1px solid black !important;
+        border-right: 1px solid #252525;
+        border-bottom: 1px solid #252525 !important;
       }
 
       th.col-header-item {
-        border-bottom: 1px solid #000000;
-        border-right: 1px solid #000000;
+        border-bottom: 1px solid #252525;
+        border-right: 1px solid #252525;
       }
     </style>
   </head>
-  <body style="margin-left: 25px; margin-top: 25px;">
+  <body class="body" style="margin-left: 25px; margin-top: 25px;">
     <table
       class="center"
       cellspacing="0"
       cellpadding="2"
-      style="border: 1px solid #000000; width: 100%;"
+      style="border: 1px solid #252525; width: 100%;"
     >
       <tr>
         <td style="width: 40%; text-align: left; padding-left: 20px">
@@ -88,10 +90,10 @@
         <td style="width: 20%; padding: 0; text-align: left;">
           <table cellspacing="0" cellpadding="2" style="width: 140px;">
             <tr>
-              <th style="height: 15px;">No : <span style="font-size: 14px; color: #646464;"><%=data.data.document_no.slice(data.data.document_no.lastIndexOf('/') + 1)%></span></th>
+              <th style="height: 15px; vertical-align: bottom;">No. : <span style="font-size: 14px; color: #646464;"><%=data.data.document_no.slice(data.data.document_no.lastIndexOf('/') + 1)%></span></th>
             </tr>
             <tr>
-              <th style="height: 15px;">Tanggal: <span><%=data.data.createdAt%></th></span>
+              <th style="height: 15px; vertical-align: bottom;">Tanggal: <span><%=data.data.createdAt%></th></span>
             </tr>
             <tr>
               <th style="height: 15px; color: white; font-size: 6px; font-style: italic; vertical-align: bottom;"><span style="padding-left: 20px; color: #000000;">Doc No. FRM ACC.03.01 rev.01</th></span>
