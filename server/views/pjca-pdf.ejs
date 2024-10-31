@@ -125,7 +125,7 @@
                   <tr>
                     <td style="width: 75px;">Nomor </td>
                     <td>:</td>
-                    <td><%=data.data.payment_request.document_no.slice(data.data.payment_request.document_no.lastIndexOf('/'))%></td>
+                    <td><%=data.data.payment_request.document_no.slice(data.data.payment_request.document_no.lastIndexOf('/') + 1)%></td>
                   </tr>
                 </table>
               </td>
@@ -144,7 +144,7 @@
                   <tr>
                     <td style="width: 75px">Tanggal CA </td>
                     <td>:</td>
-                    <td style="padding-left: 2px;"><%=new Date(data.data.payment_request.created_at).toLocaleDateString('id')%></td>
+                    <td><span style="padding-left: 2px;"><%=new Date(data.data.payment_request.created_at).toLocaleDateString('id')%></span></td>
                   </tr>
                 </table>
               </td>
