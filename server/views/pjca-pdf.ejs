@@ -156,7 +156,7 @@
         </td>
       </tr>
       <tr>
-        <td colspan="4" class="border-t">
+        <td colspan="4" style="padding: 2px; margin: 0px" class="border-t">
         </td>
       </tr>
       <tr>
@@ -466,7 +466,7 @@
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
                       <td>Rp </td>
-                      <td style="text-align: right; width: 100%;"><%=data.data.total_price%></td>
+                      <td style="text-align: right; width: 100%;"><%=data.data.total_price != null ? data.data.total_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
                 </td>
@@ -488,54 +488,54 @@
         </td>
       </tr>
       <tr>
-        <td colspan="5" style="padding: 0px; margin: 0px">
+        <td colspan="4" style="padding: 0px; margin: 0px">
           <table
             cellspacing="0"
             cellpadding="2"
             style="width: 100%; border-width: 0.2px"
           >
             <tr>
-              <th style="width: 25%; font-weight: 400;" rowspan="2">Penanggung Jawab</td>
-              <th style="width: 25%; font-weight: 400;" class="border-r" rowspan="2">Ka. Department</td>
               <th
-                style="width: 50%; font-weight: 400;"
-                colspan="3"
-                style="font-size: 14px"
-                class="border-b"
+                colspan="2"
+              >
+              </th>
+              <th
+                colspan="2" class="border-b"
+              >
+              </th>
+            </tr>
+            <tr>
+              <th style="width: 25%;">Penanggung Jawab</th>
+              <th class="border-r" style="width: 25%;">Ka. Department</th>
+              <th
+                colspan="2" class="border-b" style="width: 50%;"
               >
                 Kolom Persetujuan
               </th>
             </tr>
             <tr>
-              <th style="width: 28%; font-weight: 400;" class="border-r">Finance</th>
-              <th style="width: 50%; font-weight: 400;">Plant Manager / Direktur</th>
+              <th
+                colspan="2" class="border-r" style="width: 50%;"
+              >
+              </th>
+              <th class="border-rb" style="width: 25%;">Finance</th>
+              <th class="border-b" style="width: 25%;">Plant Manager / Direktur</th>
             </tr>
             <tr>
               <td>
-                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 80px;">
+                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 45px;">
                   <tr>
-                    <td></td>
-                  </tr>
-                  <tr>
-                    <%
-                    if(data.data.employee_name != null && data.data.employee_name != '' ){
-                    %>
-                      <td><%=data.data.employee_name%></td>
-                    <%
-                      } else {
-                    %>
-                    <td>(.............................)</td>
-                    <%
-                      }
-                    %>
+                    <td>
+                    </td>
                   </tr>
                 </table>
               </td>
               <td class="border-r">
                 <%
-                  if( qrCode.approval1 != null && qrCode.approval1.length > 0 ){
-                %>
-                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 80px;">
+                        if( qrCode.approval1 != null && qrCode.approval1.length > 0 ){
+
+                    %>
+                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 45px;">
                   <tr>
                     <% for(var i = 0; i < qrCode.approval1.length; i++ ) { %>
                     <td>
@@ -546,32 +546,17 @@
                     </td>
                     <% }%>
                   </tr>
-                  <tr>
-                    <% for(var i = 0; i < approver1.length; i++ ) { %>
-                    <td><%=approver1[i].user.name%></td>
-                    <% }%>
-                  </tr>
                 </table>
                 <%
-                  } else {
-                %>
-                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 80px;">
-                  <tr>
-                    <td></td>
-                  </tr>
-                  <tr>
-                    <td>(.............................)</td>
-                  </tr>
-                </table>
-                <%
-                  }
-                %>
+                        }
+                    %>
               </td>
-              <td class="border-r">
+              <td class="border-rb">
                 <%
-                  if( qrCode.approval2 != null && qrCode.approval2.length > 0 ){
-                %>
-                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 80px;">
+                        if( qrCode.approval2 != null && qrCode.approval2.length > 0 ){
+
+                    %>
+                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 45px;">
                   <tr>
                     <% for(var i = 0; i < qrCode.approval2.length; i++ ) { %>
                     <td>
@@ -582,32 +567,17 @@
                     </td>
                     <% }%>
                   </tr>
-                  <tr>
-                    <% for(var i = 0; i < approver2.length; i++ ) { %>
-                    <td><%=approver2[i].user.name%></td>
-                    <% }%>
-                  </tr>
                 </table>
                 <%
-                  } else {
-                %>
-                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 55px;">
-                  <tr>
-                    <td></td>
-                  </tr>
-                  <tr>
-                    <td>(.............................)</td>
-                  </tr>
-                </table>
-                <%
-                  }
-                %>
+                        }
+                    %>
               </td>
-              <td>
+              <td class="border-b">
                 <%
-                  if( qrCode.approval3 != null && qrCode.approval3.length > 0 ){
-                %>
-                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 80px;">
+                        if( qrCode.approval3 != null && qrCode.approval3.length > 0 ){
+
+                    %>
+                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 45px;">
                   <tr>
                     <% for(var i = 0; i < qrCode.approval3.length; i++ ) { %>
                     <td>
@@ -618,27 +588,98 @@
                     </td>
                     <% }%>
                   </tr>
-                  <tr>
-                    <% for(var i = 0; i < approver3.length; i++ ) { %>
-                    <td><%=approver3[i].user.name%></td>
-                    <% }%>
-                  </tr>
                 </table>
                 <%
-                  } else {
-                %>
-                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 55px;">
-                  <tr>
-                    <td></td>
-                  </tr>
-                  <tr>
-                    <td>(.............................)</td>
-                  </tr>
-                </table>
-                <%
-                  }
-                %>
+                        }
+                    %>
               </td>
+            </tr>
+            <tr>
+              <td style="padding: 3px 0;">
+                <table style="margin: auto; text-align: center;">
+                  <tr>
+                    <td>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><%=data.data.employee_name%></td>
+                  </tr>
+                </table>
+              </td>
+              <th style="padding: 3px 0;"
+                class="border-r"
+              >
+              <%
+                      if( qrCode.approval1 != null && qrCode.approval1.length > 0 ){
+
+                  %>
+              <table style="margin: auto; text-align: center;">
+                <tr>
+                  <% for(var i = 0; i < approver1.length; i++ ) { %>
+                  <td><%=approver1[i].user.name%></td>
+                  <% }%>
+                </tr>
+              </table>
+              <%
+                      } else {
+                  %>
+              <table style="margin: auto; text-align: center;">
+                <tr>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>(.............................)</td>
+                </tr>
+              </table>
+              <%
+                      }
+                  %>
+              </th>
+              <th style="padding: 3px 0;"
+                class="border-rb" style="width: 50%;"
+              >
+              <%
+                      if( qrCode.approval2 != null && qrCode.approval2.length > 0 ){
+
+                  %>
+              <table style="margin: auto; text-align: center;">
+                <tr>
+                  <% for(var i = 0; i < approver2.length; i++ ) { %>
+                  <td><%=approver2[i].user.name%></td>
+                  <% }%>
+                </tr>
+              </table>
+              <%
+                      }
+                  %>
+              </th>
+              <th style="padding: 3px 0;"
+                class="border-b" style="width: 50%;"
+              >
+              <%
+                      if( qrCode.approval3 != null && qrCode.approval3.length > 0 ){
+
+                  %>
+              <table style="margin: auto; text-align: center;">
+                <tr>
+                  <% for(var i = 0; i < approver3.length; i++ ) { %>
+                  <td><%=approver3[i].user.name%></td>
+                  <% }%>
+                </tr>
+              </table>
+              <%
+                      }
+                  %>
+              </th>
+            </tr>
+            <tr>
+              <th
+                colspan="2"
+              >
+              </th>
+              <th
+              >
+              </th>
             </tr>
           </table>
         </td>
