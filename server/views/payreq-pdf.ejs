@@ -9,21 +9,17 @@
       html {
         zoom: 0.8;
       }
-      .body {
-        font-family: 'Times New Roman', Times, serif;
-        font-weight: 400 !important;
-        color: black !important;
-      }
       .center {
         margin-left: auto;
         margin-right: auto;
         margin-top: 15px;
         width: 99%;
+        font-family: Arial, Helvetica, sans-serif;
         /* border-collapse:collapse; */
         text-align: center;
         font-size: 8px;
         border-style: solid;
-        border-color: #252525;
+        border-color: #000000;
       }
 
       .center th,
@@ -38,37 +34,37 @@
       }
 
       .border-b {
-        border-bottom: 1px solid #252525 !important;
+        border-bottom: 1px solid #000000 !important;
       }
       .border-t {
-        border-top: 1px solid #252525;
+        border-top: 1px solid #000000;
       }
 
       .border-tr {
-        border-top: 1px solid #252525;
-        border-right: 1px solid #252525;
+        border-top: 1px solid #000000;
+        border-right: 1px solid #000000;
       }
       .border-r {
-        border-right: 1px solid #252525;
+        border-right: 1px solid #000000;
       }
 
       .border-rb {
-        border-right: 1px solid #252525;
-        border-bottom: 1px solid #252525 !important;
+        border-right: 1px solid #000000;
+        border-bottom: 1px solid #000000 !important;
       }
 
       th.col-header-item {
-        border-bottom: 1px solid #252525;
-        border-right: 1px solid #252525;
+        border-bottom: 1px solid #000000;
+        border-right: 1px solid #000000;
       }
     </style>
   </head>
-  <body class="body" style="margin-left: 25px; margin-top: 25px;">
+  <body style="margin-left: 25px; margin-top: 25px;">
     <table
       class="center"
       cellspacing="0"
       cellpadding="2"
-      style="border: 1px solid #252525; width: 100%;"
+      style="border: 1px solid #000000; width: 100%;"
     >
       <tr>
         <td style="width: 40%; text-align: left; padding-left: 20px">
@@ -96,7 +92,7 @@
               <th style="height: 15px; vertical-align: bottom;">No. : <span style="font-size: 14px; font-weight: bold; color: #646464;"><%=data.data.document_no.slice(data.data.document_no.lastIndexOf('/') + 1)%></span></th>
             </tr>
             <tr>
-              <th style="height: 15px; vertical-align: bottom;">Tanggal: <span><%=data.data.createdAt%></th></span>
+              <th style="height: 15px; vertical-align: bottom;">Tanggal : <span><%=data.data.createdAt%></th></span>
             </tr>
             <tr>
               <th style="font-weight: bold; height: 15px; color: white; font-size: 6px; font-style: italic; vertical-align: bottom;"><span style="padding-left: 20px; color: #000000;">Doc No. FRM ACC.03.01 rev.01</th></span>
@@ -352,8 +348,8 @@
           colspan="3"
           style="text-align: left; border-top: 1px solid #000000 !important"
         >
-          <span style="font-weight: bold"> Untuk Pembayaran </span>
-          <span style="font-weight: bold; margin: 0 5px">: </span>
+          <span> Untuk Pembayaran </span>
+          <span margin: 0 5px">: </span>
           <span> <%=data.data.payment_desc%> </span>
         </td>
       </tr>
@@ -641,8 +637,8 @@
               </tr>
               <tr>
                 <td colspan="6" style="text-align: left" class="border-b">
-                  <span style="font-weight: bold"> Terbilang </span>
-                  <span style="font-weight: bold; margin: 0 5px">: </span>
+                  <span> Terbilang </span>
+                  <span style="margin: 0 5px">: </span>
                 </td>
               </tr>
             </tbody>
