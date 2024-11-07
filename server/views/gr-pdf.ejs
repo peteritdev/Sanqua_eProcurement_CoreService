@@ -109,8 +109,10 @@
               <td style="width: 33.35%">
                 <table style="width: 100%;">
                   <tr>
-                    <td style="width: 70px;">No PO</td>
-                    <td > <span style="margin-right: 2px;">:</span> <%=data.data.po_no%></td>
+                    <td style="width: 70px;">No Form</td>
+                    <td > <span style="margin-right: 2px;">:</span> <%=data.data.purchase_request.request_no%></td>
+                    <!-- <td style="width: 70px;">No PO</td>
+                    <td > <span style="margin-right: 2px;">:</span> <%=data.data.po_no%></td> -->
                   </tr>
                 </table>
               </td>
@@ -122,8 +124,10 @@
               <td style="width: 33.35%">
                 <table style="width: 100%;">
                   <tr>
-                    <td style="width: 70px;">No Form</td>
-                    <td > <span style="margin-right: 2px;">:</span> <%=data.data.purchase_request.request_no%></td>
+                    <!-- <td style="width: 70px;">No Form</td>
+                    <td > <span style="margin-right: 2px;">:</span> <%=data.data.purchase_request.request_no%></td> -->
+                    <td style="width: 70px;"></td>
+                    <td ></td>
                   </tr>
                 </table>
               </td>
@@ -135,7 +139,6 @@
               ><span style="margin-right: 2px;">:</span>  <%=data.data.document_no%>
               </td>
               <td style="width: 33.35%">
-                
                 <table style="width: 100%;">
                   <tr>
                     <td style="width: 70px;">Tgl. Terima</td>
@@ -235,13 +238,6 @@
                     <td></td>
                   </tr>
                   <tr>
-                    <%
-                    if(data.data.submitted_by_name != null && data.data.submitted_by_name != '' ){
-                    %>
-                      <td style="vertical-align: bottom;"><%=data.data.submitted_by_name%></td>
-                    <%
-                        }
-                    %>
                   </tr>
                 </table>
               </td>
@@ -251,13 +247,6 @@
                     <td></td>
                   </tr>
                   <tr>
-                    <%
-                    if(data.data.received_by_name != null && data.data.received_by_name != '' ){
-                    %>
-                      <td style="vertical-align: bottom;"><%=data.data.received_by_name%></td>
-                    <%
-                        }
-                    %>
                   </tr>
                 </table>
               </td>
@@ -273,9 +262,33 @@
               </td>
             </tr>
             <tr>
-              <th class="border-r" style="font-weight: 400;">Vendor</th>
-              <th class="border-r" style="font-weight: 400;">Gudang</th>
-              <th style="font-weight: 400;">QC</th>
+              <th class="border-r" style="font-weight: 400;">
+                <%
+                        if(data.data.submitted_by_name != null && data.data.submitted_by_name != '' ){
+                    %>
+                <span><%=data.data.submitted_by_name%></span>
+                <%
+                        } else {
+                    %>
+                <span style="color: white;">|EEE|</span>
+                <%
+                        }
+                    %>
+              </th>
+              <th class="border-r" style="font-weight: 400;">
+                <%
+                        if(data.data.received_by_name != null && data.data.received_by_name != '' ){
+                    %>
+                <span><%=data.data.received_by_name%></span>
+                <%
+                        } else {
+                    %>
+                <span style="color: white;">|EEE|</span>
+                <%
+                        }
+                    %>
+              </th>
+              <th style="font-weight: 400;"></th>
             </tr>
           </table>
         </td>
