@@ -724,25 +724,12 @@
                     %>
               </td>
               <td class="border-b">
-                <%
-                        if( qrCode.approval2 != null && qrCode.approval2.length > 0 ){
-
-                    %>
                 <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 45px;">
                   <tr>
-                    <% for(var i = 0; i < qrCode.approval2.length; i++ ) { %>
                     <td>
-                      <img
-                        src="<%=qrCode.qrPath%><%=qrCode.approval2[i]%>"
-                        width="80"
-                      />
                     </td>
-                    <% }%>
                   </tr>
                 </table>
-                <%
-                        }
-                    %>
               </td>
             </tr>
             <tr>
@@ -789,20 +776,11 @@
               <th style="padding: 3px 0;"
                 class="border-b" style="width: 50%;"
               >
-              <%
-                      if( qrCode.approval2 != null && qrCode.approval2.length > 0 ){
-
-                  %>
               <table style="margin: auto; text-align: center;">
                 <tr>
-                  <% for(var i = 0; i < approver2.length; i++ ) { %>
-                  <td><%=approver2[i].user.name%></td>
-                  <% }%>
+                  <td></td>
                 </tr>
               </table>
-              <%
-                      }
-                  %>
               </th>
             </tr>
             <tr>
