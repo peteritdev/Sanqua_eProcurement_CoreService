@@ -942,37 +942,54 @@ class PaymentRequestService {
 	
 						if (xResultApprovalMatrixDocument != null) {
 							if (xResultApprovalMatrixDocument.status_code == '00') {
-								// Update status Pjca to be confirmed
-								var xParamUpdatePR = {
-									id: pParam.document_id,
-									status: 2,
-									reject_reason: pParam.reject_reason
-								};
-								var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
-	
-								if (xUpdateResult.status_code == '00') {
-									if (xPayreqDetail.data.payreq_type != 2) {
-										this.updatePrdItemQtyLeft(xPayreqDetail.data, 'add')
-									} else {
-										let xDetailItem = xPayreqDetail.data.payment_request_detail
-										for (let i = 0; i < xDetailItem.length; i++) {
-											let xQtyRelease = xDetailItem[i].qty_done || 0
-											let xCalculatedQty = 0
-											xCalculatedQty = xQtyRelease + xDetailItem[i].qty_request
-											let xPyrdUpdateParam = {
-												id: xDetailItem[i].id,
-												qty_done: xCalculatedQty
+								if (xResultApprovalMatrixDocument.status_document_approved == true) {
+									// Update status payreq to be confirmed
+									var xParamUpdatePR = {
+										id: pParam.document_id,
+										status: 2,
+										reject_reason: pParam.reject_reason
+									};
+									var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
+		
+									if (xUpdateResult.status_code == '00') {
+										if (xPayreqDetail.data.payreq_type != 2) {
+											this.updatePrdItemQtyLeft(xPayreqDetail.data, 'add')
+										} else {
+											let xDetailItem = xPayreqDetail.data.payment_request_detail
+											for (let i = 0; i < xDetailItem.length; i++) {
+												let xQtyRelease = xDetailItem[i].qty_done || 0
+												let xCalculatedQty = 0
+												xCalculatedQty = xQtyRelease + xDetailItem[i].qty_request
+												let xPyrdUpdateParam = {
+													id: xDetailItem[i].id,
+													qty_done: xCalculatedQty
+												}
+												
+												let xUpdatePyrdItem = await _paymentRequestDetailRepoInstance.save(xPyrdUpdateParam, 'update')
 											}
-											
-											let xUpdatePyrdItem = await _paymentRequestDetailRepoInstance.save(xPyrdUpdateParam, 'update')
 										}
+										xJoResult = {
+											status_code: '00',
+											status_msg: 'Payreq successfully confirmed'
+										};
+									} else {
+										xJoResult = xUpdateResult;
 									}
+								} else {
+									// Sort first
+									xResultApprovalMatrixDocument.approvers = xResultApprovalMatrixDocument.approvers.sort(
+										(a, b) => {
+											if (a.sequence < b.sequence) {
+												return -1;
+											}
+										}
+									);
+
 									xJoResult = {
 										status_code: '00',
-										status_msg: 'Payreq successfully confirmed'
+										status_msg: 'Payreq successfully approved. Document available for next approver',
+										result_approval_matrix: xResultApprovalMatrixDocument
 									};
-								} else {
-									xJoResult = xUpdateResult;
 								}
 							} else {
 								xJoResult = xResultApprovalMatrixDocument;
