@@ -827,23 +827,40 @@ class PJCAService {
 	
 						if (xResultApprovalMatrixDocument != null) {
 							if (xResultApprovalMatrixDocument.status_code == '00') {
-								// Update status Pjca to be confirmed
-								var xParamUpdatePR = {
-									id: pParam.document_id,
-									status: 2,
-									reject_reason: pParam.reject_reason
-								};
-								var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
-	
-								if (xUpdateResult.status_code == '00') {
-									
-									this.updatePyrdItemQtyRelease(xPjcaDetail.data, 'add')
+								if (xResultApprovalMatrixDocument.status_document_approved == true) {
+									// Update status Pjca to be confirmed
+									var xParamUpdatePR = {
+										id: pParam.document_id,
+										status: 2,
+										reject_reason: pParam.reject_reason
+									};
+									var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
+		
+									if (xUpdateResult.status_code == '00') {
+										
+										this.updatePyrdItemQtyRelease(xPjcaDetail.data, 'add')
+										xJoResult = {
+											status_code: '00',
+											status_msg: 'PJCA successfully confirmed'
+										};
+									} else {
+										xJoResult = xUpdateResult;
+									}
+								} else {
+																	// Sort first
+									xResultApprovalMatrixDocument.approvers = xResultApprovalMatrixDocument.approvers.sort(
+										(a, b) => {
+											if (a.sequence < b.sequence) {
+												return -1;
+											}
+										}
+									);
+
 									xJoResult = {
 										status_code: '00',
-										status_msg: 'PJCA successfully confirmed'
+										status_msg: 'PJCA successfully approved. Document available for next approver',
+										result_approval_matrix: xResultApprovalMatrixDocument
 									};
-								} else {
-									xJoResult = xUpdateResult;
 								}
 							} else {
 								xJoResult = xResultApprovalMatrixDocument;
