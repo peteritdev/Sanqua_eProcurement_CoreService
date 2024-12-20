@@ -48,7 +48,11 @@ module.exports = (sequelize, DataTypes) => {
 			field: 'updated_at'
 		},
 		updated_by: DataTypes.INTEGER,
-		updated_by_name: DataTypes.STRING
+		updated_by_name: DataTypes.STRING,
+		canceled_at: DataTypes.DATE,
+		canceled_reason: DataTypes.STRING,
+		rejected_at: DataTypes.DATE,
+		rejected_reason: DataTypes.STRING,
 	});
 
 	PJCA.associate = function(models) {

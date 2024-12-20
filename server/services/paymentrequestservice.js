@@ -1074,7 +1074,8 @@ class PaymentRequestService {
 							var xParamUpdatePR = {
 								id: pParam.document_id,
 								status: 5,
-								reject_reason: pParam.reject_reason
+								rejected_at: await _utilInstance.getCurrDateTime(),
+								rejected_reason: pParam.reject_reason
 							};
 							var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
 

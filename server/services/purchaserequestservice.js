@@ -997,7 +997,8 @@ class PurchaseRequestService {
 							company_id: xPRDetail.company_id,
 							department_id: xPRDetail.department_id,
 							ecatalogue_fpb_category_item: null,
-							logged_company_id: pParam.logged_company_id
+							logged_company_id: pParam.logged_company_id,
+							approval_matrix_id: pParam.approval_matrix_id
 						};
 
 						if (xPRDetail.company_id == 5 && xPRDetail.company_id == 14) {
@@ -2089,7 +2090,8 @@ class PurchaseRequestService {
 							company_id: xPRDetail.company_id,
 							department_id: xPRDetail.department_id,
 							ecatalogue_fpb_category_item: null,
-							logged_company_id: pParam.logged_company_id
+							logged_company_id: pParam.logged_company_id,
+							approval_matrix_id: pParam.approval_matrix_id
 						};
 						
 						if (xPRDetail.company_id == 5 && xPRDetail.company_id == 14) {
