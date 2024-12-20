@@ -57,9 +57,11 @@ module.exports = (sequelize, DataTypes) => {
 		updated_by: DataTypes.INTEGER,
 		updated_by_name: DataTypes.STRING,
 		requested_at: DataTypes.DATE,
-		canceled_at: DataTypes.DATE,
 		set_to_draft_at: DataTypes.DATE,
+		canceled_at: DataTypes.DATE,
 		canceled_reason: DataTypes.STRING,
+		rejected_at: DataTypes.DATE,
+		rejected_reason: DataTypes.STRING,
 	});
 
 	PaymentRequest.associate = function(models) {

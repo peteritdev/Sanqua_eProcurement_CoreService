@@ -49,6 +49,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     updated_by: DataTypes.INTEGER,
     updated_by_name: DataTypes.STRING,
+		canceled_at: DataTypes.DATE,
+		canceled_reason: DataTypes.STRING
   });
 
   GoodsReceipt.associate = function (models) {
