@@ -468,7 +468,8 @@ class PurchaseRequestService {
 										uom_name: xRows[index].uom_name,
 										// add new 16/11/2023
 										estimate_fulfillment: xRows[index].estimate_fulfillment,
-										status: xRows[index].item_detail_status
+										status: xRows[index].item_detail_status,
+										description: xRows[index].description
 									},
 									approved_at: xRows[index].approved_at
 								});
