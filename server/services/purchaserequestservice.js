@@ -470,7 +470,8 @@ class PurchaseRequestService {
 										uom_name: xRows[index].uom_name,
 										// add new 16/11/2023
 										estimate_fulfillment: xRows[index].estimate_fulfillment,
-										status: xRows[index].item_detail_status
+										status: xRows[index].item_detail_status,
+										description: xRows[index].description
 									},
 									approved_at: xRows[index].approved_at
 								});
@@ -759,10 +760,10 @@ class PurchaseRequestService {
 								code: xDetail[index].product.code,
 								name: xDetail[index].product.name,
 								uom: xDetail[index].product.unit
-							} : null,
-							qty_left: xDetail[index].qty_left,
-							qty_done: xDetail[index].qty_done,
-							qty_paid: xDetail[index].qty_paid
+							} : null
+							// qty_left: xDetail[index].qty_left,
+							// qty_done: xDetail[index].qty_done,
+							// qty_paid: xDetail[index].qty_paid
 						});
 					}
 					// Get Approval Matrix
@@ -844,7 +845,6 @@ class PurchaseRequestService {
 							}
 						}
 					}
-					console.log(`>>> hereee`);
 
 					xJoData = {
 						id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
@@ -1252,7 +1252,8 @@ class PurchaseRequestService {
 						document_id: xEncId,
 						status: 1,
 						application_id: config.applicationId,
-						table_name: config.dbTables.fpb
+						table_name: config.dbTables.fpb,
+						note: pParam.note
 					};
 
 					var xResultApprovalMatrixDocument = await _oAuthService.confirmApprovalMatrix(
@@ -1445,7 +1446,8 @@ class PurchaseRequestService {
 						document_id: xEncId,
 						status: -1,
 						application_id: config.applicationId,
-						table_name: config.dbTables.fpb
+						table_name: config.dbTables.fpb,
+						note: pParam.reject_reason
 					};
 
 					var xResultApprovalMatrixDocument = await _oAuthService.confirmApprovalMatrix(
