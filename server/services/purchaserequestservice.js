@@ -136,12 +136,12 @@ class PurchaseRequestService {
 				xFlagProcess = true;
 			}
 
-			// if (pParam.hasOwnProperty('budget_plan_id')) {
-			// 	bDect = await _utilInstance.decrypt(pParam.budget_plan_id, config.cryptoKey.hashKey);
-			// 	if (bDect.status_code == '00') {
-			// 		pParam.budget_plan_id = bDect.decrypted
-			// 	}
-			// }
+			if (pParam.hasOwnProperty('budget_plan_id')) {
+				bDect = await _utilInstance.decrypt(pParam.budget_plan_id, config.cryptoKey.hashKey);
+				if (bDect.status_code == '00') {
+					pParam.budget_plan_id = bDect.decrypted
+				}
+			}
 
 			if (xFlagProcess) {
 				if (xAct == 'add' || xAct == 'add_batch_in_item') {
@@ -382,12 +382,12 @@ class PurchaseRequestService {
 						delete pParam.owned_document_no
 					}
 				}
-				// if (pParam.hasOwnProperty('budget_plan_id')) {
-				// 	const bDect = await _utilInstance.decrypt(pParam.budget_plan_id, config.cryptoKey.hashKey);
-				// 	if (bDect.status_code == '00') {
-				// 		pParam.budget_plan_id = bDect.decrypted
-				// 	}
-				// }
+				if (pParam.hasOwnProperty('budget_plan_id')) {
+					const bDect = await _utilInstance.decrypt(pParam.budget_plan_id, config.cryptoKey.hashKey);
+					if (bDect.status_code == '00') {
+						pParam.budget_plan_id = bDect.decrypted
+					}
+				}
 
 				// console.log(`>>> pParam 2: ${JSON.stringify(pParam)}`);
 				var xResultList = await _repoInstance.list(pParam);
@@ -410,10 +410,10 @@ class PurchaseRequestService {
 										name: xRows[index].project_name,
 										odoo_project_code: xRows[index].odoo_project_code
 									},
-									// budget_plan: {
-									// 	id: xRows[index].budget_plan_id,
-									// 	name: xRows[index].budget_plan_name
-									// },
+									budget_plan: {
+										id: xRows[index].budget_plan_id,
+										name: xRows[index].budget_plan_name
+									},
 									request_no: xRows[index].request_no,
 									requested_at:
 										xRows[index].requested_at == null
@@ -544,10 +544,10 @@ class PurchaseRequestService {
 									name: xRows[index].project_name,
 									odoo_project_code: xRows[index].odoo_project_code
 								},
-								// budget_plan: {
-								// 	id: xRows[index].budget_plan_id,
-								// 	name: xRows[index].budget_plan_name
-								// },
+								budget_plan: {
+									id: xRows[index].budget_plan_id,
+									name: xRows[index].budget_plan_name
+								},
 								request_no: xRows[index].request_no,
 								requested_at:
 									xRows[index].requested_at == null
@@ -912,7 +912,7 @@ class PurchaseRequestService {
 							xResult.took_at != null ? moment(xResult.took_at).format('DD MMM YYYY HH:mm:ss') : null,
 						took_by_name: xResult.took_by_name,
 						fpb_type: xResult.fpb_type,
-						// budget_plan: xResult.budget_plan,
+						budget_plan: xResult.budget_plan,
 						total_realization: xTotalRealization,
 						total_item_with_budget: xTotalItem,
 						approved_at: xResult.approved_at,
