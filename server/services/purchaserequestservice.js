@@ -757,7 +757,7 @@ class PurchaseRequestService {
 								code: xDetail[index].product.code,
 								name: xDetail[index].product.name,
 								uom: xDetail[index].product.unit
-							} : null,
+							} : null
 						});
 					}
 					// Get Approval Matrix
@@ -839,7 +839,6 @@ class PurchaseRequestService {
 							}
 						}
 					}
-					console.log(`>>> hereee`);
 
 					xJoData = {
 						id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
@@ -1247,7 +1246,8 @@ class PurchaseRequestService {
 						document_id: xEncId,
 						status: 1,
 						application_id: config.applicationId,
-						table_name: config.dbTables.fpb
+						table_name: config.dbTables.fpb,
+						note: pParam.note
 					};
 
 					var xResultApprovalMatrixDocument = await _oAuthService.confirmApprovalMatrix(
@@ -1440,7 +1440,8 @@ class PurchaseRequestService {
 						document_id: xEncId,
 						status: -1,
 						application_id: config.applicationId,
-						table_name: config.dbTables.fpb
+						table_name: config.dbTables.fpb,
+						note: pParam.reject_reason
 					};
 
 					var xResultApprovalMatrixDocument = await _oAuthService.confirmApprovalMatrix(
