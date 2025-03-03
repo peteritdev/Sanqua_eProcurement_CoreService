@@ -839,7 +839,6 @@ class PurchaseRequestService {
 							}
 						}
 					}
-					console.log(`>>> hereee`);
 
 					xJoData = {
 						id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
@@ -1247,7 +1246,8 @@ class PurchaseRequestService {
 						document_id: xEncId,
 						status: 1,
 						application_id: config.applicationId,
-						table_name: config.dbTables.fpb
+						table_name: config.dbTables.fpb,
+						note: pParam.note
 					};
 
 					var xResultApprovalMatrixDocument = await _oAuthService.confirmApprovalMatrix(
@@ -1295,8 +1295,7 @@ class PurchaseRequestService {
 								var xParamUpdatePR = {
 									id: pParam.document_id,
 									status: 5,
-									approved_at: await _utilInstance.getCurrDateTime(),
-									reject_reason: pParam.reject_reason
+									approved_at: await _utilInstance.getCurrDateTime()
 								};
 								var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
 
@@ -1441,7 +1440,8 @@ class PurchaseRequestService {
 						document_id: xEncId,
 						status: -1,
 						application_id: config.applicationId,
-						table_name: config.dbTables.fpb
+						table_name: config.dbTables.fpb,
+						note: pParam.reject_reason
 					};
 
 					var xResultApprovalMatrixDocument = await _oAuthService.confirmApprovalMatrix(
