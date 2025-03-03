@@ -757,7 +757,7 @@ class PurchaseRequestService {
 								code: xDetail[index].product.code,
 								name: xDetail[index].product.name,
 								uom: xDetail[index].product.unit
-							} : null,
+							} : null
 						});
 					}
 					// Get Approval Matrix
@@ -1295,7 +1295,8 @@ class PurchaseRequestService {
 								var xParamUpdatePR = {
 									id: pParam.document_id,
 									status: 5,
-									approved_at: await _utilInstance.getCurrDateTime()
+									approved_at: await _utilInstance.getCurrDateTime(),
+									reject_reason: pParam.reject_reason
 								};
 								var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
 
