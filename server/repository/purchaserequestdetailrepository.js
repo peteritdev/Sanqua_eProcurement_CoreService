@@ -132,8 +132,8 @@ class PurchaseRequestDetailRepository {
 		try {
 			var xSaved = null;
 			var xSql = "";
-			// var xSqlErrMsg = ""
-			// var xFlag = false
+			var xSqlErrMsg = ""
+			var xFlag = false
 			xTransaction = await sequelize.transaction();
 
 			xSql = `SELECT calc_rab_item_remain_qty('{
