@@ -391,6 +391,7 @@ class PurchaseRequestService {
 				var xResultList = await _repoInstance.list(pParam);
 
 				if (xResultList.total_record > 0) {
+					var fpbType = ["CA", "PO", "MIX"]
 					var xRows = xResultList.data;
 					// console.log('xRows>>>>>>>>', xRows);
 
@@ -441,7 +442,8 @@ class PurchaseRequestService {
 										code: xRows[index].company_code,
 										name: xRows[index].company_name
 									},
-
+									fpb_type_id: xRows[index].fpb_type,
+									fpb_type_name: fpbType[xRows[index].fpb_type+1],
 									created_at:
 										xRows[index].created_at != null
 											? moment(xRows[index].created_at).format('DD-MM-YYYY HH:mm:ss')
@@ -516,7 +518,8 @@ class PurchaseRequestService {
 										code: xRows[index].company_code,
 										name: xRows[index].company_name
 									},
-
+									fpb_type_id: xRows[index].fpb_type,
+									fpb_type_name: fpbType[xRows[index].fpb_type+1],
 									created_at:
 										xRows[index].created_at != null
 											? moment(xRows[index].created_at).format('DD-MM-YYYY HH:mm:ss')
@@ -587,7 +590,9 @@ class PurchaseRequestService {
 									id: xRows[index].category_item,
 									name: config.categoryItem[xRows[index].category_item]
 								},
-								approved_at: xRows[index].approved_at
+								approved_at: xRows[index].approved_at,
+								fpb_type_id: xRows[index].fpb_type,
+								fpb_type_name: fpbType[xRows[index].fpb_type+1]
 							});
 						}
 					}
