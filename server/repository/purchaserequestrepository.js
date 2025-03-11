@@ -536,7 +536,7 @@ class PurchaseRequestRepository {
 
 		if (!pParam.hasOwnProperty('is_export')) {
 			xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
-			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item,
+			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item, pr.fpb_type,
 			p.id AS "project_id", p.code AS "project_code", p.name AS "project_name", p.odoo_project_code, pr.approved_at`;
 
 			xSqlGroupBy = ` GROUP BY pr.id, 
@@ -559,7 +559,7 @@ class PurchaseRequestRepository {
 			}
 		} else {
 			if (pParam.is_export) {
-				xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
+				xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name, pr.fpb_type,
 								pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item, pr.approved_at, 
 								prd.product_code,
 								prd.product_name,
@@ -579,7 +579,7 @@ class PurchaseRequestRepository {
 
 				xSqlGroupBy = ` `;
 			} else {
-				xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
+				xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name, pr.fpb_type,
 			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item,
 			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code, pr.approved_at`;
 

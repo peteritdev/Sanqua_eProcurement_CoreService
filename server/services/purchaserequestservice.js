@@ -393,6 +393,7 @@ class PurchaseRequestService {
 				var xResultList = await _repoInstance.list(pParam);
 
 				if (xResultList.total_record > 0) {
+					var fpbType = ["CA", "PO", "MIX"]
 					var xRows = xResultList.data;
 					// console.log('xRows>>>>>>>>', xRows);
 
@@ -455,7 +456,8 @@ class PurchaseRequestService {
 										id: xRows[index].category_item,
 										name: config.categoryItem[xRows[index].category_item]
 									},
-
+									fpb_type_id: xRows[index].fpb_type,
+									fpb_type_name: fpbType[xRows[index].fpb_type+1],
 									item: {
 										product_code: xRows[index].product_code,
 										product_name: xRows[index].product_name,
@@ -518,6 +520,8 @@ class PurchaseRequestService {
 										code: xRows[index].company_code,
 										name: xRows[index].company_name
 									},
+									fpb_type_id: xRows[index].fpb_type,
+									fpb_type_name: fpbType[xRows[index].fpb_type+1],
 
 									created_at:
 										xRows[index].created_at != null
@@ -589,7 +593,9 @@ class PurchaseRequestService {
 									id: xRows[index].category_item,
 									name: config.categoryItem[xRows[index].category_item]
 								},
-								approved_at: xRows[index].approved_at
+								approved_at: xRows[index].approved_at,
+								fpb_type_id: xRows[index].fpb_type,
+								fpb_type_name: fpbType[xRows[index].fpb_type+1]
 							});
 						}
 					}
