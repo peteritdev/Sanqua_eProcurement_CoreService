@@ -689,6 +689,18 @@ class PurchaseRequestRepository {
 		}
 		// ---
 
+
+		if (pParam.hasOwnProperty('fulfillment_status')) {
+			if (pParam.fulfillment_status != '') {
+				if (Number(pParam.fulfillment_status)) {
+					xSqlWhere += ' AND prd.fulfillment_status = :fulfillmentStatus ';
+				} else {
+					xSqlWhere += ' AND (prd.fulfillment_status = :fulfillmentStatus OR prd.fulfillment_status IS NULL) ';
+				}
+				xObjJsonWhere.fulfillmentStatus = Number(pParam.fulfillment_status);
+			}
+		}
+
 		if (pParam.hasOwnProperty('request_date_start') && pParam.hasOwnProperty('request_date_end')) {
 			if (pParam.request_date_start != '' && pParam.request_date_end != '') {
 				xSqlWhere += ' AND pr.requested_at BETWEEN :startDate AND :endDate ';
@@ -767,10 +779,22 @@ class PurchaseRequestRepository {
 					xSqlWhereProjectOwnedDoc = ' AND pr.project_id IS NOT NULL AND prd.product_code IS NULL';
 				}
 				// ---
+				
+				// 24/03/2025
+				let xSqlWhereEstimateStatusOwnedDoc = '';
+				if (pParam.hasOwnProperty('fulfillment_status')) {
+					if (pParam.fulfillment_status != '') {
+						if (Number(pParam.fulfillment_status)) {
+							xSqlWhereEstimateStatusOwnedDoc = ' AND prd.fulfillment_status = :fulfillmentStatus';
+						} else {
+							xSqlWhereEstimateStatusOwnedDoc = ' AND (prd.fulfillment_status = :fulfillmentStatus OR prd.fulfillment_status IS NULL)';
+						}
+					}
+				}
 
 				xSqlWhere = ` (( ${xSqlWhere} ) OR (${xSqlWhereOr} ${xSqlWhereCompanyOwnedDoc != ''
 					? xSqlWhereCompanyOwnedDoc
-					: ''} ${xSqlWhereProjectOwnedDoc} ${xSqlWhereCategoryOwnedDoc} ${xSqlWhereDepartmentOwnedDoc}))`;
+					: ''} ${xSqlWhereProjectOwnedDoc} ${xSqlWhereCategoryOwnedDoc} ${xSqlWhereDepartmentOwnedDoc} ${xSqlWhereEstimateStatusOwnedDoc}))`;
 			}
 		}
 
@@ -845,7 +869,7 @@ class PurchaseRequestRepository {
 			  LEFT JOIN ms_projects p ON p.id = pr.project_id
 		  WHERE ${xSqlWhere}`;
 
-		// console.log(`>>> xSqlCount: ${xSqlCount}`);
+		console.log(`>>> xSql: ${xSql}`);
 
 		xData = await sequelize.query(xSql, {
 			replacements: xObjJsonWhere,
