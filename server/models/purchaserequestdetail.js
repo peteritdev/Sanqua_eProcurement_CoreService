@@ -74,6 +74,9 @@ module.exports = (sequelize, DataTypes) => {
 		is_item_match_with_odoo: DataTypes.INTEGER,
 		realization: DataTypes.DOUBLE,
 		fulfillment_status: DataTypes.INTEGER,
+		currency_id: DataTypes.INTEGER,
+		currency_symbol: DataTypes.STRING,
+		currency_code: DataTypes.STRING,
 	});
 
 	PurchaseRequestDetail.associate = function(models) {

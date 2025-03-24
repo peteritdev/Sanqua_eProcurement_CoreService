@@ -575,6 +575,9 @@ class PurchaseRequestRepository {
 								prd.uom_name,
 								prd.status AS "item_detail_status",
 								prd.description,
+								prd.currency_id,
+								prd.currency_code,
+								prd.currency_symbol,
 								p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 				xSqlGroupBy = ` `;
@@ -816,6 +819,9 @@ class PurchaseRequestRepository {
 			prd.id AS "item_detail_id",
 			prd.status AS "item_detail_status",
 			prd.is_po_created,
+			prd.currency_id,
+			prd.currency_code,
+			prd.currency_symbol,
 			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 		xSqlGroupBy = ` `;
@@ -1224,6 +1230,7 @@ class PurchaseRequestRepository {
 					p.id as "project_id", p.odoo_project_code, p.name as "project_name", prd.qty, prd.uom_id, prd.uom_name,
 					prd.last_price, prd.budget_price_per_unit, prd.budget_price_total, prd.status as "item_status",
 					prd.product_id, prd.product_code, prd.product_name, prd.vendor_id, prd.vendor_code, prd.vendor_name,
+					prd.currency_id, prd.currency_code, prd.currency_symbol,
 					pr.created_at, pr.requested_at`;
 
 		xSqlGroupBy = ``;

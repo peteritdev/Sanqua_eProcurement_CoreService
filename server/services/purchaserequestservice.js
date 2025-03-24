@@ -471,7 +471,11 @@ class PurchaseRequestService {
 										// add new 16/11/2023
 										estimate_fulfillment: xRows[index].estimate_fulfillment,
 										status: xRows[index].item_detail_status,
-										description: xRows[index].description
+										description: xRows[index].description,
+
+										currency_id: xRows[index].currency_id,
+										currency_code: xRows[index].currency_code,
+										currency_symbol: xRows[index].currency_symbol
 									},
 									approved_at: xRows[index].approved_at
 								});
@@ -762,7 +766,11 @@ class PurchaseRequestService {
 								code: xDetail[index].product.code,
 								name: xDetail[index].product.name,
 								uom: xDetail[index].product.unit
-							} : null
+							} : null,
+							
+							currency_id: xDetail[index].currency_id,
+							currency_code: xDetail[index].currency_code,
+							currency_symbol: xDetail[index].currency_symbol
 						});
 					}
 					// Get Approval Matrix
@@ -1773,7 +1781,11 @@ class PurchaseRequestService {
 										: xRows[index].item_detail_id,
 								status: xRows[index].item_detail_status,
 								status_name: config.statusDescription.purchaseRequest[xRows[index].item_detail_status],
-								is_po_created: xRows[index].is_po_created
+								is_po_created: xRows[index].is_po_created,
+								
+								currency_id: xRows[index].currency_id,
+								currency_code: xRows[index].currency_code,
+								currency_symbol: xRows[index].currency_symbol
 							}
 						});
 					}
@@ -2011,7 +2023,11 @@ class PurchaseRequestService {
 								xRows[index].item_status == -1
 									? 'Rejected'
 									: config.statusDescription.purchaseRequestDetail[xRows[index].item_status]
-						}
+						},
+						
+						currency_id: xRows[index].currency_id,
+						currency_code: xRows[index].currency_code,
+						currency_symbol: xRows[index].currency_symbol
 					});
 				}
 

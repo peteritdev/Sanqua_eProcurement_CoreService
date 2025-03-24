@@ -646,15 +646,18 @@ class VendorCatalogueRepository {
 						   vc.last_price as "last_price", \
                            v.id as "vendor_id", \
                            v.code as "vendor_code", \
-                           v.name as "vendor_name" \
+                           v.name as "vendor_name", \
+                           c.id as "currency_id", \
+                           c.code as "currency_code", \
+                           c.symbol as "currency_symbol" \
                     from ms_products p left join ms_vendorcatalogues vc \
                         on p.id = vc.product_id \
                             left join ms_vendors v on v.id = vc.vendor_id \
+							left join ms_currencies c on c.id = vc.currency_id \
                     where ' +
 				xSqlWhere +
 				' AND vc.is_delete = 0 ' +
 				' order by p.name';
-
 			var xDtQuery = await sequelize.query(xSql, {
 				replacements: xJsonWhere,
 				type: sequelize.QueryTypes.SELECT
