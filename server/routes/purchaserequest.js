@@ -198,6 +198,9 @@ module.exports = (app) => {
 	app.get(rootAPIPath + 'project/list', arrValidate, purchaseRequestController.purchaseRequestProject_List);
 
 	arrValidate = [];
+	app.get(rootAPIPath + 'project/notif', arrValidate, purchaseRequestController.purchaseRequestProject_EstimateNotif);
+
+	arrValidate = [];
 	app.get(
 		rootAPIPath + 'transaction_history',
 		arrValidate,
