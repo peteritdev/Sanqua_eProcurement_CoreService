@@ -75,7 +75,9 @@ module.exports = (sequelize, DataTypes) => {
 		updated_by_name: DataTypes.STRING,
 		approved_at: DataTypes.DATE,
 		last_click_equalization_at: DataTypes.DATE,
-		last_click_equalization_by_name: DataTypes.STRING
+		last_click_equalization_by_name: DataTypes.STRING,
+
+		budget_plan_no: DataTypes.STRING
 	});
 
 	PurchaseRequest.associate = function(models) {

@@ -257,7 +257,10 @@ class PurchaseRequestDetailService {
 								vendor_code: pParam.vendor_code,
 								employee_id: pParam.employee_id,
 								employee_name: pParam.employee_name,
-								budget_price_total: pParam.budget_price_total
+								budget_price_total: pParam.budget_price_total,
+								currency_id: pParam.currency_id,
+								currency_code: pParam.currency_code,
+								currency_symbol: pParam.currency_symbol
 							}
 						}
 					};
@@ -416,7 +419,10 @@ class PurchaseRequestDetailService {
 										vendor_code: xItem.data.vendor_code,
 										employee_id: xItem.data.employee_id,
 										employee_name: xItem.data.employee_name,
-										budget_price_total: xItem.data.budget_price_total
+										budget_price_total: xItem.data.budget_price_total,
+										currency_id: xItem.data.currency_id,
+										currency_code: xItem.data.currency_code,
+										currency_symbol: xItem.data.currency_symbol
 									},
 									after: {
 										qty: pParam.qty,
@@ -432,7 +438,10 @@ class PurchaseRequestDetailService {
 										vendor_code: pParam.vendor_code,
 										employee_id: pParam.employee_id,
 										employee_name: pParam.employee_name,
-										budget_price_total: pParam.budget_price_total
+										budget_price_total: pParam.budget_price_total,
+										currency_id: pParam.currency_id,
+										currency_code: pParam.currency_code,
+										currency_symbol: pParam.currency_symbol
 									}
 								}
 							};
@@ -635,7 +644,8 @@ class PurchaseRequestDetailService {
 																.items[i].product_name}`,
 															qty: pParam.items[i].qty,
 															note: `${pParam.items[i].description}`,
-															uom: pParam.items[i].uom
+															uom: pParam.items[i].uom,
+															currency_code: pParam.items[i].currency_code
 														});
 														xFlagOdoo = true;
 													}

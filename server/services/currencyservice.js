@@ -191,6 +191,7 @@ class CurrencyService {
                     xJoArrData.push({
                         id: xRows[index].id,
                         code: xRows[index].code,
+                        symbol: xRows[index].symbol,
                     });
                 }
 
