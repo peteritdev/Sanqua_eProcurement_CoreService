@@ -462,7 +462,8 @@ class PurchaseRequestRepository {
 						pr.employee_name ILIKE :keyword OR
 						pr.department_name ILIKE :keyword OR
 						prd.product_code ILIKE :keyword OR
-						prd.product_name ILIKE :keyword
+						prd.product_name ILIKE :keyword OR 
+						pr.budget_plan_no ILIKE :keyword
 					`;
 
 				xObjJsonWhere.keyword = `%${pParam.keyword}%`;
@@ -537,6 +538,7 @@ class PurchaseRequestRepository {
 		if (!pParam.hasOwnProperty('is_export')) {
 			xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
 			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item, pr.fpb_type,
+			pr.budget_plan_no,
 			p.id AS "project_id", p.code AS "project_code", p.name AS "project_name", p.odoo_project_code, pr.approved_at`;
 
 			xSqlGroupBy = ` GROUP BY pr.id, 
@@ -561,6 +563,7 @@ class PurchaseRequestRepository {
 			if (pParam.is_export) {
 				xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name, pr.fpb_type,
 								pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item, pr.approved_at, 
+								pr.budget_plan_no,
 								prd.product_code,
 								prd.product_name,
 								prd.qty,
@@ -584,6 +587,7 @@ class PurchaseRequestRepository {
 			} else {
 				xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name, pr.fpb_type,
 			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item,
+			pr.budget_plan_no,
 			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code, pr.approved_at`;
 
 				xSqlGroupBy = ` GROUP BY pr.id, 
@@ -726,8 +730,9 @@ class PurchaseRequestRepository {
 				xObjJsonWhere.status = pParam.status;
 			}
 		}
-
-		if (pParam.hasOwnProperty('user_id') && (pParam.is_admin == 0 || pParam.logged_is_admin == 0)) {
+		console.log('user_id>>>>', pParam.user_id, pParam.is_admin, pParam.logged_is_admin);
+		
+		if (pParam.hasOwnProperty('user_id') && pParam.logged_is_admin == 0) {
 			if (pParam.user_id != '') {
 				// xSqlWhereOr.push(' pr.created_by = :createdBy ');
 				xSqlWhere += ' AND pr.created_by = :createdBy ';
@@ -805,7 +810,8 @@ class PurchaseRequestRepository {
 						pr.employee_name ILIKE :keyword OR
 						pr.department_name ILIKE :keyword OR
 						prd.product_code ILIKE :keyword OR
-						prd.product_name ILIKE :keyword
+						prd.product_name ILIKE :keyword OR 
+						pr.budget_plan_no ILIKE :keyword
 					`;
 
 				xObjJsonWhere.keyword = `%${pParam.keyword}%`;
@@ -826,7 +832,8 @@ class PurchaseRequestRepository {
 		}
 
 		xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
-			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item, 
+			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.created_by, pr.total_price, pr.total_quotation_price, pr.category_item,
+			pr.budget_plan_no, 
 			prd.product_code,
 			prd.product_name,
 			prd.qty,
@@ -857,23 +864,24 @@ class PurchaseRequestRepository {
 		}
 
 		xSql = ` SELECT ${xSqlFields}
-				 FROM tr_purchaserequests pr 
-						LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
+				 FROM tr_purchaserequestdetails prd 
+						LEFT JOIN tr_purchaserequests pr ON pr.id = prd.request_id
 							LEFT JOIN ms_projects p ON p.id = pr.project_id
 				 WHERE ${xSqlWhere} ${xSqlGroupBy}
 				  ${xSqlOrderBy}${xSqlLimit} `;
 
 		xSqlCount = ` SELECT count(pr.request_no) AS total_record
-		  FROM tr_purchaserequests pr 
-		  	LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
+		  FROM tr_purchaserequestdetails prd
+		  	LEFT JOIN tr_purchaserequests pr ON pr.id = prd.request_id
 			  LEFT JOIN ms_projects p ON p.id = pr.project_id
 		  WHERE ${xSqlWhere}`;
 
-		console.log(`>>> xSql: ${xSql}`);
+		// console.log(`>>> xSql: ${xSql}`);
 
 		xData = await sequelize.query(xSql, {
 			replacements: xObjJsonWhere,
-			type: sequelize.QueryTypes.SELECT
+			type: sequelize.QueryTypes.SELECT,
+			logging: console.log
 		});
 
 		xTotalRecord = await sequelize.query(xSqlCount, {
@@ -1251,6 +1259,7 @@ class PurchaseRequestRepository {
 
 		xSqlFields = ` pr.id, pr.request_no, pr.employee_id, pr.employee_name, pr.company_id, pr.company_name,
 					pr.department_id, pr.department_name, pr.category_item, pr.category_pr, pr.status as "fpb_status",
+					pr.budget_plan_no,
 					p.id as "project_id", p.odoo_project_code, p.name as "project_name", prd.qty, prd.uom_id, prd.uom_name,
 					prd.last_price, prd.budget_price_per_unit, prd.budget_price_total, prd.status as "item_status",
 					prd.product_id, prd.product_code, prd.product_name, prd.vendor_id, prd.vendor_code, prd.vendor_name,
@@ -1338,6 +1347,122 @@ class PurchaseRequestRepository {
 		}
 
 		return xJoResult;
+	}
+
+	async fpbProjectEstimateNotif(pParam) {
+		var xData,
+			xTotalRecord = [];
+		var xSql,
+			xSqlCount = '';
+		var xObjJsonWhere = {};
+		var xSqlWhere = ' (1=1) ';
+		var xSqlWhereOr = [];
+		var xSqlOrderBy = '';
+		var xSqlLimit = '';
+		var xSqlGroupBy = '';
+		var xSqlFields = '';
+
+		if (pParam.hasOwnProperty('order_by')) {
+			if (pParam.order_by != '') {
+				xSqlOrderBy = ` ORDER BY pr.${pParam.order_by} ${pParam.order_type != '' ? pParam.order_type : 'ASC'}`;
+			} else {
+				xSqlOrderBy = ` ORDER BY pr.requested_at DESC`;
+			}
+		} else {
+			xSqlOrderBy = ` ORDER BY pr.requested_at DESC`;
+		}
+
+		xSqlWhere += ' AND pr.project_id IS NOT NULL AND prd.product_code IS NULL ';
+
+
+		if (pParam.hasOwnProperty('fulfillment_status')) {
+			if (pParam.fulfillment_status != '') {
+				if (Number(pParam.fulfillment_status)) {
+					xSqlWhere += ' AND prd.fulfillment_status = :fulfillmentStatus ';
+				} else {
+					xSqlWhere += ' AND (prd.fulfillment_status = :fulfillmentStatus OR prd.fulfillment_status IS NULL) ';
+				}
+				xObjJsonWhere.fulfillmentStatus = Number(pParam.fulfillment_status);
+			}
+		}
+
+		xSqlWhere += ' AND (pr.status = 2 OR pr.status = 3)';
+		
+		if (pParam.hasOwnProperty('user_id')) {
+			if (pParam.user_id != '') {
+				// xSqlWhereOr.push(' pr.created_by = :createdBy ');
+				xSqlWhere += ' AND pr.created_by = :createdBy ';
+				xObjJsonWhere.createdBy = pParam.user_id;
+			}
+		}
+
+		if (pParam.hasOwnProperty('interval')) {
+			if (pParam.interval != null & pParam.interval != '' && pParam.interval != 0) {
+				xSqlWhere += ' AND (prd.estimate_fulfillment < (now() - interval :interval day))';
+				xObjJsonWhere.interval = '' + pParam.interval;
+			}
+		}
+		// show except wim
+		xSqlWhere += ' AND pr.company_id <> 5 ';
+
+		xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
+			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.created_by, pr.total_price, pr.total_quotation_price, pr.category_item,
+			pr.budget_plan_no, 
+			prd.product_code,
+			prd.product_name,
+			prd.qty,
+			prd.budget_price_per_unit,
+			prd.budget_price_total,
+			prd.quotation_price_per_unit,
+			prd.quotation_price_total,
+			prd.estimate_date_use,
+			prd.pr_no,
+			prd.last_price,
+			prd.estimate_fulfillment,
+			prd.fulfillment_status,
+			prd.uom_name,
+			prd.id AS "item_detail_id",
+			prd.status AS "item_detail_status",
+			prd.is_po_created,
+			prd.currency_id,
+			prd.currency_code,
+			prd.currency_symbol,
+			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
+
+		xSqlGroupBy = ` `;
+
+		xSql = ` SELECT ${xSqlFields}
+				 FROM tr_purchaserequestdetails prd 
+						LEFT JOIN tr_purchaserequests pr ON pr.id = prd.request_id
+							LEFT JOIN ms_projects p ON p.id = pr.project_id
+				 WHERE ${xSqlWhere} ${xSqlGroupBy}
+				  ${xSqlOrderBy}`;
+
+		xSqlCount = ` SELECT count(pr.request_no) AS total_record
+		  FROM tr_purchaserequestdetails prd 
+		  	LEFT JOIN tr_purchaserequests pr ON pr.id = prd.request_id
+			  LEFT JOIN ms_projects p ON p.id = pr.project_id
+		  WHERE ${xSqlWhere}`;
+
+		// console.log(`>>> xSql: ${xSql}`);
+
+		xData = await sequelize.query(xSql, {
+			replacements: xObjJsonWhere,
+			type: sequelize.QueryTypes.SELECT,
+			logging: console.log
+		});
+
+		xTotalRecord = await sequelize.query(xSqlCount, {
+			replacements: xObjJsonWhere,
+			type: sequelize.QueryTypes.SELECT
+		});
+
+		return {
+			status_code: '00',
+			status_msg: 'OK',
+			data: xData,
+			total_record: xTotalRecord[0].total_record
+		};
 	}
 }
 
