@@ -291,7 +291,7 @@ class ProductRepository {
                 delete pParam.code;
                 var xWhere = {
                     where: {
-                        is_delete: 1,
+                        is_delete: 0,
                         code: xCode,
                     }
                 };
