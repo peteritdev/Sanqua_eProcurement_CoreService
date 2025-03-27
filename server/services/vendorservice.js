@@ -67,6 +67,7 @@ class VendorService {
     constructor(){}
 
     async list(pParam){
+        // 
         var xJoResult = {};
         var xJoArrData = [];       
 
