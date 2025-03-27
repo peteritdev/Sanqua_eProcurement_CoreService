@@ -692,7 +692,11 @@ class PurchaseRequestDetailRepository {
 									current_stock: xDetail.data.rows[i].current_stock,
 									vendor_catalogue_id: xDetail.data.rows[i].vendor_catalogue_id,
 
-									is_item_match_with_odoo: xIsMatchOdoo
+									is_item_match_with_odoo: xIsMatchOdoo,
+									
+									currency_id: xDetail.data.rows[i].currency_id,
+									currency_code: xDetail.data.rows[i].currency_code,
+									currency_symbol: xDetail.data.rows[i].currency_symbol
 								},
 								{ transaction: xTransaction }
 							);
