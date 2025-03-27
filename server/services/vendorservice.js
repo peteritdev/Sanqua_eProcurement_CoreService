@@ -223,11 +223,11 @@ class VendorService {
                     //     joResult.result_update_vendor = xUpdateResult;
                     // }
 
-                    if( param.act == "add" && param.code != '' ){
+                    if( param.act == "add" && param.code != null && param.code != '' ){
                         // Check if code exists or not
                         var xCheckData = await _vendorRepoInstance.getVendorByCode( param.code, null );
                         if( xCheckData != null ){
-                            xJoResult = {
+                            joResult = {
                                 status_code: '-99',
                                 status_msg: 'Vendor code already exists.'
                             }

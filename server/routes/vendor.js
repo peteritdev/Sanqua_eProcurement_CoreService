@@ -26,6 +26,7 @@ module.exports = (app) => {
 	// VENDOR'S PROFILE
 	arrValidate = [
 		check('name').not().isEmpty().withMessage('Name cannot be empty'),
+		check('code').not().isEmpty().withMessage('Code cannot be empty'),
 		check('business_entity_id', 'Business Entity must be integer and cannot be empty').not().isEmpty().isInt(),
 		check('classification_id', 'Classification Id must be integer and cannot be empty').not().isEmpty().isInt(),
 		check('sub_classification_id', 'Sub Classification Id must be integer and cannot be empty')

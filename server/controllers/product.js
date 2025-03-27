@@ -9,7 +9,7 @@ const _oAuthServiceInstance = new OAuthService();
 
 const { check, validationResult } = require('express-validator');
 
-module.exports = {product_Save, product_List, product_Delete, product_DropDown, product_Upload, product_BatchSave, product_GetById};
+module.exports = {product_Save, product_List, product_Delete, product_DropDown, product_Upload, product_BatchSave, product_GetById /*, product_UpdatePhoto*/};
 
 async function product_BatchSave(req, res){
     var joResult;
@@ -19,13 +19,21 @@ async function product_BatchSave(req, res){
 
     if( oAuthResult.status_code == "00" ){
         if( oAuthResult.token_data.status_code == "00" ){
-
-            req.body.user_id = oAuthResult.token_data.result_verify.id;
-            req.body.user_name = oAuthResult.token_data.result_verify.name;
-            joResult = await _productServiceInstance.batchSave(req.body);
-            // joResult.token_data = oAuthResult.token_data;
-            joResult = JSON.stringify(joResult);
-
+            // Validate first
+            var errors = validationResult(req).array();   
+            if( errors.length != 0 ){
+                joResult = JSON.stringify({
+                    "status_code": "-99",
+                    "status_msg":"Parameter value has problem",
+                    "error_msg": errors
+                });
+            }else{ 
+                req.body.user_id = oAuthResult.token_data.result_verify.id;
+                req.body.user_name = oAuthResult.token_data.result_verify.name;
+                joResult = await _productServiceInstance.batchSave(req.body);
+                // joResult.token_data = oAuthResult.token_data;
+                joResult = JSON.stringify(joResult);
+            }
         }else{
             joResult = JSON.stringify(oAuthResult);
         }
@@ -236,3 +244,40 @@ async function product_Delete( req, res ){
     res.setHeader('Content-Type','application/json');
     res.status(200).send(joResult);
 }
+
+// async function product_UpdatePhoto(req, res){
+//     var joResult;
+//     var errors = null;
+
+//     var oAuthResult = await _oAuthServiceInstance.verifyToken( req.headers['x-token'], req.headers['x-method'] );        
+
+//     if( oAuthResult.status_code == "00" ){
+//         if( oAuthResult.token_data.status_code == "00" ){
+//             // Validate first
+//             var errors = validationResult(req).array();   
+//             if( errors.length != 0 ){
+//                 joResult = JSON.stringify({
+//                     "status_code": "-99",
+//                     "status_msg":"Parameter value has problem",
+//                     "error_msg": errors
+//                 });
+//             }else{ 
+//                 req.body.user_id = oAuthResult.token_data.result_verify.id;
+//                 req.body.user_name = oAuthResult.token_data.result_verify.name;
+//                 joResult = await _productServiceInstance.updateBatchPhoto(req.body);
+//                 // joResult.token_data = oAuthResult.token_data;
+//                 joResult = JSON.stringify(joResult);
+//             }
+//         }else{
+//             joResult = JSON.stringify(oAuthResult);
+//         }
+
+//     }else{
+//         joResult = JSON.stringify(oAuthResult);
+//     }  
+
+    
+
+//     res.setHeader('Content-Type','application/json');
+//     res.status(200).send(joResult);
+// }

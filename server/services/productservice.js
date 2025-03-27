@@ -342,15 +342,29 @@ class ProductService {
 
                         }
                     } else {
-
-                        // Check product_code is exists
-                        xCheckData_ProductByCode = await _productRepoInstance.getProductByCode({ code: pParam.data[i].code });
-                        xCheckData_ProductByName = await _productRepoInstance.getProductByName({ code: pParam.data[i].name });
-
-                        if (xCheckData_ProductByCode == null && xCheckData_ProductByName == null) {
-                            var xAddResult = await _productRepoInstance.save(pParam.data[i], "add");
+                        if (pParam.act == 'update_by_code') {
+                            // Check product_code is exists
+                            xCheckData_ProductByCode = await _productRepoInstance.getProductByCode({ code: pParam.data[i].code });
+    
+                            if (xCheckData_ProductByCode == null) {
+                                xStringMsg += "Row " + (i + 1) + " product code " + pParam.data[i].code + " not found, <br>";
+                            } else {
+                                console.log(`>>> xCheckData_ProductByCode: ${JSON.stringify(xCheckData_ProductByCode)}`);
+                                var xAddResult = await _productRepoInstance.save(pParam.data[i], "update_by_code");
+                            }
+                            
                         } else {
-                            xStringMsg += "Row " + (i + 1) + " product code " + pParam.data[i].code + " can not duplicate, <br>";
+
+                            // Check product_code is exists
+                            xCheckData_ProductByCode = await _productRepoInstance.getProductByCode({ code: pParam.data[i].code });
+                            xCheckData_ProductByName = await _productRepoInstance.getProductByName({ name: pParam.data[i].name });
+    
+                            if (xCheckData_ProductByCode == null && xCheckData_ProductByName == null) {
+                                var xAddResult = await _productRepoInstance.save(pParam.data[i], "add");
+                            } else {
+                                xStringMsg += "Row " + (i + 1) + " product name & code " + pParam.data[i].code + " can not duplicate, <br>";
+                            }
+
                         }
 
                     }
@@ -484,8 +498,19 @@ class ProductService {
             }
 
             if (xFlagProcess) {
-                var xAddResult = await _productRepoInstance.save(pParam, xAct);
-                xJoResult = xAddResult;
+                
+                var xCheckData_ProductByCode = null 
+                xCheckData_ProductByCode = await _productRepoInstance.getProductByCode({ code: pParam.code });
+
+                if (xCheckData_ProductByCode == null) {
+                    var xAddResult = await _productRepoInstance.save(pParam, xAct);
+                    xJoResult = xAddResult;
+                } else {
+                    xJoResult = {
+                        status_code: "-99",
+                        status_msg: "Product code already exist"
+                    }
+                }
             }
 
 
@@ -574,7 +599,69 @@ class ProductService {
         }
     }
 
+    async updateBatchPhoto(pParam) {
+        var joResult;
+        var jaResult = [];
+        var xFlagProcess = true;
+        var xStringMsg = '';
 
+        if (pParam.user_id != '') {
+            var xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+            if (xDecId.status_code == '00') {
+                pParam.user_id = xDecId.decrypted;
+            } else {
+                joResult = xDecId;
+                xFlagProcess = false;
+            }
+        }
+
+        if (xFlagProcess) {
+            if (pParam.hasOwnProperty('act')) {
+                if (pParam.act == 'update_batch') {
+                    for (var i = 0; i < pParam.data.length; i++) {
+                        var xCheckData_ProductByCode = null;
+                        var pParamObj = Object.keys(pParam.data[i])
+                        if (pParamObj.length > 0) {
+                            const photo = fruits.some(fruit => fruit.toLowerCase().includes("mango"));
+                            for (let j = 0; j < array.length; j++) {
+                                if (pParamObj[j].includes("photo")) {
+                                    // Check product_code is exists
+                                    xCheckData_ProductByCode = await _productRepoInstance.getProductByCode({ code: pParam.data[i].code });
+                                    console.log(`>>> xCheckData_ProductByCode: ${JSON.stringify(xCheckData_ProductByCode)}`);
+                                    
+                                    // if (xCheckData_ProductByCode == null) {
+                                    //     var xAddResult = await _productRepoInstance.save(pParam.data[i], "update");
+                                    // } else {
+                                        xStringMsg += "Row " + (i + 1) + " product code " + pParam.data[i].code + " can not duplicate, <br>";
+                                    // }
+        
+                                } else {
+                                    xStringMsg += "Row " + (i + 1) + " product code can not be empty, <br>";
+                                }
+                            }
+                        } else {
+                            xStringMsg += "Row " + (i + 1) + " object not found, <br>";
+                        }
+                        
+                    }
+
+                    joResult = {
+                        "status_code": "00",
+                        "status_msg": "Finish save to database",
+                        "err_msg": xStringMsg,
+                    }
+                } else {
+                    joResult = {
+                        "status_code": "-99",
+                        "status_msg": "Update failed, invalid action"
+                    }
+                }
+            }
+            // await _utilInstance.changeSequenceTable((pParam.data.length)+1, 'ms_products','id');
+        }
+
+        return joResult;
+    }
 
 }
 
