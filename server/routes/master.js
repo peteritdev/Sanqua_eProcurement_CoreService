@@ -88,10 +88,6 @@ module.exports = (app) => {
 	xArrValidateProduct = [];
 	xArrValidateProduct = [ check('act').not().isEmpty().withMessage('Parameter act cannot be empty') ];
 	app.post(rootAPIPath + 'master/product/batch_save', xArrValidateProduct, productController.product_BatchSave);
-	
-	// xArrValidateProduct = [];
-	// xArrValidateProduct = [ check('act').not().isEmpty().withMessage('Parameter act cannot be empty') ];
-	// app.post(rootAPIPath + 'master/product/updateByCode', xArrValidateProduct, productController.product_UpdatePhoto);
 
 	// Unit
 	// Save
