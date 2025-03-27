@@ -7,6 +7,7 @@ const Op = sequelize.Op;
 
 //Model
 const _modelVendor = require('../models').ms_vendors;
+const _modelProduct = require('../models').ms_products;
 const _modelBusinessEntity = require('../models').ms_businessentities;
 const _modelClassification = require('../models').ms_classifications;
 const _modelSubClassification = require('../models').ms_subclassifications;
@@ -15,8 +16,7 @@ const _modelCity = require('../models').ms_cities;
 const _modelVendorDocument = require('../models').ms_vendordocuments;
 const _modelCurrency = require('../models').ms_currencies;
 
-
-const Utility = require('../utils/globalutility.js');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 class VendorRepository{
@@ -615,4 +615,3 @@ class VendorRepository{
 }
 
 module.exports = VendorRepository;
-
