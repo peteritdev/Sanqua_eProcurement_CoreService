@@ -25,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
 
         last_price: DataTypes.DOUBLE,
         last_ordered: DataTypes.DATE,
+        // 
         last_purchase_plant: DataTypes.STRING,
         sync_from_odoo_at: DataTypes.DATE,
 
