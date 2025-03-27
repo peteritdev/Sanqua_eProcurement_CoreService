@@ -349,7 +349,7 @@ class ProductService {
                             if (xCheckData_ProductByCode == null) {
                                 xStringMsg += "Row " + (i + 1) + " product code " + pParam.data[i].code + " not found, <br>";
                             } else {
-                                console.log(`>>> xCheckData_ProductByCode: ${JSON.stringify(xCheckData_ProductByCode)}`);
+                                // console.log(`>>> xCheckData_ProductByCode: ${JSON.stringify(pParam.data[i])}`);
                                 var xAddResult = await _productRepoInstance.save(pParam.data[i], "update_by_code");
                             }
                             

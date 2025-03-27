@@ -288,7 +288,7 @@ class ProductRepository {
 
                 pParam.updatedAt = await _utilInstance.getCurrDateTime();
                 var xCode = pParam.code;
-                delete pParam.id;
+                delete pParam.code;
                 var xWhere = {
                     where: {
                         is_delete: 1,
