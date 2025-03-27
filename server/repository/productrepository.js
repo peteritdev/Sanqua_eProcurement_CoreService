@@ -272,7 +272,7 @@ class ProductRepository {
                 var xErpId = pParam.erp_id;
                 delete pParam.erp_id;
 
-                saved = await _modelDb.update(pParam, {
+                xSaved = await _modelDb.update(pParam, {
                     where: {
                         erp_id: xErpId
                     }
@@ -280,10 +280,30 @@ class ProductRepository {
 
                 await xTransaction.commit();
 
-                joResult = {
+                xJoResult = {
                     status_code: "00",
                     status_msg: "Data has been successfully updated"
                 }
+            } else if (pAct == "update_by_code") {
+
+                pParam.updatedAt = await _utilInstance.getCurrDateTime();
+                var xCode = pParam.code;
+                delete pParam.id;
+                var xWhere = {
+                    where: {
+                        is_delete: 1,
+                        code: xCode,
+                    }
+                };
+                xSaved = await _modelDb.update(pParam, xWhere, { xTransaction });
+
+                await xTransaction.commit();
+
+                xJoResult = {
+                    status_code: "00",
+                    status_msg: "Data has been successfully updated"
+                }
+
             }
 
         } catch (e) {
