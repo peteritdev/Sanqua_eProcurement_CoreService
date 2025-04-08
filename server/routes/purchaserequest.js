@@ -207,7 +207,11 @@ module.exports = (app) => {
 		purchaseRequestController.purchaseRequest_TransactionHistory
 	);
 
-	arrValidate = [];
+	arrValidate = [
+		check('id').not().isEmpty().withMessage('Parameter id cannot be empty'),
+		check('act').not().isEmpty().withMessage('Parameter act cannot be empty')
+	];
+	
 	app.post(
 		rootAPIPath + 'project/update_fulfillment',
 		arrValidate,

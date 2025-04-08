@@ -1776,6 +1776,7 @@ class PurchaseRequestService {
 								fulfillment_status: xRows[index].fulfillment_status,
 								fulfillment_status_name:
 									xRows[index].fulfillment_status == 1 ? 'Lengkap' : 'Belum Lengkap',
+								fulfillment_input_status: xRows[index].fulfillment_input_status,
 								id:
 									xRows[index].item_detail_id != null
 										? await _utilInstance.encrypt(

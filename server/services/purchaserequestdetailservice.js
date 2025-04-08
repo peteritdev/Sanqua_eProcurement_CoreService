@@ -1056,6 +1056,7 @@ class PurchaseRequestDetailService {
 		var xJoResult = {};
 		var xFlagProcess = false;
 		var xDecId = null;
+		var xActObject = null;
 
 		try {
 			if (pParam.hasOwnProperty('user_id')) {
@@ -1104,11 +1105,30 @@ class PurchaseRequestDetailService {
 
 			// Check id parameter is not empty
 			if (pParam.hasOwnProperty('id')) {
-				if ((pParam.id != null) & (pParam.id != '')) {
+				if (pParam.id != null && pParam.id != '') {
 					var xItemId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
 					if (xItemId.status_code == '00') {
 						pParam.id = xItemId.decrypted;
-						xFlagProcess = true;
+						// xFlagProcess = true;
+						
+						// Check ACT parameter 
+						if (pParam.act == 'fulfillment') {
+							xActObject = {
+								fulfillment_status: pParam.fulfillment_status
+							}
+							xFlagProcess = true;
+						} else if (pParam.act == 'fulfillment_input') {
+							xActObject = {
+								fulfillment_input_status: pParam.fulfillment_input_status
+							}
+							xFlagProcess = true;
+						} else {
+							xFlagProcess = false;
+							xJoResult = {
+								status_code: '-99',
+								status_msg: 'Invalid Fulfillment Action'
+							};
+						}
 					} else {
 						xJoResult = xItemId;
 					}
@@ -1121,10 +1141,13 @@ class PurchaseRequestDetailService {
 					status_msg: 'Update failed, no supply item_id'
 				};
 			} else {
+				
 				let xParamUpdate = {
-					id: pParam.id,
-					fulfillment_status: pParam.fulfillment_status
+					id: pParam.id
+					// fulfillment_status: pParam.fulfillment_status
 				};
+
+				Object.assign(xParamUpdate, xActObject)
 
 				// update column with given pry
 				let xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
