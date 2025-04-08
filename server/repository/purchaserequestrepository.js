@@ -705,6 +705,17 @@ class PurchaseRequestRepository {
 			}
 		}
 
+		if (pParam.hasOwnProperty('fulfillment_input_status')) {
+			if (pParam.fulfillment_input_status != '') {
+				if (Number(pParam.fulfillment_input_status)) {
+					xSqlWhere += ' AND prd.fulfillment_input_status = :fulfillmentInputStatus ';
+				} else {
+					xSqlWhere += ' AND (prd.fulfillment_input_status = :fulfillmentInputStatus OR prd.fulfillment_input_status IS NULL) ';
+				}
+				xObjJsonWhere.fulfillmentInputStatus = Number(pParam.fulfillment_input_status);
+			}
+		}
+
 		if (pParam.hasOwnProperty('request_date_start') && pParam.hasOwnProperty('request_date_end')) {
 			if (pParam.request_date_start != '' && pParam.request_date_end != '') {
 				xSqlWhere += ' AND pr.requested_at BETWEEN :startDate AND :endDate ';
@@ -797,9 +808,21 @@ class PurchaseRequestRepository {
 					}
 				}
 
+				// 24/03/2025
+				let xSqlWhereInputStatusOwnedDoc = '';
+				if (pParam.hasOwnProperty('fulfillment_input_status')) {
+					if (pParam.fulfillment_input_status != '') {
+						if (Number(pParam.fulfillment_input_status)) {
+							xSqlWhereInputStatusOwnedDoc = ' AND prd.fulfillment_input_status = :fulfillmentInputStatus';
+						} else {
+							xSqlWhereInputStatusOwnedDoc = ' AND (prd.fulfillment_input_status = :fulfillmentInputStatus OR prd.fulfillment_input_status IS NULL)';
+						}
+					}
+				}
+
 				xSqlWhere = ` (( ${xSqlWhere} ) OR (${xSqlWhereOr} ${xSqlWhereCompanyOwnedDoc != ''
 					? xSqlWhereCompanyOwnedDoc
-					: ''} ${xSqlWhereProjectOwnedDoc} ${xSqlWhereCategoryOwnedDoc} ${xSqlWhereDepartmentOwnedDoc} ${xSqlWhereEstimateStatusOwnedDoc}))`;
+					: ''} ${xSqlWhereProjectOwnedDoc} ${xSqlWhereCategoryOwnedDoc} ${xSqlWhereDepartmentOwnedDoc} ${xSqlWhereEstimateStatusOwnedDoc} ${xSqlWhereInputStatusOwnedDoc}))`;
 			}
 		}
 
@@ -846,6 +869,7 @@ class PurchaseRequestRepository {
 			prd.last_price,
 			prd.estimate_fulfillment,
 			prd.fulfillment_status,
+			prd.fulfillment_input_status,
 			prd.uom_name,
 			prd.id AS "item_detail_id",
 			prd.status AS "item_detail_status",
