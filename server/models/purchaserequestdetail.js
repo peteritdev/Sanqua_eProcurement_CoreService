@@ -80,7 +80,7 @@ module.exports = (sequelize, DataTypes) => {
 		currency_id: DataTypes.INTEGER,
 		currency_symbol: DataTypes.STRING,
 		currency_code: DataTypes.STRING,
-		fulfillment_input_status: DataTypes.BOOLEAN,
+		fulfillment_input_status: DataTypes.BOOLEAN
 	});
 
 	PurchaseRequestDetail.associate = function(models) {
