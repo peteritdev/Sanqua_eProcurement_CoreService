@@ -761,6 +761,7 @@ class PurchaseRequestRepository {
 						xSqlWhereProjectOwnedDoc = ' AND pr.project_id = :projectId AND prd.product_code IS NULL';
 					}
 				} else {
+					// lsadasd1231>>>
 					xSqlWhereProjectOwnedDoc = ' AND pr.project_id IS NOT NULL AND prd.product_code IS NULL';
 				}
 				// ---
