@@ -257,7 +257,10 @@ class PurchaseRequestDetailService {
 								vendor_code: pParam.vendor_code,
 								employee_id: pParam.employee_id,
 								employee_name: pParam.employee_name,
-								budget_price_total: pParam.budget_price_total
+								budget_price_total: pParam.budget_price_total,
+								currency_id: pParam.currency_id,
+								currency_code: pParam.currency_code,
+								currency_symbol: pParam.currency_symbol
 							}
 						}
 					};
@@ -414,7 +417,10 @@ class PurchaseRequestDetailService {
 										vendor_code: xItem.data.vendor_code,
 										employee_id: xItem.data.employee_id,
 										employee_name: xItem.data.employee_name,
-										budget_price_total: xItem.data.budget_price_total
+										budget_price_total: xItem.data.budget_price_total,
+										currency_id: xItem.data.currency_id,
+										currency_code: xItem.data.currency_code,
+										currency_symbol: xItem.data.currency_symbol
 									},
 									after: {
 										qty: pParam.qty,
@@ -430,7 +436,10 @@ class PurchaseRequestDetailService {
 										vendor_code: pParam.vendor_code,
 										employee_id: pParam.employee_id,
 										employee_name: pParam.employee_name,
-										budget_price_total: pParam.budget_price_total
+										budget_price_total: pParam.budget_price_total,
+										currency_id: pParam.currency_id,
+										currency_code: pParam.currency_code,
+										currency_symbol: pParam.currency_symbol
 									}
 								}
 							};
@@ -633,7 +642,8 @@ class PurchaseRequestDetailService {
 																.items[i].product_name}`,
 															qty: pParam.items[i].qty,
 															note: `${pParam.items[i].description}`,
-															uom: pParam.items[i].uom
+															uom: pParam.items[i].uom,
+															currency_code: pParam.items[i].currency_code
 														});
 														xFlagOdoo = true;
 													}
@@ -1046,6 +1056,7 @@ class PurchaseRequestDetailService {
 		var xJoResult = {};
 		var xFlagProcess = false;
 		var xDecId = null;
+		var xActObject = null;
 
 		try {
 			if (pParam.hasOwnProperty('user_id')) {
@@ -1094,11 +1105,30 @@ class PurchaseRequestDetailService {
 
 			// Check id parameter is not empty
 			if (pParam.hasOwnProperty('id')) {
-				if ((pParam.id != null) & (pParam.id != '')) {
+				if (pParam.id != null && pParam.id != '') {
 					var xItemId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
 					if (xItemId.status_code == '00') {
 						pParam.id = xItemId.decrypted;
-						xFlagProcess = true;
+						// xFlagProcess = true;
+						
+						// Check ACT parameter 
+						if (pParam.act == 'fulfillment') {
+							xActObject = {
+								fulfillment_status: pParam.fulfillment_status
+							}
+							xFlagProcess = true;
+						} else if (pParam.act == 'fulfillment_input') {
+							xActObject = {
+								fulfillment_input_status: pParam.fulfillment_input_status
+							}
+							xFlagProcess = true;
+						} else {
+							xFlagProcess = false;
+							xJoResult = {
+								status_code: '-99',
+								status_msg: 'Invalid Fulfillment Action'
+							};
+						}
 					} else {
 						xJoResult = xItemId;
 					}
@@ -1111,10 +1141,13 @@ class PurchaseRequestDetailService {
 					status_msg: 'Update failed, no supply item_id'
 				};
 			} else {
+				
 				let xParamUpdate = {
-					id: pParam.id,
-					fulfillment_status: pParam.fulfillment_status
+					id: pParam.id
+					// fulfillment_status: pParam.fulfillment_status
 				};
+
+				Object.assign(xParamUpdate, xActObject)
 
 				// update column with given pry
 				let xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');

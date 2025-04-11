@@ -471,9 +471,14 @@ class PurchaseRequestService {
 										// add new 16/11/2023
 										estimate_fulfillment: xRows[index].estimate_fulfillment,
 										status: xRows[index].item_detail_status,
-										description: xRows[index].description
+										description: xRows[index].description,
+
+										currency_id: xRows[index].currency_id,
+										currency_code: xRows[index].currency_code,
+										currency_symbol: xRows[index].currency_symbol
 									},
-									approved_at: xRows[index].approved_at
+									approved_at: xRows[index].approved_at,
+									budget_plan_no: xRows[index].budget_plan_no
 								});
 							}
 						} else {
@@ -531,7 +536,8 @@ class PurchaseRequestService {
 										id: xRows[index].category_item,
 										name: config.categoryItem[xRows[index].category_item]
 									},
-									approved_at: xRows[index].approved_at
+									approved_at: xRows[index].approved_at,
+									budget_plan_no: xRows[index].budget_plan_no
 								});
 							}
 						}
@@ -592,7 +598,8 @@ class PurchaseRequestService {
 								},
 								approved_at: xRows[index].approved_at,
 								fpb_type_id: xRows[index].fpb_type,
-								fpb_type_name: fpbType[xRows[index].fpb_type-1]
+								fpb_type_name: fpbType[xRows[index].fpb_type-1],
+								budget_plan_no: xRows[index].budget_plan_no
 							});
 						}
 					}
@@ -762,7 +769,11 @@ class PurchaseRequestService {
 								code: xDetail[index].product.code,
 								name: xDetail[index].product.name,
 								uom: xDetail[index].product.unit
-							} : null
+							} : null,
+							
+							currency_id: xDetail[index].currency_id,
+							currency_code: xDetail[index].currency_code,
+							currency_symbol: xDetail[index].currency_symbol
 						});
 					}
 					// Get Approval Matrix
@@ -917,6 +928,7 @@ class PurchaseRequestService {
 						approved_at: xResult.approved_at,
 						last_click_equalization_at: xResult.last_click_equalization_at,
 						last_click_equalization_by_name: xResult.last_click_equalization_by_name,
+						budget_plan_no: xResult.budget_plan_no
 					};
 
 					xJoResult = {
@@ -1663,7 +1675,7 @@ class PurchaseRequestService {
 				document_id: '',
 				user_id: pParam.user_id
 			});
-			// console.log(`>>> xOwnedDocument : ${JSON.stringify(xOwnedDocument)}`);
+			console.log(`>>> xOwnedDocument : ${JSON.stringify(xOwnedDocument)}`);
 
 			if (xOwnedDocument.status_code == '00') {
 				if (xOwnedDocument.hasOwnProperty('token_data')) {
@@ -1740,7 +1752,7 @@ class PurchaseRequestService {
 								xRows[index].created_at != null
 									? moment(xRows[index].created_at).format('DD-MM-YYYY HH:mm:ss')
 									: null,
-
+							created_by: xRows[index].created_by,
 							total_price: xRows[index].total_price,
 							total_quotation_price: xRows[index].total_quotation_price,
 							category_item: {
@@ -1764,6 +1776,7 @@ class PurchaseRequestService {
 								fulfillment_status: xRows[index].fulfillment_status,
 								fulfillment_status_name:
 									xRows[index].fulfillment_status == 1 ? 'Lengkap' : 'Belum Lengkap',
+								fulfillment_input_status: xRows[index].fulfillment_input_status,
 								id:
 									xRows[index].item_detail_id != null
 										? await _utilInstance.encrypt(
@@ -1773,8 +1786,13 @@ class PurchaseRequestService {
 										: xRows[index].item_detail_id,
 								status: xRows[index].item_detail_status,
 								status_name: config.statusDescription.purchaseRequest[xRows[index].item_detail_status],
-								is_po_created: xRows[index].is_po_created
-							}
+								is_po_created: xRows[index].is_po_created,
+								
+								currency_id: xRows[index].currency_id,
+								currency_code: xRows[index].currency_code,
+								currency_symbol: xRows[index].currency_symbol
+							},
+							budget_plan_no: xRows[index].budget_plan_no
 						});
 					}
 
@@ -2011,7 +2029,12 @@ class PurchaseRequestService {
 								xRows[index].item_status == -1
 									? 'Rejected'
 									: config.statusDescription.purchaseRequestDetail[xRows[index].item_status]
-						}
+						},
+						
+						currency_id: xRows[index].currency_id,
+						currency_code: xRows[index].currency_code,
+						currency_symbol: xRows[index].currency_symbol,
+						budget_plan_no: xRows[index].budget_plan_no
 					});
 				}
 
@@ -2189,6 +2212,134 @@ class PurchaseRequestService {
 			}
 		}
 
+		return xJoResult;
+	}
+	async fpbProjectEstimateNotif(pParam) {
+		
+		var xJoResult = {};
+		var xJoArrData = [];
+		var xFlagProcess = false;
+		var xDecId = {};
+
+		if (pParam.hasOwnProperty('user_id')) {
+			if (pParam.user_id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.user_id = xDecId.decrypted;
+					xFlagProcess = true;
+				} else {
+					xJoResult = xDecId;
+				}
+			}
+		}
+
+		if (xFlagProcess) {
+
+			var xResultList = await _repoInstance.fpbProjectEstimateNotif(pParam);
+
+			if (xResultList.total_record > 0) {
+				var xRows = xResultList.data;
+				// console.log('xRows>>>>>>>>', xRows);
+
+				for (var index in xRows) {
+					xJoArrData.push({
+						id: await _utilInstance.encrypt(xRows[index].id.toString(), config.cryptoKey.hashKey),
+						project: {
+							id: xRows[index].project_id,
+							code: xRows[index].project_code,
+							name: xRows[index].project_name,
+							odoo_project_code: xRows[index].odoo_project_code
+						},
+						request_no: xRows[index].request_no,
+						requested_at:
+							xRows[index].requested_at == null
+								? ''
+								: moment(xRows[index].requested_at).tz(config.timezone).format('DD MMM'),
+						employee: {
+							id: await _utilInstance.encrypt(
+								xRows[index].employee_id.toString(),
+								config.cryptoKey.hashKey
+							),
+							name: xRows[index].employee_name
+						},
+						department: {
+							id: xRows[index].department_id,
+							name: xRows[index].department_name
+						},
+						status: {
+							id: xRows[index].status,
+							name:
+								xRows[index].status == -1
+									? 'Rejected'
+									: config.statusDescription.purchaseRequest[xRows[index].status]
+						},
+
+						company: {
+							id: xRows[index].company_id,
+							code: xRows[index].company_code,
+							name: xRows[index].company_name
+						},
+
+						created_at:
+							xRows[index].created_at != null
+								? moment(xRows[index].created_at).format('DD-MM-YYYY HH:mm:ss')
+								: null,
+						created_by: xRows[index].created_by,
+						total_price: xRows[index].total_price,
+						total_quotation_price: xRows[index].total_quotation_price,
+						category_item: {
+							id: xRows[index].category_item,
+							name: config.categoryItem[xRows[index].category_item]
+						},
+						item: {
+							product_code: xRows[index].product_code,
+							product_name: xRows[index].product_name,
+							qty: xRows[index].qty,
+							budget_price_per_unit: xRows[index].budget_price_per_unit,
+							budget_price_total: xRows[index].budget_price_total,
+							quotation_price_per_unit: xRows[index].quotation_price_per_unit,
+							quotation_price_total: xRows[index].quotation_price_total,
+							estimate_date_use: xRows[index].estimate_date_use,
+							pr_no: xRows[index].pr_no,
+							last_price: xRows[index].last_price,
+							uom_name: xRows[index].uom_name,
+							// add new 16/11/2023
+							estimate_fulfillment: xRows[index].estimate_fulfillment,
+							fulfillment_status: xRows[index].fulfillment_status,
+							fulfillment_status_name:
+								xRows[index].fulfillment_status == 1 ? 'Lengkap' : 'Belum Lengkap',
+							id:
+								xRows[index].item_detail_id != null
+									? await _utilInstance.encrypt(
+											xRows[index].item_detail_id.toString(),
+											config.cryptoKey.hashKey
+										)
+									: xRows[index].item_detail_id,
+							status: xRows[index].item_detail_status,
+							status_name: config.statusDescription.purchaseRequest[xRows[index].item_detail_status],
+							is_po_created: xRows[index].is_po_created,
+							
+							currency_id: xRows[index].currency_id,
+							currency_code: xRows[index].currency_code,
+							currency_symbol: xRows[index].currency_symbol
+						},
+						budget_plan_no: xRows[index].budget_plan_no
+					});
+				}
+
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					total_record: xResultList.total_record,
+					data: xJoArrData
+				};
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Data not found'
+				};
+			}
+		}
 		return xJoResult;
 	}
 }

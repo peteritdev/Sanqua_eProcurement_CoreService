@@ -198,13 +198,20 @@ module.exports = (app) => {
 	app.get(rootAPIPath + 'project/list', arrValidate, purchaseRequestController.purchaseRequestProject_List);
 
 	arrValidate = [];
+	app.get(rootAPIPath + 'project/notif', arrValidate, purchaseRequestController.purchaseRequestProject_EstimateNotif);
+
+	arrValidate = [];
 	app.get(
 		rootAPIPath + 'transaction_history',
 		arrValidate,
 		purchaseRequestController.purchaseRequest_TransactionHistory
 	);
 
-	arrValidate = [];
+	arrValidate = [
+		check('id').not().isEmpty().withMessage('Parameter id cannot be empty'),
+		check('act').not().isEmpty().withMessage('Parameter act cannot be empty')
+	];
+	
 	app.post(
 		rootAPIPath + 'project/update_fulfillment',
 		arrValidate,

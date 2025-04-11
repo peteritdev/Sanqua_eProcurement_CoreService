@@ -342,15 +342,29 @@ class ProductService {
 
                         }
                     } else {
-
-                        // Check product_code is exists
-                        xCheckData_ProductByCode = await _productRepoInstance.getProductByCode({ code: pParam.data[i].code });
-                        xCheckData_ProductByName = await _productRepoInstance.getProductByName({ code: pParam.data[i].name });
-
-                        if (xCheckData_ProductByCode == null && xCheckData_ProductByName == null) {
-                            var xAddResult = await _productRepoInstance.save(pParam.data[i], "add");
+                        if (pParam.act == 'update_by_code') {
+                            // Check product_code is exists
+                            xCheckData_ProductByCode = await _productRepoInstance.getProductByCode({ code: pParam.data[i].code });
+    
+                            if (xCheckData_ProductByCode == null) {
+                                xStringMsg += "Row " + (i + 1) + " product code " + pParam.data[i].code + " not found, <br>";
+                            } else {
+                                // console.log(`>>> xCheckData_ProductByCode: ${JSON.stringify(pParam.data[i])}`);
+                                var xAddResult = await _productRepoInstance.save(pParam.data[i], "update_by_code");
+                            }
+                            
                         } else {
-                            xStringMsg += "Row " + (i + 1) + " product code " + pParam.data[i].code + " can not duplicate, <br>";
+
+                            // Check product_code is exists
+                            xCheckData_ProductByCode = await _productRepoInstance.getProductByCode({ code: pParam.data[i].code });
+                            xCheckData_ProductByName = await _productRepoInstance.getProductByName({ name: pParam.data[i].name });
+    
+                            if (xCheckData_ProductByCode == null && xCheckData_ProductByName == null) {
+                                var xAddResult = await _productRepoInstance.save(pParam.data[i], "add");
+                            } else {
+                                xStringMsg += "Row " + (i + 1) + " product name & code " + pParam.data[i].code + " can not duplicate, <br>";
+                            }
+
                         }
 
                     }
@@ -484,8 +498,19 @@ class ProductService {
             }
 
             if (xFlagProcess) {
-                var xAddResult = await _productRepoInstance.save(pParam, xAct);
-                xJoResult = xAddResult;
+                
+                var xCheckData_ProductByCode = null 
+                xCheckData_ProductByCode = await _productRepoInstance.getProductByCode({ code: pParam.code });
+
+                if (xCheckData_ProductByCode == null) {
+                    var xAddResult = await _productRepoInstance.save(pParam, xAct);
+                    xJoResult = xAddResult;
+                } else {
+                    xJoResult = {
+                        status_code: "-99",
+                        status_msg: "Product code already exist"
+                    }
+                }
             }
 
 
@@ -573,9 +598,6 @@ class ProductService {
             res.status(500).send(e);
         }
     }
-
-
-
 }
 
 module.exports = ProductService;
