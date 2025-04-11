@@ -668,6 +668,15 @@ class PurchaseRequestRepository {
 			}
 		}
 
+		if (pParam.hasOwnProperty('project_id')) {
+			if (pParam.project_id != '') {
+				xSqlWhere += ' AND pr.project_id = :projectId AND prd.product_code IS NULL ';
+				xObjJsonWhere.projectId = pParam.project_id;
+			}
+		} else {
+			xSqlWhere += ' AND pr.project_id IS NOT NULL AND prd.product_code IS NULL ';
+		}
+		
 		if (pParam.hasOwnProperty('category_item')) {
 			if (pParam.category_item != '') {
 				xSqlWhere += ' AND pr.category_item = :categoryItem ';
@@ -675,8 +684,7 @@ class PurchaseRequestRepository {
 			}
 		}
 
-		// 16/11/2023 to show fpb-project--- with product code is null
-					// lsadasd1231>>>
+		// 16/11/2023 to show fpb-project with product code is null
 		if (pParam.hasOwnProperty('project_id')) {
 			if (pParam.project_id != '') {
 				xSqlWhere += ' AND pr.project_id = :projectId AND prd.product_code IS NULL ';
