@@ -675,7 +675,7 @@ class PurchaseRequestRepository {
 			}
 		}
 
-		// 16/11/2023 to show fpb-project with product code is null
+		// 16/11/2023 to show fpb-project--- with product code is null
 		if (pParam.hasOwnProperty('project_id')) {
 			if (pParam.project_id != '') {
 				xSqlWhere += ' AND pr.project_id = :projectId AND prd.product_code IS NULL ';
