@@ -657,7 +657,6 @@ class VendorCatalogueRepository {
 
 			var xDtQuery = await sequelize.query(xSql, {
 				replacements: xJsonWhere,
-				// 
 				type: sequelize.QueryTypes.SELECT
 			});
 
