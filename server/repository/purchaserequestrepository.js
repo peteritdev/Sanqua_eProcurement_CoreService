@@ -667,15 +667,6 @@ class PurchaseRequestRepository {
 				xObjJsonWhere.departmentId = pParam.department_id;
 			}
 		}
-
-		if (pParam.hasOwnProperty('project_id')) {
-			if (pParam.project_id != '') {
-				xSqlWhere += ' AND pr.project_id = :projectId AND prd.product_code IS NULL ';
-				xObjJsonWhere.projectId = pParam.project_id;
-			}
-		} else {
-			xSqlWhere += ' AND pr.project_id IS NOT NULL AND prd.product_code IS NULL ';
-		}
 		
 		if (pParam.hasOwnProperty('category_item')) {
 			if (pParam.category_item != '') {
