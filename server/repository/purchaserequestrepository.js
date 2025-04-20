@@ -712,7 +712,7 @@ class PurchaseRequestRepository {
 				} else {
 					xSqlWhere += ' AND (prd.fulfillment_input_status = :fulfillmentInputStatus OR prd.fulfillment_input_status IS NULL) ';
 				}
-				xObjJsonWhere.fulfillmentInputStatus = Number(pParam.fulfillment_input_status);
+				xObjJsonWhere.fulfillmentInputStatus = pParam.fulfillment_input_status;
 			}
 		}
 
