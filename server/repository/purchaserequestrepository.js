@@ -707,12 +707,12 @@ class PurchaseRequestRepository {
 
 		if (pParam.hasOwnProperty('fulfillment_input_status')) {
 			if (pParam.fulfillment_input_status != '') {
-				if (Number(pParam.fulfillment_input_status)) {
+				if (pParam.fulfillment_input_status) {
 					xSqlWhere += ' AND prd.fulfillment_input_status = :fulfillmentInputStatus ';
 				} else {
 					xSqlWhere += ' AND (prd.fulfillment_input_status = :fulfillmentInputStatus OR prd.fulfillment_input_status IS NULL) ';
 				}
-				xObjJsonWhere.fulfillmentInputStatus = Number(pParam.fulfillment_input_status);
+				xObjJsonWhere.fulfillmentInputStatus = pParam.fulfillment_input_status;
 			}
 		}
 
@@ -812,7 +812,7 @@ class PurchaseRequestRepository {
 				let xSqlWhereInputStatusOwnedDoc = '';
 				if (pParam.hasOwnProperty('fulfillment_input_status')) {
 					if (pParam.fulfillment_input_status != '') {
-						if (Number(pParam.fulfillment_input_status)) {
+						if (pParam.fulfillment_input_status) {
 							xSqlWhereInputStatusOwnedDoc = ' AND prd.fulfillment_input_status = :fulfillmentInputStatus';
 						} else {
 							xSqlWhereInputStatusOwnedDoc = ' AND (prd.fulfillment_input_status = :fulfillmentInputStatus OR prd.fulfillment_input_status IS NULL)';
