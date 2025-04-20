@@ -1422,7 +1422,7 @@ class PurchaseRequestRepository {
 
 		if (pParam.hasOwnProperty('interval')) {
 			if (pParam.interval != null & pParam.interval != '' && pParam.interval != 0) {
-				xSqlWhere += ' AND (prd.estimate_fulfillment < (now() - interval :interval day))';
+				xSqlWhere += ' AND (prd.estimate_fulfillment <= now() OR (prd.estimate_fulfillment > now() AND prd.estimate_fulfillment <= (now() - interval :interval day)))';
 				xObjJsonWhere.interval = '' + pParam.interval;
 			}
 		}
