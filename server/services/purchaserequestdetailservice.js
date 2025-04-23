@@ -724,7 +724,8 @@ class PurchaseRequestDetailService {
 																? xDetail.data.project.odoo_project_code
 																: null
 															: null,
-														line_ids: xLineIds
+														line_ids: xLineIds,
+														expired_date: pParam.expired_date
 													};
 
 													console.log(`>>> xParamOdoo: ${JSON.stringify(xParamOdoo)}`);
@@ -754,7 +755,8 @@ class PurchaseRequestDetailService {
 																			status:
 																				xDetail.data.category_pr != 'bahan_baku'
 																					? 2
-																					: 1
+																					: 1,
+																			expired_date: pParam.expired_date
 																			// request_id: xRequestId
 																		};
 																		let xResultUpdate = await _repoInstance.save(
