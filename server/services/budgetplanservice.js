@@ -616,6 +616,7 @@ class BudgetPlanService {
             if (xFlagProcess) {
                 // Get RAB Detail
                 var xRABDetail = await _repoInstance.getById({ id: xClearId });
+
                 if (xRABDetail !== null) {
                     if (xRABDetail.status != 0) {
                         //xRABDetail.status != 0) {
@@ -624,34 +625,98 @@ class BudgetPlanService {
                             status_msg: 'You can not submit this document. Please check again.'
                         };
                     } else {
-                        pParam.submitedAt = await _utilInstance.getCurrDateTime();
-                        pParam.status = 1;
+                        let xParamUpdate = {
+                          id: xRABDetail.id,
+                          status: 1,
+                          submitedAt: await _utilInstance.getCurrDateTime(),
+                          submited_by: pParam.user_id,
+                          submited_by_name: pParam.user_name,
+                        };
+                        // pParam.submitedAt = await _utilInstance.getCurrDateTime();
+                        // pParam.submited_by = pParam.user_id;
+                        // pParam.submited_by_name = pParam.user_name;
+                        // pParam.status = 1;
 
-                        var xUpdateResult = await _repoInstance.save(pParam, 'submit');
+                        var xUpdateResult = await _repoInstance.save(xParamUpdate, 'submit');
                         xJoResult = xUpdateResult;
                         // Next Phase : Approval Matrix & Notification to admin
                         if (xUpdateResult.status_code == '00') {
-                            if (xRABDetail != null) {
+                            // if (xRABDetail != null) {
                                 // Add Approval Matrix
-                                var xParamAddApprovalMatrix = {
-                                    act: 'add',
-                                    document_id: xEncId,
-                                    document_no: xRABDetail.budget_no,
-                                    application_id: config.applicationId,
-                                    table_name: config.dbTables.rab,
-                                    company_id: xRABDetail.company_id,
-                                    department_id: xRABDetail.department_id,
-                                    // ecatalogue_fpb_category_item: xRABDetail.category_item == 7 ? xRABDetail.category_item : null,
-                                    logged_company_id: pParam.logged_company_id
+                            var xParamAddApprovalMatrix = {
+                                act: 'fetch_matrix',
+                                document_id: xEncId,
+                                document_no: xRABDetail.budget_no,
+                                application_id: config.applicationId,
+                                table_name: config.dbTables.rab,
+                                company_id: xRABDetail.company_id,
+                                department_id: xRABDetail.department_id
+                                // ecatalogue_fpb_category_item: xRABDetail.category_item == 7 ? xRABDetail.category_item : null,
+                                // logged_company_id: pParam.logged_company_id,
+                                // approval_matrix_id: pParam.approval_matrix_id
+                            };
+
+                            var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
+                                pParam.method,
+                                pParam.token,
+                                xParamAddApprovalMatrix
+                            );
+                            if (xApprovalMatrixResult.status_code == "00") {
+                                let xArrApprover = [];
+                                for (
+                                    let i = 0;
+                                    i < xApprovalMatrixResult.approvers.length;
+                                    i++
+                                ) {
+                                    for (
+                                    let j = 0;
+                                    j <
+                                    xApprovalMatrixResult.approvers[i].approver_user.length;
+                                    j++
+                                    ) {
+                                    xArrApprover.push(
+                                        Number(
+                                        xApprovalMatrixResult.approvers[i].approver_user[j]
+                                            .employee_id
+                                        )
+                                    );
+                                    }
+                                }
+
+                                let xParamUpdateApproverId = {
+                                    id: xRABDetail.id,
+                                    approver_ids: xArrApprover,
                                 };
 
-                                var xApprovalMatrixResult = null
-                                // xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
-                                // 	pParam.method,
-                                // 	pParam.token,
-                                // 	xParamAddApprovalMatrix
-                                // );
+                                let xResultUpdateApproverId = await _repoInstance.save(
+                                    xParamUpdateApproverId,
+                                    "update"
+                                );
+                                if (xResultUpdateApproverId.status_code == "00") {
+                                    //   let xParamDetailUpdate = {
+                                    //     id: pParam.id,
+                                    //     // request_no: xReqNo,
+                                    //     status_request: xStatusDocument,
+                                    //     submitedAt: await _utilInstance.getCurrDateTime(),
+                                    //   };
+                                    //   let xResultDetailUpdate = await _documentDetailRepo.save(
+                                    //     xParamDetailUpdate,
+                                    //     "update_from_header"
+                                    //   );
+                                }
+                                xJoResult = xUpdateResult;
                                 xJoResult.approval_matrix_result = xApprovalMatrixResult;
+                            } else {
+                                xParamUpdate.id = xRABDetail.id;
+                                xParamUpdate.status = 0;
+                                xParamUpdate.submitedAt = null;
+                                xParamUpdate.submited_by = null;
+                                xParamUpdate.submited_by_name = null;
+                                
+                                await _repoInstance.save(xParamUpdate, "update");
+                                xJoResult = xApprovalMatrixResult;
+                            }
+                                // xJoResult.approval_matrix_result = xApprovalMatrixResult;
 
                                 // if (xApprovalMatrixResult.status_code == '00') {
                                 // 	if (xApprovalMatrixResult.approvers.length > 0) {
@@ -730,12 +795,12 @@ class BudgetPlanService {
                                 // 	}
                                 // }
 
-                            } else {
-                                xJoResult = {
-                                    status_code: '-99',
-                                    status_msg: 'Data not found. Please supply valid identifier'
-                                };
-                            }
+                            // } else {
+                            //     xJoResult = {
+                            //         status_code: '-99',
+                            //         status_msg: 'Data not found. Please supply valid identifier'
+                            //     };
+                            // }
                         } else {
                             xJoResult = xUpdateResult;
                         }
@@ -1095,121 +1160,67 @@ class BudgetPlanService {
 						status_msg: 'This document already confirmed before.'
 					};
 				} else {
-					// var xParamApprovalMatrixDocument = {
-					// 	document_id: xEncId,
-					// 	status: 1,
-					// 	application_id: config.applicationId,
-					// 	table_name: config.dbTables.rab
-					// };
-
-					// var xResultApprovalMatrixDocument = await _oAuthService.confirmApprovalMatrix(
-					// 	pParam.method,
-					// 	pParam.token,
-					// 	xParamApprovalMatrixDocument
-					// );
-
-					// if (xResultApprovalMatrixDocument != null) {
-						// if (xResultApprovalMatrixDocument.status_code == '00') {
-							// let xResultApprove = null;
-							// if (xResultApprovalMatrixDocument.status_document_approved == true) {
-								
-                    var xParamUpdatePR = {
-                        id: pParam.document_id,
-                        status: 2
+                    var xParamApprovalMatrixDocument = {
+                        document_id: xEncId,
+                        status: 1,
+                        application_id: config.applicationId,
+                        table_name: config.dbTables.rab,
+                        note: pParam.note,
                     };
-                    var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
 
-                    if (xUpdateResult.status_code == '00') {
-                        xJoResult = {
-                            status_code: '00',
-                            status_msg: 'RAB successfully approved'
-                        };
+                    var xResultApprovalMatrixDocument =
+                    await _oAuthService.confirmApprovalMatrix(
+                        pParam.method,
+                        pParam.token,
+                        xParamApprovalMatrixDocument
+                    );
+
+                    if (xResultApprovalMatrixDocument != null) {
+                        if (xResultApprovalMatrixDocument.status_code == "00") {
+                            if (
+                            xResultApprovalMatrixDocument.status_document_approved == true
+                            ) {
+
+                                var xParamUpdatePR = {
+                                    id: pParam.document_id,
+                                    status: 2
+                                };
+                                var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
+            
+                                if (xUpdateResult.status_code == '00') {
+                                    xJoResult = {
+                                        status_code: '00',
+                                        status_msg: 'RAB successfully approved'
+                                    };
+                                } else {
+                                    xJoResult = xUpdateResult;
+                                }
+                            } else {
+                                // Sort first
+                                xResultApprovalMatrixDocument.approvers =
+                                xResultApprovalMatrixDocument.approvers.sort((a, b) => {
+                                    if (a.sequence < b.sequence) {
+                                        return -1;
+                                    }
+                                });
+            
+                                xJoResult = {
+                                    status_code: "00",
+                                    status_msg:
+                                        "Document successfully approved. Document available for next approver",
+                                    result_approval_matrix: xResultApprovalMatrixDocument,
+                                };
+                            }
+                        } else {
+                            xJoResult = xResultApprovalMatrixDocument;
+                        }
                     } else {
-                        xJoResult = xUpdateResult;
+                        xJoResult = {
+                            status_code: "-99",
+                            status_msg:
+                            "There is problem on approval matrix processing. Please try again",
+                        };
                     }
-							// } else {
-							// 	// Sort first
-							// 	xResultApprovalMatrixDocument.approvers = xResultApprovalMatrixDocument.approvers.sort(
-							// 		(a, b) => {
-							// 			if (a.sequence < b.sequence) {
-							// 				return -1;
-							// 			}
-							// 		}
-							// 	);
-
-							// 	// Send to next approver...
-							// 	let xNextApprover = xResultApprovalMatrixDocument.approvers[0].approver_user;
-							// 	console.log(`>>> xNextApprover : ${JSON.stringify(xNextApprover)}`);
-							// 	if (xNextApprover != null) {
-							// 		for (var i in xNextApprover) {
-							// 			let xInAppNotificationResult = await _notificationService.inAppNotification({
-							// 				document_code: xRABDetail.budget_no,
-							// 				document_id: xEncId,
-							// 				document_status: xRABDetail.status,
-							// 				mode: 'request_approval_rab',
-							// 				method: pParam.method,
-							// 				token: pParam.token,
-							// 				employee_id: await _utilInstance.encrypt(
-							// 					xNextApprover[i].employee_id.toString(),
-							// 					config.cryptoKey.hashKey
-							// 				)
-							// 			});
-
-							// 			// Email Notification
-							// 			let xParamEmailNotification,
-							// 				xNotificationResult = {};
-
-							// 			if (xNextApprover[i].notification_via_email) {
-							// 				xParamEmailNotification = {
-							// 					mode: 'request_approval_fpb',
-							// 					id: xEncId,
-							// 					request_no: xRABDetail.budget_no,
-							// 					company_name: xRABDetail.company_name,
-							// 					department_name: xRABDetail.department_name,
-							// 					created_by: xRABDetail.employee_name,
-							// 					created_at:
-							// 						xRABDetail.createdAt != null
-							// 							? moment(xRABDetail.createdAt).format('DD MMM YYYY')
-							// 							: '',
-							// 					items: xRABDetail.purchase_request_detail,
-							// 					approver_user: {
-							// 						employee_name: xNextApprover[i].user_name,
-							// 						email: xNextApprover[i].email
-							// 					}
-							// 				};
-							// 				console.log(
-							// 					`>>> xParamEmailNotification: ${JSON.stringify(
-							// 						xParamEmailNotification
-							// 					)}`
-							// 				);
-							// 				xNotificationResult = await _notificationService.sendNotificationEmail_FPBNeedApproval(
-							// 					xParamEmailNotification,
-							// 					pParam.method,
-							// 					pParam.token
-							// 				);
-
-							// 				console.log(
-							// 					`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`
-							// 				);
-							// 			}
-							// 		}
-							// 	}
-
-							// 	xJoResult = {
-							// 		status_code: '00',
-							// 		status_msg: 'FPB successfully approved. Document available for next approver',
-							// 		result_approval_matrix: xResultApprovalMatrixDocument
-							// 	};
-							// }
-						// } else {
-						// 	xJoResult = xResultApprovalMatrixDocument;
-						// }
-					// } else {
-					// 	xJoResult = {
-					// 		status_code: '-99',
-					// 		status_msg: 'There is problem on approval matrix processing. Please try again'
-					// 	};
-					// }
 				}
 			} else {
 				xJoResult = {
@@ -1256,52 +1267,47 @@ class BudgetPlanService {
 						status_msg: 'Cannot reject, document already in process'
 					};
 				} else {
-					// var xParamApprovalMatrixDocument = {
-					// 	document_id: xEncId,
-					// 	status: -1,
-					// 	application_id: config.applicationId,
-					// 	table_name: config.dbTables.fpb
-					// };
-
-					// var xResultApprovalMatrixDocument = await _oAuthService.confirmApprovalMatrix(
-					// 	pParam.method,
-					// 	pParam.token,
-					// 	xParamApprovalMatrixDocument
-					// );
-
-					// await _utilInstance.writeLog(
-					// 	`${_xClassName}.rejectFPB`,
-					// 	`xResultApprovalMatrixDocument: ${xResultApprovalMatrixDocument}`,
-					// 	'debug'
-					// );
-
-					// if (xResultApprovalMatrixDocument != null) {
-					// 	if (xResultApprovalMatrixDocument.status_code == '00') {
-							// Update status FPB to be confirmed
-                    var xParamUpdatePR = {
-                        id: pParam.document_id,
-                        status: 6,
-                        reject_reason: pParam.reject_reason
+                    var xParamApprovalMatrixDocument = {
+                        document_id: xEncId,
+                        status: -1,
+                        application_id: config.applicationId,
+                        table_name: config.dbTables.rab,
+                        note: pParam.reject_reason,
                     };
-                    var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
+                    var xResultApprovalMatrixDocument =
+                    await _oAuthService.confirmApprovalMatrix(
+                        pParam.method,
+                        pParam.token,
+                        xParamApprovalMatrixDocument
+                    );
 
-                    if (xUpdateResult.status_code == '00') {
-                        xJoResult = {
-                            status_code: '00',
-                            status_msg: 'RAB successfully rejected'
-                        };
+                    if (xResultApprovalMatrixDocument != null) {
+                        if (xResultApprovalMatrixDocument.status_code == "00") {
+                            var xParamUpdatePR = {
+                                id: pParam.document_id,
+                                status: 6,
+                                // reject_reason: pParam.reject_reason
+                            };
+                            var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
+
+                            if (xUpdateResult.status_code == '00') {
+                                xJoResult = {
+                                    status_code: '00',
+                                    status_msg: 'RAB successfully rejected'
+                                };
+                            } else {
+                                xJoResult = xUpdateResult;
+                            }
+                        } else {
+                            xJoResult = xResultApprovalMatrixDocument;
+                        }
                     } else {
-                        xJoResult = xUpdateResult;
+                        xJoResult = {
+                        status_code: "-99",
+                        status_msg:
+                            "There is problem on approval matrix processing. Please try again",
+                        };
                     }
-					// 	} else {
-					// 		xJoResult = xResultApprovalMatrixDocument;
-					// 	}
-					// } else {
-					// 	xJoResult = {
-					// 		status_code: '-99',
-					// 		status_msg: 'There is problem on approval matrix processing. Please try again'
-					// 	};
-					// }
 				}
 			} else {
 				xJoResult = {

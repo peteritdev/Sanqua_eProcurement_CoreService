@@ -245,9 +245,6 @@ class BudgetPlanRepository {
 						break;
 					case 'submit':
 						xComment = 'submitted';
-						// pParam.submited_at = await _utilInstance.getCurrDateTime();
-						pParam.submited_by = pParam.user_id;
-						pParam.submited_by_name = pParam.user_name;
 						break;
 					case 'take':
 						xComment = 'take';

@@ -59,7 +59,7 @@ class PurchaseRequestRepository {
 			{
 				model: _modelBudgetPlan,
 				as: 'budget_plan',
-				attributes: [ 'id', 'name' ]
+				attributes: [ 'id', 'name', 'budget_no' ]
 			}
 		];
 
@@ -444,7 +444,7 @@ class PurchaseRequestRepository {
 
 				xSqlWhere = ` (( ${xSqlWhere} ) OR (${xSqlWhereOr} ${xSqlWhereCompanyOwnedDoc != ''
 					? xSqlWhereCompanyOwnedDoc
-					: ''} ${xSqlWhereProjectOwnedDoc} ${xSqlWhereCategoryOwnedDoc} ${xSqlWhereDepartmentOwnedDoc} ${xSqlWhereStatusOwnedDoc}))`;
+					: ''} ${xSqlWhereProjectOwnedDoc} ${xSqlWhereCategoryOwnedDoc} ${xSqlWhereDepartmentOwnedDoc} ${xSqlWhereStatusOwnedDoc} ${xSqlWhereRabOwnedDoc}))`;
 			}
 		}
 
@@ -961,7 +961,7 @@ class PurchaseRequestRepository {
 				var xSqlErrMsg = ""
 				// SELECT calc_rab_item_remain_qty
 				if (pParam.hasOwnProperty('budget_plan_id')) {
-					xSql = `SELECT calc_rab_item_remain_qty('{
+					xSql = `SELECT calc_rab_item_remain_qty_v2('{
 							"pAct": "${pAct}",
 							"budget_plan_id" : ${pParam.budget_plan_id},
 							"purchase_request_detail" : ${JSON.stringify(pParam.purchase_request_detail)}
@@ -972,12 +972,12 @@ class PurchaseRequestRepository {
 					});
 
 					if (xDtQuery.length > 0) {
-						if (xDtQuery[0].calc_rab_item_remain_qty.status_code == "00") {
+						if (xDtQuery[0].calc_rab_item_remain_qty_v2.status_code == "00") {
 							xFlag = true
 						} else {
-						//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty;
+						//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty_v2;
 							xFlag = false
-							xSqlErrMsg = xDtQuery[0].calc_rab_item_remain_qty.status_msg
+							xSqlErrMsg = xDtQuery[0].calc_rab_item_remain_qty_v2.status_msg
 						}
 					} else {
 						xFlag = false
@@ -1059,7 +1059,7 @@ class PurchaseRequestRepository {
 
 					xJoResult = {
 						status_code: '-99',
-						status_msg: 'Failed save to database ' + xSqlErrMsg
+						status_msg: 'Failed save to database <br/>' + xSqlErrMsg
 					};
 				}
 			} else if (

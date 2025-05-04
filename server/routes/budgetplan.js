@@ -136,4 +136,8 @@ module.exports = (app) => {
 	app.delete(rootAPIPath + 'delete_detail/:id', arrValidate, budgetPlanController.budgetPlanDetail_Delete);
 
 
+	arrValidate = [
+		check('request_id').not().isEmpty().withMessage('Parameter request_id cannot be empty')
+	];
+	app.get(rootAPIPath + 'detail_dropdown', arrValidate, budgetPlanController.budgetPlanDetail_Dropdown);
 };

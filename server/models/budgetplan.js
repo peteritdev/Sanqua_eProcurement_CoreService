@@ -27,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
 		total_plan_qty: DataTypes.DOUBLE,
 		status: DataTypes.INTEGER,
 		reject_reason: DataTypes.STRING,
+		approver_ids: DataTypes.JSONB,
 
 		submitedAt: {
 			type: DataTypes.DATE,
@@ -82,7 +83,7 @@ module.exports = (sequelize, DataTypes) => {
 			field: 'done_at'
 		},
 		done_by: DataTypes.INTEGER,
-		done_by_name: DataTypes.STRING,
+		done_by_name: DataTypes.STRING
 	});
 
 	BudgetPlan.associate = function(models) {

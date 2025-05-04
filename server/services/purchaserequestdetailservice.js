@@ -174,7 +174,8 @@ class PurchaseRequestDetailService {
 				) {
 					var xParamUpdate = {
 						id: xPurchaseRequestDetail.id,
-						qty: Math.round(sequelize.literal(`qty + ${pParam.qty}`) * 1000) / 1000,
+						qty: Math.round((Number(xPurchaseRequestDetail.qty) + Number(pParam.qty)) * 1000) / 1000,
+						// qty: Math.round(sequelize.literal(`qty + ${pParam.qty}`) * 1000) / 1000,
 						// qty: sequelize.literal(`qty + ${pParam.qty}`),
 						budget_price_total:
 							Math.round(
@@ -184,6 +185,7 @@ class PurchaseRequestDetailService {
 							) / 1000
 						// (xPurchaseRequestDetail.qty + pParam.qty) * xPurchaseRequestDetail.budget_price_per_unit
 					};
+					// console.log(`>>> xParamUpdate : ${JSON.stringify(xParamUpdate)}`);
 					pParam = null;
 					pParam = xParamUpdate;
 
@@ -227,6 +229,7 @@ class PurchaseRequestDetailService {
 
 				// Validate if product_id is null (free keyin for project), estimate_fulfillment
 				pParam.qty_left = pParam.qty
+				// console.log(`>>> pParam : ${JSON.stringify(pParam)}`, xAct);
 				var xAddResult = await _repoInstance.save(pParam, xAct);
 				xJoResult = xAddResult;
 
@@ -1032,7 +1035,8 @@ class PurchaseRequestDetailService {
 				let xParamUpdate = {
 					pr_no: pParam.pr_no,
 					is_po_created: pParam.is_po_created,
-					create_po_by_name: pParam.user_name
+					create_po_by_name: pParam.user_name,
+					po_budget: pParam.po_budget
 				};
 
 				// update column with given pr

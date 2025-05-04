@@ -48,7 +48,11 @@ module.exports = (sequelize, DataTypes) => {
 			field: 'updated_at'
 		},
 		updated_by: DataTypes.INTEGER,
-		updated_by_name: DataTypes.STRING
+		updated_by_name: DataTypes.STRING,
+		currency_id: DataTypes.INTEGER,
+		currency_symbol: DataTypes.STRING,
+		currency_code: DataTypes.STRING,
+		last_price: DataTypes.DOUBLE,
 	});
 
 	BudgetPlanDetail.associate = function(models) {

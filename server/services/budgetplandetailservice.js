@@ -508,6 +508,98 @@ class BudgetPlanDetailService {
 
 		return xJoResult;
 	}
+	
+	async dropdown(pParam) {
+		var xJoResult = {};
+		var xJoArrData = [];
+		var xDecId = null;
+		var xFlagProcess = false;
+
+		try {
+			if (pParam.hasOwnProperty('request_id')) {
+				if (pParam.request_id != '' && pParam.request_id.length > 15) {
+					xDecId = await _utilInstance.decrypt(pParam.request_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.request_id = xDecId.decrypted;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xDecId;
+					}
+				} else {
+					xFlagProcess = true;
+				}
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'You need to supply correct parameter'
+				};
+			}
+			
+			console.log(`>>> xFlagProcess: ${JSON.stringify(xFlagProcess)}`);
+			console.log(`>>> xJoResult: ${JSON.stringify(xJoResult)}`);
+			if (xFlagProcess) {
+				var xResultList = await _repoInstance.list(pParam);
+				if (xResultList) {
+					console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
+					if (xResultList.status_code == '00') {
+						var xRows = xResultList.data.rows;
+						if (xRows.length > 0) {
+							for (var i in xRows) {
+								xJoArrData.push({
+									// id: await _utilInstance.encrypt(xRows[i].id.toString(), config.cryptoKey.hashKey),
+									// request_id: xRows[i].request_id,
+									product: {
+										id: xRows[i].product_id,
+										code: xRows[i].product_code,
+										name: xRows[i].product_name,
+										uom_id: xRows[i].uom_id,
+										uom_name: xRows[i].uom_name,
+										last_price: xRows[i].last_price,
+										currency_id: xRows[i].currency_id,
+										currency_code: xRows[i].currency_code,
+										currency_symbol: xRows[i].currency_symbol
+									},
+									vendor: {
+										id: xRows[i].vendor_id,
+										code: xRows[i].vendor_code,
+										name: xRows[i].vendor_name
+									},
+									qty: xRows[i].qty,
+									estimate_date_use: moment(xRows[i].estimate_date_use).format('DD MMM YYYY HH:mm:ss'),
+									budget_price_per_unit: xRows[i].budget_price_per_unit
+								});
+							}
+
+							xJoResult = {
+								status_code: '00',
+								status_msg: 'OK',
+								total_record: xResultList.total_record,
+								data: xJoArrData
+							};
+						} else {
+							xJoResult = {
+								status_code: '-99',
+								status_msg: 'Data not found'
+							};
+						}
+					} else {
+						xJoResult = xResultList;
+					}
+				} else {
+					xJoResult = xResultList;
+				}
+			}
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.dropdown`, `Exception error: ${e.message}`, 'error');
+
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.dropdown: Exception error: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
 }
 
 module.exports = BudgetPlanDetailService;
