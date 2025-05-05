@@ -139,9 +139,8 @@ class PurchaseRequestService {
 				}
 
 				if (pParam.hasOwnProperty('budget_plan_id')) {
-					if (pParam.budget_plan_id.length > 15) {
+					if (pParam.budget_plan_id != null && pParam.budget_plan_id.length > 15) {
 						bDect = await _utilInstance.decrypt(pParam.budget_plan_id, config.cryptoKey.hashKey);
-						console.log(`>>> bDect: ${JSON.stringify(bDect)} `);
 						if (bDect.status_code == '00') {
 							pParam.budget_plan_id = bDect.decrypted
 						}
