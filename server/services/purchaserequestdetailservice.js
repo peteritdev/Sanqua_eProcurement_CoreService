@@ -898,7 +898,8 @@ class PurchaseRequestDetailService {
 										cancel_reason: updateAt,
 										status: 5,
 										user_id: pParam.user_id,
-										user_name: pParam.user_name
+										user_name: pParam.user_name,
+										is_po_created: false
 									};
 									let xCancelPR = await _repoInstance.save(xParamUpdate, 'update_by_pr_no');
 
