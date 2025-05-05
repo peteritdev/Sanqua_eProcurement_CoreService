@@ -817,7 +817,9 @@ class PurchaseRequestService {
 							
 							currency_id: xDetail[index].currency_id,
 							currency_code: xDetail[index].currency_code,
-							currency_symbol: xDetail[index].currency_symbol
+							currency_symbol: xDetail[index].currency_symbol,
+							qty_paid: xDetail[index].qty_paid,
+							qty_done: xDetail[index].qty_done
 						});
 					}
 					// Get Approval Matrix
