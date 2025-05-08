@@ -320,17 +320,25 @@ class VendorRepository{
                 delete pParam.user_id;
                 delete pParam.user_name;
 
-                saved = await _modelVendor.create(pParam,{transaction});
-    
-                await transaction.commit();
-    
-                joResult = {
-                    status_code: "00",
-                    status_msg: "Data has been successfully saved",
-                    created_id: (await _utilInstance.encrypt(saved.id)),
-                    clear_id: saved.id,
+                saved = await _modelVendor.create(pParam, { transaction: transaction } );
+
+                if (saved.id) {
+                    await transaction.commit();
+        
+                    joResult = {
+                        status_code: "00",
+                        status_msg: "Data has been successfully saved",
+                        created_id: (await _utilInstance.encrypt(saved.id, config.cryptoKey.hashKey)),
+                        clear_id: saved.id,
+                    }
+                } else {
+                    if( transaction ) await transaction.rollback();
+                    joResult = {
+                        status_code: "-99",
+                        status_msg: "Failed save or update data",
+                    }
                 }
-            }else if( xAct == "update" ){
+            } else if ( xAct == "update" ) {
 
                 xId = pParam.id;
                 delete pParam.id;
@@ -339,7 +347,7 @@ class VendorRepository{
                     delete pParam.logo;
                 }
     
-                saved = await _modelVendor.update(pParam, { where: { id: xId } }, {transaction});
+                saved = await _modelVendor.update(pParam, { where: { id: xId } }, { transaction: transaction });
 
                 await transaction.commit();
 
@@ -348,7 +356,7 @@ class VendorRepository{
                     status_msg: "Data has been successfully updated",
                 }
 
-            }else if( pAct == "update_by_code" ){
+            } else if ( pAct == "update_by_code" ) {
                 
                 pParam.updatedAt = await _utilInstance.getCurrDateTime();
                 var xCode = pParam.code;
@@ -356,9 +364,10 @@ class VendorRepository{
                 var xWhere = {
                     where : {
                         code: xCode,
-                    }
+                    },
+                    transaction: transaction
                 };
-                saved = await _modelVendor.update( pParam, xWhere, {transaction} );
+                saved = await _modelVendor.update( pParam, xWhere);
 
                 await transaction.commit();
 
@@ -369,18 +378,16 @@ class VendorRepository{
 
             }
 
-            return joResult;
-        }catch(e){
+        } catch (e) {
             if( transaction ) await transaction.rollback();
             joResult = {
                 status_code: "-99",
                 status_msg: "Failed save or update data",
                 err_msg: e
             }
-
-            return joResult;
         } 
 
+        return joResult;
     }    
 
     async blockVendor( pParam ){
