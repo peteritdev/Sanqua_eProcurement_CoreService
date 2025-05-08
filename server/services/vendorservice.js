@@ -177,9 +177,6 @@ class VendorService {
         var xDec = null;
         var xVendorCode = "";
 
-        // console.log(">>> Service : ");
-        // console.log(JSON.stringify(param));
-
         if( ( param.act == "add" && checkDuplicateResult == null ) || param.act == "update" ){
 
             if( param.act == "update" ){
@@ -243,11 +240,7 @@ class VendorService {
 
                     param = await _secureInstance.encryptCriticalField(param);
                     joResult = await _vendorRepoInstance.save( param );
-                    
                 // }
-
-                
-
             }
 
         }else{
@@ -257,7 +250,7 @@ class VendorService {
             }
         }
 
-        return (joResult);
+        return joResult;
     }
 
     async blockVendor( pParam ){

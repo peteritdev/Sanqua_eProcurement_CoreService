@@ -297,19 +297,16 @@ class VendorRepository{
 
     async save( pParam ){
 
-        let transaction;
+        let xTransaction;
         var joResult = {};
         var xAct = pParam.act;
         var xId = 0;
 
-        console.log(JSON.stringify(pParam));
-
         delete pParam.act;
 
         try{
-
             var saved = null;
-            transaction = await sequelize.transaction(); 
+            xTransaction = await sequelize.transaction(); 
 
             if( xAct == "add" ){
 
@@ -320,17 +317,24 @@ class VendorRepository{
                 delete pParam.user_id;
                 delete pParam.user_name;
 
-                saved = await _modelVendor.create(pParam,{transaction});
-    
-                await transaction.commit();
-    
-                joResult = {
-                    status_code: "00",
-                    status_msg: "Data has been successfully saved",
-                    created_id: (await _utilInstance.encrypt(saved.id)),
-                    clear_id: saved.id,
-                }
-            }else if( xAct == "update" ){
+                saved = await _modelVendor.create(pParam, { transaction: xTransaction });
+				if (saved.id != null) {
+                    await xTransaction.commit();
+                    joResult = {
+                        status_code: "00",
+                        status_msg: "Data has been successfully saved",
+                        created_id: (await _utilInstance.encrypt(saved.id, config.cryptoKey.hashKey)),
+                        clear_id: saved.id,
+                    }
+                } else {
+					await xTransaction.rollback();
+
+					joResult = {
+						status_code: '-99',
+						status_msg: 'Failed save to database'
+					};
+				}
+            } else if ( xAct == "update" ){
 
                 xId = pParam.id;
                 delete pParam.id;
@@ -339,28 +343,28 @@ class VendorRepository{
                     delete pParam.logo;
                 }
     
-                saved = await _modelVendor.update(pParam, { where: { id: xId } }, {transaction});
+                saved = await _modelVendor.update(pParam, { where: { id: xId } }, {transaction: xTransaction});
 
-                await transaction.commit();
+                await xTransaction.commit();
 
                 joResult = {
                     status_code: "00",
                     status_msg: "Data has been successfully updated",
                 }
 
-            }else if( pAct == "update_by_code" ){
+            } else if ( pAct == "update_by_code" ){
                 
                 pParam.updatedAt = await _utilInstance.getCurrDateTime();
                 var xCode = pParam.code;
                 delete pParam.code;
-                var xWhere = {
-                    where : {
-                        code: xCode,
-                    }
-                };
-                saved = await _modelVendor.update( pParam, xWhere, {transaction} );
+                // var xWhere = {
+                //     where : {
+                //         code: xCode,
+                //     }
+                // };
+                saved = await _modelVendor.update( pParam, { where: { code: xCode }, transaction: xTransaction });
 
-                await transaction.commit();
+                await xTransaction.commit();
 
                 joResult = {
                     status_code: "00",
@@ -368,19 +372,16 @@ class VendorRepository{
                 }
 
             }
-
-            return joResult;
-        }catch(e){
-            if( transaction ) await transaction.rollback();
+        } catch (e){
+            if( xTransaction ) await xTransaction.rollback();
             joResult = {
                 status_code: "-99",
                 status_msg: "Failed save or update data",
                 err_msg: e
             }
-
-            return joResult;
         } 
 
+        return joResult;
     }    
 
     async blockVendor( pParam ){

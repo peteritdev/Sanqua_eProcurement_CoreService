@@ -68,8 +68,7 @@ module.exports = ( sequelize, DataTypes ) => {
         },
         updated_by: DataTypes.INTEGER,
         updated_by_name: DataTypes.STRING,
-
-    } );
+    });
 
     Vendor.associate = function(models){
         Vendor.belongsTo( models.ms_businessentities, {
