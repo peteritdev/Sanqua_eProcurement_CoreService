@@ -39,34 +39,34 @@ const _xlsxToJson = require('xlsx-to-json-lc');
 
 // Setup multer storage
 var storage = multer.diskStorage({
-	destination: function(req, file, cb) {
-		cb(null, './uploads/');
-	},
-	filename: function(req, file, cb) {
-		var dateTimeStamp = Date.now();
-		cb(
-			null,
-			file.fieldname +
-				'-' +
-				dateTimeStamp +
-				'.' +
-				file.originalname.split('.')[file.originalname.split('.').length - 1]
-		);
-	}
+    destination: function(req, file, cb) {
+        cb(null, './uploads/');
+    },
+    filename: function(req, file, cb) {
+        var dateTimeStamp = Date.now();
+        cb(
+            null,
+            file.fieldname +
+                '-' +
+                dateTimeStamp +
+                '.' +
+                file.originalname.split('.')[file.originalname.split('.').length - 1]
+        );
+    }
 });
 
 var upload = multer({
-	storage: storage,
-	fileFilter: function(req, file, callback) {
-		if ([ 'xls', 'xlsx' ].indexOf(file.originalname.split('.')[file.originalname.split('.').length - 1]) === -1) {
-			return callback(new Error('Wrong extension type'));
-		}
-		callback(null, true);
-	}
+    storage: storage,
+    fileFilter: function(req, file, callback) {
+        if ([ 'xls', 'xlsx' ].indexOf(file.originalname.split('.')[file.originalname.split('.').length - 1]) === -1) {
+            return callback(new Error('Wrong extension type'));
+        }
+        callback(null, true);
+    }
 }).single('file');
 
 var upload = multer({
-	storage: storage
+    storage: storage
 }).single('file');
 
 class VendorService {
