@@ -47,15 +47,15 @@ class VendorRepository{
         return xData;
     }
 
-	async list(pParam) {
-		var xOrder = [ 'name', 'ASC' ];
-		var xWhere = [];
-		var xWhereOr = [];
-		var xWhereAnd = [];
-		var xInclude = [];
-		var xJoResult = {};
+    async list(pParam) {
+        var xOrder = [ 'name', 'ASC' ];
+        var xWhere = [];
+        var xWhereOr = [];
+        var xWhereAnd = [];
+        var xInclude = [];
+        var xJoResult = {};
 
-		try {
+        try {
             xInclude = [
                 {
                     model: _modelBusinessEntity,
@@ -80,85 +80,85 @@ class VendorRepository{
                 }
             ];
 
-			if (pParam.hasOwnProperty('status')) {
-				if (pParam.status != '') {
-					xWhereAnd.push({
-						status: pParam.status
-					});
-				}
-			}
+            if (pParam.hasOwnProperty('status')) {
+                if (pParam.status != '') {
+                    xWhereAnd.push({
+                        status: pParam.status
+                    });
+                }
+            }
 
-			if (pParam.hasOwnProperty('keyword')) {
-				if (pParam.keyword != '') {
-					xWhereOr.push(
-						{
-							name: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
-							}
-						},
-						{
-							code: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
-							}
-						},
-						{
-							email: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
-							}
-						}
-					);
-				}
-			}
+            if (pParam.hasOwnProperty('keyword')) {
+                if (pParam.keyword != '') {
+                    xWhereOr.push(
+                        {
+                            name: {
+                                [Op.iLike]: '%' + pParam.keyword + '%'
+                            }
+                        },
+                        {
+                            code: {
+                                [Op.iLike]: '%' + pParam.keyword + '%'
+                            }
+                        },
+                        {
+                            email: {
+                                [Op.iLike]: '%' + pParam.keyword + '%'
+                            }
+                        }
+                    );
+                }
+            }
 
-			if (xWhereAnd.length > 0) {
-				xWhere.push({
-					[Op.and]: xWhereAnd
-				});
-			}
+            if (xWhereAnd.length > 0) {
+                xWhere.push({
+                    [Op.and]: xWhereAnd
+                });
+            }
 
-			if (pParam.hasOwnProperty('order_by')) {
-				if (pParam.order_by != '') {
-					xOrder = [ pParam.order_by, pParam.order_type == 'desc' ? 'DESC' : 'ASC' ];
-				}
-			}
+            if (pParam.hasOwnProperty('order_by')) {
+                if (pParam.order_by != '') {
+                    xOrder = [ pParam.order_by, pParam.order_type == 'desc' ? 'DESC' : 'ASC' ];
+                }
+            }
 
-			if (xWhereOr.length > 0) {
-				xWhere.push({
-					[Op.or]: xWhereOr
-				});
-			}
+            if (xWhereOr.length > 0) {
+                xWhere.push({
+                    [Op.or]: xWhereOr
+                });
+            }
 
-			var xParamQuery = {
-				where: xWhere,
-				order: [ xOrder ],
-				include: xInclude,
-				subQuery: false
-			};
+            var xParamQuery = {
+                where: xWhere,
+                order: [ xOrder ],
+                include: xInclude,
+                subQuery: false
+            };
 
-			// var xCountDataWithoutLimit = await _modelDb.count(xParamQuery);
+            // var xCountDataWithoutLimit = await _modelDb.count(xParamQuery);
 
-			if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
-				if (pParam.offset != '' && pParam.limit != '' && pParam.limit != 'all') {
-					xParamQuery.offset = pParam.offset;
-					xParamQuery.limit = pParam.limit;
-				}
-			}
+            if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
+                if (pParam.offset != '' && pParam.limit != '' && pParam.limit != 'all') {
+                    xParamQuery.offset = pParam.offset;
+                    xParamQuery.limit = pParam.limit;
+                }
+            }
 
-			var xData = await _modelVendor.findAndCountAll(xParamQuery);
+            var xData = await _modelVendor.findAndCountAll(xParamQuery);
 
-			// console.log(`>>> xData: ${JSON.stringify(xData)}`);
+            // console.log(`>>> xData: ${JSON.stringify(xData)}`);
 
-			xJoResult = xData;
-		} catch (e) {
-			_utilInstance.writeLog(`vendor.list`, `Exception error: ${e.message}`, 'error');
-			xJoResult = {
-				status_code: '-99',
-				status_msg: `vendor.list: Exception error: ${e.message}`
-			};
-		}
+            xJoResult = xData;
+        } catch (e) {
+            _utilInstance.writeLog(`vendor.list`, `Exception error: ${e.message}`, 'error');
+            xJoResult = {
+                status_code: '-99',
+                status_msg: `vendor.list: Exception error: ${e.message}`
+            };
+        }
         console.log(`xJoResult>>>>, ${JSON.stringify(xJoResult)}`);
 
-		return xJoResult;
+        return xJoResult;
     }
     
     // async list2( pParam ){
@@ -318,7 +318,7 @@ class VendorRepository{
                 delete pParam.user_name;
 
                 saved = await _modelVendor.create(pParam, { transaction: xTransaction });
-				if (saved.id != null) {
+                if (saved.id != null) {
                     await xTransaction.commit();
                     joResult = {
                         status_code: "00",
@@ -327,13 +327,13 @@ class VendorRepository{
                         clear_id: saved.id,
                     }
                 } else {
-					await xTransaction.rollback();
+                    await xTransaction.rollback();
 
-					joResult = {
-						status_code: '-99',
-						status_msg: 'Failed save to database'
-					};
-				}
+                    joResult = {
+                        status_code: '-99',
+                        status_msg: 'Failed save to database'
+                    };
+                }
             } else if ( xAct == "update" ){
 
                 xId = pParam.id;
