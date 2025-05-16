@@ -87,6 +87,18 @@ class VendorRepository{
                     });
                 }
             }
+            
+            if (!pParam.hasOwnProperty('is_delete')) {
+                xWhereAnd.push({
+                    is_delete: 0
+                });
+            } else {
+                if (pParam.is_delete != '') {
+                    xWhereAnd.push({
+                        is_delete: pParam.is_delete
+                    });
+                }
+            }
 
             if (pParam.hasOwnProperty('keyword')) {
                 if (pParam.keyword != '') {
