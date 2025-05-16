@@ -7,6 +7,7 @@ const Op = sequelize.Op;
 
 //Model
 const _modelVendor = require('../models').ms_vendors;
+const _modelProduct = require('../models').ms_products;
 const _modelBusinessEntity = require('../models').ms_businessentities;
 const _modelClassification = require('../models').ms_classifications;
 const _modelSubClassification = require('../models').ms_subclassifications;
@@ -15,8 +16,7 @@ const _modelCity = require('../models').ms_cities;
 const _modelVendorDocument = require('../models').ms_vendordocuments;
 const _modelCurrency = require('../models').ms_currencies;
 
-
-const Utility = require('../utils/globalutility.js');
+const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
 class VendorRepository{
@@ -47,15 +47,15 @@ class VendorRepository{
         return xData;
     }
 
-	async list(pParam) {
-		var xOrder = [ 'name', 'ASC' ];
-		var xWhere = [];
-		var xWhereOr = [];
-		var xWhereAnd = [];
-		var xInclude = [];
-		var xJoResult = {};
+    async list(pParam) {
+        var xOrder = [ 'name', 'ASC' ];
+        var xWhere = [];
+        var xWhereOr = [];
+        var xWhereAnd = [];
+        var xInclude = [];
+        var xJoResult = {};
 
-		try {
+        try {
             xInclude = [
                 {
                     model: _modelBusinessEntity,
@@ -80,85 +80,85 @@ class VendorRepository{
                 }
             ];
 
-			if (pParam.hasOwnProperty('status')) {
-				if (pParam.status != '') {
-					xWhereAnd.push({
-						status: pParam.status
-					});
-				}
-			}
+            if (pParam.hasOwnProperty('status')) {
+                if (pParam.status != '') {
+                    xWhereAnd.push({
+                        status: pParam.status
+                    });
+                }
+            }
 
-			if (pParam.hasOwnProperty('keyword')) {
-				if (pParam.keyword != '') {
-					xWhereOr.push(
-						{
-							name: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
-							}
-						},
-						{
-							code: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
-							}
-						},
-						{
-							email: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
-							}
-						}
-					);
-				}
-			}
+            if (pParam.hasOwnProperty('keyword')) {
+                if (pParam.keyword != '') {
+                    xWhereOr.push(
+                        {
+                            name: {
+                                [Op.iLike]: '%' + pParam.keyword + '%'
+                            }
+                        },
+                        {
+                            code: {
+                                [Op.iLike]: '%' + pParam.keyword + '%'
+                            }
+                        },
+                        {
+                            email: {
+                                [Op.iLike]: '%' + pParam.keyword + '%'
+                            }
+                        }
+                    );
+                }
+            }
 
-			if (xWhereAnd.length > 0) {
-				xWhere.push({
-					[Op.and]: xWhereAnd
-				});
-			}
+            if (xWhereAnd.length > 0) {
+                xWhere.push({
+                    [Op.and]: xWhereAnd
+                });
+            }
 
-			if (pParam.hasOwnProperty('order_by')) {
-				if (pParam.order_by != '') {
-					xOrder = [ pParam.order_by, pParam.order_type == 'desc' ? 'DESC' : 'ASC' ];
-				}
-			}
+            if (pParam.hasOwnProperty('order_by')) {
+                if (pParam.order_by != '') {
+                    xOrder = [ pParam.order_by, pParam.order_type == 'desc' ? 'DESC' : 'ASC' ];
+                }
+            }
 
-			if (xWhereOr.length > 0) {
-				xWhere.push({
-					[Op.or]: xWhereOr
-				});
-			}
+            if (xWhereOr.length > 0) {
+                xWhere.push({
+                    [Op.or]: xWhereOr
+                });
+            }
 
-			var xParamQuery = {
-				where: xWhere,
-				order: [ xOrder ],
-				include: xInclude,
-				subQuery: false
-			};
+            var xParamQuery = {
+                where: xWhere,
+                order: [ xOrder ],
+                include: xInclude,
+                subQuery: false
+            };
 
-			// var xCountDataWithoutLimit = await _modelDb.count(xParamQuery);
+            // var xCountDataWithoutLimit = await _modelDb.count(xParamQuery);
 
-			if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
-				if (pParam.offset != '' && pParam.limit != '' && pParam.limit != 'all') {
-					xParamQuery.offset = pParam.offset;
-					xParamQuery.limit = pParam.limit;
-				}
-			}
+            if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
+                if (pParam.offset != '' && pParam.limit != '' && pParam.limit != 'all') {
+                    xParamQuery.offset = pParam.offset;
+                    xParamQuery.limit = pParam.limit;
+                }
+            }
 
-			var xData = await _modelVendor.findAndCountAll(xParamQuery);
+            var xData = await _modelVendor.findAndCountAll(xParamQuery);
 
-			// console.log(`>>> xData: ${JSON.stringify(xData)}`);
+            // console.log(`>>> xData: ${JSON.stringify(xData)}`);
 
-			xJoResult = xData;
-		} catch (e) {
-			_utilInstance.writeLog(`vendor.list`, `Exception error: ${e.message}`, 'error');
-			xJoResult = {
-				status_code: '-99',
-				status_msg: `vendor.list: Exception error: ${e.message}`
-			};
-		}
+            xJoResult = xData;
+        } catch (e) {
+            _utilInstance.writeLog(`vendor.list`, `Exception error: ${e.message}`, 'error');
+            xJoResult = {
+                status_code: '-99',
+                status_msg: `vendor.list: Exception error: ${e.message}`
+            };
+        }
         console.log(`xJoResult>>>>, ${JSON.stringify(xJoResult)}`);
 
-		return xJoResult;
+        return xJoResult;
     }
     
     // async list2( pParam ){
@@ -297,19 +297,16 @@ class VendorRepository{
 
     async save( pParam ){
 
-        let transaction;
+        let xTransaction;
         var joResult = {};
         var xAct = pParam.act;
         var xId = 0;
 
-        console.log(JSON.stringify(pParam));
-
         delete pParam.act;
 
         try{
-
             var saved = null;
-            transaction = await sequelize.transaction(); 
+            xTransaction = await sequelize.transaction(); 
 
             if( xAct == "add" ){
 
@@ -320,17 +317,24 @@ class VendorRepository{
                 delete pParam.user_id;
                 delete pParam.user_name;
 
-                saved = await _modelVendor.create(pParam,{transaction});
-    
-                await transaction.commit();
-    
-                joResult = {
-                    status_code: "00",
-                    status_msg: "Data has been successfully saved",
-                    created_id: (await _utilInstance.encrypt(saved.id)),
-                    clear_id: saved.id,
+                saved = await _modelVendor.create(pParam, { transaction: xTransaction });
+                if (saved.id != null) {
+                    await xTransaction.commit();
+                    joResult = {
+                        status_code: "00",
+                        status_msg: "Data has been successfully saved",
+                        created_id: (await _utilInstance.encrypt(saved.id, config.cryptoKey.hashKey)),
+                        clear_id: saved.id,
+                    }
+                } else {
+                    await xTransaction.rollback();
+
+                    joResult = {
+                        status_code: '-99',
+                        status_msg: 'Failed save to database'
+                    };
                 }
-            }else if( xAct == "update" ){
+            } else if ( xAct == "update" ){
 
                 xId = pParam.id;
                 delete pParam.id;
@@ -339,28 +343,28 @@ class VendorRepository{
                     delete pParam.logo;
                 }
     
-                saved = await _modelVendor.update(pParam, { where: { id: xId } }, {transaction});
+                saved = await _modelVendor.update(pParam, { where: { id: xId } }, {transaction: xTransaction});
 
-                await transaction.commit();
+                await xTransaction.commit();
 
                 joResult = {
                     status_code: "00",
                     status_msg: "Data has been successfully updated",
                 }
 
-            }else if( pAct == "update_by_code" ){
+            } else if ( pAct == "update_by_code" ) {
                 
                 pParam.updatedAt = await _utilInstance.getCurrDateTime();
                 var xCode = pParam.code;
                 delete pParam.code;
-                var xWhere = {
-                    where : {
-                        code: xCode,
-                    }
-                };
-                saved = await _modelVendor.update( pParam, xWhere, {transaction} );
+                // var xWhere = {
+                //     where : {
+                //         code: xCode,
+                //     }
+                // };
+                saved = await _modelVendor.update( pParam, { where: { code: xCode }, transaction: xTransaction });
 
-                await transaction.commit();
+                await xTransaction.commit();
 
                 joResult = {
                     status_code: "00",
@@ -368,19 +372,16 @@ class VendorRepository{
                 }
 
             }
-
-            return joResult;
-        }catch(e){
-            if( transaction ) await transaction.rollback();
+        } catch (e){
+            if( xTransaction ) await xTransaction.rollback();
             joResult = {
                 status_code: "-99",
                 status_msg: "Failed save or update data",
                 err_msg: e
             }
-
-            return joResult;
         } 
 
+        return joResult;
     }    
 
     async blockVendor( pParam ){
@@ -615,4 +616,3 @@ class VendorRepository{
 }
 
 module.exports = VendorRepository;
-
