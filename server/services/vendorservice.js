@@ -172,7 +172,9 @@ class VendorService {
 
     async save(param){
         var joResult;
+        // check duplicate not working because email in db already encrypted
         var checkDuplicateResult = await _vendorRepoInstance.isDataExists(param.name, param.email);
+        // console.log(`>>> checkDuplicateResult: ${JSON.stringify(checkDuplicateResult)}`, param.name, param.email);
         var flagProcess = true;
         var xDec = null;
         var xVendorCode = "";
@@ -238,7 +240,7 @@ class VendorService {
                         }
                     }
 
-                    param = await _secureInstance.encryptCriticalField(param);
+                    // param = await _secureInstance.encryptCriticalField(param);
                     joResult = await _vendorRepoInstance.save( param );
                 // }
             }
