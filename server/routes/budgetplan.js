@@ -140,4 +140,15 @@ module.exports = (app) => {
 		check('request_id').not().isEmpty().withMessage('Parameter request_id cannot be empty')
 	];
 	app.get(rootAPIPath + 'detail_dropdown', arrValidate, budgetPlanController.budgetPlanDetail_Dropdown);
+	
+	arrValidate = [];
+	arrValidate = [
+		check('id').not().isEmpty().withMessage('Parameter id cannot be empty'),
+		check('file', 'Parameter photo must be array and cannot be empty').not().isEmpty().isArray()
+	];
+	app.post(
+		rootAPIPath + 'update_file_upload',
+		arrValidate,
+		budgetPlanController.budgetPlan_UpdateFileUpload
+	);
 };

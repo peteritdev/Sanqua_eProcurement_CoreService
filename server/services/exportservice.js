@@ -396,7 +396,7 @@ class ExportService {
 								var xDirectoryPath = path.resolve(xPathFile);
 								pRes.download(xDirectoryPath, xFileName, (err) => {
 									if (err) {
-										res.status(500).send({
+										pRes.status(500).send({
 											message: `Could not download the file. ${err}`
 										});
 									}

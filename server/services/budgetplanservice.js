@@ -435,6 +435,16 @@ class BudgetPlanService {
 				var xJoArrBudgetDetailData = [];
 				var xDetail = xResult.budget_plan_detail;
 
+                let xFileArr = [];
+                for (var j in xResult.file) {
+                    xFileArr.push({
+                        subject: xResult.file[j].subject,
+                        file:
+                            xResult.file[j].file != null
+                                ? `${config.imagePathESanQua}/eprocurement/rab/${xResult.file[j].file}`
+                                : null
+                    });
+                }
 				for (var index in xDetail) {
 
 					xJoArrBudgetDetailData.push({
@@ -569,6 +579,7 @@ class BudgetPlanService {
 
 					done_at: xResult.doneAt != null ? moment(xResult.doneAt).format('DD MMM YYYY HH:mm:ss') : null,
                     done_by_name: xResult.done_by_name,
+                    file: xFileArr
 				};
 
 				xJoResult = {
