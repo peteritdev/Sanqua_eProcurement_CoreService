@@ -114,7 +114,7 @@ class BudgetPlanRepository {
 			}
 
 			var xData = await _modelDb.findAndCountAll(xParamQuery);
-			console.log('FIND AND COUNT ALL >>>>>', xData);
+			// console.log('FIND AND COUNT ALL >>>>>', xData);
 			xJoResult = {
 				status_code: '00',
 				status_msg: 'OK',

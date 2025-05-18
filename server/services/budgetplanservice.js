@@ -482,7 +482,8 @@ class BudgetPlanService {
 						estimate_date_use:
 							xDetail[index].estimate_date_use != null
 								? moment(xDetail[index].estimate_date_use).format('DD MMM YYYY')
-								: ''
+								: '',
+						section_title: xDetail[index].section_title,
 					});
 				}
 				// Get Approval Matrix
@@ -579,7 +580,8 @@ class BudgetPlanService {
 
 					done_at: xResult.doneAt != null ? moment(xResult.doneAt).format('DD MMM YYYY HH:mm:ss') : null,
                     done_by_name: xResult.done_by_name,
-                    file: xFileArr
+                    file: xFileArr,
+                    note: xResult.note,
 				};
 
 				xJoResult = {

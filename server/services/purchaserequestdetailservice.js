@@ -503,7 +503,7 @@ class PurchaseRequestDetailService {
 						settodraft_by_name: pParam.logged_user_name,
 						settodraft_reason: pParam.settodraft_reason
 					};
-					var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
+					var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update_status');
 					if (xUpdateResult.status_code == '00') {
 						xJoResult = {
 							status_code: '00',
@@ -696,7 +696,7 @@ class PurchaseRequestDetailService {
 														await _repoInstance.save(
 															xParamUpdate,
 															// 'update_by_product_code_and_request_id'
-															'update'
+															'update_status'
 														);
 													}
 
@@ -1160,7 +1160,7 @@ class PurchaseRequestDetailService {
 				Object.assign(xParamUpdate, xActObject)
 
 				// update column with given pry
-				let xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
+				let xUpdateResult = await _repoInstance.save(xParamUpdate, 'update_status');
 
 				if (xUpdateResult.status_code === '00') {
 					xJoResult = {
@@ -1443,7 +1443,7 @@ class PurchaseRequestDetailService {
 						status: 5,
 						cancel_reason: updateAt
 					};
-					var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
+					var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update_status');
 					if (xUpdateResult.status_code == '00') {
 						xJoResult = {
 							status_code: '00',

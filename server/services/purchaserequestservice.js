@@ -46,7 +46,12 @@ const ProjectService = require('../services/projectservice.js');
 const purchaserequestdetail = require('../models/purchaserequestdetail.js');
 const _projectServiceInstance = new ProjectService();
 
+const BudgetPlanDetailService = require('../services/budgetplandetailservice.js');
+const _budgetPlanDetailService = new BudgetPlanDetailService();
+
 const _xClassName = 'PurchaseRequestService';
+const _PrConfStat = config.statusDescription.purchaseRequest
+const _PrdConfStat = config.statusDescription.purchaseRequestDetail
 
 class PurchaseRequestService {
 	constructor() {}
@@ -1257,13 +1262,93 @@ class PurchaseRequestService {
 			} else {
 				xJoResult = xDecId;
 			}
+		} else {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: 'Document ID and User ID must be supplied'
+			};
 		}
 
 		if (xFlagProcess) {
+			// check is fpb status already cancelled
+			let xData = await _repoInstance.getById(pParam);
+			console.log(`>>> xData: ${JSON.stringify(xData)}`);
 			pParam.set_to_draft_at = await _utilInstance.getCurrDateTime();
-			pParam.status = 0;
+			pParam.status = _PrConfStat.indexOf('Draft');
+			if (xData != null) {
+				if (xData.status == _PrConfStat.indexOf('Cancel') || xData.status == -1) {
+					// check fpb has RAB
+					if (xData.budget_plan != null) {
+						let xCheckRAB = await _rabRepoInstance.getById({id: xData.budget_plan.id});
+						if (xCheckRAB != null) {
+							// check rab status is in progress before update rab item qty
+							if (xCheckRAB.status == 3) {
+								// check rab item qty_remaining not less than fpb qty
+								// make sure rab item qty_remaining > fpb qty before activate fpb again
+								for (const fpbItem of xData.purchase_request_detail) {
+									// Find matching RAB item by product_code and product_name
+									const rabItem = xCheckRAB.budget_plan_detail.find(
+										rab =>
+											rab.product_id === fpbItem.product_id &&
+											rab.product_code === fpbItem.product_code &&
+											rab.product_name === fpbItem.product_name
+									);
+									
+									if (rabItem) {
+										if (rabItem.qty_remain < fpbItem.qty) {
+											xFlagProcess = false;
+											xUpdateResult = {
+												status_code: '-99',
+												status_msg: `(${rabItem.product_code})${rabItem.product_name} has not enough RAB remaining qty. Please check RAB qty.`
+											};
+											break; // Stop checking if any item is not enough
+										}
+									} else {
+										// // If no matching RAB item found, treat as not enough
+										// xFlagProcess = false;
+										// xUpdateResult = {
+										// 	status_code: '-99',
+										// 	status_msg: 'There are some items in FPB that have not enough RAB remaining qty. Please check RAB qty.'
+										// };
+										// break;
+									}
+								}
 
-			var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
+								if (xFlagProcess) {
+								// update rab item qty & update fpb to draft
+									var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
+									
+									if (xUpdateResult.status_code == '00') {
+										let xCutRabItemQty = await _budgetPlanDetailService.updateItemQtyLeft(xData, 'decrease', xCheckRAB)
+									}
+								}
+							} else {
+								xUpdateResult = {
+									status_code: '-99',
+									status_msg: 'You can not set this document to draft. RAB not processed yet.'
+								};
+							}
+						} else {
+							var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
+						}
+					// var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
+					} else {
+						var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
+					}
+				} else {
+					xUpdateResult = {
+						status_code: '-99',
+						status_msg: 'Make sure document already cancelled, before set to draft.'
+					};
+				}
+			} else {
+				xUpdateResult = {
+					status_code: '-99',
+					status_msg: 'Update failed, Document not found.'
+				};
+			}
+
+			// var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
 			xJoResult = xUpdateResult;
 			// Next Phase : Notification to adamin
 		}
@@ -1493,7 +1578,7 @@ class PurchaseRequestService {
 			// Check if this request id valid or not
 			var xPRDetail = await _repoInstance.getById({ id: pParam.document_id });
 			if (xPRDetail != null) {
-				if (xPRDetail.status != 1) {
+				if (xPRDetail.status != _PrConfStat.indexOf('Waiting Approval')) {
 					xJoResult = {
 						status_code: '-99',
 						status_msg: 'This document already confirmed before.'
@@ -1534,6 +1619,7 @@ class PurchaseRequestService {
 									status_code: '00',
 									status_msg: 'FPB successfully rejected'
 								};
+								let xReturnRabItemQty = await _budgetPlanDetailService.updateItemQtyLeft(xPRDetail, 'return')
 							} else {
 								xJoResult = xUpdateResult;
 							}
@@ -1638,18 +1724,19 @@ class PurchaseRequestService {
 				id: pParam.document_id
 			});
 			if (xData != null) {
-				if (xData.status == 0 || xData.status == 2) {
-					pParam.status = 4;
-					if (xData.status == 2) {
-						// Check if all the items still in draft
+				// console.log(`>>> xPurchaseRequestDetail: ${JSON.stringify(xPurchaseRequestDetail)}`, pAct);
+				if (xData.status == _PrConfStat.indexOf('Draft') || xData.status == _PrConfStat.indexOf('In Progress')) {
+					pParam.status = _PrConfStat.indexOf('Cancel');
+					if (xData.status == _PrConfStat.indexOf('In Progress')) {
+						// Check if all the items still in draft or not, if not cant cancel
 						let xItems = await _repoDetailInstance.getByParam({
 							request_id: pParam.document_id,
-							status: [ 2, 3, 4 ]
+							status: [ _PrdConfStat.indexOf('PR'), _PrdConfStat.indexOf('CA'), _PrdConfStat.indexOf('Close') ]
 						});
 						if (xItems.status_code == '00') {
 							xJoResult = {
 								status_code: '-99',
-								status_msg: "You can't close this FPB because there are items that already processed."
+								status_msg: "You can't cancel this FPB because there are items that already processed."
 							};
 						} else {
 							var xUpdateResult = await _repoInstance.save(
@@ -1662,6 +1749,9 @@ class PurchaseRequestService {
 								},
 								'cancel_fpb'
 							);
+							if (xUpdateResult.status_code == '00') {
+								let xReturnRabItemQty = await _budgetPlanDetailService.updateItemQtyLeft(xData, 'return')
+							}
 							xJoResult = xUpdateResult;
 						}
 					} else {
@@ -1675,12 +1765,15 @@ class PurchaseRequestService {
 							},
 							'cancel_fpb'
 						);
+						if (xUpdateResult.status_code == '00') {
+							let xReturnRabItemQty = await _budgetPlanDetailService.updateItemQtyLeft(xData, 'return')
+						}
 						xJoResult = xUpdateResult;
 					}
 				} else {
 					xJoResult = {
 						status_code: '-99',
-						status_msg: "You can't close this FPB. Only FPB with In Progress status that can be close."
+						status_msg: "You can't cancel this FPB. Only FPB with In Progress status that can be cancel."
 					};
 				}
 			} else {

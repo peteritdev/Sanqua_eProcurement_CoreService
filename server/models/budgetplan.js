@@ -29,6 +29,7 @@ module.exports = (sequelize, DataTypes) => {
 		reject_reason: DataTypes.STRING,
 		approver_ids: DataTypes.JSONB,
 		file: DataTypes.JSON,
+		note: DataTypes.STRING,
 
 		submitedAt: {
 			type: DataTypes.DATE,

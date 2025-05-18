@@ -30,6 +30,9 @@ const _goodsReceiptServiceInstance = new GoodsReceiptService();
 const PJCAService = require('./pjcaservice.js');
 const _pjcaServiceInstance = new PJCAService();
 
+const RABService = require('./budgetplanservice.js');
+const _rabServiceInstance = new RABService();
+
 const OAuthService = require('../services/oauthservice.js');
 const _oAuthService = new OAuthService();
 
@@ -966,6 +969,198 @@ class ExportService {
 						var xPJCANo = xJoResultPJCA.data.document_no.replace(/\//g, '-');
 						var xFileName = `pjca-${xPJCANo}.pdf`;
 						var xPathFile = `./generated_files/pjca/${xFileName}`;
+
+						pdf.create(data, xOptions).toFile(xPathFile, function(err, data) {
+							if (err) {
+								console.log(`>>> error pdf 1: ${err}`);
+								pRes.send(err);
+							} else {
+								var xDirectoryPath = path.resolve(xPathFile);
+								pRes.download(xDirectoryPath, xFileName, (err) => {
+									if (err) {
+										console.log(`>>> error pdf 2: ${err}`);
+										pRes.status(500).send({
+											message: `Could not download the file. ${err}`
+										});
+									}
+								});
+							}
+						});
+					}
+				);
+			}
+		}
+	}
+	
+	async generateRAB(pId, pMethod, pToken, pRes) {
+		var xParam = {
+			id: pId,
+			method: pMethod,
+			token: pToken
+		};
+		var xCompanyData = {};
+		var xJoResultRAB = await _rabServiceInstance.getById(xParam);
+		var xDecId = null;
+		var xFlagProcess = false;
+		let xRABID = 0;
+
+		if (xJoResultRAB != null && xJoResultRAB.status_code == '00') {
+			// Decrypt ID
+			if (xJoResultRAB.data.id.length == 65) {
+				xDecId = await _utilInstance.decrypt(xJoResultRAB.data.id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					xRABID = xDecId.decrypted;
+					xFlagProcess = true;
+				}
+			}
+
+			if (xFlagProcess) {
+				// Get Company Detail
+				console.log(`>>> xJoResultRAB: ${JSON.stringify(xJoResultRAB.data)}`);
+				var xEncCompanyId = await _utilInstance.encrypt(
+					xJoResultRAB.data.company.id.toString(),
+					config.cryptoKey.hashKey
+				);
+				var xCompanyDetail = await _oAuthService.getCompanyDetail(pToken, pMethod, xEncCompanyId);
+				if (xCompanyDetail != null) {
+					if (xCompanyDetail.status_code == '00') {
+						xCompanyData = {
+							logo: config.basePathESanqua + '/company_logo/' + xCompanyDetail.token_data.data.logo,
+							iso_purchase_request_no: xCompanyDetail.token_data.data.iso_purchase_request_no
+						};
+						console.log(`>>> xCompanyData: ${JSON.stringify(xCompanyData)}`);
+					}
+				}
+
+				let xCreator = null;
+				let xApprover1 = null;
+				let xApprover2 = null;
+				let xApprover3 = null;
+				let xStringQRCodeCreator = '';
+				let xStringQRCodeApprover1 = '';
+				let xStringQRCodeApprover2 = '';
+				let xStringQRCodeApprover3 = '';
+				let xApprovalFinanceAccounting = null;
+				let xFilePathQRCodeApproval = `${config.uploadBasePath}/digital_sign_qrcode/`;
+				let xQRCodeFileNameCreator,
+					xQRCodeFileName1 = [],
+					xQRCodeFileName2 = [],
+					xQRCodeFileName3 = [];
+
+				xApprover1 =
+					xJoResultRAB.data.approval_matrix != null
+						? xJoResultRAB.data.approval_matrix.find((el) => el.sequence === 1)
+						: null;
+				xApprover2 =
+					xJoResultRAB.data.approval_matrix != null
+						? xJoResultRAB.data.approval_matrix.find((el) => el.sequence === 2)
+						: null;
+				xApprover3 =
+					xJoResultRAB.data.approval_matrix != null
+						? xJoResultRAB.data.approval_matrix.find((el) => el.sequence === 3)
+						: null;
+
+				// Generate QRCode Digital Sign
+
+				let xApprovedUser1 =
+					xApprover1 != null ? xApprover1.approver_user.filter((el) => el.status === 1) : null;
+				if (xApprover1 != null && xApprovedUser1 != null) {
+					for (var i in xApprovedUser1) {
+						xStringQRCodeApprover1 =
+							`VALIDATE_SIGNATURE|PJCA|` +
+							(await _utilInstance.encrypt(
+								`${xRABID}|${xApprovedUser1[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
+
+						let xQRCodeApproval1 = await _qrCode.toDataURL(xStringQRCodeApprover1);
+						xQRCodeFileName1.push(`approval_${xRABID}${xApprovedUser1[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval1,
+							xFilePathQRCodeApproval + `approval_${xRABID}${xApprovedUser1[i].user.id}.png`
+						);
+					}
+					let xUser = xApprover1.approver_user.filter((el) => el.status === 1);
+					console.log(`>>> xUser: ${JSON.stringify(xUser)}`);
+				}
+				console.log(`>>> xApprovedUser 1: ${JSON.stringify(xApprovedUser1)}`);
+
+				let xApprovedUser2 =
+					xApprover2 != null ? xApprover2.approver_user.filter((el) => el.status === 1) : null;
+				if (xApprover2 != null && xApprovedUser2 != null) {
+					for (var i in xApprovedUser2) {
+						xStringQRCodeApprover2 =
+							`VALIDATE_SIGNATURE|PJCA|` +
+							(await _utilInstance.encrypt(
+								`${xRABID}|${xApprovedUser2[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
+
+						let xQRCodeApproval2 = await _qrCode.toDataURL(xStringQRCodeApprover2);
+						xQRCodeFileName2.push(`approval_${xRABID}${xApprovedUser2[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval2,
+							xFilePathQRCodeApproval + `approval_${xRABID}${xApprovedUser2[i].user.id}.png`
+						);
+					}
+				}
+				console.log(`>>> xApprovedUser 2: ${JSON.stringify(xApprovedUser2)}`);
+
+				let xApprovedUser3 =
+					xApprover3 != null ? xApprover3.approver_user.filter((el) => el.status === 1) : null;
+				if (xApprover3 != null && xApprovedUser3 != null) {
+					for (var i in xApprovedUser3) {
+						xStringQRCodeApprover3 =
+							`VALIDATE_SIGNATURE|PJCA|` +
+							(await _utilInstance.encrypt(
+								`${xRABID}|${xApprovedUser3[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
+
+						let xQRCodeApproval3 = await _qrCode.toDataURL(xStringQRCodeApprover3);
+						xQRCodeFileName3.push(`approval_${xRABID}${xApprovedUser3[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval3,
+							xFilePathQRCodeApproval + `approval_${xRABID}${xApprovedUser3[i].user.id}.png`
+						);
+					}
+				}
+				console.log(`>>> xApprovedUser 3: ${JSON.stringify(xApprovedUser3)}`);
+				console.log(`>>> xJoResultRAB: ${JSON.stringify(xJoResultRAB.data.budget_plan_detail)}`);
+				ejs.renderFile(
+					path.join(__dirname, '../views/', 'rab-pdf.ejs'),
+					{
+						data: xJoResultRAB,
+						companyData: xCompanyData,
+						imagePath: config.imagePath,
+
+						approver1: xApprovedUser1,
+						approver2: xApprovedUser2,
+						approver3: xApprovedUser3,
+
+						qrCode: {
+							qrPath: `${config.imagePathESanQua_dev}/digital_sign_qrcode/`,
+							approval1: xQRCodeFileName1,
+							approval2: xQRCodeFileName2,
+							approval3: xQRCodeFileName3
+						}
+					},
+					(err, data) => {
+						console.log(`>>> error pdf 0: ${err}`);
+						var xOptions = {};
+
+						xOptions = {
+							// width: '209mm',
+							// height: '148.5mm',
+							// height: '210mm',
+							format: 'A4',
+							orientation: 'landscape',
+							borders: '0.2cm'
+						};
+
+						var xRABNo = xJoResultRAB.data.budget_no.replace(/\//g, '-');
+						var xFileName = `rab-${xRABNo}.pdf`;
+						var xPathFile = `./generated_files/rab/${xFileName}`;
 
 						pdf.create(data, xOptions).toFile(xPathFile, function(err, data) {
 							if (err) {
