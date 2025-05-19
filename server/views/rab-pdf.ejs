@@ -6,7 +6,7 @@
   <style>
     @page {
       size: A4 landscape;
-      margin: 25mm;
+      margin: 15mm;
     }
 
     body {
@@ -52,7 +52,7 @@
     .main-table th, .main-table td {
       border: 1px solid #000 !important;
       padding: 4px;
-      text-align: left;
+      /* text-align: center; */
     }
 
     .main-table th {
@@ -102,10 +102,10 @@
       <td class="info-label">Nomor RAB</td>
       <td class="info-value">: <%=data.data.budget_no%></td>
     </tr>
-    <tr>
+    <!-- <tr>
       <td class="info-label">Unit</td>
       <td class="info-value">: <%=data.data.name%></td>
-    </tr>
+    </tr> -->
     <tr>
       <td class="info-label">Penanggung Jawab</td>
       <td class="info-value">: <%=data.data.pic_employee != null ? data.data.pic_employee.name : '-'%></td>
@@ -115,7 +115,7 @@
       <td class="info-value">: <%=data.data.employee != null ? data.data.employee.name : '-'%></td>
     </tr>
     <tr>
-      <td class="info-label">Perusahaan</td>
+      <td class="info-label">Unit</td>
       <td class="info-value">: <%=data.data.company != null ? data.data.company.name : '-'%></td>
     </tr>
     <tr>
@@ -132,8 +132,8 @@
         <th rowspan="2">PIC</th> -->
         <th rowspan="2">Nama Barang</th>
         <th rowspan="2">Spesifikasi</th>
-        <th rowspan="2">Rekomendasi Merek & type</th>
-        <th rowspan="2">Kepentingan/kegunaan</th>
+        <th rowspan="2">Merek & Tipe</th>
+        <th rowspan="2">Kepentingan/Kegunaan</th>
         <th rowspan="2">Qty</th>
         <th rowspan="2">Satuan</th>
         <th colspan="2">Budget</th>
@@ -157,7 +157,7 @@
         <!-- <td><%=data.data.company != null ? data.data.company.alias : '-'%></td>
         <td><%=data.data.department != null ? data.data.department.name : '-'%></td> -->
         <td><%=item.product != null ? item.product.name : '-'%></td>
-        <td><%=item.merk + ' ' + item.type + ' ' + item.material + ' ' + item.dimension%></td>
+        <td><%=item.merk + ' ' + ' ' + item.material + ' ' + item.dimension%></td>
         <td><%=item.merk + ' ' + item.type%></td>
         <td><%=item.description%></td>
         <td class="right-align"><%=item.qty%></td>
@@ -192,7 +192,7 @@
 
   <table class="signature-section">
     <tr>
-      <td colspan="4" style="text-align: left;">..., <%=data.data.created_at%></td>
+      <td colspan="4" style="text-align: left;">Jakarta, <%=data.data.created_at%></td>
     </tr>
     <tr>
       <td colspan="4" style="padding: 0px; margin: 0px">
