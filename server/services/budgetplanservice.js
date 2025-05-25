@@ -429,7 +429,7 @@ class BudgetPlanService {
 		if (xFlagProcess) {
 			var xResult = await _repoInstance.getById(pParam);
 
-			// console.log(`>>> xResult: ${JSON.stringify(xResult)}`);
+			console.log(`>>> xResult: ${JSON.stringify(xResult)}`);
 
 			if (xResult != null) {
 				var xJoArrBudgetDetailData = [];
@@ -515,9 +515,9 @@ class BudgetPlanService {
 				xJoData = {
 					id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
                     project: {
-                      id: xResult.project_id,
-                      code: xResult.project_code,
-                      name: xResult.project_name,    
+                      id: xResult.project.id,
+                      code: xResult.project.odoo_project_code,
+                      name: xResult.project.name,    
                     },
 					name: xResult.name,
 					budget_no: xResult.budget_no,
