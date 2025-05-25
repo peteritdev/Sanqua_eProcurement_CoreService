@@ -26,6 +26,8 @@ const _repoInstance = new PurchaseRequestRepository();
 // Repository
 const PurchaseRequestDetailRepository = require('../repository/purchaserequestdetailrepository.js');
 const _repoDetailInstance = new PurchaseRequestDetailRepository();
+const RabRepository = require('../repository/budgetplanrepository.js');
+const _rabRepoInstance = new RabRepository();
 
 // OAuth Service
 const OAuthService = require('../services/oauthservice.js');
@@ -44,7 +46,12 @@ const ProjectService = require('../services/projectservice.js');
 const purchaserequestdetail = require('../models/purchaserequestdetail.js');
 const _projectServiceInstance = new ProjectService();
 
+const BudgetPlanDetailService = require('../services/budgetplandetailservice.js');
+const _budgetPlanDetailService = new BudgetPlanDetailService();
+
 const _xClassName = 'PurchaseRequestService';
+const _PrConfStat = config.statusDescription.purchaseRequest
+const _PrdConfStat = config.statusDescription.purchaseRequestDetail
 
 class PurchaseRequestService {
 	constructor() {}
@@ -57,236 +64,275 @@ class PurchaseRequestService {
 		var bDect = null;
 
 		delete pParam.act;
-
-		if (pParam.hasOwnProperty('user_id')) {
-			if (pParam.user_id != '') {
-				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
-				if (xDecId.status_code == '00') {
-					pParam.user_id = xDecId.decrypted;
-					xFlagProcess = true;
-					if (pParam.hasOwnProperty('employee_id')) {
-						if (pParam.employee_id != '') {
-							if (pParam.employee_id.length == 65) {
-								xDecId = await _utilInstance.decrypt(pParam.employee_id, config.cryptoKey.hashKey);
-								if (xDecId.status_code == '00') {
-									pParam.employee_id = xDecId.decrypted;
-									xFlagProcess = true;
+		try {
+			if (pParam.hasOwnProperty('user_id')) {
+				if (pParam.user_id != '') {
+					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.user_id = xDecId.decrypted;
+						xFlagProcess = true;
+						if (pParam.hasOwnProperty('employee_id')) {
+							if (pParam.employee_id != '') {
+								if (pParam.employee_id.length == 65) {
+									xDecId = await _utilInstance.decrypt(pParam.employee_id, config.cryptoKey.hashKey);
+									if (xDecId.status_code == '00') {
+										pParam.employee_id = xDecId.decrypted;
+										xFlagProcess = true;
+									} else {
+										xJoResult = xDecId;
+									}
 								} else {
-									xJoResult = xDecId;
+									xFlagProcess = true;
 								}
 							} else {
-								xFlagProcess = true;
+								xJoResult = {
+									status_code: '-99',
+									status_msg: 'Parameter employee_id can not be empty'
+								};
 							}
 						} else {
-							xJoResult = {
-								status_code: '-99',
-								status_msg: 'Parameter employee_id can not be empty'
-							};
+							xFlagProcess = true;
 						}
-					} else {
-						xFlagProcess = true;
-					}
-				} else {
-					xJoResult = xDecId;
-				}
-			} else {
-				xJoResult = {
-					status_code: '-99',
-					status_msg: 'Parameter user_id can not be empty'
-				};
-			}
-		}
-
-		if (xFlagProcess) {
-			xFlagProcess = false;
-			/*
-				At: 10/11/2023
-				Description: Checking when the parameter project is set, category_time must be 7 and category_pr must be 'asset'
-
-				At: 30/12/2023
-				Description: Since for project, the category pr must be project also then in backend will force to categpry_pr become 'project'
-			*/
-			// if (pParam.hasOwnProperty('project_id')) {
-			// 	if (
-			// 		pParam.project_id != '' &&
-			// 		pParam.project_id != null &&
-			// 		(pParam.category_item != 7 || pParam.category_pr != 'asset')
-			// 	) {
-			// 		xJoResult = {
-			// 			status_code: '-99',
-			// 			status_msg: 'Kategori Barang dan Kategori PR tidak sesuai dengan peruntukan project.'
-			// 		};
-			// 	} else {
-			// 		// Check if project_id is match with FPB company
-
-			// 		xFlagProcess = true;
-			// 	}
-			// } else {
-			// 	xFlagProcess = true;
-			// }
-
-			if (pParam.hasOwnProperty('project_id')) {
-				if (pParam.project_id != '' && pParam.project_id != null) {
-					pParam.category_pr = 'project';
-					xFlagProcess = true;
-				} else {
-					xFlagProcess = true;
-				}
-			} else {
-				xFlagProcess = true;
-			}
-
-			// if (pParam.hasOwnProperty('budget_plan_id')) {
-			// 	bDect = await _utilInstance.decrypt(pParam.budget_plan_id, config.cryptoKey.hashKey);
-			// 	if (bDect.status_code == '00') {
-			// 		pParam.budget_plan_id = bDect.decrypted
-			// 	}
-			// }
-
-			if (xFlagProcess) {
-				if (xAct == 'add' || xAct == 'add_batch_in_item') {
-					// Calculate the total
-					var xJoArrItems = [];
-
-					if (pParam.hasOwnProperty('purchase_request_detail')) {
-						xJoArrItems = pParam.purchase_request_detail;
-						if (xJoArrItems.length > 0) {
-							for (var i in xJoArrItems) {
-								if (
-									xJoArrItems[i].hasOwnProperty('qty') &&
-									xJoArrItems[i].hasOwnProperty('budget_price_per_unit')
-								) {
-									xJoArrItems[i].budget_price_total =
-										xJoArrItems[i].qty * xJoArrItems[i].budget_price_per_unit;
-								}
-
-								if (xJoArrItems[i].hasOwnProperty('estimate_date_use')) {
-									if (xJoArrItems[i].estimate_date_use == '') {
-										xJoArrItems[i].estimate_date_use = null;
-									}
-								}
-								// Get Last price from etalase ecatalogue
-								let xCatalogue = await _catalogueService.getByVendorCodeAndProductCode({
-									vendor_code: xJoArrItems[i].vendor_code,
-									product_code: xJoArrItems[i].product_code
-								});
-
-								if (xCatalogue.status_code == '00') {
-									xJoArrItems[i].last_price = xCatalogue.data.last_price;
-									xJoArrItems[i].uom_id = xCatalogue.data.uom_id;
-									xJoArrItems[i].uom_name = xCatalogue.data.uom_name;
-								}
-							}
-						}
-						pParam.purchase_request_detail = xJoArrItems;
-					}
-
-					var xAddResult = await _repoInstance.save(pParam, xAct);
-					if (xAddResult.status_code == '00' && xAddResult.created_id != '' && xAddResult.clear_id != '') {
-						// Generate FPB No
-						var xFPBNo = await _globalUtilInstance.generatePurchaseRequestNo(
-							xAddResult.clear_id,
-							pParam.company_code
-						);
-						var xParamUpdate = {
-							request_no: xFPBNo,
-							id: xAddResult.clear_id
-						};
-
-						var xUpdate = await _repoInstance.save(xParamUpdate, 'update');
-
-						if (xUpdate.status_code == '00') {
-							xJoResult = xAddResult;
-							// ---------------- Start: Add to log ----------------
-							let xParamLog = {
-								act: 'add',
-								employee_id: pParam.employee_id,
-								employee_name: pParam.employee_name,
-								request_id: xAddResult.clear_id,
-								request_no: xFPBNo,
-								body: {
-									act: 'add',
-									msg: 'FPB created'
-								}
-							};
-							console.log(`>>> xParamLog : ${JSON.stringify(xParamLog)}`);
-							var xResultLog = await _logServiceInstance.addLog(pParam.method, pParam.token, xParamLog);
-							xJoResult.log_result = xResultLog;
-							// ---------------- End: Add to log ----------------
-
-							delete xJoResult.clear_id;
-						} else {
-							xJoResult = xUpdate;
-						}
-					} else {
-						xJoResult = xAddResult;
-					}
-				} else if (xAct == 'update') {
-					var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
-					if (xDecId.status_code == '00') {
-						pParam.id = xDecId.decrypted;
-						pParam.updated_by = pParam.user_id;
-						pParam.updated_by_name = pParam.user_name;
-						xFlagProcess = true;
 					} else {
 						xJoResult = xDecId;
 					}
+				} else {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Parameter user_id can not be empty'
+					};
+				}
+			}
 
-					if (xFlagProcess) {
-						// Get data before update
-						let xDataBeforeUpdate = await _repoInstance.getById({ id: pParam.id });
-						delete xDataBeforeUpdate.purchase_request_detail;
+			if (xFlagProcess) {
+				xFlagProcess = false;
+				/*
+					At: 10/11/2023
+					Description: Checking when the parameter project is set, category_time must be 7 and category_pr must be 'asset'
 
-						// ---------------- Start: Add to log ----------------
-						// let xParamLog = {
-						// 	act: 'add',
-						// 	employee_id: pParam.employee_id,
-						// 	employee_name: pParam.employee_name,
-						// 	request_id: pParam.id,
-						// 	request_no: xDataBeforeUpdate.request_no,
-						// 	body: {
-						// 		act: 'update',
-						// 		msg: 'FPB changed',
-						// 		before: {
-						// 			category_item: xDataBeforeUpdate.category_item,
-						// 			category_pr: xDataBeforeUpdate.category_pr,
-						// 			reference_from_ecommerce: xDataBeforeUpdate.reference_from_ecommerce,
-						// 			budget_is_approved: xDataBeforeUpdate.budget_is_approved,
-						// 			memo_special_request: xDataBeforeUpdate.memo_special_request
-						// 		},
-						// 		after: pParam
-						// 	}
-						// };
+					At: 30/12/2023
+					Description: Since for project, the category pr must be project also then in backend will force to categpry_pr become 'project'
+				*/
+				// if (pParam.hasOwnProperty('project_id')) {
+				// 	if (
+				// 		pParam.project_id != '' &&
+				// 		pParam.project_id != null &&
+				// 		(pParam.category_item != 7 || pParam.category_pr != 'asset')
+				// 	) {
+				// 		xJoResult = {
+				// 			status_code: '-99',
+				// 			status_msg: 'Kategori Barang dan Kategori PR tidak sesuai dengan peruntukan project.'
+				// 		};
+				// 	} else {
+				// 		// Check if project_id is match with FPB company
 
-						delete pParam.employee_id;
-						delete pParam.employee_name;
-						delete pParam.department_id;
-						delete pParam.department_name;
-						var xAddResult = await _repoInstance.save(pParam, xAct);
-						// set is_item_match_with_odoo to null if existing document project is not null and updated to null
-						if (xDataBeforeUpdate.project != null && pParam.project_id == null) {
-							const xItemParam = {
-								request_id: xDataBeforeUpdate.id,
-								is_item_match_with_odoo: null
-							};
-							const xUpdateItemStatus = await _repoDetailInstance.save(
-								xItemParam,
-								'update_by_request_id'
-							);
-							console.log(`>>> xUpdateItemStatus: ${JSON.stringify(xDataBeforeUpdate.project)} `);
+				// 		xFlagProcess = true;
+				// 	}
+				// } else {
+				// 	xFlagProcess = true;
+				// }
+
+				if (pParam.hasOwnProperty('project_id')) {
+					if (pParam.project_id != '' && pParam.project_id != null) {
+						pParam.category_pr = 'project';
+						xFlagProcess = true;
+					} else {
+						xFlagProcess = true;
+					}
+				} else {
+					xFlagProcess = true;
+				}
+
+				if (pParam.hasOwnProperty('budget_plan_id')) {
+					if (pParam.budget_plan_id != null && pParam.budget_plan_id.length > 15) {
+						bDect = await _utilInstance.decrypt(pParam.budget_plan_id, config.cryptoKey.hashKey);
+						if (bDect.status_code == '00') {
+							pParam.budget_plan_id = bDect.decrypted
 						}
-						xJoResult = xAddResult;
+					}
+				}
 
-						// if (xJoResult.status_code == '00') {
-						// 	var xResultLog = await _logServiceInstance.addLog(pParam.method, pParam.token, xParamLog);
-						// 	xJoResult.log_result = xResultLog;
-						// 	// ---------------- End: Add to log ----------------
-						// }
+				if (xFlagProcess) {
+					if (xAct == 'add' || xAct == 'add_batch_in_item') {
+						// Calculate the total
+						var xJoArrItems = [];
+
+						if (pParam.hasOwnProperty('purchase_request_detail')) {
+							xJoArrItems = pParam.purchase_request_detail;
+							if (xJoArrItems.length > 0) {
+								for (var i in xJoArrItems) {
+									if (
+										xJoArrItems[i].hasOwnProperty('qty') &&
+										xJoArrItems[i].hasOwnProperty('budget_price_per_unit')
+									) {
+										xJoArrItems[i].budget_price_total =
+											xJoArrItems[i].qty * xJoArrItems[i].budget_price_per_unit;
+									}
+
+									if (xJoArrItems[i].hasOwnProperty('estimate_date_use')) {
+										if (xJoArrItems[i].estimate_date_use == '') {
+											xJoArrItems[i].estimate_date_use = null;
+										}
+									}
+									// Get Last price from etalase ecatalogue
+									let xCatalogue = await _catalogueService.getByVendorCodeAndProductCode({
+										vendor_code: xJoArrItems[i].vendor_code,
+										product_code: xJoArrItems[i].product_code
+									});
+
+									if (xCatalogue.status_code == '00') {
+										xJoArrItems[i].last_price = xCatalogue.data.last_price;
+										xJoArrItems[i].uom_id = xCatalogue.data.uom_id;
+										xJoArrItems[i].uom_name = xCatalogue.data.uom_name;
+									}
+									xJoArrItems[i].qty_left = xJoArrItems[i].qty;
+									// xJoArrItems[i].qty_done = 0;
+								}
+							}
+							pParam.purchase_request_detail = xJoArrItems;
+						}
+
+						// console.log(`>>> Create FPB : ${JSON.stringify(pParam)}`, xAct);
+						var xAddResult = await _repoInstance.save(pParam, xAct);
+						if (xAddResult.status_code == '00' && xAddResult.created_id != '' && xAddResult.clear_id != '') {
+							// Generate FPB No
+							var xFPBNo = await _globalUtilInstance.generatePurchaseRequestNo(
+								xAddResult.clear_id,
+								pParam.company_code
+							);
+							var xParamUpdate = {
+								request_no: xFPBNo,
+								id: xAddResult.clear_id
+							};
+
+							var xUpdate = await _repoInstance.save(xParamUpdate, 'update');
+
+							if (xUpdate.status_code == '00') {
+								xJoResult = xAddResult;
+								// ---------------- Start: Add to log ----------------
+								let xParamLog = {
+									act: 'add',
+									employee_id: pParam.employee_id,
+									employee_name: pParam.employee_name,
+									request_id: xAddResult.clear_id,
+									request_no: xFPBNo,
+									body: {
+										act: 'add',
+										msg: 'FPB created'
+									}
+								};
+								console.log(`>>> xParamLog : ${JSON.stringify(xParamLog)}`);
+								var xResultLog = await _logServiceInstance.addLog(pParam.method, pParam.token, xParamLog);
+								xJoResult.log_result = xResultLog;
+								// ---------------- End: Add to log ----------------
+
+								delete xJoResult.clear_id;
+							} else {
+								xJoResult = xUpdate;
+							}
+						} else {
+							xJoResult = xAddResult;
+						}
+					} else if (xAct == 'update') {
+						var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+						if (xDecId.status_code == '00') {
+							pParam.id = xDecId.decrypted;
+							pParam.updated_by = pParam.user_id;
+							pParam.updated_by_name = pParam.user_name;
+						} else {
+							xJoResult = xDecId;
+						}
+
+						if (xFlagProcess) {
+							// Get data before update
+							let xDataBeforeUpdate = await _repoInstance.getById({ id: pParam.id });
+							delete xDataBeforeUpdate.purchase_request_detail;
+
+							// ---------------- Start: Add to log ----------------
+							// let xParamLog = {
+							// 	act: 'add',
+							// 	employee_id: pParam.employee_id,
+							// 	employee_name: pParam.employee_name,
+							// 	request_id: pParam.id,
+							// 	request_no: xDataBeforeUpdate.request_no,
+							// 	body: {
+							// 		act: 'update',
+							// 		msg: 'FPB changed',
+							// 		before: {
+							// 			category_item: xDataBeforeUpdate.category_item,
+							// 			category_pr: xDataBeforeUpdate.category_pr,
+							// 			reference_from_ecommerce: xDataBeforeUpdate.reference_from_ecommerce,
+							// 			budget_is_approved: xDataBeforeUpdate.budget_is_approved,
+							// 			memo_special_request: xDataBeforeUpdate.memo_special_request
+							// 		},
+							// 		after: pParam
+							// 	}
+							// };
+
+							delete pParam.employee_id;
+							delete pParam.employee_name;
+							delete pParam.department_id;
+							delete pParam.department_name;
+							
+							console.log(`>>> xDataBeforeUpdate: ${JSON.stringify(xDataBeforeUpdate)} `);
+							if (xDataBeforeUpdate.budget_plan != null) {
+								// 04/05/2025
+								// check if rab already processed or not
+								if (pParam.budget_plan_id != xDataBeforeUpdate.budget_plan.id) {
+									let xGetDetailRAB = await _rabRepoInstance.getById({ id: xDataBeforeUpdate.budget_plan.id });
+									if (xGetDetailRAB != null) {
+										if (xGetDetailRAB.status == 3) {
+											xJoResult = {
+												status_code: '-99',
+												status_msg: `Tidak dapat merubah FPB, RAB yang dicantumkan sudah diproses`
+											};
+											xFlagProcess = false;
+										} else {
+											xFlagProcess = true;
+										}
+									} else {
+										xFlagProcess = true;
+									}
+								} else {
+									xFlagProcess = true;
+								}
+								
+							} else {
+								xFlagProcess = true;
+							}
+
+							if (xFlagProcess) {
+								var xAddResult = await _repoInstance.save(pParam, xAct);
+								// set is_item_match_with_odoo to null if existing document project is not null and updated to null
+								if (xDataBeforeUpdate.project != null && pParam.project_id == null) {
+									const xItemParam = {
+										request_id: xDataBeforeUpdate.id,
+										is_item_match_with_odoo: null
+									};
+									const xUpdateItemStatus = await _repoDetailInstance.save(
+										xItemParam,
+										'update_by_request_id'
+									);
+									console.log(`>>> xUpdateItemStatus: ${JSON.stringify(xDataBeforeUpdate.project)} `);
+								}
+								xJoResult = xAddResult;
+							}
+
+							// if (xJoResult.status_code == '00') {
+							// 	var xResultLog = await _logServiceInstance.addLog(pParam.method, pParam.token, xParamLog);
+							// 	xJoResult.log_result = xResultLog;
+							// 	// ---------------- End: Add to log ----------------
+							// }
+						}
 					}
 				}
 			}
+		} catch (e) {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `purchaseRequestService.save: Exception error: ${e.message}`
+			};
 		}
-
 		return xJoResult;
 	}
 
@@ -380,12 +426,12 @@ class PurchaseRequestService {
 						delete pParam.owned_document_no
 					}
 				}
-				// if (pParam.hasOwnProperty('budget_plan_id')) {
-				// 	const bDect = await _utilInstance.decrypt(pParam.budget_plan_id, config.cryptoKey.hashKey);
-				// 	if (bDect.status_code == '00') {
-				// 		pParam.budget_plan_id = bDect.decrypted
-				// 	}
-				// }
+				if (pParam.hasOwnProperty('budget_plan_id')) {
+					const bDect = await _utilInstance.decrypt(pParam.budget_plan_id, config.cryptoKey.hashKey);
+					if (bDect.status_code == '00') {
+						pParam.budget_plan_id = bDect.decrypted
+					}
+				}
 
 				// console.log(`>>> pParam 2: ${JSON.stringify(pParam)}`);
 				var xResultList = await _repoInstance.list(pParam);
@@ -409,10 +455,10 @@ class PurchaseRequestService {
 										name: xRows[index].project_name,
 										odoo_project_code: xRows[index].odoo_project_code
 									},
-									// budget_plan: {
-									// 	id: xRows[index].budget_plan_id,
-									// 	name: xRows[index].budget_plan_name
-									// },
+									budget_plan: {
+										id: xRows[index].budget_plan_id,
+										name: xRows[index].budget_plan_name
+									},
 									request_no: xRows[index].request_no,
 									requested_at:
 										xRows[index].requested_at == null
@@ -455,7 +501,8 @@ class PurchaseRequestService {
 										id: xRows[index].category_item,
 										name: config.categoryItem[xRows[index].category_item]
 									},
-
+									fpb_type_id: xRows[index].fpb_type,
+									fpb_type_name: fpbType[xRows[index].fpb_type-1],
 									item: {
 										product_code: xRows[index].product_code,
 										product_name: xRows[index].product_name,
@@ -525,6 +572,7 @@ class PurchaseRequestService {
 									},
 									fpb_type_id: xRows[index].fpb_type,
 									fpb_type_name: fpbType[xRows[index].fpb_type-1],
+
 									created_at:
 										xRows[index].created_at != null
 											? moment(xRows[index].created_at).format('DD-MM-YYYY HH:mm:ss')
@@ -551,10 +599,10 @@ class PurchaseRequestService {
 									name: xRows[index].project_name,
 									odoo_project_code: xRows[index].odoo_project_code
 								},
-								// budget_plan: {
-								// 	id: xRows[index].budget_plan_id,
-								// 	name: xRows[index].budget_plan_name
-								// },
+								budget_plan: {
+									id: xRows[index].budget_plan_id,
+									name: xRows[index].budget_plan_name
+								},
 								request_no: xRows[index].request_no,
 								requested_at:
 									xRows[index].requested_at == null
@@ -707,6 +755,7 @@ class PurchaseRequestService {
 						// console.log(`>>> xDetail[index]: ${JSON.stringify(xDetail[index])}`);
 						xJoArrRequestDetailData.push({
 							id: await _utilInstance.encrypt(xDetail[index].id, config.cryptoKey.hashKey),
+							clear_id: xDetail[index].id,
 							product: {
 								id: xDetail[index].product_id,
 								code: xDetail[index].product_code,
@@ -774,6 +823,8 @@ class PurchaseRequestService {
 							currency_id: xDetail[index].currency_id,
 							currency_code: xDetail[index].currency_code,
 							currency_symbol: xDetail[index].currency_symbol
+							// qty_paid: xDetail[index].qty_paid,
+							// qty_done: xDetail[index].qty_done
 						});
 					}
 					// Get Approval Matrix
@@ -922,7 +973,7 @@ class PurchaseRequestService {
 							xResult.took_at != null ? moment(xResult.took_at).format('DD MMM YYYY HH:mm:ss') : null,
 						took_by_name: xResult.took_by_name,
 						fpb_type: xResult.fpb_type,
-						// budget_plan: xResult.budget_plan,
+						budget_plan: xResult.budget_plan,
 						total_realization: xTotalRealization,
 						total_item_with_budget: xTotalItem,
 						approved_at: xResult.approved_at,
@@ -1211,13 +1262,93 @@ class PurchaseRequestService {
 			} else {
 				xJoResult = xDecId;
 			}
+		} else {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: 'Document ID and User ID must be supplied'
+			};
 		}
 
 		if (xFlagProcess) {
+			// check is fpb status already cancelled
+			let xData = await _repoInstance.getById(pParam);
+			console.log(`>>> xData: ${JSON.stringify(xData)}`);
 			pParam.set_to_draft_at = await _utilInstance.getCurrDateTime();
-			pParam.status = 0;
+			pParam.status = _PrConfStat.indexOf('Draft');
+			if (xData != null) {
+				if (xData.status == _PrConfStat.indexOf('Cancel') || xData.status == -1) {
+					// check fpb has RAB
+					if (xData.budget_plan != null) {
+						let xCheckRAB = await _rabRepoInstance.getById({id: xData.budget_plan.id});
+						if (xCheckRAB != null) {
+							// check rab status is in progress before update rab item qty
+							if (xCheckRAB.status == 3) {
+								// check rab item qty_remaining not less than fpb qty
+								// make sure rab item qty_remaining > fpb qty before activate fpb again
+								for (const fpbItem of xData.purchase_request_detail) {
+									// Find matching RAB item by product_code and product_name
+									const rabItem = xCheckRAB.budget_plan_detail.find(
+										rab =>
+											rab.product_id === fpbItem.product_id &&
+											rab.product_code === fpbItem.product_code &&
+											rab.product_name === fpbItem.product_name
+									);
+									
+									if (rabItem) {
+										if (rabItem.qty_remain < fpbItem.qty) {
+											xFlagProcess = false;
+											xUpdateResult = {
+												status_code: '-99',
+												status_msg: `(${rabItem.product_code})${rabItem.product_name} has not enough RAB remaining qty. Please check RAB qty.`
+											};
+											break; // Stop checking if any item is not enough
+										}
+									} else {
+										// // If no matching RAB item found, treat as not enough
+										// xFlagProcess = false;
+										// xUpdateResult = {
+										// 	status_code: '-99',
+										// 	status_msg: 'There are some items in FPB that have not enough RAB remaining qty. Please check RAB qty.'
+										// };
+										// break;
+									}
+								}
 
-			var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
+								if (xFlagProcess) {
+								// update rab item qty & update fpb to draft
+									var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
+									
+									if (xUpdateResult.status_code == '00') {
+										let xCutRabItemQty = await _budgetPlanDetailService.updateItemQtyLeft(xData, 'decrease', xCheckRAB)
+									}
+								}
+							} else {
+								xUpdateResult = {
+									status_code: '-99',
+									status_msg: 'You can not set this document to draft. RAB not processed yet.'
+								};
+							}
+						} else {
+							var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
+						}
+					// var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
+					} else {
+						var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
+					}
+				} else {
+					xUpdateResult = {
+						status_code: '-99',
+						status_msg: 'Make sure document already cancelled, before set to draft.'
+					};
+				}
+			} else {
+				xUpdateResult = {
+					status_code: '-99',
+					status_msg: 'Update failed, Document not found.'
+				};
+			}
+
+			// var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
 			xJoResult = xUpdateResult;
 			// Next Phase : Notification to adamin
 		}
@@ -1447,7 +1578,7 @@ class PurchaseRequestService {
 			// Check if this request id valid or not
 			var xPRDetail = await _repoInstance.getById({ id: pParam.document_id });
 			if (xPRDetail != null) {
-				if (xPRDetail.status != 1) {
+				if (xPRDetail.status != _PrConfStat.indexOf('Waiting Approval')) {
 					xJoResult = {
 						status_code: '-99',
 						status_msg: 'This document already confirmed before.'
@@ -1488,6 +1619,7 @@ class PurchaseRequestService {
 									status_code: '00',
 									status_msg: 'FPB successfully rejected'
 								};
+								let xReturnRabItemQty = await _budgetPlanDetailService.updateItemQtyLeft(xPRDetail, 'return')
 							} else {
 								xJoResult = xUpdateResult;
 							}
@@ -1592,18 +1724,19 @@ class PurchaseRequestService {
 				id: pParam.document_id
 			});
 			if (xData != null) {
-				if (xData.status == 0 || xData.status == 2) {
-					pParam.status = 4;
-					if (xData.status == 2) {
-						// Check if all the items still in draft
+				// console.log(`>>> xPurchaseRequestDetail: ${JSON.stringify(xPurchaseRequestDetail)}`, pAct);
+				if (xData.status == _PrConfStat.indexOf('Draft') || xData.status == _PrConfStat.indexOf('In Progress')) {
+					pParam.status = _PrConfStat.indexOf('Cancel');
+					if (xData.status == _PrConfStat.indexOf('In Progress')) {
+						// Check if all the items still in draft or not, if not cant cancel
 						let xItems = await _repoDetailInstance.getByParam({
 							request_id: pParam.document_id,
-							status: [ 2, 3, 4 ]
+							status: [ _PrdConfStat.indexOf('PR'), _PrdConfStat.indexOf('CA'), _PrdConfStat.indexOf('Close') ]
 						});
 						if (xItems.status_code == '00') {
 							xJoResult = {
 								status_code: '-99',
-								status_msg: "You can't close this FPB because there are items that already processed."
+								status_msg: "You can't cancel this FPB because there are items that already processed."
 							};
 						} else {
 							var xUpdateResult = await _repoInstance.save(
@@ -1616,6 +1749,9 @@ class PurchaseRequestService {
 								},
 								'cancel_fpb'
 							);
+							if (xUpdateResult.status_code == '00') {
+								let xReturnRabItemQty = await _budgetPlanDetailService.updateItemQtyLeft(xData, 'return')
+							}
 							xJoResult = xUpdateResult;
 						}
 					} else {
@@ -1629,12 +1765,15 @@ class PurchaseRequestService {
 							},
 							'cancel_fpb'
 						);
+						if (xUpdateResult.status_code == '00') {
+							let xReturnRabItemQty = await _budgetPlanDetailService.updateItemQtyLeft(xData, 'return')
+						}
 						xJoResult = xUpdateResult;
 					}
 				} else {
 					xJoResult = {
 						status_code: '-99',
-						status_msg: "You can't close this FPB. Only FPB with In Progress status that can be close."
+						status_msg: "You can't cancel this FPB. Only FPB with In Progress status that can be cancel."
 					};
 				}
 			} else {
