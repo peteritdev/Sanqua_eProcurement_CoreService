@@ -674,7 +674,7 @@ class PurchaseRequestRepository {
 				xObjJsonWhere.departmentId = pParam.department_id;
 			}
 		}
-
+		
 		if (pParam.hasOwnProperty('category_item')) {
 			if (pParam.category_item != '') {
 				xSqlWhere += ' AND pr.category_item = :categoryItem ';
