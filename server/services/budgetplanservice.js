@@ -482,7 +482,7 @@ class BudgetPlanService {
 						estimate_date_use:
 							xDetail[index].estimate_date_use != null
 								? moment(xDetail[index].estimate_date_use).format('DD MMM YYYY')
-								: '',
+								: null,
 						section_title: xDetail[index].section_title,
 					});
 				}

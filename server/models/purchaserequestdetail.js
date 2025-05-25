@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
 		quotation_price_total: DataTypes.DOUBLE,
 		vendor_id: DataTypes.INTEGER,
 		has_budget: DataTypes.INTEGER,
-		estimate_date_use: DataTypes.INTEGER,
+		estimate_date_use: DataTypes.DATE,
 		description: DataTypes.STRING,
 		vendor_code: DataTypes.STRING,
 		vendor_name: DataTypes.STRING,

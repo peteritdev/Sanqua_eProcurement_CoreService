@@ -794,7 +794,7 @@ class PurchaseRequestService {
 							estimate_date_use:
 								xDetail[index].estimate_date_use != null
 									? moment(xDetail[index].estimate_date_use).format('DD MMM YYYY')
-									: '',
+									: null,
 							description: xDetail[index].description,
 							pr_no: xDetail[index].pr_no,
 							status: {

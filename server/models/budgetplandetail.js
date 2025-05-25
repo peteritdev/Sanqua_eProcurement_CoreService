@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
 		budget_price_total: DataTypes.DOUBLE,
 		uom_id: DataTypes.INTEGER,
 		uom_name: DataTypes.STRING,
-		estimate_date_use: DataTypes.INTEGER,
+		estimate_date_use: DataTypes.DATE,
 		vendor_id: DataTypes.INTEGER,
 		vendor_code: DataTypes.STRING,
 		vendor_name: DataTypes.STRING,
