@@ -6,7 +6,7 @@
       "fpb": "tr_purchaserequests",
       "rab": "tr_budgetplans"
     },
-    "logging": false,
+    "logging": true,
     "username": "postgres",
     "password": "P455uu0rd^^ok",
     "database": "sanqua_procurement_03092023",
@@ -53,12 +53,12 @@
 
       "oAuth": {
         "url": {
-          "verifyToken": "http://10.10.20.5:9189/api/oauth/v1/user/verify_token",
+          "verifyToken": "http://localhost:9189/api/oauth/v1/user/verify_token",
           "approval_matrix_document": {
-            "save": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/save",
-            "list": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/list",
-            "confirm": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/confirm",
-            "confirm_via_email": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/confirm_via_email"
+            "save": "http://localhost:9189/api/oauth/v1/approval_matrix/document/save",
+            "list": "http://localhost:9189/api/oauth/v1/approval_matrix/document/list",
+            "confirm": "http://localhost:9189/api/oauth/v1/approval_matrix/document/confirm",
+            "confirm_via_email": "http://localhost:9189/api/oauth/v1/approval_matrix/document/confirm_via_email"
           }
         }
       },
@@ -117,7 +117,8 @@
     "appPort": 9191, 
     "dbTables": {
       "procurement": "tr_procurements",
-      "fpb": "tr_purchaserequests"
+      "fpb": "tr_purchaserequests",
+      "rab": "tr_budgetplans"
     },
     "username": "postgres",
     "password": "P455uu0rd^^ok",
