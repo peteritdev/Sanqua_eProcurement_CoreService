@@ -620,7 +620,7 @@ class PurchaseRequestRepository {
 
 		xSqlCount = ` SELECT count(distinct pr.request_no) AS total_record
 		  FROM tr_purchaserequests pr 
-		  	LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
+			LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
 			  LEFT JOIN ms_projects p ON p.id = pr.project_id
 		  WHERE ${xSqlWhere}`;
 
@@ -896,7 +896,7 @@ class PurchaseRequestRepository {
 
 		xSqlCount = ` SELECT count(pr.request_no) AS total_record
 		  FROM tr_purchaserequestdetails prd
-		  	LEFT JOIN tr_purchaserequests pr ON pr.id = prd.request_id
+			LEFT JOIN tr_purchaserequests pr ON pr.id = prd.request_id
 			  LEFT JOIN ms_projects p ON p.id = pr.project_id
 		  WHERE ${xSqlWhere}`;
 
@@ -1464,7 +1464,7 @@ class PurchaseRequestRepository {
 
 		xSqlCount = ` SELECT count(pr.request_no) AS total_record
 		  FROM tr_purchaserequestdetails prd 
-		  	LEFT JOIN tr_purchaserequests pr ON pr.id = prd.request_id
+			LEFT JOIN tr_purchaserequests pr ON pr.id = prd.request_id
 			  LEFT JOIN ms_projects p ON p.id = pr.project_id
 		  WHERE ${xSqlWhere}`;
 
