@@ -124,6 +124,7 @@
     "dbTables": {
       "procurement": "tr_procurements",
       "fpb": "tr_purchaserequests",
+      "rab": "tr_budgetplans",
       "payreq": "tr_paymentrequests",
       "gr": "tr_goodsreceipts",
       "pjca": "tr_pjcas"
