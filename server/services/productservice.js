@@ -32,254 +32,266 @@ const _productCategoryServiceInstance = new ProductCategoryService();
 
 // Setup multer storage
 var _storage = _multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, './uploads/')
-    },
-    filename: function (req, file, cb) {
-        var dateTimeStamp = Date.now();
-        cb(null, file.fieldname + '-' + dateTimeStamp + '.' + file.originalname.split('.')[file.originalname.split('.').length - 1])
-    }
+	destination: function(req, file, cb) {
+		cb(null, './uploads/');
+	},
+	filename: function(req, file, cb) {
+		var dateTimeStamp = Date.now();
+		cb(
+			null,
+			file.fieldname +
+				'-' +
+				dateTimeStamp +
+				'.' +
+				file.originalname.split('.')[file.originalname.split('.').length - 1]
+		);
+	}
 });
 
 var _upload = _multer({
-    storage: _storage,
-    fileFilter: function (req, file, callback) {
-        if (['xls', 'xlsx'].indexOf(file.originalname.split('.')[file.originalname.split('.').length - 1]) === -1) {
-            return callback(new Error('Wrong extension type'));
-        }
-        callback(null, true);
-    }
+	storage: _storage,
+	fileFilter: function(req, file, callback) {
+		if ([ 'xls', 'xlsx' ].indexOf(file.originalname.split('.')[file.originalname.split('.').length - 1]) === -1) {
+			return callback(new Error('Wrong extension type'));
+		}
+		callback(null, true);
+	}
 }).single('file');
 
 var _upload = _multer({
-    storage: _storage
+	storage: _storage
 }).single('file');
 
 class ProductService {
-    constructor() { }
+	constructor() {}
 
-    async getById(pParam) {
-        var xJoResult;
-        var xFlag = true;
-        var xProductPhotoPath = config.frontParam.photoPath.product;
+	async getByParameter(pParam) {
+		return await _productRepoInstance.getByParameter(pParam);
+	}
 
-        if (pParam.id != '' && pParam.id.length == 65) {
-            var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
-            if (xDecId.status_code == '00') {
-                pParam.id = xDecId.decrypted;
-            } else {
-                xFlag = false;
-                xJoResult = xDecId;
-            }
-        }
+	async getById(pParam) {
+		var xJoResult;
+		var xFlag = true;
+		var xProductPhotoPath = config.frontParam.photoPath.product;
 
-        if (xFlag) {
-            var xData = await _productRepoInstance.getProductById(pParam);
-            if (xData != null) {
-                xJoResult = {
-                    status_code: "00",
-                    status_msg: "OK",
-                    data: {
-                        id: await _utilInstance.encrypt(xData.id, config.cryptoKey.hashKey),
-                        code: xData.code,
-                        category: xData.category,
-                        name: xData.name,
-                        unit: xData.unit,
-                        merk: xData.merk,
-                        spesification: xData.spesification,
-                        is_asset: xData.is_asset,
-                        photo_1: (xData.photo_1 == '' ? null : (xProductPhotoPath.product1 + xData.photo_1)),
-                        photo_2: (xData.photo_2 == '' ? null : (xProductPhotoPath.product2 + xData.photo_2)),
-                        photo_3: (xData.photo_3 == '' ? null : (xProductPhotoPath.product3 + xData.photo_3)),
-                        photo_4: (xData.photo_4 == '' ? null : (xProductPhotoPath.product4 + xData.photo_4)),
-                        photo_5: (xData.photo_5 == '' ? null : (xProductPhotoPath.product5 + xData.photo_5)),
-                    }
-                }
-            }
-        }
+		if (pParam.id != '' && pParam.id.length == 65) {
+			var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				pParam.id = xDecId.decrypted;
+			} else {
+				xFlag = false;
+				xJoResult = xDecId;
+			}
+		}
 
-        return xJoResult;
-    }
+		if (xFlag) {
+			var xData = await _productRepoInstance.getProductById(pParam);
+			if (xData != null) {
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					data: {
+						id: await _utilInstance.encrypt(xData.id, config.cryptoKey.hashKey),
+						code: xData.code,
+						category: xData.category,
+						name: xData.name,
+						unit: xData.unit,
+						merk: xData.merk,
+						spesification: xData.spesification,
+						is_asset: xData.is_asset,
+						photo_1: xData.photo_1 == '' ? null : xProductPhotoPath.product1 + xData.photo_1,
+						photo_2: xData.photo_2 == '' ? null : xProductPhotoPath.product2 + xData.photo_2,
+						photo_3: xData.photo_3 == '' ? null : xProductPhotoPath.product3 + xData.photo_3,
+						photo_4: xData.photo_4 == '' ? null : xProductPhotoPath.product4 + xData.photo_4,
+						photo_5: xData.photo_5 == '' ? null : xProductPhotoPath.product5 + xData.photo_5
+					}
+				};
+			}
+		}
 
-    async uploadFromExcel(pReq, pRes) {
-        var xExcelToJSON;
-        _upload(pReq, pRes, function (pErr) {
-            if (pErr) {
-                var joResult = {
-                    "status_code": "-99",
-                    "status_msg": "",
-                    "err_msg": pErr
-                }
+		return xJoResult;
+	}
 
-                try {
-                    fs.unlinkSync(pReq.file.path);
-                } catch (e) {
-                    //error deleting the file
-                    console.log(e);
-                }
+	async uploadFromExcel(pReq, pRes) {
+		var xExcelToJSON;
+		_upload(pReq, pRes, function(pErr) {
+			if (pErr) {
+				var joResult = {
+					status_code: '-99',
+					status_msg: '',
+					err_msg: pErr
+				};
 
-                pRes.setHeader('Content-Type', 'application/json');
-                pRes.status(200).send(joResult);
-            }
+				try {
+					fs.unlinkSync(pReq.file.path);
+				} catch (e) {
+					//error deleting the file
+					console.log(e);
+				}
 
-            console.log(pReq.file)
+				pRes.setHeader('Content-Type', 'application/json');
+				pRes.status(200).send(joResult);
+			}
 
-            if (!pReq.file) {
-                var joResult = {
-                    "status_code": "-99",
-                    "status_msg": "",
-                    "err_msg": "No file passed"
-                }
+			console.log(pReq.file);
 
-                try {
-                    fs.unlinkSync(pReq.file.path);
-                } catch (e) {
-                    //error deleting the file
-                    console.log(e);
-                }
+			if (!pReq.file) {
+				var joResult = {
+					status_code: '-99',
+					status_msg: '',
+					err_msg: 'No file passed'
+				};
 
-                pRes.setHeader('Content-Type', 'application/json');
-                pRes.status(200).send(joResult);
-            }
+				try {
+					fs.unlinkSync(pReq.file.path);
+				} catch (e) {
+					//error deleting the file
+					console.log(e);
+				}
 
-            //start convert process
-            /** Check the extension of the incoming file and
+				pRes.setHeader('Content-Type', 'application/json');
+				pRes.status(200).send(joResult);
+			}
+
+			//start convert process
+			/** Check the extension of the incoming file and
              *  use the appropriate module
              */
-            if (pReq.file.originalname.split('.')[pReq.file.originalname.split('.').length - 1] === 'xlsx') {
-                console.log(">>> XLSX");
-                xExcelToJSON = _xlsxToJson;
-            } else {
-                console.log(">>> XLS");
-                xExcelToJSON = _xlsToJson;
-            }
+			if (pReq.file.originalname.split('.')[pReq.file.originalname.split('.').length - 1] === 'xlsx') {
+				console.log('>>> XLSX');
+				xExcelToJSON = _xlsxToJson;
+			} else {
+				console.log('>>> XLS');
+				xExcelToJSON = _xlsToJson;
+			}
 
-            try {
+			try {
+				console.log('>>> Path : ' + pReq.file.path);
 
-                console.log(">>> Path : " + pReq.file.path);
+				xExcelToJSON(
+					{
+						input: pReq.file.path, //the same path where we uploaded our file
+						output: null, //since we don't need output.json
+						lowerCaseHeaders: true
+					},
+					function(err, result) {
+						if (err) {
+							var joResult = {
+								status_code: '-99',
+								status_msg: '',
+								err_msg: err
+							};
 
-                xExcelToJSON({
-                    input: pReq.file.path, //the same path where we uploaded our file
-                    output: null, //since we don't need output.json
-                    lowerCaseHeaders: true
-                }, function (err, result) {
-                    if (err) {
-                        var joResult = {
-                            "status_code": "-99",
-                            "status_msg": "",
-                            "err_msg": err
-                        }
+							try {
+								fs.unlinkSync(pReq.file.path);
+							} catch (e) {
+								//error deleting the file
+								console.log(e);
+							}
 
-                        try {
-                            fs.unlinkSync(pReq.file.path);
-                        } catch (e) {
-                            //error deleting the file
-                            console.log(e);
-                        }
+							pRes.setHeader('Content-Type', 'application/json');
+							pRes.status(200).send(joResult);
+						}
+						var joResult = {
+							status_code: '00',
+							status_msg: 'OK',
+							data: result,
+							err_msg: null
+						};
 
-                        pRes.setHeader('Content-Type', 'application/json');
-                        pRes.status(200).send(joResult);
-                    }
-                    var joResult = {
-                        "status_code": "00",
-                        "status_msg": "OK",
-                        "data": result,
-                        "err_msg": null
-                    }
+						try {
+							fs.unlinkSync(pReq.file.path);
+						} catch (e) {
+							//error deleting the file
+							console.log(e);
+						}
 
-                    try {
-                        fs.unlinkSync(pReq.file.path);
-                    } catch (e) {
-                        //error deleting the file
-                        console.log(e);
-                    }
+						console.log(joResult);
 
-                    console.log(joResult);
+						pRes.setHeader('Content-Type', 'application/json');
+						pRes.status(200).send(joResult);
+					}
+				);
+			} catch (e) {
+				var joResult = {
+					status_code: '-99',
+					status_msg: '',
+					err_msg: 'Corupted excel file'
+				};
 
-                    pRes.setHeader('Content-Type', 'application/json');
-                    pRes.status(200).send(joResult);
-                });
-            } catch (e) {
-                var joResult = {
-                    "status_code": "-99",
-                    "status_msg": "",
-                    "err_msg": "Corupted excel file"
-                }
+				try {
+					fs.unlinkSync(pReq.file.path);
+				} catch (e) {
+					//error deleting the file
+					console.log(e);
+				}
 
-                try {
-                    fs.unlinkSync(pReq.file.path);
-                } catch (e) {
-                    //error deleting the file
-                    console.log(e);
-                }
+				pRes.setHeader('Content-Type', 'application/json');
+				pRes.status(200).send(joResult);
+			}
+		});
+	}
 
-                pRes.setHeader('Content-Type', 'application/json');
-                pRes.status(200).send(joResult);
-            }
+	async batchSaveOdoo(pParam) {
+		var joResult;
+		var jaResult = [];
+		var xFlagProcess = true;
 
-        });
-    }
+		if (pParam.user_id != '') {
+			var xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				pParam.user_id = xDecId.decrypted;
+			} else {
+				joResult = xDecId;
+				xFlagProcess = false;
+			}
+		}
 
-    async batchSaveOdoo(pParam) {
-        var joResult;
-        var jaResult = [];
-        var xFlagProcess = true;
+		if (xFlagProcess) {
+			for (var i = 0; i < pParam.data.length; i++) {
+				var xAddResult = {};
+				var xCheckData = await _productRepoInstance.getProductByERPId(pParam.data[i]);
 
-        if (pParam.user_id != '') {
-            var xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
-            if (xDecId.status_code == '00') {
-                pParam.user_id = xDecId.decrypted;
-            } else {
-                joResult = xDecId;
-                xFlagProcess = false;
-            }
-        }
+				// Get Product Category Id by ERP Category Id
+				var xCategory = await _productCategoryServiceInstance.getProductCategoryByERPId({
+					erp_id: pParam.data[i].erp_category_id
+				});
+				if (xCategory != null) {
+					pParam.data[i].category_id = xCategory.id;
+				}
 
-        if (xFlagProcess) {
+				// console.log(">>> productservice:");
+				// console.log(">>> xCheckData : " + JSON.stringify(xCheckData));
+				// console.log(">>> xCategory : " + JSON.stringify(xCategory));
+				// console.log(">>> pParam : " + JSON.stringify( pParam.data[i]));
 
-            for (var i = 0; i < pParam.data.length; i++) {
-                var xAddResult = {};
-                var xCheckData = await _productRepoInstance.getProductByERPId(pParam.data[i]);
+				if (xCheckData != null) {
+					// console.log(">>> Start : Update By ERP ID");
+					pParam.data[i].updated_by = pParam.user_id;
+					pParam.data[i].updated_by_name = pParam.user_name;
+					pParam.data[i].is_delete = 0;
+					xAddResult = await _productRepoInstance.save(pParam.data[i], 'update_by_erpid');
+					// console.log(">>> End : Update By ERP ID");
+				} else {
+					pParam.data[i].created_by = pParam.user_id;
+					pParam.data[i].created_by_name = pParam.user_name;
+					pParam.data[i].is_delete = 0;
+					xAddResult = await _productRepoInstance.save(pParam.data[i], 'add');
+				}
+				jaResult.push(xAddResult);
+			}
 
-                // Get Product Category Id by ERP Category Id
-                var xCategory = await _productCategoryServiceInstance.getProductCategoryByERPId({ erp_id: pParam.data[i].erp_category_id });
-                if (xCategory != null) {
-                    pParam.data[i].category_id = xCategory.id;
-                }
+			await _utilInstance.changeSequenceTable(pParam.data.length + 1, 'ms_products', 'id');
 
-                // console.log(">>> productservice:");
-                // console.log(">>> xCheckData : " + JSON.stringify(xCheckData));
-                // console.log(">>> xCategory : " + JSON.stringify(xCategory));
-                // console.log(">>> pParam : " + JSON.stringify( pParam.data[i]));
+			joResult = {
+				status_code: '00',
+				status_msg: 'Finish save to database',
+				line_saved: jaResult
+			};
+		}
 
-                if (xCheckData != null) {
-                    // console.log(">>> Start : Update By ERP ID");            
-                    pParam.data[i].updated_by = pParam.user_id;
-                    pParam.data[i].updated_by_name = pParam.user_name;
-                    pParam.data[i].is_delete = 0;
-                    xAddResult = await _productRepoInstance.save(pParam.data[i], 'update_by_erpid');
-                    // console.log(">>> End : Update By ERP ID");
-                } else {
-                    pParam.data[i].created_by = pParam.user_id;
-                    pParam.data[i].created_by_name = pParam.user_name;
-                    pParam.data[i].is_delete = 0;
-                    xAddResult = await _productRepoInstance.save(pParam.data[i], 'add');
-                }
-                jaResult.push(xAddResult);
-            }
-
-            await _utilInstance.changeSequenceTable((pParam.data.length) + 1, 'ms_products', 'id');
-
-            joResult = {
-                "status_code": "00",
-                "status_msg": "Finish save to database",
-                "line_saved": jaResult,
-            }
-
-        }
-
-        return joResult;
-    }
+		return joResult;
+	}
 
     async batchSave(pParam) {
         var joResult;
@@ -542,62 +554,60 @@ class ProductService {
         return xJoResult;
     }
 
-    async delete(pParam) {
-        var xJoResult;
-        var xFlagProcess = true;
+	async delete(pParam) {
+		var xJoResult;
+		var xFlagProcess = true;
 
-        var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
-        if (xDecId.status_code == "00") {
-            pParam.id = xDecId.decrypted;
-            xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
-            if (xDecId.status_code == "00") {
-                pParam.deleted_by = xDecId.decrypted;
-                pParam.deleted_by_name = pParam.user_name;
-            } else {
-                xFlagProcess = false;
-                xJoResult = xDecId;
-            }
-        } else {
-            xFlagProcess = false;
-            xJoResult = xDecId;
-        }
+		var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+		if (xDecId.status_code == '00') {
+			pParam.id = xDecId.decrypted;
+			xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				pParam.deleted_by = xDecId.decrypted;
+				pParam.deleted_by_name = pParam.user_name;
+			} else {
+				xFlagProcess = false;
+				xJoResult = xDecId;
+			}
+		} else {
+			xFlagProcess = false;
+			xJoResult = xDecId;
+		}
 
-        if (xFlagProcess) {
+		if (xFlagProcess) {
+			var xDeleteResult = await _productRepoInstance.delete(pParam);
+			xJoResult = xDeleteResult;
+		}
 
-            var xDeleteResult = await _productRepoInstance.delete(pParam);
-            xJoResult = xDeleteResult;
+		return xJoResult;
+	}
 
-        }
+	async upload(param) {
+		try {
+			console.log('>>> Req : ' + param.files);
+			if (!req.files) {
+				res.send({
+					status: false,
+					message: 'No file uploaded'
+				});
+			} else {
+				let uploadedPhoto = param.files.attachment;
+				uploadedPhoto.mv('../files/product_categories/' + uploadedPhoto.name);
 
-        return xJoResult;
-    }
-
-    async upload(param) {
-        try {
-            console.log(">>> Req : " + param.files);
-            if (!req.files) {
-                res.send({
-                    status: false,
-                    message: "No file uploaded"
-                });
-            } else {
-                let uploadedPhoto = param.files.attachment;
-                uploadedPhoto.mv('../files/product_categories/' + uploadedPhoto.name);
-
-                res.send({
-                    status: true,
-                    message: "File successfully uploaded",
-                    data: {
-                        name: uploadedPhoto.name,
-                        mimetype: uploadedPhoto.mimetype,
-                        size: uploadedPhoto.size
-                    }
-                });
-            }
-        } catch (e) {
-            res.status(500).send(e);
-        }
-    }
+				res.send({
+					status: true,
+					message: 'File successfully uploaded',
+					data: {
+						name: uploadedPhoto.name,
+						mimetype: uploadedPhoto.mimetype,
+						size: uploadedPhoto.size
+					}
+				});
+			}
+		} catch (e) {
+			res.status(500).send(e);
+		}
+	}
 }
 
 module.exports = ProductService;

@@ -174,7 +174,8 @@ class PurchaseRequestDetailService {
 				) {
 					var xParamUpdate = {
 						id: xPurchaseRequestDetail.id,
-						qty: Math.round(sequelize.literal(`qty + ${pParam.qty}`) * 1000) / 1000,
+						qty: Math.round((Number(xPurchaseRequestDetail.qty) + Number(pParam.qty)) * 1000) / 1000,
+						// qty: Math.round(sequelize.literal(`qty + ${pParam.qty}`) * 1000) / 1000,
 						// qty: sequelize.literal(`qty + ${pParam.qty}`),
 						budget_price_total:
 							Math.round(
@@ -184,6 +185,7 @@ class PurchaseRequestDetailService {
 							) / 1000
 						// (xPurchaseRequestDetail.qty + pParam.qty) * xPurchaseRequestDetail.budget_price_per_unit
 					};
+					// console.log(`>>> xParamUpdate : ${JSON.stringify(xParamUpdate)}`);
 					pParam = null;
 					pParam = xParamUpdate;
 
@@ -226,7 +228,8 @@ class PurchaseRequestDetailService {
 				}
 
 				// Validate if product_id is null (free keyin for project), estimate_fulfillment
-
+				pParam.qty_left = pParam.qty
+				// console.log(`>>> pParam : ${JSON.stringify(pParam)}`, xAct);
 				var xAddResult = await _repoInstance.save(pParam, xAct);
 				xJoResult = xAddResult;
 
@@ -348,6 +351,7 @@ class PurchaseRequestDetailService {
 						// if (xCatalogue.status_code == '00') {
 						// 	xItems[i].last_price = xCatalogue.data.last_price;
 						// }
+						xItems[i].qty_left = xItems[i].qty
 						var xAddResult = await _repoInstance.save(xItems[i], xAct);
 						arrMsg.push({
 							index: i,
@@ -381,6 +385,7 @@ class PurchaseRequestDetailService {
 							pParam.quotation_price_total =
 								Math.round(pParam.qty * pParam.quotation_price_per_unit * 1000) / 1000;
 						}
+						pParam.qty_left = pParam.qty
 					}
 
 					if (pParam.estimate_date_use == '') {
@@ -498,7 +503,7 @@ class PurchaseRequestDetailService {
 						settodraft_by_name: pParam.logged_user_name,
 						settodraft_reason: pParam.settodraft_reason
 					};
-					var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
+					var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update_status');
 					if (xUpdateResult.status_code == '00') {
 						xJoResult = {
 							status_code: '00',
@@ -691,7 +696,7 @@ class PurchaseRequestDetailService {
 														await _repoInstance.save(
 															xParamUpdate,
 															// 'update_by_product_code_and_request_id'
-															'update'
+															'update_status'
 														);
 													}
 
@@ -894,7 +899,8 @@ class PurchaseRequestDetailService {
 										cancel_reason: updateAt,
 										status: 5,
 										user_id: pParam.user_id,
-										user_name: pParam.user_name
+										user_name: pParam.user_name,
+										is_po_created: false
 									};
 									let xCancelPR = await _repoInstance.save(xParamUpdate, 'update_by_pr_no');
 
@@ -1031,7 +1037,8 @@ class PurchaseRequestDetailService {
 				let xParamUpdate = {
 					pr_no: pParam.pr_no,
 					is_po_created: pParam.is_po_created,
-					create_po_by_name: pParam.user_name
+					create_po_by_name: pParam.user_name,
+					po_budget: pParam.po_budget
 				};
 
 				// update column with given pr
@@ -1153,7 +1160,7 @@ class PurchaseRequestDetailService {
 				Object.assign(xParamUpdate, xActObject)
 
 				// update column with given pry
-				let xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
+				let xUpdateResult = await _repoInstance.save(xParamUpdate, 'update_status');
 
 				if (xUpdateResult.status_code === '00') {
 					xJoResult = {
@@ -1436,7 +1443,7 @@ class PurchaseRequestDetailService {
 						status: 5,
 						cancel_reason: updateAt
 					};
-					var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
+					var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update_status');
 					if (xUpdateResult.status_code == '00') {
 						xJoResult = {
 							status_code: '00',
@@ -1449,6 +1456,76 @@ class PurchaseRequestDetailService {
 			} else {
 				xJoResult = xDetail;
 			}
+		}
+
+		return xJoResult;
+	}
+
+	async outstandingItem_list(pParam) {
+		var xJoResult = {};
+		var xJoArrData = [];
+
+		try {
+			var xResultList = await _repoInstance.outstandingItemList(pParam);
+
+			if (xResultList.total_record > 0) {
+				var xRows = xResultList.data;
+				for (var index in xRows) {
+					xJoArrData.push({
+						id: await _utilInstance.encrypt(xRows[index].pr_id.toString(), config.cryptoKey.hashKey),
+						prd_id: xRows[index].prd_id,
+						request_no: xRows[index].request_no,
+						employee_id: xRows[index].employee_id,
+						employee_name: xRows[index].employee_name,
+						company_id: xRows[index].company_id,
+						company_name: xRows[index].company_name,
+						company_code: xRows[index].company_code,
+						department_id: xRows[index].department_id,
+						department_name: xRows[index].department_name,
+						prd_status: {
+							id: xRows[index].prd_status,
+							name:
+								xRows[index].prd_status == -1
+									? 'Rejected'
+									: config.statusDescription.purchaseRequestDetail[xRows[index].prd_status]
+						},
+						product_id: xRows[index].product_id,
+						product_name: xRows[index].product_name,
+						product_code: xRows[index].product_code,
+						qty: xRows[index].qty,
+						qty_paid: xRows[index].qty_paid,
+						qty_done: xRows[index].qty_done,
+						uom_id: xRows[index].uom_id,
+						uom_name: xRows[index].uom_name,
+						budget_price_per_unit: xRows[index].budget_price_per_unit,
+						budget_price_total: xRows[index].budget_price_total,
+						pr_status: xRows[index].pr_status,
+						category_item: {
+							id: xRows[index].category_item,
+							name: config.categoryItem[xRows[index].category_item]
+						},
+						category_pr: xRows[index].category_pr,
+						fpb_type: xRows[index].fpb_type,
+						prj_id: xRows[index].prj_id,
+						prj_name: xRows[index].prj_name,
+						created_at: xRows[index].created_at,
+						is_po_created: xRows[index].is_po_created
+					});
+				}
+				console.log(`>>> xJoArrData: ${JSON.stringify(xJoArrData)}`);
+
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					total_record: xResultList.total_record,
+					data: xJoArrData
+				};
+			}
+		} catch (e) {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Exception error <${_xClassName}.dropDown>: ${e.message}`
+			};
 		}
 
 		return xJoResult;

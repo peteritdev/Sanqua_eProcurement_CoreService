@@ -13,203 +13,263 @@ const _modelUnit = require('../models').ms_units;
 const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
+var _xClassName = 'ProductRepository';
+
 class ProductRepository {
-    constructor() { }
+	constructor() {}
 
-    async list(pParam) {
+	async list(pParam) {
+		var xWhereAnd_LastUpdated = null;
 
-        var xWhereAnd_LastUpdated = null;
+		var xOrder = [ 'name', 'ASC' ];
+		var xWhereAnd_isAsset = {};
+		var xInclude = [
+			{
+				attributes: [ 'id', 'name' ],
+				model: _modelCategory,
+				as: 'category'
+			},
+			{
+				attributes: [ 'id', 'name' ],
+				model: _modelUnit,
+				as: 'unit'
+			}
+		];
 
-        var xOrder = ['name', 'ASC'];
-        var xWhereAnd_isAsset = {};
-        var xInclude = [
-            {
-                attributes: ['id', 'name'],
-                model: _modelCategory,
-                as: 'category'
-            }, {
-                attributes: ['id', 'name'],
-                model: _modelUnit,
-                as: 'unit'
-            }
-        ]
+		if (pParam.order_by != '' && pParam.hasOwnProperty('order_by')) {
+			xOrder = [ pParam.order_by, pParam.order_type == 'desc' ? 'DESC' : 'ASC' ];
+		}
 
-        if (pParam.order_by != '' && pParam.hasOwnProperty('order_by')) {
-            xOrder = [pParam.order_by, (pParam.order_type == 'desc' ? 'DESC' : 'ASC')];
-        }
+		// This parameter for sync at ams
+		if (pParam.hasOwnProperty('last_updated')) {
+			if (pParam.last_updated != '') {
+				xWhereAnd_LastUpdated = Sequelize.where(
+					Sequelize.fn('DATE', Sequelize.col('ms_products.updated_at')),
+					'>=',
+					pParam.last_updated
+				);
+			}
+		}
 
-        // This parameter for sync at ams
-        if (pParam.hasOwnProperty('last_updated')) {
-            if (pParam.last_updated != '') {
-                xWhereAnd_LastUpdated = Sequelize.where(
-                    Sequelize.fn(
-                        'DATE', Sequelize.col('ms_products.updated_at')), '>=', pParam.last_updated
-                )
-            }
-        }
+		if (pParam.hasOwnProperty('is_asset')) {
+			if (pParam.is_asset != '') {
+				xWhereAnd_isAsset = {
+					is_asset: pParam.is_asset
+				};
+			}
+		}
 
-        if (pParam.hasOwnProperty('is_asset')) {
-            if (pParam.is_asset != '') {
-                xWhereAnd_isAsset = {
-                    is_asset: pParam.is_asset,
-                }
-            }
-        }
+		var xParamQuery = {
+			where: {
+				[Op.and]: [
+					{
+						is_delete: 0
+					},
+					xWhereAnd_LastUpdated,
+					xWhereAnd_isAsset
+				],
+				[Op.or]: [
+					{
+						name: {
+							[Op.iLike]: '%' + pParam.keyword + '%'
+						}
+					},
+					{
+						code: {
+							[Op.iLike]: '%' + pParam.keyword + '%'
+						}
+					}
+					// {
+					//     code: {
+					//         [Op.iLike]: '%' + pParam.keyword + '%'
+					//     },
+					// },
+				]
+			},
+			include: xInclude,
+			order: [ xOrder ]
+		};
 
-        var xParamQuery = {
-            where: {
-                [Op.and]: [
-                    {
-                        is_delete: 0
-                    }, xWhereAnd_LastUpdated
-                    ,
-                    xWhereAnd_isAsset,
-                ],
-                [Op.or]: [
-                    {
-                        name: {
-                            [Op.iLike]: '%' + pParam.keyword + '%'
-                        },
-                    },
-                    {
-                        code: {
-                            [Op.iLike]: '%' + pParam.keyword + '%'
-                        },
-                    },
-                    // {
-                    //     code: {
-                    //         [Op.iLike]: '%' + pParam.keyword + '%'
-                    //     },
-                    // },
-                ]
-            },
-            include: xInclude,
-            order: [xOrder],
-        };
+		if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
+			if (pParam.offset != '' && pParam.limit != '') {
+				if (pParam.limit != 'all') {
+					xParamQuery.offset = pParam.offset;
+					xParamQuery.limit = pParam.limit;
+				}
+			}
+		}
 
-        if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
-            if (pParam.offset != '' && pParam.limit != '') {
-                if (pParam.limit != 'all') {
-                    xParamQuery.offset = pParam.offset;
-                    xParamQuery.limit = pParam.limit;
-                }
-            }
-        }
+		var xData = await _modelDb.findAndCountAll(xParamQuery);
 
-        var xData = await _modelDb.findAndCountAll(xParamQuery);
+		return xData;
+	}
 
-        return xData;
-    }
+	async isDataExists(pName) {
+		var data = await _modelDb.findOne({
+			where: {
+				name: pName
+			}
+		});
 
-    async isDataExists(pName) {
-        var data = await _modelDb.findOne({
-            where: {
-                name: pName
-            }
-        });
+		return data;
+	}
 
-        return data;
-    }
+	async getProductByERPId(pParam) {
+		var data = await _modelDb.findOne({
+			where: {
+				erp_id: pParam.erp_id,
+				is_delete: 0
+			}
+		});
 
-    async getProductByERPId(pParam) {
-        var data = await _modelDb.findOne({
-            where: {
-                erp_id: pParam.erp_id,
-                is_delete: 0
-            }
-        });
+		return data;
+	}
 
-        return data;
-    }
+	async getProductByCode(pParam) {
+		var xWhere = {};
 
-    async getProductByCode(pParam) {
+		if (pParam.hasOwnProperty('id')) {
+			if (pParam.id != '') {
+				xWhere = {
+					code: pParam.code,
+					is_delete: 0,
+					id: {
+						[Op.ne]: pParam.id
+					}
+				};
+			} else {
+				xWhere = {
+					code: pParam.code,
+					is_delete: 0
+				};
+			}
+		} else {
+			xWhere = {
+				code: pParam.code,
+				is_delete: 0
+			};
+		}
 
-        var xWhere = {};
+		var data = await _modelDb.findOne({
+			where: xWhere
+		});
 
-        if (pParam.hasOwnProperty('id')) {
-            if (pParam.id != '') {
-                xWhere = {
-                    code: pParam.code,
-                    is_delete: 0,
-                    id: {
-                        [Op.ne]: pParam.id,
-                    }
-                }
-            } else {
-                xWhere = {
-                    code: pParam.code,
-                    is_delete: 0,
-                }
-            }
-        } else {
-            xWhere = {
-                code: pParam.code,
-                is_delete: 0,
-            }
-        }
+		return data;
+	}
 
-        var data = await _modelDb.findOne({
-            where: xWhere
-        });
+	async getProductByName(pParam) {
+		var xWhere = {};
 
-        return data;
-    }
+		if (pParam.hasOwnProperty('id')) {
+			if (pParam.id != '') {
+				xWhere = {
+					name: pParam.name,
+					is_delete: 0,
+					id: {
+						[Op.ne]: pParam.id
+					}
+				};
+			} else {
+				xWhere = {
+					name: pParam.name,
+					is_delete: 0
+				};
+			}
+		} else {
+			xWhere = {
+				name: pParam.name,
+				is_delete: 0
+			};
+		}
 
-    async getProductByName(pParam) {
+		var data = await _modelDb.findOne({
+			where: xWhere
+		});
 
-        var xWhere = {};
+		return data;
+	}
 
-        if (pParam.hasOwnProperty('id')) {
-            if (pParam.id != '') {
-                xWhere = {
-                    name: pParam.name,
-                    is_delete: 0,
-                    id: {
-                        [Op.ne]: pParam.id,
-                    }
-                }
-            } else {
-                xWhere = {
-                    name: pParam.name,
-                    is_delete: 0,
-                }
-            }
-        } else {
-            xWhere = {
-                name: pParam.name,
-                is_delete: 0,
-            }
-        }
+	async getProductById(pParam) {
+		var xData = await _modelDb.findOne({
+			where: {
+				id: pParam.id,
+				is_delete: 0
+			},
+			include: [
+				{
+					attributes: [ 'id', 'name' ],
+					model: _modelCategory,
+					as: 'category'
+				},
+				{
+					attributes: [ 'id', 'name' ],
+					model: _modelUnit,
+					as: 'unit'
+				}
+			]
+		});
 
-        var data = await _modelDb.findOne({
-            where: xWhere
-        });
+		return xData;
+	}
 
-        return data;
-    }
+	async getByParameter(pParam) {
+		var xInclude = [];
+		var xWhereOr = [];
+		var xWhereAnd = [];
+		var xWhere = [];
+		var xAttributes = [];
+		var xJoResult = {};
+		try {
+			if (pParam.hasOwnProperty('code')) {
+				if (pParam.code != '') {
+					xWhereAnd.push({
+						code: pParam.code
+					});
+				}
+			}
 
-    async getProductById(pParam) {
-        var xData = await _modelDb.findOne({
-            where: {
-                id: pParam.id,
-                is_delete: 0,
-            },
-            include: [
-                {
-                    attributes: ['id', 'name'],
-                    model: _modelCategory,
-                    as: 'category'
-                },
-                {
-                    attributes: ['id', 'name'],
-                    model: _modelUnit,
-                    as: 'unit'
-                },
-            ],
-        });
+			if (pParam.hasOwnProperty('name')) {
+				if (pParam.name != '') {
+					xWhereAnd.push({
+						name: pParam.name
+					});
+				}
+			}
 
-        return xData;
-    }
+			if (xWhereAnd.length > 0) {
+				xWhere.push({
+					[Op.and]: xWhereAnd
+				});
+			}
+
+			var xData = await _modelDb.findOne({
+				where: xWhere,
+				include: xInclude,
+				subQuery: false
+			});
+
+			if (xData) {
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					data: xData
+				};
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Data not found'
+				};
+			}
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.getByParameter`, `Exception error: ${e.message}`, 'error');
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Failed get data. Error : ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
 
     async save(pParam, pAct) {
         let xTransaction;
@@ -321,52 +381,50 @@ class ProductRepository {
         return xJoResult;
     }
 
-    async delete(pParam) {
-        let xTransaction;
-        var xJoResult = {};
+	async delete(pParam) {
+		let xTransaction;
+		var xJoResult = {};
 
-        try {
-            var xSaved = null;
-            xTransaction = await sequelize.transaction();
+		try {
+			var xSaved = null;
+			xTransaction = await sequelize.transaction();
 
-            console.log(JSON.stringify(pParam));
+			console.log(JSON.stringify(pParam));
 
-            xSaved = await _modelDb.update(
-                {
-                    is_delete: 1,
-                    deleted_by: pParam.deleted_by,
-                    deleted_by_name: pParam.deleted_by_name,
-                    deleted_at: await _utilInstance.getCurrDateTime(),
-                },
-                {
-                    where: {
-                        id: pParam.id
-                    }
-                },
-                { xTransaction }
-            );
+			xSaved = await _modelDb.update(
+				{
+					is_delete: 1,
+					deleted_by: pParam.deleted_by,
+					deleted_by_name: pParam.deleted_by_name,
+					deleted_at: await _utilInstance.getCurrDateTime()
+				},
+				{
+					where: {
+						id: pParam.id
+					}
+				},
+				{ xTransaction }
+			);
 
-            await xTransaction.commit();
+			await xTransaction.commit();
 
-            xJoResult = {
-                status_code: "00",
-                status_msg: "Data has been successfully deleted",
-            }
+			xJoResult = {
+				status_code: '00',
+				status_msg: 'Data has been successfully deleted'
+			};
 
-            return xJoResult;
+			return xJoResult;
+		} catch (e) {
+			if (xTransaction) await xTransaction.rollback();
+			xJoResult = {
+				status_code: '-99',
+				status_msg: 'Failed save or update data',
+				err_msg: e
+			};
 
-        } catch (e) {
-            if (xTransaction) await xTransaction.rollback();
-            xJoResult = {
-                status_code: "-99",
-                status_msg: "Failed save or update data",
-                err_msg: e
-            }
-
-            return xJoResult;
-        }
-    }
+			return xJoResult;
+		}
+	}
 }
 
 module.exports = ProductRepository;
-

@@ -131,15 +131,15 @@ class PurchaseRequestDetailRepository {
 
 		try {
 			var xSaved = null;
-			// var xSql = "";
-			// var xSqlErrMsg = ""
-			// var xFlag = false
+			var xSql = "";
+			var xSqlErrMsg = ""
+			var xFlag = false
 			xTransaction = await sequelize.transaction();
 
-			// xSql = `SELECT calc_rab_item_remain_qty('{
-			// 	"pAct": "${pAct}",
-			// 	"purchase_request_detail" : ${JSON.stringify(pParam)}
-			// }'::json)`;
+			xSql = `SELECT calc_rab_item_remain_qty_v2('{
+				"pAct": "${pAct}",
+				"purchase_request_detail" : ${JSON.stringify(pParam)}
+			}'::json)`;
 
 			if (pAct == 'add') {
 				pParam.status = 0;
@@ -147,50 +147,50 @@ class PurchaseRequestDetailRepository {
 				pParam.created_by = pParam.user_id;
 				pParam.created_by_name = pParam.user_name;
 
-				// var xDtQuery = await sequelize.query(xSql, {
-				// 	type: sequelize.QueryTypes.SELECT,
-				// });
+				var xDtQuery = await sequelize.query(xSql, {
+					type: sequelize.QueryTypes.SELECT,
+				});
 
-				// if (xDtQuery.length > 0) {
-				// 	if (xDtQuery[0].calc_rab_item_remain_qty.status_code == "00") {
-				// 		xFlag = true
-				// 	} else {
-				// 	//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty;
-				// 		xFlag = false
-				// 		xSqlErrMsg = `, ${xDtQuery[0].calc_rab_item_remain_qty.status_msg}`
-				// 	}
-				// } else {
-				// 	xFlag = false
-				// }
+				if (xDtQuery.length > 0) {
+					if (xDtQuery[0].calc_rab_item_remain_qty_v2.status_code == "00") {
+						xFlag = true
+					} else {
+					//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty_v2;
+						xFlag = false
+						xSqlErrMsg = `, ${xDtQuery[0].calc_rab_item_remain_qty_v2.status_msg}`
+					}
+				} else {
+					xFlag = false
+				}
 
-				// if (xFlag) {
-				xSaved = await _modelDb.create(pParam, { transaction: xTransaction });
+				if (xFlag) {
+					xSaved = await _modelDb.create(pParam, { transaction: xTransaction });
 
-				if (xSaved.id != null) {
-					xJoResult = {
-						status_code: '00',
-						status_msg: 'Data has been successfully saved',
-						created_id: await _utilInstance.encrypt(xSaved.id, config.cryptoKey.hashKey)
-						//// clear_id: xSaved.id,
-					};
+					if (xSaved.id != null) {
+						xJoResult = {
+							status_code: '00',
+							status_msg: 'Data has been successfully saved',
+							created_id: await _utilInstance.encrypt(xSaved.id, config.cryptoKey.hashKey)
+							//// clear_id: xSaved.id,
+						};
 
-					await xTransaction.commit();
+						await xTransaction.commit();
+					} else {
+						if (xTransaction) await xTransaction.rollback();
+
+						xJoResult = {
+							status_code: '-99',
+							status_msg: 'Failed save to database'
+						};
+					}
 				} else {
 					if (xTransaction) await xTransaction.rollback();
 
 					xJoResult = {
 						status_code: '-99',
-						status_msg: 'Failed save to database'
+						status_msg: `Failed save to database ${xSqlErrMsg}`
 					};
 				}
-				// } else {
-				// 	if (xTransaction) await xTransaction.rollback();
-
-				// 	xJoResult = {
-				// 		status_code: '-99',
-				// 		status_msg: `Failed save to database ${xSqlErrMsg}`
-				// 	};
-				// }
 			} else if (pAct == 'update') {
 				// var xFlag = false
 				pParam.updatedAt = await _utilInstance.getCurrDateTime();
@@ -206,39 +206,39 @@ class PurchaseRequestDetailRepository {
 				pParam.updated_by = pParam.user_id;
 				pParam.updated_by_name = pParam.user_name;
 
-				// var xDtQuery = await sequelize.query(xSql, {
-				// 	type: sequelize.QueryTypes.SELECT,
-				// });
+				var xDtQuery = await sequelize.query(xSql, {
+					type: sequelize.QueryTypes.SELECT,
+				});
 
-				// if (xDtQuery.length > 0) {
-				// 	if (xDtQuery[0].calc_rab_item_remain_qty.status_code == "00") {
-				// 		xFlag = true
-				// 	} else {
-				// 	//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty;
-				// 		xFlag = false
-				// 		xSqlErrMsg = xDtQuery[0].calc_rab_item_remain_qty.status_msg
-				// 	}
-				// } else {
-				// 	xFlag = false
-				// }
+				if (xDtQuery.length > 0) {
+					if (xDtQuery[0].calc_rab_item_remain_qty_v2.status_code == "00") {
+						xFlag = true
+					} else {
+					//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty;
+						xFlag = false
+						xSqlErrMsg = xDtQuery[0].calc_rab_item_remain_qty_v2.status_msg
+					}
+				} else {
+					xFlag = false
+				}
 
-				// if (xFlag) {
-				xSaved = await _modelDb.update(pParam, xWhere);
+				if (xFlag) {
+					xSaved = await _modelDb.update(pParam, xWhere);
 
-				await xTransaction.commit();
+					await xTransaction.commit();
 
-				xJoResult = {
-					status_code: '00',
-					status_msg: 'Data has been successfully updated'
-				};
-				// } else {
-				// 	if (xTransaction) await xTransaction.rollback();
+					xJoResult = {
+						status_code: '00',
+						status_msg: 'Data has been successfully updated'
+					};
+				} else {
+					if (xTransaction) await xTransaction.rollback();
 
-				// 	xJoResult = {
-				// 		status_code: '-99',
-				// 		status_msg: `Failed save to database ${xSqlErrMsg}`
-				// 	};
-				// }
+					xJoResult = {
+						status_code: '-99',
+						status_msg: `Failed save to database ${xSqlErrMsg}`
+					};
+				}
 			} else if (pAct == 'update_by_product_code') {
 				pParam.updatedAt = await _utilInstance.getCurrDateTime();
 				var xProductCode = pParam.product_code;
@@ -265,7 +265,7 @@ class PurchaseRequestDetailRepository {
 				pParam.create_po_at = await _utilInstance.getCurrDateTime();
 				var xPRNo = pParam.pr_no;
 				delete pParam.pr_no;
-				pParam.is_po_created = false;
+				// pParam.is_po_created = false;
 				var xWhere = {
 					where: {
 						pr_no: xPRNo
@@ -355,6 +355,26 @@ class PurchaseRequestDetailRepository {
 					status_code: '00',
 					status_msg: 'Data has been successfully updated'
 				};
+			} else if (pAct == 'update_status') {
+				var xId = pParam.id;
+				delete pParam.id;
+				pParam.updated_by = pParam.user_id;
+				pParam.updated_by_name = pParam.user_name;
+				var xWhere = {
+					where: {
+						id: xId
+					},
+					transaction: xTransaction
+				};
+
+				xSaved = await _modelDb.update(pParam, xWhere);
+
+				await xTransaction.commit();
+
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'Data has been successfully updated'
+				};
 			}
 		} catch (e) {
 			if (xTransaction) await xTransaction.rollback();
@@ -374,60 +394,60 @@ class PurchaseRequestDetailRepository {
 
 		try {
 			var xSaved = null;
-			// var xSql = "";
-			// var xSqlErrMsg = ""
-			// var xFlag = false
+			var xSql = "";
+			var xSqlErrMsg = ""
+			var xFlag = false
 			xTransaction = await sequelize.transaction();
 
 			// console.log('DELETE ITEM >>>>>', pParam);
 
-			// xSql = `SELECT calc_rab_item_remain_qty('{
-			// 	"pAct": "update",
-			// 	"purchase_request_detail" : ${JSON.stringify(pParam)}
-			// }'::json)`;
+			xSql = `SELECT calc_rab_item_remain_qty('{
+				"pAct": "update",
+				"purchase_request_detail" : ${JSON.stringify(pParam)}
+			}'::json)`;
 
-			// var xDtQuery = await sequelize.query(xSql, {
-			// 	type: sequelize.QueryTypes.SELECT,
-			// });
-			// console.log('xUpdateResult>>>>', xDtQuery);
+			var xDtQuery = await sequelize.query(xSql, {
+				type: sequelize.QueryTypes.SELECT,
+			});
+			console.log('xUpdateResult>>>>', xDtQuery);
 
-			// if (xDtQuery.length > 0) {
-			// 	if (xDtQuery[0].calc_rab_item_remain_qty.status_code == "00") {
-			// 		xFlag = true
-			// 	} else {
-			// 	//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty;
-			// 		xFlag = false
-			// 		xSqlErrMsg = xDtQuery[0].calc_rab_item_remain_qty.status_msg
-			// 	}
-			// } else {
-			// 	xFlag = false
-			// }
+			if (xDtQuery.length > 0) {
+				if (xDtQuery[0].calc_rab_item_remain_qty.status_code == "00") {
+					xFlag = true
+				} else {
+				//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty;
+					xFlag = false
+					xSqlErrMsg = xDtQuery[0].calc_rab_item_remain_qty.status_msg
+				}
+			} else {
+				xFlag = false
+			}
 
-			// if (xFlag) {
-			xSaved = await _modelDb.destroy(
-				{
-					where: {
-						id: pParam.id
-					}
-				},
-				{ xTransaction }
-			);
+			if (xFlag) {
+				xSaved = await _modelDb.destroy(
+					{
+						where: {
+							id: pParam.id
+						}
+					},
+					{ xTransaction }
+				);
 
-			await xTransaction.commit();
+				await xTransaction.commit();
 
-			xJoResult = {
-				status_code: '00',
-				status_msg: 'Data has been successfully deleted'
-			};
-			// } else {
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'Data has been successfully deleted'
+				};
+			} else {
 
-			// 	if (xTransaction) await xTransaction.rollback();
+				if (xTransaction) await xTransaction.rollback();
 
-			// 	xJoResult = {
-			// 		status_code: '-99',
-			// 		status_msg: `Failed save to database ${xSqlErrMsg}`
-			// 	};
-			// }
+				xJoResult = {
+					status_code: '-99',
+					status_msg: `Failed save to database ${xSqlErrMsg}`
+				};
+			}
 
 			return xJoResult;
 		} catch (e) {
@@ -736,6 +756,144 @@ class PurchaseRequestDetailRepository {
 			};
 		}
 
+		return xJoResult;
+	}
+	
+	async outstandingItemList(pParam) {var xJoResult = {};
+		var xSql = '';
+		var xSqlCount = '';
+		var xTotalRecord = [];
+		var xObjJsonWhere = {};
+		var xSqlWhere = ' (1=1) ';
+		var xSqlWhereOr = [];
+		var xSqlOrderBy = '';
+		var xSqlLimit = '';
+		var xSqlGroupBy = '';
+		var xSqlFields = '';
+
+		try {
+			if (pParam.hasOwnProperty('order_by')) {
+				if (pParam.order_by != '') {
+					xSqlOrderBy = ` ORDER BY ${pParam.order_by} ${pParam.order_type != '' ? pParam.order_type : 'ASC'}`;
+				} else {
+					xSqlOrderBy = ` ORDER BY pr.created_at DESC`;
+				}
+			} else {
+				xSqlOrderBy = ` ORDER BY pr.created_at DESC`;
+			}
+
+			xSqlWhere += ' AND prd.status = 3 AND prd.qty_done < prd.qty_paid ';
+
+			if (pParam.hasOwnProperty('company_id')) {
+				if (pParam.company_id != '') {
+					xSqlWhere += ' AND pr.company_id = :companyId ';
+					xObjJsonWhere.companyId = pParam.company_id;
+				}
+			}
+
+			if (pParam.hasOwnProperty('department_id')) {
+				if (pParam.department_id != '') {
+					xSqlWhere += ' AND pr.department_id = :departmentId ';
+					xObjJsonWhere.departmentId = pParam.department_id;
+				}
+			}
+
+			if (pParam.hasOwnProperty('project_id')) {
+				if (pParam.project_id != '') {
+					xSqlWhere += ' AND pr.project_id = :projectId ';
+					xObjJsonWhere.projectId = pParam.project_id;
+				}
+			}
+
+			if (pParam.hasOwnProperty('category_item')) {
+				if (pParam.category_item != '') {
+					xSqlWhere += ' AND pr.category_item = :categoryItem ';
+					xObjJsonWhere.categoryItem = pParam.category_item;
+				}
+			}
+
+			// if (pParam.hasOwnProperty('pr_status')) {
+			// 	if (pParam.pr_status != '') {
+			// 		xSqlWhere += ' AND pr.status = :prStatus ';
+			// 		xObjJsonWhere.prStatus = pParam.pr_status;
+			// 	}
+			// }
+
+			if (pParam.hasOwnProperty('keyword')) {
+				if (pParam.keyword != '') {
+					let xSqlWhereKeyword = ` 
+							pr.request_no ILIKE :keyword OR
+							prd.product_code ILIKE :keyword OR
+							prd.product_name ILIKE :keyword OR
+							pr.company_name ILIKE :keyword OR
+							pr.company_code ILIKE :keyword OR
+							pr.department_name ILIKE :keyword OR
+							pr.employee_name ILIKE :keyword OR
+							prj.name ILIKE :keyword
+						`;
+					xObjJsonWhere.keyword = `%${pParam.keyword}%`;
+					xSqlWhere = ` ${xSqlWhere} AND (${xSqlWhereKeyword}) `;
+				}
+			}
+
+			if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
+				if (pParam.offset != '' && pParam.limit != '') {
+					xSqlLimit = ` OFFSET ${pParam.offset} LIMIT ${pParam.limit} `;
+				}
+			}
+
+			xSqlFields = ` prd.id as "prd_id", pr.id as "pr_id", pr.request_no, pr.employee_id, pr.employee_name,
+			pr.company_id, pr.company_name, pr.company_code, pr.department_id, pr.department_name, 
+			prd.status as "prd_status", prd.product_id, prd.product_code, prd.product_name,
+			prd.qty, prd.qty_paid, prd.qty_done, prd.uom_id, prd.uom_name, prd.budget_price_per_unit, 
+			prd.budget_price_total, prd.estimate_date_use, pr.created_at, pr.created_by, pr.created_by_name,
+			pr.status as "pr_status", pr.category_item, pr.category_pr, pr.fpb_type,
+			pr.project_id as "prj_id", prj.name as "prj_name", prd.is_po_created`;
+
+			xSql = ` SELECT ${xSqlFields}
+			FROM tr_purchaserequestdetails as prd
+			LEFT JOIN tr_purchaserequests as pr on pr.id = prd.request_id
+			LEFT JOIN ms_projects as prj on prj.id = pr.project_id
+			WHERE ${xSqlWhere} ${xSqlOrderBy} ${xSqlLimit} `;
+
+			xSqlCount = ` SELECT count(distinct pr.request_no) AS total_record
+			FROM tr_purchaserequestdetails as prd
+			LEFT JOIN tr_purchaserequests as pr on pr.id = prd.request_id
+			LEFT JOIN ms_projects as prj on prj.id = pr.project_id
+			WHERE ${xSqlWhere} `;
+
+			let xData = await sequelize.query(xSql, {
+				replacements: xObjJsonWhere,
+				type: sequelize.QueryTypes.SELECT,
+				// logging: console.log
+			});
+
+			xTotalRecord = await sequelize.query(xSqlCount, {
+				replacements: xObjJsonWhere,
+				type: sequelize.QueryTypes.SELECT
+			});
+			console.log(`>>> xData: ${JSON.stringify(xData)}`);
+			if (xData != null && xData.length > 0) {
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					total_record: xTotalRecord[0].total_record,
+					data: xData
+				};
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Data Not Found'
+				};
+			}
+
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.outstandingItemList`, `Exception error: ${e.message}`, 'error');
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.outstandingItemList: Exception error: ${e.message}`
+			};
+		}
 		return xJoResult;
 	}
 }

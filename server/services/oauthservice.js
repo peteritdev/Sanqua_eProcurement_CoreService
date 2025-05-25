@@ -48,7 +48,9 @@ class OAuthService {
 				'x-token': pToken
 			}
 		};
+		// console.log(`>>> approval : ${JSON.stringify(pParam)}`);
 		var xResultVerify = await _utilInstance.axiosRequestPost(xAPIUrl, 'POST', pParam, xHeader);
+		// console.log(`>>> xResultVerify : ${JSON.stringify(xResultVerify)}`);
 
 		return xResultVerify;
 	}
