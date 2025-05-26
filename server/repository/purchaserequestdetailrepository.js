@@ -397,11 +397,12 @@ class PurchaseRequestDetailRepository {
 			var xSql = "";
 			var xSqlErrMsg = ""
 			var xFlag = false
+			pParam.act = 'delete'
 			xTransaction = await sequelize.transaction();
 
-			// console.log('DELETE ITEM >>>>>', pParam);
+			console.log('DELETE ITEM >>>>>', pParam);
 			xSql = `SELECT calc_rab_item_remain_qty_v2('{
-				"pAct": "delete",
+				"pAct": "update",
 				"purchase_request_detail" : ${JSON.stringify(pParam)}
 			}'::json)`;
 
