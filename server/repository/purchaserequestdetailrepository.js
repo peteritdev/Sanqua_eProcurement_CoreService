@@ -401,7 +401,7 @@ class PurchaseRequestDetailRepository {
 
 			// console.log('DELETE ITEM >>>>>', pParam);
 
-			xSql = `SELECT calc_rab_item_remain_qty('{
+			xSql = `SELECT calc_rab_item_remain_qty_v2('{
 				"pAct": "update",
 				"purchase_request_detail" : ${JSON.stringify(pParam)}
 			}'::json)`;
@@ -412,12 +412,12 @@ class PurchaseRequestDetailRepository {
 			console.log('xUpdateResult>>>>', xDtQuery);
 
 			if (xDtQuery.length > 0) {
-				if (xDtQuery[0].calc_rab_item_remain_qty.status_code == "00") {
+				if (xDtQuery[0].calc_rab_item_remain_qty_v2.status_code == "00") {
 					xFlag = true
 				} else {
-				//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty;
+				//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty_v2;
 					xFlag = false
-					xSqlErrMsg = xDtQuery[0].calc_rab_item_remain_qty.status_msg
+					xSqlErrMsg = xDtQuery[0].calc_rab_item_remain_qty_v2.status_msg
 				}
 			} else {
 				xFlag = false
