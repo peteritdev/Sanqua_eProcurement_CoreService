@@ -78,7 +78,7 @@ class VendorService {
         var xJoArrData = [];       
 
         var xResultList = await _vendorRepoInstance.list(pParam);
-
+        // console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
         if( xResultList.count > 0 ){
             xJoResult.status_code = "00";
             xJoResult.status_msg = "OK";
@@ -86,7 +86,36 @@ class VendorService {
 
             var xRows = xResultList.rows;
 
-            for(var index in xRows){                
+            for(var index in xRows){
+                var phone1 = null;
+                var phone2 = null;
+                var email = null;
+                if( xRows[index].phone1 != null && xRows[index].phone1 != '' ) {
+                    if (xRows[index].phone1.length == 65) {
+                        var dec = await _utilInstance.decrypt( xRows[index].phone1, config.cryptoKey.hashKey)
+                        phone1 = dec.decrypted; 
+                    } else {
+                        phone1 = xRows[index].phone1
+                    }
+                }
+                
+                if( xRows[index].phone2 != null && xRows[index].phone2 != '' ) {
+                    if (xRows[index].phone2.length == 65) {
+                        var dec = await _utilInstance.decrypt( xRows[index].phone2, config.cryptoKey.hashKey)
+                        phone2 = dec.decrypted; 
+                    } else {
+                        phone2 = xRows[index].phone2
+                    }
+                }
+                
+                if( xRows[index].email != null && xRows[index].email != '' ) {
+                    if (xRows[index].email.length == 65) {
+                        var dec = await _utilInstance.decrypt( xRows[index].email, config.cryptoKey.hashKey)
+                        email = dec.decrypted; 
+                    } else {
+                        email = xRows[index].email
+                    }
+                }
 
                 xJoArrData.push({
                     id: await _utilInstance.encrypt((xRows[index].id).toString(), config.cryptoKey.hashKey),
@@ -99,9 +128,9 @@ class VendorService {
                     city: xRows[index].city,
                     address: xRows[index].address,
                     zip_code: xRows[index].zip_code,
-                    phone1: ( xRows[index].phone1 != null && xRows[index].phone1 != '' ? (await _utilInstance.decrypt( xRows[index].phone1, config.cryptoKey.hashKey )).decrypted : '' ),
-                    phone2: ( xRows[index].phone2 != null && xRows[index].phone2 != '' ? (await _utilInstance.decrypt( xRows[index].phone2, config.cryptoKey.hashKey )).decrypted : '' ),
-                    email: ( xRows[index].email != null && xRows[index].email != '' ? (await _utilInstance.decrypt( xRows[index].email, config.cryptoKey.hashKey )).decrypted : '' ),
+                    phone1: phone1,
+                    phone2: phone2,
+                    email: email,
                     website: xRows[index].website,
                     status: xRows[index].status,
                     currency: xRows[index].currency,
