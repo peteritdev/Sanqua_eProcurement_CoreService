@@ -162,7 +162,7 @@ class VendorService {
 
         if( xFlag ){
             var xData = await _vendorRepoInstance.getVendorById(pParam.id);
-            console.log(`>>> xData: ${JSON.stringify(xData)}`);
+            // console.log(`>>> xData: ${JSON.stringify(xData)}`);
             if( xData != null ){
                 var phone1 = null;
                 var phone2 = null;
