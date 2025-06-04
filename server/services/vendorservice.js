@@ -162,7 +162,35 @@ class VendorService {
 
         if( xFlag ){
             var xData = await _vendorRepoInstance.getVendorById(pParam.id);
+            // console.log(`>>> xData: ${JSON.stringify(xData)}`);
             if( xData != null ){
+                var phone1 = null;
+                var phone2 = null;
+                var email = null;
+
+                if( xData.phone1 != null && xData.phone1 != '' ) {
+                    if (xData.phone1.length == 65) {
+                        phone1 = await _utilInstance.decrypt( xData.phone1, config.cryptoKey.hashKey).decrypted; 
+                    } else {
+                        phone1 = xData.phone1
+                    }
+                }
+                
+                if( xData.phone2 != null && xData.phone2 != '' ) {
+                    if (xData.phone2.length == 65) {
+                        phone2 = await _utilInstance.decrypt( xData.phone2, config.cryptoKey.hashKey).decrypted;
+                    } else {
+                        phone2 = xData.phone2
+                    }
+                }
+                
+                if( xData.email != null && xData.email != '' ) {
+                    if (xData.email.length == 65) {
+                        email = await _utilInstance.decrypt( xData.email, config.cryptoKey.hashKey).decrypted;
+                    } else {
+                        email = xData.email
+                    }
+                }
                 xJoResult = {
                     status_code: "00",
                     status_msg: "OK",
@@ -179,9 +207,9 @@ class VendorService {
                         city: xData.city,
                         address: xData.address,
                         zip_code: xData.zip_code,
-                        phone1: (await _utilInstance.decrypt( xData.phone1, config.cryptoKey.hashKey )).decrypted,
-                        phone2: (await _utilInstance.decrypt( xData.phone2, config.cryptoKey.hashKey )).decrypted,
-                        email: (await _utilInstance.decrypt( xData.email, config.cryptoKey.hashKey )).decrypted,
+                        phone1: phone1,
+                        phone2: phone2,
+                        email: email,
                         website: xData.website,
                         about: xData.about,
                         location_lat: xData.location_lat,
