@@ -56,9 +56,7 @@ module.exports = (app) => {
 		check('file', 'Parameter photo must be array and cannot be empty').not().isEmpty().isArray()
 	];
 	app.post(
-		rootAPIPath + 'update_file_upload',
-		arrValidate,
-		purchaseRequestController.purchaseRequest_UpdateFileUpload
+		rootAPIPath + 'update_file_upload', arrValidate, purchaseRequestController.purchaseRequest_UpdateFileUpload
 	);
 
 	arrValidate = [];
@@ -141,9 +139,7 @@ module.exports = (app) => {
 	arrValidate = [];
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
 	app.post(
-		rootAPIPath + 'item/set_to_draft',
-		arrValidate,
-		purchaseRequestController.purchaseRequestDetail_SetToDraft
+		rootAPIPath + 'item/set_to_draft', arrValidate, purchaseRequestController.purchaseRequestDetail_SetToDraft
 	);
 
 	// Save Batch Detail
@@ -238,9 +234,7 @@ module.exports = (app) => {
 	arrValidate = [];
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
 	app.post(
-		rootAPIPath + 'item/cancel',
-		arrValidate,
-		purchaseRequestController.purchaseRequestDetail_CancelItem
+		rootAPIPath + 'item/cancel', arrValidate, purchaseRequestController.purchaseRequestDetail_CancelItem
 	);
 
 	// List FPB Item with outstanding GR
@@ -250,4 +244,10 @@ module.exports = (app) => {
 		check('limit').not().isEmpty().withMessage('Parameter limit cannot be empty')
 	];
 	app.get(rootAPIPath + 'gr-outstanding/list', arrValidate, purchaseRequestController.purchaseRequestDetail_OutstandingItemList);
+	
+	arrValidate = [];
+	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
+	app.post(
+		rootAPIPath + 'item/paid', arrValidate, purchaseRequestController.purchaseRequestDetail_PaidItem
+	);
 };

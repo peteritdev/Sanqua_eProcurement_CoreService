@@ -581,6 +581,8 @@ class PurchaseRequestRepository {
 								prd.currency_id,
 								prd.currency_code,
 								prd.currency_symbol,
+								prd.paid_at,
+								prd.paid_by_name,
 								p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 				xSqlGroupBy = ` `;
@@ -877,6 +879,8 @@ class PurchaseRequestRepository {
 			prd.currency_id,
 			prd.currency_code,
 			prd.currency_symbol,
+			prd.paid_at,
+			prd.paid_by_name,
 			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 		xSqlGroupBy = ` `;
