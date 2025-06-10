@@ -716,6 +716,10 @@ class PurchaseRequestService {
 					}
 					// looping detail item fpb
 					for (var index in xDetail) {
+						if (xDetail[index].uom_name != null) {
+							xDetail[index].uom_name = xDetail[index].uom_name.replace(/''/g, "'")
+						}
+						
 						// 17/11/2023 array for send to odoo check item
 						if (xDetail[index].is_item_match_with_odoo != 1) {
 							if (xResult.project !== null) {
