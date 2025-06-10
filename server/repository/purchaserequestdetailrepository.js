@@ -136,6 +136,9 @@ class PurchaseRequestDetailRepository {
 			var xFlag = false
 			xTransaction = await sequelize.transaction();
 
+			// Sanitize the input
+			pParam.uom_name = pParam.uom_name != null ? pParam.uom_name.replace(/'/g, "''") : null
+			
 			xSql = `SELECT calc_rab_item_remain_qty_v2('{
 				"pAct": "${pAct}",
 				"purchase_request_detail" : ${JSON.stringify(pParam)}
@@ -399,6 +402,8 @@ class PurchaseRequestDetailRepository {
 			var xFlag = false
 			pParam.act = 'delete'
 			xTransaction = await sequelize.transaction();
+			// Sanitize the input
+			pParam.uom_name = pParam.uom_name != null ? pParam.uom_name.replace(/'/g, "''") : null
 
 			console.log('DELETE ITEM >>>>>', pParam);
 			xSql = `SELECT calc_rab_item_remain_qty_v2('{

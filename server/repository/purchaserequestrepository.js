@@ -581,6 +581,8 @@ class PurchaseRequestRepository {
 								prd.currency_id,
 								prd.currency_code,
 								prd.currency_symbol,
+								prd.paid_at,
+								prd.paid_by_name,
 								p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 				xSqlGroupBy = ` `;
@@ -877,6 +879,8 @@ class PurchaseRequestRepository {
 			prd.currency_id,
 			prd.currency_code,
 			prd.currency_symbol,
+			prd.paid_at,
+			prd.paid_by_name,
 			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 		xSqlGroupBy = ` `;
@@ -961,10 +965,16 @@ class PurchaseRequestRepository {
 				var xSqlErrMsg = ""
 				// SELECT calc_rab_item_remain_qty
 				if (pParam.hasOwnProperty('budget_plan_id')) {
+					// Sanitize the input
+					const sanitizedPurchaseRequestDetail = pParam.purchase_request_detail.map(item => {
+					item.uom_name = item.uom_name.replace(/'/g, "''"); // Escape single quotes
+					return item;
+					});
+					
 					xSql = `SELECT calc_rab_item_remain_qty_v2('{
 							"pAct": "${pAct}",
 							"budget_plan_id" : ${pParam.budget_plan_id},
-							"purchase_request_detail" : ${JSON.stringify(pParam.purchase_request_detail)}
+							"purchase_request_detail" : ${JSON.stringify(sanitizedPurchaseRequestDetail)}
 						}'::json)`;
 
 					var xDtQuery = await sequelize.query(xSql, {
