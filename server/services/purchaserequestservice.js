@@ -192,7 +192,7 @@ class PurchaseRequestService {
 							pParam.purchase_request_detail = xJoArrItems;
 						}
 
-						// console.log(`>>> Create FPB : ${JSON.stringify(pParam)}`, xAct);
+						// console.log(`>>> Create FPB : ${JSON.stringify(pParam.purchase_request_detail)}`);
 						var xAddResult = await _repoInstance.save(pParam, xAct);
 						if (xAddResult.status_code == '00' && xAddResult.created_id != '' && xAddResult.clear_id != '') {
 							// Generate FPB No
@@ -221,7 +221,6 @@ class PurchaseRequestService {
 										msg: 'FPB created'
 									}
 								};
-								console.log(`>>> xParamLog : ${JSON.stringify(xParamLog)}`);
 								var xResultLog = await _logServiceInstance.addLog(pParam.method, pParam.token, xParamLog);
 								xJoResult.log_result = xResultLog;
 								// ---------------- End: Add to log ----------------
@@ -274,7 +273,6 @@ class PurchaseRequestService {
 							delete pParam.department_id;
 							delete pParam.department_name;
 							
-							console.log(`>>> xDataBeforeUpdate: ${JSON.stringify(xDataBeforeUpdate)} `);
 							if (xDataBeforeUpdate.budget_plan != null) {
 								// 04/05/2025
 								// check if rab already processed or not
@@ -313,7 +311,7 @@ class PurchaseRequestService {
 										xItemParam,
 										'update_by_request_id'
 									);
-									console.log(`>>> xUpdateItemStatus: ${JSON.stringify(xDataBeforeUpdate.project)} `);
+									// console.log(`>>> xUpdateItemStatus: ${JSON.stringify(xDataBeforeUpdate.project)} `);
 								}
 								xJoResult = xAddResult;
 							}
@@ -695,6 +693,7 @@ class PurchaseRequestService {
 				if (xResult != null) {
 					var xJoArrRequestDetailData = [];
 					var xDetail = xResult.purchase_request_detail;
+					// console.log(`>>> xResultDetail: ${JSON.stringify(xDetail)} <<<`);
 					// 17/11/2023 array for send to odoo check item
 					var xOdooArrItem = [];
 					// --
@@ -713,10 +712,6 @@ class PurchaseRequestService {
 					}
 					// looping detail item fpb
 					for (var index in xDetail) {
-						if (xDetail[index].uom_name != null) {
-							xDetail[index].uom_name = xDetail[index].uom_name.replace(/''/g, "'")
-						}
-						
 						// 17/11/2023 array for send to odoo check item
 						if (xDetail[index].is_item_match_with_odoo != 1) {
 							if (xResult.project !== null) {
@@ -861,8 +856,6 @@ class PurchaseRequestService {
 
 					// Call check item in odoo
 					if (xResult.status == 0) {
-						// console.log(`>>>xOdooArrItem ${JSON.stringify(xOdooArrItem)}`);
-						// console.log(`>>>xResult.id ${JSON.stringify(xResult.id)}`);
 						let xCheckItemInOdoo = await _oAuthService.checkItem({ items: xOdooArrItem });
 						if (xCheckItemInOdoo.status_code === '00') {
 							const xResultArr = xCheckItemInOdoo.data[0].eSanqua;
@@ -901,12 +894,10 @@ class PurchaseRequestService {
 									product_code: xItemCode,
 									product_name: xResultItem.name
 								};
-								console.log(`>>>>>>> xParamUpdate: ${JSON.stringify(xParamUpdate)}`);
 								let xUpdateParamChecking = await _repoDetailInstance.save(
 									xParamUpdate,
 									'update_by_product_code_and_request_id'
 								);
-								console.log(`>>>>>>> xUpdateParamChecking: ${JSON.stringify(xUpdateParamChecking)}`);
 							}
 						}
 					}
@@ -1104,20 +1095,9 @@ class PurchaseRequestService {
 											`xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`,
 											'info'
 										);
-
-										console.log(
-											`>>> xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`
-										);
-
 										// Email Notification
 										let xParamEmailNotification,
 											xNotificationResult = {};
-
-										console.log(
-											`>>> xApproverSeq1.approver_user[i]: ${JSON.stringify(
-												xApproverSeq1.approver_user[i]
-											)}`
-										);
 
 										if (xApproverSeq1.approver_user[i].notification_via_email) {
 											xParamEmailNotification = {
@@ -1137,19 +1117,10 @@ class PurchaseRequestService {
 													email: xApproverSeq1.approver_user[i].email
 												}
 											};
-											console.log(
-												`>>> xParamEmailNotification: ${JSON.stringify(
-													xParamEmailNotification
-												)}`
-											);
 											xNotificationResult = await _notificationService.sendNotificationEmail_FPBNeedApproval(
 												xParamEmailNotification,
 												pParam.method,
 												pParam.token
-											);
-
-											console.log(
-												`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`
 											);
 										}
 									}
@@ -1276,7 +1247,7 @@ class PurchaseRequestService {
 		if (xFlagProcess) {
 			// check is fpb status already cancelled
 			let xData = await _repoInstance.getById(pParam);
-			console.log(`>>> xData: ${JSON.stringify(xData)}`);
+			// console.log(`>>> xData: ${JSON.stringify(xData)}`);
 			pParam.set_to_draft_at = await _utilInstance.getCurrDateTime();
 			pParam.status = _PrConfStat.indexOf('Draft');
 			if (xData != null) {
@@ -1471,7 +1442,7 @@ class PurchaseRequestService {
 
 								// Send to next approver...
 								let xNextApprover = xResultApprovalMatrixDocument.approvers[0].approver_user;
-								console.log(`>>> xNextApprover : ${JSON.stringify(xNextApprover)}`);
+								// console.log(`>>> xNextApprover : ${JSON.stringify(xNextApprover)}`);
 								if (xNextApprover != null) {
 									for (var i in xNextApprover) {
 										let xInAppNotificationResult = await _notificationService.inAppNotification({
@@ -1509,20 +1480,12 @@ class PurchaseRequestService {
 													email: xNextApprover[i].email
 												}
 											};
-											console.log(
-												`>>> xParamEmailNotification: ${JSON.stringify(
-													xParamEmailNotification
-												)}`
-											);
 											xNotificationResult = await _notificationService.sendNotificationEmail_FPBNeedApproval(
 												xParamEmailNotification,
 												pParam.method,
 												pParam.token
 											);
 
-											console.log(
-												`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`
-											);
 										}
 									}
 								}
@@ -1818,7 +1781,6 @@ class PurchaseRequestService {
 				document_id: '',
 				user_id: pParam.user_id
 			});
-			console.log(`>>> xOwnedDocument : ${JSON.stringify(xOwnedDocument)}`);
 
 			if (xOwnedDocument.status_code == '00') {
 				if (xOwnedDocument.hasOwnProperty('token_data')) {
@@ -2094,7 +2056,6 @@ class PurchaseRequestService {
 		if (xFlagProcess) {
 			var xResultList = await _repoInstance.transaction_history(pParam);
 
-			console.log(`>>> xResultList : ${JSON.stringify(xResultList)}`);
 			if (xResultList.total_record > 0) {
 				var xRows = xResultList.data;
 				for (var index in xRows) {
@@ -2227,7 +2188,6 @@ class PurchaseRequestService {
 		if (xFlagProcess) {
 			// Get PR Detail
 			var xPRDetail = await _repoInstance.getById({ id: xClearId });
-			console.log(`>>> xPRDetail: ${JSON.stringify(xPRDetail)}`);
 			if (xPRDetail != null) {
 				if (xPRDetail.status != 1) {
 					xJoResult = {
@@ -2243,7 +2203,6 @@ class PurchaseRequestService {
 						user_name: pParam.user_name
 					}
 					var xUpdateResult = await _repoInstance.save(xUpdateParam, 'update');
-					console.log(`>>> xUpdateResult: ${JSON.stringify(xUpdateResult)}`);
 					xJoResult = xUpdateResult;
 					// Next Phase : Approval Matrix & Notification to admin
 					if (xUpdateResult.status_code == '00') {
@@ -2272,7 +2231,6 @@ class PurchaseRequestService {
 							pParam.token,
 							xParamAddApprovalMatrix
 						);
-						console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
 						xJoResult.approval_matrix_result = xApprovalMatrixResult;
 
 						if (xApprovalMatrixResult.status_code == '00') {
@@ -2322,20 +2280,14 @@ class PurchaseRequestService {
 													email: xApproverSeq1.approver_user[i].email
 												}
 											};
-											console.log(
-												`>>> xParamEmailNotification: ${JSON.stringify(
-													xParamEmailNotification
-												)}`
-											);
 											xNotificationResult = await _notificationService.sendNotificationEmail_FPBNeedApproval(
 												xParamEmailNotification,
 												pParam.method,
 												pParam.token
 											);
-
-											console.log(
-												`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`
-											);
+											// console.log(
+											// 	`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`
+											// );
 										}
 									}
 								}

@@ -743,7 +743,7 @@ class PurchaseRequestRepository {
 				xObjJsonWhere.status = pParam.status;
 			}
 		}
-		console.log('user_id>>>>', pParam.user_id, pParam.is_admin, pParam.logged_is_admin);
+		// console.log('user_id>>>>', pParam.user_id, pParam.is_admin, pParam.logged_is_admin);
 		
 		if (pParam.hasOwnProperty('user_id') && pParam.logged_is_admin == 0) {
 			if (pParam.user_id != '') {
@@ -965,21 +965,35 @@ class PurchaseRequestRepository {
 				var xSqlErrMsg = ""
 				// SELECT calc_rab_item_remain_qty
 				if (pParam.hasOwnProperty('budget_plan_id')) {
-					// Sanitize the input
-					const sanitizedPurchaseRequestDetail = pParam.purchase_request_detail.map(item => {
-					item.uom_name = item.uom_name.replace(/'/g, "''"); // Escape single quotes
-					return item;
-					});
+					// // Sanitize the input
+					// const sanitizedPurchaseRequestDetail = pParam.purchase_request_detail.map(item => {
+					// 	item.uom_name = item.uom_name.replace(/'/g, "''"); // Escape single quotes
+					// 	return item;
+					// });
 					
-					xSql = `SELECT calc_rab_item_remain_qty_v2('{
-							"pAct": "${pAct}",
-							"budget_plan_id" : ${pParam.budget_plan_id},
-							"purchase_request_detail" : ${JSON.stringify(sanitizedPurchaseRequestDetail)}
-						}'::json)`;
+					// console.log(`>>> sanitizedPurchaseRequestDetail : ${JSON.stringify(sanitizedPurchaseRequestDetail)}`);
+					// xSql = `SELECT calc_rab_item_remain_qty_v2('{
+					// 		"pAct": "${pAct}",
+					// 		"budget_plan_id" : ${pParam.budget_plan_id},
+					// 		"purchase_request_detail" : ${JSON.stringify(sanitizedPurchaseRequestDetail)}
+					// 	}'::json)`;
 
-					var xDtQuery = await sequelize.query(xSql, {
+					// var xDtQuery = await sequelize.query(xSql, {
+					// 	type: sequelize.QueryTypes.SELECT,
+					// });
+					// Gunakan parameter binding agar Sequelize dan PostgreSQL menangani escape karakter-karakter khusus dengan aman.
+					const payload = {
+						pAct: pAct,
+						budget_plan_id: pParam.budget_plan_id,
+						purchase_request_detail: pParam.purchase_request_detail,
+					};
+					xSql = `SELECT calc_rab_item_remain_qty_v2(:payload::json)`;
+
+					const xDtQuery = await sequelize.query(xSql, {
+						replacements: { payload: JSON.stringify(payload) },
 						type: sequelize.QueryTypes.SELECT,
 					});
+					// console.log(`>>> xDtQuery : ${JSON.stringify(xDtQuery)}`);
 
 					if (xDtQuery.length > 0) {
 						if (xDtQuery[0].calc_rab_item_remain_qty_v2.status_code == "00") {
@@ -1359,13 +1373,13 @@ class PurchaseRequestRepository {
 					}
 				};
 
-				console.log('>>>> here 1');
+				// console.log('>>>> here 1');
 				xSaved = await _modelDb.update(pParam, xWhere, { xTransaction });
-				console.log('>>>> here 2');
+				// console.log('>>>> here 2');
 
 				await xTransaction.commit();
 
-				console.log('>>>> here 1');
+				// console.log('>>>> here 1');
 				xJoResult = {
 					status_code: '00',
 					status_msg: `Data has been successfully`
