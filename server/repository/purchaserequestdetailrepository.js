@@ -135,14 +135,16 @@ class PurchaseRequestDetailRepository {
 			var xSqlErrMsg = ""
 			var xFlag = false
 			xTransaction = await sequelize.transaction();
-
-			// Sanitize the input
-			pParam.uom_name = pParam.uom_name != null ? pParam.uom_name.replace(/'/g, "''") : null
-			
-			xSql = `SELECT calc_rab_item_remain_qty_v2('{
-				"pAct": "${pAct}",
-				"purchase_request_detail" : ${JSON.stringify(pParam)}
-			}'::json)`;
+			// Gunakan parameter binding agar Sequelize dan PostgreSQL menangani escape karakter-karakter khusus dengan aman.
+			const payload = {
+				pAct: pAct,
+				purchase_request_detail: pParam,
+			};
+			xSql = `SELECT calc_rab_item_remain_qty_v2(:payload::json)`;
+			// xSql = `SELECT calc_rab_item_remain_qty_v2('{
+			// 	"pAct": "${pAct}",
+			// 	"purchase_request_detail" : ${JSON.stringify(pParam)}
+			// }'::json)`;
 
 			if (pAct == 'add') {
 				pParam.status = 0;
@@ -150,9 +152,13 @@ class PurchaseRequestDetailRepository {
 				pParam.created_by = pParam.user_id;
 				pParam.created_by_name = pParam.user_name;
 
-				var xDtQuery = await sequelize.query(xSql, {
+				const xDtQuery = await sequelize.query(xSql, {
+					replacements: { payload: JSON.stringify(payload) },
 					type: sequelize.QueryTypes.SELECT,
 				});
+				// var xDtQuery = await sequelize.query(xSql, {
+				// 	type: sequelize.QueryTypes.SELECT,
+				// });
 
 				if (xDtQuery.length > 0) {
 					if (xDtQuery[0].calc_rab_item_remain_qty_v2.status_code == "00") {
@@ -209,9 +215,13 @@ class PurchaseRequestDetailRepository {
 				pParam.updated_by = pParam.user_id;
 				pParam.updated_by_name = pParam.user_name;
 
-				var xDtQuery = await sequelize.query(xSql, {
+				const xDtQuery = await sequelize.query(xSql, {
+					replacements: { payload: JSON.stringify(payload) },
 					type: sequelize.QueryTypes.SELECT,
 				});
+				// var xDtQuery = await sequelize.query(xSql, {
+				// 	type: sequelize.QueryTypes.SELECT,
+				// });
 
 				if (xDtQuery.length > 0) {
 					if (xDtQuery[0].calc_rab_item_remain_qty_v2.status_code == "00") {
@@ -402,19 +412,23 @@ class PurchaseRequestDetailRepository {
 			var xFlag = false
 			pParam.act = 'delete'
 			xTransaction = await sequelize.transaction();
-			// Sanitize the input
-			pParam.uom_name = pParam.uom_name != null ? pParam.uom_name.replace(/'/g, "''") : null
 
-			console.log('DELETE ITEM >>>>>', pParam);
-			xSql = `SELECT calc_rab_item_remain_qty_v2('{
-				"pAct": "update",
-				"purchase_request_detail" : ${JSON.stringify(pParam)}
-			}'::json)`;
-
-			var xDtQuery = await sequelize.query(xSql, {
+			const payload = {
+				pAct: pAct,
+				purchase_request_detail: pParam,
+			};
+			xSql = `SELECT calc_rab_item_remain_qty_v2(:payload::json)`;
+			// xSql = `SELECT calc_rab_item_remain_qty_v2('{
+			// 	"pAct": "update",
+			// 	"purchase_request_detail" : ${JSON.stringify(pParam)}
+			// }'::json)`;
+			const xDtQuery = await sequelize.query(xSql, {
+				replacements: { payload: JSON.stringify(payload) },
 				type: sequelize.QueryTypes.SELECT,
 			});
-			console.log('xUpdateResult>>>>', xDtQuery);
+			// var xDtQuery = await sequelize.query(xSql, {
+			// 	type: sequelize.QueryTypes.SELECT,
+			// });
 
 			if (xDtQuery.length > 0) {
 				if (xDtQuery[0].calc_rab_item_remain_qty_v2.status_code == "00") {
@@ -636,7 +650,6 @@ class PurchaseRequestDetailRepository {
 		var xIsMatchOdoo = 0;
 
 		try {
-			console.log(`>>> pParam : ${JSON.stringify(pParam)}`);
 			xTransaction = await sequelize.transaction();
 
 			// Get the unmatch detail
@@ -877,7 +890,6 @@ class PurchaseRequestDetailRepository {
 				replacements: xObjJsonWhere,
 				type: sequelize.QueryTypes.SELECT
 			});
-			console.log(`>>> xData: ${JSON.stringify(xData)}`);
 			if (xData != null && xData.length > 0) {
 				xJoResult = {
 					status_code: '00',
