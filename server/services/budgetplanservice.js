@@ -382,25 +382,23 @@ class BudgetPlanService {
                             }
 
                             if (xFlagProcess) {
-                                
                                 // check detail rab if loged id match with created_id
-                                
-                                var xDetailRab = await _repoInstance.getById({id: pParam.id});
-                                if (pParam.employee_id == xDetailRab.employee_id || pParam.logged_is_admin == 1) {
-                                    delete pParam.employee_id
-                                    delete pParam.employee_nik
-                                    delete pParam.employee_name
-                                    delete pParam.department_id
-                                    delete pParam.department_name
+                                // var xDetailRab = await _repoInstance.getById({id: pParam.id});
+                                // if (pParam.employee_id == xDetailRab.employee_id || pParam.logged_is_admin == 1) {
+                                delete pParam.employee_id
+                                delete pParam.employee_nik
+                                delete pParam.employee_name
+                                delete pParam.department_id
+                                delete pParam.department_name
 
-                                    let xResult = await _repoInstance.save(pParam, xAct);
-                                    xJoResult = xResult;
-                                } else {
-                                    xJoResult = {
-                                        status_code: '-99',
-                                        status_msg: 'Cannot edit RAB, Must be owner of this document or PIC eCatalog'
-                                    };
-                                }
+                                let xResult = await _repoInstance.save(pParam, xAct);
+                                xJoResult = xResult;
+                                // } else {
+                                //     xJoResult = {
+                                //         status_code: '-99',
+                                //         status_msg: 'Cannot edit RAB, Must be owner of this document or PIC eCatalog'
+                                //     };
+                                // }
                             }
 
                         } else {
