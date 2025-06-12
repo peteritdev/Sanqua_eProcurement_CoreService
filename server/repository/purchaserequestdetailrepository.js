@@ -414,7 +414,7 @@ class PurchaseRequestDetailRepository {
 			xTransaction = await sequelize.transaction();
 
 			const payload = {
-				pAct: pAct,
+				pAct: 'update',
 				purchase_request_detail: pParam,
 			};
 			xSql = `SELECT calc_rab_item_remain_qty_v2(:payload::json)`;
