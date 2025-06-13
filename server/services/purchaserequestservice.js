@@ -428,6 +428,7 @@ class PurchaseRequestService {
 					const bDect = await _utilInstance.decrypt(pParam.budget_plan_id, config.cryptoKey.hashKey);
 					if (bDect.status_code == '00') {
 						pParam.budget_plan_id = bDect.decrypted
+						delete pParam.department_id
 					}
 				}
 
