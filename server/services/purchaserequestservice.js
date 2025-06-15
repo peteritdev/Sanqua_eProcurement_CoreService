@@ -969,7 +969,11 @@ class PurchaseRequestService {
 							xResult.took_at != null ? moment(xResult.took_at).format('DD MMM YYYY HH:mm:ss') : null,
 						took_by_name: xResult.took_by_name,
 						fpb_type: xResult.fpb_type,
-						budget_plan: xResult.budget_plan,
+						budget_plan: xResult.budget_plan != null ? {
+							id: await _utilInstance.encrypt(xResult.budget_plan.id.toString(), config.cryptoKey.hashKey),
+							name: xResult.budget_plan.name,
+							budget_no: xResult.budget_plan.budget_no
+						} : null,
 						total_realization: xTotalRealization,
 						total_item_with_budget: xTotalItem,
 						approved_at: xResult.approved_at,
