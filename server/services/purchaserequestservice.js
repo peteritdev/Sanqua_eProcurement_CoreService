@@ -276,23 +276,26 @@ class PurchaseRequestService {
 							if (xDataBeforeUpdate.budget_plan != null) {
 								// 04/05/2025
 								// check if rab already processed or not
-								if (pParam.budget_plan_id != xDataBeforeUpdate.budget_plan.id) {
-									let xGetDetailRAB = await _rabRepoInstance.getById({ id: xDataBeforeUpdate.budget_plan.id });
-									if (xGetDetailRAB != null) {
-										if (xGetDetailRAB.status == 3) {
-											xJoResult = {
-												status_code: '-99',
-												status_msg: `Tidak dapat merubah FPB, RAB yang dicantumkan sudah diproses`
-											};
-											xFlagProcess = false;
+            					console.log(`pParam.budget_plan_id>>>>>>: ${JSON.stringify(pParam.budget_plan_id)}`);
+								if (pParam.hasOwnProperty('budget_plan_id')) {
+									if (pParam.budget_plan_id != xDataBeforeUpdate.budget_plan.id) {
+										let xGetDetailRAB = await _rabRepoInstance.getById({ id: xDataBeforeUpdate.budget_plan.id });
+										if (xGetDetailRAB != null) {
+											if (xGetDetailRAB.status == 3) {
+												xJoResult = {
+													status_code: '-99',
+													status_msg: `Tidak dapat merubah FPB, RAB yang dicantumkan sudah diproses`
+												};
+												xFlagProcess = false;
+											} else {
+												xFlagProcess = true;
+											}
 										} else {
 											xFlagProcess = true;
 										}
 									} else {
 										xFlagProcess = true;
 									}
-								} else {
-									xFlagProcess = true;
 								}
 								
 							} else {
