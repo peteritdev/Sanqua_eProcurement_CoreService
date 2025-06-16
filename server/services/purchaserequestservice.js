@@ -276,23 +276,25 @@ class PurchaseRequestService {
 							if (xDataBeforeUpdate.budget_plan != null) {
 								// 04/05/2025
 								// check if rab already processed or not
-								if (pParam.budget_plan_id != xDataBeforeUpdate.budget_plan.id) {
-									let xGetDetailRAB = await _rabRepoInstance.getById({ id: xDataBeforeUpdate.budget_plan.id });
-									if (xGetDetailRAB != null) {
-										if (xGetDetailRAB.status == 3) {
-											xJoResult = {
-												status_code: '-99',
-												status_msg: `Tidak dapat merubah FPB, RAB yang dicantumkan sudah diproses`
-											};
-											xFlagProcess = false;
+								if (pParam.hasOwnProperty('budget_plan_id')) {
+									if (pParam.budget_plan_id != xDataBeforeUpdate.budget_plan.id) {
+										let xGetDetailRAB = await _rabRepoInstance.getById({ id: xDataBeforeUpdate.budget_plan.id });
+										if (xGetDetailRAB != null) {
+											if (xGetDetailRAB.status == 3) {
+												xJoResult = {
+													status_code: '-99',
+													status_msg: `Tidak dapat merubah FPB, RAB yang dicantumkan sudah diproses`
+												};
+												xFlagProcess = false;
+											} else {
+												xFlagProcess = true;
+											}
 										} else {
 											xFlagProcess = true;
 										}
 									} else {
 										xFlagProcess = true;
 									}
-								} else {
-									xFlagProcess = true;
 								}
 								
 							} else {
@@ -522,6 +524,8 @@ class PurchaseRequestService {
 										currency_id: xRows[index].currency_id,
 										currency_code: xRows[index].currency_code,
 										currency_symbol: xRows[index].currency_symbol
+										// paid_at: xRows[index].paid_at,
+										// paid_by_name: xRows[index].paid_by_name,
 									},
 									approved_at: xRows[index].approved_at,
 									budget_plan_no: xRows[index].budget_plan_no
@@ -825,6 +829,10 @@ class PurchaseRequestService {
 							currency_symbol: xDetail[index].currency_symbol
 							// qty_paid: xDetail[index].qty_paid,
 							// qty_done: xDetail[index].qty_done
+							// paid_at: xDetail[index].paid_at,
+							// paid_by: xDetail[index].paid_by,
+							// paid_by_name: xDetail[index].paid_by_name,
+							// paid_note: xDetail[index].paid_note
 						});
 					}
 					// Get Approval Matrix
@@ -1901,6 +1909,8 @@ class PurchaseRequestService {
 								currency_id: xRows[index].currency_id,
 								currency_code: xRows[index].currency_code,
 								currency_symbol: xRows[index].currency_symbol
+								// paid_at: xRows[index].paid_at,
+								// paid_by_name: xRows[index].paid_by_name
 							},
 							budget_plan_no: xRows[index].budget_plan_no
 						});
