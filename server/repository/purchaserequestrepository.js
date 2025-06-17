@@ -13,6 +13,7 @@ const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
 const _modelBudgetPlan = require('../models').tr_budgetplans;
+const _modelBudgetPlanDetail = require('../models').tr_budgetplandetails;
 
 const Utility = require('peters-globallib-v2');
 const { param } = require('express-validator');
@@ -48,6 +49,10 @@ class PurchaseRequestRepository {
 								attributes: [ 'id', 'name'],
 							}
 						]
+					},
+					{
+						model: _modelBudgetPlanDetail,
+						as: 'rab_item'
 					},
 				]
 			},

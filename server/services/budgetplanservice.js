@@ -182,6 +182,7 @@ class BudgetPlanService {
                                         // set_to_draft_by_name: xRows[i].set_to_draft_by_name,
                                         // deleted_at: moment(xRows[i].deletedAt).format('DD MMM YYYY HH:mm:ss'),
                                         // deleted_by_name: xRows[i].deleted_by_name
+                                        rab_type: xRows[i].rab_type,
                                     });
                                 }
         
@@ -319,22 +320,24 @@ class BudgetPlanService {
                                             xJoArrItems[i].category_name = xCatalogue.data.product.category.name;
                                         }
                         			}
+                                    if (
+                        				xJoArrItems[i].hasOwnProperty('rab_origin_id') && xJoArrItems[i].rab_origin_id != null && xJoArrItems[i].rab_origin_id != ''
+                        			) {
+                                        const xRabOriginId = await _utilInstance.decrypt(xJoArrItems[i].rab_origin_id, config.cryptoKey.hashKey);
+                        				xJoArrItems[i].xJoArrItems[i].rab_origin_id = xRabOriginId.decrypted;
+                        			}
                         		}
                         	}
                         	pParam.budget_plan_detail = xJoArrItems;
                         }
 
+                        // console.log(`>>> xParamUpdate : ${JSON.stringify(pParam)}`);
                         var xAddResult = await _repoInstance.save(pParam, xAct);
                         if (xAddResult.status_code == '00' && xAddResult.created_id != '' && xAddResult.clear_id != '') {
                             // Generate RAB No
-                            
                             var dt = dateTime.create();
                             var xDate = dt.format('ym');
                             var xRABNo = `${pParam.company_code}/RAB/${xDate}/` + xAddResult.clear_id.padStart(5, '0');
-                            // var xRABNo = await _globalUtilInstance.generatePurchaseRequestNo(
-                            // 	xAddResult.clear_id,
-                            // 	pParam.company_code
-                            // );
                             
                             var xParamUpdate = {
                                 budget_no: xRABNo,
@@ -498,6 +501,12 @@ class BudgetPlanService {
 								? moment(xDetail[index].estimate_date_use).format('DD MMM YYYY')
 								: null,
 						section_title: xDetail[index].section_title,
+						fpb_ids: xDetail[index].fpb_ids,
+						rab_origin: xDetail[index].rab_origin != null ? {
+                            id: await _utilInstance.encrypt(xDetail[index].rab_origin.id.toString(), config.cryptoKey.hashKey),
+                            name: xDetail[index].rab_origin.name,
+                            document_no: xDetail[index].rab_origin.budget_no,
+                        } : null
 					});
 				}
 				// Get Approval Matrix
@@ -596,6 +605,8 @@ class BudgetPlanService {
                     done_by_name: xResult.done_by_name,
                     file: xFileArr,
                     note: xResult.note,
+					rab_type: xResult.rab_type,
+					rab_type_name: xResult.rab_type == 1 ? 'Original' : xResult.rab_type == 2 ? 'Revisi' : null,
 				};
 
 				xJoResult = {

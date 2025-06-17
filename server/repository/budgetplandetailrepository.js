@@ -37,6 +37,11 @@ class BudgetPlanDetailRepository {
           as: "budget_plan",
           attributes: ["budget_no", "name"],
         },
+        {
+          model: _modelBudgetPlan,
+          as: "rab_origin",
+          attributes: ["id, budget_no", "name"],
+        },
       ];
 
       if (pParam.hasOwnProperty("request_id")) {

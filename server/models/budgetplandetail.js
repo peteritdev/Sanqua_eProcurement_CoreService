@@ -53,7 +53,9 @@ module.exports = (sequelize, DataTypes) => {
 		currency_symbol: DataTypes.STRING,
 		currency_code: DataTypes.STRING,
 		last_price: DataTypes.DOUBLE,
-		section_title: DataTypes.STRING
+		section_title: DataTypes.STRING,
+		rab_origin_id: DataTypes.INTEGER,
+		fpb_ids: DataTypes.JSON
 	});
 
 	BudgetPlanDetail.associate = function(models) {
@@ -78,6 +80,12 @@ module.exports = (sequelize, DataTypes) => {
 		BudgetPlanDetail.belongsTo(models.ms_vendorcatalogues, {
 			foreignKey: 'vendor_catalogue_id',
 			as: 'vendor_catalogue',
+			onDelete: 'CASCADE'
+		});
+
+		BudgetPlanDetail.belongsTo(models.tr_budgetplans, {
+			foreignKey: 'rab_origin_id',
+			as: 'rab_origin',
 			onDelete: 'CASCADE'
 		});
 	};

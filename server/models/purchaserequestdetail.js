@@ -86,6 +86,7 @@ module.exports = (sequelize, DataTypes) => {
 		paid_by: DataTypes.INTEGER,
 		paid_by_name: DataTypes.STRING,
 		paid_note: DataTypes.STRING,
+		rab_item_id: DataTypes.INTEGER,
 	});
 
 	PurchaseRequestDetail.associate = function(models) {
@@ -110,6 +111,12 @@ module.exports = (sequelize, DataTypes) => {
 		PurchaseRequestDetail.belongsTo(models.ms_vendorcatalogues, {
 			foreignKey: 'vendor_catalogue_id',
 			as: 'vendor_catalogue',
+			onDelete: 'CASCADE'
+		});
+
+		PurchaseRequestDetail.belongsTo(models.tr_budgetplandetails, {
+			foreignKey: 'rab_item_id',
+			as: 'rab_item',
 			onDelete: 'CASCADE'
 		});
 	};

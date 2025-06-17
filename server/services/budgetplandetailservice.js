@@ -88,7 +88,13 @@ class BudgetPlanDetailService {
 								vendor_catalogue_id: xRows[i].vendor_catalogue_id,
 								vendor_recomendation: xRows[i].vendor_recomendation,
 								budget_plan: xRows[i].budget_plan,
-								section_title: xRows[i].section_title
+								section_title: xRows[i].section_title,
+								fpb_ids: xRows[i].fpb_ids,
+								rab_origin: xRows[i].rab_origin != null ? {
+									id: await _utilInstance.encrypt(xRows[i].rab_origin.id.toString(), config.cryptoKey.hashKey),
+									name: xDetail[index].rab_origin.name,
+									document_no: xDetail[index].rab_origin.budget_no,
+								} : null
 							});
 						}
 
@@ -165,12 +171,24 @@ class BudgetPlanDetailService {
 					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
 					if (xDecId.status_code == '00') {
 						pParam.user_id = xDecId.decrypted;
-						xFlagProcess = true;
+						// xFlagProcess = true;
 						xDecId = await _utilInstance.decrypt(pParam.request_id, config.cryptoKey.hashKey);
 						if (xDecId.status_code == '00') {
 							pParam.request_id = xDecId.decrypted;
 							xRequestIdClear = xDecId.decrypted;
-							xFlagProcess = true;
+							// xFlagProcess = true;
+							if (pParam.hasOwnProperty('rab_origin_id') && pParam.rab_origin_id != '' && pParam.rab_origin_id != null) {
+								// Check if rab_origin_id is encrypted or not
+								xDecId = await _utilInstance.decrypt(pParam.rab_origin_id, config.cryptoKey.hashKey);
+								if (xDecId.status_code == '00') {
+									pParam.rab_origin_id = xDecId.decrypted;
+									xFlagProcess = true;
+								} else {
+									xJoResult = xDecId;
+								}
+							} else {
+								xFlagProcess = true;
+							}
 						} else {
 							xJoResult = xDecId;
 						}
@@ -196,34 +214,7 @@ class BudgetPlanDetailService {
 				var xBudgetPlanDetail = null,
 					xProductDetail = null,
 					xVendorDetail = null;
-
-				// if (pParam.hasOwnProperty('product_id') && pParam.hasOwnProperty('vendor_id')) {
-				// 	if (pParam.product_id != null && pParam.vendor_id != null) {
-				// 		// Check first whether product_id and vendor_id already exists in detail or not
-				// 		xBudgetPlanDetail = await _repoInstance.getByProductIdVendorId({
-				// 			product_id: pParam.product_id,
-				// 			vendor_id: pParam.vendor_id,
-				// 			request_id: pParam.request_id
-				// 		});
-				// 	}
-				// }
-
-				// if (
-				// 	xBudgetPlanDetail != null &&
-				// 	xBudgetPlanDetail.budget_price_per_unit == pParam.budget_price_per_unit
-				// ) {
-				// 	var xParamUpdate = {
-				// 		id: xBudgetPlanDetail.id,
-				// 		qty: sequelize.literal(`qty + ${pParam.qty}`),
-				// 		budget_price_total:
-				// 			(xBudgetPlanDetail.qty + pParam.qty) * xBudgetPlanDetail.budget_price_per_unit
-				// 	};
-				// 	pParam = null;
-				// 	pParam = xParamUpdate;
-
-				// 	xAct = 'update';
-				// } else {
-					// console.log(`>>> pParam CEK CEK CEK : ${JSON.stringify(pParam)}`);
+				
                 if (pParam.hasOwnProperty('product_id')) {
                     if (pParam.product_id != null) {
                         // Get Product detail by Id
@@ -258,46 +249,11 @@ class BudgetPlanDetailService {
 				if (pParam.estimate_date_use == '') {
 					pParam.estimate_date_use = null;
 				}
-
 				// Validate if product_id is null (free keyin for project), estimate_fulfillment
-
+				// console.log(`>>> pParam save : ${JSON.stringify(pParam)}`);
 				var xAddResult = await _repoInstance.save(pParam, xAct);
 				xJoResult = xAddResult;
 
-				// if (xAddResult.status_code == '00') {
-				// 	// ---------------- Start: Add to log ----------------
-				// 	// console.log(`>>> pParam : ${JSON.stringify(pParam)}`);
-				// 	let xParamLog = {
-				// 		act: 'add',
-				// 		employee_id: pParam.employee_id,
-				// 		employee_name: pParam.employee_name,
-				// 		request_id: pParam.request_id,
-				// 		request_no: xBudgetPlan.data.budget_no,
-				// 		body: {
-				// 			act: 'add',
-				// 			msg: 'RAB Item created',
-				// 			before: null,
-				// 			after: {
-				// 				qty: pParam.qty,
-				// 				budget_price_per_unit: pParam.budget_price_per_unit,
-				// 				quotation_price_per_unit: pParam.quotation_price_per_unit,
-				// 				has_budget: pParam.has_budget,
-				// 				estimate_date_use: pParam.estimate_date_use,
-				// 				description: pParam.description,
-				// 				product_id: pParam.product_id,
-				// 				product_name: pParam.product_name,
-				// 				vendor_id: pParam.vendor_id,
-				// 				vendor_name: pParam.vendor_name,
-				// 				vendor_code: pParam.vendor_code,
-				// 				employee_id: pParam.employee_id,
-				// 				employee_name: pParam.employee_name,
-				// 				budget_price_total: pParam.budget_price_total
-				// 			}
-				// 		}
-				// 	};
-				// 	var xResultLog = await _logServiceInstance.addLog(xMethod, xToken, xParamLog);
-				// 	xJoResult.log_result = xResultLog;
-				// }
 			} else if (xAct == 'add_batch') {
 				if (pParam.hasOwnProperty('items')) {
 					var xItems = pParam.items;
@@ -345,41 +301,19 @@ class BudgetPlanDetailService {
 								}
 							}
 							
-							// if (xItems[i].product_id !== null) {
-							// 	var xProductDetail = await _productServiceInstance.getById({
-							// 		id: await _utilInstance.encrypt(
-							// 			xItems[i].product_id.toString(),
-							// 			config.cryptoKey.hashKey
-							// 		)
-							// 	});
-							// 	console.log('Add Batch Detail | Product >>>>', xProductDetail);
-							// 	if (xProductDetail != null) {
-							// 		// console.log(JSON.stringify(xProductDetail));
-							// 		xItems[i].product_code = xProductDetail.data.code;
-							// 		xItems[i].product_name = xProductDetail.data.name;
-							// 	}
-							// }
-
-							// // Get Vendor detail by id
-							// if (xItems[i].vendor_id !== null) {
-							// 	var xVendorDetail = await _vendorServiceInstance.getVendorById({
-							// 		id: await _utilInstance.encrypt(
-							// 			xItems[i].vendor_id.toString(),
-							// 			config.cryptoKey.hashKey
-							// 		)
-							// 	});
-	
-							// 	if (xVendorDetail != null) {
-							// 		xItems[i].vendor_code = xVendorDetail.data.code;
-							// 		xItems[i].vendor_name = xVendorDetail.data.name;
-							// 	}
-							// }
-
 							xItems[i].qty_remain = xItems[i].qty;
 							xItems[i].budget_price_total = xItems[i].qty * xItems[i].budget_price_per_unit;
 							xItems[i].request_id = xRequestIdClear;
 							xItems[i].user_id = pParam.user_id;
 							xItems[i].user_name = pParam.user_name;
+							if (xItems[i].hasOwnProperty('rab_origin_id') && xItems[i].rab_origin_id != '' && xItems[i].rab_origin_id != null) {
+								// Check if rab_origin_id is encrypted or not
+								let origin_id = await _utilInstance.decrypt(xItems[i].rab_origin_id, config.cryptoKey.hashKey);
+								if (origin_id.status_code == '00') {
+									xItems[i].rab_origin_id = origin_id.decrypted;
+								}
+								
+							}
 
 							xAct = 'add';
 						}
@@ -420,58 +354,6 @@ class BudgetPlanDetailService {
 
 							var xUpdateResult = await _repoInstance.save(pParam, xAct);
 							xJoResult = xUpdateResult;
-							if (xUpdateResult.status_code == '00') {
-								// ---------------- Start: Add to log ----------------
-								// console.log(`>>> pParam.id : ${pParam.id}`);
-								if (xItem.status_code == '00') {
-									// let xParamLog = {
-									//     act: 'add',
-									//     employee_id: pParam.employee_id,
-									//     employee_name: pParam.employee_name,
-									//     request_id: pParam.request_id,
-									//     request_no: xBudgetPlan.data.budget_no,
-									//     body: {
-									//         act: 'update',
-									//         msg: 'RAB item changed',
-									//         before: {
-									//             qty: xItem.data.qty,
-									//             budget_price_per_unit: xItem.data.budget_price_per_unit,
-									//             quotation_price_per_unit: xItem.data.quotation_price_per_unit,
-									//             has_budget: xItem.data.has_budget,
-									//             estimate_date_use: xItem.data.estimate_date_use,
-									//             description: xItem.data.description,
-									//             product_id: parseInt(xItem.data.product_id),
-									//             product_name: xItem.data.product_name,
-									//             vendor_id: parseInt(xItem.data.vendor_id),
-									//             vendor_name: xItem.data.vendor_name,
-									//             vendor_code: xItem.data.vendor_code,
-									//             employee_id: xItem.data.employee_id,
-									//             employee_name: xItem.data.employee_name,
-									//             budget_price_total: xItem.data.budget_price_total
-									//         },
-									//         after: {
-									//             qty: pParam.qty,
-									//             budget_price_per_unit: pParam.budget_price_per_unit,
-									//             quotation_price_per_unit: pParam.quotation_price_per_unit,
-									//             has_budget: pParam.has_budget,
-									//             estimate_date_use: pParam.estimate_date_use,
-									//             description: pParam.description,
-									//             product_id: pParam.product_id,
-									//             product_name: pParam.product_name,
-									//             vendor_id: pParam.vendor_id,
-									//             vendor_name: pParam.vendor_name,
-									//             vendor_code: pParam.vendor_code,
-									//             employee_id: pParam.employee_id,
-									//             employee_name: pParam.employee_name,
-									//             budget_price_total: pParam.budget_price_total
-									//         }
-									//     }
-									// };
-									// var xResultLog = await _logServiceInstance.addLog(pParam.method, pParam.token, xParamLog);
-									// xJoResult.log_result = xResultLog;
-								}
-								// ---------------- End: Add to log ----------------
-							}
 						} else {
 							xJoResult = {
 								status_code: '-99',

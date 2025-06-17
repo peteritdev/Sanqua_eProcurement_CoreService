@@ -317,12 +317,13 @@ class BudgetPlanRepository {
 			{
 				model: _modelBudgetPlanDetail,
 				as: 'budget_plan_detail',
-				// include: [
-				// 	{
-				// 		model: _modelVendorCatalogueDb,
-				// 		as: 'vendor_catalogue'
-				// 	}
-				// ]
+				include: [
+					{
+						model: _modelDb,
+						as: 'rab_origin',
+						attributes: [ 'id', 'name', 'budget_no' ],
+					}
+				]
 			},
 			{
 				model: _modelProject,
