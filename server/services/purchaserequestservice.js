@@ -276,23 +276,25 @@ class PurchaseRequestService {
 							if (xDataBeforeUpdate.budget_plan != null) {
 								// 04/05/2025
 								// check if rab already processed or not
-								if (pParam.budget_plan_id != xDataBeforeUpdate.budget_plan.id) {
-									let xGetDetailRAB = await _rabRepoInstance.getById({ id: xDataBeforeUpdate.budget_plan.id });
-									if (xGetDetailRAB != null) {
-										if (xGetDetailRAB.status == 3) {
-											xJoResult = {
-												status_code: '-99',
-												status_msg: `Tidak dapat merubah FPB, RAB yang dicantumkan sudah diproses`
-											};
-											xFlagProcess = false;
+								if (pParam.hasOwnProperty('budget_plan_id')) {
+									if (pParam.budget_plan_id != xDataBeforeUpdate.budget_plan.id) {
+										let xGetDetailRAB = await _rabRepoInstance.getById({ id: xDataBeforeUpdate.budget_plan.id });
+										if (xGetDetailRAB != null) {
+											if (xGetDetailRAB.status == 3) {
+												xJoResult = {
+													status_code: '-99',
+													status_msg: `Tidak dapat merubah FPB, RAB yang dicantumkan sudah diproses`
+												};
+												xFlagProcess = false;
+											} else {
+												xFlagProcess = true;
+											}
 										} else {
 											xFlagProcess = true;
 										}
 									} else {
 										xFlagProcess = true;
 									}
-								} else {
-									xFlagProcess = true;
 								}
 								
 							} else {
@@ -428,6 +430,7 @@ class PurchaseRequestService {
 					const bDect = await _utilInstance.decrypt(pParam.budget_plan_id, config.cryptoKey.hashKey);
 					if (bDect.status_code == '00') {
 						pParam.budget_plan_id = bDect.decrypted
+						delete pParam.department_id
 					}
 				}
 
@@ -521,9 +524,8 @@ class PurchaseRequestService {
 										currency_id: xRows[index].currency_id,
 										currency_code: xRows[index].currency_code,
 										currency_symbol: xRows[index].currency_symbol,
-
 										paid_at: xRows[index].paid_at,
-										paid_by_name: xRows[index].paid_by_name,
+										paid_by_name: xRows[index].paid_by_name
 									},
 									approved_at: xRows[index].approved_at,
 									budget_plan_no: xRows[index].budget_plan_no
@@ -975,7 +977,11 @@ class PurchaseRequestService {
 							xResult.took_at != null ? moment(xResult.took_at).format('DD MMM YYYY HH:mm:ss') : null,
 						took_by_name: xResult.took_by_name,
 						fpb_type: xResult.fpb_type,
-						budget_plan: xResult.budget_plan,
+						budget_plan: xResult.budget_plan != null ? {
+							id: await _utilInstance.encrypt(xResult.budget_plan.id.toString(), config.cryptoKey.hashKey),
+							name: xResult.budget_plan.name,
+							budget_no: xResult.budget_plan.budget_no
+						} : null,
 						total_realization: xTotalRealization,
 						total_item_with_budget: xTotalItem,
 						approved_at: xResult.approved_at,
