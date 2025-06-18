@@ -446,11 +446,10 @@ class BudgetPlanService {
 		if (xFlagProcess) {
 			var xResult = await _repoInstance.getById(pParam);
 
-			console.log(`>>> xResult: ${JSON.stringify(xResult)}`);
-
 			if (xResult != null) {
 				var xJoArrBudgetDetailData = [];
 				var xDetail = xResult.budget_plan_detail;
+			    console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`);
 
                 let xFileArr = [];
                 for (var j in xResult.file) {
@@ -506,7 +505,8 @@ class BudgetPlanService {
                             id: await _utilInstance.encrypt(xDetail[index].rab_origin.id.toString(), config.cryptoKey.hashKey),
                             name: xDetail[index].rab_origin.name,
                             document_no: xDetail[index].rab_origin.budget_no,
-                        } : null
+                        } : null,
+						purchase_request_detail: xDetail[index].purchase_request_detail,
 					});
 				}
 				// Get Approval Matrix

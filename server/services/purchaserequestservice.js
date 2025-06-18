@@ -156,6 +156,7 @@ class PurchaseRequestService {
 					if (xAct == 'add' || xAct == 'add_batch_in_item') {
 						// Calculate the total
 						var xJoArrItems = [];
+						// var xRabItemsIDs = [];
 
 						if (pParam.hasOwnProperty('purchase_request_detail')) {
 							xJoArrItems = pParam.purchase_request_detail;
@@ -187,12 +188,18 @@ class PurchaseRequestService {
 									}
 									xJoArrItems[i].qty_left = xJoArrItems[i].qty;
 									// xJoArrItems[i].qty_done = 0;
+									if (xJoArrItems[i].hasOwnProperty('rab_item_id') && xJoArrItems[i].rab_item_id != null && xJoArrItems[i].rab_item_id != '') {
+										const xRabItemId = await _utilInstance.decrypt(xJoArrItems[i].rab_item_id, config.cryptoKey.hashKey);
+										xJoArrItems[i].rab_item_id = xRabItemId.decrypted;
+										// xRabItemsIDs.push(xRabItemId.decrypted);
+									}
 								}
 							}
 							pParam.purchase_request_detail = xJoArrItems;
 						}
 
-						// console.log(`>>> Create FPB : ${JSON.stringify(pParam.purchase_request_detail)}`);
+						console.log(`>>> Create FPB : ${JSON.stringify(pParam.purchase_request_detail)}`);
+						// console.log(`>>> xRabItemsIDs : ${JSON.stringify(xRabItemsIDs)}`);
 						var xAddResult = await _repoInstance.save(pParam, xAct);
 						if (xAddResult.status_code == '00' && xAddResult.created_id != '' && xAddResult.clear_id != '') {
 							// Generate FPB No
@@ -831,7 +838,8 @@ class PurchaseRequestService {
 							// paid_at: xDetail[index].paid_at,
 							// paid_by: xDetail[index].paid_by,
 							// paid_by_name: xDetail[index].paid_by_name,
-							paid_note: xDetail[index].paid_note
+							paid_note: xDetail[index].paid_note,
+							rab_item: xDetail[index].rab_item
 						});
 					}
 					// Get Approval Matrix

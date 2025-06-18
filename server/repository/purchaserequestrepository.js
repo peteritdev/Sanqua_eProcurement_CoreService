@@ -52,7 +52,15 @@ class PurchaseRequestRepository {
 					},
 					{
 						model: _modelBudgetPlanDetail,
-						as: 'rab_item'
+						as: 'rab_item',
+						attributes: [ 'id', 'product_code', 'product_name', 'qty', 'qty_remain'],
+						include: [
+							{
+								model: _modelBudgetPlan,
+								as: 'rab_origin',
+								attributes: [ 'id', 'budget_no'],
+							}
+						]
 					},
 				]
 			},
@@ -971,28 +979,13 @@ class PurchaseRequestRepository {
 				// SELECT calc_rab_item_remain_qty
 				if (pParam.hasOwnProperty('budget_plan_id')) {
 					// // Sanitize the input
-					// const sanitizedPurchaseRequestDetail = pParam.purchase_request_detail.map(item => {
-					// 	item.uom_name = item.uom_name.replace(/'/g, "''"); // Escape single quotes
-					// 	return item;
-					// });
-					
-					// console.log(`>>> sanitizedPurchaseRequestDetail : ${JSON.stringify(sanitizedPurchaseRequestDetail)}`);
-					// xSql = `SELECT calc_rab_item_remain_qty_v2('{
-					// 		"pAct": "${pAct}",
-					// 		"budget_plan_id" : ${pParam.budget_plan_id},
-					// 		"purchase_request_detail" : ${JSON.stringify(sanitizedPurchaseRequestDetail)}
-					// 	}'::json)`;
-
-					// var xDtQuery = await sequelize.query(xSql, {
-					// 	type: sequelize.QueryTypes.SELECT,
-					// });
 					// Gunakan parameter binding agar Sequelize dan PostgreSQL menangani escape karakter-karakter khusus dengan aman.
 					const payload = {
 						pAct: pAct,
 						budget_plan_id: pParam.budget_plan_id,
 						purchase_request_detail: pParam.purchase_request_detail,
 					};
-					xSql = `SELECT calc_rab_item_remain_qty_v2(:payload::json)`;
+					xSql = `SELECT calc_rab_item_remain_qty_v3(:payload::json)`;
 
 					const xDtQuery = await sequelize.query(xSql, {
 						replacements: { payload: JSON.stringify(payload) },
@@ -1001,12 +994,12 @@ class PurchaseRequestRepository {
 					// console.log(`>>> xDtQuery : ${JSON.stringify(xDtQuery)}`);
 
 					if (xDtQuery.length > 0) {
-						if (xDtQuery[0].calc_rab_item_remain_qty_v2.status_code == "00") {
+						if (xDtQuery[0].calc_rab_item_remain_qty_v3.status_code == "00") {
 							xFlag = true
 						} else {
-						//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty_v2;
+						//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty_v3;
 							xFlag = false
-							xSqlErrMsg = xDtQuery[0].calc_rab_item_remain_qty_v2.status_msg
+							xSqlErrMsg = xDtQuery[0].calc_rab_item_remain_qty_v3.status_msg
 						}
 					} else {
 						xFlag = false

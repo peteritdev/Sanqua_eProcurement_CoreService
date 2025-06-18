@@ -9,6 +9,8 @@ const Op = Sequelize.Op;
 const _modelDb = require('../models').tr_budgetplans;
 const _modelProject = require('../models').ms_projects;
 const _modelBudgetPlanDetail = require('../models').tr_budgetplandetails;
+const _modelPurchaseRequest = require('../models').tr_purchaserequests;
+const _modelPurchaseRequestDetail = require('../models').tr_purchaserequestdetails;
 // const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 
 const Utility = require('peters-globallib-v2');
@@ -322,6 +324,18 @@ class BudgetPlanRepository {
 						model: _modelDb,
 						as: 'rab_origin',
 						attributes: [ 'id', 'name', 'budget_no' ],
+					},
+					{
+						model: _modelPurchaseRequestDetail,
+						as: 'purchase_request_detail',
+						attributes: [ 'id', 'product_code', 'product_name', 'qty'],
+						include: [
+							{
+								model: _modelPurchaseRequest,
+								as: 'purchase_request',
+								attributes: [ 'id', 'request_no' ]
+							}
+						]
 					}
 				]
 			},

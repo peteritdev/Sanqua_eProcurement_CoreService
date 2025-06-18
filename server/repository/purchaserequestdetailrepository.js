@@ -140,8 +140,8 @@ class PurchaseRequestDetailRepository {
 				pAct: pAct,
 				purchase_request_detail: pParam,
 			};
-			xSql = `SELECT calc_rab_item_remain_qty_v2(:payload::json)`;
-			// xSql = `SELECT calc_rab_item_remain_qty_v2('{
+			xSql = `SELECT calc_rab_item_remain_qty_v3(:payload::json)`;
+			// xSql = `SELECT calc_rab_item_remain_qty_v3('{
 			// 	"pAct": "${pAct}",
 			// 	"purchase_request_detail" : ${JSON.stringify(pParam)}
 			// }'::json)`;
@@ -161,12 +161,12 @@ class PurchaseRequestDetailRepository {
 				// });
 
 				if (xDtQuery.length > 0) {
-					if (xDtQuery[0].calc_rab_item_remain_qty_v2.status_code == "00") {
+					if (xDtQuery[0].calc_rab_item_remain_qty_v3.status_code == "00") {
 						xFlag = true
 					} else {
-					//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty_v2;
+					//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty_v3;
 						xFlag = false
-						xSqlErrMsg = `, ${xDtQuery[0].calc_rab_item_remain_qty_v2.status_msg}`
+						xSqlErrMsg = `, ${xDtQuery[0].calc_rab_item_remain_qty_v3.status_msg}`
 					}
 				} else {
 					xFlag = false
@@ -224,12 +224,12 @@ class PurchaseRequestDetailRepository {
 				// });
 
 				if (xDtQuery.length > 0) {
-					if (xDtQuery[0].calc_rab_item_remain_qty_v2.status_code == "00") {
+					if (xDtQuery[0].calc_rab_item_remain_qty_v3.status_code == "00") {
 						xFlag = true
 					} else {
 					//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty;
 						xFlag = false
-						xSqlErrMsg = xDtQuery[0].calc_rab_item_remain_qty_v2.status_msg
+						xSqlErrMsg = xDtQuery[0].calc_rab_item_remain_qty_v3.status_msg
 					}
 				} else {
 					xFlag = false
@@ -417,8 +417,8 @@ class PurchaseRequestDetailRepository {
 				pAct: 'update',
 				purchase_request_detail: pParam,
 			};
-			xSql = `SELECT calc_rab_item_remain_qty_v2(:payload::json)`;
-			// xSql = `SELECT calc_rab_item_remain_qty_v2('{
+			xSql = `SELECT calc_rab_item_remain_qty_v3(:payload::json)`;
+			// xSql = `SELECT calc_rab_item_remain_qty_v3('{
 			// 	"pAct": "update",
 			// 	"purchase_request_detail" : ${JSON.stringify(pParam)}
 			// }'::json)`;
@@ -431,12 +431,12 @@ class PurchaseRequestDetailRepository {
 			// });
 
 			if (xDtQuery.length > 0) {
-				if (xDtQuery[0].calc_rab_item_remain_qty_v2.status_code == "00") {
+				if (xDtQuery[0].calc_rab_item_remain_qty_v3.status_code == "00") {
 					xFlag = true
 				} else {
-				//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty_v2;
+				//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty_v3;
 					xFlag = false
-					xSqlErrMsg = xDtQuery[0].calc_rab_item_remain_qty_v2.status_msg
+					xSqlErrMsg = xDtQuery[0].calc_rab_item_remain_qty_v3.status_msg
 				}
 			} else {
 				xFlag = false
