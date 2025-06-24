@@ -333,7 +333,8 @@ class BudgetPlanRepository {
 							{
 								model: _modelPurchaseRequest,
 								as: 'purchase_request',
-								attributes: [ 'id', 'request_no' ]
+								// rubah nama menjadi alias yang pendek agar dapat tertampil, karena pada level include seperti ini object tidak dapat terbaca
+								attributes: [ 'id', ['request_no', 'no'], ['status', 'stt'] ]
 							}
 						]
 					}

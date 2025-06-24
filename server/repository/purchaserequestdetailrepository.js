@@ -29,7 +29,14 @@ class PurchaseRequestDetailRepository {
 		var xJoResult = {};
 
 		try {
-			xInclude = [];
+			xInclude = [
+				{
+					model: _modelPurchaseRequest,
+					as: 'purchase_request',
+					// rubah nama menjadi alias yang pendek agar dapat tertampil, karena pada level include seperti ini object tidak dapat terbaca
+					attributes: [ 'id', 'request_no', 'status' ]
+				}
+			];
 
 			if (pParam.hasOwnProperty('filter')) {
 				if (pParam.filter != null && pParam.filter != undefined && pParam.filter != '') {
@@ -40,6 +47,14 @@ class PurchaseRequestDetailRepository {
 							xWhereAnd.push(xFilter[index]);
 						}
 					}
+				}
+			}
+			
+			if (pParam.hasOwnProperty('rab_item_id')) {
+				if (pParam.rab_item_id != '') {
+					xWhereAnd.push({
+						rab_item_id: pParam.rab_item_id
+					});
 				}
 			}
 
@@ -105,15 +120,21 @@ class PurchaseRequestDetailRepository {
 			}
 
 			var xData = await _modelDb.findAndCountAll(xParamQuery);
+			if (xData) {
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					data: xData,
+					total_record: xCountDataWithoutLimit
+				};
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'No data found'
+				};
+			}
+			console.log(`>>> xData: ${JSON.stringify(xData)}`);
 
-			// console.log(`>>> xData: ${JSON.stringify(xData)}`);
-
-			xJoResult = {
-				status_code: '00',
-				status_msg: 'OK',
-				data: xData,
-				total_record: xCountDataWithoutLimit
-			};
 		} catch (e) {
 			_utilInstance.writeLog(`${_xClassName}.list`, `Exception error: ${e.message}`, 'error');
 			xJoResult = {
@@ -140,6 +161,7 @@ class PurchaseRequestDetailRepository {
 				pAct: pAct,
 				purchase_request_detail: pParam,
 			};
+			console.log(`>>> payload : ${JSON.stringify(payload)}`, payload.purchase_request_detail.id);
 			xSql = `SELECT calc_rab_item_remain_qty_v3(:payload::json)`;
 			// xSql = `SELECT calc_rab_item_remain_qty_v3('{
 			// 	"pAct": "${pAct}",
@@ -215,6 +237,7 @@ class PurchaseRequestDetailRepository {
 				pParam.updated_by = pParam.user_id;
 				pParam.updated_by_name = pParam.user_name;
 
+				console.log(`>>> payload 2: ${JSON.stringify(payload)}`, payload.purchase_request_detail.id);
 				const xDtQuery = await sequelize.query(xSql, {
 					replacements: { payload: JSON.stringify(payload) },
 					type: sequelize.QueryTypes.SELECT,

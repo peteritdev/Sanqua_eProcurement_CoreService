@@ -190,16 +190,47 @@ class PurchaseRequestService {
 									// xJoArrItems[i].qty_done = 0;
 									if (xJoArrItems[i].hasOwnProperty('rab_item_id') && xJoArrItems[i].rab_item_id != null && xJoArrItems[i].rab_item_id != '') {
 										const xRabItemId = await _utilInstance.decrypt(xJoArrItems[i].rab_item_id, config.cryptoKey.hashKey);
-										xJoArrItems[i].rab_item_id = xRabItemId.decrypted;
-										// xRabItemsIDs.push(xRabItemId.decrypted);
+										if (xRabItemId.status_code == '00') {
+											xJoArrItems[i].rab_item_id = xRabItemId.decrypted;
+											let lastFpbQty = 0
+											let lastGap = 0
+											lastFpbQty = xJoArrItems[i].rab_qty - xJoArrItems[i].rab_qty_remain;
+											if (xJoArrItems[i].rab_qty_remain < 0) {
+												lastGap = (xJoArrItems[i].rab_qty - lastFpbQty);
+											}
+											xJoArrItems[i].rab_qty_gap = (xJoArrItems[i].rab_qty_remain - xJoArrItems[i].qty) - lastGap
+											if (xJoArrItems[i].rab_qty_gap == null) {
+												return xJoResult = {
+													status_code: '-99',
+													status_msg: `purchaseRequestService.save: xJoArrItems[i].rab_qty_gap: ${xJoArrItems[i].rab_qty_gap}`
+												};
+											}
+
+											// check item already created on other fpb with status fpb already inprogress or not ?
+											// if there's already created one but status fpb still draft then reject incoming submit !!
+											const xCheckRabItemInFpb = await _repoDetailInstance.list({rab_item_id: xRabItemId.decrypted})
+											if (xCheckRabItemInFpb.status_code == '00' && xCheckRabItemInFpb.data != undefined && xCheckRabItemInFpb.data != null && xCheckRabItemInFpb.data.rows.length > 0) {
+												const xRows = xCheckRabItemInFpb.data.rows
+												console.log(`>>> xCheckRabItemInFpb : ${JSON.stringify(xRows)}`);
+												const xFindPR = xRows.find(
+													({ purchase_request }) => purchase_request != null && (purchase_request.status == 0 || purchase_request.status == 4)
+												);
+												if (xFindPR != undefined) {
+													return xJoResult = {
+														status_code: '-99',
+														status_msg: `Item: "${xFindPR.product_name}" Terdeteksi ada di FPB (${xFindPR.purchase_request.request_no}) yang belum diproses, silahkan proses FPB terlebih dahulu`
+													};
+												}
+											}
+										} else {
+											return xRabItemId
+										}
 									}
 								}
 							}
 							pParam.purchase_request_detail = xJoArrItems;
 						}
-
-						console.log(`>>> Create FPB : ${JSON.stringify(pParam.purchase_request_detail)}`);
-						// console.log(`>>> xRabItemsIDs : ${JSON.stringify(xRabItemsIDs)}`);
+						// console.log(`>>> Create FPB : ${JSON.stringify(pParam.purchase_request_detail)}`);
 						var xAddResult = await _repoInstance.save(pParam, xAct);
 						if (xAddResult.status_code == '00' && xAddResult.created_id != '' && xAddResult.clear_id != '') {
 							// Generate FPB No
@@ -839,7 +870,8 @@ class PurchaseRequestService {
 							// paid_by: xDetail[index].paid_by,
 							// paid_by_name: xDetail[index].paid_by_name,
 							paid_note: xDetail[index].paid_note,
-							rab_item: xDetail[index].rab_item
+							rab_item: xDetail[index].rab_item,
+							rab_qty_gap: xDetail[index].rab_qty_gap
 						});
 					}
 					// Get Approval Matrix

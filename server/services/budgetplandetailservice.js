@@ -452,6 +452,8 @@ class BudgetPlanDetailService {
 										name: xRows[i].vendor_name
 									},
 									qty: xRows[i].qty,
+									qty_remain: xRows[i].qty_remain,
+									id: await _utilInstance.encrypt(xRows[i].id.toString(), config.cryptoKey.hashKey),
 									estimate_date_use: moment(xRows[i].estimate_date_use).format('DD MMM YYYY HH:mm:ss'),
 									budget_price_per_unit: xRows[i].budget_price_per_unit
 								});
