@@ -493,33 +493,38 @@ class BudgetPlanDetailService {
 	async updateItemQtyLeft(pParam, pAct, rab){
 		let xPurchaseRequestDetail = pParam.purchase_request_detail
 		console.log(`>>> xPurchaseRequestDetail: ${JSON.stringify(xPurchaseRequestDetail)}`);
+		console.log(`>>> pAct: ${JSON.stringify(pAct)}`);
+		console.log(`>>> rab: ${JSON.stringify(rab)}`);
 		if (pParam.budget_plan != null) {
 			let xRabId = pParam.budget_plan.id
 			// check rab
 			var xRabDetail = rab || await _budgetPlanRepoInstance.getById({id: xRabId})
 			if (xRabDetail != null) {
-				let xRabDetailItem = xRabDetail.budget_plan_detail
+				// let xRabDetailItem = xRabDetail.budget_plan_detail
 				// console.log(`>>> xRabDetailItem: ${JSON.stringify(xRabDetailItem)}`);
 				for (let i = 0; i < xPurchaseRequestDetail.length; i++) {
-					let xCheckRabItem = xRabDetailItem.find(({ product_id, product_code, product_name }) => product_id == xPurchaseRequestDetail[i].product_id && product_code == xPurchaseRequestDetail[i].product_code && product_name == xPurchaseRequestDetail[i].product_name)
+					// let xCheckRabItem = xRabDetailItem.find(({ product_id, product_code, product_name }) => product_id == xPurchaseRequestDetail[i].product_id && product_code == xPurchaseRequestDetail[i].product_code && product_name == xPurchaseRequestDetail[i].product_name)
+					let xCheckRabItem = await _repoInstance.getByParam({id: xPurchaseRequestDetail[i].rab_item.id})
 					console.log(`>>> xCheckRabItem: ${JSON.stringify(xCheckRabItem)}`);
-					console.log(`>>> pr.product_id: ${JSON.stringify(xPurchaseRequestDetail[i].product_id)}`);
-					console.log(`>>> pr.product_code: ${JSON.stringify(xPurchaseRequestDetail[i].product_code)}`);
-					console.log(`>>> pr.product_name: ${JSON.stringify(xPurchaseRequestDetail[i].product_name)}`);
-					if (xCheckRabItem != undefined) {
-						let xQtyLeft = xCheckRabItem.qty_remain || 0
-						let xCalculatedQty = 0
-						if (pAct == 'return') {
-							xCalculatedQty = xQtyLeft + xPurchaseRequestDetail[i].qty
-						} else if (pAct == 'decrease') {
-							xCalculatedQty = xQtyLeft - xPurchaseRequestDetail[i].qty
+					// console.log(`>>> pr.product_id: ${JSON.stringify(xPurchaseRequestDetail[i].product_id)}`);
+					// console.log(`>>> pr.product_code: ${JSON.stringify(xPurchaseRequestDetail[i].product_code)}`);
+					// console.log(`>>> pr.product_name: ${JSON.stringify(xPurchaseRequestDetail[i].product_name)}`);
+					if (xCheckRabItem != null && xCheckRabItem.length > 0) {
+						for (let j = 0; j < xCheckRabItem.length; j++) {
+							let xQtyLeft = xCheckRabItem[j].qty_remain || 0
+							let xCalculatedQty = 0
+							if (pAct == 'return') {
+								xCalculatedQty = xQtyLeft + xPurchaseRequestDetail[i].qty
+							} else if (pAct == 'decrease') {
+								xCalculatedQty = xQtyLeft - xPurchaseRequestDetail[i].qty
+							}
+							let xUpdateItemParam = {
+								id: xCheckRabItem[j].id,
+								qty_remain: xCalculatedQty
+							}
+							console.log(`>>> xUpdateItem[${i+1}]: ${JSON.stringify(xUpdateItemParam)}`);
+							let xUpdateItem = await _repoInstance.save(xUpdateItemParam, 'update')
 						}
-						let xUpdateItemParam = {
-							id: xCheckRabItem.id,
-							qty_remain: xCalculatedQty
-						}
-						let xUpdateItem = await _repoInstance.save(xUpdateItemParam, 'update')
-						// 	console.log(`>>> xUpdateItem: ${JSON.stringify(xUpdateItem)}`);
 					}
 				}
 			}

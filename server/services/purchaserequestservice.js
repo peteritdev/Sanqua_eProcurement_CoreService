@@ -1312,34 +1312,34 @@ class PurchaseRequestService {
 							if (xCheckRAB.status == 3) {
 								// check rab item qty_remaining not less than fpb qty
 								// make sure rab item qty_remaining > fpb qty before activate fpb again
-								for (const fpbItem of xData.purchase_request_detail) {
-									// Find matching RAB item by product_code and product_name
-									const rabItem = xCheckRAB.budget_plan_detail.find(
-										rab =>
-											rab.product_id === fpbItem.product_id &&
-											rab.product_code === fpbItem.product_code &&
-											rab.product_name === fpbItem.product_name
-									);
+								// for (const fpbItem of xData.purchase_request_detail) {
+								// 	// Find matching RAB item by product_code and product_name
+								// 	const rabItem = xCheckRAB.budget_plan_detail.find(
+								// 		rab =>
+								// 			rab.product_id === fpbItem.product_id &&
+								// 			rab.product_code === fpbItem.product_code &&
+								// 			rab.product_name === fpbItem.product_name
+								// 	);
 									
-									if (rabItem) {
-										if (rabItem.qty_remain < fpbItem.qty) {
-											xFlagProcess = false;
-											xUpdateResult = {
-												status_code: '-99',
-												status_msg: `(${rabItem.product_code})${rabItem.product_name} has not enough RAB remaining qty. Please check RAB qty.`
-											};
-											break; // Stop checking if any item is not enough
-										}
-									} else {
-										// // If no matching RAB item found, treat as not enough
-										// xFlagProcess = false;
-										// xUpdateResult = {
-										// 	status_code: '-99',
-										// 	status_msg: 'There are some items in FPB that have not enough RAB remaining qty. Please check RAB qty.'
-										// };
-										// break;
-									}
-								}
+								// 	if (rabItem) {
+								// 		if (rabItem.qty_remain < fpbItem.qty) {
+								// 			xFlagProcess = false;
+								// 			xUpdateResult = {
+								// 				status_code: '-99',
+								// 				status_msg: `(${rabItem.product_code})${rabItem.product_name} has not enough RAB remaining qty. Please check RAB qty.`
+								// 			};
+								// 			break; // Stop checking if any item is not enough
+								// 		}
+								// 	} else {
+								// 		// // If no matching RAB item found, treat as not enough
+								// 		// xFlagProcess = false;
+								// 		// xUpdateResult = {
+								// 		// 	status_code: '-99',
+								// 		// 	status_msg: 'There are some items in FPB that have not enough RAB remaining qty. Please check RAB qty.'
+								// 		// };
+								// 		// break;
+								// 	}
+								// }
 
 								if (xFlagProcess) {
 								// update rab item qty & update fpb to draft

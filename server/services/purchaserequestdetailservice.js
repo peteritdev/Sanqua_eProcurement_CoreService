@@ -186,9 +186,9 @@ class PurchaseRequestDetailService {
 									1000
 							) / 1000,
 						// (xPurchaseRequestDetail.qty + pParam.qty) * xPurchaseRequestDetail.budget_price_per_unit
-						rab_item_id: pParam.rab_item_id,
-						rab_qty: pParam.rab_qty,
-						rab_qty_remain: pParam.rab_qty_remain
+						rab_item_id: pParam.rab_item_id != undefined ? pParam.rab_item_id : null,
+						rab_qty: pParam.rab_item_id != undefined ? pParam.rab_qty : null,
+						rab_qty_remain: pParam.rab_item_id != undefined ? pParam.rab_qty_remain + Number(xPurchaseRequestDetail.qty) : null
 					};
 					// console.log(`>>> xParamUpdate : ${JSON.stringify(xParamUpdate)}`);
 					pParam = null;
@@ -259,7 +259,7 @@ class PurchaseRequestDetailService {
 						if (xCheckRabItemInFpb.status_code == '00' && xCheckRabItemInFpb.data != undefined && xCheckRabItemInFpb.data != null && xCheckRabItemInFpb.data.rows.length > 0) {
 							const xRows = xCheckRabItemInFpb.data.rows
 							const xFindPR = xRows.find(
-								({ purchase_request }) => purchase_request != null && (purchase_request.status == 0 || purchase_request.status == 4) && purchase_request.id != pParam.request_id
+								({ purchase_request }) => purchase_request != null && (purchase_request.status == 0 || purchase_request.status == 4) && purchase_request.id != xRequestIdClear
 							);
 							if (xFindPR != undefined) {
 								return xJoResult = {

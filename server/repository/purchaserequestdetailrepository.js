@@ -227,6 +227,7 @@ class PurchaseRequestDetailRepository {
 				pParam.updatedAt = await _utilInstance.getCurrDateTime();
 				var xId = pParam.id;
 				delete pParam.id;
+				payload.purchase_request_detail.xId = xId
 				var xWhere = {
 					where: {
 						id: xId
@@ -237,7 +238,7 @@ class PurchaseRequestDetailRepository {
 				pParam.updated_by = pParam.user_id;
 				pParam.updated_by_name = pParam.user_name;
 
-				console.log(`>>> payload 2: ${JSON.stringify(payload)}`, payload.purchase_request_detail.id);
+				console.log(`>>> payload 2: ${JSON.stringify(payload)}`);
 				const xDtQuery = await sequelize.query(xSql, {
 					replacements: { payload: JSON.stringify(payload) },
 					type: sequelize.QueryTypes.SELECT,

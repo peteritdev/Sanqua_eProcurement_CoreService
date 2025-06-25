@@ -321,6 +321,58 @@ class ProjectService {
 
 		return xJoResult;
 	}
+	
+	async setDraft(pParam) {
+		var xJoResult = {};
+		var xFlagProcess = false;
+		var xDecId = null;
+		var xEncId = null;
+		var xJoData = {};
+
+		try {
+			if (pParam.id != '' && pParam.user_id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					xFlagProcess = true;
+					xEncId = pParam.id;
+					pParam.id = xDecId.decrypted;
+					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.user_id = xDecId.decrypted;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xDecId;
+					}
+				} else {
+					xJoResult = xDecId;
+				}
+			}
+
+			if (xFlagProcess) {
+				var xDetail = await _repoInstance.getByParameter({
+					id: pParam.id
+				});
+				console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`);
+
+				if (xDetail.status_code == '00') {
+					pParam.status = 0;
+					// var xUpdate = await _repoInstance.save(pParam, 'set_to_draft');
+					xJoResult = xUpdate;
+				} else {
+					xJoResult = xDetail;
+				}
+			}
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.set_to_draft`, `Exception error: ${e.message}`, 'error');
+
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.set_to_draft: Exception error: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
 }
 
 module.exports = ProjectService;
