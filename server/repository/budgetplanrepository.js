@@ -386,6 +386,23 @@ class BudgetPlanRepository {
 			return xJoResult;
 		}
 	}
+	
+	async getByParam(pParam) {
+		var xWhereAnd = [];
+		var xWhere = [];
+
+		if (xWhereAnd.length > 0) {
+		xWhere.push({
+			[Op.and]: xWhereAnd,
+		});
+		}
+		var xData = await _modelDb.findAll({
+		where: xWhere,
+		subQuery: false,
+		});
+
+		return xData;
+	}
 }
 
 module.exports = BudgetPlanRepository;
