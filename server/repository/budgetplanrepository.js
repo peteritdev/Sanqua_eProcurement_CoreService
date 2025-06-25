@@ -390,6 +390,13 @@ class BudgetPlanRepository {
 	async getByParam(pParam) {
 		var xWhereAnd = [];
 		var xWhere = [];
+		if (pParam.hasOwnProperty('project_id')) {
+			if (pParam.project_id != '') {
+				xWhereAnd.push({
+					project_id: pParam.project_id
+				});
+			}
+		}
 
 		if (xWhereAnd.length > 0) {
 		xWhere.push({
