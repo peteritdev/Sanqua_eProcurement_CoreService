@@ -20,6 +20,10 @@ const _globalUtilInstance = new LocalUtility();
 // Repository
 const Repository = require('../repository/projectrepository.js');
 const _repoInstance = new Repository();
+const BudgetPlanRepo = require('../repository/budgetplanrepository.js');
+const _budgetPlanRepo = new BudgetPlanRepo();
+const PurchaseRequestRepo = require('../repository/purchaserequestrepository.js');
+const _purchaseRequestRepo = new PurchaseRequestRepo();
 
 const _xClassName = 'ProjectService';
 
@@ -317,6 +321,82 @@ class ProjectService {
 				// Next: Will add delete user first on oauth
 				xJoResult = await _repoInstance.delete(pParam);
 			}
+		}
+
+		return xJoResult;
+	}
+	
+	async setDraft(pParam) {
+		var xJoResult = {};
+		var xFlagProcess = false;
+		var xDecId = null;
+		var xEncId = null;
+		var xJoData = {};
+
+		try {
+			if (pParam.id != '' && pParam.user_id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					xFlagProcess = true;
+					xEncId = pParam.id;
+					pParam.id = xDecId.decrypted;
+					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.user_id = xDecId.decrypted;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xDecId;
+					}
+				} else {
+					xJoResult = xDecId;
+				}
+			}
+
+			if (xFlagProcess) {
+				var xDetail = await _repoInstance.getByParameter({
+					id: pParam.id
+				});
+				// console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`);
+				if (xDetail.status_code == '00') {
+					if (xDetail.data.status == 1) {
+						var xCheckCreatedRAB = await _budgetPlanRepo.getByParam({project_id: xDetail.data.id})
+						// console.log(`>>> xCheckCreatedRAB: ${JSON.stringify(xCheckCreatedRAB)}`);
+						if (xCheckCreatedRAB != null && xCheckCreatedRAB.length > 0 ) {
+							return xJoResult = {
+								status_code: '-99',
+								status_msg: 'Update failed, project already used by RAB'
+							};
+						}
+
+						var xCheckCreatedFPB = await _purchaseRequestRepo.list({project_id: xDetail.data.id})
+						// console.log(`>>> xCheckCreatedFPB: ${JSON.stringify(xCheckCreatedFPB)}`);
+						if (xCheckCreatedFPB != null && xCheckCreatedFPB.status_code == '00' && xCheckCreatedFPB.data.length > 0 ) {
+							return xJoResult = {
+								status_code: '-99',
+								status_msg: 'Update failed, project already used by FPB'
+							};
+						}
+
+						pParam.status = 0;
+						var xUpdate = await _repoInstance.save(pParam, 'set_to_draft_project');
+						xJoResult = xUpdate;
+					} else {
+						xJoResult = {
+							status_code: '-99',
+							status_msg: 'Update failed, project already draft'
+						};
+					}
+				} else {
+					xJoResult = xDetail;
+				}
+			}
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.set_draft`, `Exception error: ${e.message}`, 'error');
+
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.set_draft: Exception error: ${e.message}`
+			};
 		}
 
 		return xJoResult;

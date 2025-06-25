@@ -756,7 +756,6 @@ class PurchaseRequestService {
 							xTotalItem = xTotalItem + 1;
 							xTotalRealization = xTotalRealization + (xDetail[index].realization != null ? xDetail[index].realization : 0)
 						}
-						// console.log(`>>> xDetail[index]: ${JSON.stringify(xDetail[index])}`);
 						xJoArrRequestDetailData.push({
 							id: await _utilInstance.encrypt(xDetail[index].id, config.cryptoKey.hashKey),
 							clear_id: xDetail[index].id,
@@ -796,7 +795,7 @@ class PurchaseRequestService {
 							},
 							has_budget: xDetail[index].has_budget,
 							estimate_date_use:
-								xDetail[index].estimate_date_use != null
+								xDetail[index].estimate_date_use != null && xDetail[index].estimate_date_use != ''
 									? moment(xDetail[index].estimate_date_use).format('DD MMM YYYY')
 									: null,
 							description: xDetail[index].description,
