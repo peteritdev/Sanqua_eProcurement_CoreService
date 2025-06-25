@@ -356,8 +356,7 @@ class ProjectService {
 				var xDetail = await _repoInstance.getByParameter({
 					id: pParam.id
 				});
-				console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`);
-
+				// console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`);
 				if (xDetail.status_code == '00') {
 					if (xDetail.data.status == 1) {
 						var xCheckCreatedRAB = await _budgetPlanRepo.getByParam({project_id: xDetail.data.id})
