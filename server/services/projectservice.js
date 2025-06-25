@@ -356,11 +356,12 @@ class ProjectService {
 				var xDetail = await _repoInstance.getByParameter({
 					id: pParam.id
 				});
+				console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`);
 
 				if (xDetail.status_code == '00') {
 					if (xDetail.data.status == 1) {
-						var xCheckCreatedRAB = await _budgetPlanRepo.getByParam({project_id:pParam.id})
-						console.log(`>>> xCheckCreatedRAB: ${JSON.stringify(xCheckCreatedRAB)}`);
+						var xCheckCreatedRAB = await _budgetPlanRepo.getByParam({project_id: xDetail.data.id})
+						// console.log(`>>> xCheckCreatedRAB: ${JSON.stringify(xCheckCreatedRAB)}`);
 						if (xCheckCreatedRAB != null && xCheckCreatedRAB.length > 0 ) {
 							return xJoResult = {
 								status_code: '-99',
@@ -368,8 +369,8 @@ class ProjectService {
 							};
 						}
 
-						var xCheckCreatedFPB = await _purchaseRequestRepo.list({project_id:pParam.id})
-						console.log(`>>> xCheckCreatedFPB: ${JSON.stringify(xCheckCreatedFPB)}`);
+						var xCheckCreatedFPB = await _purchaseRequestRepo.list({project_id: xDetail.data.id})
+						// console.log(`>>> xCheckCreatedFPB: ${JSON.stringify(xCheckCreatedFPB)}`);
 						if (xCheckCreatedFPB != null && xCheckCreatedFPB.status_code == '00' && xCheckCreatedFPB.data.length > 0 ) {
 							return xJoResult = {
 								status_code: '-99',
@@ -378,7 +379,7 @@ class ProjectService {
 						}
 
 						pParam.status = 0;
-						// var xUpdate = await _repoInstance.save(pParam, 'set_draft');
+						var xUpdate = await _repoInstance.save(pParam, 'set_to_draft_project');
 						xJoResult = xUpdate;
 					} else {
 						xJoResult = {
