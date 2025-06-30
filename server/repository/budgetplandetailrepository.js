@@ -13,6 +13,8 @@ const Op = Sequelize.Op;
 // Model
 const _modelDb = require("../models").tr_budgetplandetails;
 const _modelBudgetPlan = require("../models").tr_budgetplans;
+const _modelPurchaseRequest = require('../models').tr_purchaserequests;
+const _modelPurchaseRequestDetail = require('../models').tr_purchaserequestdetails;
 
 const Utility = require("peters-globallib-v2");
 const _utilInstance = new Utility();
@@ -37,6 +39,30 @@ class BudgetPlanDetailRepository {
           as: "budget_plan",
           attributes: ["budget_no", "name"],
         },
+        {
+          model: _modelBudgetPlan,
+          as: "rab_origin",
+          attributes: ["id", "budget_no", "name"],
+        },
+        {
+          model: _modelPurchaseRequestDetail,
+          as: "deviation_fpb_item",
+          attributes: ["id", "budget_no", "name"],
+        },
+        
+        {
+						model: _modelPurchaseRequestDetail,
+						as: 'deviation_fpb_item',
+						attributes: [ 'id', 'product_code', 'product_name', 'qty'],
+						include: [
+							{
+								model: _modelPurchaseRequest,
+								as: 'purchase_request',
+								// rubah nama menjadi alias yang pendek agar dapat tertampil, karena pada level include seperti ini object tidak dapat terbaca
+								attributes: [ 'id', ['request_no', 'no'], ['status', 'stt'] ]
+							}
+						]
+					}
       ];
 
       if (pParam.hasOwnProperty("request_id")) {
@@ -361,6 +387,7 @@ class BudgetPlanDetailRepository {
       xTransaction = await sequelize.transaction();
 
       if (pAct == "add") {
+        pParam.status = 0;
         pParam.is_delete = 0;
         pParam.created_by = pParam.user_id;
         pParam.created_by_name = pParam.user_name;

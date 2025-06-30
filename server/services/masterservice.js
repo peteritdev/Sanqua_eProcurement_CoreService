@@ -68,10 +68,18 @@ class MasterService {
         if( xResultList.count > 0 ){
             var xRows = xResultList.rows;
             for( var index in xRows ){
-                xJoArrData.push({
-                    id: xRows[index].id,
-                    name: xRows[index].name,
-                });
+                if (pParam.model == 'project') {
+                    xJoArrData.push({
+                        id: xRows[index].id,
+                        name: xRows[index].name,
+                        code: xRows[index].odoo_project_code
+                    });
+                } else {
+                    xJoArrData.push({
+                        id: xRows[index].id,
+                        name: xRows[index].name,
+                    });
+                }
             }
             xJoResult = {
                 status_code: "00",

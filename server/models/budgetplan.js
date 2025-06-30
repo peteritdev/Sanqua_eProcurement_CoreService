@@ -30,6 +30,7 @@ module.exports = (sequelize, DataTypes) => {
 		approver_ids: DataTypes.JSONB,
 		file: DataTypes.JSON,
 		note: DataTypes.STRING,
+		rab_type: DataTypes.INTEGER, // 1: Original, 2: Revisi
 
 		submitedAt: {
 			type: DataTypes.DATE,
