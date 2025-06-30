@@ -23,7 +23,6 @@ const _globalUtilInstance = new GlobalUtility();
 const PurchaseRequestRepository = require('../repository/purchaserequestrepository.js');
 const _repoInstance = new PurchaseRequestRepository();
 
-// Repository
 const PurchaseRequestDetailRepository = require('../repository/purchaserequestdetailrepository.js');
 const _repoDetailInstance = new PurchaseRequestDetailRepository();
 const RabRepository = require('../repository/budgetplanrepository.js');
@@ -871,7 +870,8 @@ class PurchaseRequestService {
 							// paid_by_name: xDetail[index].paid_by_name,
 							paid_note: xDetail[index].paid_note,
 							rab_item: xDetail[index].rab_item,
-							rab_qty_gap: xDetail[index].rab_qty_gap
+							rab_qty_gap: xDetail[index].rab_qty_gap,
+							rab_revision_item: xDetail[index].rab_revision_item
 						});
 					}
 					// Get Approval Matrix
