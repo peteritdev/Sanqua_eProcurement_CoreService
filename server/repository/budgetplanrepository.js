@@ -337,6 +337,19 @@ class BudgetPlanRepository {
 								attributes: [ 'id', ['request_no', 'no'], ['status', 'stt'] ]
 							}
 						]
+					},
+					{
+						model: _modelPurchaseRequestDetail,
+						as: 'deviation_fpb_item',
+						attributes: [ 'id', 'product_code', 'product_name', 'qty', 'rab_qty_gap'],
+						include: [
+							{
+								model: _modelPurchaseRequest,
+								as: 'purchase_request',
+								// rubah nama menjadi alias yang pendek agar dapat tertampil, karena pada level include seperti ini object tidak dapat terbaca
+								attributes: [ 'id', ['request_no', 'no'], ['status', 'stt'] ]
+							}
+						]
 					}
 				]
 			},

@@ -57,7 +57,7 @@ class BudgetPlanDetailService {
 		try {
 			var xResultList = await _repoInstance.list(pParam);
 			if (xResultList) {
-				console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
+				// console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
 				if (xResultList.status_code == '00') {
 					var xRows = xResultList.data.rows;
 					if (xRows.length > 0) {
@@ -89,12 +89,13 @@ class BudgetPlanDetailService {
 								vendor_recomendation: xRows[i].vendor_recomendation,
 								budget_plan: xRows[i].budget_plan,
 								section_title: xRows[i].section_title,
-								fpb_ids: xRows[i].fpb_ids,
+								// fpb_ids: xRows[i].fpb_ids,
 								rab_origin: xRows[i].rab_origin != null ? {
 									id: await _utilInstance.encrypt(xRows[i].rab_origin.id.toString(), config.cryptoKey.hashKey),
 									name: xDetail[index].rab_origin.name,
 									document_no: xDetail[index].rab_origin.budget_no,
-								} : null
+								} : null,
+								deviation_fpb_item_id: xRows[i].deviation_fpb_item_id,
 							});
 						}
 
@@ -222,7 +223,7 @@ class BudgetPlanDetailService {
                             id: await _utilInstance.encrypt(pParam.product_id.toString(), config.cryptoKey.hashKey)
                         });
                         if (xProductDetail != null) {
-                            console.log(JSON.stringify(xProductDetail));
+                            // console.log(JSON.stringify(xProductDetail));
                             pParam.product_code = xProductDetail.data.code;
                             pParam.product_name = xProductDetail.data.name;
                         }
@@ -422,12 +423,12 @@ class BudgetPlanDetailService {
 				};
 			}
 			
-			console.log(`>>> xFlagProcess: ${JSON.stringify(xFlagProcess)}`);
-			console.log(`>>> xJoResult: ${JSON.stringify(xJoResult)}`);
+			// console.log(`>>> xFlagProcess: ${JSON.stringify(xFlagProcess)}`);
+			// console.log(`>>> xJoResult: ${JSON.stringify(xJoResult)}`);
 			if (xFlagProcess) {
 				var xResultList = await _repoInstance.list(pParam);
 				if (xResultList) {
-					console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
+					// console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
 					if (xResultList.status_code == '00') {
 						var xRows = xResultList.data.rows;
 						if (xRows.length > 0) {
@@ -492,9 +493,9 @@ class BudgetPlanDetailService {
 	
 	async updateItemQtyLeft(pParam, pAct, rab){
 		let xPurchaseRequestDetail = pParam.purchase_request_detail
-		console.log(`>>> xPurchaseRequestDetail: ${JSON.stringify(xPurchaseRequestDetail)}`);
-		console.log(`>>> pAct: ${JSON.stringify(pAct)}`);
-		console.log(`>>> rab: ${JSON.stringify(rab)}`);
+		// console.log(`>>> xPurchaseRequestDetail: ${JSON.stringify(xPurchaseRequestDetail)}`);
+		// console.log(`>>> pAct: ${JSON.stringify(pAct)}`);
+		// console.log(`>>> rab: ${JSON.stringify(rab)}`);
 		if (pParam.budget_plan != null) {
 			let xRabId = pParam.budget_plan.id
 			// check rab
@@ -505,7 +506,7 @@ class BudgetPlanDetailService {
 				for (let i = 0; i < xPurchaseRequestDetail.length; i++) {
 					// let xCheckRabItem = xRabDetailItem.find(({ product_id, product_code, product_name }) => product_id == xPurchaseRequestDetail[i].product_id && product_code == xPurchaseRequestDetail[i].product_code && product_name == xPurchaseRequestDetail[i].product_name)
 					let xCheckRabItem = await _repoInstance.getByParam({id: xPurchaseRequestDetail[i].rab_item.id})
-					console.log(`>>> xCheckRabItem: ${JSON.stringify(xCheckRabItem)}`);
+					// console.log(`>>> xCheckRabItem: ${JSON.stringify(xCheckRabItem)}`);
 					// console.log(`>>> pr.product_id: ${JSON.stringify(xPurchaseRequestDetail[i].product_id)}`);
 					// console.log(`>>> pr.product_code: ${JSON.stringify(xPurchaseRequestDetail[i].product_code)}`);
 					// console.log(`>>> pr.product_name: ${JSON.stringify(xPurchaseRequestDetail[i].product_name)}`);
@@ -522,7 +523,7 @@ class BudgetPlanDetailService {
 								id: xCheckRabItem[j].id,
 								qty_remain: xCalculatedQty
 							}
-							console.log(`>>> xUpdateItem[${i+1}]: ${JSON.stringify(xUpdateItemParam)}`);
+							// console.log(`>>> xUpdateItem[${i+1}]: ${JSON.stringify(xUpdateItemParam)}`);
 							let xUpdateItem = await _repoInstance.save(xUpdateItemParam, 'update')
 						}
 					}

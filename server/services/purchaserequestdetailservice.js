@@ -1647,6 +1647,114 @@ class PurchaseRequestDetailService {
 
 		return xJoResult;
 	}
+	
+	async deviationItemList(pParam) {
+		// console.log(`>>> heree: ${JSON.stringify(pParam)}`);
+		var xJoResult = {};
+		var xJoArrData = [];
+
+		try {
+			var xResultList = await _repoInstance.deviationItemList(pParam);
+			// console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
+			if (xResultList.total_record > 0) {
+				var xRows = xResultList.data;
+				for (var index in xRows) {
+					xJoArrData.push({
+						id: await _utilInstance.encrypt(xRows[index].pr_id.toString(), config.cryptoKey.hashKey),
+						prd_id: xRows[index].prd_id,
+						request_no: xRows[index].request_no,
+						employee: xRows[index].employee_id != null ? {
+							id: xRows[index].employee_id,
+							name: xRows[index].employee_name
+						} : null,
+						company: xRows[index].company_id != null ? {
+							id: xRows[index].company_id,
+							name: xRows[index].company_name,
+							code: xRows[index].company_code
+						} : null,
+						department: xRows[index].department_id != null ? {
+							id: xRows[index].department_id,
+							name: xRows[index].department_name
+						} : null,
+						prd_status: xRows[index].prd_status != null ? {
+							id: xRows[index].prd_status,
+							name:
+								xRows[index].prd_status == -1
+									? 'Rejected'
+									: config.statusDescription.purchaseRequestDetail[xRows[index].prd_status]
+						} : null,
+						product: {
+							id: xRows[index].product_id,
+							name: xRows[index].product_name,
+							code: xRows[index].product_code
+						},
+						qty: xRows[index].qty,
+						uom: xRows[index].uom_id != null ? {
+							id: xRows[index].uom_id,
+							name: xRows[index].uom_name
+						} : null,
+						budget_price_per_unit: xRows[index].budget_price_per_unit,
+						budget_price_total: xRows[index].budget_price_total,
+						pr_status: xRows[index].pr_status != null ? {
+							id: xRows[index].pr_status,
+							name:
+								xRows[index].pr_status == -1
+									? 'Rejected'
+									: config.statusDescription.purchaseRequest[xRows[index].pr_status]
+						} : null,
+						category_item: xRows[index].category_item != null ? {
+							id: xRows[index].category_item,
+							name: config.categoryItem[xRows[index].category_item]
+						} : null,
+						category_pr: xRows[index].category_pr,
+						fpb_type: xRows[index].fpb_type,
+						project: xRows[index].prj_id != null ? {
+							id: xRows[index].prj_id,
+							name: xRows[index].prj_name,
+							code: xRows[index].prj_code
+						} : null,
+						rab_item: xRows[index].rab_item_id != null ? {
+							id: xRows[index].rab_item_id,
+							qty: xRows[index].rab_qty,
+							qty_remain: xRows[index].rab_qty_remain
+						} : null,
+						rab: xRows[index].bp_id != null ? {
+							id: xRows[index].bp_id,
+							name: xRows[index].bp_name,
+							budget_no: xRows[index].bp_budget_no
+						} : null,
+						rab_origin: xRows[index].rab_origin_id != null ? {
+							id: xRows[index].rab_origin_id,
+							budget_no: xRows[index].rab_origin_no
+						} : null,
+						rab_qty_gap: xRows[index].rab_qty_gap,
+						is_po_created: xRows[index].is_po_created,
+						vendor: xRows[index].vendor_id != null ? {
+							id: xRows[index].vendor_id,
+							name: xRows[index].vendor_name,
+							code: xRows[index].vendor_code
+						} : null,
+						estimate_date_use: xRows[index].estimate_date_use
+					});
+				}
+				console.log(`>>> xJoArrData: ${JSON.stringify(xJoArrData)}`);
+
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					total_record: xResultList.total_record,
+					data: xJoArrData
+				};
+			}
+		} catch (e) {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Exception error <${_xClassName}.deviationItemList>: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
 }
 
 module.exports = PurchaseRequestDetailService;

@@ -27,6 +27,8 @@ const _repoInstance = new BudgetPlanRepository();
 // Repository
 // const BudgetPlanDetailRepository = require('../repository/budgetplandetailrepository.js');
 // const _repoDetailInstance = new BudgetPlanDetailRepository();
+const PurchaseRequestDetailRepo = require('../repository/purchaserequestdetailrepository.js');
+const _purchaseRequestDetailRepo = new PurchaseRequestDetailRepo();
 
 const VendorCatalogueService = require('../services/vendorcatalogueservice.js');
 const _catalogueService = new VendorCatalogueService();
@@ -292,9 +294,12 @@ class BudgetPlanService {
                         				xJoArrItems[i].hasOwnProperty('qty') &&
                         				xJoArrItems[i].hasOwnProperty('budget_price_per_unit')
                         			) {
-                        				xJoArrItems[i].budget_price_total =
-                        					xJoArrItems[i].qty * xJoArrItems[i].budget_price_per_unit;
+                        				xJoArrItems[i].budget_price_total = xJoArrItems[i].qty * xJoArrItems[i].budget_price_per_unit;
+                                        if (pParam.rab_type == 1) {
                                             xJoArrItems[i].qty_remain = xJoArrItems[i].qty;
+                                        } else {
+                                            xJoArrItems[i].qty_remain = 0;
+                                        }
                         			}
 
                         			if (xJoArrItems[i].hasOwnProperty('estimate_date_use')) {
@@ -302,29 +307,50 @@ class BudgetPlanService {
                         					xJoArrItems[i].estimate_date_use = null;
                         				}
                         			}
-                        			// Get Last price from etalase ecatalogue
-                        			let xCatalogue = await _catalogueService.getByVendorCodeAndProductCode({
-                        				vendor_code: xJoArrItems[i].vendor_code,
-                        				product_code: xJoArrItems[i].product_code
-                                    });
-                                    console.log('xCatalogue >>>>', xCatalogue.data.product.category);
 
-                        			if (xCatalogue.status_code == '00') {
-                        				// xJoArrItems[i].last_price = xCatalogue.data.last_price;
-                        				xJoArrItems[i].uom_id = xCatalogue.data.uom_id;
-                                        xJoArrItems[i].uom_name = xCatalogue.data.uom_name;
-                                        // xJoArrItems[i].merk = xCatalogue.data.merk;
-                                        // xJoArrItems[i].description = xCatalogue.data.spesification;
-                                        if (xCatalogue.data.product.category !== undefined) {
-                                            xJoArrItems[i].category_id = xCatalogue.data.product.category.id;
-                                            xJoArrItems[i].category_name = xCatalogue.data.product.category.name;
+                                    // console.log(`>>> Hereeee 1.${i} >>>> : ${JSON.stringify(xJoArrItems[i].qty_remain)}`);
+                                    if (xJoArrItems[i].product_id != undefined && xJoArrItems[i].product_id != null && xJoArrItems[i].vendor_id != null && xJoArrItems[i].vendor_id != null) {
+                                            
+                                        // Get Last price from etalase ecatalogue
+                                        let xCatalogue = await _catalogueService.getByVendorCodeAndProductCode({
+                                            vendor_code: xJoArrItems[i].vendor_code,
+                                            product_code: xJoArrItems[i].product_code
+                                        });
+                                        console.log('xCatalogue >>>>', xCatalogue.data.product.category);
+
+                                        if (xCatalogue.status_code == '00') {
+                                            // xJoArrItems[i].last_price = xCatalogue.data.last_price;
+                                            xJoArrItems[i].uom_id = xCatalogue.data.uom_id;
+                                            xJoArrItems[i].uom_name = xCatalogue.data.uom_name;
+                                            // xJoArrItems[i].merk = xCatalogue.data.merk;
+                                            // xJoArrItems[i].description = xCatalogue.data.spesification;
+                                            if (xCatalogue.data.product.category !== undefined) {
+                                                xJoArrItems[i].category_id = xCatalogue.data.product.category.id;
+                                                xJoArrItems[i].category_name = xCatalogue.data.product.category.name;
+                                            }
                                         }
-                        			}
+                                    
+                                    }
+
+                                    // console.log(`>>> Hereeee 2.${i} >>>> : ${JSON.stringify(xJoArrItems[i].qty_remain)}`);
                                     if (
-                        				xJoArrItems[i].hasOwnProperty('rab_origin_id') && xJoArrItems[i].rab_origin_id != null && xJoArrItems[i].rab_origin_id != ''
+                        				xJoArrItems[i].hasOwnProperty('rab_origin_id') && xJoArrItems[i].rab_origin_id != null && xJoArrItems[i].rab_origin_id != '' && xJoArrItems[i].rab_origin_id.length > 5
                         			) {
                                         const xRabOriginId = await _utilInstance.decrypt(xJoArrItems[i].rab_origin_id, config.cryptoKey.hashKey);
-                        				xJoArrItems[i].xJoArrItems[i].rab_origin_id = xRabOriginId.decrypted;
+                        				if (xRabOriginId.status_code == '00') {
+                                            xJoArrItems[i].xJoArrItems[i].rab_origin_id = xRabOriginId.decrypted;
+                                        }
+                        			}
+
+                                    if (
+                        				xJoArrItems[i].hasOwnProperty('deviation_fpb_item_id') && xJoArrItems[i].deviation_fpb_item_id != null && xJoArrItems[i].deviation_fpb_item_id != ''
+                        			) {
+                                        if ( xJoArrItems[i].deviation_fpb_item_id.length > 5) {
+                                            const xDeviationFpbId = await _utilInstance.decrypt(xJoArrItems[i].deviation_fpb_item_id, config.cryptoKey.hashKey);
+                                            if (xDeviationFpbId.status_code == '00') {
+                                                xJoArrItems[i].deviation_fpb_item_id = xDeviationFpbId.decrypted;
+                                            }
+                                        }
                         			}
                         		}
                         	}
@@ -347,6 +373,30 @@ class BudgetPlanService {
                             var xUpdate = await _repoInstance.save(xParamUpdate, 'update');
 
                             if (xUpdate.status_code == '00') {
+                                // update purchase request detail item is_gap_paid_off if rab qty revisi fulfilled
+                                if (pParam.rab_type == 2) {
+                                    for (var i in xJoArrItems) {
+                                        const xCheckFpbItem = await _purchaseRequestDetailRepo.getById({ id: xJoArrItems[i].deviation_fpb_item_id })
+                                        
+                                        if (xCheckFpbItem != null) {
+                                            let xTotalRabRev = 0
+                                            const xRabQtyGap = xCheckFpbItem.rab_qty_gap
+                                            if (xCheckFpbItem.rab_revision_item != null && xCheckFpbItem.rab_revision_item.length > 0) {
+                                                for (let i = 0; i < xCheckFpbItem.rab_revision_item.length; i++) {
+                                                    xTotalRabRev = xTotalRabRev + xCheckFpbItem.rab_revision_item[i].qty
+                                                }
+                                                // if (xTotalRabRev == Math.abs(xRabQtyGap)) {
+                                                await _purchaseRequestDetailRepo.save(
+                                                    {
+                                                        id: xJoArrItems[i].deviation_fpb_item_id,
+                                                        rab_qty_gap: xRabQtyGap + xTotalRabRev
+                                                    }, 'update_status'
+                                                )
+                                                // }
+                                            }
+                                        }
+                                    }
+                                }
                                 xJoResult = xAddResult;
                                 // // ---------------- Start: Add to log ----------------
                                 // let xParamLog = {
@@ -500,13 +550,15 @@ class BudgetPlanService {
 								? moment(xDetail[index].estimate_date_use).format('DD MMM YYYY')
 								: null,
 						section_title: xDetail[index].section_title,
-						fpb_ids: xDetail[index].fpb_ids,
+						// fpb_ids: xDetail[index].fpb_ids,
 						rab_origin: xDetail[index].rab_origin != null ? {
                             id: await _utilInstance.encrypt(xDetail[index].rab_origin.id.toString(), config.cryptoKey.hashKey),
                             name: xDetail[index].rab_origin.name,
                             document_no: xDetail[index].rab_origin.budget_no,
                         } : null,
 						purchase_request_detail: xDetail[index].purchase_request_detail,
+						deviation_fpb_item_id: xDetail[index].deviation_fpb_item_id,
+						deviation_fpb_item: xDetail[index].deviation_fpb_item,
 					});
 				}
 				// Get Approval Matrix

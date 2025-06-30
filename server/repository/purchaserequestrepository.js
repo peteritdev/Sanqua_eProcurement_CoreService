@@ -62,6 +62,18 @@ class PurchaseRequestRepository {
 							}
 						]
 					},
+					{
+						model: _modelBudgetPlanDetail,
+						as: 'rab_revision_item',
+						attributes: [ 'id', 'product_code', 'product_name', 'qty', 'qty_remain'],
+						include: [
+							{
+								model: _modelBudgetPlan,
+								as: 'budget_plan',
+								attributes: [ 'id', 'budget_no'],
+							}
+						]
+					},
 				]
 			},
 			{

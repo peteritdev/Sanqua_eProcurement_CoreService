@@ -88,6 +88,7 @@ module.exports = (sequelize, DataTypes) => {
 		paid_note: DataTypes.STRING,
 		rab_item_id: DataTypes.INTEGER,
 		rab_qty_gap: DataTypes.INTEGER,
+		is_gap_paid_off: DataTypes.BOOLEAN,
 	});
 
 	PurchaseRequestDetail.associate = function(models) {
@@ -118,6 +119,12 @@ module.exports = (sequelize, DataTypes) => {
 		PurchaseRequestDetail.belongsTo(models.tr_budgetplandetails, {
 			foreignKey: 'rab_item_id',
 			as: 'rab_item',
+			onDelete: 'CASCADE'
+		});
+
+		PurchaseRequestDetail.hasMany(models.tr_budgetplandetails, {
+			foreignKey: 'deviation_fpb_item_id',
+			as: 'rab_revision_item',
 			onDelete: 'CASCADE'
 		});
 	};

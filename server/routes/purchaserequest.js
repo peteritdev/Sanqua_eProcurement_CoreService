@@ -250,4 +250,12 @@ module.exports = (app) => {
 	app.post(
 		rootAPIPath + 'item/paid', arrValidate, purchaseRequestController.purchaseRequestDetail_PaidItem
 	);
+
+	// List Deviasi item FPB dengan RAB
+	arrValidate = [];
+	arrValidate = [
+		check('offset', 'Parameter offset must be integer and cannot be empty').not().isEmpty().isInt(),
+		check('limit').not().isEmpty().withMessage('Parameter limit cannot be empty')
+	];
+	app.get(rootAPIPath + 'item/deviation/list', arrValidate, purchaseRequestController.purchaseRequestDetail_DeviationList);
 };

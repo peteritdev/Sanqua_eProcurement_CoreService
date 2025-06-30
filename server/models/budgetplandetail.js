@@ -54,7 +54,8 @@ module.exports = (sequelize, DataTypes) => {
 		currency_code: DataTypes.STRING,
 		last_price: DataTypes.DOUBLE,
 		section_title: DataTypes.STRING,
-		rab_origin_id: DataTypes.INTEGER
+		rab_origin_id: DataTypes.INTEGER,
+		deviation_fpb_item_id: DataTypes.INTEGER
 		// fpb_ids: DataTypes.JSONB
 	});
 
@@ -92,6 +93,12 @@ module.exports = (sequelize, DataTypes) => {
 		BudgetPlanDetail.hasMany(models.tr_purchaserequestdetails, {
 			foreignKey: 'rab_item_id',
 			as: 'purchase_request_detail'
+		});
+		
+		BudgetPlanDetail.belongsTo(models.tr_purchaserequestdetails, {
+			foreignKey: 'deviation_fpb_item_id',
+			as: 'deviation_fpb_item',
+			onDelete: 'CASCADE'
 		});
 	};
 
