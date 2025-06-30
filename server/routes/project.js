@@ -49,4 +49,8 @@ module.exports = (app) => {
 	arrValidate = [];
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
 	app.delete(rootAPIPath + 'delete/:id', arrValidate, _projectController.deletePermanent);
+	
+	arrValidate = [];
+	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
+	app.post(rootAPIPath + 'set_draft', arrValidate, _projectController.setDraft);
 };
