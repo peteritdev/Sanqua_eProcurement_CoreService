@@ -190,6 +190,7 @@ class PurchaseRequestService {
 									if (xJoArrItems[i].hasOwnProperty('rab_item_id') && xJoArrItems[i].rab_item_id != null && xJoArrItems[i].rab_item_id != '') {
 										const xRabItemId = await _utilInstance.decrypt(xJoArrItems[i].rab_item_id, config.cryptoKey.hashKey);
 										if (xRabItemId.status_code == '00') {
+											// console.log(`>>> xJoArrItems[i].rab_item_id : ${JSON.stringify(xRabItemId.decrypted)}`);
 											xJoArrItems[i].rab_item_id = xRabItemId.decrypted;
 											let lastFpbQty = 0
 											let lastGap = 0
@@ -229,7 +230,7 @@ class PurchaseRequestService {
 							}
 							pParam.purchase_request_detail = xJoArrItems;
 						}
-						// console.log(`>>> Create FPB : ${JSON.stringify(pParam.purchase_request_detail)}`);
+						// console.log(`>>> Create FPB : ${JSON.stringify(pParam)}`);
 						var xAddResult = await _repoInstance.save(pParam, xAct);
 						if (xAddResult.status_code == '00' && xAddResult.created_id != '' && xAddResult.clear_id != '') {
 							// Generate FPB No
@@ -871,7 +872,9 @@ class PurchaseRequestService {
 							paid_note: xDetail[index].paid_note,
 							rab_item: xDetail[index].rab_item,
 							rab_qty_gap: xDetail[index].rab_qty_gap,
-							rab_revision_item: xDetail[index].rab_revision_item
+							rab_revision_item: xDetail[index].rab_revision_item,
+							is_deviation_fulfilled: xDetail[index].is_deviation_fulfilled,
+							is_subtitute: xDetail[index].is_subtitute
 						});
 					}
 					// Get Approval Matrix

@@ -373,7 +373,7 @@ class BudgetPlanService {
                             var xUpdate = await _repoInstance.save(xParamUpdate, 'update');
 
                             if (xUpdate.status_code == '00') {
-                                // update purchase request detail item is_gap_paid_off if rab qty revisi fulfilled
+                                // update purchase request detail item is_deviation_fulfilled if rab qty revisi fulfilled
                                 if (pParam.rab_type == 2) {
                                     for (var i in xJoArrItems) {
                                         const xCheckFpbItem = await _purchaseRequestDetailRepo.getById({ id: xJoArrItems[i].deviation_fpb_item_id })
@@ -385,13 +385,20 @@ class BudgetPlanService {
                                                 for (let i = 0; i < xCheckFpbItem.rab_revision_item.length; i++) {
                                                     xTotalRabRev = xTotalRabRev + xCheckFpbItem.rab_revision_item[i].qty
                                                 }
+                                                const xUpdateParam = {
+                                                    id: xJoArrItems[i].deviation_fpb_item_id,
+                                                    // rab_qty_gap: xRabQtyGap + xTotalRabRev
+                                                }
+                                                if (xCheckFpbItem.is_subtitute) {
+                                                    xUpdateParam.is_deviation_fulfilled = true
+                                                }
+                                                if ((xRabQtyGap + xTotalRabRev) < 0) {
+                                                    xUpdateParam.is_deviation_fulfilled = false
+                                                } else {
+                                                    xUpdateParam.is_deviation_fulfilled = true
+                                                }
                                                 // if (xTotalRabRev == Math.abs(xRabQtyGap)) {
-                                                await _purchaseRequestDetailRepo.save(
-                                                    {
-                                                        id: xJoArrItems[i].deviation_fpb_item_id,
-                                                        rab_qty_gap: xRabQtyGap + xTotalRabRev
-                                                    }, 'update_status'
-                                                )
+                                                await _purchaseRequestDetailRepo.save(xUpdateParam, 'update_status')
                                                 // }
                                             }
                                         }
