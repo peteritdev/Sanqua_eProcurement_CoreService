@@ -46,23 +46,23 @@ class BudgetPlanDetailRepository {
         },
         {
           model: _modelPurchaseRequestDetail,
-          as: "deviation_fpb_item",
-          attributes: ["id", "budget_no", "name"],
+          as: "purchase_request_detail",
+          // attributes: ["id", "budget_no", "name"],
         },
         
         {
-						model: _modelPurchaseRequestDetail,
-						as: 'deviation_fpb_item',
-						attributes: [ 'id', 'product_code', 'product_name', 'qty'],
-						include: [
-							{
-								model: _modelPurchaseRequest,
-								as: 'purchase_request',
-								// rubah nama menjadi alias yang pendek agar dapat tertampil, karena pada level include seperti ini object tidak dapat terbaca
-								attributes: [ 'id', ['request_no', 'no'], ['status', 'stt'] ]
-							}
-						]
-					}
+          model: _modelPurchaseRequestDetail,
+          as: 'deviation_fpb_item',
+          attributes: [ 'id', 'product_code', 'product_name', 'qty'],
+          include: [
+            {
+              model: _modelPurchaseRequest,
+              as: 'purchase_request',
+              // rubah nama menjadi alias yang pendek agar dapat tertampil, karena pada level include seperti ini object tidak dapat terbaca
+              attributes: [ 'id', ['request_no', 'no'], ['status', 'stt'] ]
+            }
+          ]
+        }
       ];
 
       if (pParam.hasOwnProperty("request_id")) {

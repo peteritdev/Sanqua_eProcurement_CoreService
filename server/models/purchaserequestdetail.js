@@ -88,7 +88,8 @@ module.exports = (sequelize, DataTypes) => {
 		paid_note: DataTypes.STRING,
 		rab_item_id: DataTypes.INTEGER,
 		rab_qty_gap: DataTypes.INTEGER,
-		is_gap_paid_off: DataTypes.BOOLEAN,
+		is_deviation_fulfilled: DataTypes.BOOLEAN,
+		is_subtitute: DataTypes.BOOLEAN
 	});
 
 	PurchaseRequestDetail.associate = function(models) {

@@ -258,4 +258,13 @@ module.exports = (app) => {
 		check('limit').not().isEmpty().withMessage('Parameter limit cannot be empty')
 	];
 	app.get(rootAPIPath + 'item/deviation/list', arrValidate, purchaseRequestController.purchaseRequestDetail_DeviationList);
+	
+	// Subtitute Item
+	arrValidate = [];
+	arrValidate = [
+		check('act').not().isEmpty().withMessage('Parameter act cannot be empty'),
+		check('id').not().isEmpty().withMessage('Parameter item_id cannot be empty'),
+		check('request_id').not().isEmpty().withMessage('Parameter request_id cannot be empty')
+	];
+	app.post(rootAPIPath + 'item/subtitute', arrValidate, purchaseRequestController.purchaseRequestDetail_Subtitute);
 };

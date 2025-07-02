@@ -30,7 +30,12 @@ class BudgetPlanRepository {
 		var xJoResult = {};
 
 		try {
-			xInclude = [];
+			xInclude = [
+				{
+					model: _modelBudgetPlanDetail,
+					as: 'budget_plan_detail'
+				}
+			];
 
 			if (pParam.hasOwnProperty('company_id')) {
 				if (pParam.company_id != '') {

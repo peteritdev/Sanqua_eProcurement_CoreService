@@ -164,8 +164,8 @@ class PurchaseRequestDetailRepository {
 				purchase_request_detail: pParam,
 			};
 			console.log(`>>> payload : ${JSON.stringify(payload)}`, payload.purchase_request_detail.id);
-			xSql = `SELECT calc_rab_item_remain_qty_v3(:payload::json)`;
-			// xSql = `SELECT calc_rab_item_remain_qty_v3('{
+			xSql = `SELECT calc_rab_item_remain_qty_v4(:payload::json)`;
+			// xSql = `SELECT calc_rab_item_remain_qty_v4('{
 			// 	"pAct": "${pAct}",
 			// 	"purchase_request_detail" : ${JSON.stringify(pParam)}
 			// }'::json)`;
@@ -185,12 +185,12 @@ class PurchaseRequestDetailRepository {
 				// });
 
 				if (xDtQuery.length > 0) {
-					if (xDtQuery[0].calc_rab_item_remain_qty_v3.status_code == "00") {
+					if (xDtQuery[0].calc_rab_item_remain_qty_v4.status_code == "00") {
 						xFlag = true
 					} else {
-					//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty_v3;
+					//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty_v4;
 						xFlag = false
-						xSqlErrMsg = `, ${xDtQuery[0].calc_rab_item_remain_qty_v3.status_msg}`
+						xSqlErrMsg = `, ${xDtQuery[0].calc_rab_item_remain_qty_v4.status_msg}`
 					}
 				} else {
 					xFlag = false
@@ -250,12 +250,12 @@ class PurchaseRequestDetailRepository {
 				// });
 
 				if (xDtQuery.length > 0) {
-					if (xDtQuery[0].calc_rab_item_remain_qty_v3.status_code == "00") {
+					if (xDtQuery[0].calc_rab_item_remain_qty_v4.status_code == "00") {
 						xFlag = true
 					} else {
 					//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty;
 						xFlag = false
-						xSqlErrMsg = xDtQuery[0].calc_rab_item_remain_qty_v3.status_msg
+						xSqlErrMsg = xDtQuery[0].calc_rab_item_remain_qty_v4.status_msg
 					}
 				} else {
 					xFlag = false
@@ -443,8 +443,8 @@ class PurchaseRequestDetailRepository {
 				pAct: 'update',
 				purchase_request_detail: pParam,
 			};
-			xSql = `SELECT calc_rab_item_remain_qty_v3(:payload::json)`;
-			// xSql = `SELECT calc_rab_item_remain_qty_v3('{
+			xSql = `SELECT calc_rab_item_remain_qty_v4(:payload::json)`;
+			// xSql = `SELECT calc_rab_item_remain_qty_v4('{
 			// 	"pAct": "update",
 			// 	"purchase_request_detail" : ${JSON.stringify(pParam)}
 			// }'::json)`;
@@ -457,12 +457,12 @@ class PurchaseRequestDetailRepository {
 			// });
 
 			if (xDtQuery.length > 0) {
-				if (xDtQuery[0].calc_rab_item_remain_qty_v3.status_code == "00") {
+				if (xDtQuery[0].calc_rab_item_remain_qty_v4.status_code == "00") {
 					xFlag = true
 				} else {
-				//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty_v3;
+				//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty_v4;
 					xFlag = false
-					xSqlErrMsg = xDtQuery[0].calc_rab_item_remain_qty_v3.status_msg
+					xSqlErrMsg = xDtQuery[0].calc_rab_item_remain_qty_v4.status_msg
 				}
 			} else {
 				xFlag = false
@@ -965,7 +965,7 @@ class PurchaseRequestDetailRepository {
 			}
 
 			// xSqlWhere += ' AND pr.status <> -1 AND pr.status <> 4 AND prd.rab_qty_gap < 0 AND (prd.is_gap_paid_off is null OR prd.is_gap_paid_off = false)';
-			xSqlWhere += ' AND pr.status <> -1 AND pr.status <> 4 AND prd.rab_qty_gap < 0';
+			xSqlWhere += ' AND (pr.status = 2 OR pr.status = 3 OR pr.status = 5) AND ((prd.rab_qty_gap < 0 AND prd.is_deviation_fulfilled is not true) OR (prd.is_subtitute is true AND prd.is_deviation_fulfilled is not true))';
 
 			if (pParam.hasOwnProperty('company_id')) {
 				if (pParam.company_id != '') {
@@ -1042,8 +1042,10 @@ class PurchaseRequestDetailRepository {
 			pr.budget_plan_id as "bp_id", bp.name as "bp_name", bp.budget_no as "bp_budget_no",
 			prd.status as "prd_status", prd.product_id, prd.product_code, prd.product_name, prd.uom_id, prd.uom_name,
 			prd.vendor_id, prd.vendor_code, prd.vendor_name, prd.estimate_date_use,
-			prd.budget_price_per_unit, prd.budget_price_total, prd.rab_qty_gap, prd.qty, prd.rab_item_id, prd.is_gap_paid_off,
-			bpd.qty as "rab_qty", bpd.qty_remain as "rab_qty_remain", bpd.rab_origin_id, bpo.budget_no as "rab_origin_no"`;
+			prd.budget_price_per_unit, prd.budget_price_total, prd.rab_qty_gap, prd.qty, prd.rab_item_id,
+			prd.is_deviation_fulfilled, prd.is_subtitute,
+			bpd.product_code as "rab_product_code", bpd.product_name as "rab_product_name", bpd.qty as "rab_qty",
+			bpd.qty_remain as "rab_qty_remain", bpd.rab_origin_id, bpo.budget_no as "rab_origin_no"`;
 
 			xSql = ` SELECT ${xSqlFields}
 			FROM tr_purchaserequestdetails as prd
