@@ -197,10 +197,11 @@ class PurchaseRequestService {
 											lastFpbQty = xJoArrItems[i].rab_qty - xJoArrItems[i].rab_qty_remain;
 											if (xJoArrItems[i].rab_qty_remain < 0) {
 												lastGap = (xJoArrItems[i].rab_qty - lastFpbQty);
+												xJoArrItems[i].rab_qty_gap = (xJoArrItems[i].rab_qty_remain - xJoArrItems[i].qty) - lastGap
 											} else {
 												lastGap = lastFpbQty
+												xJoArrItems[i].rab_qty_gap = lastFpbQty - xJoArrItems[i].qty
 											}
-											xJoArrItems[i].rab_qty_gap = (xJoArrItems[i].rab_qty_remain - xJoArrItems[i].qty) - lastGap
 											if (xJoArrItems[i].rab_qty_gap == null) {
 												return xJoResult = {
 													status_code: '-99',
@@ -232,8 +233,8 @@ class PurchaseRequestService {
 							}
 							pParam.purchase_request_detail = xJoArrItems;
 						}
-						// console.log(`>>> Create FPB : ${JSON.stringify(pParam.purchase_request_detail)}`);
-						var xAddResult = await _repoInstance.save(pParam, xAct);
+						console.log(`>>> Create FPB : ${JSON.stringify(pParam.purchase_request_detail)}`);
+						// var xAddResult = await _repoInstance.save(pParam, xAct);
 						if (xAddResult.status_code == '00' && xAddResult.created_id != '' && xAddResult.clear_id != '') {
 							// Generate FPB No
 							var xFPBNo = await _globalUtilInstance.generatePurchaseRequestNo(
