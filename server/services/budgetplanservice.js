@@ -295,10 +295,12 @@ class BudgetPlanService {
                         				xJoArrItems[i].hasOwnProperty('budget_price_per_unit')
                         			) {
                         				xJoArrItems[i].budget_price_total = xJoArrItems[i].qty * xJoArrItems[i].budget_price_per_unit;
-                                        if (pParam.rab_type == 1) {
-                                            xJoArrItems[i].qty_remain = xJoArrItems[i].qty;
-                                        } else {
+                                        if (pParam.rab_type == 2) {
                                             xJoArrItems[i].qty_remain = 0;
+                                        } else {
+                                            // set rab type to original
+                                            pParam.rab_type = 1
+                                            xJoArrItems[i].qty_remain = xJoArrItems[i].qty;
                                         }
                         			}
 
