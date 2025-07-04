@@ -68,9 +68,19 @@
                 <td style="text-align: left;" colspan="2"><span><%=data.data.department.name%></span>&nbsp;&nbsp;<span style="padding-left:100px;">Tanggal : <%=data.data.created_at%></span></td>
             </tr>
             <tr>
+                <td style="text-align: left;">Project</td>
+                <td>:</td>
+                <td style="text-align: left;" colspan="2"><span>(<%=data.data.project.odoo_project_code%>)</span><span style="margin-left: 2px;"><%=data.data.project.name%></span></td>
+            </tr>
+            <tr>
+                <td style="text-align: left;">Rencana Anggaran Belanja</td>
+                <td>:</td>
+                <td style="text-align: left;" colspan="2"><span><%=data.data.budget_plan.budget_no%></span></td>
+            </tr>
+            <tr>
                 <td style="text-align: left;vertical-align: top;">Kategori Barang</td>
-                <td style="text-align: left;vertical-align: top;">:</td>
-                <td colspan="2" style="padding-left:100px;">
+                <td style="vertical-align: top;">:</td>
+                <td colspan="2">
                     <table style="text-align: left;" cellpadding="2" cellspacing="2"> 
                         <tr>
                             <td>
