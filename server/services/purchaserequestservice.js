@@ -232,8 +232,8 @@ class PurchaseRequestService {
 							}
 							pParam.purchase_request_detail = xJoArrItems;
 						}
-						console.log(`>>> Create FPB : ${JSON.stringify(pParam.purchase_request_detail)}`);
-						// var xAddResult = await _repoInstance.save(pParam, xAct);
+						// console.log(`>>> Create FPB : ${JSON.stringify(pParam.purchase_request_detail)}`);
+						var xAddResult = await _repoInstance.save(pParam, xAct);
 						if (xAddResult.status_code == '00' && xAddResult.created_id != '' && xAddResult.clear_id != '') {
 							// Generate FPB No
 							var xFPBNo = await _globalUtilInstance.generatePurchaseRequestNo(
