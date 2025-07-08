@@ -111,7 +111,7 @@ class BudgetPlanService {
 
                     if (pParam.hasOwnProperty("filter")) {
                         let filter = JSON.parse(pParam.filter)
-                        console.log('Filter raw >>>>', filter);
+                        // console.log('Filter raw >>>>', filter);
                         for (let i = 0; i < filter.length; i++) {
                             if (filter[i]['project_id'] !== undefined) {
                                 if (typeof filter[i]['project_id'] === 'string') {
@@ -318,7 +318,7 @@ class BudgetPlanService {
                                             vendor_code: xJoArrItems[i].vendor_code,
                                             product_code: xJoArrItems[i].product_code
                                         });
-                                        console.log('xCatalogue >>>>', xCatalogue.data.product.category);
+                                        // console.log('xCatalogue >>>>', xCatalogue.data.product.category);
 
                                         if (xCatalogue.status_code == '00') {
                                             // xJoArrItems[i].last_price = xCatalogue.data.last_price;
@@ -508,7 +508,7 @@ class BudgetPlanService {
 			if (xResult != null) {
 				var xJoArrBudgetDetailData = [];
 				var xDetail = xResult.budget_plan_detail;
-			    console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`);
+			    // console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`);
 
                 let xFileArr = [];
                 for (var j in xResult.file) {
