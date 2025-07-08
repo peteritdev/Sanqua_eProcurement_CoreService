@@ -438,8 +438,8 @@ class BudgetPlanRepository {
 		});
 		}
 		var xData = await _modelDb.findAll({
-		where: xWhere,
-		subQuery: false,
+			where: xWhere,
+			subQuery: false,
 		});
 
 		return xData;

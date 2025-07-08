@@ -91,7 +91,6 @@ module.exports = (app) => {
 	// Delete RAB
 	arrValidate = [];
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
-	arrValidate = [ check('is_permanent').not().isEmpty().withMessage('Parameter is_permanent cannot be empty') ];
 	app.delete(rootAPIPath + 'delete/:id', arrValidate, budgetPlanController.budgetPlan_Delete);
 
 	// Dropdown RAB

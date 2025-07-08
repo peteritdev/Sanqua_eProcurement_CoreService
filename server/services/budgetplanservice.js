@@ -1480,23 +1480,28 @@ class BudgetPlanService {
 				status_msg: 'You not allowed to delete this data'
 			};
         } else {
+            let xId = pParam.id.slice(0, pParam.id.lastIndexOf('&'))
+            if (pParam.id.includes('is_permanent')) {
+                let xIs_permanent = pParam.id.slice(pParam.id.lastIndexOf('is_permanent'))
+                pParam.is_permanent = (String(xIs_permanent.split('=')[1]).toLowerCase() === 'true')
+            }
             if (pParam.hasOwnProperty('is_permanent')) {
-                
-                var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+                var xDecId = await _utilInstance.decrypt(xId, config.cryptoKey.hashKey);
                 if (xDecId.status_code == '00') {
-                    xEncId = pParam.id;
-                    pParam.id = xDecId.decrypted;
+                    xEncId = xId;
+                    xId = xDecId.decrypted;
                     xFlagProcess = true;
                 } else {
                     xJoResult = xDecId;
                 }
 
                 if (xFlagProcess) {
-                    var xRABDetail = await _repoInstance.getById({ id: pParam.id });
+                    var xRABDetail = await _repoInstance.getById({ id: xId });
                     
                     if (xRABDetail != null) {
+                        pParam.id = xId;
                         // Next: Will add delete user first on oauth
-                        if (xRABDetail.status != 0) {
+                        if (xRABDetail.status != 0 && xRABDetail.status != 5) {
                             xJoResult = {
                                 status_code: '-99',
                                 status_msg: 'You cannot delete this document now'

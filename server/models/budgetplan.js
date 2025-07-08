@@ -92,7 +92,9 @@ module.exports = (sequelize, DataTypes) => {
 	BudgetPlan.associate = function(models) {
 		BudgetPlan.hasMany(models.tr_budgetplandetails, {
 			foreignKey: 'request_id',
-			as: 'budget_plan_detail'
+			as: 'budget_plan_detail',
+			onDelete: 'CASCADE',
+			hooks: true
 		});
 
 		BudgetPlan.belongsTo(models.ms_projects, {

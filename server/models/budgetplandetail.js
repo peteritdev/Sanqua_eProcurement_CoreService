@@ -74,8 +74,8 @@ module.exports = (sequelize, DataTypes) => {
 
 		BudgetPlanDetail.belongsTo(models.tr_budgetplans, {
 			foreignKey: 'request_id',
-			as: 'budget_plan',
-			onDelete: 'CASCADE'
+			as: 'budget_plan'
+			// onDelete: 'CASCADE'
 		});
 
 		BudgetPlanDetail.belongsTo(models.ms_vendorcatalogues, {
