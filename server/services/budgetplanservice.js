@@ -111,7 +111,7 @@ class BudgetPlanService {
 
                     if (pParam.hasOwnProperty("filter")) {
                         let filter = JSON.parse(pParam.filter)
-                        console.log('Filter raw >>>>', filter);
+                        // console.log('Filter raw >>>>', filter);
                         for (let i = 0; i < filter.length; i++) {
                             if (filter[i]['project_id'] !== undefined) {
                                 if (typeof filter[i]['project_id'] === 'string') {
@@ -318,7 +318,7 @@ class BudgetPlanService {
                                             vendor_code: xJoArrItems[i].vendor_code,
                                             product_code: xJoArrItems[i].product_code
                                         });
-                                        console.log('xCatalogue >>>>', xCatalogue.data.product.category);
+                                        // console.log('xCatalogue >>>>', xCatalogue.data.product.category);
 
                                         if (xCatalogue.status_code == '00') {
                                             // xJoArrItems[i].last_price = xCatalogue.data.last_price;
@@ -508,7 +508,7 @@ class BudgetPlanService {
 			if (xResult != null) {
 				var xJoArrBudgetDetailData = [];
 				var xDetail = xResult.budget_plan_detail;
-			    console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`);
+			    // console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`);
 
                 let xFileArr = [];
                 for (var j in xResult.file) {
@@ -1480,23 +1480,28 @@ class BudgetPlanService {
 				status_msg: 'You not allowed to delete this data'
 			};
         } else {
+            let xId = pParam.id.slice(0, pParam.id.lastIndexOf('&'))
+            if (pParam.id.includes('is_permanent')) {
+                let xIs_permanent = pParam.id.slice(pParam.id.lastIndexOf('is_permanent'))
+                pParam.is_permanent = (String(xIs_permanent.split('=')[1]).toLowerCase() === 'true')
+            }
             if (pParam.hasOwnProperty('is_permanent')) {
-                
-                var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+                var xDecId = await _utilInstance.decrypt(xId, config.cryptoKey.hashKey);
                 if (xDecId.status_code == '00') {
-                    xEncId = pParam.id;
-                    pParam.id = xDecId.decrypted;
+                    xEncId = xId;
+                    xId = xDecId.decrypted;
                     xFlagProcess = true;
                 } else {
                     xJoResult = xDecId;
                 }
 
                 if (xFlagProcess) {
-                    var xRABDetail = await _repoInstance.getById({ id: pParam.id });
+                    var xRABDetail = await _repoInstance.getById({ id: xId });
                     
                     if (xRABDetail != null) {
+                        pParam.id = xId;
                         // Next: Will add delete user first on oauth
-                        if (xRABDetail.status != 0) {
+                        if (xRABDetail.status != 0 && xRABDetail.status != 5) {
                             xJoResult = {
                                 status_code: '-99',
                                 status_msg: 'You cannot delete this document now'
