@@ -242,12 +242,12 @@
                                     <td class="col-item"><%=item.qty%></td>
                                     <td class="col-item"><%=item.uom%></td>
                                     <td style="text-align: right;" class="col-item"><%=item.budget_price_per_unit != null ? item.budget_price_per_unit.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
-                                    <td style="text-align: left;" class="col-item"><%=item.vendor.name%></td>
+                                    <td style="text-align: left; text-transform: capitalize;" class="col-item"><%=item.vendor.name%></td>
                                     <td class="col-item">
                                         <%
                                             if( item.has_budget == 1 ){
                                         %>
-                                                <img src="<%=imagePath%>checklist.png" width="15">
+                                                <img src="<%=imagePath%>box_checklist.png" width="10">
                                         <%
                                             }
                                         %>
@@ -256,7 +256,7 @@
                                         <%
                                             if( item.has_budget == 0 ){
                                         %>
-                                                <img src="<%=imagePath%>checklist.png" width="15">
+                                                <img src="<%=imagePath%>blank_checklist.png" width="10">
                                         <%
                                             }
                                         %>
