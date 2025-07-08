@@ -107,6 +107,7 @@ class PaymentRequestService {
 							var xTotalDiscItem = 0;
 							var xTotalDiscWoTax = 0;
 							var xTaxes = 0;
+							var xDpp = 0
 								
 							// // looping detail item
 							for (var i in xPayreqDetail) {
@@ -203,16 +204,25 @@ class PaymentRequestService {
 
 							if (xGlobalAmount == 0) {
 								xDetail.data.untaxed_amount = Math.round((xDetail.data.total_base_price - xDetail.data.total_discount || 0 ) * 1000) / 1000
-								xDetail.data.total_tax_amount = Math.round(( xTaxes || 0 ) * 1000) / 1000
+								if (xPayreqDetail.every( ({ tax_type }) => tax_type == 6 || tax_type == 7)) {
+									xDpp = (Math.round((xDetail.data.untaxed_amount * (11/12)) * 1000 )  / 1000) || 0
+									xDetail.data.total_tax_amount = (Math.round((xDpp * 0.12) * 1000 )  / 1000) || 0
+								} else {
+									xDetail.data.total_tax_amount = Math.round(( xTaxes || 0 ) * 1000) / 1000
+								}
 							} else {
 								xDetail.data.untaxed_amount = Math.round((xDetail.data.total_base_price - xGlobalAmount || 0) * 1000) / 1000
-								if (xPayreqDetail.every( ({ tax_type }) => tax_type == 3 || tax_type == 4)) {
-									xDetail.data.total_tax_amount = (Math.round((xDetail.data.untaxed_amount * 0.11) * 1000 )  / 1000) || 0
+								if (xPayreqDetail.every( ({ tax_type }) => tax_type == 6 || tax_type == 7)) {
+									xDpp = (Math.round((xDetail.data.untaxed_amount * (11/12)) * 1000 )  / 1000) || 0
+									// before update ppn12%
+									// xDetail.data.total_tax_amount = (Math.round((xDetail.data.untaxed_amount * 0.11) * 1000 )  / 1000) || 0
+									xDetail.data.total_tax_amount = (Math.round((xDpp * 0.12) * 1000 )  / 1000) || 0
 								} else {
 									xDetail.data.total_tax_amount = (Math.round((xTaxes) * 1000 )  / 1000) || 0
 								}
 								// xDetail.data.total_tax_amount = (Math.round((xTaxes - (xTaxes * (xDetail.data.global_discount_percent / 100))) * 1000 )  / 1000) || 0
 							}
+							xDetail.data.total_dpp = xDpp
 							var xPreTotalPrice = xDetail.data.untaxed_amount + xDetail.data.total_tax_amount + xDetail.data.delivery_costs + xDetail.data.service_costs + xDetail.data.other_costs
 							xDetail.data.total_price = Math.round((xPreTotalPrice || 0) * 1000) / 1000
 							// get Detail FPB
