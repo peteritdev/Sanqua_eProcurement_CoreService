@@ -5,16 +5,28 @@
     <style>
       @page {
         size: A4 landscape;
-        margin: 15mm;
+        /* margin: 15mm; */
+        /* border: 0.2cm; */
+      }
+      
+      @media print {
+        .page-break {
+          page-break-before: always;
+        }
+
+        .no-break {
+          page-break-inside: avoid;
+        }
       }
 
       body {
         font-family: Arial, sans-serif;
         font-size: 9px;
       }
-      /* tr, td, th {
-        border: 1px solid black;
-      } */
+
+      tr, td, th {
+        page-break-inside: avoid; /* hindari potongan di tengah baris */
+      }
 
       .title {
         text-align: center;
@@ -83,7 +95,7 @@
       }
 
       .signature-section td {
-        padding: 5px;
+        padding: 10px;
       }
 
       .right-align {
