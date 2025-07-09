@@ -16,6 +16,10 @@
         border: 1px solid black;
       } */
 
+      .page-break {
+        page-break-before: always;
+      }
+
       .title {
         text-align: center;
         font-weight: bold;
@@ -82,9 +86,9 @@
         font-size: 9px;
       }
 
-      /* .signature-section td {
-        padding: 15px;
-      } */
+      .signature-section td {
+        padding: 10px;
+      }
 
       .right-align {
         text-align: right;
@@ -161,7 +165,7 @@
           <td colspan="11"><%=item.section_title%></td>
         </tr>
         <% } %>
-        <tr>
+        <tr style="page-break-inside: avoid;">
           <td><%=index%></td>
           <!-- <td><%=data.data.company != null ? data.data.company.alias : '-'%></td>
         <td><%=data.data.department != null ? data.data.department.name : '-'%></td> -->
@@ -202,7 +206,7 @@
     </table>
 
     <table class="note-table">
-      <tr>
+      <tr style="page-break-inside: avoid;">
         <td>
           <strong>Note :</strong><br />
           <%=data.data.note%>
@@ -211,19 +215,19 @@
     </table>
 
     <table class="signature-section">
-      <tr>
+      <tr style="page-break-inside: avoid;">
         <td colspan="4" style="text-align: left">
           Jakarta, <%=data.data.created_at%>
         </td>
       </tr>
-      <tr>
+      <tr style="page-break-inside: avoid;">
         <td colspan="4" style="padding: 0px; margin: 0px">
           <table
             cellspacing="0"
             cellpadding="0"
             style="width: 100%; border-width: 0.2px"
           >
-            <tr>
+            <tr style="page-break-inside: avoid;">
               <th style="width: 25%; font-weight: 400">Dibuat Oleh.,</th>
               <th class="border-r" style="width: 25%; font-weight: 400">
                 Diperiksa Oleh.,
@@ -235,7 +239,7 @@
                 Disetujui Oleh.,
               </th>
             </tr>
-            <tr>
+            <tr style="page-break-inside: avoid;">
               <td>
                 <table
                   style="
@@ -362,7 +366,7 @@
                 <% } %>
               </td>
             </tr>
-            <tr>
+            <tr style="page-break-inside: avoid;">
               <td style="padding: 3px 0">
                 <table style="margin: auto; text-align: center">
                   <!-- <tr>
