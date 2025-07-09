@@ -249,7 +249,7 @@
                     min-height: 35px;
                   "
                 >
-                  <tr>
+                  <tr style="page-break-inside: avoid;">
                     <td></td>
                   </tr>
                 </table>
@@ -265,7 +265,7 @@
                     min-height: 35px;
                   "
                 >
-                  <tr>
+                  <tr style="page-break-inside: avoid;">
                     <% for(var i = 0; i < qrCode.approval1.length; i++ ) { %>
                     <td>
                       <img
@@ -285,7 +285,7 @@
                     min-height: 35px;
                   "
                 >
-                  <tr>
+                  <tr style="page-break-inside: avoid;">
                     <td></td>
                   </tr>
                 </table>
@@ -302,7 +302,7 @@
                     min-height: 35px;
                   "
                 >
-                  <tr>
+                  <tr style="page-break-inside: avoid;">
                     <% for(var i = 0; i < qrCode.approval2.length; i++ ) { %>
                     <td>
                       <img
@@ -322,7 +322,7 @@
                     min-height: 35px;
                   "
                 >
-                  <tr>
+                  <tr style="page-break-inside: avoid;">
                     <td></td>
                   </tr>
                 </table>
@@ -339,7 +339,7 @@
                     min-height: 35px;
                   "
                 >
-                  <tr>
+                  <tr style="page-break-inside: avoid;">
                     <% for(var i = 0; i < qrCode.approval3.length; i++ ) { %>
                     <td>
                       <img
@@ -359,7 +359,7 @@
                     min-height: 35px;
                   "
                 >
-                  <tr>
+                  <tr style="page-break-inside: avoid;">
                     <td></td>
                   </tr>
                 </table>
@@ -373,7 +373,7 @@
                   <td>
                   </td>
                 </tr> -->
-                  <tr>
+                  <tr style="page-break-inside: avoid;">
                     <td><%=data.data.created_by_name%></td>
                   </tr>
                 </table>
@@ -382,7 +382,7 @@
                 <% if( qrCode.approval1 != null && qrCode.approval1.length > 0
                 ){ %>
                 <table style="margin: auto; text-align: center">
-                  <tr>
+                  <tr style="page-break-inside: avoid;">
                     <% for(var i = 0; i < approver1.length; i++ ) { %>
                     <td><%=approver1[i].user.name%></td>
                     <% }%>
@@ -393,7 +393,7 @@
                   <!-- <tr>
                 <td></td>
               </tr> -->
-                  <tr>
+                  <tr style="page-break-inside: avoid;">
                     <td>(.............................)</td>
                   </tr>
                 </table>
@@ -403,7 +403,7 @@
                 <% if( qrCode.approval2 != null && qrCode.approval2.length > 0
                 ){ %>
                 <table style="margin: auto; text-align: center">
-                  <tr>
+                  <tr style="page-break-inside: avoid;">
                     <% for(var i = 0; i < approver2.length; i++ ) { %>
                     <td><%=approver2[i].user.name%></td>
                     <% }%>
@@ -414,7 +414,7 @@
                   <!-- <tr>
                 <td></td>
               </tr> -->
-                  <tr>
+                  <tr style="page-break-inside: avoid;">
                     <td>(.............................)</td>
                   </tr>
                 </table>
@@ -424,7 +424,7 @@
                 <% if( qrCode.approval3 != null && qrCode.approval3.length > 0
                 ){ %>
                 <table style="margin: auto; text-align: center">
-                  <tr>
+                  <tr style="page-break-inside: avoid;">
                     <% for(var i = 0; i < approver3.length; i++ ) { %>
                     <td><%=approver3[i].user.name%></td>
                     <% }%>
@@ -435,7 +435,7 @@
                   <!-- <tr>
                 <td></td>
               </tr> -->
-                  <tr>
+                  <tr style="page-break-inside: avoid;">
                     <td>(.............................)</td>
                   </tr>
                 </table>
