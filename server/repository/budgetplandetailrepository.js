@@ -15,6 +15,7 @@ const _modelDb = require("../models").tr_budgetplandetails;
 const _modelBudgetPlan = require("../models").tr_budgetplans;
 const _modelPurchaseRequest = require('../models').tr_purchaserequests;
 const _modelPurchaseRequestDetail = require('../models').tr_purchaserequestdetails;
+const _modelLogSubtitute = require('../models').log_fpbitemsubtitutes;
 
 const Utility = require("peters-globallib-v2");
 const _utilInstance = new Utility();
@@ -49,7 +50,6 @@ class BudgetPlanDetailRepository {
           as: "purchase_request_detail",
           // attributes: ["id", "budget_no", "name"],
         },
-        
         {
           model: _modelPurchaseRequestDetail,
           as: 'deviation_fpb_item',
@@ -62,6 +62,10 @@ class BudgetPlanDetailRepository {
               attributes: [ 'id', ['request_no', 'no'], ['status', 'stt'] ]
             }
           ]
+        },
+        {
+          model: _modelLogSubtitute,
+          as: 'log_subtitute'
         }
       ];
 

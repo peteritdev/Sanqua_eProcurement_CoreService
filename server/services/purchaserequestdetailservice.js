@@ -1847,9 +1847,9 @@ class PurchaseRequestDetailService {
 					if (xItem.status_code == '00') {
 						let xSubtituteParam = {
 							act: 'add',
-							pr_item_id: pParam.pr_item_id,
+							pr_item_id: pParam.xId,
 							rab_item_id: pParam.rab_item_id,
-							reason: pParam.reason,
+							reason: pParam.subtitute_reason,
 							before: {
 								// qty: xItem.data.qty,
 								// budget_price_per_unit: xItem.data.budget_price_per_unit,
@@ -1871,6 +1871,7 @@ class PurchaseRequestDetailService {
 								// uom_name: pParam.uom_name
 							}
 						}
+						console.log(`>>> _subtituteRepoInstance.save : ${JSON.stringify(xSubtituteParam)}`);
 						var xResultSubtitute = await _subtituteRepoInstance.save(xSubtituteParam, 'add');
 						console.log(`>>> xResultSubtitute : ${JSON.stringify(xResultSubtitute)}`);
 					}

@@ -58,6 +58,19 @@ module.exports = (sequelize, DataTypes) => {
 		deviation_fpb_item_id: DataTypes.INTEGER
 		// fpb_ids: DataTypes.JSONB
 	});
+	BudgetPlanDetail.beforeCreate(async (item, options) => {
+		if (!item.rab_origin_id && item.request_id) {
+			item.rab_origin_id = item.request_id;
+		}
+	});
+
+	BudgetPlanDetail.beforeBulkCreate(async (items, options) => {
+		for (const item of items) {
+			if (!item.rab_origin_id && item.request_id) {
+			item.rab_origin_id = item.request_id;
+			}
+		}
+	});
 
 	BudgetPlanDetail.associate = function(models) {
 		BudgetPlanDetail.belongsTo(models.ms_products, {
@@ -98,6 +111,12 @@ module.exports = (sequelize, DataTypes) => {
 		BudgetPlanDetail.belongsTo(models.tr_purchaserequestdetails, {
 			foreignKey: 'deviation_fpb_item_id',
 			as: 'deviation_fpb_item',
+			onDelete: 'CASCADE'
+		});
+		
+		BudgetPlanDetail.hasMany(models.log_fpbitemsubtitutes, {
+			foreignKey: 'rab_item_id',
+			as: 'log_subtitute',
 			onDelete: 'CASCADE'
 		});
 	};

@@ -880,7 +880,8 @@ class PurchaseRequestService {
 							rab_qty_gap: xDetail[index].rab_qty_gap,
 							rab_revision_item: xDetail[index].rab_revision_item,
 							is_deviation_fulfilled: xDetail[index].is_deviation_fulfilled,
-							is_subtitute: xDetail[index].is_subtitute
+							is_subtitute: xDetail[index].is_subtitute,
+                        	log_subtitute: xDetail[index].log_subtitute
 						});
 					}
 					// Get Approval Matrix
