@@ -14,6 +14,7 @@ const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
 const _modelBudgetPlan = require('../models').tr_budgetplans;
 const _modelBudgetPlanDetail = require('../models').tr_budgetplandetails;
+const _modelLogSubtitute = require('../models').log_fpbitemsubtitutes;
 
 const Utility = require('peters-globallib-v2');
 const { param } = require('express-validator');
@@ -74,6 +75,10 @@ class PurchaseRequestRepository {
 							}
 						]
 					},
+					{
+						model: _modelLogSubtitute,
+						as: 'log_subtitute'
+					}
 				]
 			},
 			{

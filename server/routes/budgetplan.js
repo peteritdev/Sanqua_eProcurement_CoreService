@@ -146,8 +146,11 @@ module.exports = (app) => {
 		check('file', 'Parameter photo must be array and cannot be empty').not().isEmpty().isArray()
 	];
 	app.post(
-		rootAPIPath + 'update_file_upload',
-		arrValidate,
-		budgetPlanController.budgetPlan_UpdateFileUpload
+		rootAPIPath + 'update_file_upload', arrValidate, budgetPlanController.budgetPlan_UpdateFileUpload
 	);
+
+	// Fetch Matrix RAB
+	arrValidate = [];
+	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
+	app.post(rootAPIPath + 'fetch_matrix', arrValidate, budgetPlanController.budgetPlan_FetchMatrix);
 };

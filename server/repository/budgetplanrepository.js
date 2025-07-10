@@ -11,6 +11,7 @@ const _modelProject = require('../models').ms_projects;
 const _modelBudgetPlanDetail = require('../models').tr_budgetplandetails;
 const _modelPurchaseRequest = require('../models').tr_purchaserequests;
 const _modelPurchaseRequestDetail = require('../models').tr_purchaserequestdetails;
+const _modelLogSubtitute = require('../models').log_fpbitemsubtitutes;
 // const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 
 const Utility = require('peters-globallib-v2');
@@ -355,6 +356,10 @@ class BudgetPlanRepository {
 								attributes: [ 'id', ['request_no', 'no'], ['status', 'stt'] ]
 							}
 						]
+					},
+					{
+						model: _modelLogSubtitute,
+						as: 'log_subtitute'
 					}
 				]
 			},

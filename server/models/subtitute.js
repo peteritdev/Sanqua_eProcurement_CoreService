@@ -3,7 +3,7 @@
 const sequelize = require("sequelize")
 
 module.exports = ( sequelize, DataTypes ) => {
-    const Subtitute = sequelize.define( 'log_fpbitemsubtitutes', {
+    const ItemSubtitute = sequelize.define( 'log_fpbitemsubtitutes', {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
@@ -24,5 +24,19 @@ module.exports = ( sequelize, DataTypes ) => {
         created_by_name: DataTypes.STRING
     },{timestamps: false} );
 
-    return Subtitute;
+    ItemSubtitute.associate = function(models) {
+		ItemSubtitute.belongsTo(models.tr_budgetplandetails, {
+			foreignKey: 'rab_item_id',
+			as: 'budget_plan_detail'
+			// onDelete: 'CASCADE'
+		});
+
+		ItemSubtitute.belongsTo(models.tr_purchaserequestdetails, {
+			foreignKey: 'pr_item_id',
+			as: 'purchase_request_detail'
+			// onDelete: 'CASCADE'
+		});
+	};
+
+    return ItemSubtitute;
 }

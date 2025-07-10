@@ -96,6 +96,7 @@ class BudgetPlanDetailService {
 									document_no: xDetail[index].rab_origin.budget_no,
 								} : null,
 								deviation_fpb_item_id: xRows[i].deviation_fpb_item_id,
+								log_subtitute: xRows[i].log_subtitute,
 							});
 						}
 

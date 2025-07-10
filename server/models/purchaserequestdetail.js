@@ -128,6 +128,12 @@ module.exports = (sequelize, DataTypes) => {
 			as: 'rab_revision_item',
 			onDelete: 'CASCADE'
 		});
+		
+		PurchaseRequestDetail.hasMany(models.log_fpbitemsubtitutes, {
+			foreignKey: 'pr_item_id',
+			as: 'log_subtitute',
+			onDelete: 'CASCADE'
+		});
 	};
 
 	return PurchaseRequestDetail;

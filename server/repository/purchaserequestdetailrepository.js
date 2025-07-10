@@ -13,6 +13,7 @@ const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
 const _modelBudgetPlan = require('../models').tr_budgetplans;
 const _modelBudgetPlanDetail = require('../models').tr_budgetplandetails;
+const _modelLogSubtitute = require('../models').log_fpbitemsubtitutes;
 
 const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
@@ -37,6 +38,10 @@ class PurchaseRequestDetailRepository {
 					as: 'purchase_request',
 					// rubah nama menjadi alias yang pendek agar dapat tertampil, karena pada level include seperti ini object tidak dapat terbaca
 					attributes: [ 'id', 'request_no', 'status' ]
+				},
+				{
+					model: _modelLogSubtitute,
+					as: 'log_subtitute'
 				}
 			];
 
