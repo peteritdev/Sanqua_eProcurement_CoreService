@@ -23,6 +23,8 @@ const _globalUtilInstance = new GlobalUtility();
 // Repository
 const BudgetPlanRepository = require('../repository/budgetplanrepository.js');
 const _repoInstance = new BudgetPlanRepository();
+const BudgetPlanDetailRepo = require('../repository/budgetplandetailrepository.js');
+const _budgetPlanDetailRepo = new BudgetPlanDetailRepo();
 
 // Repository
 // const BudgetPlanDetailRepository = require('../repository/budgetplandetailrepository.js');
@@ -1121,6 +1123,50 @@ class BudgetPlanService {
                             status_msg: 'You cannot cancel this document now'
                         };
                     } else {
+                        // check if rab revisi then update is_deviation_fullfiled to false in fpb item based on all rab items
+                        // then when rab set to draft again, check every item already created other rab revision or not
+                        // if no other rab created then update is_deviation_fullfiled on fpb item to true
+                        // if there is other rab created then keep is_deviation_fullfiled to false and cannot set to draft
+                        if (xRABDetail.rab_type == 2) {
+                            if (xRABDetail.budget_plan_detail != null && xRABDetail.budget_plan_detail.length > 0) {
+                                let xErrorFlag = false
+                                for (var i in xRABDetail.budget_plan_detail) {
+                                    // console.log(`>>> Cancel RAB Revisi : ${JSON.stringify(xRABDetail.budget_plan_detail[i].deviation_fpb_item)}`);
+                                    if (xRABDetail.budget_plan_detail[i].deviation_fpb_item_id != null) {
+                                        let xParamUpdateFpbItem = {
+                                            id: xRABDetail.budget_plan_detail[i].deviation_fpb_item_id,
+                                            is_deviation_fulfilled: false
+                                        };
+                                        let xUpdateFpbItemResult = await _purchaseRequestDetailRepo.save(xParamUpdateFpbItem, 'update_status');
+                                        // console.log(`>>> xUpdateFpbItemResult : ${JSON.stringify(xUpdateFpbItemResult)}`);
+                                        if (xUpdateFpbItemResult.status_code != '00') {
+                                            // console.log(`>>> Error update fpb item : ${JSON.stringify(xUpdateFpbItemResult)}`);
+                                            xErrorFlag = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                // if some transaction error then rollback previous updated successfully fpb item then return error to frontend
+                                if (xErrorFlag) {
+                                    for (var i in xRABDetail.budget_plan_detail) {
+                                        if (xRABDetail.budget_plan_detail[i].deviation_fpb_item_id != null) {
+                                            let xParamUpdateFpbItem = {
+                                                id: xRABDetail.budget_plan_detail[i].deviation_fpb_item_id,
+                                                is_deviation_fulfilled: true
+                                            };
+                                            await _purchaseRequestDetailRepo.save(xParamUpdateFpbItem, 'update_status');
+                                        }
+                                    }
+                                    xJoResult = {
+                                        status_code: '-99',
+                                        status_msg: 'Error update fpb item, please try again later'
+                                    };
+                                    return xJoResult;
+                                }
+                                
+                            }
+                            
+                        }
                         pParam.cancelAt = await _utilInstance.getCurrDateTime();
                         pParam.status = 5;
                         var xUpdateResult = await _repoInstance.save(pParam, 'cancel');
@@ -1195,6 +1241,52 @@ class BudgetPlanService {
                             status_msg: 'You cannot set to draft while this docment already in process'
                         };
                     } else {
+                        // check every item, if some item has already created on other rab revision
+                        // then update is_deviation_fullfiled on fpb item to true and return cannot set to draft
+                        // if there is no other rab created then go ahead and set to draft
+                        if (xRABDetail.rab_type == 2) {
+                            if (xRABDetail.budget_plan_detail != null && xRABDetail.budget_plan_detail.length > 0) {
+                                let xFindOtherRab = null
+                                for (var i in xRABDetail.budget_plan_detail) {
+                                    if (xRABDetail.budget_plan_detail[i].deviation_fpb_item_id != null) {
+                                        // check if this item already created on other rab revision or not
+                                        let xCheckOtherRab = await _budgetPlanDetailRepo.getByParam(
+                                            {
+                                                deviation_fpb_item_id: xRABDetail.budget_plan_detail[i].deviation_fpb_item_id
+                                            }
+                                        )
+                                        // check if item created on other rab revision with same deviation_fpb_item_id and rab status not cancel not draft and not reject
+                                        const xRabResult = xCheckOtherRab.find(({ deviation_fpb_item_id, budget_plan}) => budget_plan != null && budget_plan.status != 5 && budget_plan.status != 6 && budget_plan.id != xRABDetail.id && deviation_fpb_item_id == xRABDetail.budget_plan_detail[i].deviation_fpb_item_id )
+                                        console.log(`>>> xCheckOtherRab : ${JSON.stringify(xFindOtherRab)}`);
+                                        if (xRabResult != undefined) {
+                                            // console.log(`>>> Error set to draft, this item already created on other rab revision : ${JSON.stringify(xRABDetail.budget_plan_detail[i].deviation_fpb_item_id)}`);
+                                            xFindOtherRab = xRabResult;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (xFindOtherRab != null) {
+                                    xJoResult = {
+                                        status_code: '-99',
+                                        status_msg: `You cannot set to draft, some item on this document already created on other rab revision: ${xFindOtherRab.budget_plan.budget_no}`
+                                    };
+                                    return xJoResult;
+                                    
+                                } else {
+                                    // update fpb item is_deviation_fulfilled to true
+                                    for (var i in xRABDetail.budget_plan_detail) {
+                                        if (xRABDetail.budget_plan_detail[i].deviation_fpb_item_id != null) {
+                                            let xParamUpdateFpbItem = {
+                                                id: xRABDetail.budget_plan_detail[i].deviation_fpb_item_id,
+                                                is_deviation_fulfilled: true
+                                            };
+                                            await _purchaseRequestDetailRepo.save(xParamUpdateFpbItem, 'update_status');
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
                         pParam.set_to_draftAt = await _utilInstance.getCurrDateTime();
                         pParam.status = 0;
                         var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft');
@@ -1367,6 +1459,51 @@ class BudgetPlanService {
 						status_msg: 'Cannot reject, document already in process'
 					};
 				} else {
+                    // check if rab revisi then update is_deviation_fullfiled to false in fpb item based on all rab items
+                    // then when rab set to draft again, check every item already created other rab revision or not
+                    // if no other rab created then update is_deviation_fullfiled on fpb item to true
+                    // if there is other rab created then keep is_deviation_fullfiled to false and cannot set to draft
+                    if (xRABDetail.rab_type == 2) {
+                        if (xRABDetail.budget_plan_detail != null && xRABDetail.budget_plan_detail.length > 0) {
+                            let xErrorFlag = false
+                            for (var i in xRABDetail.budget_plan_detail) {
+                                // console.log(`>>> Cancel RAB Revisi : ${JSON.stringify(xRABDetail.budget_plan_detail[i].deviation_fpb_item)}`);
+                                if (xRABDetail.budget_plan_detail[i].deviation_fpb_item_id != null) {
+                                    let xParamUpdateFpbItem = {
+                                        id: xRABDetail.budget_plan_detail[i].deviation_fpb_item_id,
+                                        is_deviation_fulfilled: false
+                                    };
+                                    let xUpdateFpbItemResult = await _purchaseRequestDetailRepo.save(xParamUpdateFpbItem, 'update_status');
+                                    // console.log(`>>> xUpdateFpbItemResult : ${JSON.stringify(xUpdateFpbItemResult)}`);
+                                    if (xUpdateFpbItemResult.status_code != '00') {
+                                        // console.log(`>>> Error update fpb item : ${JSON.stringify(xUpdateFpbItemResult)}`);
+                                        xErrorFlag = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            // if some transaction error then rollback previous updated successfully fpb item then return error to frontend
+                            if (xErrorFlag) {
+                                for (var i in xRABDetail.budget_plan_detail) {
+                                    if (xRABDetail.budget_plan_detail[i].deviation_fpb_item_id != null) {
+                                        let xParamUpdateFpbItem = {
+                                            id: xRABDetail.budget_plan_detail[i].deviation_fpb_item_id,
+                                            is_deviation_fulfilled: true
+                                        };
+                                        await _purchaseRequestDetailRepo.save(xParamUpdateFpbItem, 'update_status');
+                                    }
+                                }
+                                xJoResult = {
+                                    status_code: '-99',
+                                    status_msg: 'Error update fpb item, please try again later'
+                                };
+                                return xJoResult;
+                            }
+                            
+                        }
+                        
+                    }
+                    
                     var xParamApprovalMatrixDocument = {
                         document_id: xEncId,
                         status: -1,

@@ -351,8 +351,17 @@ class BudgetPlanDetailRepository {
     }
   }
   async getByParam(pParam) {
+    var xOrder = ["product_name", "ASC"];
     var xWhereAnd = [];
     var xWhere = [];
+    var xInclude = [];
+    xInclude = [
+        {
+          model: _modelBudgetPlan,
+          as: "budget_plan",
+          attributes: ["id", "budget_no", "name", "status"],
+        }
+    ];
 
     if (pParam.hasOwnProperty("id")) {
       if (pParam.pr_no != "") {
@@ -368,6 +377,13 @@ class BudgetPlanDetailRepository {
         });
       }
     }
+    if (pParam.hasOwnProperty("deviation_fpb_item_id")) {
+      if (pParam.deviation_fpb_item_id != "") {
+        xWhereAnd.push({
+          deviation_fpb_item_id: pParam.deviation_fpb_item_id,
+        });
+      }
+    }
 
     if (xWhereAnd.length > 0) {
       xWhere.push({
@@ -377,6 +393,7 @@ class BudgetPlanDetailRepository {
     var xData = await _modelDb.findAll({
       where: xWhere,
       subQuery: false,
+      include: xInclude
     });
 
     return xData;
