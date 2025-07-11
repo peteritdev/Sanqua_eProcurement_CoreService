@@ -71,7 +71,7 @@ class PurchaseRequestRepository {
 							{
 								model: _modelBudgetPlan,
 								as: 'budget_plan',
-								attributes: [ 'id', 'budget_no'],
+								attributes: [ 'id', 'budget_no', 'status'],
 							}
 						]
 					},

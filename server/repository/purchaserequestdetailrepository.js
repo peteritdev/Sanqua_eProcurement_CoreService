@@ -404,13 +404,13 @@ class PurchaseRequestDetailRepository {
 				delete pParam.id;
 				pParam.updated_by = pParam.user_id;
 				pParam.updated_by_name = pParam.user_name;
+				// console.log(`>>> pParam : ${JSON.stringify(pParam)}`);
 				var xWhere = {
 					where: {
 						id: xId
 					},
 					transaction: xTransaction
 				};
-
 				xSaved = await _modelDb.update(pParam, xWhere);
 
 				await xTransaction.commit();
