@@ -1326,13 +1326,16 @@ class PaymentRequestService {
 							act: 'fetch_matrix',
 							document_id: xEncId,
 							document_no: xPayreqDetail.data.document_no,
-							application_id: 8,
+							application_id: 8,//ecatalog app id
 							table_name: config.dbTables.payreq,
 							company_id: xPayreqDetail.data.company_id,
 							department_id: xPayreqDetail.data.department_id,
-							ecatalogue_fpb_category_item: null,
-							logged_company_id: pParam.logged_company_id
+							// ecatalogue_fpb_category_item: null,
+							logged_company_id: pParam.logged_company_id,
+							approval_matrix_id: pParam.approval_matrix_id
 						};
+						
+						console.log(`>>> xParamAddApprovalMatrix: ${JSON.stringify(xParamAddApprovalMatrix)}`)
 
 						var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
 							pParam.method,
