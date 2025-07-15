@@ -218,7 +218,7 @@ class PurchaseRequestService {
 												const xRows = xCheckRabItemInFpb.data.rows
 												console.log(`>>> xCheckRabItemInFpb : ${JSON.stringify(xRows)}`);
 												const xFindPR = xRows.find(
-													({ purchase_request }) => purchase_request != null && (purchase_request.status == 0 || purchase_request.status == 4)
+													({ purchase_request }) => purchase_request != null && (purchase_request.status == 0)
 												);
 												if (xFindPR != undefined) {
 													return xJoResult = {
