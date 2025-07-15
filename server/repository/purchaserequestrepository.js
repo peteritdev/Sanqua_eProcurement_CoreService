@@ -1527,6 +1527,49 @@ class PurchaseRequestRepository {
 			total_record: xTotalRecord[0].total_record
 		};
 	}
+	
+	async getByParam(pParam) {
+		var xWhereAnd = [];
+		var xWhere = [];
+		
+		if (pParam.hasOwnProperty('budget_plan_id')) {
+			if (pParam.budget_plan_id != '') {
+				xWhereAnd.push({
+					budget_plan_id: pParam.budget_plan_id
+				});
+			}
+		}
+
+		if (pParam.hasOwnProperty('status')) {
+			if (pParam.status != '') {
+				// query can receive single status or array of status
+				if (Array.isArray(pParam.status)) {
+					xWhereAnd.push({
+						status: {
+							[Op.in]: pParam.status
+						}
+					});
+				} else {
+					xWhereAnd.push({
+						status: pParam.status
+					});
+				}
+			}
+		}
+
+
+		if (xWhereAnd.length > 0) {
+		xWhere.push({
+			[Op.and]: xWhereAnd,
+		});
+		}
+		var xData = await _modelDb.findAll({
+			where: xWhere,
+			subQuery: false,
+		});
+
+		return xData;
+	}
 }
 
 module.exports = PurchaseRequestRepository;

@@ -116,7 +116,8 @@
       }
       
     },
-    "pendingNotifDay": 1
+    "pendingNotifDay": 1,
+    "puppeteerExecutablePath": null
   },
 
   "development": {
@@ -232,7 +233,8 @@
       }
       
     },
-    "pendingNotifDay": 1
+    "pendingNotifDay": 1,
+    "puppeteerExecutablePath": "/usr/bin/chromium-browser"
   },  
 
   "staging": {
@@ -349,7 +351,8 @@
       }
       
     },
-    "pendingNotifDay": 1
+    "pendingNotifDay": 1,
+    "puppeteerExecutablePath": "/usr/bin/chromium-browser"
   },
 
   "production": {
@@ -457,6 +460,7 @@
         "accounting": "peter.susanto@sanqua.co.id,ecatalog.sanqua@gmail.com,setiawan.banjar@sanqua.co.id,audit.division@sanqua.co.id"
       }
     },
-    "pendingNotifDay": 1
+    "pendingNotifDay": 1,
+    "puppeteerExecutablePath": "/usr/bin/chromium-browser"
   }  
 }

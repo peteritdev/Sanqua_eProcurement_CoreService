@@ -1341,12 +1341,16 @@ class ExportService {
 								}
 							}
 						);
-						
-						const browser = await puppeteer.launch({
+						const puppeteerConfig = {
 							headless: true,
   							executablePath: '/usr/bin/chromium-browser',
 							args: ['--no-sandbox', '--disable-setuid-sandbox']
-						});
+						}
+						if (config.puppeteerExecutablePath != null) {
+							puppeteerConfig.executablePath = config.puppeteerExecutablePath;
+						}
+						const browser = await puppeteer.launch(puppeteerConfig);
+
 						const page = await browser.newPage();
 						await page.setContent(html, { waitUntil: 'networkidle0' });
 
