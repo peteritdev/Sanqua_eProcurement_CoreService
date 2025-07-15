@@ -1320,42 +1320,46 @@ class PurchaseRequestService {
 						if (xCheckRAB != null) {
 							// check rab status is in progress before update rab item qty
 							if (xCheckRAB.status == 3) {
-								// check rab item qty_remaining not less than fpb qty
-								// make sure rab item qty_remaining > fpb qty before activate fpb again
-								// for (const fpbItem of xData.purchase_request_detail) {
-								// 	// Find matching RAB item by product_code and product_name
-								// 	const rabItem = xCheckRAB.budget_plan_detail.find(
-								// 		rab =>
-								// 			rab.product_id === fpbItem.product_id &&
-								// 			rab.product_code === fpbItem.product_code &&
-								// 			rab.product_name === fpbItem.product_name
-								// 	);
-									
-								// 	if (rabItem) {
-								// 		if (rabItem.qty_remain < fpbItem.qty) {
-								// 			xFlagProcess = false;
-								// 			xUpdateResult = {
-								// 				status_code: '-99',
-								// 				status_msg: `(${rabItem.product_code})${rabItem.product_name} has not enough RAB remaining qty. Please check RAB qty.`
-								// 			};
-								// 			break; // Stop checking if any item is not enough
-								// 		}
-								// 	} else {
-								// 		// // If no matching RAB item found, treat as not enough
-								// 		// xFlagProcess = false;
-								// 		// xUpdateResult = {
-								// 		// 	status_code: '-99',
-								// 		// 	status_msg: 'There are some items in FPB that have not enough RAB remaining qty. Please check RAB qty.'
-								// 		// };
-								// 		// break;
-								// 	}
-								// }
 
 								if (xFlagProcess) {
 								// update rab item qty & update fpb to draft
 									var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
-									
+
 									if (xUpdateResult.status_code == '00') {
+										for (const fpbItem of xData.purchase_request_detail) {
+										// 	// Find matching RAB item by product_code and product_name
+											const xParamFpbItemUpdate = {id: fpbItem.id}
+											const rabItem = xCheckRAB.budget_plan_detail.find(
+												rab =>
+													rab.product_id === fpbItem.product_id &&
+													rab.product_code === fpbItem.product_code &&
+													rab.product_name === fpbItem.product_name
+											);
+											// console.log(`>>> rabItem : ${JSON.stringify(rabItem)}`, );
+											
+											if (rabItem != undefined) {
+												// check rab item qty_remaining less than 0 or not, if yes then 
+												// check if pr item is_deviation_fulfilled is null or not, if null then
+												// set is_deviation_fulfilled to true, if not null keep it null
+												// and set rab_qty_gap = rabItem.qty_remain - fpbItem.qty
+												// if null then set to true, and set rab_qty_gap = rabItem.qty_remain - fpbItem.qty
+												
+												console.log(`>>> rabItem.qty_remain - fpbItem.qty : ${JSON.stringify(rabItem.qty_remain - fpbItem.qty)}`, );
+												if (rabItem.qty_remain - fpbItem.qty < 0) {
+													if (fpbItem.is_deviation_fulfilled == null) {
+														xParamFpbItemUpdate.is_deviation_fulfilled = false;
+													}
+													xParamFpbItemUpdate.rab_qty_gap = rabItem.qty_remain - fpbItem.qty;
+												} else {
+													xParamFpbItemUpdate.is_deviation_fulfilled = null;
+													xParamFpbItemUpdate.rab_qty_gap = rabItem.qty_remain - fpbItem.qty;
+												}
+												console.log(`>>> xParamFpbItemUpdate : ${JSON.stringify(xParamFpbItemUpdate)}`, );
+												const xUpdateFpbItem = await _repoDetailInstance.save(xParamFpbItemUpdate, "update_by_setDraftPrProject")
+												// console.log(`>>> xUpdateFpbItem : ${JSON.stringify(xUpdateFpbItem)}`, );
+											}
+										}
+										
 										let xCutRabItemQty = await _budgetPlanDetailService.updateItemQtyLeft(xData, 'decrease', xCheckRAB)
 									}
 								}
@@ -1366,11 +1370,11 @@ class PurchaseRequestService {
 								};
 							}
 						} else {
-							var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
+							// var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
 						}
 					// var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
 					} else {
-						var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
+						// var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
 					}
 				} else {
 					xUpdateResult = {
