@@ -519,11 +519,13 @@ class PaymentRequestService {
 									let xFpbItemQty = 0
 									let xArrPayreqNo = []
 									for (let j = 0; j < xArrItem.length; j++) {
+										if (j == 0) {
+											xFpbItemQty = xArrItem[j].purchase_request_detail.qty;
+										}
+
 										if (xArrItem[j].payment_request != null && xArrItem[j].payment_request.status != 4 && xArrItem[j].payment_request.status != 5) {
 											xTotalQtyRequest += xArrItem[j].qty_request;
-											// if (j == 0) {
-											xFpbItemQty = xArrItem[j].purchase_request_detail.qty;
-											// }
+											
 											xArrPayreqNo.push(xArrItem[j].payment_request.document_no);
 										}
 									}
@@ -767,11 +769,11 @@ class PaymentRequestService {
 											let xFpbItemQty = 0
 											let xArrPayreqNo = []
 											for (let j = 0; j < xArrItem.length; j++) {
+												if (j == 0) {
+													xFpbItemQty = xArrItem[j].purchase_request_detail.qty;
+												}
 												if (xArrItem[j].payment_request != null && xArrItem[j].payment_request.status != 4 && xArrItem[j].payment_request.status != 5) {
 													xTotalQtyRequest += xArrItem[j].qty_request;
-													// if (j == 0) {
-													xFpbItemQty = xArrItem[j].purchase_request_detail.qty;
-													// }
 													xArrPayreqNo.push(xArrItem[j].payment_request.document_no);
 												}
 											}
