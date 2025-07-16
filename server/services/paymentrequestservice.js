@@ -506,10 +506,43 @@ class PaymentRequestService {
 								xJoArrItems[i].price_total =
 									xJoArrItems[i].qty_request * xJoArrItems[i].price_request;
 							}
+							// check item with same prd_id in other payment request with status not cancel and reject already created or not
+							// if already created then calculate all qty_request from other payreq item and this item then
+							// check if total qty_request is exceed qty on fpb item or not
+							// if exceed then return cannot create payreq if not then continue
+							const xResultCheckItem = await _paymentRequestDetailRepoInstance.list({prd_id: xJoArrItems[i].prd_id});
+							// console.log(`>>> xResultCheckItem ${JSON.stringify(xResultCheckItem)}`);
+							if (xResultCheckItem.status_code == '00') {
+								if (xResultCheckItem.data.count > 0) {
+									let xArrItem = xResultCheckItem.data.rows;
+									let xTotalQtyRequest = 0;
+									let xFpbItemQty = 0
+									let xArrPayreqNo = []
+									for (let j = 0; j < xArrItem.length; j++) {
+										if (xArrItem[j].payment_request != null && xArrItem[j].payment_request.status != 4 && xArrItem[j].payment_request.status != 5) {
+											xTotalQtyRequest += xArrItem[j].qty_request;
+											// if (j == 0) {
+											xFpbItemQty = xArrItem[j].purchase_request_detail.qty;
+											// }
+											xArrPayreqNo.push(xArrItem[j].payment_request.document_no);
+										}
+									}
+									xTotalQtyRequest += xJoArrItems[i].qty_request;
+									// const xResultGetPrd = await _purchaseRequestDetailRepoInstance.list({id: xJoArrItems[i].prd_id});
+									// console.log(`>>> xResultGetPrd ${JSON.stringify(xResultGetPrd)}`);
+									// console.log(`>>> xTotalQtyRequest x xFpbItemQty ${JSON.stringify(xTotalQtyRequest)}`, xFpbItemQty);
+									if (xTotalQtyRequest > xFpbItemQty) {
+										xJoResult = {
+											status_code: '-99',
+											status_msg: `Terdeteksi payreq lain yang sudah terbentuk dengan total qty request (${xTotalQtyRequest}) sudah melebihi qty pada FPB (${xFpbItemQty}) untuk item ${xJoArrItems[i].product_name}. Silahkan cek payreq dengan nomor ${xArrPayreqNo.join(', ')}`
+										};
+										return xJoResult;
+									}
+								}
+							}
 						}
 					}
-
-					console.log(`>>> xJoArrItems ${JSON.stringify(xJoArrItems)}`);
+					// console.log(`>>> xJoArrItems ${JSON.stringify(xJoArrItems)}`);
 					pParam.purchase_request_detail = xJoArrItems;
 				}
 
@@ -715,6 +748,47 @@ class PaymentRequestService {
 								status_msg: 'This document already draft'
 							};
 						} else {
+
+							// first check item on this payreq have created on other payreq or not
+							// if not created then continue to set to draft
+							// if already created then calculate all qty from other payreq item and this item
+							// then check if total qty payreq item is exceed qty on fpb item or not
+							// if exceed then return cannot create payreq if not then continue
+							// console.log(`>>> xPayreqDetail ${JSON.stringify(xPayreqDetail.data.payment_request_detail)}`);
+							if (xPayreqDetail.data.payment_request_detail != null && xPayreqDetail.data.payment_request_detail.length > 0) {
+								for (let i = 0; i < xPayreqDetail.data.payment_request_detail.length; i++) {
+									const xResultCheckItem = await _paymentRequestDetailRepoInstance.list({prd_id: xPayreqDetail.data.payment_request_detail[i].prd_id});
+									// console.log(`>>> xResultCheckItem 2 ${JSON.stringify(xResultCheckItem)}`);
+									if (xResultCheckItem.status_code == '00') {
+										if (xResultCheckItem.data.count > 0) {
+											let xArrItem = xResultCheckItem.data.rows;
+											// console.log(`>>> xArrItem ${JSON.stringify(xArrItem)}`);
+											let xTotalQtyRequest = 0;
+											let xFpbItemQty = 0
+											let xArrPayreqNo = []
+											for (let j = 0; j < xArrItem.length; j++) {
+												if (xArrItem[j].payment_request != null && xArrItem[j].payment_request.status != 4 && xArrItem[j].payment_request.status != 5) {
+													xTotalQtyRequest += xArrItem[j].qty_request;
+													// if (j == 0) {
+													xFpbItemQty = xArrItem[j].purchase_request_detail.qty;
+													// }
+													xArrPayreqNo.push(xArrItem[j].payment_request.document_no);
+												}
+											}
+											xTotalQtyRequest += xPayreqDetail.data.payment_request_detail[i].qty_request;
+											// console.log(`>>> xTotalQtyRequest x xFpbItemQty ${JSON.stringify(xTotalQtyRequest)}`, xFpbItemQty);
+											if (xTotalQtyRequest > xFpbItemQty) {
+												xJoResult = {
+													status_code: '-99',
+													status_msg: `Terdeteksi payreq lain yang sudah terbentuk dengan total qty request (${xTotalQtyRequest}) sudah melebihi qty pada FPB (${xFpbItemQty}) untuk item ${xPayreqDetail.data.payment_request_detail[i].product_name}. Silahkan cek payreq dengan nomor ${xArrPayreqNo.join(', ')}`
+												};
+												return xJoResult;
+											}
+										}
+									}
+								}
+							}
+
 							var xParamUpdate = {
 								id: pParam.id,
 								status: 0,

@@ -11,6 +11,8 @@ const _modelPaymentRequest = require('../models').tr_paymentrequests;
 const _modelEmployee = require('../models').ms_employees;
 const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
+const _modelPurchaseRequestDetail = require('../models').tr_purchaserequestdetails;
+
 
 const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
@@ -310,6 +312,157 @@ class PaymentRequestDetailRepository {
 
 		return xJoResult;
 	}
+	
+	async list(pParam) {
+		var xOrder = ["product_name", "ASC"];
+		var xWhere = [];
+		var xWhereOr = [];
+		var xWhereAnd = [];
+		var xInclude = [];
+		var xJoResult = {};
+
+		try {
+			xInclude = [
+				{
+					model: _modelPaymentRequest,
+					as: 'payment_request',
+					attributes: [ 'id', 'document_no', 'status' ]
+				},
+				{
+					model: _modelPurchaseRequestDetail,
+					as: 'purchase_request_detail',
+					attributes: [ 'id', 'request_id', 'product_id', 'product_code', 'product_name', 'qty', 'qty_paid', 'qty_done' ]
+				}
+			];
+
+			if (pParam.hasOwnProperty('id')) {
+				if (pParam.id != '') {
+					xWhereAnd.push({
+						id: pParam.id
+					});
+				}
+			}
+
+			if (pParam.hasOwnProperty('payment_request_id')) {
+				if (pParam.payment_request_id != '') {
+					xWhereAnd.push({
+						payment_request_id: pParam.payment_request_id
+					});
+				}
+			}
+
+			if (pParam.hasOwnProperty('prd_id')) {
+				if (pParam.prd_id != '') {
+					xWhereAnd.push({
+						prd_id: pParam.prd_id
+					});
+				}
+			}
+
+			if (pParam.hasOwnProperty('product_code')) {
+				if (pParam.product_code != '') {
+					xWhereAnd.push({
+						product_code: pParam.product_code
+					});
+				}
+			}
+
+			if (pParam.hasOwnProperty("filter")) {
+				if (
+					pParam.filter != null &&
+					pParam.filter != undefined &&
+					pParam.filter != ""
+				) {
+					var xFilter = JSON.parse(pParam.filter);
+					if (xFilter.length > 0) {
+						for (var index in xFilter) {
+							xWhereAnd.push(xFilter[index]);
+						}
+					}
+				}
+			}
+
+			if (pParam.hasOwnProperty("keyword")) {
+				if (pParam.keyword != "") {
+					xWhereOr.push(
+						{
+							product_name: {
+								[Op.iLike]: "%" + pParam.keyword + "%",
+							},
+						},
+						{
+							product_code: {
+								[Op.iLike]: "%" + pParam.keyword + "%",
+							},
+						}
+					);
+				}
+			}
+
+			if (xWhereAnd.length > 0) {
+				xWhere.push({
+					[Op.and]: xWhereAnd,
+				});
+			}
+
+			if (pParam.hasOwnProperty("order_by")) {
+				if (pParam.order_by != "") {
+					xOrder = [
+						pParam.order_by,
+						pParam.order_type == "desc" ? "DESC" : "ASC",
+					];
+				}
+			}
+
+			if (xWhereOr.length > 0) {
+				xWhere.push({
+					[Op.or]: xWhereOr,
+				});
+			}
+
+			var xParamQuery = {
+				where: xWhere,
+				order: [xOrder],
+				include: xInclude,
+				subQuery: false,
+			};
+
+			var xCountDataWithoutLimit = await _modelDb.count(xParamQuery);
+
+			if (pParam.hasOwnProperty("offset") && pParam.hasOwnProperty("limit")) {
+				if (
+					pParam.offset != "" &&
+					pParam.limit != "" &&
+					pParam.limit != "all"
+				) {
+					xParamQuery.offset = pParam.offset;
+					xParamQuery.limit = pParam.limit;
+				}
+			}
+
+			var xData = await _modelDb.findAndCountAll(xParamQuery);
+			
+			xJoResult = {
+				status_code: "00",
+				status_msg: "OK",
+				total_record: xCountDataWithoutLimit,
+				filtered_record: xData.count,
+				data: xData
+			};
+		} catch (e) {
+			_utilInstance.writeLog(
+				`${_xClassName}.list`,
+				`Exception error: ${e.message}`,
+				"error"
+			);
+			xJoResult = {
+				status_code: "-99",
+				status_msg: `${_xClassName}.list: Exception error: ${e.message}`,
+			};
+		}
+		return xJoResult;
+	}
+
 }
 
 module.exports = PaymentRequestDetailRepository;
