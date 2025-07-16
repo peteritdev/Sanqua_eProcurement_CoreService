@@ -1344,7 +1344,7 @@ class PurchaseRequestService {
 												// and set rab_qty_gap = rabItem.qty_remain - fpbItem.qty
 												// if null then set to true, and set rab_qty_gap = rabItem.qty_remain - fpbItem.qty
 												
-												console.log(`>>> rabItem.qty_remain - fpbItem.qty : ${JSON.stringify(rabItem.qty_remain - fpbItem.qty)}`, );
+												// console.log(`>>> rabItem.qty_remain - fpbItem.qty : ${JSON.stringify(rabItem.qty_remain - fpbItem.qty)}`, );
 												if (rabItem.qty_remain - fpbItem.qty < 0) {
 													if (fpbItem.is_deviation_fulfilled == null) {
 														xParamFpbItemUpdate.is_deviation_fulfilled = false;
@@ -1354,7 +1354,7 @@ class PurchaseRequestService {
 													xParamFpbItemUpdate.is_deviation_fulfilled = null;
 													xParamFpbItemUpdate.rab_qty_gap = rabItem.qty_remain - fpbItem.qty;
 												}
-												console.log(`>>> xParamFpbItemUpdate : ${JSON.stringify(xParamFpbItemUpdate)}`, );
+												// console.log(`>>> xParamFpbItemUpdate : ${JSON.stringify(xParamFpbItemUpdate)}`, );
 												const xUpdateFpbItem = await _repoDetailInstance.save(xParamFpbItemUpdate, "update_by_setDraftPrProject")
 												// console.log(`>>> xUpdateFpbItem : ${JSON.stringify(xUpdateFpbItem)}`, );
 											}
@@ -1370,11 +1370,11 @@ class PurchaseRequestService {
 								};
 							}
 						} else {
-							// var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
+							var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
 						}
-					// var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
+						var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
 					} else {
-						// var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
+						var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
 					}
 				} else {
 					xUpdateResult = {
@@ -1388,7 +1388,6 @@ class PurchaseRequestService {
 					status_msg: 'Update failed, Document not found.'
 				};
 			}
-
 			// var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
 			xJoResult = xUpdateResult;
 			// Next Phase : Notification to adamin
