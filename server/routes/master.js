@@ -88,6 +88,12 @@ module.exports = (app) => {
 	xArrValidateProduct = [ check('act').not().isEmpty().withMessage('Parameter act cannot be empty') ];
 	app.post(rootAPIPath + 'master/product/batch_save', xArrValidateProduct, productController.product_BatchSave);
 
+	xArrValidateProduct = [];
+	xArrValidateProduct = [
+		check('keyword').not().isEmpty().withMessage('Parameter name can not be empty')
+	];
+	app.get(rootAPIPath + 'master/product/similarity', xArrValidateProduct, productController.product_Similarity);
+
 	// Unit
 	// Save
 	arrValidate = [];
