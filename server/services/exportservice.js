@@ -447,16 +447,23 @@ class ExportService {
 				let xApprover1 = null;
 				let xApprover2 = null;
 				let xApprover3 = null;
+				let xApprover4 = null;
+				let xApprover5 = null;
+				let xApprover6 = null;
 				let xStringQRCodeCreator = '';
 				let xStringQRCodeApprover1 = '';
 				let xStringQRCodeApprover2 = '';
 				let xStringQRCodeApprover3 = '';
+				let xStringQRCodeApprover4 = '';
+				let xStringQRCodeApprover5 = '';
 				let xApprovalFinanceAccounting = null;
 				let xFilePathQRCodeApproval = `${config.uploadBasePath}/digital_sign_qrcode/`;
 				let xQRCodeFileNameCreator,
 					xQRCodeFileName1 = [],
 					xQRCodeFileName2 = [],
-					xQRCodeFileName3 = [];
+					xQRCodeFileName3 = [],
+					xQRCodeFileName4 = [],
+					xQRCodeFileName5 = [];
 
 				xApprover1 =
 					xJoResultRAB.data.approval_matrix != null
@@ -470,6 +477,14 @@ class ExportService {
 					xJoResultRAB.data.approval_matrix != null
 						? xJoResultRAB.data.approval_matrix.find((el) => el.sequence === 3)
 						: null;
+				xApprover4 =
+					xJoResultRAB.data.approval_matrix != null
+						? xJoResultRAB.data.approval_matrix.find((el) => el.sequence === 4)
+						: null;
+				xApprover5 =
+					xJoResultRAB.data.approval_matrix != null
+						? xJoResultRAB.data.approval_matrix.find((el) => el.sequence === 5)
+						: null;
 
 				// Generate QRCode Digital Sign
 
@@ -478,7 +493,7 @@ class ExportService {
 				if (xApprover1 != null && xApprovedUser1 != null) {
 					for (var i in xApprovedUser1) {
 						xStringQRCodeApprover1 =
-							`VALIDATE_SIGNATURE|PJCA|` +
+							`VALIDATE_SIGNATURE|RAB|` +
 							(await _utilInstance.encrypt(
 								`${xRABID}|${xApprovedUser1[i].user.id}`,
 								config.cryptoKey.hashKey
@@ -501,7 +516,7 @@ class ExportService {
 				if (xApprover2 != null && xApprovedUser2 != null) {
 					for (var i in xApprovedUser2) {
 						xStringQRCodeApprover2 =
-							`VALIDATE_SIGNATURE|PJCA|` +
+							`VALIDATE_SIGNATURE|RAB|` +
 							(await _utilInstance.encrypt(
 								`${xRABID}|${xApprovedUser2[i].user.id}`,
 								config.cryptoKey.hashKey
@@ -522,7 +537,7 @@ class ExportService {
 				if (xApprover3 != null && xApprovedUser3 != null) {
 					for (var i in xApprovedUser3) {
 						xStringQRCodeApprover3 =
-							`VALIDATE_SIGNATURE|PJCA|` +
+							`VALIDATE_SIGNATURE|RAB|` +
 							(await _utilInstance.encrypt(
 								`${xRABID}|${xApprovedUser3[i].user.id}`,
 								config.cryptoKey.hashKey
@@ -537,6 +552,49 @@ class ExportService {
 					}
 				}
 				console.log(`>>> xApprovedUser 3: ${JSON.stringify(xApprovedUser3)}`);
+				
+				let xApprovedUser4 =
+					xApprover4 != null ? xApprover4.approver_user.filter((el) => el.status === 1) : null;
+				if (xApprover4 != null && xApprovedUser4 != null) {
+					for (var i in xApprovedUser4) {
+						xStringQRCodeApprover4 =
+							`VALIDATE_SIGNATURE|RAB|` +
+							(await _utilInstance.encrypt(
+								`${xRABID}|${xApprovedUser4[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
+
+						let xQRCodeApproval4 = await _qrCode.toDataURL(xStringQRCodeApprover4);
+						xQRCodeFileName4.push(`approval_${xRABID}${xApprovedUser4[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval4,
+							xFilePathQRCodeApproval + `approval_${xRABID}${xApprovedUser4[i].user.id}.png`
+						);
+					}
+				}
+				console.log(`>>> xApprovedUser 4: ${JSON.stringify(xApprovedUser4)}`);
+				
+				let xApprovedUser5 =
+					xApprover5 != null ? xApprover5.approver_user.filter((el) => el.status === 1) : null;
+				if (xApprover5 != null && xApprovedUser5 != null) {
+					for (var i in xApprovedUser5) {
+						xStringQRCodeApprover5 =
+							`VALIDATE_SIGNATURE|RAB|` +
+							(await _utilInstance.encrypt(
+								`${xRABID}|${xApprovedUser5[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
+
+						let xQRCodeApproval5 = await _qrCode.toDataURL(xStringQRCodeApprover5);
+						xQRCodeFileName5.push(`approval_${xRABID}${xApprovedUser5[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval5,
+							xFilePathQRCodeApproval + `approval_${xRABID}${xApprovedUser5[i].user.id}.png`
+						);
+					}
+				}
+				console.log(`>>> xApprovedUser 5: ${JSON.stringify(xApprovedUser5)}`);
+
 				console.log(`>>> xJoResultRAB: ${JSON.stringify(xJoResultRAB.data.budget_plan_detail)}`);
 				ejs.renderFile(
 					path.join(__dirname, '../views/', 'rab-pdf.ejs'),
@@ -548,12 +606,16 @@ class ExportService {
 						approver1: xApprovedUser1,
 						approver2: xApprovedUser2,
 						approver3: xApprovedUser3,
+						approver4: xApprovedUser4,
+						approver5: xApprovedUser5,
 
 						qrCode: {
 							qrPath: `${config.imagePathESanQua_dev}/digital_sign_qrcode/`,
 							approval1: xQRCodeFileName1,
 							approval2: xQRCodeFileName2,
-							approval3: xQRCodeFileName3
+							approval3: xQRCodeFileName3,
+							approval4: xQRCodeFileName4,
+							approval5: xQRCodeFileName5
 						}
 					},
 					(err, data) => {
