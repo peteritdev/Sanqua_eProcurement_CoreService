@@ -1054,7 +1054,7 @@ class ExportService {
 				(async () => {
 					try {
 						const html = await ejs.renderFile(
-							path.join(__dirname, '../views/', 'fpb-pdf-puppeteer.ejs'),
+							path.join(__dirname, '../views/', 'fpb-pdf-puppeteer_v2.ejs'),
 							{
 								data: xJoResultFPB,
 								companyData: xCompanyData,

@@ -19,7 +19,7 @@
                     page-break-inside: avoid;
                 }
             }
-
+            
             tr, td, th {
                 page-break-inside: avoid; /* hindari potongan di tengah baris */
             }
@@ -54,7 +54,7 @@
         </style>
     </head>
     <body>
-        <table class="center" cellspacing="0" cellpadding="5" style="border:1px solid #000000;">
+        <table class="center" cellspacing="0" cellpadding="8" style="border: 1px solid #000000; border-bottom: none;">
             <tr>
                 <td style="width:25%;text-align: left;padding-left: 10px;" colspan="2">
                     <img src="<%=companyData.logo%>" height="45">
@@ -223,70 +223,69 @@
                     </table>
                 </td>
             </tr>
-            <tr>
-                <td colspan="4" style="padding:0px;margin:0px;">
-                    <table class="center" cellspacing="0" cellpadding="2" border="1" style="width:100%;border-width: 0.2px;">
-                        <thead>                            
-                            <tr>
-                                <th rowspan="2" style="text-align:center;width:3%;" class="col-header-item">No</th>
-                                <th rowspan="2" style="text-align:center;width:30%;" class="col-header-item">Deskripsi</th>
-                                <th rowspan="2" style="text-align:center;width:5%;" class="col-header-item">Stock</th>
-                                <th rowspan="2" style="text-align:center;width:5%;" class="col-header-item">Qty</th>
-                                <th rowspan="2" style="text-align:center;width:4%;" class="col-header-item">Sat.</th>
-                                <th rowspan="2" style="text-align:center;width:10%;" class="col-header-item">Harga</th>
-                                <th rowspan="2" style="text-align:center;width:10%;" class="col-header-item">Supplier</th>
-                                <th colspan="2" style="text-align:center;width:10%;" >Budget</th>
-                                <th rowspan="2" style="text-align:center;width:7%;" class="col-header-item">Tgl. Diperlukan</th>
-                                <th rowspan="2" style="border-right: none !important; width: 16%;" class="col-header-item">Alasan Permintaan</th>
-                            </tr>
-                            <tr>
-                                <th class="col-header-item">Ada</th>
-                                <th class="col-header-item">Tidak</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+        </table>
+        <!-- Product list tabel -->
+        <table class="center" cellspacing="0" cellpadding="8" border="1" style="margin-top:0; border-width: 0.2px;">
+            <thead>                            
+                <tr>
+                    <th rowspan="2" style="text-align:center;width:3%;" class="col-header-item">No</th>
+                    <th rowspan="2" style="text-align:center;width:30%;" class="col-header-item">Deskripsi</th>
+                    <th rowspan="2" style="text-align:center;width:5%;" class="col-header-item">Stock</th>
+                    <th rowspan="2" style="text-align:center;width:5%;" class="col-header-item">Qty</th>
+                    <th rowspan="2" style="text-align:center;width:4%;" class="col-header-item">Sat.</th>
+                    <th rowspan="2" style="text-align:center;width:10%;" class="col-header-item">Harga</th>
+                    <th rowspan="2" style="text-align:center;width:10%;" class="col-header-item">Supplier</th>
+                    <th colspan="2" style="text-align:center;width:10%;" >Budget</th>
+                    <th rowspan="2" style="text-align:center;width:7%;" class="col-header-item">Tgl. Diperlukan</th>
+                    <th rowspan="2" style="border-right: none !important; width: 16%;" class="col-header-item">Alasan Permintaan</th>
+                </tr>
+                <tr>
+                    <th class="col-header-item">Ada</th>
+                    <th class="col-header-item">Tidak</th>
+                </tr>
+            </thead>
+            <tbody>
+                <%
+                    var index = 1;
+                    data.data.purchase_request_detail.forEach( item => {
+                %>
+                    <tr>
+                        <td style="text-align:right;" class="col-item"><%=index%>.</td>
+                        <td style="text-align: left;" class="col-item"><%=item.product.name%></td>
+                        <td class="col-item"><%=item.current_stock%></td>
+                        <td class="col-item"><%=item.qty%></td>
+                        <td class="col-item"><%=item.uom%></td>
+                        <td style="text-align: right;" class="col-item"><%=item.budget_price_per_unit != null ? item.budget_price_per_unit.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                        <td style="text-align: left;" class="col-item"><%=item.vendor.name%></td>
+                        <td class="col-item">
                             <%
-                                var index = 1;
-                                data.data.purchase_request_detail.forEach( item => {
+                                if( item.has_budget == 1 ){
                             %>
-                                <tr>
-                                    <td style="text-align:right;" class="col-item"><%=index%>.</td>
-                                    <td style="text-align: left;" class="col-item"><%=item.product.name%></td>
-                                    <td class="col-item"><%=item.current_stock%></td>
-                                    <td class="col-item"><%=item.qty%></td>
-                                    <td class="col-item"><%=item.uom%></td>
-                                    <td style="text-align: right;" class="col-item"><%=item.budget_price_per_unit != null ? item.budget_price_per_unit.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
-                                    <td style="text-align: left;" class="col-item"><%=item.vendor.name%></td>
-                                    <td class="col-item">
-                                        <%
-                                            if( item.has_budget == 1 ){
-                                        %>
-                                                <img src="<%=imagePath%>checklist.png" width="10">
-                                        <%
-                                            }
-                                        %>
-                                    </td>
-                                    <td class="col-item">
-                                        <%
-                                            if( item.has_budget == 0 ){
-                                        %>
-                                                <img src="<%=imagePath%>checklist.png" width="10">
-                                        <%
-                                            }
-                                        %>
-                                    </td>
-                                    <td nowrap="nowrap" class="col-item"><%=item.estimate_date_use%></td>
-                                    <td style="border-right: none !important;text-align: left;" class="col-item"><%=item.description%></td>
-                                </tr>
+                                    <img src="<%=imagePath%>checklist.png" width="10">
                             <%
-                                    index++;
-                                } )
+                                }
                             %>
-                            
-                        </tbody>
-                    </table>
-                </td>
-            </tr>
+                        </td>
+                        <td class="col-item">
+                            <%
+                                if( item.has_budget == 0 ){
+                            %>
+                                    <img src="<%=imagePath%>checklist.png" width="10">
+                            <%
+                                }
+                            %>
+                        </td>
+                        <td nowrap="nowrap" class="col-item"><%=item.estimate_date_use%></td>
+                        <td style="border-right: none !important;text-align: left;" class="col-item"><%=item.description%></td>
+                    </tr>
+                <%
+                        index++;
+                    } )
+                %>
+                
+            </tbody>
+        </table>
+        <table class="center" cellspacing="0" cellpadding="8" style="border: 1px solid #000000; border-bottom: none; border-top: none; margin-top:0;">
             <tr >
                 <td colspan="4" style="text-align: left;border-top: 1px solid #000000 !important;">Harap mengisi keterangan dengan lengkap dan jelas</td>
             </tr>
