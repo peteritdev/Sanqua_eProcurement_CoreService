@@ -109,12 +109,18 @@ class VendorService {
                 }
                 
                 if( xRows[index].email != null && xRows[index].email != '' ) {
-                    if (xRows[index].email.length == 65) {
-                        var dec = await _utilInstance.decrypt( xRows[index].email, config.cryptoKey.hashKey)
+                    // console.log(`>>> xRows[index].email: ${JSON.stringify(xRows[index].email.length)}`);
+                    // if (xRows[index].email.length == 65) {
+                    var dec = await _utilInstance.decrypt( xRows[index].email, config.cryptoKey.hashKey)
+                    if (dec) {
                         email = dec.decrypted; 
                     } else {
                         email = xRows[index].email
                     }
+                    // email = dec.decrypted; 
+                    // } else {
+                    //     email = xRows[index].email
+                    // }
                 }
 
                 xJoArrData.push({
@@ -185,11 +191,16 @@ class VendorService {
                 }
                 
                 if( xData.email != null && xData.email != '' ) {
-                    if (xData.email.length == 65) {
-                        email = await _utilInstance.decrypt( xData.email, config.cryptoKey.hashKey).decrypted;
-                    } else {
-                        email = xData.email
-                    }
+                    // if (xData.email.length == 65) {
+                        const dec = await _utilInstance.decrypt( xData.email, config.cryptoKey.hashKey);
+                        if (dec) {
+                            email = dec.decrypted; 
+                        } else {
+                            email = xData.email
+                        }
+                    // } else {
+                    //     email = xData.email
+                    // }
                 }
                 xJoResult = {
                     status_code: "00",
