@@ -677,10 +677,10 @@ class BudgetPlanService {
                                 application_id: config.applicationId,
                                 table_name: config.dbTables.rab,
                                 company_id: xRABDetail.company_id,
-                                department_id: xRABDetail.department_id
+                                department_id: xRABDetail.department_id,
                                 // ecatalogue_fpb_category_item: xRABDetail.category_item == 7 ? xRABDetail.category_item : null,
                                 // logged_company_id: pParam.logged_company_id,
-                                // approval_matrix_id: pParam.approval_matrix_id
+                                approval_matrix_id: pParam.approval_matrix_id
                             };
 
                             var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
@@ -1201,6 +1201,7 @@ class BudgetPlanService {
                         pParam.token,
                         xParamApprovalMatrixDocument
                     );
+                    console.log(`>>> xResultApprovalMatrixDocument : ${JSON.stringify(xResultApprovalMatrixDocument)}`);
 
                     if (xResultApprovalMatrixDocument != null) {
                         if (xResultApprovalMatrixDocument.status_code == "00") {
@@ -1451,6 +1452,165 @@ class BudgetPlanService {
 
 		return xJoResult;
 	}
+    async fetchMatrixRAB(pParam) {
+        // console.log(`>>> fetchMatrixRAB : ${JSON.stringify(pParam)}`);
+        var xJoResult = {};
+        var xDecId = null;
+        var xFlagProcess = false;
+        var xEncId = '';
+        var xClearId = '';
+
+        if (pParam.id != '' && pParam.user_id != '') {
+            xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+            if (xDecId.status_code == '00') {
+                xFlagProcess = true;
+                xEncId = pParam.id;
+                pParam.id = xDecId.decrypted;
+                xClearId = xDecId.decrypted;
+                xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+                if (xDecId.status_code == '00') {
+                    pParam.user_id = xDecId.decrypted;
+                    xFlagProcess = true;
+                } else {
+                    xJoResult = xDecId;
+                }
+            } else {
+                xJoResult = xDecId;
+            }
+        } else {
+            xJoResult = {
+                status_code: '-99',
+                status_msg: 'Invalid ID / User ID'
+            };
+        }
+        // console.log(`>>> hereee 1`,xFlagProcess);
+
+        if (xFlagProcess) {
+            // Get Budget Detail
+            var xBudgetDetail = await _repoInstance.getById({ id: xClearId });
+            // console.log(`>>> xBudgetDetail : ${JSON.stringify(xBudgetDetail)}`);
+            if (xBudgetDetail != null) {
+                if (xBudgetDetail.status != 1) {
+                    xJoResult = {
+                        status_code: '-99',
+                        status_msg: 'Fetch matrix cannot be processed, please check again'
+                    };
+                } else {
+                    pParam.approved_at = null;
+                    const xUpdateParam = {
+                        id: xClearId,
+                        approved_at: null,
+                        user_id: pParam.user_id,
+                        user_name: pParam.user_name
+                    }
+                    var xUpdateResult = await _repoInstance.save(xUpdateParam, 'update');
+                    xJoResult = xUpdateResult;
+                    // Next Phase : Approval Matrix & Notification to admin
+                    if (xUpdateResult.status_code == '00') {
+                        // Fetch Approval Matrix
+                        var xParamAddApprovalMatrix = {
+                            act: 'fetch_matrix',
+                            document_id: xEncId,
+                            document_no: xBudgetDetail.budget_no,
+                            application_id: config.applicationId,
+                            table_name: config.dbTables.rab,
+                            company_id: xBudgetDetail.company_id,
+                            department_id: xBudgetDetail.department_id,
+                            // ecatalogue_fpb_category_item: null,
+                            logged_company_id: pParam.logged_company_id,
+                            approval_matrix_id: pParam.approval_matrix_id
+                        };
+                        // if (xBudgetDetail.company_id == 5 && xBudgetDetail.company_id == 14) {
+                        //     xParamAddApprovalMatrix.ecatalogue_fpb_category_item = xBudgetDetail.category_item
+                        // } else {
+                        //     xParamAddApprovalMatrix.ecatalogue_fpb_category_item = xBudgetDetail.category_item >= 7 ? xBudgetDetail.category_item : null
+                        // }
+                        // console.log(`>>> xParamAddApprovalMatrix : ${JSON.stringify(xParamAddApprovalMatrix)}`);
+
+                        var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
+                            pParam.method,
+                            pParam.token,
+                            xParamAddApprovalMatrix
+                        );
+                        xJoResult.approval_matrix_result = xApprovalMatrixResult;
+                        console.log(`>>> xApprovalMatrixResult : ${JSON.stringify(xApprovalMatrixResult)}`);
+
+                        // if (xApprovalMatrixResult.status_code == '00') {
+                            // if (xApprovalMatrixResult.approvers.length > 0) {
+                                // let xApproverSeq1 = xApprovalMatrixResult.approvers.find((el) => el.sequence === 1);
+                                // if (xApproverSeq1 != null) {
+                                    // for (var i in xApproverSeq1.approver_user) {
+                                        // In App notification
+                                        // let xInAppNotificationResult = await _notificationService.inAppNotification({
+                                        //     document_code: xBudgetDetail.request_no,
+                                        //     document_id: xEncId,
+                                        //     document_status: xBudgetDetail.status,
+                                        //     mode: 'request_approval_fpb',
+                                        //     method: pParam.method,
+                                        //     token: pParam.token,
+                                        //     employee_id: await _utilInstance.encrypt(
+                                        //         xApproverSeq1.approver_user[i].employee_id.toString(),
+                                        //         config.cryptoKey.hashKey
+                                        //     )
+                                        // });
+
+                                        // _utilInstance.writeLog(
+                                        //     `${_xClassName}.submitRAb`,
+                                        //     `xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`,
+                                        //     'info'
+                                        // );
+
+                                        // // Email Notification
+                                        // let xParamEmailNotification,
+                                        //     xNotificationResult = {};
+
+                                        // if (xApproverSeq1.approver_user[i].notification_via_email) {
+                                        //     xParamEmailNotification = {
+                                        //         mode: 'request_approval_fpb',
+                                        //         id: xEncId,
+                                        //         request_no: xBudgetDetail.request_no,
+                                        //         company_name: xBudgetDetail.company_name,
+                                        //         department_name: xBudgetDetail.department_name,
+                                        //         created_by: xBudgetDetail.employee_name,
+                                        //         created_at:
+                                        //             xBudgetDetail.createdAt != null
+                                        //                 ? moment(xBudgetDetail.createdAt).format('DD MMM YYYY')
+                                        //                 : '',
+                                        //         items: xBudgetDetail.purchase_request_detail,
+                                        //         approver_user: {
+                                        //             employee_name: xApproverSeq1.approver_user[i].user_name,
+                                        //             email: xApproverSeq1.approver_user[i].email
+                                        //         }
+                                        //     };
+                                        //     xNotificationResult = await _notificationService.sendNotificationEmail_FPBNeedApproval(
+                                        //         xParamEmailNotification,
+                                        //         pParam.method,
+                                        //         pParam.token
+                                        //     );
+                                        // }
+                                    // }
+                                // }
+                            // }
+                        // }
+    
+                        
+                    } else {
+                        xJoResult = xUpdateResult;
+                    }
+                }
+            } else {
+                xJoResult = {
+                    status_code: '-99',
+                    status_msg: 'Data not found. Please supply valid identifier'
+                };
+            }
+        }
+        
+        
+        console.log(`>>> hereee 2`);
+
+        return xJoResult;
+    }
 }
 
 module.exports = BudgetPlanService;
