@@ -94,7 +94,20 @@
         font-weight: bold;
         font-size: 10px;
       }
-    </style>
+      .center {
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 0;
+        margin-bottom: 0;
+        width:99%;
+        /* border-collapse:collapse; */
+        text-align:center;
+        font-size: 8px;
+        font-family: 'Arial';
+        /* border-style: solid;
+        border-color: #000000; */
+      }
+      </style>
   </head>
   <body>
     <div class="title">RAB <%=data.data.name%></div>
@@ -156,10 +169,16 @@
       </thead>
       <tbody>
         <% var index = 1; data.data.budget_plan_detail.forEach( item => { %> <%
-        if ( item.section_title ) { %>
+        if (item.section_title && index == 1) { %>
         <tr class="section-header">
           <td colspan="11"><%=item.section_title%></td>
         </tr>
+        <% } else { %> <%
+          if (index > 1 && item.section_title && item.section_title != data.data.budget_plan_detail[index - 2].section_title ) { %>
+          <tr class="section-header">
+            <td colspan="11"><%=item.section_title%></td>
+          </tr>
+          <% } %>
         <% } %>
         <tr>
           <td><%=index%></td>
@@ -217,228 +236,170 @@
         </td>
       </tr>
       <tr>
-        <td colspan="4" style="padding: 0px; margin: 0px">
-          <table
-            cellspacing="0"
-            cellpadding="0"
-            style="width: 100%; border-width: 0.2px"
-          >
-            <tr>
-              <th style="width: 25%; font-weight: 400">Dibuat Oleh.,</th>
-              <th class="border-r" style="width: 25%; font-weight: 400">
-                Diperiksa Oleh.,
-              </th>
-              <th class="border-r" style="width: 25%; font-weight: 400">
-                Mengetahui.,
-              </th>
-              <th class="border-b" style="width: 50%; font-weight: 400">
-                Disetujui Oleh.,
-              </th>
-            </tr>
-            <tr>
-              <td>
-                <table
-                  style="
-                    margin-left: auto;
-                    margin-right: auto;
-                    text-align: center;
-                    min-height: 35px;
-                  "
-                >
-                  <tr>
-                    <td></td>
-                  </tr>
-                </table>
-              </td>
-              <td>
-                <% if( qrCode.approval1 != null && qrCode.approval1.length > 0
-                ){ %>
-                <table
-                  style="
-                    margin-left: auto;
-                    margin-right: auto;
-                    text-align: center;
-                    min-height: 35px;
-                  "
-                >
-                  <tr>
-                    <% for(var i = 0; i < qrCode.approval1.length; i++ ) { %>
-                    <td>
-                      <img
-                        src="<%=qrCode.qrPath%><%=qrCode.approval1[i]%>"
-                        width="80"
-                      />
+        <td colspan="4" style="padding:0px;margin:0px;">
+            <table class="center" cellspacing="0" cellpadding="0"  border="1" style="width:100%; border-width: 0.1px; font-size: 10px;">
+                <tr style="padding:0; margin:0">
+                    <td rowspan="2" style="padding:0; margin:0">
+                        Dibuat Oleh
                     </td>
-                    <% }%>
-                  </tr>
-                </table>
-                <% } else { %>
-                <table
-                  style="
-                    margin-left: auto;
-                    margin-right: auto;
-                    text-align: center;
-                    min-height: 35px;
-                  "
-                >
-                  <tr>
-                    <td></td>
-                  </tr>
-                </table>
-                <% } %>
-              </td>
-              <td>
-                <% if( qrCode.approval2 != null && qrCode.approval2.length > 0
-                ){ %>
-                <table
-                  style="
-                    margin-left: auto;
-                    margin-right: auto;
-                    text-align: center;
-                    min-height: 35px;
-                  "
-                >
-                  <tr>
-                    <% for(var i = 0; i < qrCode.approval2.length; i++ ) { %>
-                    <td>
-                      <img
-                        src="<%=qrCode.qrPath%><%=qrCode.approval2[i]%>"
-                        width="80"
-                      />
+                    <td colspan="2" style="padding:0; margin:0">
+                        Mengetahui
                     </td>
-                    <% }%>
-                  </tr>
-                </table>
-                <% } else { %>
-                <table
-                  style="
-                    margin-left: auto;
-                    margin-right: auto;
-                    text-align: center;
-                    min-height: 35px;
-                  "
-                >
-                  <tr>
-                    <td></td>
-                  </tr>
-                </table>
-                <% } %>
-              </td>
-              <td>
-                <% if( qrCode.approval3 != null && qrCode.approval3.length > 0
-                ){ %>
-                <table
-                  style="
-                    margin-left: auto;
-                    margin-right: auto;
-                    text-align: center;
-                    min-height: 35px;
-                  "
-                >
-                  <tr>
-                    <% for(var i = 0; i < qrCode.approval3.length; i++ ) { %>
-                    <td>
-                      <img
-                        src="<%=qrCode.qrPath%><%=qrCode.approval3[i]%>"
-                        width="80"
-                      />
+                    <td colspan="2" style="padding:0; margin:0">
+                        Disetujui
                     </td>
-                    <% }%>
-                  </tr>
-                </table>
-                <% } else { %>
-                <table
-                  style="
-                    margin-left: auto;
-                    margin-right: auto;
-                    text-align: center;
-                    min-height: 35px;
-                  "
-                >
-                  <tr>
-                    <td></td>
-                  </tr>
-                </table>
-                <% } %>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding: 3px 0">
-                <table style="margin: auto; text-align: center">
-                  <!-- <tr>
-                  <td>
-                  </td>
+                </tr>
+                <tr style="padding:0; margin:0">
+                    <td style="padding:0; margin:0">Head Department</td>
+                    <td style="padding:0; margin:0">Dept. Pembelian Plant</strong></td>
+                    <td style="padding:0; margin:0">PM / Head HCGS</td>
+                    <!-- <td>Head F&A</td> -->
+                    <!-- <td>Head Procurement</td> -->
+                    <td style="padding:0; margin:0">Direktur</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; vertical-align: middle;" width="10">
+                        <table class="center">
+                          <tr>
+                            <%=data.data.employee.name%>
+                          </tr>
+                        </table>
+                    </td>
+                    <td style="text-align: center;vertical-align: middle;">
+                        
+                    <%
+                        if( qrCode.approval1.length > 0 ){
+
+                    %>
+                            <table class="center">
+                                <tr style="padding:0; margin:0">
+                                    <% for(var i = 0; i < qrCode.approval1.length; i++ ) { %>
+                                        <td style="padding:0; margin:0"><img src="<%=qrCode.qrPath%><%=qrCode.approval1[i]%>" width="80"></td>
+                                    <% }%>
+                                </tr>
+                                <tr style="padding:0; margin:0">
+                                    <% for(var i = 0; i < approver1.length; i++ ) { %>
+                                        <td style="padding:0; margin:0"><%=approver1[i].user.name%></td>
+                                    <% }%>
+                                </tr>
+                            </table>
+                            
+                    <%
+                        }
+                    %>
+                    </td>
+                    <td style="text-align: center;vertical-align: middle;">
+                        
+                        <%
+                            if( qrCode.approval2.length > 0 ){
+
+                        %>
+                                <table class="center">
+                                    <tr style="padding:0; margin:0">
+                                        <% for(var i = 0; i < qrCode.approval2.length; i++ ) { %>
+                                            <td style="padding:0; margin:0"><img src="<%=qrCode.qrPath%><%=qrCode.approval2[i]%>" width="80"></td>
+                                        <% }%>
+                                    </tr>
+                                    <tr style="padding:0; margin:0">
+                                        <% for(var i = 0; i < approver2.length; i++ ) { %>
+                                            <td style="padding:0; margin:0"><%=approver2[i].user.name%></td>
+                                        <% }%>
+                                    </tr>
+                                </table>
+                                
+                        <%
+                            }
+                        %>
+                    </td>
+                    <td style="text-align: center;vertical-align: middle;">
+                        
+                        <%
+                            if( qrCode.approval3.length > 0 ){
+
+                        %>
+                                <table class="center">
+                                    <tr style="padding:0; margin:0">
+                                        <% for(var i = 0; i < qrCode.approval3.length; i++ ) { %>
+                                            <td style="padding:0; margin:0"><img src="<%=qrCode.qrPath%><%=qrCode.approval3[i]%>" width="80"></td>
+                                        <% }%>
+                                    </tr>
+                                    <tr style="padding:0; margin:0">
+                                        <% for(var i = 0; i < approver3.length; i++ ) { %>
+                                            <td style="padding:0; margin:0"><%=approver3[i].user.name%></td>
+                                        <% }%>
+                                    </tr>
+                                </table>
+                                
+                        <%
+                            }
+                        %>
+                    </td>
+                    <!-- <td style="text-align: center;vertical-align: middle;">
+                        
+                        <%
+                            if( qrCode.approval4.length > 0 ){
+
+                        %>
+                                <table class="center">
+                                    <tr style="padding:0; margin:0">
+                                        <% for(var i = 0; i < qrCode.approval4.length; i++ ) { %>
+                                            <td style="padding:0; margin:0"><img src="<%=qrCode.qrPath%><%=qrCode.approval4[i]%>" width="80"></td>
+                                        <% }%>
+                                    </tr>
+                                    <tr style="padding:0; margin:0">
+                                        <% for(var i = 0; i < approver4.length; i++ ) { %>
+                                            <td style="padding:0; margin:0"><%=approver4[i].user.name%></td>
+                                        <% }%>
+                                    </tr>
+                                </table>
+                                
+                        <%
+                            }
+                        %>
+                    </td> -->
+                    <td style="text-align: center;vertical-align: middle;">
+                        
+                        <%
+                            if( qrCode.approval5.length > 0 ){
+
+                        %>
+                                <table class="center">
+                                    <tr style="padding:0; margin:0">
+                                        <% for(var i = 0; i < qrCode.approval5.length; i++ ) { %>
+                                            <td style="padding:0; margin:0"><img src="<%=qrCode.qrPath%><%=qrCode.approval5[i]%>" width="80"></td>
+                                        <% }%>
+                                    </tr>
+                                    <tr style="padding:0; margin:0">
+                                        <% for(var i = 0; i < approver5.length; i++ ) { %>
+                                            <td style="padding:0; margin:0"><%=approver5[i].user.name%></td>
+                                        <% }%>
+                                    </tr>
+                                </table>
+                                
+                        <%
+                            }
+                        %>
+                    </td>
+                    <!-- <td style="text-align: center;vertical-align: middle;">
+                        <%
+                            if( qrCode.approval2 != '' ){
+                        %>
+                            <img src="<%=qrCode.approval2%>" width="80">
+                        <%
+                            }
+                        %>                                
+                    </td> -->
+                    
+                </tr>
+                <!-- <tr style="height: 20px;">
+                    <td><%=data.data.employee.name%></td>
+                    <td><%=approver1%></td>
+                    <td><%=approver2%></td>                            
+                    <td><%=approver3%></td>
+                    <td><%=approver4%></td>
+                    <td  style="border-right: none !important;"><%=approver5%></td>
                 </tr> -->
-                  <tr>
-                    <td><%=data.data.created_by_name%></td>
-                  </tr>
-                </table>
-              </td>
-              <th style="padding: 3px 0" class="border-r">
-                <% if( qrCode.approval1 != null && qrCode.approval1.length > 0
-                ){ %>
-                <table style="margin: auto; text-align: center">
-                  <tr>
-                    <% for(var i = 0; i < approver1.length; i++ ) { %>
-                    <td><%=approver1[i].user.name%></td>
-                    <% }%>
-                  </tr>
-                </table>
-                <% } else { %>
-                <table style="margin: auto; text-align: center">
-                  <!-- <tr>
-                <td></td>
-              </tr> -->
-                  <tr>
-                    <td>(.............................)</td>
-                  </tr>
-                </table>
-                <% } %>
-              </th>
-              <th style="padding: 3px 0" class="border-rb">
-                <% if( qrCode.approval2 != null && qrCode.approval2.length > 0
-                ){ %>
-                <table style="margin: auto; text-align: center">
-                  <tr>
-                    <% for(var i = 0; i < approver2.length; i++ ) { %>
-                    <td><%=approver2[i].user.name%></td>
-                    <% }%>
-                  </tr>
-                </table>
-                <% } else { %>
-                <table style="margin: auto; text-align: center">
-                  <!-- <tr>
-                <td></td>
-              </tr> -->
-                  <tr>
-                    <td>(.............................)</td>
-                  </tr>
-                </table>
-                <% } %>
-              </th>
-              <th style="padding: 3px 0" class="border-b">
-                <% if( qrCode.approval3 != null && qrCode.approval3.length > 0
-                ){ %>
-                <table style="margin: auto; text-align: center">
-                  <tr>
-                    <% for(var i = 0; i < approver3.length; i++ ) { %>
-                    <td><%=approver3[i].user.name%></td>
-                    <% }%>
-                  </tr>
-                </table>
-                <% } else { %>
-                <table style="margin: auto; text-align: center">
-                  <!-- <tr>
-                <td></td>
-              </tr> -->
-                  <tr>
-                    <td>(.............................)</td>
-                  </tr>
-                </table>
-                <% } %>
-              </th>
-            </tr>
-          </table>
+            </table>
         </td>
       </tr>
       <!-- <tr>

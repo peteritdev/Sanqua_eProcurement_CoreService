@@ -425,6 +425,73 @@ class ProductRepository {
 			return xJoResult;
 		}
 	}
+	
+	async similarity(pParam) {
+		var xJoResult = {};
+		var xSql = "";
+		var xSqlCount = '';
+		var xTotalRecord = [];
+		var xObjJsonWhere = {};
+		var xSqlWhere = ' (1=1) ';
+		var xSqlWhereOr = [];
+		var xSqlOrderBy = '';
+		var xSqlLimit = '';
+		var xSqlGroupBy = '';
+		var xSqlFields = '';
+
+		try {
+			if (pParam.hasOwnProperty('order_by')) {
+				if (pParam.order_by != '') {
+					xSqlOrderBy = ` ORDER BY ${pParam.order_by} ${pParam.order_type != '' ? pParam.order_type : 'ASC'}`;
+				} else {
+					xSqlOrderBy = ` ORDER BY created_at DESC`;
+				}
+			} else {
+				xSqlOrderBy = ` ORDER BY created_at DESC`;
+			}
+			
+			xSqlFields = `id, code, name, similarity(name, '${pParam.keyword}') AS sim_score`;
+
+			xSql = ` SELECT ${xSqlFields}
+			FROM ms_products
+			WHERE similarity(name, '${pParam.keyword}') > 0.3 ${xSqlOrderBy} ${xSqlLimit} `;
+
+			xSqlCount = ` SELECT count(*) AS total_record
+			FROM ms_products
+			WHERE similarity(name, '${pParam.keyword}') > 0.3 `;
+
+			let xData = await sequelize.query(xSql, {
+				// replacements: xObjJsonWhere,
+				type: sequelize.QueryTypes.SELECT,
+				// logging: console.log
+			});
+
+			xTotalRecord = await sequelize.query(xSqlCount, {
+				// replacements: xObjJsonWhere,
+				type: sequelize.QueryTypes.SELECT
+			});
+
+			if (xData != null && xData.length > 0) {
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					total_record: xTotalRecord[0].total_record,
+					data: xData
+				};
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Data Not Found'
+				};
+			}
+		} catch (e) {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.similarity: Exception error: ${e.message}`
+			};
+		}
+		return xJoResult;
+	}
 }
 
 module.exports = ProductRepository;

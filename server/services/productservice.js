@@ -608,6 +608,38 @@ class ProductService {
 			res.status(500).send(e);
 		}
 	}
+	
+    async productSimilarity(pParam) {
+        var xJoResult = {};
+        var xJoArrData = [];
+
+        var xResultList = await _productRepoInstance.similarity(pParam);
+		// console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
+        if (xResultList.status_code === '00') {
+
+            var xRows = xResultList.data;
+            // console.log(JSON.stringify(xRows));
+
+            for (var index in xRows) {
+                xJoArrData.push({
+                    // id: xRows[index].id,
+                    code: xRows[index].code,
+                    name: xRows[index].name
+                });
+            }
+
+			xJoResult = {
+				status_code: '00',
+				status_msg: 'OK',
+				total_record: xResultList.total_record,
+				data: xJoArrData
+			}
+        } else {
+			xJoResult = xResultList
+        }
+
+        return xJoResult;
+    }
 }
 
 module.exports = ProductService;

@@ -151,4 +151,9 @@ module.exports = (app) => {
 		arrValidate,
 		budgetPlanController.budgetPlan_UpdateFileUpload
 	);
+	
+	// Fetch Matrix FPB
+	arrValidate = [];
+	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
+	app.post(rootAPIPath + 'fetch_matrix', arrValidate, budgetPlanController.budgetPlan_FetchMatrix);
 };
