@@ -1389,6 +1389,7 @@ class BudgetPlanService {
                         pParam.token,
                         xParamApprovalMatrixDocument
                     );
+                    console.log(`>>> xResultApprovalMatrixDocument : ${JSON.stringify(xResultApprovalMatrixDocument)}`);
 
                     if (xResultApprovalMatrixDocument != null) {
                         if (xResultApprovalMatrixDocument.status_code == "00") {
@@ -1714,11 +1715,17 @@ class BudgetPlanService {
             } else {
                 xJoResult = xDecId;
             }
+        } else {
+            xJoResult = {
+                status_code: '-99',
+                status_msg: 'Invalid ID / User ID'
+            };
         }
 
         if (xFlagProcess) {
-            // Get RAB Detail
+            // Get Budget Detail
             var xBudgetDetail = await _repoInstance.getById({ id: xClearId });
+            // console.log(`>>> xBudgetDetail : ${JSON.stringify(xBudgetDetail)}`);
             if (xBudgetDetail != null) {
                 if (xBudgetDetail.status != 1) {
                     xJoResult = {
@@ -1750,7 +1757,7 @@ class BudgetPlanService {
                             // logged_company_id: pParam.logged_company_id,
                             approval_matrix_id: pParam.approval_matrix_id
                         };
-
+                        
                         var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
                             pParam.method,
                             pParam.token,
@@ -1794,6 +1801,7 @@ class BudgetPlanService {
                                 xJoResult.approval_matrix_result = xApprovalMatrixResult;
                             }
                         }
+
                     } else {
                         xJoResult = xUpdateResult;
                     }
