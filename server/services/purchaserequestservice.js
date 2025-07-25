@@ -831,7 +831,7 @@ class PurchaseRequestService {
 							// paid_at: xDetail[index].paid_at,
 							// paid_by: xDetail[index].paid_by,
 							// paid_by_name: xDetail[index].paid_by_name,
-							paid_note: xDetail[index].paid_note
+							// paid_note: xDetail[index].paid_note
 						});
 					}
 					// Get Approval Matrix

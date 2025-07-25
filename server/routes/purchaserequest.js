@@ -244,10 +244,9 @@ module.exports = (app) => {
 		check('limit').not().isEmpty().withMessage('Parameter limit cannot be empty')
 	];
 	app.get(rootAPIPath + 'gr-outstanding/list', arrValidate, purchaseRequestController.purchaseRequestDetail_OutstandingItemList);
-	
-	arrValidate = [];
-	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
-	app.post(
-		rootAPIPath + 'item/paid', arrValidate, purchaseRequestController.purchaseRequestDetail_PaidItem
-	);
+	// arrValidate = [];
+	// arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
+	// app.post(
+	// 	rootAPIPath + 'item/paid', arrValidate, purchaseRequestController.purchaseRequestDetail_PaidItem
+	// );
 };
