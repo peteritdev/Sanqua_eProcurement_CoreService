@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      @page {
+        size: A4 landscape;
+        /* margin: 15mm; */
+        /* border: 0.2cm; */
+      }
+      
+      @media print {
+        .page-break {
+          page-break-before: always;
+        }
+
+        .no-break {
+          page-break-inside: avoid;
+        }
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        font-size: 9px;
+      }
+
+      tr, td, th {
+        page-break-inside: avoid; /* hindari potongan di tengah baris */
+      }
+
+      .title {
+        text-align: center;
+        font-weight: bold;
+        font-size: 16px;
+        margin-bottom: 15px;
+      }
+
+      .info-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 9px;
+        margin-bottom: 10px;
+      }
+
+      .info-table td {
+        padding: 2px 2px;
+        vertical-align: top;
+      }
+
+      .info-label {
+        width: 5%;
+        white-space: nowrap;
+      }
+
+      .info-value {
+        width: 45%;
+      }
+
+      .main-table {
+        width: 100%;
+        border: 1px solid black;
+        border-collapse: collapse;
+        margin-top: 5px;
+      }
+
+      .main-table th,
+      .main-table td {
+        border: 1px solid #000 !important;
+        padding: 4px;
+        /* text-align: center; */
+      }
+
+      .main-table th {
+        background-color: #f0f0f0;
+        font-size: 9px;
+      }
+
+      .section-header td {
+        background-color: #d9d9d9;
+        font-weight: bold;
+        text-align: left;
+      }
+
+      .note-table {
+        width: 100%;
+        font-size: 8.5px;
+        margin-top: 12px;
+      }
+
+      .signature-section {
+        width: 100%;
+        margin-top: 20px;
+        text-align: center;
+        font-size: 9px;
+      }
+
+      .signature-section td {
+        padding: 5px;
+      }
+
+      .right-align {
+        text-align: right;
+      }
+
+      .total-info {
+        font-weight: bold;
+        font-size: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="title">RAB <%=data.data.name%></div>
+
+    <table class="info-table">
+      <tr>
+        <td class="info-label">Nomor RAB</td>
+        <td class="info-value">: <%=data.data.budget_no%></td>
+      </tr>
+      <!-- <tr>
+        <td class="info-label">Unit</td>
+        <td class="info-value">: <%=data.data.name%></td>
+      </tr> -->
+      <tr>
+        <td class="info-label">Penanggung Jawab</td>
+        <td class="info-value">
+          : <%=data.data.pic_employee != null ? data.data.pic_employee.name :
+          '-'%>
+        </td>
+      </tr>
+      <tr>
+        <td class="info-label">PIC</td>
+        <td class="info-value">
+          : <%=data.data.employee != null ? data.data.employee.name : '-'%>
+        </td>
+      </tr>
+      <tr>
+        <td class="info-label">Unit</td>
+        <td class="info-value">
+          : <%=data.data.company != null ? data.data.company.name : '-'%>
+        </td>
+      </tr>
+      <tr>
+        <td class="info-label">Department</td>
+        <td class="info-value">
+          : <%=data.data.department != null ? data.data.department.name : '-'%>
+        </td>
+      </tr>
+    </table>
+
+    <table class="main-table">
+      <thead>
+        <tr>
+          <th rowspan="2">No.</th>
+          <!-- <th rowspan="2">Plant</th>
+        <th rowspan="2">PIC</th> -->
+          <th rowspan="2">Nama Barang</th>
+          <th rowspan="2">Spesifikasi</th>
+          <th rowspan="2">Merek & Tipe</th>
+          <th rowspan="2">Kepentingan/Kegunaan</th>
+          <th rowspan="2">Qty</th>
+          <th rowspan="2">Satuan</th>
+          <th colspan="2">Budget</th>
+        </tr>
+        <tr>
+          <th>Harga Satuan</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% var index = 1; data.data.budget_plan_detail.forEach( item => { %> <%
+        if ( item.section_title ) { %>
+        <tr class="section-header">
+          <td colspan="11"><%=item.section_title%></td>
+        </tr>
+        <% } %>
+        <tr>
+          <td><%=index%></td>
+          <!-- <td><%=data.data.company != null ? data.data.company.alias : '-'%></td>
+        <td><%=data.data.department != null ? data.data.department.name : '-'%></td> -->
+          <td><%=item.product != null ? item.product.name : '-'%></td>
+          <td>
+            <%=item.merk + ' ' + ' ' + item.material + ' ' + item.dimension%>
+          </td>
+          <td><%=item.merk + ' ' + item.type%></td>
+          <td><%=item.description%></td>
+          <td class="right-align"><%=item.qty%></td>
+          <td><%=item.uom != null ? item.uom.name : '-'%></td>
+          <td class="right-align">
+            Rp <%=item.budget_price_per_unit.toLocaleString('id-ID')%>
+          </td>
+          <td class="right-align">
+            Rp <%=item.budget_price_total.toLocaleString('id-ID')%>
+          </td>
+        </tr>
+        <% index++; } ) %>
+      </tbody>
+    </table>
+
+    <table class="info-table" style="margin-top: 10px">
+      <tr class="total-info">
+        <td class="right-align" style="width: 85%">TOTAL PENGAJUAN :</td>
+        <td class="right-align">
+          Rp <%=data.data.total_budget_plan.toLocaleString('id-ID')%>
+        </td>
+      </tr>
+      <tr class="total-info">
+        <td class="right-align">REALISASI :</td>
+        <td class="right-align">Rp -</td>
+      </tr>
+      <tr class="total-info">
+        <td class="right-align">Selisih :</td>
+        <td class="right-align">Rp -</td>
+      </tr>
+    </table>
+
+    <table class="note-table">
+      <tr>
+        <td>
+          <strong>Note :</strong><br />
+          <%=data.data.note%>
+        </td>
+      </tr>
+    </table>
+
+    <table class="signature-section">
+      <tr>
+        <td colspan="4" style="text-align: left">
+          Jakarta, <%=data.data.created_at%>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4" style="padding: 0px; margin: 0px">
+          <table
+            cellspacing="0"
+            cellpadding="0"
+            style="width: 100%; border-width: 0.2px"
+          >
+            <tr>
+              <th style="width: 25%; font-weight: 400">Dibuat Oleh.,</th>
+              <th class="border-r" style="width: 25%; font-weight: 400">
+                Diperiksa Oleh.,
+              </th>
+              <th class="border-r" style="width: 25%; font-weight: 400">
+                Mengetahui.,
+              </th>
+              <th class="border-b" style="width: 50%; font-weight: 400">
+                Disetujui Oleh.,
+              </th>
+            </tr>
+            <tr>
+              <td>
+                <table
+                  style="
+                    margin-left: auto;
+                    margin-right: auto;
+                    text-align: center;
+                    min-height: 35px;
+                  "
+                >
+                  <tr>
+                    <td></td>
+                  </tr>
+                </table>
+              </td>
+              <td>
+                <% if( qrCode.approval1 != null && qrCode.approval1.length > 0
+                ){ %>
+                <table
+                  style="
+                    margin-left: auto;
+                    margin-right: auto;
+                    text-align: center;
+                    min-height: 35px;
+                  "
+                >
+                  <tr>
+                    <% for(var i = 0; i < qrCode.approval1.length; i++ ) { %>
+                    <td>
+                      <img
+                        src="<%=qrCode.qrPath%><%=qrCode.approval1[i]%>"
+                        width="80"
+                      />
+                    </td>
+                    <% }%>
+                  </tr>
+                </table>
+                <% } else { %>
+                <table
+                  style="
+                    margin-left: auto;
+                    margin-right: auto;
+                    text-align: center;
+                    min-height: 35px;
+                  "
+                >
+                  <tr>
+                    <td></td>
+                  </tr>
+                </table>
+                <% } %>
+              </td>
+              <td>
+                <% if( qrCode.approval2 != null && qrCode.approval2.length > 0
+                ){ %>
+                <table
+                  style="
+                    margin-left: auto;
+                    margin-right: auto;
+                    text-align: center;
+                    min-height: 35px;
+                  "
+                >
+                  <tr>
+                    <% for(var i = 0; i < qrCode.approval2.length; i++ ) { %>
+                    <td>
+                      <img
+                        src="<%=qrCode.qrPath%><%=qrCode.approval2[i]%>"
+                        width="80"
+                      />
+                    </td>
+                    <% }%>
+                  </tr>
+                </table>
+                <% } else { %>
+                <table
+                  style="
+                    margin-left: auto;
+                    margin-right: auto;
+                    text-align: center;
+                    min-height: 35px;
+                  "
+                >
+                  <tr>
+                    <td></td>
+                  </tr>
+                </table>
+                <% } %>
+              </td>
+              <td>
+                <% if( qrCode.approval3 != null && qrCode.approval3.length > 0
+                ){ %>
+                <table
+                  style="
+                    margin-left: auto;
+                    margin-right: auto;
+                    text-align: center;
+                    min-height: 35px;
+                  "
+                >
+                  <tr>
+                    <% for(var i = 0; i < qrCode.approval3.length; i++ ) { %>
+                    <td>
+                      <img
+                        src="<%=qrCode.qrPath%><%=qrCode.approval3[i]%>"
+                        width="80"
+                      />
+                    </td>
+                    <% }%>
+                  </tr>
+                </table>
+                <% } else { %>
+                <table
+                  style="
+                    margin-left: auto;
+                    margin-right: auto;
+                    text-align: center;
+                    min-height: 35px;
+                  "
+                >
+                  <tr>
+                    <td></td>
+                  </tr>
+                </table>
+                <% } %>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 3px 0">
+                <table style="margin: auto; text-align: center">
+                  <!-- <tr>
+                  <td>
+                  </td>
+                </tr> -->
+                  <tr>
+                    <td><%=data.data.created_by_name%></td>
+                  </tr>
+                </table>
+              </td>
+              <th style="padding: 3px 0" class="border-r">
+                <% if( qrCode.approval1 != null && qrCode.approval1.length > 0
+                ){ %>
+                <table style="margin: auto; text-align: center">
+                  <tr>
+                    <% for(var i = 0; i < approver1.length; i++ ) { %>
+                    <td><%=approver1[i].user.name%></td>
+                    <% }%>
+                  </tr>
+                </table>
+                <% } else { %>
+                <table style="margin: auto; text-align: center">
+                  <!-- <tr>
+                <td></td>
+              </tr> -->
+                  <tr>
+                    <td>(.............................)</td>
+                  </tr>
+                </table>
+                <% } %>
+              </th>
+              <th style="padding: 3px 0" class="border-rb">
+                <% if( qrCode.approval2 != null && qrCode.approval2.length > 0
+                ){ %>
+                <table style="margin: auto; text-align: center">
+                  <tr>
+                    <% for(var i = 0; i < approver2.length; i++ ) { %>
+                    <td><%=approver2[i].user.name%></td>
+                    <% }%>
+                  </tr>
+                </table>
+                <% } else { %>
+                <table style="margin: auto; text-align: center">
+                  <!-- <tr>
+                <td></td>
+              </tr> -->
+                  <tr>
+                    <td>(.............................)</td>
+                  </tr>
+                </table>
+                <% } %>
+              </th>
+              <th style="padding: 3px 0" class="border-b">
+                <% if( qrCode.approval3 != null && qrCode.approval3.length > 0
+                ){ %>
+                <table style="margin: auto; text-align: center">
+                  <tr>
+                    <% for(var i = 0; i < approver3.length; i++ ) { %>
+                    <td><%=approver3[i].user.name%></td>
+                    <% }%>
+                  </tr>
+                </table>
+                <% } else { %>
+                <table style="margin: auto; text-align: center">
+                  <!-- <tr>
+                <td></td>
+              </tr> -->
+                  <tr>
+                    <td>(.............................)</td>
+                  </tr>
+                </table>
+                <% } %>
+              </th>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <!-- <tr>
+      <td>Dibuat Oleh,<br><br><br><br><%=data.data.created_by_name%><br>............................</td>
+      <td>Mengetahui,<br><br><br><br>............................</td>
+      <td>Diperiksa Oleh,<br><br><br><br>............................</td>
+      <td>Disetujui Oleh,<br><br><br><br>............................</td>
+    </tr> -->
+    </table>
+  </body>
+</html>
