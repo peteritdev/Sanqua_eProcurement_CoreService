@@ -588,18 +588,18 @@ class BudgetPlanService {
 					xParamApprovalMatrix
 				);
 
-				if (xResultApprovalMatrix != null) {
-					if (xResultApprovalMatrix.status_code == '00') {
-						let xListApprover = xResultApprovalMatrix.token_data.data;
-						for (var i in xListApprover) {
-							let xApproverUsers = _.filter(xListApprover[i].approver_user, { status: 0 }).map(
-								(v) => (v.user != null ? v.user.email : v.user)
-							);
-				            console.log(`>>> xApproverUsers: ${JSON.stringify(xApproverUsers)}`);
-							xArrUserCanCancel.push.apply(xArrUserCanCancel, xApproverUsers);
-						}
-					}
-				}
+                if (xResultApprovalMatrix != null) {
+                    if (xResultApprovalMatrix.status_code == '00') {
+                        let xListApprover = xResultApprovalMatrix.token_data.data;
+                        for (var i in xListApprover) {
+                            let xApproverUsers = _.filter(xListApprover[i].approver_user, { status: 0 }).map(
+                                (v) => (v.user != null ? v.user.email : v.user)
+                            );
+                            // console.log(`>>> xApproverUsers: ${JSON.stringify(xApproverUsers)}`);
+                            xArrUserCanCancel.push.apply(xArrUserCanCancel, xApproverUsers);
+                        }
+                    }
+                }
 
 				xJoData = {
 					id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),

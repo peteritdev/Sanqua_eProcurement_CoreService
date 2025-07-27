@@ -2,7 +2,7 @@ let ejs = require('ejs');
 let pdf = require('html-pdf');
 let path = require('path');
 
-const puppeteer = require('puppeteer');
+// const puppeteer = require('puppeteer');
 const jwt = require('jsonwebtoken');
 const md5 = require('md5');
 const crypto = require('crypto');

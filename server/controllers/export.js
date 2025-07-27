@@ -117,7 +117,6 @@ async function generateRAB( req, res ){
         res.status(200).send(joResult);
     }
 }
-
 async function generateRAB_V2( req, res ){
     var joResult = {};
     var oAuthResult = await oAuthServiceInstance.verifyToken( req.headers['x-token'], req.headers['x-method'] );
