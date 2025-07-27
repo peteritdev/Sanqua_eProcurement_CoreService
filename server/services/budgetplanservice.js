@@ -588,19 +588,18 @@ class BudgetPlanService {
 					xParamApprovalMatrix
 				);
 
-				// console.log(`>>> xResultApprovalMatrix: ${JSON.stringify(xResultApprovalMatrix)}`);
-
-				// if (xResultApprovalMatrix != null) {
-				// 	if (xResultApprovalMatrix.status_code == '00') {
-				// 		let xListApprover = xResultApprovalMatrix.token_data.data;
-				// 		for (var i in xListApprover) {
-				// 			let xApproverUsers = _.filter(xListApprover[i].approver_user, { status: 1 }).map(
-				// 				(v) => (v.user != null ? v.user.email : v.user)
-				// 			);
-				// 			xArrUserCanCancel.push.apply(xArrUserCanCancel, xApproverUsers);
-				// 		}
-				// 	}
-				// }
+				if (xResultApprovalMatrix != null) {
+					if (xResultApprovalMatrix.status_code == '00') {
+						let xListApprover = xResultApprovalMatrix.token_data.data;
+						for (var i in xListApprover) {
+							let xApproverUsers = _.filter(xListApprover[i].approver_user, { status: 0 }).map(
+								(v) => (v.user != null ? v.user.email : v.user)
+							);
+				            console.log(`>>> xApproverUsers: ${JSON.stringify(xApproverUsers)}`);
+							xArrUserCanCancel.push.apply(xArrUserCanCancel, xApproverUsers);
+						}
+					}
+				}
 
 				xJoData = {
 					id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
@@ -1389,6 +1388,7 @@ class BudgetPlanService {
                         pParam.token,
                         xParamApprovalMatrixDocument
                     );
+                    console.log(`>>> xResultApprovalMatrixDocument : ${JSON.stringify(xResultApprovalMatrixDocument)}`);
 
                     if (xResultApprovalMatrixDocument != null) {
                         if (xResultApprovalMatrixDocument.status_code == "00") {
@@ -1714,11 +1714,17 @@ class BudgetPlanService {
             } else {
                 xJoResult = xDecId;
             }
+        } else {
+            xJoResult = {
+                status_code: '-99',
+                status_msg: 'Invalid ID / User ID'
+            };
         }
 
         if (xFlagProcess) {
-            // Get RAB Detail
+            // Get Budget Detail
             var xBudgetDetail = await _repoInstance.getById({ id: xClearId });
+            // console.log(`>>> xBudgetDetail : ${JSON.stringify(xBudgetDetail)}`);
             if (xBudgetDetail != null) {
                 if (xBudgetDetail.status != 1) {
                     xJoResult = {
@@ -1750,7 +1756,7 @@ class BudgetPlanService {
                             // logged_company_id: pParam.logged_company_id,
                             approval_matrix_id: pParam.approval_matrix_id
                         };
-
+                        
                         var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
                             pParam.method,
                             pParam.token,
@@ -1794,6 +1800,7 @@ class BudgetPlanService {
                                 xJoResult.approval_matrix_result = xApprovalMatrixResult;
                             }
                         }
+
                     } else {
                         xJoResult = xUpdateResult;
                     }
