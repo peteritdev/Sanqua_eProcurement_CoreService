@@ -75,6 +75,13 @@ class VendorRegistrationRepository {
 					});
 				}
 			}
+			if (pParam.hasOwnProperty('status')) {
+				if (pParam.status != '') {
+					xWhereAnd.push({
+						status: pParam.status
+					});
+				}
+			}
 			// if (pParam.hasOwnProperty('filter')) {
 			// 	if (pParam.filter != null && pParam.filter != undefined && pParam.filter != '') {
 			// 		var xFilter = JSON.parse(pParam.filter);
@@ -225,6 +232,8 @@ class VendorRegistrationRepository {
 				pParam.is_delete = 0;
 				pParam.created_by = pParam.user_id;
 				pParam.created_by_name = pParam.user_name;
+				pParam.created_by_company_id = pParam.logged_company_id
+				pParam.created_by_company_name = pParam.logged_company_name
 
 				var xSaved = await _modelDb.create(pParam, { transaction: xTransaction });
 
@@ -271,6 +280,40 @@ class VendorRegistrationRepository {
 			};
 		}
 
+		return xJoResult;
+	}
+
+	async deletePermanent(pParam) {
+		let xTransaction;
+		var xJoResult = {};
+
+		try {
+			var xSaved = null;
+			xTransaction = await sequelize.transaction();
+
+			xSaved = await _modelDb.destroy(
+				{
+					where: {
+						id: pParam.id
+					}
+				},
+				{ xTransaction }
+			);
+
+			await xTransaction.commit();
+
+			xJoResult = {
+				status_code: '00',
+				status_msg: 'Data has been successfully deleted'
+			};
+		} catch (e) {
+			if (xTransaction) await xTransaction.rollback();
+			xJoResult = {
+				status_code: '-99',
+				status_msg: 'Failed delete data. Error: ' + e.message,
+				err_msg: e
+			};
+		}
 		return xJoResult;
 	}
 

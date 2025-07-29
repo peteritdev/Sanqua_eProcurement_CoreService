@@ -63,6 +63,7 @@ async function vendorRegistration_Save(req, res) {
 
 		req.body.logged_company_id = oAuthResult.token_data.result_verify.employee_info.company.id;
 		req.body.logged_company_name = oAuthResult.token_data.result_verify.employee_info.company.name;
+		req.body.logged_company_alias = oAuthResult.token_data.result_verify.employee_info.company.alias;
 
 		req.body.token = req.headers['x-token'];
 		req.body.method = req.headers['x-method'];
@@ -98,6 +99,11 @@ async function vendorRegistration_Submit(req, res) {
 	const oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
 
 	if (oAuthResult.status_code === '00' && oAuthResult.token_data.status_code === '00') {
+		let xLevel = oAuthResult.token_data.result_verify.user_level.find(
+			(el) => el.application.id === config.applicationId || el.application.id === 1
+		);
+		req.body.logged_is_admin = xLevel.is_admin;
+		
 		req.body.user_id = oAuthResult.token_data.result_verify.id;
 		req.body.user_name = oAuthResult.token_data.result_verify.name;
 		req.body.token = req.headers['x-token'];
@@ -165,6 +171,11 @@ async function vendorRegistration_Cancel(req, res) {
 	const oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
 
 	if (oAuthResult.status_code === '00' && oAuthResult.token_data.status_code === '00') {
+		let xLevel = oAuthResult.token_data.result_verify.user_level.find(
+			(el) => el.application.id === config.applicationId || el.application.id === 1
+		);
+
+		req.body.logged_is_admin = xLevel.is_admin;
 		req.body.user_id = oAuthResult.token_data.result_verify.id;
 		req.body.user_name = oAuthResult.token_data.result_verify.name;
 		req.body.token = req.headers['x-token'];
@@ -184,6 +195,11 @@ async function vendorRegistration_SetToDraft(req, res) {
 	const oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
 
 	if (oAuthResult.status_code === '00' && oAuthResult.token_data.status_code === '00') {
+		let xLevel = oAuthResult.token_data.result_verify.user_level.find(
+			(el) => el.application.id === config.applicationId || el.application.id === 1
+		);
+
+		req.body.logged_is_admin = xLevel.is_admin;
 		req.body.user_id = oAuthResult.token_data.result_verify.id;
 		req.body.user_name = oAuthResult.token_data.result_verify.name;
 		req.body.token = req.headers['x-token'];
@@ -203,6 +219,11 @@ async function vendorRegistration_Delete(req, res) {
 	const oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
 
 	if (oAuthResult.status_code === '00' && oAuthResult.token_data.status_code === '00') {
+		let xLevel = oAuthResult.token_data.result_verify.user_level.find(
+			(el) => el.application.id === config.applicationId || el.application.id === 1
+		);
+
+		req.body.logged_is_admin = xLevel.is_admin;
 		req.body.user_id = oAuthResult.token_data.result_verify.id;
 		req.body.user_name = oAuthResult.token_data.result_verify.name;
 		req.body.logged_user_level = oAuthResult.token_data.result_verify.user_level;

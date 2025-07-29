@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
 			primaryKey: true,
 			autoIncrement: true // Tidak auto increment karena sudah ditentukan manual
 		},
+		request_no: DataTypes.STRING,
 		name: DataTypes.STRING,
 		business_entity: DataTypes.SMALLINT, // 1:UD, 2:CV, 3:PT, 4:Lain-lain
 		year_founded: DataTypes.STRING(4),
@@ -18,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
 		city_name: DataTypes.STRING,
 		lat: DataTypes.STRING(20),
 		lng: DataTypes.STRING(20),
-		phone_number: DataTypes.STRING(10),
+		phone_number: DataTypes.STRING(25),
 		email: DataTypes.STRING,
 		website: DataTypes.STRING,
 		company_scale: DataTypes.INTEGER, // 1:Kecil, 2:Menengah, 3:Besar
@@ -63,10 +64,7 @@ module.exports = (sequelize, DataTypes) => {
 			defaultValue: 0
 		},
 		updated_by_name: DataTypes.STRING,
-		created_by_company_id: {
-			type: DataTypes.INTEGER,
-			defaultValue: 0
-		},
+		created_by_company_id: DataTypes.INTEGER,
 		created_by_company_name: DataTypes.STRING,
         takeAt: {
 			type: DataTypes.DATE,
@@ -77,7 +75,11 @@ module.exports = (sequelize, DataTypes) => {
 			defaultValue: 0
 		},
 		take_by_name: DataTypes.STRING,
-		status: DataTypes.INTEGER, // 0: Draft, 1: Waiting, 2: Inprogress, 3: Done, 4: Cancel
+		cancel_reason: DataTypes.STRING,
+		status: {
+			type: DataTypes.INTEGER,
+			defaultValue: 0
+		}, // 0: Draft, 1: Waiting, 2: Inprogress, 3: Done, 4: Cancel
 	});
 
 	// Jika ingin relasi ditambahkan, bisa diatur di sini

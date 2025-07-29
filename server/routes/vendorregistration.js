@@ -78,8 +78,7 @@ module.exports = (app) => {
 
 	// Delete Vendor Registration
 	arrValidate = [
-		check('id').not().isEmpty().withMessage('Parameter id cannot be empty'),
-		check('is_permanent').not().isEmpty().withMessage('Parameter is_permanent cannot be empty')
+		check('id').not().isEmpty().withMessage('Parameter id cannot be empty')
 	];
 	app.delete(rootAPIPath + 'delete/:id', arrValidate, vendorRegistrationController.vendorRegistration_Delete);
 };

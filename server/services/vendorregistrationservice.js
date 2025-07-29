@@ -40,11 +40,9 @@ class VendorRegistrationService {
 							id: await _utilInstance.encrypt(row.id.toString(), config.cryptoKey.hashKey),
 							name: row.name,
 							email: row.email,
-							phone: row.phone,
+							phone_number: row.phone_number,
 							website: row.website,
 							address: row.address,
-							npwp: row.npwp,
-							nib: row.nib,
 							province_id: row.province_id,
 							province_name: row.province && row.province.name ? row.province.name : null,
 							city_id: row.city_id,
@@ -53,13 +51,18 @@ class VendorRegistrationService {
 							classification_name: row.classification && row.classification.name ? row.classification.name : null,
 							sub_classification_id: row.sub_classification_id,
 							sub_classification_name: row.sub_classification && row.sub_classification.name ? row.sub_classification.name : null,
-							status: row.status,
+							business_entity: row.business_entity,
                             status: {
                                 id: row.status,
                                 name: config.statusDescription.vendorRegistration[row.status]
                             },
 							created_at: moment(row.createdAt).format('DD MMM YYYY HH:mm:ss'),
-							updated_at: moment(row.updatedAt).format('DD MMM YYYY HH:mm:ss')
+							updated_at: moment(row.updatedAt).format('DD MMM YYYY HH:mm:ss'),
+							created_by_company_id: row.created_by_company_id,
+							created_by_company_name: row.created_by_company_name,
+							created_by: row.created_by,
+							created_by_name: row.created_by_name,
+							request_no: row.request_no
 						});
 					}
 
@@ -114,6 +117,25 @@ class VendorRegistrationService {
 				if (pParam.act === 'add') {
 					const xSave = await _repoInstance.save(pParam, 'add');
 					xJoResult = xSave;
+					if (xSave.status_code == '00' && xSave.created_id != '' && xSave.clear_id != '') {
+						// Generate Document No
+						var dt = dateTime.create();
+						var xDate = dt.format('ym');
+						var xDocNo = `${pParam.logged_company_alias}/VREG/${xDate}/` + xSave.clear_id.padStart(5, '0');
+						var xParamUpdate = {
+							request_no: xDocNo,
+							id: xSave.clear_id
+						};
+
+						var xUpdate = await _repoInstance.save(xParamUpdate, 'update');
+						if (xUpdate.status_code == '00') {
+							xJoResult = xSave;
+						} else {
+							xJoResult = xUpdate;
+						}
+					} else {
+						xJoResult = xSave;
+					}
 				} else if (pParam.act === 'update') {
 					const xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
 					if (xDecId.status_code === '00') {
@@ -155,30 +177,29 @@ class VendorRegistrationService {
 			if (xFlagProcess) {
 				const xData = await _repoInstance.getById(pParam);
 
-				if (xData) {
+				if (xData.status_code == '00') {
+					const xDetail = xData.data
+					xDetail.id = await _utilInstance.encrypt(xDetail.id.toString(), config.cryptoKey.hashKey)
+					xDetail.status = {
+						id: xDetail.status,
+						name: config.statusDescription.vendorRegistration[xDetail.status]
+					}
+					
+					console.log(`>>> xData 2: ${JSON.stringify(xData)}`);
+					const xDocumentFile = xDetail.vendor_document;
+					console.log(`>>> xData 3`);
+					if (xDocumentFile != null) {
+						for (let i = 0; i < xDocumentFile.length; i++) {
+							if (xDocumentFile[i].file != null) {
+								xDetail.vendor_document[i].file = `${config.imagePathESanQua}/eprocurement/vendor-regist/${xDocumentFile[i].file}`
+							}
+						}
+					}
+
 					xJoResult = {
 						status_code: '00',
 						status_msg: 'OK',
-						data: {
-							id: await _utilInstance.encrypt(xData.id.toString(), config.cryptoKey.hashKey),
-							name: xData.name,
-							email: xData.email,
-							phone: xData.phone,
-							website: xData.website,
-							address: xData.address,
-							npwp: xData.npwp,
-							nib: xData.nib,
-							province_id: xData.province_id,
-							city_id: xData.city_id,
-							classification_id: xData.classification_id,
-							sub_classification_id: xData.sub_classification_id,
-                            status: {
-                                id: xData.status,
-                                name: config.statusDescription.vendorRegistration[xData.status]
-                            },
-							created_at: moment(xData.createdAt).format('DD MMM YYYY HH:mm:ss'),
-							updated_at: moment(xData.updatedAt).format('DD MMM YYYY HH:mm:ss')
-						}
+						data: xDetail
 					};
 				} else {
 					xJoResult = {
@@ -213,8 +234,8 @@ class VendorRegistrationService {
 			if (xData.created_by !== pParam.user_id) {
 				return { status_code: '-99', status_msg: 'Only creator can delete this data' };
 			}
-
-			xJoResult = await _repoInstance.delete(pParam);
+			// delete all foto / file inside this data before delete
+			xJoResult = await _repoInstance.deletePermanent(pParam);
 		} catch (e) {
 			_utilInstance.writeLog(`${_xClassName}.delete`, `Exception error: ${e.message}`, 'error');
 			xJoResult = {
@@ -245,20 +266,19 @@ class VendorRegistrationService {
 	}
 
 	async cancel(pParam) {
-		return this._changeStatus(pParam, 9, 'cancel', {
-			notFrom: [0]
+		return this._changeStatus(pParam, 4, 'cancel', {
+			notFrom: [3]
 		});
 	}
 
 	async setDraft(pParam) {
 		return this._changeStatus(pParam, 0, 'setDraft', {
-			from: [9]
+			from: [4]
 		});
 	}
 
 	async _changeStatus(pParam, newStatus, actionName, opts = {}) {
 		let xJoResult = {};
-
 		try {
 			const decId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
 			if (decId.status_code !== '00') return decId;
@@ -269,11 +289,11 @@ class VendorRegistrationService {
 			pParam.user_id = decUser.decrypted;
 
 			const xData = await _repoInstance.getById({ id: pParam.id });
-			if (!xData) {
-				return { status_code: '-99', status_msg: 'Data not found' };
+			if (xData.status_code != '00') {
+				return xData
 			}
 
-			const currentStatus = xData.status;
+			const currentStatus = xData.data.status;
 			if (currentStatus === newStatus) {
 				return {
 					status_code: '-99',
@@ -284,22 +304,25 @@ class VendorRegistrationService {
 			if (opts.from && !opts.from.includes(currentStatus)) {
 				return {
 					status_code: '-99',
-					status_msg: `Cannot ${actionName}, data must be in status: ${opts.from.join(', ')}`
+					status_msg: `Tidak dapat ${actionName}, statu harus di saat: ${opts.from.join(', ')}`
 				};
 			}
 
 			if (opts.notFrom && opts.notFrom.includes(currentStatus)) {
 				return {
 					status_code: '-99',
-					status_msg: `Cannot ${actionName} from current status`
+					status_msg: `Tidak dapat ${actionName} dari status ini`
 				};
 			}
 
-			if (opts.onlyCreator && xData.created_by !== pParam.user_id) {
-				return {
-					status_code: '-99',
-					status_msg: `Only the creator can perform ${actionName}`
-				};
+			console.log(`>>> pParam.logged_is_admin: ${JSON.stringify(pParam.logged_is_admin)}`);
+			if (!pParam.logged_is_admin) {
+				if (opts.onlyCreator && xData.created_by !== pParam.user_id) {
+					return {
+						status_code: '-99',
+						status_msg: `Hanya admin / pembuat dokumen yang bisa ${actionName}`
+					};
+				}
 			}
 
 			const upd = {
