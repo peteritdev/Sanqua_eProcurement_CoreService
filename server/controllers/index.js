@@ -2,6 +2,7 @@ const vendor = require('./vendor');
 const vendorRateHistory = require('./vendorratehistory');
 const vendorExperience = require('./vendorexperience');
 const vendorCatalogue = require('./vendorcatalogue');
+const vendorRegistration = require('./vendorregistration');
 
 const master = require('./master');
 const productCategory = require('./productcategory');
@@ -66,5 +67,6 @@ module.exports = {
 	paymentRequest,
 	goodsReceipt,
 	pjca,
-	tax
+	tax,
+	vendorRegistration
 };
