@@ -47,7 +47,6 @@ module.exports = {
 	purchaseRequestDetail_RefreshItem,
 	purchaseRequest_FetchMatrix,
 	purchaseRequestDetail_CancelItem,
-	
 	purchaseRequestDetail_OutstandingItemList,
 	purchaseRequestDetail_PaidItem,
 	purchaseRequestDetail_DeviationList,
