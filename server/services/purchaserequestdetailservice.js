@@ -1428,7 +1428,7 @@ class PurchaseRequestDetailService {
 				id: pParam.id
 			});
 			if (xDetail.status_code == '00') {
-				if (xDetail.data.status != 0) {
+				if (xDetail.data.status != 0 && xDetail.data.status != 6) {
 					xJoResult = {
 						status_code: '-99',
 						status_msg: 'Item already proccessed, You cannot cancel this item'
@@ -1526,6 +1526,72 @@ class PurchaseRequestDetailService {
 				status_code: '-99',
 				status_msg: `Exception error <${_xClassName}.dropDown>: ${e.message}`
 			};
+		}
+
+		return xJoResult;
+	}
+	
+	async paidItem(pParam) {
+		var xJoResult = {};
+		var xDecId = null;
+		var xFlagProcess = false;
+
+		if (pParam.hasOwnProperty('logged_user_id') && pParam.hasOwnProperty('id')) {
+			if (pParam.id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.id = xDecId.decrypted;
+					xDecId = await _utilInstance.decrypt(pParam.logged_user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.logged_user_id = xDecId.decrypted;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xDecId;
+					}
+				} else {
+					xJoResult = xDecId;
+				}
+			}
+		}
+
+		if (xFlagProcess) {
+			// Get Detail of items
+			let xDetail = await _repoInstance.getByParam({
+				id: pParam.id
+			});
+			if (xDetail.status_code == '00') {
+				if (xDetail.data.status != 3) {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'You cannot update this item to paid yet'
+					};
+				} else {
+					const date = new Date();
+					const local = date.toLocaleString('id');
+					const updateAt = `[${local} | ${pParam.logged_user_name}]\n${pParam.note}`;
+
+					let xParamUpdate = {
+						id: pParam.id,
+						status: 6,
+						paid_at: await _utilInstance.getCurrDateTime(),
+						paid_by: pParam.logged_user_id,
+						paid_by_name: pParam.logged_user_name,
+						paid_note: updateAt
+					};
+					// console.log(`>>> xParamUpdate: ${JSON.stringify(xParamUpdate)}`);
+					var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update_status');
+					if (xUpdateResult.status_code == '00') {
+						xJoResult = {
+							status_code: '00',
+							status_msg: 'Data has successfully canceled'
+						};
+					} else {
+						xJoResult = xUpdateResult;
+					}
+				}
+			} else {
+				xJoResult = xDetail;
+			}
 		}
 
 		return xJoResult;

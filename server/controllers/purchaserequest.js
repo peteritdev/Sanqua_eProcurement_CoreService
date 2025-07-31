@@ -48,7 +48,8 @@ module.exports = {
 	purchaseRequest_FetchMatrix,
 	purchaseRequestDetail_CancelItem,
 	
-	purchaseRequestDetail_OutstandingItemList,
+	purchaseRequestDetail_OutstandingItemList
+	// purchaseRequestDetail_PaidItem
 };
 
 async function purchaseRequest_List(req, res) {
@@ -1285,3 +1286,67 @@ async function purchaseRequestDetail_OutstandingItemList(req, res) {
 	res.setHeader('Content-Type', 'application/json');
 	res.status(200).send(joResult);
 }
+
+// async function purchaseRequestDetail_PaidItem(req, res) {
+// 	var joResult;
+// 	var oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
+
+// 	if (oAuthResult.status_code == '00') {
+// 		if (oAuthResult.token_data.status_code == '00') {
+// 			// Validate first
+// 			var errors = validationResult(req).array();
+
+// 			if (errors.length != 0) {
+// 				joResult = JSON.stringify({
+// 					status_code: '-99',
+// 					status_msg: 'Parameter value has problem',
+// 					error_msg: errors
+// 				});
+// 			} else {
+// 				const xTokenVerify = oAuthResult.token_data.result_verify
+// 				const xLoggedEmployee = xTokenVerify.employee_info
+// 				let xLevel = xTokenVerify.user_level.find(
+// 					(el) => el.application.id === config.applicationId || el.application.id === 1
+// 				);
+
+// 				req.body.logged_is_admin = xLevel.is_admin;
+// 				req.body.logged_user_id = xTokenVerify.id;
+// 				req.body.logged_user_name = xTokenVerify.name;
+// 				req.body.token = req.headers['x-token'];
+// 				req.body.method = req.headers['x-method'];
+				
+// 				if (xLoggedEmployee.department.hasOwnProperty('unit')) {
+// 					if (xLoggedEmployee.department.unit != null) {
+// 						req.body.logged_department_id = xLoggedEmployee.department.unit.id;
+// 						req.body.logged_department_name = xLoggedEmployee.department.unit.name;
+// 					} else {
+// 						if (xLoggedEmployee.department.section != null) {
+// 							req.body.logged_department_id = xLoggedEmployee.department.section.id;
+// 							req.body.logged_department_name = xLoggedEmployee.department.section.name;
+// 						}
+// 					}
+// 				} else {
+// 					if (xLoggedEmployee.department.section != null) {
+// 						req.body.logged_department_id = xLoggedEmployee.department.section.id;
+// 						req.body.logged_department_name = xLoggedEmployee.department.section.name;
+// 					} else {
+// 						req.body.logged_department_id = xLoggedEmployee.department.id;
+// 						req.body.logged_department_name = xLoggedEmployee.department.name;
+// 					}
+// 				}
+// 				req.body.logged_company_id = xLoggedEmployee.company.id;
+// 				req.body.logged_company_name = xLoggedEmployee.company.name;
+
+// 				joResult = await _serviceDetailInstance.paidItem(req.body);
+// 				joResult = JSON.stringify(joResult);
+// 			}
+// 		} else {
+// 			joResult = JSON.stringify(oAuthResult);
+// 		}
+// 	} else {
+// 		joResult = JSON.stringify(oAuthResult);
+// 	}
+
+// 	res.setHeader('Content-Type', 'application/json');
+// 	res.status(200).send(joResult);
+// }
