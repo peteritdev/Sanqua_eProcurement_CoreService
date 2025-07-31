@@ -272,16 +272,16 @@ class ProjectRepository {
 						xComment = 'submitted';
 						break;
 					case 'cancel_project':
-						pParam.cancel_at = await _utilInstance.getCurrDateTime();
+						pParam.cancelAt = await _utilInstance.getCurrDateTime();
 						pParam.cancel_by = pParam.user_id;
 						pParam.cancel_by_name = pParam.user_name;
 						xComment = 'canceled';
 						pParam.cancel_reason = pParam.cancel_reason;
 						break;
 					case 'set_to_draft_project':
-						pParam.set_to_draft_at = await _utilInstance.getCurrDateTime();
-						pParam.set_to_draft_by = pParam.user_id;
-						pParam.set_to_draft_by_name = pParam.user_name;
+						// pParam.set_to_draftAt = await _utilInstance.getCurrDateTime();
+						// pParam.set_to_draft_by = pParam.user_id;
+						// pParam.set_to_draft_by_name = pParam.user_name;
 						xComment = 'set to draft';
 						break;
 					case 'close_project':
