@@ -13,6 +13,8 @@ const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
 const _modelBudgetPlan = require('../models').tr_budgetplans;
+const _modelBudgetPlanDetail = require('../models').tr_budgetplandetails;
+const _modelLogSubtitute = require('../models').log_fpbitemsubtitutes;
 
 const Utility = require('peters-globallib-v2');
 const { param } = require('express-validator');
@@ -49,6 +51,34 @@ class PurchaseRequestRepository {
 							}
 						]
 					},
+					{
+						model: _modelBudgetPlanDetail,
+						as: 'rab_item',
+						attributes: [ 'id', 'product_code', 'product_name', 'qty', 'qty_remain'],
+						include: [
+							{
+								model: _modelBudgetPlan,
+								as: 'rab_origin',
+								attributes: [ 'id', 'budget_no'],
+							}
+						]
+					},
+					{
+						model: _modelBudgetPlanDetail,
+						as: 'rab_revision_item',
+						attributes: [ 'id', 'product_code', 'product_name', 'qty', 'qty_remain'],
+						include: [
+							{
+								model: _modelBudgetPlan,
+								as: 'budget_plan',
+								attributes: [ 'id', 'budget_no', 'status'],
+							}
+						]
+					},
+					{
+						model: _modelLogSubtitute,
+						as: 'log_subtitute'
+					}
 				]
 			},
 			{
@@ -964,30 +994,15 @@ class PurchaseRequestRepository {
 				var xSql = "";
 				var xSqlErrMsg = ""
 				// SELECT calc_rab_item_remain_qty
-				if (pParam.hasOwnProperty('budget_plan_id')) {
+				if (pParam.hasOwnProperty('budget_plan_id') && pParam.budget_plan_id != null) {
 					// // Sanitize the input
-					// const sanitizedPurchaseRequestDetail = pParam.purchase_request_detail.map(item => {
-					// 	item.uom_name = item.uom_name.replace(/'/g, "''"); // Escape single quotes
-					// 	return item;
-					// });
-					
-					// console.log(`>>> sanitizedPurchaseRequestDetail : ${JSON.stringify(sanitizedPurchaseRequestDetail)}`);
-					// xSql = `SELECT calc_rab_item_remain_qty_v2('{
-					// 		"pAct": "${pAct}",
-					// 		"budget_plan_id" : ${pParam.budget_plan_id},
-					// 		"purchase_request_detail" : ${JSON.stringify(sanitizedPurchaseRequestDetail)}
-					// 	}'::json)`;
-
-					// var xDtQuery = await sequelize.query(xSql, {
-					// 	type: sequelize.QueryTypes.SELECT,
-					// });
 					// Gunakan parameter binding agar Sequelize dan PostgreSQL menangani escape karakter-karakter khusus dengan aman.
 					const payload = {
 						pAct: pAct,
 						budget_plan_id: pParam.budget_plan_id,
 						purchase_request_detail: pParam.purchase_request_detail,
 					};
-					xSql = `SELECT calc_rab_item_remain_qty_v2(:payload::json)`;
+					xSql = `SELECT calc_rab_item_remain_qty_v4(:payload::json)`;
 
 					const xDtQuery = await sequelize.query(xSql, {
 						replacements: { payload: JSON.stringify(payload) },
@@ -996,12 +1011,12 @@ class PurchaseRequestRepository {
 					// console.log(`>>> xDtQuery : ${JSON.stringify(xDtQuery)}`);
 
 					if (xDtQuery.length > 0) {
-						if (xDtQuery[0].calc_rab_item_remain_qty_v2.status_code == "00") {
+						if (xDtQuery[0].calc_rab_item_remain_qty_v4.status_code == "00") {
 							xFlag = true
 						} else {
-						//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty_v2;
+						//   xJoResult = xDtQuery[0].calc_rab_item_remain_qty_v4;
 							xFlag = false
-							xSqlErrMsg = xDtQuery[0].calc_rab_item_remain_qty_v2.status_msg
+							xSqlErrMsg = xDtQuery[0].calc_rab_item_remain_qty_v4.status_msg
 						}
 					} else {
 						xFlag = false
@@ -1511,6 +1526,49 @@ class PurchaseRequestRepository {
 			data: xData,
 			total_record: xTotalRecord[0].total_record
 		};
+	}
+	
+	async getByParam(pParam) {
+		var xWhereAnd = [];
+		var xWhere = [];
+		
+		if (pParam.hasOwnProperty('budget_plan_id')) {
+			if (pParam.budget_plan_id != '') {
+				xWhereAnd.push({
+					budget_plan_id: pParam.budget_plan_id
+				});
+			}
+		}
+
+		if (pParam.hasOwnProperty('status')) {
+			if (pParam.status != '') {
+				// query can receive single status or array of status
+				if (Array.isArray(pParam.status)) {
+					xWhereAnd.push({
+						status: {
+							[Op.in]: pParam.status
+						}
+					});
+				} else {
+					xWhereAnd.push({
+						status: pParam.status
+					});
+				}
+			}
+		}
+
+
+		if (xWhereAnd.length > 0) {
+		xWhere.push({
+			[Op.and]: xWhereAnd,
+		});
+		}
+		var xData = await _modelDb.findAll({
+			where: xWhere,
+			subQuery: false,
+		});
+
+		return xData;
 	}
 }
 

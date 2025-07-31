@@ -23,7 +23,6 @@ const _globalUtilInstance = new GlobalUtility();
 const PurchaseRequestRepository = require('../repository/purchaserequestrepository.js');
 const _repoInstance = new PurchaseRequestRepository();
 
-// Repository
 const PurchaseRequestDetailRepository = require('../repository/purchaserequestdetailrepository.js');
 const _repoDetailInstance = new PurchaseRequestDetailRepository();
 const RabRepository = require('../repository/budgetplanrepository.js');
@@ -156,6 +155,7 @@ class PurchaseRequestService {
 					if (xAct == 'add' || xAct == 'add_batch_in_item') {
 						// Calculate the total
 						var xJoArrItems = [];
+						// var xRabItemsIDs = [];
 
 						if (pParam.hasOwnProperty('purchase_request_detail')) {
 							xJoArrItems = pParam.purchase_request_detail;
@@ -187,11 +187,55 @@ class PurchaseRequestService {
 									}
 									xJoArrItems[i].qty_left = xJoArrItems[i].qty;
 									// xJoArrItems[i].qty_done = 0;
+									if (xJoArrItems[i].hasOwnProperty('rab_item_id') && xJoArrItems[i].rab_item_id != null && xJoArrItems[i].rab_item_id != '') {
+										const xRabItemId = await _utilInstance.decrypt(xJoArrItems[i].rab_item_id, config.cryptoKey.hashKey);
+										if (xRabItemId.status_code == '00') {
+											// console.log(`>>> xJoArrItems[i].rab_item_id : ${JSON.stringify(xRabItemId.decrypted)}`);
+											xJoArrItems[i].rab_item_id = xRabItemId.decrypted;
+											let lastFpbQty = 0
+											let lastGap = 0
+											lastFpbQty = xJoArrItems[i].rab_qty - xJoArrItems[i].rab_qty_remain;
+											if (xJoArrItems[i].rab_qty_remain < 0) {
+												lastGap = (xJoArrItems[i].rab_qty - lastFpbQty);
+												// xJoArrItems[i].rab_qty_gap = (xJoArrItems[i].rab_qty_remain - xJoArrItems[i].qty) - lastGap
+											}
+											//  else {
+											// 	lastGap = lastFpbQty
+											// 	xJoArrItems[i].rab_qty_gap = lastFpbQty - xJoArrItems[i].qty
+											// }
+											xJoArrItems[i].rab_qty_gap = (xJoArrItems[i].rab_qty_remain - xJoArrItems[i].qty) - lastGap
+											if (xJoArrItems[i].rab_qty_gap == null) {
+												return xJoResult = {
+													status_code: '-99',
+													status_msg: `purchaseRequestService.save: xJoArrItems[i].rab_qty_gap: ${xJoArrItems[i].rab_qty_gap}`
+												};
+											}
+
+											// check item already created on other fpb with status fpb already inprogress or not ?
+											// if there's already created one but status fpb still draft then reject incoming submit !!
+											const xCheckRabItemInFpb = await _repoDetailInstance.list({rab_item_id: xRabItemId.decrypted})
+											if (xCheckRabItemInFpb.status_code == '00' && xCheckRabItemInFpb.data != undefined && xCheckRabItemInFpb.data != null && xCheckRabItemInFpb.data.rows.length > 0) {
+												const xRows = xCheckRabItemInFpb.data.rows
+												console.log(`>>> xCheckRabItemInFpb : ${JSON.stringify(xRows)}`);
+												const xFindPR = xRows.find(
+													({ purchase_request }) => purchase_request != null && (purchase_request.status == 0)
+												);
+												if (xFindPR != undefined) {
+													return xJoResult = {
+														status_code: '-99',
+														status_msg: `Item: "${xFindPR.product_name}" Terdeteksi ada di FPB (${xFindPR.purchase_request.request_no}) yang belum diproses, silahkan proses FPB terlebih dahulu`
+													};
+												}
+											}
+										} else {
+											return xRabItemId
+										}
+									}
 								}
 							}
 							pParam.purchase_request_detail = xJoArrItems;
 						}
-
+						// console.log(`>>> Create FPB : ${JSON.stringify(pParam)}`, xAct);
 						// console.log(`>>> Create FPB : ${JSON.stringify(pParam.purchase_request_detail)}`);
 						var xAddResult = await _repoInstance.save(pParam, xAct);
 						if (xAddResult.status_code == '00' && xAddResult.created_id != '' && xAddResult.clear_id != '') {
@@ -831,7 +875,13 @@ class PurchaseRequestService {
 							// paid_at: xDetail[index].paid_at,
 							// paid_by: xDetail[index].paid_by,
 							// paid_by_name: xDetail[index].paid_by_name,
-							// paid_note: xDetail[index].paid_note
+							paid_note: xDetail[index].paid_note,
+							rab_item: xDetail[index].rab_item,
+							rab_qty_gap: xDetail[index].rab_qty_gap,
+							rab_revision_item: xDetail[index].rab_revision_item,
+							is_deviation_fulfilled: xDetail[index].is_deviation_fulfilled,
+							is_subtitute: xDetail[index].is_subtitute,
+                        	log_subtitute: xDetail[index].log_subtitute
 						});
 					}
 					// Get Approval Matrix
@@ -1270,42 +1320,46 @@ class PurchaseRequestService {
 						if (xCheckRAB != null) {
 							// check rab status is in progress before update rab item qty
 							if (xCheckRAB.status == 3) {
-								// check rab item qty_remaining not less than fpb qty
-								// make sure rab item qty_remaining > fpb qty before activate fpb again
-								for (const fpbItem of xData.purchase_request_detail) {
-									// Find matching RAB item by product_code and product_name
-									const rabItem = xCheckRAB.budget_plan_detail.find(
-										rab =>
-											rab.product_id === fpbItem.product_id &&
-											rab.product_code === fpbItem.product_code &&
-											rab.product_name === fpbItem.product_name
-									);
-									
-									if (rabItem) {
-										if (rabItem.qty_remain < fpbItem.qty) {
-											xFlagProcess = false;
-											xUpdateResult = {
-												status_code: '-99',
-												status_msg: `(${rabItem.product_code})${rabItem.product_name} has not enough RAB remaining qty. Please check RAB qty.`
-											};
-											break; // Stop checking if any item is not enough
-										}
-									} else {
-										// // If no matching RAB item found, treat as not enough
-										// xFlagProcess = false;
-										// xUpdateResult = {
-										// 	status_code: '-99',
-										// 	status_msg: 'There are some items in FPB that have not enough RAB remaining qty. Please check RAB qty.'
-										// };
-										// break;
-									}
-								}
 
 								if (xFlagProcess) {
 								// update rab item qty & update fpb to draft
 									var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
-									
+
 									if (xUpdateResult.status_code == '00') {
+										for (const fpbItem of xData.purchase_request_detail) {
+										// 	// Find matching RAB item by product_code and product_name
+											const xParamFpbItemUpdate = {id: fpbItem.id}
+											const rabItem = xCheckRAB.budget_plan_detail.find(
+												rab =>
+													rab.product_id === fpbItem.product_id &&
+													rab.product_code === fpbItem.product_code &&
+													rab.product_name === fpbItem.product_name
+											);
+											// console.log(`>>> rabItem : ${JSON.stringify(rabItem)}`, );
+											
+											if (rabItem != undefined) {
+												// check rab item qty_remaining less than 0 or not, if yes then 
+												// check if pr item is_deviation_fulfilled is null or not, if null then
+												// set is_deviation_fulfilled to true, if not null keep it null
+												// and set rab_qty_gap = rabItem.qty_remain - fpbItem.qty
+												// if null then set to true, and set rab_qty_gap = rabItem.qty_remain - fpbItem.qty
+												
+												console.log(`>>> rabItem.qty_remain - fpbItem.qty : ${JSON.stringify(rabItem.qty_remain - fpbItem.qty)}`, );
+												if (rabItem.qty_remain - fpbItem.qty < 0) {
+													if (fpbItem.is_deviation_fulfilled == null) {
+														xParamFpbItemUpdate.is_deviation_fulfilled = false;
+													}
+													xParamFpbItemUpdate.rab_qty_gap = rabItem.qty_remain - fpbItem.qty;
+												} else {
+													xParamFpbItemUpdate.is_deviation_fulfilled = null;
+													xParamFpbItemUpdate.rab_qty_gap = rabItem.qty_remain - fpbItem.qty;
+												}
+												console.log(`>>> xParamFpbItemUpdate : ${JSON.stringify(xParamFpbItemUpdate)}`, );
+												const xUpdateFpbItem = await _repoDetailInstance.save(xParamFpbItemUpdate, "update_by_setDraftPrProject")
+												// console.log(`>>> xUpdateFpbItem : ${JSON.stringify(xUpdateFpbItem)}`, );
+											}
+										}
+										
 										let xCutRabItemQty = await _budgetPlanDetailService.updateItemQtyLeft(xData, 'decrease', xCheckRAB)
 									}
 								}
@@ -1316,11 +1370,11 @@ class PurchaseRequestService {
 								};
 							}
 						} else {
-							var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
+							// var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
 						}
 					// var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
 					} else {
-						var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
+						// var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
 					}
 				} else {
 					xUpdateResult = {

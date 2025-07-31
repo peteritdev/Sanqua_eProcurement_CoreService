@@ -189,7 +189,7 @@ class BudgetPlanService {
                                         // set_to_draft_by_name: xRows[i].set_to_draft_by_name,
                                         // deleted_at: moment(xRows[i].deletedAt).format('DD MMM YYYY HH:mm:ss'),
                                         // deleted_by_name: xRows[i].deleted_by_name
-                                        // rab_type: xRows[i].rab_type,
+                                        rab_type: xRows[i].rab_type,
                                     });
                                 }
         
@@ -299,9 +299,14 @@ class BudgetPlanService {
                         				xJoArrItems[i].hasOwnProperty('qty') &&
                         				xJoArrItems[i].hasOwnProperty('budget_price_per_unit')
                         			) {
-                        				xJoArrItems[i].budget_price_total =
-                        					xJoArrItems[i].qty * xJoArrItems[i].budget_price_per_unit;
+                        				xJoArrItems[i].budget_price_total = xJoArrItems[i].qty * xJoArrItems[i].budget_price_per_unit;
+                                        if (pParam.rab_type == 2) {
+                                            xJoArrItems[i].qty_remain = 0;
+                                        } else {
+                                            // set rab type to original
+                                            pParam.rab_type = 1
                                             xJoArrItems[i].qty_remain = xJoArrItems[i].qty;
+                                        }
                         			}
 
                         			if (xJoArrItems[i].hasOwnProperty('estimate_date_use')) {
@@ -309,22 +314,49 @@ class BudgetPlanService {
                         					xJoArrItems[i].estimate_date_use = null;
                         				}
                         			}
-                        			// Get Last price from etalase ecatalogue
-                        			let xCatalogue = await _catalogueService.getByVendorCodeAndProductCode({
-                        				vendor_code: xJoArrItems[i].vendor_code,
-                        				product_code: xJoArrItems[i].product_code
-                                    });
-                                    console.log('xCatalogue >>>>', xCatalogue.data.product.category);
 
-                        			if (xCatalogue.status_code == '00') {
-                        				// xJoArrItems[i].last_price = xCatalogue.data.last_price;
-                        				xJoArrItems[i].uom_id = xCatalogue.data.uom_id;
-                                        xJoArrItems[i].uom_name = xCatalogue.data.uom_name;
-                                        // xJoArrItems[i].merk = xCatalogue.data.merk;
-                                        // xJoArrItems[i].description = xCatalogue.data.spesification;
-                                        if (xCatalogue.data.product.category !== undefined) {
-                                            xJoArrItems[i].category_id = xCatalogue.data.product.category.id;
-                                            xJoArrItems[i].category_name = xCatalogue.data.product.category.name;
+                                    // console.log(`>>> Hereeee 1.${i} >>>> : ${JSON.stringify(xJoArrItems[i].qty_remain)}`);
+                                    if (xJoArrItems[i].product_id != undefined && xJoArrItems[i].product_id != null && xJoArrItems[i].vendor_id != null && xJoArrItems[i].vendor_id != null) {
+                                            
+                                        // Get Last price from etalase ecatalogue
+                                        let xCatalogue = await _catalogueService.getByVendorCodeAndProductCode({
+                                            vendor_code: xJoArrItems[i].vendor_code,
+                                            product_code: xJoArrItems[i].product_code
+                                        });
+                                        // console.log('xCatalogue >>>>', xCatalogue.data.product.category);
+
+                                        if (xCatalogue.status_code == '00') {
+                                            // xJoArrItems[i].last_price = xCatalogue.data.last_price;
+                                            xJoArrItems[i].uom_id = xCatalogue.data.uom_id;
+                                            xJoArrItems[i].uom_name = xCatalogue.data.uom_name;
+                                            // xJoArrItems[i].merk = xCatalogue.data.merk;
+                                            // xJoArrItems[i].description = xCatalogue.data.spesification;
+                                            if (xCatalogue.data.product.category !== undefined) {
+                                                xJoArrItems[i].category_id = xCatalogue.data.product.category.id;
+                                                xJoArrItems[i].category_name = xCatalogue.data.product.category.name;
+                                            }
+                                        }
+                                    
+                                    }
+
+                                    // console.log(`>>> Hereeee 2.${i} >>>> : ${JSON.stringify(xJoArrItems[i].qty_remain)}`);
+                                    if (
+                        				xJoArrItems[i].hasOwnProperty('rab_origin_id') && xJoArrItems[i].rab_origin_id != null && xJoArrItems[i].rab_origin_id != '' && xJoArrItems[i].rab_origin_id.length > 5
+                        			) {
+                                        const xRabOriginId = await _utilInstance.decrypt(xJoArrItems[i].rab_origin_id, config.cryptoKey.hashKey);
+                        				if (xRabOriginId.status_code == '00') {
+                                            xJoArrItems[i].xJoArrItems[i].rab_origin_id = xRabOriginId.decrypted;
+                                        }
+                        			}
+
+                                    if (
+                        				xJoArrItems[i].hasOwnProperty('deviation_fpb_item_id') && xJoArrItems[i].deviation_fpb_item_id != null && xJoArrItems[i].deviation_fpb_item_id != ''
+                        			) {
+                                        if ( xJoArrItems[i].deviation_fpb_item_id.length > 5) {
+                                            const xDeviationFpbId = await _utilInstance.decrypt(xJoArrItems[i].deviation_fpb_item_id, config.cryptoKey.hashKey);
+                                            if (xDeviationFpbId.status_code == '00') {
+                                                xJoArrItems[i].deviation_fpb_item_id = xDeviationFpbId.decrypted;
+                                            }
                                         }
                         			}
                         		}
@@ -336,14 +368,9 @@ class BudgetPlanService {
                         var xAddResult = await _repoInstance.save(pParam, xAct);
                         if (xAddResult.status_code == '00' && xAddResult.created_id != '' && xAddResult.clear_id != '') {
                             // Generate RAB No
-                            
                             var dt = dateTime.create();
                             var xDate = dt.format('ym');
                             var xRABNo = `${pParam.company_code}/RAB/${xDate}/` + xAddResult.clear_id.padStart(5, '0');
-                            // var xRABNo = await _globalUtilInstance.generatePurchaseRequestNo(
-                            // 	xAddResult.clear_id,
-                            // 	pParam.company_code
-                            // );
                             
                             var xParamUpdate = {
                                 budget_no: xRABNo,
@@ -353,6 +380,37 @@ class BudgetPlanService {
                             var xUpdate = await _repoInstance.save(xParamUpdate, 'update');
 
                             if (xUpdate.status_code == '00') {
+                                // update purchase request detail item is_deviation_fulfilled if rab qty revisi fulfilled
+                                if (pParam.rab_type == 2) {
+                                    for (var i in xJoArrItems) {
+                                        const xCheckFpbItem = await _purchaseRequestDetailRepo.getById({ id: xJoArrItems[i].deviation_fpb_item_id })
+                                        
+                                        if (xCheckFpbItem != null) {
+                                            let xTotalRabRev = 0
+                                            const xRabQtyGap = xCheckFpbItem.rab_qty_gap
+                                            if (xCheckFpbItem.rab_revision_item != null && xCheckFpbItem.rab_revision_item.length > 0) {
+                                                for (let i = 0; i < xCheckFpbItem.rab_revision_item.length; i++) {
+                                                    xTotalRabRev = xTotalRabRev + xCheckFpbItem.rab_revision_item[i].qty
+                                                }
+                                                const xUpdateParam = {
+                                                    id: xJoArrItems[i].deviation_fpb_item_id,
+                                                    // rab_qty_gap: xRabQtyGap + xTotalRabRev
+                                                }
+                                                if (xCheckFpbItem.is_subtitute) {
+                                                    xUpdateParam.is_deviation_fulfilled = true
+                                                }
+                                                if ((xRabQtyGap + xTotalRabRev) < 0) {
+                                                    xUpdateParam.is_deviation_fulfilled = false
+                                                } else {
+                                                    xUpdateParam.is_deviation_fulfilled = true
+                                                }
+                                                // if (xTotalRabRev == Math.abs(xRabQtyGap)) {
+                                                await _purchaseRequestDetailRepo.save(xUpdateParam, 'update_status')
+                                                // }
+                                            }
+                                        }
+                                    }
+                                }
                                 xJoResult = xAddResult;
                                 // // ---------------- Start: Add to log ----------------
                                 // let xParamLog = {
@@ -452,11 +510,10 @@ class BudgetPlanService {
 		if (xFlagProcess) {
 			var xResult = await _repoInstance.getById(pParam);
 
-			console.log(`>>> xResult: ${JSON.stringify(xResult)}`);
-
 			if (xResult != null) {
 				var xJoArrBudgetDetailData = [];
 				var xDetail = xResult.budget_plan_detail;
+			    // console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`);
 
                 let xFileArr = [];
                 for (var j in xResult.file) {
@@ -507,6 +564,16 @@ class BudgetPlanService {
 								? moment(xDetail[index].estimate_date_use).format('DD MMM YYYY')
 								: null,
 						section_title: xDetail[index].section_title,
+						// fpb_ids: xDetail[index].fpb_ids,
+						rab_origin: xDetail[index].rab_origin != null ? {
+                            id: await _utilInstance.encrypt(xDetail[index].rab_origin.id.toString(), config.cryptoKey.hashKey),
+                            name: xDetail[index].rab_origin.name,
+                            document_no: xDetail[index].rab_origin.budget_no,
+                        } : null,
+						purchase_request_detail: xDetail[index].purchase_request_detail,
+						deviation_fpb_item_id: xDetail[index].deviation_fpb_item_id,
+						deviation_fpb_item: xDetail[index].deviation_fpb_item,
+                        log_subtitute: xDetail[index].log_subtitute
 					});
 				}
 				// Get Approval Matrix
@@ -521,18 +588,18 @@ class BudgetPlanService {
 					xParamApprovalMatrix
 				);
 
-                if (xResultApprovalMatrix != null) {
-                    if (xResultApprovalMatrix.status_code == '00') {
-                        let xListApprover = xResultApprovalMatrix.token_data.data;
-                        for (var i in xListApprover) {
-                            let xApproverUsers = _.filter(xListApprover[i].approver_user, { status: 0 }).map(
-                                (v) => (v.user != null ? v.user.email : v.user)
-                            );
-                            // console.log(`>>> xApproverUsers: ${JSON.stringify(xApproverUsers)}`);
-                            xArrUserCanCancel.push.apply(xArrUserCanCancel, xApproverUsers);
-                        }
-                    }
-                }
+				if (xResultApprovalMatrix != null) {
+					if (xResultApprovalMatrix.status_code == '00') {
+						let xListApprover = xResultApprovalMatrix.token_data.data;
+						for (var i in xListApprover) {
+							let xApproverUsers = _.filter(xListApprover[i].approver_user, { status: 0 }).map(
+								(v) => (v.user != null ? v.user.email : v.user)
+							);
+				            console.log(`>>> xApproverUsers: ${JSON.stringify(xApproverUsers)}`);
+							xArrUserCanCancel.push.apply(xArrUserCanCancel, xApproverUsers);
+						}
+					}
+				}
 
 				xJoData = {
 					id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
@@ -604,6 +671,8 @@ class BudgetPlanService {
                     done_by_name: xResult.done_by_name,
                     file: xFileArr,
                     note: xResult.note,
+					rab_type: xResult.rab_type,
+					rab_type_name: xResult.rab_type == 1 ? 'Original' : xResult.rab_type == 2 ? 'Revisi' : null,
 				};
 
 				xJoResult = {
@@ -1056,6 +1125,70 @@ class BudgetPlanService {
                             status_msg: 'You cannot cancel this document now'
                         };
                     } else {
+                        // check if rab revisi then update is_deviation_fullfiled to false in fpb item based on all rab items
+                        // then when rab set to draft again, check every item already created other rab revision or not
+                        // if no other rab created then update is_deviation_fullfiled on fpb item to true
+                        // if there is other rab created then keep is_deviation_fullfiled to false and cannot set to draft
+                        if (xRABDetail.rab_type == 2) {
+                            if (xRABDetail.budget_plan_detail != null && xRABDetail.budget_plan_detail.length > 0) {
+                                let xErrorFlag = false
+                                for (var i in xRABDetail.budget_plan_detail) {
+                                    // console.log(`>>> Cancel RAB Revisi : ${JSON.stringify(xRABDetail.budget_plan_detail[i].deviation_fpb_item)}`);
+                                    if (xRABDetail.budget_plan_detail[i].deviation_fpb_item_id != null) {
+                                        let xParamUpdateFpbItem = {
+                                            id: xRABDetail.budget_plan_detail[i].deviation_fpb_item_id,
+                                            is_deviation_fulfilled: false
+                                        };
+                                        let xUpdateFpbItemResult = await _purchaseRequestDetailRepo.save(xParamUpdateFpbItem, 'update_status');
+                                        // console.log(`>>> xUpdateFpbItemResult : ${JSON.stringify(xUpdateFpbItemResult)}`);
+                                        if (xUpdateFpbItemResult.status_code != '00') {
+                                            // console.log(`>>> Error update fpb item : ${JSON.stringify(xUpdateFpbItemResult)}`);
+                                            xErrorFlag = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                // if some transaction error then rollback previous updated successfully fpb item then return error to frontend
+                                if (xErrorFlag) {
+                                    for (var i in xRABDetail.budget_plan_detail) {
+                                        if (xRABDetail.budget_plan_detail[i].deviation_fpb_item_id != null) {
+                                            let xParamUpdateFpbItem = {
+                                                id: xRABDetail.budget_plan_detail[i].deviation_fpb_item_id,
+                                                is_deviation_fulfilled: true
+                                            };
+                                            await _purchaseRequestDetailRepo.save(xParamUpdateFpbItem, 'update_status');
+                                        }
+                                    }
+                                    xJoResult = {
+                                        status_code: '-99',
+                                        status_msg: 'Error update fpb item, please try again later'
+                                    };
+                                    return xJoResult;
+                                }
+                                
+                            }
+                            
+                        }
+
+                        // check if this rab already have inprogress FPB or not, if yes then cannot cancel
+                        // if canceled FPB will set to draft again in the future, then check RAB status must inprogress or done
+                        // if not, then cannot set to draft FPB
+                        const xFpbResult = await _purchaseRequestRepo.getByParam(
+                            {
+                                budget_plan_id: xRABDetail.id,
+                                status: [0, 1, 2, 3, 5]
+                            }
+                        )
+                        
+                        if (xFpbResult != null && xFpbResult.length > 0) {
+                            xJoResult = {
+                                status_code: '-99',
+                                status_msg: 'You cannot cancel this document, since this document already have inprogress FPB'
+                            };
+                            return xJoResult;
+                            
+                        }
+
                         pParam.cancelAt = await _utilInstance.getCurrDateTime();
                         pParam.status = 5;
                         var xUpdateResult = await _repoInstance.save(pParam, 'cancel');
@@ -1130,6 +1263,52 @@ class BudgetPlanService {
                             status_msg: 'You cannot set to draft while this docment already in process'
                         };
                     } else {
+                        // check every item, if some item has already created on other rab revision
+                        // then update is_deviation_fullfiled on fpb item to true and return cannot set to draft
+                        // if there is no other rab created then go ahead and set to draft
+                        if (xRABDetail.rab_type == 2) {
+                            if (xRABDetail.budget_plan_detail != null && xRABDetail.budget_plan_detail.length > 0) {
+                                let xFindOtherRab = null
+                                for (var i in xRABDetail.budget_plan_detail) {
+                                    if (xRABDetail.budget_plan_detail[i].deviation_fpb_item_id != null) {
+                                        // check if this item already created on other rab revision or not
+                                        let xCheckOtherRab = await _budgetPlanDetailRepo.getByParam(
+                                            {
+                                                deviation_fpb_item_id: xRABDetail.budget_plan_detail[i].deviation_fpb_item_id
+                                            }
+                                        )
+                                        // check if item created on other rab revision with same deviation_fpb_item_id and rab status not cancel not draft and not reject
+                                        const xRabResult = xCheckOtherRab.find(({ deviation_fpb_item_id, budget_plan}) => budget_plan != null && budget_plan.status != 5 && budget_plan.status != 6 && budget_plan.id != xRABDetail.id && deviation_fpb_item_id == xRABDetail.budget_plan_detail[i].deviation_fpb_item_id )
+                                        console.log(`>>> xCheckOtherRab : ${JSON.stringify(xFindOtherRab)}`);
+                                        if (xRabResult != undefined) {
+                                            // console.log(`>>> Error set to draft, this item already created on other rab revision : ${JSON.stringify(xRABDetail.budget_plan_detail[i].deviation_fpb_item_id)}`);
+                                            xFindOtherRab = xRabResult;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (xFindOtherRab != null) {
+                                    xJoResult = {
+                                        status_code: '-99',
+                                        status_msg: `You cannot set to draft, some item on this document already created on other rab revision: ${xFindOtherRab.budget_plan.budget_no}`
+                                    };
+                                    return xJoResult;
+                                    
+                                } else {
+                                    // update fpb item is_deviation_fulfilled to true
+                                    for (var i in xRABDetail.budget_plan_detail) {
+                                        if (xRABDetail.budget_plan_detail[i].deviation_fpb_item_id != null) {
+                                            let xParamUpdateFpbItem = {
+                                                id: xRABDetail.budget_plan_detail[i].deviation_fpb_item_id,
+                                                is_deviation_fulfilled: true
+                                            };
+                                            await _purchaseRequestDetailRepo.save(xParamUpdateFpbItem, 'update_status');
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
                         pParam.set_to_draftAt = await _utilInstance.getCurrDateTime();
                         pParam.status = 0;
                         var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft');
@@ -1303,6 +1482,51 @@ class BudgetPlanService {
 						status_msg: 'Cannot reject, document already in process'
 					};
 				} else {
+                    // check if rab revisi then update is_deviation_fullfiled to false in fpb item based on all rab items
+                    // then when rab set to draft again, check every item already created other rab revision or not
+                    // if no other rab created then update is_deviation_fullfiled on fpb item to true
+                    // if there is other rab created then keep is_deviation_fullfiled to false and cannot set to draft
+                    if (xRABDetail.rab_type == 2) {
+                        if (xRABDetail.budget_plan_detail != null && xRABDetail.budget_plan_detail.length > 0) {
+                            let xErrorFlag = false
+                            for (var i in xRABDetail.budget_plan_detail) {
+                                // console.log(`>>> Cancel RAB Revisi : ${JSON.stringify(xRABDetail.budget_plan_detail[i].deviation_fpb_item)}`);
+                                if (xRABDetail.budget_plan_detail[i].deviation_fpb_item_id != null) {
+                                    let xParamUpdateFpbItem = {
+                                        id: xRABDetail.budget_plan_detail[i].deviation_fpb_item_id,
+                                        is_deviation_fulfilled: false
+                                    };
+                                    let xUpdateFpbItemResult = await _purchaseRequestDetailRepo.save(xParamUpdateFpbItem, 'update_status');
+                                    // console.log(`>>> xUpdateFpbItemResult : ${JSON.stringify(xUpdateFpbItemResult)}`);
+                                    if (xUpdateFpbItemResult.status_code != '00') {
+                                        // console.log(`>>> Error update fpb item : ${JSON.stringify(xUpdateFpbItemResult)}`);
+                                        xErrorFlag = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            // if some transaction error then rollback previous updated successfully fpb item then return error to frontend
+                            if (xErrorFlag) {
+                                for (var i in xRABDetail.budget_plan_detail) {
+                                    if (xRABDetail.budget_plan_detail[i].deviation_fpb_item_id != null) {
+                                        let xParamUpdateFpbItem = {
+                                            id: xRABDetail.budget_plan_detail[i].deviation_fpb_item_id,
+                                            is_deviation_fulfilled: true
+                                        };
+                                        await _purchaseRequestDetailRepo.save(xParamUpdateFpbItem, 'update_status');
+                                    }
+                                }
+                                xJoResult = {
+                                    status_code: '-99',
+                                    status_msg: 'Error update fpb item, please try again later'
+                                };
+                                return xJoResult;
+                            }
+                            
+                        }
+                        
+                    }
+                    
                     var xParamApprovalMatrixDocument = {
                         document_id: xEncId,
                         status: -1,
@@ -1465,6 +1689,7 @@ class BudgetPlanService {
 
 		return xJoResult;
 	}
+    
     async fetchMatrixRAB(pParam) {
         var xJoResult = {};
         var xDecId = null;
@@ -1531,20 +1756,13 @@ class BudgetPlanService {
                             // logged_company_id: pParam.logged_company_id,
                             approval_matrix_id: pParam.approval_matrix_id
                         };
-                        // if (xBudgetDetail.company_id == 5 && xBudgetDetail.company_id == 14) {
-                        //     xParamAddApprovalMatrix.ecatalogue_fpb_category_item = xBudgetDetail.category_item
-                        // } else {
-                        //     xParamAddApprovalMatrix.ecatalogue_fpb_category_item = xBudgetDetail.category_item >= 7 ? xBudgetDetail.category_item : null
-                        // }
-                        // console.log(`>>> xParamAddApprovalMatrix : ${JSON.stringify(xParamAddApprovalMatrix)}`);
-
+                        
                         var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
                             pParam.method,
                             pParam.token,
                             xParamAddApprovalMatrix
                         );
                         xJoResult.approval_matrix_result = xApprovalMatrixResult;
-                        console.log(`>>> xApprovalMatrixResult : ${JSON.stringify(xApprovalMatrixResult)}`);
 
                         if (xApprovalMatrixResult.status_code == '00') {
                             if (xApprovalMatrixResult.approvers.length > 0) {
