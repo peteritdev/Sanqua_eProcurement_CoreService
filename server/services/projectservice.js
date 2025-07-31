@@ -199,7 +199,7 @@ class ProjectService {
 				if (xFlagProcess) {
 					let xDetail = await _repoInstance.getByParameter(pParam);
 
-					// console.log(`>>> pParam: ${JSON.stringify(xDetail)}`);
+					console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`);
 					if (xDetail.status_code == '00') {
 						xJoData = {
 							id: await _utilInstance.encrypt(xDetail.data.id.toString(), config.cryptoKey.hashKey),
@@ -217,7 +217,13 @@ class ProjectService {
 							created_at: moment(xDetail.data.createdAt).format('DD MMM YYYY HH:mm:ss'),
 							created_by_name: xDetail.data.created_by_name,
 							updated_at: moment(xDetail.data.updatedAt).format('DD MMM YYYY HH:mm:ss'),
-							updated_by_name: xDetail.data.updated_by_name
+							updated_by_name: xDetail.data.updated_by_name,
+							
+							cancel_reason: xDetail.data.cancel_reason,
+							cancel_at: moment(xDetail.data.cancelAt).format('DD MMM YYYY HH:mm:ss'),
+							cancel_by_name: xDetail.data.cancel_by_name,
+							done_at: moment(xDetail.data.doneAt).format('DD MMM YYYY HH:mm:ss'),
+							done_by_name: xDetail.data.done_by_name
 						};
 						xJoResult = {
 							status_code: '00',
@@ -334,6 +340,181 @@ class ProjectService {
 		var xJoData = {};
 
 		try {
+			let xLevel = pParam.logged_user_level.find(
+				(el) => el.application.id === config.applicationId || el.application.id === 1
+			);
+
+			if (pParam.id != '' && pParam.user_id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					xFlagProcess = true;
+					xEncId = pParam.id;
+					pParam.id = xDecId.decrypted;
+					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.user_id = xDecId.decrypted;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xDecId;
+					}
+				} else {
+					xJoResult = xDecId;
+				}
+			}
+
+			if (xFlagProcess) {
+				var xDetail = await _repoInstance.getByParameter({
+					id: pParam.id
+				});
+				// console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`);
+				if (xDetail.status_code == '00') {
+					if (xDetail.data.status == 3) {
+						if (xDetail.data.employee_id != pParam.logged_employee_id && xLevel.is_admin != 1) {
+							return xJoResult = {
+								status_code: '-99',
+								status_msg: 'You not allowed to change this data'
+							};
+						}
+						
+						pParam.status = 0;
+						var xUpdate = await _repoInstance.save(pParam, 'set_to_draft_project');
+						xJoResult = xUpdate;
+					} else {
+						xJoResult = {
+							status_code: '-99',
+							status_msg: 'Update failed, project already draft'
+						};
+					}
+				} else {
+					xJoResult = xDetail;
+				}
+			}
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.set_draft`, `Exception error: ${e.message}`, 'error');
+
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.set_draft: Exception error: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
+	
+	async cancel(pParam) {
+		var xJoResult = {};
+		var xFlagProcess = false;
+		var xDecId = null;
+		var xEncId = null;
+		var xJoData = {};
+
+		try {
+			let xLevel = pParam.logged_user_level.find(
+				(el) => el.application.id === config.applicationId || el.application.id === 1
+			);
+			// console.log(`>>> xLevel: ${JSON.stringify(xLevel)}`);
+
+			if (pParam.id != '' && pParam.user_id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					xFlagProcess = true;
+					xEncId = pParam.id;
+					pParam.id = xDecId.decrypted;
+					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.user_id = xDecId.decrypted;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xDecId;
+					}
+				} else {
+					xJoResult = xDecId;
+				}
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Invalid Document ID or User ID'
+				};
+			}
+
+			if (xFlagProcess) {
+				var xDetail = await _repoInstance.getByParameter({
+					id: pParam.id
+				});
+				// console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`);
+				if (xDetail.status_code == '00') {
+					if (xDetail.data.status != 2) {
+						if (xDetail.data.employee_id != pParam.logged_employee_id && xLevel.is_admin != 1) {
+							return xJoResult = {
+								status_code: '-99',
+								status_msg: 'You not allowed to cancel this data'
+							};
+						}
+						// check if project still have active rab and fpb or not, if yes cant cancel
+						// and check if all status already cancel / reject or not
+						var xCheckCreatedRAB = await _budgetPlanRepo.getByParam({project_id: xDetail.data.id})
+						var rabHaveActiveStat = xCheckCreatedRAB.find(
+							({ status }) => status != 5 && status != 6
+						)
+						// console.log(`>>> xCheckCreatedRAB: ${JSON.stringify(xCheckCreatedRAB)}`);
+						// console.log(`>>> rabHaveActiveStat: ${JSON.stringify(rabHaveActiveStat)}`);
+						if (xCheckCreatedRAB != null && xCheckCreatedRAB.length > 0 && rabHaveActiveStat != undefined) {
+							return xJoResult = {
+								status_code: '-99',
+								status_msg: 'Update failed, project already used by RAB or Please cancel all rab first'
+							};
+						}
+
+						var xCheckCreatedFPB = await _purchaseRequestRepo.list({project_id: xDetail.data.id})
+						console.log(`>>> xCheckCreatedFPB: ${JSON.stringify(xCheckCreatedFPB)}`);
+						var fpbHaveActiveStat = xCheckCreatedFPB.data.find(
+							({ status }) => status != -1 && status != 4
+						)
+						console.log(`>>> fpbHaveActiveStat: ${JSON.stringify(fpbHaveActiveStat)}`);
+						if (xCheckCreatedFPB != null && xCheckCreatedFPB.status_code == '00' && xCheckCreatedFPB.data.length > 0 && fpbHaveActiveStat != undefined) {
+							return xJoResult = {
+								status_code: '-99',
+								status_msg: 'Update failed, project already used by FPB or Please cancel all fpb first'
+							};
+						}
+
+						pParam.status = 3;
+						var xUpdate = await _repoInstance.save(pParam, 'cancel_project');
+						xJoResult = xUpdate;
+					} else {
+						xJoResult = {
+							status_code: '-99',
+							status_msg: 'Update failed, project already draft'
+						};
+					}
+				} else {
+					xJoResult = xDetail;
+				}
+			}
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.set_draft`, `Exception error: ${e.message}`, 'error');
+
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.set_draft: Exception error: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
+	
+	async done(pParam) {
+		var xJoResult = {};
+		var xFlagProcess = false;
+		var xDecId = null;
+		var xEncId = null;
+		var xJoData = {};
+
+		try {
+			let xLevel = pParam.logged_user_level.find(
+				(el) => el.application.id === config.applicationId || el.application.id === 1
+			);
+
 			if (pParam.id != '' && pParam.user_id != '') {
 				xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
 				if (xDecId.status_code == '00') {
@@ -359,31 +540,23 @@ class ProjectService {
 				// console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`);
 				if (xDetail.status_code == '00') {
 					if (xDetail.data.status == 1) {
-						var xCheckCreatedRAB = await _budgetPlanRepo.getByParam({project_id: xDetail.data.id})
-						// console.log(`>>> xCheckCreatedRAB: ${JSON.stringify(xCheckCreatedRAB)}`);
-						if (xCheckCreatedRAB != null && xCheckCreatedRAB.length > 0 ) {
+						if (xDetail.data.employee_id != pParam.logged_employee_id && xLevel.is_admin != 1) {
 							return xJoResult = {
 								status_code: '-99',
-								status_msg: 'Update failed, project already used by RAB'
+								status_msg: 'You not allowed to change this data'
 							};
 						}
-
-						var xCheckCreatedFPB = await _purchaseRequestRepo.list({project_id: xDetail.data.id})
-						// console.log(`>>> xCheckCreatedFPB: ${JSON.stringify(xCheckCreatedFPB)}`);
-						if (xCheckCreatedFPB != null && xCheckCreatedFPB.status_code == '00' && xCheckCreatedFPB.data.length > 0 ) {
-							return xJoResult = {
-								status_code: '-99',
-								status_msg: 'Update failed, project already used by FPB'
-							};
-						}
-
-						pParam.status = 0;
-						var xUpdate = await _repoInstance.save(pParam, 'set_to_draft_project');
+						
+						pParam.status = 2;
+						pParam.doneAt = await _utilInstance.getCurrDateTime();
+						pParam.done_by = pParam.user_id;
+						pParam.done_by_name = pParam.user_name;
+						var xUpdate = await _repoInstance.save(pParam, 'update');
 						xJoResult = xUpdate;
 					} else {
 						xJoResult = {
 							status_code: '-99',
-							status_msg: 'Update failed, project already draft'
+							status_msg: 'Update failed, cannot change status right now'
 						};
 					}
 				} else {
@@ -391,11 +564,11 @@ class ProjectService {
 				}
 			}
 		} catch (e) {
-			_utilInstance.writeLog(`${_xClassName}.set_draft`, `Exception error: ${e.message}`, 'error');
+			_utilInstance.writeLog(`${_xClassName}.done`, `Exception error: ${e.message}`, 'error');
 
 			xJoResult = {
 				status_code: '-99',
-				status_msg: `${_xClassName}.set_draft: Exception error: ${e.message}`
+				status_msg: `${_xClassName}.done: Exception error: ${e.message}`
 			};
 		}
 
