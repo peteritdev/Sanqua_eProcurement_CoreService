@@ -170,8 +170,8 @@ class PurchaseRequestService {
 									}
 
 									if (xJoArrItems[i].hasOwnProperty('estimate_date_use')) {
-										if (xJoArrItems[i].estimate_date_use == '') {
-											xJoArrItems[i].estimate_date_use = null;
+										if (xJoArrItems[i].estimate_date_use == '' || isNaN(new Date(xJoArrItems[i].estimate_date_use).getTime())) {
+											xJoArrItems[i].estimate_date_use = new Date().toISOString().split('T')[0];
 										}
 									}
 									// Get Last price from etalase ecatalogue
