@@ -28,6 +28,8 @@ const PurchaseRequestDetailRepository = require('../repository/purchaserequestde
 const _repoDetailInstance = new PurchaseRequestDetailRepository();
 const RabRepository = require('../repository/budgetplanrepository.js');
 const _rabRepoInstance = new RabRepository();
+const ProjectRepository = require('../repository/projectrepository.js');
+const _projectRepoInstance = new ProjectRepository();
 
 // OAuth Service
 const OAuthService = require('../services/oauthservice.js');
@@ -135,7 +137,16 @@ class PurchaseRequestService {
 				if (pParam.hasOwnProperty('project_id')) {
 					if (pParam.project_id != '' && pParam.project_id != null) {
 						pParam.category_pr = 'project';
-						xFlagProcess = true;
+						// check if project status still submitted befor save
+						var xCheckStatus = _projectRepoInstance.getByParameter({id:pParam.project_id})
+						if (xCheckStatus.status_code == '00' && xCheckStatus.data.status == 1) {
+							xFlagProcess = true;
+						} else {
+							return xJoResult = {
+								status_code: '-99',
+								status_msg: `Status project sedang tidak dapat digunakan, silahkan pilih kode project lain atau hubungi admin`
+							};
+						}
 					} else {
 						xFlagProcess = true;
 					}

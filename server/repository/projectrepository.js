@@ -56,7 +56,6 @@ class ProjectRepository {
 				include: xInclude,
 				subQuery: false
 			});
-
 			if (xData) {
 				xJoResult = {
 					status_code: '00',
