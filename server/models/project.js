@@ -30,7 +30,20 @@ module.exports = (sequelize, DataTypes) => {
 			field: 'updated_at'
 		},
 		updated_by: DataTypes.INTEGER,
-		updated_by_name: DataTypes.STRING
+		updated_by_name: DataTypes.STRING,
+		cancel_reason: DataTypes.STRING,
+		cancelAt: {
+			type: DataTypes.DATE,
+			field: 'cancel_at'
+		},
+		cancel_by: DataTypes.INTEGER,
+		cancel_by_name: DataTypes.STRING,
+		doneAt: {
+			type: DataTypes.DATE,
+			field: 'done_at'
+		},
+		done_by: DataTypes.INTEGER,
+		done_by_name: DataTypes.STRING
 	});
 
 	// Project.associate = function(models) {
