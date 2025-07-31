@@ -101,7 +101,8 @@
       "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel", "Pending"],
       "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel", "Paid"],
       "budgetPlan":["Draft", "Waiting Approval", "Pending", "In Progress", "Done", "Cancel", "Reject"],
-      "vendorRegistration":["Draft", "Waiting", "Inprogress", "Done", "Cancel"]
+      "vendorRegistration":["Draft", "Waiting", "Inprogress", "Done", "Cancel"],
+      "project":["Draft", "Submitted", "Done", "Cancel"]
     },
     "categoryItem": ["", "Raw Material", "Factory Supply", "Office Supply", "Sparepart", "Jasa", "Maintenance Repair", "Investment / Asset", "Office Supply (< 1jt)", "Office Supply (1jt-5jt)", "Office Supply (> 5j)", "Marketing Material (< 1jt)", "Marketing Material (1jt-5jt)", "Marketing Material (> 5j)", "Sparepart (< 1jt)", "Sparepart (1jt-5jt)", "Sparepart (> 5j)", "Jasa (< 1jt)", "Jasa (1jt-5jt)", "Jasa (> 5j)", "Maintenance Repair (< 1jt)", "Maintenance Repair (1jt-5jt)", "Maintenance Repair (> 5j)"],
 
@@ -214,7 +215,8 @@
       "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel", "Pending"],
       "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel", "Paid"],
       "budgetPlan":["Draft", "Waiting Approval", "Pending", "In Progress", "Done", "Cancel", "Reject"],
-      "vendorRegistration":["Draft", "Waiting", "Inprogress", "Done", "Cancel"]
+      "vendorRegistration":["Draft", "Waiting", "Inprogress", "Done", "Cancel"],
+      "project":["Draft", "Submitted", "Done", "Cancel"]
     },
     "categoryItem": ["", "Raw Material", "Factory Supply", "Office Supply", "Sparepart", "Jasa", "Maintenance Repair", "Investment / Asset", "Office Supply (< 1jt)", "Office Supply (1jt-5jt)", "Office Supply (> 5j)", "Marketing Material (< 1jt)", "Marketing Material (1jt-5jt)", "Marketing Material (> 5j)", "Sparepart (< 1jt)", "Sparepart (1jt-5jt)", "Sparepart (> 5j)", "Jasa (< 1jt)", "Jasa (1jt-5jt)", "Jasa (> 5j)", "Maintenance Repair (< 1jt)", "Maintenance Repair (1jt-5jt)", "Maintenance Repair (> 5j)"],
     "notification": {
@@ -326,7 +328,8 @@
       "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel"],
       "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel", "Paid"],
       "budgetPlan":["Draft", "Waiting Approval", "Pending", "In Progress", "Done", "Cancel", "Reject"],
-      "vendorRegistration":["Draft", "Waiting", "Inprogress", "Done", "Cancel"]
+      "vendorRegistration":["Draft", "Waiting", "Inprogress", "Done", "Cancel"],
+      "project":["Draft", "Submitted", "Done", "Cancel"]
     },
     "categoryItem": ["", "Raw Material", "Factory Supply", "Office Supply", "Sparepart", "Jasa", "Maintenance Repair", "Investment / Asset", "Office Supply (< 1jt)", "Office Supply (1jt-5jt)", "Office Supply (> 5j)", "Marketing Material (< 1jt)", "Marketing Material (1jt-5jt)", "Marketing Material (> 5j)", "Sparepart (< 1jt)", "Sparepart (1jt-5jt)", "Sparepart (> 5j)", "Jasa (< 1jt)", "Jasa (1jt-5jt)", "Jasa (> 5j)", "Maintenance Repair (< 1jt)", "Maintenance Repair (1jt-5jt)", "Maintenance Repair (> 5j)"],
     "notification": {
