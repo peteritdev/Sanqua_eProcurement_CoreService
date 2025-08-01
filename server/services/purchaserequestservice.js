@@ -27,6 +27,8 @@ const PurchaseRequestDetailRepository = require('../repository/purchaserequestde
 const _repoDetailInstance = new PurchaseRequestDetailRepository();
 const RabRepository = require('../repository/budgetplanrepository.js');
 const _rabRepoInstance = new RabRepository();
+const ProjectRepository = require('../repository/projectrepository.js');
+const _projectRepoInstance = new ProjectRepository();
 
 // OAuth Service
 const OAuthService = require('../services/oauthservice.js');
@@ -134,7 +136,16 @@ class PurchaseRequestService {
 				if (pParam.hasOwnProperty('project_id')) {
 					if (pParam.project_id != '' && pParam.project_id != null) {
 						pParam.category_pr = 'project';
-						xFlagProcess = true;
+						// check if project status still submitted befor save
+						var xCheckStatus = await _projectRepoInstance.getByParameter({id:pParam.project_id})
+						if (xCheckStatus.status_code == '00' && xCheckStatus.data.status == 1) {
+							xFlagProcess = true;
+						} else {
+							return xJoResult = {
+								status_code: '-99',
+								status_msg: `Status project sedang tidak dapat digunakan, silahkan pilih kode project lain atau hubungi admin`
+							};
+						}
 					} else {
 						xFlagProcess = true;
 					}
@@ -170,8 +181,8 @@ class PurchaseRequestService {
 									}
 
 									if (xJoArrItems[i].hasOwnProperty('estimate_date_use')) {
-										if (xJoArrItems[i].estimate_date_use == '') {
-											xJoArrItems[i].estimate_date_use = null;
+										if (xJoArrItems[i].estimate_date_use == '' || isNaN(new Date(xJoArrItems[i].estimate_date_use).getTime())) {
+											xJoArrItems[i].estimate_date_use = new Date().toISOString().split('T')[0];
 										}
 									}
 									// Get Last price from etalase ecatalogue
