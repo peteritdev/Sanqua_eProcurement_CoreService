@@ -34,6 +34,8 @@ const _purchaseRequestDetailRepo = new PurchaseRequestDetailRepo();
 
 const PurchaseRequestRepo = require('../repository/purchaserequestrepository.js');
 const _purchaseRequestRepo = new PurchaseRequestRepo();
+const ProjectRepository = require('../repository/projectrepository.js');
+const _projectRepoInstance = new ProjectRepository();
 
 const VendorCatalogueService = require('../services/vendorcatalogueservice.js');
 const _catalogueService = new VendorCatalogueService();
@@ -279,7 +281,16 @@ class BudgetPlanService {
                 
                 if (pParam.hasOwnProperty('project_id')) {
                     if (pParam.project_id != '' && pParam.project_id != null) {
-                        xFlagProcess = true;
+                        // check if project status still submitted befor save
+						var xCheckStatus = _projectRepoInstance.getByParameter({id:pParam.project_id})
+						if (xCheckStatus.status_code == '00' && xCheckStatus.data.status == 1) {
+							xFlagProcess = true;
+						} else {
+							return xJoResult = {
+								status_code: '-99',
+								status_msg: `Status project sedang tidak dapat digunakan, silahkan pilih kode project lain atau hubungi admin`
+							};
+						}
                     } else {
                         xFlagProcess = true;
                     }
@@ -304,11 +315,11 @@ class BudgetPlanService {
                                             xJoArrItems[i].qty_remain = xJoArrItems[i].qty;
                         			}
 
-                        			if (xJoArrItems[i].hasOwnProperty('estimate_date_use')) {
-                        				if (xJoArrItems[i].estimate_date_use == '') {
-                        					xJoArrItems[i].estimate_date_use = null;
-                        				}
-                        			}
+									if (xJoArrItems[i].hasOwnProperty('estimate_date_use')) {
+										if (xJoArrItems[i].estimate_date_use == '' || isNaN(new Date(xJoArrItems[i].estimate_date_use).getTime())) {
+											xJoArrItems[i].estimate_date_use = new Date().toISOString().split('T')[0];
+										}
+									}
                         			// Get Last price from etalase ecatalogue
                         			let xCatalogue = await _catalogueService.getByVendorCodeAndProductCode({
                         				vendor_code: xJoArrItems[i].vendor_code,

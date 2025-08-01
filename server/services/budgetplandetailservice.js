@@ -255,8 +255,10 @@ class BudgetPlanDetailService {
                 pParam.qty_remain = pParam.qty;
 				// }
 
-				if (pParam.estimate_date_use == '') {
-					pParam.estimate_date_use = null;
+				if (pParam.hasOwnProperty('estimate_date_use')) {
+					if (pParam.estimate_date_use == ''|| isNaN(new Date(pParam.estimate_date_use).getTime())) {
+						pParam.estimate_date_use = new Date().toISOString().split('T')[0];
+					}
 				}
 
 				// Validate if product_id is null (free keyin for project), estimate_fulfillment
@@ -414,8 +416,10 @@ class BudgetPlanDetailService {
 								pParam.qty_remain = pParam.qty;
 							}
 
-							if (pParam.estimate_date_use == '') {
-								pParam.estimate_date_use = null;
+							if (xJoArrItems[i].hasOwnProperty('estimate_date_use')) {
+								if (xJoArrItems[i].estimate_date_use == '' || isNaN(new Date(xJoArrItems[i].estimate_date_use).getTime())) {
+									xJoArrItems[i].estimate_date_use = new Date().toISOString().split('T')[0];
+								}
 							}
 
 							var xUpdateResult = await _repoInstance.save(pParam, xAct);
