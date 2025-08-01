@@ -5,6 +5,7 @@ const moment = require('moment');
 const dateFormat = require('dateformat');
 const bcrypt = require('bcrypt');
 const fs = require('fs');
+const dateTime = require('node-datetime');
 
 // Config
 const env = process.env.NODE_ENV || 'localhost';
