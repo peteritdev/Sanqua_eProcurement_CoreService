@@ -137,7 +137,7 @@ class PurchaseRequestService {
 					if (pParam.project_id != '' && pParam.project_id != null) {
 						pParam.category_pr = 'project';
 						// check if project status still submitted befor save
-						var xCheckStatus = _projectRepoInstance.getByParameter({id:pParam.project_id})
+						var xCheckStatus = await _projectRepoInstance.getByParameter({id:pParam.project_id})
 						if (xCheckStatus.status_code == '00' && xCheckStatus.data.status == 1) {
 							xFlagProcess = true;
 						} else {
