@@ -229,9 +229,10 @@ class PurchaseRequestDetailService {
 					pParam.budget_price_total = Math.round(pParam.qty * pParam.budget_price_per_unit * 1000) / 1000;
 					// pParam.budget_price_total = pParam.qty * pParam.budget_price_per_unit;
 				}
-
-				if (pParam.estimate_date_use == '') {
-					pParam.estimate_date_use = null;
+				if (pParam.hasOwnProperty('estimate_date_use')) {
+					if (pParam.estimate_date_use == ''|| isNaN(new Date(pParam.estimate_date_use).getTime())) {
+						pParam.estimate_date_use = new Date().toISOString().split('T')[0];
+					}
 				}
 
 				// Validate if product_id is null (free keyin for project), estimate_fulfillment
@@ -441,8 +442,10 @@ class PurchaseRequestDetailService {
 						}
 					}
 
-					if (pParam.estimate_date_use == '') {
-						pParam.estimate_date_use = null;
+					if (pParam.hasOwnProperty('estimate_date_use')) {
+						if (pParam.estimate_date_use == ''|| isNaN(new Date(pParam.estimate_date_use).getTime())) {
+							pParam.estimate_date_use = new Date().toISOString().split('T')[0];
+						}
 					}
 
 					// console.log(`>>> pParam : ${JSON.stringify(pParam)}`);
