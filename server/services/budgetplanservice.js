@@ -283,6 +283,7 @@ class BudgetPlanService {
                     if (pParam.project_id != '' && pParam.project_id != null) {
                         // check if project status still submitted befor save
 						var xCheckStatus = _projectRepoInstance.getByParameter({id:pParam.project_id})
+                        console.log(`>>> xCheckStatusProjec>>> : ${JSON.stringify(xCheckStatus)}`);
 						if (xCheckStatus.status_code == '00' && xCheckStatus.data.status == 1) {
 							xFlagProcess = true;
 						} else {
