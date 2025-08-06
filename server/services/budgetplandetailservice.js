@@ -416,9 +416,9 @@ class BudgetPlanDetailService {
 								pParam.qty_remain = pParam.qty;
 							}
 
-							if (xItem[i].hasOwnProperty('estimate_date_use')) {
-								if (xItem[i].estimate_date_use == '' || isNaN(new Date(xItem[i].estimate_date_use).getTime())) {
-									xItem[i].estimate_date_use = new Date().toISOString().split('T')[0];
+							if (xItem.hasOwnProperty('estimate_date_use')) {
+								if (xItem.estimate_date_use == '' || isNaN(new Date(xItem.estimate_date_use).getTime())) {
+									xItem.estimate_date_use = new Date().toISOString().split('T')[0];
 								}
 							}
 
