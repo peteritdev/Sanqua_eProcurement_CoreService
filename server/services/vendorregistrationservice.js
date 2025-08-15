@@ -192,7 +192,9 @@ class VendorRegistrationService {
 					if (xDocumentFile != null) {
 						for (let i = 0; i < xDocumentFile.length; i++) {
 							if (xDocumentFile[i].file != null) {
-								xDetail.vendor_document[i].file = `${config.imagePathESanQua}/eprocurement/vendor_regist/${xDocumentFile[i].file}`
+								// xDetail.vendor_document[i].file = `${config.imagePathESanQua}/eprocurement/vendor_regist/${xDocumentFile[i].file}`
+								xDetail.vendor_document[i].file = `${xDocumentFile[i].file}`
+								xDetail.vendor_document[i].path = `${config.imagePathESanQua}/eprocurement/vendor_regist/`
 							}
 						}
 					}
