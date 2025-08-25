@@ -548,9 +548,9 @@ class BudgetPlanService {
 				xJoData = {
 					id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
                     project: {
-                      id: xResult.project.id,
-                      code: xResult.project.odoo_project_code,
-                      name: xResult.project.name,    
+                      id: xResult.project != null ? xResult.project.id : xResult.project_id,
+                      code: xResult.project != null ? xResult.project.odoo_project_code : null,
+                      name: xResult.project != null ? xResult.project.name : xResult.project_name,    
                     },
 					name: xResult.name,
 					budget_no: xResult.budget_no,
