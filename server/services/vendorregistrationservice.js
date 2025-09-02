@@ -186,15 +186,25 @@ class VendorRegistrationService {
 						name: config.statusDescription.vendorRegistration[xDetail.status]
 					}
 					
-					console.log(`>>> xData 2: ${JSON.stringify(xData)}`);
+					// console.log(`>>> xData 2: ${JSON.stringify(xData)}`);
 					const xDocumentFile = xDetail.vendor_document;
-					console.log(`>>> xData 3`);
+					// console.log(`>>> xData 3`);
 					if (xDocumentFile != null) {
 						for (let i = 0; i < xDocumentFile.length; i++) {
 							if (xDocumentFile[i].file != null) {
 								// xDetail.vendor_document[i].file = `${config.imagePathESanQua}/eprocurement/vendor_regist/${xDocumentFile[i].file}`
 								xDetail.vendor_document[i].file = `${xDocumentFile[i].file}`
 								xDetail.vendor_document[i].path = `${config.imagePathESanQua}/eprocurement/vendor_regist/`
+							}
+						}
+					}
+					const xProductCategory = xDetail.vendor_product_category;
+					// console.log(`>>> xData 3`);
+					if (xProductCategory != null) {
+						for (let i = 0; i < xProductCategory.length; i++) {
+							if (xProductCategory[i].file != null) {
+								xDetail.vendor_product_category[i].file = `${xProductCategory[i].file}`
+								xDetail.vendor_product_category[i].path = `${config.imagePathESanQua}/eprocurement/vendor_regist/`
 							}
 						}
 					}
