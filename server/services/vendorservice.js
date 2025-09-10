@@ -112,7 +112,8 @@ class VendorService {
                     // console.log(`>>> xRows[index].email: ${JSON.stringify(xRows[index].email.length)}`);
                     // if (xRows[index].email.length == 65) {
                     var dec = await _utilInstance.decrypt( xRows[index].email, config.cryptoKey.hashKey)
-                    if (dec) {
+                    // console.log(`>>> dec: ${JSON.stringify(dec)}`);
+                    if (dec != null && dec.status_code == '00') {
                         email = dec.decrypted; 
                     } else {
                         email = xRows[index].email
@@ -193,7 +194,7 @@ class VendorService {
                 if( xData.email != null && xData.email != '' ) {
                     // if (xData.email.length == 65) {
                         const dec = await _utilInstance.decrypt( xData.email, config.cryptoKey.hashKey);
-                        if (dec) {
+                        if (dec != null && dec.status_code == '00') {
                             email = dec.decrypted; 
                         } else {
                             email = xData.email
@@ -309,8 +310,16 @@ class VendorService {
                     }
 
                     // param = await _secureInstance.encryptCriticalField(param);
+                    console.log(
+                        `>>> paramSave: ${JSON.stringify(param)}`
+                    );
                     joResult = await _vendorRepoInstance.save( param );
                 // }
+            } else {
+                joResult = {
+                    status_code: "-99",
+                    status_msg: "Invalid user ID"
+                }
             }
 
         }else{

@@ -126,7 +126,9 @@ class OAuthService {
 	}
 
 	async eSanQuaNotification(pMethod, pToken, pParam, pPath) {
+		// console.log(`>>> sendNotificationEmail_VendorRegistration: ${JSON.stringify(pParam)}`);
 		var xAPIUrl = `${config.api.eSanqua}${pPath}`;
+		// console.log(`>>> xAPIUrl: ${JSON.stringify(xAPIUrl)}`);
 		var xHeader = {
 			headers: {
 				'x-method': pMethod,
