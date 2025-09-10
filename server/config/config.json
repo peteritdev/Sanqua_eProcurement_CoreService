@@ -4,7 +4,8 @@
     "dbTables": {
       "procurement": "tr_procurements",
       "fpb": "tr_purchaserequests",
-      "rab": "tr_budgetplans"
+      "rab": "tr_budgetplans",
+      "vendor_registration": "tr_vendorregistrations"
     },
     "logging": true,
     "username": "postgres",
@@ -101,7 +102,7 @@
       "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel", "Pending"],
       "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel", "Paid"],
       "budgetPlan":["Draft", "Waiting Approval", "Pending", "In Progress", "Done", "Cancel", "Reject"],
-      "vendorRegistration":["Draft", "Waiting", "Inprogress", "Done", "Cancel"],
+      "vendorRegistration":["Draft", "Waiting", "Inprogress", "Done", "Cancel", "Reject"],
       "project":["Draft", "Submitted", "Done", "Cancel"]
     },
     "categoryItem": ["", "Raw Material", "Factory Supply", "Office Supply", "Sparepart", "Jasa", "Maintenance Repair", "Investment / Asset", "Office Supply (< 1jt)", "Office Supply (1jt-5jt)", "Office Supply (> 5j)", "Marketing Material (< 1jt)", "Marketing Material (1jt-5jt)", "Marketing Material (> 5j)", "Sparepart (< 1jt)", "Sparepart (1jt-5jt)", "Sparepart (> 5j)", "Jasa (< 1jt)", "Jasa (1jt-5jt)", "Jasa (> 5j)", "Maintenance Repair (< 1jt)", "Maintenance Repair (1jt-5jt)", "Maintenance Repair (> 5j)"],
@@ -109,8 +110,12 @@
     "notification": {
       "email": {
         "accounting": "a1.arifrahman.1213@gmail.com"
+      },
+      "vendor_registration": {
+        "to_name": "IPAH HANDAYANI",
+        "to": "hafizaadwafara@gmail.com",
+        "cc": "arif.0496.rahman@gmail.com,hafizaadwafara@gmail.com"
       }
-      
     },
     "pendingNotifDay": 1
   },
@@ -120,7 +125,8 @@
     "dbTables": {
       "procurement": "tr_procurements",
       "fpb": "tr_purchaserequests",
-      "rab": "tr_budgetplans"
+      "rab": "tr_budgetplans",
+      "vendor_registration": "tr_vendorregistrations"
     },
     "username": "postgres",
     "password": "P455uu0rd^^ok",
@@ -222,8 +228,12 @@
     "notification": {
       "email": {
         "accounting": "peter.susanto@sanqua.co.id,a1.arifrahman.1213@gmail.com,muthia.aw.ma@gmail.com"
+      },
+      "vendor_registration": {
+        "to_name": "IPAH HANDAYANI",
+        "to": "hafizaadwafara@gmail.com",
+        "cc": "arif.0496.rahman@gmail.com,hafizaadwafara@gmail.com"
       }
-      
     },
     "pendingNotifDay": 1
   },  
@@ -233,7 +243,8 @@
     "dbTables": {
       "procurement": "tr_procurements",
       "fpb": "tr_purchaserequests",
-      "rab": "tr_budgetplans"
+      "rab": "tr_budgetplans",
+      "vendor_registration": "tr_vendorregistrations"
     },
     "username": "postgres",
     "password": "P455uu0rd^^ok",
@@ -335,8 +346,12 @@
     "notification": {
       "email": {
         "accounting": "peter.susanto@sanqua.co.id,a1.arifrahman.1213@gmail.com,muthia.aw.ma@gmail.com"
+      },
+      "vendor_registration": {
+        "to_name": "IPAH HANDAYANI",
+        "to": "ipahhandayani@yahoo.com",
+        "cc": "ecatalog.sanqua@gmail.com,procurement.technic@sanqua.co.id,ipahhandayani@yahoo.com,maria.kurniati@sanqua.co.id"
       }
-      
     },
     "pendingNotifDay": 1
   },
@@ -349,7 +364,8 @@
     "dbTables": {
       "procurement": "tr_procurements",
       "fpb": "tr_purchaserequests",
-      "rab": "tr_budgetplans"
+      "rab": "tr_budgetplans",
+      "vendor_registration": "tr_vendorregistrations"
     },
     "username": "postgres",
     "password": "T0b3L1k3Jesus^^)ok",
@@ -445,6 +461,11 @@
     "notification": {
       "email": {
         "accounting": "peter.susanto@sanqua.co.id,ecatalog.sanqua@gmail.com,setiawan.banjar@sanqua.co.id,audit.division@sanqua.co.id"
+      },
+      "vendor_registration": {
+        "to_name": "IPAH HANDAYANI",
+        "to": "ipahhandayani@yahoo.com",
+        "cc": "ecatalog.sanqua@gmail.com,procurement.technic@sanqua.co.id,ipahhandayani@yahoo.com,maria.kurniati@sanqua.co.id"
       }
     },
     "pendingNotifDay": 1

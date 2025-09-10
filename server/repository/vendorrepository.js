@@ -542,13 +542,12 @@ class VendorRepository{
                 delete pParam.user_name;
 
                 saved = await _modelVendorDocument.create(pParam,{transaction});
-    
                 await transaction.commit();
     
                 joResult = {
                     status_code: "00",
                     status_msg: "Data has been successfully saved",
-                    created_id: (await _utilInstance.encrypt(saved.id))
+                    created_id: (await _utilInstance.encrypt(saved.id, config.cryptoKey.hashKey ))
                 }
             }else if( xAct == "update" ){
 
