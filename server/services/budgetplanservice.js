@@ -1067,6 +1067,25 @@ class BudgetPlanService {
                             status_msg: 'You cannot cancel this document now'
                         };
                     } else {
+                        // check if this rab already have inprogress FPB or not, if yes then cannot cancel
+                        // if canceled FPB will set to draft again in the future, then check RAB status must inprogress or done
+                        // if not, then cannot set to draft FPB
+                        const xFpbResult = await _purchaseRequestRepo.getByParam(
+                            {
+                                budget_plan_id: xRABDetail.id,
+                                status: [0, 1, 2, 3, 5]
+                            }
+                        )
+                        
+                        if (xFpbResult != null && xFpbResult.length > 0) {
+                            xJoResult = {
+                                status_code: '-99',
+                                status_msg: 'You cannot cancel this document, since this document already have inprogress FPB'
+                            };
+                            return xJoResult;
+                            
+                        }
+
                         pParam.cancelAt = await _utilInstance.getCurrDateTime();
                         pParam.status = 5;
                         var xUpdateResult = await _repoInstance.save(pParam, 'cancel');
