@@ -97,6 +97,9 @@ class BudgetPlanDetailService {
 								} : null,
 								deviation_fpb_item_id: xRows[i].deviation_fpb_item_id,
 								log_subtitute: xRows[i].log_subtitute,
+								currency_id: xRows[i].currency_id,
+								currency_code: xRows[i].currency_code,
+								currency_symbol: xRows[i].currency_symbol
 							});
 						}
 

@@ -584,7 +584,12 @@ class BudgetPlanService {
 						purchase_request_detail: xDetail[index].purchase_request_detail,
 						deviation_fpb_item_id: xDetail[index].deviation_fpb_item_id,
 						deviation_fpb_item: xDetail[index].deviation_fpb_item,
-                        log_subtitute: xDetail[index].log_subtitute
+                        log_subtitute: xDetail[index].log_subtitute,
+						currency: {
+							id: xDetail[index].currency_id,
+							code: xDetail[index].currency_code,
+							symbol: xDetail[index].currency_symbol
+						}
 					});
 				}
 				// Get Approval Matrix
