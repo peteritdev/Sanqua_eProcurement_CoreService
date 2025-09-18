@@ -88,7 +88,10 @@ class BudgetPlanDetailService {
 								vendor_catalogue_id: xRows[i].vendor_catalogue_id,
 								vendor_recomendation: xRows[i].vendor_recomendation,
 								budget_plan: xRows[i].budget_plan,
-								section_title: xRows[i].section_title
+								section_title: xRows[i].section_title,
+								currency_id: xRows[i].currency_id,
+								currency_code: xRows[i].currency_code,
+								currency_symbol: xRows[i].currency_symbol
 							});
 						}
 
