@@ -507,6 +507,11 @@ class BudgetPlanService {
 								? moment(xDetail[index].estimate_date_use).format('DD MMM YYYY')
 								: null,
 						section_title: xDetail[index].section_title,
+						currency: {
+							id: xDetail[index].currency_id,
+							code: xDetail[index].currency_code,
+							symbol: xDetail[index].currency_symbol
+						}
 					});
 				}
 				// Get Approval Matrix
