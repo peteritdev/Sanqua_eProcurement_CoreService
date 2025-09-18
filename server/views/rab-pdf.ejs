@@ -193,10 +193,10 @@
           <td class="right-align"><%=item.qty%></td>
           <td><%=item.uom != null ? item.uom.name : '-'%></td>
           <td class="right-align">
-            Rp <%=item.budget_price_per_unit.toLocaleString('id-ID')%>
+            <%=item.budget_price_per_unit.toLocaleString('id-ID')%>
           </td>
           <td class="right-align">
-            Rp <%=item.budget_price_total.toLocaleString('id-ID')%>
+            <%=item.budget_price_total.toLocaleString('id-ID')%>
           </td>
         </tr>
         <% index++; } ) %>
@@ -207,16 +207,16 @@
       <tr class="total-info">
         <td class="right-align" style="width: 85%">TOTAL PENGAJUAN :</td>
         <td class="right-align">
-          Rp <%=data.data.total_budget_plan.toLocaleString('id-ID')%>
+          <%=data.data.total_budget_plan.toLocaleString('id-ID')%>
         </td>
       </tr>
       <tr class="total-info">
         <td class="right-align">REALISASI :</td>
-        <td class="right-align">Rp -</td>
+        <td class="right-align">-</td>
       </tr>
       <tr class="total-info">
         <td class="right-align">Selisih :</td>
-        <td class="right-align">Rp -</td>
+        <td class="right-align">-</td>
       </tr>
     </table>
 
