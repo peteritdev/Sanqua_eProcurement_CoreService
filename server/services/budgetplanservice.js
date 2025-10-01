@@ -511,7 +511,11 @@ class BudgetPlanService {
 							code: xDetail[index].vendor_code,
 							name: xDetail[index].vendor_name
 						},
-						vendor_recomendation: xDetail[index].vendor_recomendation,
+						vendor_recomendation: {
+							id: xDetail[index].vendor_recomendation_id != null ? xDetail[index].vendor_recomendation_id.toString() : null,
+							code: xDetail[index].vendor_recomendation_code,
+							name: xDetail[index].vendor_recomendation
+						},
 						vendor_catalogue_id: xDetail[index].vendor_catalogue_id,
 						estimate_date_use:
 							xDetail[index].estimate_date_use != null

@@ -87,6 +87,8 @@ class BudgetPlanDetailService {
 								vendor_name: xRows[i].vendor_name,
 								vendor_catalogue_id: xRows[i].vendor_catalogue_id,
 								vendor_recomendation: xRows[i].vendor_recomendation,
+								vendor_recomendation_id: xRows[i].vendor_recomendation_id,
+								vendor_recomendation_code: xRows[i].vendor_recomendation_code,
 								budget_plan: xRows[i].budget_plan,
 								section_title: xRows[i].section_title,
 								currency_id: xRows[i].currency_id,

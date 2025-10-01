@@ -804,6 +804,11 @@ class PurchaseRequestService {
 								code: xDetail[index].vendor_code,
 								name: xDetail[index].vendor_name
 							},
+							vendor_rec: {
+								id: xDetail[index].vendor_rec_id != null ? xDetail[index].vendor_rec_id.toString() : null,
+								code: xDetail[index].vendor_rec_code,
+								name: xDetail[index].vendor_rec_name
+							},
 							has_budget: xDetail[index].has_budget,
 							estimate_date_use:
 								xDetail[index].estimate_date_use != null && xDetail[index].estimate_date_use != ''
@@ -2152,6 +2157,11 @@ class PurchaseRequestService {
 							id: xRows[index].vendor_id,
 							name: xRows[index].vendor_name,
 							code: xRows[index].vendor_code
+						},
+						vendor_rec: {
+							id: xRows[index].vendor_rec_id,
+							name: xRows[index].vendor_rec_name,
+							code: xRows[index].vendor_rec_code
 						},
 						item_status: {
 							id: xRows[index].item_status,
