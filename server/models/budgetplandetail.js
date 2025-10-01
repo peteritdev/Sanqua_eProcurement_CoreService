@@ -30,6 +30,8 @@ module.exports = (sequelize, DataTypes) => {
 		vendor_code: DataTypes.STRING,
 		vendor_name: DataTypes.STRING,
 		vendor_recomendation: DataTypes.STRING,
+		vendor_recomendation_id: DataTypes.INTEGER,
+		vendor_recomendation_code: DataTypes.STRING,
 		vendor_catalogue_id: DataTypes.BIGINT,
 		is_delete: DataTypes.INTEGER,
 		deleted_at: DataTypes.DATE,
