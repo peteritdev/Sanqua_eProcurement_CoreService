@@ -289,49 +289,32 @@ class PurchaseRequestService {
 						if (xFlagProcess) {
 							// Get data before update
 							let xDataBeforeUpdate = await _repoInstance.getById({ id: pParam.id });
-							delete xDataBeforeUpdate.purchase_request_detail;
-
-							// ---------------- Start: Add to log ----------------
-							// let xParamLog = {
-							// 	act: 'add',
-							// 	employee_id: pParam.employee_id,
-							// 	employee_name: pParam.employee_name,
-							// 	request_id: pParam.id,
-							// 	request_no: xDataBeforeUpdate.request_no,
-							// 	body: {
-							// 		act: 'update',
-							// 		msg: 'FPB changed',
-							// 		before: {
-							// 			category_item: xDataBeforeUpdate.category_item,
-							// 			category_pr: xDataBeforeUpdate.category_pr,
-							// 			reference_from_ecommerce: xDataBeforeUpdate.reference_from_ecommerce,
-							// 			budget_is_approved: xDataBeforeUpdate.budget_is_approved,
-							// 			memo_special_request: xDataBeforeUpdate.memo_special_request
-							// 		},
-							// 		after: pParam
-							// 	}
-							// };
-
-							delete pParam.employee_id;
-							delete pParam.employee_name;
-							delete pParam.department_id;
-							delete pParam.department_name;
-							
+							let xGetDetailRAB = null
 							if (xDataBeforeUpdate.budget_plan != null) {
 								// 04/05/2025
 								// check if rab already processed or not
 								if (pParam.hasOwnProperty('budget_plan_id')) {
 									if (pParam.budget_plan_id != xDataBeforeUpdate.budget_plan.id) {
-										let xGetDetailRAB = await _rabRepoInstance.getById({ id: xDataBeforeUpdate.budget_plan.id });
+										xGetDetailRAB = await _rabRepoInstance.getById({ id: pParam.budget_plan_id });
 										if (xGetDetailRAB != null) {
 											if (xGetDetailRAB.status == 3) {
+												const checkFpbItem = await this.isFPBItemsInRAB(xDataBeforeUpdate, xGetDetailRAB)
+												if (checkFpbItem) {
+													xFlagProcess = true;
+												} else {	
+													xFlagProcess = false;
+													xJoResult = {
+														status_code: '-99',
+														status_msg: `Item FPB tidak sesuai dengan item RAB pengganti`
+													};
+													// console.log(`>>> checkFpbItem: ${JSON.stringify(checkFpbItem)} `);
+												}
+											} else {
+												xFlagProcess = false;
 												xJoResult = {
 													status_code: '-99',
-													status_msg: `Tidak dapat merubah FPB, RAB yang dicantumkan sudah diproses`
+													status_msg: `Tidak dapat merubah FPB, RAB yang dicantumkan sedang tidak diproses`
 												};
-												xFlagProcess = false;
-											} else {
-												xFlagProcess = true;
 											}
 										} else {
 											xFlagProcess = true;
@@ -340,10 +323,44 @@ class PurchaseRequestService {
 										xFlagProcess = true;
 									}
 								}
-								
 							} else {
-								xFlagProcess = true;
+								// 06/10/2025
+								// check if rab already processed or not
+								if (pParam.hasOwnProperty('budget_plan_id')) {
+									xGetDetailRAB = await _rabRepoInstance.getById({ id: pParam.budget_plan_id });
+									if (xGetDetailRAB != null) {
+										if (xGetDetailRAB.status == 3) {
+											const checkFpbItem = await this.isFPBItemsInRAB(xDataBeforeUpdate, xGetDetailRAB)
+											if (checkFpbItem) {
+												xFlagProcess = true;
+											} else {	
+												xFlagProcess = false;
+												xJoResult = {
+													status_code: '-99',
+													status_msg: `Item FPB tidak sesuai dengan item RAB pengganti`
+												};
+												// console.log(`>>> checkFpbItem: ${JSON.stringify(checkFpbItem)} `);
+											}
+										} else {	
+											xFlagProcess = false;
+											xJoResult = {
+												status_code: '-99',
+												status_msg: `Tidak dapat merubah FPB, RAB yang dicantumkan sedang tidak diproses`
+											};
+										}
+									} else {
+										xFlagProcess = true;
+									}
+								} else {
+									xFlagProcess = true;
+								}
 							}
+							
+							delete xDataBeforeUpdate.purchase_request_detail;
+							delete pParam.employee_id;
+							delete pParam.employee_name;
+							delete pParam.department_id;
+							delete pParam.department_name;
 
 							if (xFlagProcess) {
 								var xAddResult = await _repoInstance.save(pParam, xAct);
@@ -836,6 +853,11 @@ class PurchaseRequestService {
 								id: xDetail[index].vendor_id,
 								code: xDetail[index].vendor_code,
 								name: xDetail[index].vendor_name
+							},
+							vendor_rec: {
+								id: xDetail[index].vendor_rec_id != null ? xDetail[index].vendor_rec_id.toString() : null,
+								code: xDetail[index].vendor_rec_code,
+								name: xDetail[index].vendor_rec_name
 							},
 							has_budget: xDetail[index].has_budget,
 							estimate_date_use:
@@ -2196,6 +2218,11 @@ class PurchaseRequestService {
 							name: xRows[index].vendor_name,
 							code: xRows[index].vendor_code
 						},
+						vendor_rec: {
+							id: xRows[index].vendor_rec_id,
+							name: xRows[index].vendor_rec_name,
+							code: xRows[index].vendor_rec_code
+						},
 						item_status: {
 							id: xRows[index].item_status,
 							name:
@@ -2505,6 +2532,35 @@ class PurchaseRequestService {
 			}
 		}
 		return xJoResult;
+	}
+	async isFPBItemsInRAB(detailFPB, detailRAB) {
+		const fpbDetails = detailFPB.purchase_request_detail;
+		const rabDetails = detailRAB.budget_plan_detail;
+		
+		console.log(`>>> fpbDetails: ${JSON.stringify(fpbDetails)} `);
+		console.log(`>>> rabDetails: ${JSON.stringify(rabDetails)} `);
+
+		// Jika purchase_request_detail kosong → boleh lanjut
+		if (fpbDetails.length === 0) {
+			return true;
+		}
+
+		// Cek apakah ada SATU item di FPB yang tidak ada di RAB
+		const hasMismatch = fpbDetails.some(fpbItem => {
+			const match = rabDetails.some(rabItem =>
+			(fpbItem.product_id == rabItem.product_id) &&
+			(fpbItem.product_code == rabItem.product_code) &&
+			(fpbItem.product_name == rabItem.product_name) &&
+			(fpbItem.budget_price_per_unit == rabItem.budget_price_per_unit) &&
+			(fpbItem.qty == rabItem.qty) &&
+			(fpbItem.uom_id == rabItem.uom_id)
+			);
+			return !match; // kalau tidak ada match, berarti mismatch
+		});
+		console.log(`>>> hasMismatch: ${JSON.stringify(hasMismatch)} `);
+
+		// Jika ada mismatch, return false. Kalau tidak, return true
+		return hasMismatch ? false : true;
 	}
 }
 

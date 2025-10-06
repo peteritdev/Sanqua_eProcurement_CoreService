@@ -557,7 +557,11 @@ class BudgetPlanService {
 							code: xDetail[index].vendor_code,
 							name: xDetail[index].vendor_name
 						},
-						vendor_recomendation: xDetail[index].vendor_recomendation,
+						vendor_recomendation: {
+							id: xDetail[index].vendor_recomendation_id != null ? xDetail[index].vendor_recomendation_id.toString() : null,
+							code: xDetail[index].vendor_recomendation_code,
+							name: xDetail[index].vendor_recomendation
+						},
 						vendor_catalogue_id: xDetail[index].vendor_catalogue_id,
 						estimate_date_use:
 							xDetail[index].estimate_date_use != null
@@ -573,7 +577,12 @@ class BudgetPlanService {
 						purchase_request_detail: xDetail[index].purchase_request_detail,
 						deviation_fpb_item_id: xDetail[index].deviation_fpb_item_id,
 						deviation_fpb_item: xDetail[index].deviation_fpb_item,
-                        log_subtitute: xDetail[index].log_subtitute
+                        log_subtitute: xDetail[index].log_subtitute,
+						currency: {
+							id: xDetail[index].currency_id,
+							code: xDetail[index].currency_code,
+							symbol: xDetail[index].currency_symbol
+						}
 					});
 				}
 				// Get Approval Matrix
