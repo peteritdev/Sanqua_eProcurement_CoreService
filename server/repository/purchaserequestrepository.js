@@ -1466,7 +1466,7 @@ class PurchaseRequestRepository {
 			}
 		}
 		// show except wim
-		xSqlWhere += ' AND pr.company_id <> 5 ';
+		xSqlWhere += ' AND (pr.company_id <> 5 AND pr.company_id <> 14) ';
 
 		xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
 			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.created_by, pr.total_price, pr.total_quotation_price, pr.category_item,
