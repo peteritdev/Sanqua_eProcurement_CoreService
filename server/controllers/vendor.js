@@ -8,7 +8,7 @@ const _vendorServiceInstance = new VendorService();
 
 const { check, validationResult } = require('express-validator');
 
-module.exports = { save, blockVendor, unblockVendor, getVendorById, saveVendorDocument, list, vendor_Delete, vendor_GetVendorDocument, vendor_UploadExcel, vendor_BatchSave, dropdown }
+module.exports = { save, blockVendor, unblockVendor, getVendorById, saveVendorDocument, list, vendor_Delete, vendor_GetVendorDocument, vendor_UploadExcel, vendor_BatchSave, dropdown, vendor_DeleteVendorDocument }
 
 async function list( req, res ){
 
@@ -394,4 +394,42 @@ async function dropdown( req, res ){
     res.setHeader('Content-Type','application/json');
     res.status(200).send(joResult);
 
+}
+
+async function vendor_DeleteVendorDocument( req, res ){
+    var joResult;
+    var errors = null;
+
+    var oAuthResult = await oAuthServiceInstance.verifyToken( req.headers['x-token'], req.headers['x-method'] );
+
+    if( oAuthResult.status_code == "00" ){
+        if( oAuthResult.token_data.status_code == "00" ){
+
+            // Validate first
+            var errors = validationResult(req).array();   
+            
+            if( errors.length != 0 ){
+                joResult = JSON.stringify({
+                    "status_code": "-99",
+                    "status_msg":"Parameter value has problem",
+                    "error_msg": errors
+                });
+            }else{      
+                req.params.user_id = oAuthResult.token_data.result_verify.id;
+                req.params.user_name = oAuthResult.token_data.result_verify.name;
+                joResult = await _vendorServiceInstance.deleteVendorDocument(req.params);
+                joResult.token_data = oAuthResult.token_data;
+                joResult = JSON.stringify(joResult);
+            }
+
+        }else{
+            joResult = JSON.stringify(oAuthResult);
+        }
+
+    }else{
+        joResult = JSON.stringify(oAuthResult);
+    }
+
+    res.setHeader('Content-Type','application/json');
+    res.status(200).send(joResult);
 }

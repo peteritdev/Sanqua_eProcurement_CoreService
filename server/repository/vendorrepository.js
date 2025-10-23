@@ -655,6 +655,42 @@ class VendorRepository{
         }
     }
 
+	async deleteVendorDocument(pParam) {
+		let xTransaction;
+		var xJoResult = {};
+
+		try {
+			var xSaved = null;
+			xTransaction = await sequelize.transaction();
+
+			xSaved = await _modelVendorDocument.destroy(
+				{
+					where: {
+						id: pParam.id
+					}
+				},
+				{ xTransaction }
+			);
+
+			await xTransaction.commit();
+
+			xJoResult = {
+				status_code: '00',
+				status_msg: 'Data has been successfully deleted'
+			};
+
+			return xJoResult;
+		} catch (e) {
+			if (xTransaction) await xTransaction.rollback();
+			xJoResult = {
+				status_code: '-99',
+				status_msg: 'Failed save or update data',
+				err_msg: e
+			};
+
+			return xJoResult;
+		}
+	}
 }
 
 module.exports = VendorRepository;

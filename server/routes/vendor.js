@@ -105,6 +105,10 @@ module.exports = (app) => {
 	];
 	app.get(rootAPIPath + 'vendor/document/list', arrValidate, vendorController.vendor_GetVendorDocument);
 
+	arrValidate = [];
+	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
+	app.delete(rootAPIPath + 'vendor/document/delete/:id', arrValidate, vendorController.vendor_DeleteVendorDocument);
+
 	// VENDOR's EXPERIENCE
 	arrValidate = [];
 	arrValidate = [
