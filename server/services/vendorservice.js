@@ -430,29 +430,31 @@ class VendorService {
         var xJoResult;        
         var xFlagProcess = true;
         var xDec = null;
-        var isExists = null;       
+        var isExists = null;
 
-        xDec = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
-        if( xDec.status_code == '00' ){
-            pParam.id = xDec.decrypted;     
-            xDec = await _utilInstance.decrypt(pParam.vendor_id, config.cryptoKey.hashKey);
-            if( xDec.status_code == "00" ){
-                pParam.vendor_id = xDec.decrypted; 
-                xDec = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
-                if( xDec.status_code == "00" ){
-                    pParam.user_id = xDec.decrypted;                    
-                }else{
-                    xFlagProcess = false;
-                    xJoResult = xDec;
-                }              
-            }else{
+        xDec = await _utilInstance.decrypt(pParam.vendor_id, config.cryptoKey.hashKey);
+        if( xDec.status_code == "00" ){
+            pParam.vendor_id = xDec.decrypted; 
+            xDec = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+            if ( xDec.status_code == "00" ){
+                pParam.user_id = xDec.decrypted;
+                if (pParam.act == 'update') {
+                    xDec = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+                    if( xDec.status_code == '00' ){
+                        pParam.id = xDec.decrypted;
+                    } else {
+                        xFlagProcess = false;
+                        xJoResult = xDec;
+                    }  
+                }
+            } else {
                 xFlagProcess = false;
                 xJoResult = xDec;
-            }
-        }else{
+            }              
+        } else {
             xFlagProcess = false;
             xJoResult = xDec;
-        }      
+        }
         
 
         if( xFlagProcess ){                   
