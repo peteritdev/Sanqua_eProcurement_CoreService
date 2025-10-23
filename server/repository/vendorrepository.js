@@ -15,6 +15,7 @@ const _modelProvince = require('../models').ms_provinces;
 const _modelCity = require('../models').ms_cities;
 const _modelVendorDocument = require('../models').ms_vendordocuments;
 const _modelCurrency = require('../models').ms_currencies;
+const _modelDocumentType = require('../models').ms_documenttypes;
 
 const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
@@ -35,13 +36,33 @@ class VendorRepository{
     } 
 
     async getVendorDocumentByDocumentTypeId( pParam ){
-        var xData = await _modelVendorDocument.findOne({
-            where: {
-                document_type_id: pParam.document_type_id,
-                vendor_id: pParam.vendor_id,
-            },
+        var xWhere = {}
+        
+        var xInclude = [
+            {
+            	model: _modelDocumentType,
+            	as: 'document_type',
+            	attributes: [ 'id', 'name' ]
+            }
+        ];
+
+        if (pParam.hasOwnProperty('document_type_id') && pParam.document_type_id != '' && pParam.document_type_id != null) {
+            Object.assign(xWhere, {
+                document_type_id: pParam.document_type_id
+            })
+        }
+
+        if (pParam.hasOwnProperty('vendor_id') && pParam.vendor_id != '' && pParam.vendor_id != null) {
+            Object.assign(xWhere, {
+                vendor_id: pParam.vendor_id
+            })
+        }
+
+        var xData = await _modelVendorDocument.findAndCountAll({
+            where: xWhere,
             limit: pParam.limit,
             offset: pParam.offset,
+            include: xInclude,
         });
 
         return xData;
@@ -542,21 +563,31 @@ class VendorRepository{
                 delete pParam.user_name;
 
                 saved = await _modelVendorDocument.create(pParam,{transaction});
-                await transaction.commit();
-    
-                joResult = {
-                    status_code: "00",
-                    status_msg: "Data has been successfully saved",
-                    created_id: (await _utilInstance.encrypt(saved.id, config.cryptoKey.hashKey ))
-                }
+                if (saved.id != null) {
+					joResult = {
+						status_code: '00',
+						status_msg: 'Data has been successfully saved',
+						created_id: await _utilInstance.encrypt(saved.id, config.cryptoKey.hashKey),
+						clear_id: saved.id
+					};
+
+					await transaction.commit();
+				} else {
+					if (transaction) await transaction.rollback();
+
+					joResult = {
+						status_code: '-99',
+						status_msg: 'Failed save to database'
+					};
+				}
             }else if( xAct == "update" ){
 
-                xId = pParam.vendor_id;
+                xId = pParam.id;
                 xDocumentTypeId = pParam.document_type_id;
                 delete pParam.id;
                 delete pParam.document_type_id;
     
-                saved = await _modelVendorDocument.update(pParam, { where: { vendor_id: xId, document_type_id: xDocumentTypeId  } }, {transaction});
+                saved = await _modelVendorDocument.update(pParam, { where: { id: xId } }, {transaction});
 
                 await transaction.commit();
 
