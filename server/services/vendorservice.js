@@ -169,7 +169,6 @@ class VendorService {
 
         if( xFlag ){
             var xData = await _vendorRepoInstance.getVendorById(pParam.id);
-            // console.log(`>>> xData: ${JSON.stringify(xData)}`);
             if( xData != null ){
                 var phone1 = null;
                 var phone2 = null;
@@ -191,7 +190,7 @@ class VendorService {
                     }
                 }
                 
-                if( xData.email != null && xData.email != '' ) {
+                if( xData.email != null && xData.email != '' && xData.email.length > 60) {
                     // if (xData.email.length == 65) {
                         const dec = await _utilInstance.decrypt( xData.email, config.cryptoKey.hashKey);
                         if (dec != null && dec.status_code == '00') {
@@ -202,7 +201,10 @@ class VendorService {
                     // } else {
                     //     email = xData.email
                     // }
+                } else {
+                    email = xData.email
                 }
+                
                 xJoResult = {
                     status_code: "00",
                     status_msg: "OK",
@@ -210,7 +212,7 @@ class VendorService {
                         id: await _utilInstance.encrypt( xData.id, config.cryptoKey.hashKey ),
                         code: xData.code,
                         name: xData.name,
-                        logo: ( xData.logo == null ? '' : ( config.frontParam.photoPath.logo + xData.logo ) ),
+                        logo: xData.logo,
                         npwp: xData.npwp,
                         business_entity: xData.business_entity,
                         classification: xData.classification,
@@ -231,6 +233,26 @@ class VendorService {
                         tags: xData.tags,
                         company_scale: xData.company_scale,
                         currency: xData.currency,
+                        is_pkp: xData.is_pkp,
+                        cp_name: xData.cp_name,
+                        cp_phone: xData.cp_phone,
+                        cp_position: xData.cp_position,
+                        cp_email: xData.cp_email,
+                        finance_name: xData.finance_name,
+                        finance_phone: xData.finance_phone,
+                        finance_account_no: xData.finance_account_no,
+                        finance_bank_name: xData.finance_bank_name,
+                        finance_bank_kcu: xData.finance_bank_kcu,
+                        finance_account_name: xData.finance_account_name,
+                        payment_method: xData.payment_method,
+                        product_description: xData.product_description,
+                        average_turnover: xData.average_turnover,
+                        service_coverage: xData.service_coverage,
+                        number_products: xData.number_products,
+                        experience: xData.experience,
+                        current_employee: xData.current_employee,
+                        year_founded: xData.year_founded,
+                        urlPath: `${config.imagePathESanQua}/vendors/logo/`,
                     }
                 }
             }
@@ -410,16 +432,23 @@ class VendorService {
         var xDec = null;
         var isExists = null;       
 
-        xDec = await _utilInstance.decrypt(pParam.vendor_id, config.cryptoKey.hashKey);
+        xDec = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
         if( xDec.status_code == '00' ){
-            pParam.vendor_id = xDec.decrypted;     
-            xDec = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+            pParam.id = xDec.decrypted;     
+            xDec = await _utilInstance.decrypt(pParam.vendor_id, config.cryptoKey.hashKey);
             if( xDec.status_code == "00" ){
-                pParam.user_id = xDec.decrypted;                    
+                pParam.vendor_id = xDec.decrypted; 
+                xDec = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+                if( xDec.status_code == "00" ){
+                    pParam.user_id = xDec.decrypted;                    
+                }else{
+                    xFlagProcess = false;
+                    xJoResult = xDec;
+                }              
             }else{
                 xFlagProcess = false;
                 xJoResult = xDec;
-            }   
+            }
         }else{
             xFlagProcess = false;
             xJoResult = xDec;
@@ -429,12 +458,11 @@ class VendorService {
         if( xFlagProcess ){                   
 
             isExists = await _vendorRepoInstance.isVendorDocumentExists(pParam.vendor_id, pParam.document_type_id);
-
-            if( isExists != null ){
-                pParam.act = "update";
-            }else{
-                pParam.act = "add";
-            }
+            // if( isExists != null ){
+            //     pParam.act = "update";
+            // }else{
+            //     pParam.act = "add";
+            // }
 
             xJoResult = await _vendorRepoInstance.saveVendorDocument( pParam );       
             
@@ -486,9 +514,10 @@ class VendorService {
 
     async getVendorDocumentByDocumentTypeId( pParam ){
         var xJoResult = {};
+		var xJoArrData = [];
         var xFlagProcess = true;
 
-        if( pParam.vendor_id != '' && pParam.document_type_id != '' ){
+        if( pParam.vendor_id != '' ){
             var xDecId = await _utilInstance.decrypt( pParam.vendor_id, config.cryptoKey.hashKey );
             if( xDecId.status_code == '00' ){
                 pParam.vendor_id = xDecId.decrypted;
@@ -500,24 +529,32 @@ class VendorService {
 
         if( xFlagProcess ){
             var xResult = await _vendorRepoInstance.getVendorDocumentByDocumentTypeId( pParam );
-            if( xResult != null ){
+            console.log(`>>> xResult: ${JSON.stringify(xResult)}`);
+            if( xResult != null && xResult.count > 0){
+                var xRows = xResult.rows;
+                for (let i = 0; i < xRows.length; i++) {
+                    xJoArrData.push({
+                        id: await _utilInstance.encrypt( xRows[i].id, config.cryptoKey.hashKey ),
+                        document_type: xRows[i].document_type,
+                        document_no: xRows[i].document_no,
+                        date: xRows[i].date,
+                        expire_date: xRows[i].expire_date,
+                        file: xRows[i].file,
+                        description: xRows[i].description,
+                        instance: xRows[i].instance,
+                        siup_qualification: xRows[i].siup_qualification,
+                        address: xRows[i].address,
+                        urlPath: config.imagePathESanQua + '/vendors/'
+                    });
+                }
+
                 xJoResult = {
                     status_code: '00',
                     status_msg: 'OK',
-                    data: {
-                        id: await _utilInstance.encrypt( xResult.id, config.cryptoKey.hashKey ),
-                        document_type_id: xResult.document_type_id,
-                        document_no: xResult.document_no,
-                        date: xResult.date,
-                        expire_date: xResult.expire_date,
-                        file: xResult.file,
-                        description: xResult.description,
-                        instance: xResult.instance,
-                        siup_qualification: xResult.siup_qualification,
-                        address: xResult.address,
-                    },
+                    total_record: xResult.count,
+                    data: xJoArrData,
                 }
-            }else{
+            } else {
                 xJoResult = {
                     status_code: '-99',
                     status_msg: 'Data not found'
