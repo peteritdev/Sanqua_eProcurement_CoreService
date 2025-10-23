@@ -40,9 +40,9 @@ module.exports = (app) => {
 		// check("zip_code").not().isEmpty().withMessage("Zip Code cannot be empty"),
 		check('phone1').isNumeric().withMessage('Phone number 1 must be a number'),
 		check('phone2', 'Phone 2 must be numeric').isNumeric().optional({ checkFalsy: true }),
-		check('about').not().isEmpty().withMessage('About cannot be empty'),
+		// check('about').not().isEmpty().withMessage('About cannot be empty'),
 		check('company_scale', 'Company Scale must be a number').not().isEmpty().isInt(),
-		check('register_via', 'Register Via must be integer and cannot be empty').not().isEmpty().isInt()
+		// check('register_via', 'Register Via must be integer and cannot be empty').not().isEmpty().isInt()
 	];
 	app.post(rootAPIPath + 'vendor/save', arrValidate, vendorController.save);
 
@@ -90,16 +90,17 @@ module.exports = (app) => {
 
 	// VENDOR'S DOCUMENTS
 	arrValidate = [];
+	arrValidate = [ check('act').not().isEmpty().withMessage('Parameter act can not be empty') ];
 	app.post(rootAPIPath + 'vendor/document/save', arrValidate, vendorController.saveVendorDocument);
 
 	arrValidate = [];
 	arrValidate = [
 		check('offset', 'Parameter offset must be integer and cannot be empty').not().isEmpty().isInt(),
 		check('limit', 'Parameter limit must be integer and cannot be empty').not().isEmpty().isInt(),
-		check('document_type_id', 'Parameter document_type_id must be integer and cannot be empty')
-			.not()
-			.isEmpty()
-			.isInt(),
+		// check('document_type_id', 'Parameter document_type_id must be integer and cannot be empty')
+		// 	.not()
+		// 	.isEmpty()
+		// 	.isInt(),
 		check('vendor_id').not().isEmpty().withMessage('Parameter vendor_id can not be empty')
 	];
 	app.get(rootAPIPath + 'vendor/document/list', arrValidate, vendorController.vendor_GetVendorDocument);
