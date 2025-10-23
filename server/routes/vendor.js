@@ -29,10 +29,10 @@ module.exports = (app) => {
 		check('code').not().isEmpty().withMessage('Code cannot be empty'),
 		check('business_entity_id', 'Business Entity must be integer and cannot be empty').not().isEmpty().isInt(),
 		check('classification_id', 'Classification Id must be integer and cannot be empty').not().isEmpty().isInt(),
-		check('sub_classification_id', 'Sub Classification Id must be integer and cannot be empty')
-			.not()
-			.isEmpty()
-			.isInt(),
+		// check('sub_classification_id', 'Sub Classification Id must be integer and cannot be empty')
+		// 	.not()
+		// 	.isEmpty()
+		// 	.isInt(),
 		check('province_id').not().isEmpty().withMessage('Province ID cannot be empty'),
 		check('city_id').not().isEmpty().withMessage('City ID cannot be empty'),
 		check('email').isEmail().optional({ checkFalsy: true }),
