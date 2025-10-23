@@ -793,7 +793,38 @@ class VendorService {
         }
 
         return (xJoResult);
-    } 
+    }
+
+    async deleteVendorDocument(pParam){
+        var xJoResult;
+        var xFlagProcess = true;  
+
+        var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+        if( xDecId.status_code == "00" ){
+            pParam.id = xDecId.decrypted;                    
+            xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+            if( xDecId.status_code == "00" ){
+                pParam.deleted_by = xDecId.decrypted;
+                pParam.deleted_by_name = pParam.user_name;
+            }else{
+                xFlagProcess = false;
+                xJoResult = xDecId;
+            }
+        }else{
+            xFlagProcess = false;
+            xJoResult = xDecId;
+        }
+
+        if( xFlagProcess ){
+            // // Check if vendor's document and vendor's catalogue has exists or not
+            // var xTotalVendorDocument = await _vendorRepoInstance.getTotalVendorDocumentByVendorId( pParam.id );
+
+            var xDeleteResult = await _vendorRepoInstance.deleteVendorDocument( pParam );
+            xJoResult = xDeleteResult;
+        }
+
+        return xJoResult;
+    }
 }
 
 module.exports = VendorService;
