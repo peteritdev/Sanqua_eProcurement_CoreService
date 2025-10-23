@@ -32,9 +32,15 @@ module.exports = ( sequelize, DataTypes ) => {
             field: 'updated_at'
         },
         updated_by: DataTypes.INTEGER,
-        updated_by_name: DataTypes.STRING,
+        updated_by_name: DataTypes.STRING
 
-    }  );
+    });
 
+    VendorDocument.associate = function(models) {
+		VendorDocument.belongsTo(models.ms_documenttypes, {
+			foreignKey: 'document_type_id',
+			as: 'document_type'
+		});
+	};
     return VendorDocument;
 }
