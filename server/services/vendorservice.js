@@ -110,17 +110,17 @@ class VendorService {
                 
                 if( xRows[index].email != null && xRows[index].email != '' ) {
                     // console.log(`>>> xRows[index].email: ${JSON.stringify(xRows[index].email.length)}`);
-                    // if (xRows[index].email.length == 65) {
-                    var dec = await _utilInstance.decrypt( xRows[index].email, config.cryptoKey.hashKey)
-                    if (dec) {
-                        email = dec.decrypted; 
+                    if (xRows[index].email.length > 60) {
+                        var dec = await _utilInstance.decrypt( xRows[index].email, config.cryptoKey.hashKey)
+                        if (dec) {
+                            email = dec.decrypted; 
+                        } else {
+                            email = xRows[index].email
+                        }
+                    // email = dec.decrypted; 
                     } else {
                         email = xRows[index].email
                     }
-                    // email = dec.decrypted; 
-                    // } else {
-                    //     email = xRows[index].email
-                    // }
                 }
 
                 xJoArrData.push({
