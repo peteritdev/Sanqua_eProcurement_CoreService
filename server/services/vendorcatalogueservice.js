@@ -374,7 +374,8 @@ class VendorCatalogueService {
 							: xResultList.catalogue_type == 2
 							? "Umum"
 							: null,
-							photo: [xResultList.product_photo_1, xResultList.product_photo_2, xResultList.product_photo_3, xResultList.product_photo_4, xResultList.product_photo_5]
+						photo: [xResultList.product_photo_1, xResultList.product_photo_2, xResultList.product_photo_3, xResultList.product_photo_4, xResultList.product_photo_5],
+						spesification: xResultList.product.spesification,
 					
 					}
 				};
