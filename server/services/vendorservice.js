@@ -172,6 +172,7 @@ class VendorService {
                 var phone1 = null;
                 var phone2 = null;
                 var email = null;
+                var documents = []
 
                 if( xData.phone1 != null && xData.phone1 != '' ) {
                     if (xData.phone1.length == 65) {
@@ -203,7 +204,26 @@ class VendorService {
                 } else {
                     email = xData.email
                 }
-                
+                // get documents
+                var xGetVendorDocument = await _vendorRepoInstance.getVendorDocumentByDocumentTypeId( {vendor_id: pParam.id} );
+                if( xGetVendorDocument != null && xGetVendorDocument.count > 0){
+                    var xRows = xGetVendorDocument.rows;
+                    for (let i = 0; i < xRows.length; i++) {
+                        documents.push({
+                            id: await _utilInstance.encrypt( xRows[i].id, config.cryptoKey.hashKey ),
+                            document_type: xRows[i].document_type,
+                            document_no: xRows[i].document_no,
+                            date: xRows[i].date,
+                            expire_date: xRows[i].expire_date,
+                            file: xRows[i].file,
+                            description: xRows[i].description,
+                            instance: xRows[i].instance,
+                            siup_qualification: xRows[i].siup_qualification,
+                            address: xRows[i].address,
+                            urlPath: config.imagePathESanQua + '/vendors/'
+                        });
+                    }
+                }
                 xJoResult = {
                     status_code: "00",
                     status_msg: "OK",
@@ -252,6 +272,7 @@ class VendorService {
                         current_employee: xData.current_employee,
                         year_founded: xData.year_founded,
                         urlPath: `${config.imagePathESanQua}/vendors/logo/`,
+                        documents: documents
                     }
                 }
             }
