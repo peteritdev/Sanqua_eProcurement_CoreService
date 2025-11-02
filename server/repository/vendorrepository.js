@@ -375,7 +375,7 @@ class VendorRepository{
                 if( pParam.logo == "" ){
                     delete pParam.logo;
                 }
-    
+                
                 saved = await _modelVendor.update(pParam, { where: { id: xId } }, {transaction: xTransaction});
 
                 await xTransaction.commit();
@@ -406,6 +406,7 @@ class VendorRepository{
 
             }
         } catch (e){
+            console.log(`>>> catch: ${JSON.stringify(e)}`);
             if( xTransaction ) await xTransaction.rollback();
             joResult = {
                 status_code: "-99",

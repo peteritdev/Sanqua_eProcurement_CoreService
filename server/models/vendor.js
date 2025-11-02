@@ -87,7 +87,8 @@ module.exports = ( sequelize, DataTypes ) => {
         number_products: DataTypes.INTEGER,
         experience: DataTypes.STRING,
         current_employee: DataTypes.INTEGER,
-        year_founded: DataTypes.INTEGER
+        year_founded: DataTypes.INTEGER,
+        review_status: DataTypes.INTEGER
     });
 
     Vendor.associate = function(models){
