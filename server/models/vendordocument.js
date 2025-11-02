@@ -32,8 +32,8 @@ module.exports = ( sequelize, DataTypes ) => {
             field: 'updated_at'
         },
         updated_by: DataTypes.INTEGER,
-        updated_by_name: DataTypes.STRING
-
+        updated_by_name: DataTypes.STRING,
+        combined_file_type: DataTypes.JSON
     });
 
     VendorDocument.associate = function(models) {

@@ -192,6 +192,7 @@ class BudgetPlanService {
                                         // deleted_at: moment(xRows[i].deletedAt).format('DD MMM YYYY HH:mm:ss'),
                                         // deleted_by_name: xRows[i].deleted_by_name
                                         rab_type: xRows[i].rab_type,
+                                        budget_category: xRows[i].budget_category
                                     });
                                 }
         
@@ -623,11 +624,11 @@ class BudgetPlanService {
 
 				xJoData = {
 					id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
-                    project: {
-                      id: xResult.project != null ? xResult.project.id : xResult.project_id,
-                      code: xResult.project != null ? xResult.project.odoo_project_code : null,
-                      name: xResult.project != null ? xResult.project.name : xResult.project_name,    
-                    },
+                    project: xResult.project != null ? {
+                      id: xResult.project.id,
+                      code: xResult.project.odoo_project_code,
+                      name: xResult.project.name,    
+                    } : null,
 					name: xResult.name,
 					budget_no: xResult.budget_no,
 					employee: {
@@ -693,6 +694,7 @@ class BudgetPlanService {
                     note: xResult.note,
 					rab_type: xResult.rab_type,
 					rab_type_name: xResult.rab_type == 1 ? 'Original' : xResult.rab_type == 2 ? 'Revisi' : null,
+                    budget_category: xResult.budget_category
 				};
 
 				xJoResult = {

@@ -140,6 +140,7 @@ class VendorService {
                     website: xRows[index].website,
                     status: xRows[index].status,
                     currency: xRows[index].currency,
+                    review_status: xRows[index].review_status
                 });
             }
 
@@ -220,6 +221,7 @@ class VendorService {
                             instance: xRows[i].instance,
                             siup_qualification: xRows[i].siup_qualification,
                             address: xRows[i].address,
+                            combined_file_type: xRows[i].combined_file_type,
                             urlPath: config.imagePathESanQua + '/vendors/'
                         });
                     }
@@ -272,7 +274,8 @@ class VendorService {
                         current_employee: xData.current_employee,
                         year_founded: xData.year_founded,
                         urlPath: `${config.imagePathESanQua}/vendors/logo/`,
-                        documents: documents
+                        documents: documents,
+                        review_status: xData.review_status
                     }
                 }
             }
@@ -566,6 +569,7 @@ class VendorService {
                         instance: xRows[i].instance,
                         siup_qualification: xRows[i].siup_qualification,
                         address: xRows[i].address,
+                        combined_file_type: xRows[i].combined_file_type,
                         urlPath: config.imagePathESanQua + '/vendors/'
                     });
                 }
