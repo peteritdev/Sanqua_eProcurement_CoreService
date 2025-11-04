@@ -503,7 +503,13 @@ async function province_DropDown( req, res ){
             joResult = JSON.stringify(oAuthResult);
         }   
     }else{
-        joResult = JSON.stringify(oAuthResult);
+        if (req.headers['x-app'] != undefined && req.headers['x-app'] == 'mitra') {
+            joResult = await _provinceServiceInstance.dropDownList(req.query);
+            // joResult.token_data = oAuthResult.token_data;
+            joResult = JSON.stringify(joResult);
+        } else {
+            joResult = JSON.stringify(oAuthResult);
+        }
     }    
 
     res.setHeader('Content-Type','application/json');
