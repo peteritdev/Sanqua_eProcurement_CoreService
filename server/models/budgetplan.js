@@ -86,7 +86,13 @@ module.exports = (sequelize, DataTypes) => {
 			field: 'done_at'
 		},
 		done_by: DataTypes.INTEGER,
-		done_by_name: DataTypes.STRING
+		done_by_name: DataTypes.STRING,
+		
+		currency_id: DataTypes.INTEGER,
+		currency_symbol: DataTypes.STRING,
+		currency_code: DataTypes.STRING,
+		note: DataTypes.STRING,
+		budget_category: DataTypes.STRING
 	});
 
 	BudgetPlan.associate = function(models) {

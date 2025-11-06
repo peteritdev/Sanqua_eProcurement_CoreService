@@ -785,7 +785,10 @@ class PurchaseRequestDetailRepository {
 									
 									currency_id: xDetail.data.rows[i].currency_id,
 									currency_code: xDetail.data.rows[i].currency_code,
-									currency_symbol: xDetail.data.rows[i].currency_symbol
+									currency_symbol: xDetail.data.rows[i].currency_symbol,
+									vendor_rec_code: xDetail.data.rows[i].vendor_code,
+									vendor_rec_id: xDetail.data.rows[i].vendor_rec_id,
+									vendor_rec_name: xDetail.data.rows[i].vendor_rec_name,
 								},
 								{ transaction: xTransaction }
 							);

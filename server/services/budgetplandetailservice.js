@@ -46,8 +46,8 @@ const _logServiceInstance = new LogService();
 const _xClassName = 'BudgetDetailDetailService';
 
 class BudgetPlanDetailService {
-    constructor() { }
-    
+	constructor() {}
+
 	async list(pParam) {
 		var xJoResult = {};
 		var xJoArrData = [];
@@ -87,16 +87,13 @@ class BudgetPlanDetailService {
 								vendor_name: xRows[i].vendor_name,
 								vendor_catalogue_id: xRows[i].vendor_catalogue_id,
 								vendor_recomendation: xRows[i].vendor_recomendation,
+								vendor_recomendation_id: xRows[i].vendor_recomendation_id,
+								vendor_recomendation_code: xRows[i].vendor_recomendation_code,
 								budget_plan: xRows[i].budget_plan,
 								section_title: xRows[i].section_title,
-								// fpb_ids: xRows[i].fpb_ids,
-								rab_origin: xRows[i].rab_origin != null ? {
-									id: await _utilInstance.encrypt(xRows[i].rab_origin.id.toString(), config.cryptoKey.hashKey),
-									name: xDetail[index].rab_origin.name,
-									document_no: xDetail[index].rab_origin.budget_no,
-								} : null,
-								deviation_fpb_item_id: xRows[i].deviation_fpb_item_id,
-								log_subtitute: xRows[i].log_subtitute,
+								currency_id: xRows[i].currency_id,
+								currency_code: xRows[i].currency_code,
+								currency_symbol: xRows[i].currency_symbol
 							});
 						}
 
@@ -129,7 +126,7 @@ class BudgetPlanDetailService {
 
 		return xJoResult;
 	}
-	
+
 	async save(pParam) {
 		var xJoResult;
 		var xAct = pParam.act;
@@ -179,7 +176,11 @@ class BudgetPlanDetailService {
 							pParam.request_id = xDecId.decrypted;
 							xRequestIdClear = xDecId.decrypted;
 							// xFlagProcess = true;
-							if (pParam.hasOwnProperty('rab_origin_id') && pParam.rab_origin_id != '' && pParam.rab_origin_id != null) {
+							if (
+								pParam.hasOwnProperty('rab_origin_id') &&
+								pParam.rab_origin_id != '' &&
+								pParam.rab_origin_id != null
+							) {
 								// Check if rab_origin_id is encrypted or not
 								xDecId = await _utilInstance.decrypt(pParam.rab_origin_id, config.cryptoKey.hashKey);
 								if (xDecId.status_code == '00') {
@@ -216,36 +217,36 @@ class BudgetPlanDetailService {
 				var xBudgetPlanDetail = null,
 					xProductDetail = null,
 					xVendorDetail = null;
-				
-                if (pParam.hasOwnProperty('product_id')) {
-                    if (pParam.product_id != null) {
-                        // Get Product detail by Id
-                        xProductDetail = await _productServiceInstance.getById({
-                            id: await _utilInstance.encrypt(pParam.product_id.toString(), config.cryptoKey.hashKey)
-                        });
-                        if (xProductDetail != null) {
-                            // console.log(JSON.stringify(xProductDetail));
-                            pParam.product_code = xProductDetail.data.code;
-                            pParam.product_name = xProductDetail.data.name;
-                        }
-                    }
-                }
 
-                if (pParam.hasOwnProperty('vendor_id')) {
-                    if (pParam.vendor_id != null) {
-                        // Get Vendor detail by id
-                        xVendorDetail = await _vendorServiceInstance.getVendorById({
-                            id: await _utilInstance.encrypt(pParam.vendor_id.toString(), config.cryptoKey.hashKey)
-                        });
-                        if (xVendorDetail != null) {
-                            pParam.vendor_code = xVendorDetail.data.code;
-                            pParam.vendor_name = xVendorDetail.data.name; // test
-                        }
-                    }
-                }
+				if (pParam.hasOwnProperty('product_id')) {
+					if (pParam.product_id != null) {
+						// Get Product detail by Id
+						xProductDetail = await _productServiceInstance.getById({
+							id: await _utilInstance.encrypt(pParam.product_id.toString(), config.cryptoKey.hashKey)
+						});
+						if (xProductDetail != null) {
+							// console.log(JSON.stringify(xProductDetail));
+							pParam.product_code = xProductDetail.data.code;
+							pParam.product_name = xProductDetail.data.name;
+						}
+					}
+				}
 
-                pParam.budget_price_total = pParam.qty * pParam.budget_price_per_unit;
-                pParam.qty_remain = pParam.qty;
+				if (pParam.hasOwnProperty('vendor_id')) {
+					if (pParam.vendor_id != null) {
+						// Get Vendor detail by id
+						xVendorDetail = await _vendorServiceInstance.getVendorById({
+							id: await _utilInstance.encrypt(pParam.vendor_id.toString(), config.cryptoKey.hashKey)
+						});
+						if (xVendorDetail != null) {
+							pParam.vendor_code = xVendorDetail.data.code;
+							pParam.vendor_name = xVendorDetail.data.name; // test
+						}
+					}
+				}
+
+				pParam.budget_price_total = pParam.qty * pParam.budget_price_per_unit;
+				pParam.qty_remain = pParam.qty;
 				// }
 
 				if (pParam.estimate_date_use == '') {
@@ -255,7 +256,6 @@ class BudgetPlanDetailService {
 				// console.log(`>>> pParam save : ${JSON.stringify(pParam)}`);
 				var xAddResult = await _repoInstance.save(pParam, xAct);
 				xJoResult = xAddResult;
-
 			} else if (xAct == 'add_batch') {
 				if (pParam.hasOwnProperty('items')) {
 					var xItems = pParam.items;
@@ -275,8 +275,7 @@ class BudgetPlanDetailService {
 								qty: sequelize.literal(`qty + ${xItems[i].qty}`),
 								qty_remain: sequelize.literal(`qty_remain + ${xItems[i].qty}`),
 								budget_price_total:
-									(xBudgetPlanDetail.qty + xItems[i].qty) *
-									xBudgetPlanDetail.budget_price_per_unit
+									(xBudgetPlanDetail.qty + xItems[i].qty) * xBudgetPlanDetail.budget_price_per_unit
 							};
 
 							xItems[i] = null;
@@ -302,19 +301,25 @@ class BudgetPlanDetailService {
 									xItems[i].category_name = xCatalogue.data.product.category.name;
 								}
 							}
-							
+
 							xItems[i].qty_remain = xItems[i].qty;
 							xItems[i].budget_price_total = xItems[i].qty * xItems[i].budget_price_per_unit;
 							xItems[i].request_id = xRequestIdClear;
 							xItems[i].user_id = pParam.user_id;
 							xItems[i].user_name = pParam.user_name;
-							if (xItems[i].hasOwnProperty('rab_origin_id') && xItems[i].rab_origin_id != '' && xItems[i].rab_origin_id != null) {
+							if (
+								xItems[i].hasOwnProperty('rab_origin_id') &&
+								xItems[i].rab_origin_id != '' &&
+								xItems[i].rab_origin_id != null
+							) {
 								// Check if rab_origin_id is encrypted or not
-								let origin_id = await _utilInstance.decrypt(xItems[i].rab_origin_id, config.cryptoKey.hashKey);
+								let origin_id = await _utilInstance.decrypt(
+									xItems[i].rab_origin_id,
+									config.cryptoKey.hashKey
+								);
 								if (origin_id.status_code == '00') {
 									xItems[i].rab_origin_id = origin_id.decrypted;
 								}
-								
 							}
 
 							xAct = 'add';
@@ -338,9 +343,8 @@ class BudgetPlanDetailService {
 					xJoResult = xDecId;
 				}
 
-                if (xFlagProcess) {
-                
-                    if (pParam.hasOwnProperty('id')) {
+				if (xFlagProcess) {
+					if (pParam.hasOwnProperty('id')) {
 						let xItem = await _repoInstance.getByParam({ id: xClearId });
 						if (xItem.length > 0) {
 							if (pParam.hasOwnProperty('qty')) {
@@ -362,19 +366,19 @@ class BudgetPlanDetailService {
 								status_msg: 'Data not found'
 							};
 						}
-                    } else {
-                        xJoResult = {
-                            status_code: '-99',
-                            status_msg: 'Please supply parameter id'
-                        };
-                    }
+					} else {
+						xJoResult = {
+							status_code: '-99',
+							status_msg: 'Please supply parameter id'
+						};
+					}
 				}
 			}
 		}
 
 		return xJoResult;
-    }
-    
+	}
+
 	async delete(pParam) {
 		var xJoResult = {};
 		var xFlagProcess = false;
@@ -397,7 +401,7 @@ class BudgetPlanDetailService {
 
 		return xJoResult;
 	}
-	
+
 	async dropdown(pParam) {
 		var xJoResult = {};
 		var xJoArrData = [];
@@ -423,7 +427,7 @@ class BudgetPlanDetailService {
 					status_msg: 'You need to supply correct parameter'
 				};
 			}
-			
+
 			// console.log(`>>> xFlagProcess: ${JSON.stringify(xFlagProcess)}`);
 			// console.log(`>>> xJoResult: ${JSON.stringify(xJoResult)}`);
 			if (xFlagProcess) {
@@ -456,7 +460,9 @@ class BudgetPlanDetailService {
 									qty: xRows[i].qty,
 									qty_remain: xRows[i].qty_remain,
 									id: await _utilInstance.encrypt(xRows[i].id.toString(), config.cryptoKey.hashKey),
-									estimate_date_use: moment(xRows[i].estimate_date_use).format('DD MMM YYYY HH:mm:ss'),
+									estimate_date_use: moment(xRows[i].estimate_date_use).format(
+										'DD MMM YYYY HH:mm:ss'
+									),
 									budget_price_per_unit: xRows[i].budget_price_per_unit
 								});
 							}
@@ -491,47 +497,47 @@ class BudgetPlanDetailService {
 
 		return xJoResult;
 	}
-	
-	async updateItemQtyLeft(pParam, pAct, rab){
-		let xPurchaseRequestDetail = pParam.purchase_request_detail
+
+	async updateItemQtyLeft(pParam, pAct, rab) {
+		let xPurchaseRequestDetail = pParam.purchase_request_detail;
 		// console.log(`>>> xPurchaseRequestDetail: ${JSON.stringify(xPurchaseRequestDetail)}`);
 		// console.log(`>>> pAct: ${JSON.stringify(pAct)}`);
 		// console.log(`>>> rab: ${JSON.stringify(rab)}`);
 		if (pParam.budget_plan != null) {
-			let xRabId = pParam.budget_plan.id
+			let xRabId = pParam.budget_plan.id;
 			// check rab
-			var xRabDetail = rab || await _budgetPlanRepoInstance.getById({id: xRabId})
+			var xRabDetail = rab || (await _budgetPlanRepoInstance.getById({ id: xRabId }));
 			if (xRabDetail != null) {
 				// let xRabDetailItem = xRabDetail.budget_plan_detail
 				// console.log(`>>> xRabDetailItem: ${JSON.stringify(xRabDetailItem)}`);
 				for (let i = 0; i < xPurchaseRequestDetail.length; i++) {
 					// let xCheckRabItem = xRabDetailItem.find(({ product_id, product_code, product_name }) => product_id == xPurchaseRequestDetail[i].product_id && product_code == xPurchaseRequestDetail[i].product_code && product_name == xPurchaseRequestDetail[i].product_name)
-					let xCheckRabItem = await _repoInstance.getByParam({id: xPurchaseRequestDetail[i].rab_item.id})
+					let xCheckRabItem = await _repoInstance.getByParam({ id: xPurchaseRequestDetail[i].rab_item.id });
 					// console.log(`>>> xCheckRabItem: ${JSON.stringify(xCheckRabItem)}`);
 					// console.log(`>>> pr.product_id: ${JSON.stringify(xPurchaseRequestDetail[i].product_id)}`);
 					// console.log(`>>> pr.product_code: ${JSON.stringify(xPurchaseRequestDetail[i].product_code)}`);
 					// console.log(`>>> pr.product_name: ${JSON.stringify(xPurchaseRequestDetail[i].product_name)}`);
 					if (xCheckRabItem != null && xCheckRabItem.length > 0) {
 						for (let j = 0; j < xCheckRabItem.length; j++) {
-							let xQtyLeft = xCheckRabItem[j].qty_remain || 0
-							let xCalculatedQty = 0
+							let xQtyLeft = xCheckRabItem[j].qty_remain || 0;
+							let xCalculatedQty = 0;
 							if (pAct == 'return') {
-								xCalculatedQty = xQtyLeft + xPurchaseRequestDetail[i].qty
+								xCalculatedQty = xQtyLeft + xPurchaseRequestDetail[i].qty;
 							} else if (pAct == 'decrease') {
-								xCalculatedQty = xQtyLeft - xPurchaseRequestDetail[i].qty
+								xCalculatedQty = xQtyLeft - xPurchaseRequestDetail[i].qty;
 							}
 							let xUpdateItemParam = {
 								id: xCheckRabItem[j].id,
 								qty_remain: xCalculatedQty
-							}
+							};
 							// console.log(`>>> xUpdateItem[${i+1}]: ${JSON.stringify(xUpdateItemParam)}`);
-							let xUpdateItem = await _repoInstance.save(xUpdateItemParam, 'update')
+							let xUpdateItem = await _repoInstance.save(xUpdateItemParam, 'update');
 						}
 					}
 				}
 			}
 		}
-		return null
+		return null;
 	}
 }
 

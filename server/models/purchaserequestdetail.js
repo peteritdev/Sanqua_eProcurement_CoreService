@@ -86,10 +86,10 @@ module.exports = (sequelize, DataTypes) => {
 		paid_by: DataTypes.INTEGER,
 		paid_by_name: DataTypes.STRING,
 		paid_note: DataTypes.STRING,
-		rab_item_id: DataTypes.INTEGER,
-		rab_qty_gap: DataTypes.INTEGER,
-		is_deviation_fulfilled: DataTypes.BOOLEAN,
-		is_subtitute: DataTypes.BOOLEAN
+		
+		vendor_rec_id: DataTypes.INTEGER,
+		vendor_rec_name: DataTypes.STRING,
+		vendor_rec_code: DataTypes.STRING
 	});
 
 	PurchaseRequestDetail.associate = function(models) {

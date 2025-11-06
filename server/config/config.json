@@ -97,7 +97,7 @@
     "applicationName": "eProcurement",
     "imagePath": "http://10.10.20.8:8020/assets/icon/",
     "imagePathESanQua": "http://10.10.20.8:8020",
-
+    "imagePathESanQuaDomain": "https://dev-esanqua.sanquawater.co.id/image/ecatalogue",
     "qrCodeImagePath": "C:\\MIS-PETER\\SanQuaApp\\eProcurement\\Sanqua_eProcurement_CoreService\\generated_files",
 
     "statusDescription":{
@@ -217,7 +217,7 @@
     "applicationName": "eProcurement",
 
     "imagePath": "http://10.10.20.8:8020/assets/icon/",
-    "imagePathESanQua": "http://10.10.20.8:8020",
+    "imagePathESanQua": "https://dev-esanqua.sanquawater.co.id/image/ecatalogue",
     "imagePathESanQua_dev": "http://10.10.20.5:83/eprocurement",
     "uploadBasePath": "/var/www/esanqua_upload/eprocurement",
     "statusDescription":{
@@ -336,7 +336,7 @@
     "applicationName": "eProcurement",
 
     "imagePath": "http://10.10.20.8:8020/assets/icon/",
-    "imagePathESanQua": "http://10.10.20.8:8020",
+    "imagePathESanQua": "https://dev-esanqua.sanquawater.co.id/image/ecatalogue",
     "imagePathESanQua_dev": "http://10.10.20.5:83/eprocurement",
     "uploadBasePath": "/var/www/esanqua_upload/eprocurement",
     "statusDescription":{
