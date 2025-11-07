@@ -201,20 +201,6 @@ class PurchaseRequestDetailRepository {
 					};
 				}
 			} else if (pAct == 'update') {
-				// var xFlag = false
-				pParam.updatedAt = await _utilInstance.getCurrDateTime();
-				var xId = pParam.id;
-				delete pParam.id;
-				var xWhere = {
-					where: {
-						id: xId
-					},
-					transaction: xTransaction
-				};
-
-				pParam.updated_by = pParam.user_id;
-				pParam.updated_by_name = pParam.user_name;
-
 				const xDtQuery = await sequelize.query(xSql, {
 					replacements: { payload: JSON.stringify(payload) },
 					type: sequelize.QueryTypes.SELECT,
@@ -234,7 +220,20 @@ class PurchaseRequestDetailRepository {
 				} else {
 					xFlag = false
 				}
+				// var xFlag = false
+				pParam.updatedAt = await _utilInstance.getCurrDateTime();
+				var xId = pParam.id;
+				delete pParam.id;
+				var xWhere = {
+					where: {
+						id: xId
+					},
+					transaction: xTransaction
+				};
 
+				pParam.updated_by = pParam.user_id;
+				pParam.updated_by_name = pParam.user_name;
+				
 				if (xFlag) {
 					xSaved = await _modelDb.update(pParam, xWhere);
 
