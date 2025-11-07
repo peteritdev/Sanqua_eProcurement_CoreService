@@ -52,7 +52,7 @@ async function unit_DropDown( req, res ){
     var oAuthResult = await _oAuthServiceInstance.verifyToken( req.headers['x-token'], req.headers['x-method'] );
 
     if (req.headers['x-app'] != undefined && req.headers['x-app'] == 'mitra') {
-        joResult = await _provinceServiceInstance.dropDownList(req.query);
+        joResult = await _unitServiceInstance.dropDownList(req.query);
         // joResult.token_data = oAuthResult.token_data;
         joResult = JSON.stringify(joResult);
     } else {
