@@ -51,29 +51,34 @@ async function unit_DropDown( req, res ){
 
     var oAuthResult = await _oAuthServiceInstance.verifyToken( req.headers['x-token'], req.headers['x-method'] );
 
-    if( oAuthResult.status_code == "00" ){
-        if( oAuthResult.token_data.status_code == "00" ){
-            // Validate first
-            var errors = validationResult(req).array();   
-            
-            if( errors.length != 0 ){
-                joResult = JSON.stringify({
-                    "status_code": "-99",
-                    "status_msg":"Parameter value has problem",
-                    "error_msg": errors
-                });
-            }else{                      
-                joResult = await _unitServiceInstance.dropDownList(req.query);
-                joResult.token_data = oAuthResult.token_data;
-                joResult = JSON.stringify(joResult);
-            }
+    if (req.headers['x-app'] != undefined && req.headers['x-app'] == 'mitra') {
+        joResult = await _provinceServiceInstance.dropDownList(req.query);
+        // joResult.token_data = oAuthResult.token_data;
+        joResult = JSON.stringify(joResult);
+    } else {
+        if( oAuthResult.status_code == "00" ){
+            if( oAuthResult.token_data.status_code == "00" ){
+                // Validate first
+                var errors = validationResult(req).array();   
+                
+                if( errors.length != 0 ){
+                    joResult = JSON.stringify({
+                        "status_code": "-99",
+                        "status_msg":"Parameter value has problem",
+                        "error_msg": errors
+                    });
+                }else{                      
+                    joResult = await _unitServiceInstance.dropDownList(req.query);
+                    joResult.token_data = oAuthResult.token_data;
+                    joResult = JSON.stringify(joResult);
+                }
+            }else{
+                joResult = JSON.stringify(oAuthResult);
+            }   
         }else{
             joResult = JSON.stringify(oAuthResult);
-        }   
-    }else{
-        joResult = JSON.stringify(oAuthResult);
-    }    
-
+        }    
+    }
     res.setHeader('Content-Type','application/json');
     res.status(200).send(joResult);
 }
