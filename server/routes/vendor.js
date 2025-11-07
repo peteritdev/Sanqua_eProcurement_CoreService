@@ -29,10 +29,10 @@ module.exports = (app) => {
 		check('code').not().isEmpty().withMessage('Code cannot be empty'),
 		check('business_entity_id', 'Business Entity must be integer and cannot be empty').not().isEmpty().isInt(),
 		check('classification_id', 'Classification Id must be integer and cannot be empty').not().isEmpty().isInt(),
-		check('sub_classification_id', 'Sub Classification Id must be integer and cannot be empty')
-			.not()
-			.isEmpty()
-			.isInt(),
+		// check('sub_classification_id', 'Sub Classification Id must be integer and cannot be empty')
+		// 	.not()
+		// 	.isEmpty()
+		// 	.isInt(),
 		check('province_id').not().isEmpty().withMessage('Province ID cannot be empty'),
 		check('city_id').not().isEmpty().withMessage('City ID cannot be empty'),
 		check('email').isEmail().optional({ checkFalsy: true }),
@@ -104,6 +104,10 @@ module.exports = (app) => {
 		check('vendor_id').not().isEmpty().withMessage('Parameter vendor_id can not be empty')
 	];
 	app.get(rootAPIPath + 'vendor/document/list', arrValidate, vendorController.vendor_GetVendorDocument);
+
+	arrValidate = [];
+	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
+	app.delete(rootAPIPath + 'vendor/document/delete/:id', arrValidate, vendorController.vendor_DeleteVendorDocument);
 
 	// VENDOR's EXPERIENCE
 	arrValidate = [];

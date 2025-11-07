@@ -110,18 +110,17 @@ class VendorService {
                 
                 if( xRows[index].email != null && xRows[index].email != '' ) {
                     // console.log(`>>> xRows[index].email: ${JSON.stringify(xRows[index].email.length)}`);
-                    // if (xRows[index].email.length == 65) {
-                    var dec = await _utilInstance.decrypt( xRows[index].email, config.cryptoKey.hashKey)
-                    // console.log(`>>> dec: ${JSON.stringify(dec)}`);
-                    if (dec != null && dec.status_code == '00') {
-                        email = dec.decrypted; 
+                    if (xRows[index].email.length > 60) {
+                        var dec = await _utilInstance.decrypt( xRows[index].email, config.cryptoKey.hashKey)
+                        if (dec) {
+                            email = dec.decrypted; 
+                        } else {
+                            email = xRows[index].email
+                        }
+                    // email = dec.decrypted; 
                     } else {
                         email = xRows[index].email
                     }
-                    // email = dec.decrypted; 
-                    // } else {
-                    //     email = xRows[index].email
-                    // }
                 }
 
                 xJoArrData.push({
@@ -141,6 +140,7 @@ class VendorService {
                     website: xRows[index].website,
                     status: xRows[index].status,
                     currency: xRows[index].currency,
+                    review_status: xRows[index].review_status
                 });
             }
 
@@ -173,6 +173,7 @@ class VendorService {
                 var phone1 = null;
                 var phone2 = null;
                 var email = null;
+                var documents = []
 
                 if( xData.phone1 != null && xData.phone1 != '' ) {
                     if (xData.phone1.length == 65) {
@@ -204,7 +205,27 @@ class VendorService {
                 } else {
                     email = xData.email
                 }
-                
+                // get documents
+                var xGetVendorDocument = await _vendorRepoInstance.getVendorDocumentByDocumentTypeId( {vendor_id: pParam.id} );
+                if( xGetVendorDocument != null && xGetVendorDocument.count > 0){
+                    var xRows = xGetVendorDocument.rows;
+                    for (let i = 0; i < xRows.length; i++) {
+                        documents.push({
+                            id: await _utilInstance.encrypt( xRows[i].id, config.cryptoKey.hashKey ),
+                            document_type: xRows[i].document_type,
+                            document_no: xRows[i].document_no,
+                            date: xRows[i].date,
+                            expire_date: xRows[i].expire_date,
+                            file: xRows[i].file,
+                            description: xRows[i].description,
+                            instance: xRows[i].instance,
+                            siup_qualification: xRows[i].siup_qualification,
+                            address: xRows[i].address,
+                            combined_file_type: xRows[i].combined_file_type,
+                            urlPath: config.imagePathESanQua + '/vendors/'
+                        });
+                    }
+                }
                 xJoResult = {
                     status_code: "00",
                     status_msg: "OK",
@@ -253,6 +274,8 @@ class VendorService {
                         current_employee: xData.current_employee,
                         year_founded: xData.year_founded,
                         urlPath: `${config.imagePathESanQua}/vendors/logo/`,
+                        documents: documents,
+                        review_status: xData.review_status
                     }
                 }
             }
@@ -430,29 +453,31 @@ class VendorService {
         var xJoResult;        
         var xFlagProcess = true;
         var xDec = null;
-        var isExists = null;       
+        var isExists = null;
 
-        xDec = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
-        if( xDec.status_code == '00' ){
-            pParam.id = xDec.decrypted;     
-            xDec = await _utilInstance.decrypt(pParam.vendor_id, config.cryptoKey.hashKey);
-            if( xDec.status_code == "00" ){
-                pParam.vendor_id = xDec.decrypted; 
-                xDec = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
-                if( xDec.status_code == "00" ){
-                    pParam.user_id = xDec.decrypted;                    
-                }else{
-                    xFlagProcess = false;
-                    xJoResult = xDec;
-                }              
-            }else{
+        xDec = await _utilInstance.decrypt(pParam.vendor_id, config.cryptoKey.hashKey);
+        if( xDec.status_code == "00" ){
+            pParam.vendor_id = xDec.decrypted; 
+            xDec = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+            if ( xDec.status_code == "00" ){
+                pParam.user_id = xDec.decrypted;
+                if (pParam.act == 'update') {
+                    xDec = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+                    if( xDec.status_code == '00' ){
+                        pParam.id = xDec.decrypted;
+                    } else {
+                        xFlagProcess = false;
+                        xJoResult = xDec;
+                    }  
+                }
+            } else {
                 xFlagProcess = false;
                 xJoResult = xDec;
-            }
-        }else{
+            }              
+        } else {
             xFlagProcess = false;
             xJoResult = xDec;
-        }      
+        }
         
 
         if( xFlagProcess ){                   
@@ -544,6 +569,7 @@ class VendorService {
                         instance: xRows[i].instance,
                         siup_qualification: xRows[i].siup_qualification,
                         address: xRows[i].address,
+                        combined_file_type: xRows[i].combined_file_type,
                         urlPath: config.imagePathESanQua + '/vendors/'
                     });
                 }
@@ -800,7 +826,38 @@ class VendorService {
         }
 
         return (xJoResult);
-    } 
+    }
+
+    async deleteVendorDocument(pParam){
+        var xJoResult;
+        var xFlagProcess = true;  
+
+        var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+        if( xDecId.status_code == "00" ){
+            pParam.id = xDecId.decrypted;                    
+            xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+            if( xDecId.status_code == "00" ){
+                pParam.deleted_by = xDecId.decrypted;
+                pParam.deleted_by_name = pParam.user_name;
+            }else{
+                xFlagProcess = false;
+                xJoResult = xDecId;
+            }
+        }else{
+            xFlagProcess = false;
+            xJoResult = xDecId;
+        }
+
+        if( xFlagProcess ){
+            // // Check if vendor's document and vendor's catalogue has exists or not
+            // var xTotalVendorDocument = await _vendorRepoInstance.getTotalVendorDocumentByVendorId( pParam.id );
+
+            var xDeleteResult = await _vendorRepoInstance.deleteVendorDocument( pParam );
+            xJoResult = xDeleteResult;
+        }
+
+        return xJoResult;
+    }
 }
 
 module.exports = VendorService;

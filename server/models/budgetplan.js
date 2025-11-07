@@ -90,7 +90,8 @@ module.exports = (sequelize, DataTypes) => {
 		currency_id: DataTypes.INTEGER,
 		currency_symbol: DataTypes.STRING,
 		currency_code: DataTypes.STRING,
-		note: DataTypes.STRING
+		note: DataTypes.STRING,
+		budget_category: DataTypes.STRING
 	});
 
 	BudgetPlan.associate = function(models) {
