@@ -626,11 +626,11 @@ class BudgetPlanDetailService {
 				let xRabDetailItem = xRabDetail.budget_plan_detail
 				// console.log(`>>> xRabDetailItem: ${JSON.stringify(xRabDetailItem)}`);
 				for (let i = 0; i < xPurchaseRequestDetail.length; i++) {
-					let xCheckRabItem = xRabDetailItem.find(({ product_id, product_code, product_name }) => product_id == xPurchaseRequestDetail[i].product_id && product_code == xPurchaseRequestDetail[i].product_code && product_name == xPurchaseRequestDetail[i].product_name)
-					console.log(`>>> xCheckRabItem: ${JSON.stringify(xCheckRabItem)}`);
-					console.log(`>>> pr.product_id: ${JSON.stringify(xPurchaseRequestDetail[i].product_id)}`);
-					console.log(`>>> pr.product_code: ${JSON.stringify(xPurchaseRequestDetail[i].product_code)}`);
-					console.log(`>>> pr.product_name: ${JSON.stringify(xPurchaseRequestDetail[i].product_name)}`);
+					let xCheckRabItem = xRabDetailItem.find(({ product_id, product_code, product_name, budget_price_per_unit }) => budget_price_per_unit == xPurchaseRequestDetail[i].budget_price_per_unit && product_id == xPurchaseRequestDetail[i].product_id && product_code == xPurchaseRequestDetail[i].product_code && product_name == xPurchaseRequestDetail[i].product_name)
+					// console.log(`>>> xCheckRabItem: ${JSON.stringify(xCheckRabItem)}`);
+					// console.log(`>>> pr.product_id: ${JSON.stringify(xPurchaseRequestDetail[i].product_id)}`);
+					// console.log(`>>> pr.product_code: ${JSON.stringify(xPurchaseRequestDetail[i].product_code)}`);
+					// console.log(`>>> pr.product_name: ${JSON.stringify(xPurchaseRequestDetail[i].product_name)}`);
 					if (xCheckRabItem != undefined) {
 						let xQtyLeft = xCheckRabItem.qty_remain || 0
 						let xCalculatedQty = 0
@@ -643,8 +643,8 @@ class BudgetPlanDetailService {
 							id: xCheckRabItem.id,
 							qty_remain: xCalculatedQty
 						}
+						// console.log(`>>> xUpdateItemParam: ${JSON.stringify(xUpdateItemParam)}`);
 						let xUpdateItem = await _repoInstance.save(xUpdateItemParam, 'update')
-						// 	console.log(`>>> xUpdateItem: ${JSON.stringify(xUpdateItem)}`);
 					}
 				}
 			}
