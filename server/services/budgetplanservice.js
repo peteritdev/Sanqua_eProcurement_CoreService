@@ -34,6 +34,8 @@ const _purchaseRequestDetailRepo = new PurchaseRequestDetailRepo();
 
 const PurchaseRequestRepo = require('../repository/purchaserequestrepository.js');
 const _purchaseRequestRepo = new PurchaseRequestRepo();
+const ProjectRepository = require('../repository/projectrepository.js');
+const _projectRepoInstance = new ProjectRepository();
 
 const VendorCatalogueService = require('../services/vendorcatalogueservice.js');
 const _catalogueService = new VendorCatalogueService();
@@ -190,6 +192,7 @@ class BudgetPlanService {
                                         // deleted_at: moment(xRows[i].deletedAt).format('DD MMM YYYY HH:mm:ss'),
                                         // deleted_by_name: xRows[i].deleted_by_name
                                         rab_type: xRows[i].rab_type,
+                                        budget_category: xRows[i].budget_category
                                     });
                                 }
         
@@ -279,7 +282,16 @@ class BudgetPlanService {
                 
                 if (pParam.hasOwnProperty('project_id')) {
                     if (pParam.project_id != '' && pParam.project_id != null) {
-                        xFlagProcess = true;
+                        // check if project status still submitted befor save
+						var xCheckStatus = await _projectRepoInstance.getByParameter({id:pParam.project_id})
+						if (xCheckStatus.status_code == '00' && xCheckStatus.data.status == 1) {
+							xFlagProcess = true;
+						} else {
+							return xJoResult = {
+								status_code: '-99',
+								status_msg: `Status project sedang tidak dapat digunakan, silahkan pilih kode project lain atau hubungi admin`
+							};
+						}
                     } else {
                         xFlagProcess = true;
                     }
@@ -612,11 +624,11 @@ class BudgetPlanService {
 
 				xJoData = {
 					id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
-                    project: {
+                    project: xResult.project != null ? {
                       id: xResult.project.id,
                       code: xResult.project.odoo_project_code,
                       name: xResult.project.name,    
-                    },
+                    } : null,
 					name: xResult.name,
 					budget_no: xResult.budget_no,
 					employee: {
@@ -682,6 +694,7 @@ class BudgetPlanService {
                     note: xResult.note,
 					rab_type: xResult.rab_type,
 					rab_type_name: xResult.rab_type == 1 ? 'Original' : xResult.rab_type == 2 ? 'Revisi' : null,
+                    budget_category: xResult.budget_category,
 				};
 
 				xJoResult = {
