@@ -448,7 +448,6 @@ class PurchaseRequestDetailService {
 						}
 					}
 
-					// console.log(`>>> pParam : ${JSON.stringify(pParam)}`);
 					var xUpdateResult = await _repoInstance.save(pParam, xAct);
 					xJoResult = xUpdateResult;
 					if (xUpdateResult.status_code == '00') {

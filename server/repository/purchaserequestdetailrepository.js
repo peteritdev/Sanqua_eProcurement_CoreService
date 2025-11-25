@@ -265,23 +265,11 @@ class PurchaseRequestDetailRepository {
 				} else {
 					xFlag = false
 				}
-				// var xFlag = false
-				pParam.updatedAt = await _utilInstance.getCurrDateTime();
-				var xId = pParam.id;
-				delete pParam.id;
-				var xWhere = {
-					where: {
-						id: xId
-					},
-					transaction: xTransaction
-				};
-
-				pParam.updated_by = pParam.user_id;
-				pParam.updated_by_name = pParam.user_name;
 				
 				if (xFlag) {
 					xSaved = await _modelDb.update(pParam, xWhere);
-
+					// console.log(`>>> xSaved : ${JSON.stringify(xSaved)}`);
+					
 					await xTransaction.commit();
 
 					xJoResult = {
