@@ -230,22 +230,6 @@ class PurchaseRequestDetailRepository {
 					};
 				}
 			} else if (pAct == 'update') {
-				// var xFlag = false
-				pParam.updatedAt = await _utilInstance.getCurrDateTime();
-				var xId = pParam.id;
-				delete pParam.id;
-				payload.purchase_request_detail.xId = xId
-				var xWhere = {
-					where: {
-						id: xId
-					},
-					transaction: xTransaction
-				};
-
-				pParam.updated_by = pParam.user_id;
-				pParam.updated_by_name = pParam.user_name;
-
-				console.log(`>>> payload 2: ${JSON.stringify(payload)}`);
 				const xDtQuery = await sequelize.query(xSql, {
 					replacements: { payload: JSON.stringify(payload) },
 					type: sequelize.QueryTypes.SELECT,
@@ -265,7 +249,20 @@ class PurchaseRequestDetailRepository {
 				} else {
 					xFlag = false
 				}
+				// var xFlag = false
+				pParam.updatedAt = await _utilInstance.getCurrDateTime();
+				var xId = pParam.id;
+				delete pParam.id;
+				var xWhere = {
+					where: {
+						id: xId
+					},
+					transaction: xTransaction
+				};
 
+				pParam.updated_by = pParam.user_id;
+				pParam.updated_by_name = pParam.user_name;
+				
 				if (xFlag) {
 					xSaved = await _modelDb.update(pParam, xWhere);
 
@@ -785,7 +782,10 @@ class PurchaseRequestDetailRepository {
 									
 									currency_id: xDetail.data.rows[i].currency_id,
 									currency_code: xDetail.data.rows[i].currency_code,
-									currency_symbol: xDetail.data.rows[i].currency_symbol
+									currency_symbol: xDetail.data.rows[i].currency_symbol,
+									vendor_rec_code: xDetail.data.rows[i].vendor_code,
+									vendor_rec_id: xDetail.data.rows[i].vendor_rec_id,
+									vendor_rec_name: xDetail.data.rows[i].vendor_rec_name,
 								},
 								{ transaction: xTransaction }
 							);

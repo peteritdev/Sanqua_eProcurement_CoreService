@@ -34,6 +34,8 @@ const _purchaseRequestDetailRepo = new PurchaseRequestDetailRepo();
 
 const PurchaseRequestRepo = require('../repository/purchaserequestrepository.js');
 const _purchaseRequestRepo = new PurchaseRequestRepo();
+const ProjectRepository = require('../repository/projectrepository.js');
+const _projectRepoInstance = new ProjectRepository();
 
 const VendorCatalogueService = require('../services/vendorcatalogueservice.js');
 const _catalogueService = new VendorCatalogueService();
@@ -190,6 +192,7 @@ class BudgetPlanService {
                                         // deleted_at: moment(xRows[i].deletedAt).format('DD MMM YYYY HH:mm:ss'),
                                         // deleted_by_name: xRows[i].deleted_by_name
                                         rab_type: xRows[i].rab_type,
+                                        budget_category: xRows[i].budget_category
                                     });
                                 }
         
@@ -279,7 +282,16 @@ class BudgetPlanService {
                 
                 if (pParam.hasOwnProperty('project_id')) {
                     if (pParam.project_id != '' && pParam.project_id != null) {
-                        xFlagProcess = true;
+                        // check if project status still submitted befor save
+						var xCheckStatus = await _projectRepoInstance.getByParameter({id:pParam.project_id})
+						if (xCheckStatus.status_code == '00' && xCheckStatus.data.status == 1) {
+							xFlagProcess = true;
+						} else {
+							return xJoResult = {
+								status_code: '-99',
+								status_msg: `Status project sedang tidak dapat digunakan, silahkan pilih kode project lain atau hubungi admin`
+							};
+						}
                     } else {
                         xFlagProcess = true;
                     }
@@ -309,54 +321,27 @@ class BudgetPlanService {
                                         }
                         			}
 
-                        			if (xJoArrItems[i].hasOwnProperty('estimate_date_use')) {
-                        				if (xJoArrItems[i].estimate_date_use == '') {
-                        					xJoArrItems[i].estimate_date_use = null;
-                        				}
-                        			}
+									if (xJoArrItems[i].hasOwnProperty('estimate_date_use')) {
+										if (xJoArrItems[i].estimate_date_use == '' || isNaN(new Date(xJoArrItems[i].estimate_date_use).getTime())) {
+											xJoArrItems[i].estimate_date_use = new Date().toISOString().split('T')[0];
+										}
+									}
+                        			// Get Last price from etalase ecatalogue
+                        			let xCatalogue = await _catalogueService.getByVendorCodeAndProductCode({
+                        				vendor_code: xJoArrItems[i].vendor_code,
+                        				product_code: xJoArrItems[i].product_code
+                                    });
+                                    console.log('xCatalogue >>>>', xCatalogue.data.product.category);
 
-                                    // console.log(`>>> Hereeee 1.${i} >>>> : ${JSON.stringify(xJoArrItems[i].qty_remain)}`);
-                                    if (xJoArrItems[i].product_id != undefined && xJoArrItems[i].product_id != null && xJoArrItems[i].vendor_id != null && xJoArrItems[i].vendor_id != null) {
-                                            
-                                        // Get Last price from etalase ecatalogue
-                                        let xCatalogue = await _catalogueService.getByVendorCodeAndProductCode({
-                                            vendor_code: xJoArrItems[i].vendor_code,
-                                            product_code: xJoArrItems[i].product_code
-                                        });
-                                        // console.log('xCatalogue >>>>', xCatalogue.data.product.category);
-
-                                        if (xCatalogue.status_code == '00') {
-                                            // xJoArrItems[i].last_price = xCatalogue.data.last_price;
-                                            xJoArrItems[i].uom_id = xCatalogue.data.uom_id;
-                                            xJoArrItems[i].uom_name = xCatalogue.data.uom_name;
-                                            // xJoArrItems[i].merk = xCatalogue.data.merk;
-                                            // xJoArrItems[i].description = xCatalogue.data.spesification;
-                                            if (xCatalogue.data.product.category !== undefined) {
-                                                xJoArrItems[i].category_id = xCatalogue.data.product.category.id;
-                                                xJoArrItems[i].category_name = xCatalogue.data.product.category.name;
-                                            }
-                                        }
-                                    
-                                    }
-
-                                    // console.log(`>>> Hereeee 2.${i} >>>> : ${JSON.stringify(xJoArrItems[i].qty_remain)}`);
-                                    if (
-                        				xJoArrItems[i].hasOwnProperty('rab_origin_id') && xJoArrItems[i].rab_origin_id != null && xJoArrItems[i].rab_origin_id != '' && xJoArrItems[i].rab_origin_id.length > 5
-                        			) {
-                                        const xRabOriginId = await _utilInstance.decrypt(xJoArrItems[i].rab_origin_id, config.cryptoKey.hashKey);
-                        				if (xRabOriginId.status_code == '00') {
-                                            xJoArrItems[i].xJoArrItems[i].rab_origin_id = xRabOriginId.decrypted;
-                                        }
-                        			}
-
-                                    if (
-                        				xJoArrItems[i].hasOwnProperty('deviation_fpb_item_id') && xJoArrItems[i].deviation_fpb_item_id != null && xJoArrItems[i].deviation_fpb_item_id != ''
-                        			) {
-                                        if ( xJoArrItems[i].deviation_fpb_item_id.length > 5) {
-                                            const xDeviationFpbId = await _utilInstance.decrypt(xJoArrItems[i].deviation_fpb_item_id, config.cryptoKey.hashKey);
-                                            if (xDeviationFpbId.status_code == '00') {
-                                                xJoArrItems[i].deviation_fpb_item_id = xDeviationFpbId.decrypted;
-                                            }
+                        			if (xCatalogue.status_code == '00') {
+                        				// xJoArrItems[i].last_price = xCatalogue.data.last_price;
+                        				xJoArrItems[i].uom_id = xCatalogue.data.uom_id;
+                                        xJoArrItems[i].uom_name = xCatalogue.data.uom_name;
+                                        // xJoArrItems[i].merk = xCatalogue.data.merk;
+                                        // xJoArrItems[i].description = xCatalogue.data.spesification;
+                                        if (xCatalogue.data.product.category !== undefined) {
+                                            xJoArrItems[i].category_id = xCatalogue.data.product.category.id;
+                                            xJoArrItems[i].category_name = xCatalogue.data.product.category.name;
                                         }
                         			}
                         		}
@@ -557,7 +542,11 @@ class BudgetPlanService {
 							code: xDetail[index].vendor_code,
 							name: xDetail[index].vendor_name
 						},
-						vendor_recomendation: xDetail[index].vendor_recomendation,
+						vendor_recomendation: {
+							id: xDetail[index].vendor_recomendation_id != null ? xDetail[index].vendor_recomendation_id.toString() : null,
+							code: xDetail[index].vendor_recomendation_code,
+							name: xDetail[index].vendor_recomendation
+						},
 						vendor_catalogue_id: xDetail[index].vendor_catalogue_id,
 						estimate_date_use:
 							xDetail[index].estimate_date_use != null
@@ -573,7 +562,12 @@ class BudgetPlanService {
 						purchase_request_detail: xDetail[index].purchase_request_detail,
 						deviation_fpb_item_id: xDetail[index].deviation_fpb_item_id,
 						deviation_fpb_item: xDetail[index].deviation_fpb_item,
-                        log_subtitute: xDetail[index].log_subtitute
+                        log_subtitute: xDetail[index].log_subtitute,
+						currency: {
+							id: xDetail[index].currency_id,
+							code: xDetail[index].currency_code,
+							symbol: xDetail[index].currency_symbol
+						}
 					});
 				}
 				// Get Approval Matrix
@@ -603,11 +597,11 @@ class BudgetPlanService {
 
 				xJoData = {
 					id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
-                    project: {
+                    project: xResult.project != null ? {
                       id: xResult.project.id,
                       code: xResult.project.odoo_project_code,
                       name: xResult.project.name,    
-                    },
+                    } : null,
 					name: xResult.name,
 					budget_no: xResult.budget_no,
 					employee: {
@@ -673,6 +667,7 @@ class BudgetPlanService {
                     note: xResult.note,
 					rab_type: xResult.rab_type,
 					rab_type_name: xResult.rab_type == 1 ? 'Original' : xResult.rab_type == 2 ? 'Revisi' : null,
+                    budget_category: xResult.budget_category
 				};
 
 				xJoResult = {

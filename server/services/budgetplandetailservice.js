@@ -87,6 +87,8 @@ class BudgetPlanDetailService {
 								vendor_name: xRows[i].vendor_name,
 								vendor_catalogue_id: xRows[i].vendor_catalogue_id,
 								vendor_recomendation: xRows[i].vendor_recomendation,
+								vendor_recomendation_id: xRows[i].vendor_recomendation_id,
+								vendor_recomendation_code: xRows[i].vendor_recomendation_code,
 								budget_plan: xRows[i].budget_plan,
 								section_title: xRows[i].section_title,
 								// fpb_ids: xRows[i].fpb_ids,
@@ -97,6 +99,9 @@ class BudgetPlanDetailService {
 								} : null,
 								deviation_fpb_item_id: xRows[i].deviation_fpb_item_id,
 								log_subtitute: xRows[i].log_subtitute,
+								currency_id: xRows[i].currency_id,
+								currency_code: xRows[i].currency_code,
+								currency_symbol: xRows[i].currency_symbol
 							});
 						}
 
@@ -248,8 +253,10 @@ class BudgetPlanDetailService {
                 pParam.qty_remain = pParam.qty;
 				// }
 
-				if (pParam.estimate_date_use == '') {
-					pParam.estimate_date_use = null;
+				if (pParam.hasOwnProperty('estimate_date_use')) {
+					if (pParam.estimate_date_use == ''|| isNaN(new Date(pParam.estimate_date_use).getTime())) {
+						pParam.estimate_date_use = new Date().toISOString().split('T')[0];
+					}
 				}
 				// Validate if product_id is null (free keyin for project), estimate_fulfillment
 				// console.log(`>>> pParam save : ${JSON.stringify(pParam)}`);
@@ -350,8 +357,10 @@ class BudgetPlanDetailService {
 								pParam.qty_remain = pParam.qty;
 							}
 
-							if (pParam.estimate_date_use == '') {
-								pParam.estimate_date_use = null;
+							if (pParam.hasOwnProperty('estimate_date_use')) {
+								if (pParam.estimate_date_use == '' || isNaN(new Date(pParam.estimate_date_use).getTime())) {
+									pParam.estimate_date_use = new Date().toISOString().split('T')[0];
+								}
 							}
 
 							var xUpdateResult = await _repoInstance.save(pParam, xAct);
