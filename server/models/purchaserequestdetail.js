@@ -90,6 +90,7 @@ module.exports = (sequelize, DataTypes) => {
 		rab_qty_gap: DataTypes.INTEGER,
 		is_deviation_fulfilled: DataTypes.BOOLEAN,
 		is_subtitute: DataTypes.BOOLEAN,
+		
 		vendor_rec_id: DataTypes.INTEGER,
 		vendor_rec_name: DataTypes.STRING,
 		vendor_rec_code: DataTypes.STRING
