@@ -36,6 +36,9 @@ const _purchaseRequestDetailRepoInstance = new PurchaseRequestDetailRepository()
 const GoodsReceiptRepository = require('../repository/goodsreceiptrepository.js');
 const _goodsReceiptRepoInstance = new GoodsReceiptRepository();
 
+const GoodsReceiptDetailRepository = require('../repository/goodsreceiptdetailrepository.js');
+const _goodsReceiptDetailRepository = new GoodsReceiptDetailRepository();
+
 const PJCARepository = require('../repository/pjcarepository.js');
 const _pjcaRepoInstance = new PJCARepository();
 // const PaymentRequestDetailRepository = require('../repository/paymentrequestdetailrepository.js');
@@ -884,30 +887,32 @@ class PaymentRequestService {
 									};
 									xFlagProcess = false
 								} else {
-									// check if product have submited GR
-									const xArrId = []
-									for (let i = 0; i < xPayreqDetail.data.payment_request_detail.length; i++) {
-										xArrId.push(xPayreqDetail.data.payment_request_detail[i].product_id)
-									}
-									const xParamGr = {
-										purchase_request_id: xPayreqDetail.data.purchase_request_id,
-										product_id: xArrId,
-										status: 1
-									}
-									var xGrResultList = await _goodsReceiptRepoInstance.list(xParamGr);
-									console.log(`>>> xGrResultList: ${JSON.stringify(xGrResultList)}`);
-									if (xGrResultList.status_code == '00') {
-										if (xGrResultList.data.rows.length > 0) {
-											xJoResult = {
-												status_code: '-99',
-												status_msg: "Cancel failed, this document already have some processed receipt"
-											};
-											xFlagProcess = false
-										}
-									} else {
-										xFlagProcess = false
-										xJoResult = xGrResultList
-									}
+									// // check if product have submited GR
+									// const xArrId = []
+									// for (let i = 0; i < xPayreqDetail.data.payment_request_detail.length; i++) {
+									// 	xArrId.push(xPayreqDetail.data.payment_request_detail[i].product_id)
+									// }
+									// const xParamGr = {
+									// 	purchase_request_id: xPayreqDetail.data.purchase_request_id,
+									// 	product_id: xArrId,
+									// 	status: 1
+									// }
+									// console.log(`>>> xParamGr: ${JSON.stringify(xParamGr)}`);
+									// var xGrResultList = await _goodsReceiptRepoInstance.list(xParamGr);
+									// console.log(`>>> xGrResultList: ${JSON.stringify(xGrResultList)}`);
+									// if (xGrResultList.status_code == '00') {
+									// 	if (xGrResultList.data.rows.length > 0) {
+									// 		const xGrData = xGrResultList.data.rows
+									// 		xJoResult = {
+									// 			status_code: '-99',
+									// 			status_msg: "Cancel failed, this document already have some processed receipt"
+									// 		};
+									// 		xFlagProcess = false
+									// 	}
+									// } else {
+									// 	xFlagProcess = false
+									// 	xJoResult = xGrResultList
+									// }
 								}
 							} else {
 								xFlagProcess = false
@@ -922,7 +927,7 @@ class PaymentRequestService {
 									canceled_reason: pParam.cancel_reason,
 									// approved_at: await _utilInstance.getCurrDateTime()
 								};
-								var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
+								// var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
 	
 								if (xUpdateResult.status_code == '00') {
 									if (xPayreqDetail.data.status != 0) {

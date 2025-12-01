@@ -9,7 +9,7 @@ const Op = Sequelize.Op;
 const _modelDb = require('../models').tr_goodsreceipts;
 const _modelGoodsReceiptDetail = require('../models').tr_goodsreceiptdetails;
 const _modelPaymentRequest = require('../models').tr_paymentrequests;
-// const _modelPaymentRequestDetail = require('../models').tr_paymentrequestdetails;
+const _modelPaymentRequestDetail = require('../models').tr_paymentrequestdetails;
 const _modelPurchaseRequest = require('../models').tr_purchaserequests;
 const _modelPurchaseRequestDetail = require('../models').tr_purchaserequestdetails;
 const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
@@ -133,18 +133,19 @@ class GoodsReceiptRepository {
 			
 			if (pParam.hasOwnProperty('product_id')) {
 				if (pParam.product_id != null && pParam.product_id != undefined && pParam.product_id != '') {
-					var xProduct = JSON.parse(pParam.product_id);
-					if (xProduct.length > 0) {
+					
+					if (pParam.product_id.length > 0) {
+						// var xProduct = JSON.parse(pParam.product_id);
 						xInclude.push(
 							{
-								model: _modelPaymentRequestDetail,
-								as: 'payment_request_detail'
+								model: _modelGoodsReceiptDetail,
+								as: 'goods_receipt_detail'
 							}
 						)
 
 						xWhereAnd.push({
-							'$payment_request_detail.product_id$': {
-								[Op.in]: xProduct
+							'$goods_receipt_detail.product_id$': {
+								[Op.in]: pParam.product_id
 							}
 						});
 					}
@@ -283,7 +284,8 @@ class GoodsReceiptRepository {
 				where: xWhere,
 				order: [ xOrder ],
 				include: xInclude,
-				subQuery: false
+				subQuery: false,
+				logging: true
 			};
 
 			var xCountDataWithoutLimit = await _modelDb.count(xParamQuery);
