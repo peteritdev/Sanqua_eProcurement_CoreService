@@ -525,12 +525,12 @@ class PaymentRequestService {
 										}
 
 										if (xArrItem[j].payment_request != null && xArrItem[j].payment_request.status != 4 && xArrItem[j].payment_request.status != 5) {
-											xTotalQtyRequest += xArrItem[j].qty_request;
+											xTotalQtyRequest += Number(xArrItem[j].qty_request || 0);
 											
 											xArrPayreqNo.push(xArrItem[j].payment_request.document_no);
 										}
 									}
-									xTotalQtyRequest += xJoArrItems[i].qty_request;
+									xTotalQtyRequest += Number(xJoArrItems[i].qty_request || 0);
 									// const xResultGetPrd = await _purchaseRequestDetailRepoInstance.list({id: xJoArrItems[i].prd_id});
 									// console.log(`>>> xResultGetPrd ${JSON.stringify(xResultGetPrd)}`);
 									// console.log(`>>> xTotalQtyRequest x xFpbItemQty ${JSON.stringify(xTotalQtyRequest)}`, xFpbItemQty);
