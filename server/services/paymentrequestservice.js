@@ -512,7 +512,7 @@ class PaymentRequestService {
 							// check if total qty_request is exceed qty on fpb item or not
 							// if exceed then return cannot create payreq if not then continue
 							const xResultCheckItem = await _paymentRequestDetailRepoInstance.list({prd_id: xJoArrItems[i].prd_id});
-							// console.log(`>>> xResultCheckItem ${JSON.stringify(xResultCheckItem)}`);
+							console.log(`>>> xResultCheckItem ${JSON.stringify(xResultCheckItem)}`);
 							if (xResultCheckItem.status_code == '00') {
 								if (xResultCheckItem.data.count > 0) {
 									let xArrItem = xResultCheckItem.data.rows;
@@ -525,15 +525,15 @@ class PaymentRequestService {
 										}
 
 										if (xArrItem[j].payment_request != null && xArrItem[j].payment_request.status != 4 && xArrItem[j].payment_request.status != 5) {
-											xTotalQtyRequest += xArrItem[j].qty_request;
+											xTotalQtyRequest += Number(xArrItem[j].qty_request || 0);
 											
 											xArrPayreqNo.push(xArrItem[j].payment_request.document_no);
 										}
 									}
-									xTotalQtyRequest += xJoArrItems[i].qty_request;
+									xTotalQtyRequest += Number(xJoArrItems[i].qty_request || 0);
 									// const xResultGetPrd = await _purchaseRequestDetailRepoInstance.list({id: xJoArrItems[i].prd_id});
 									// console.log(`>>> xResultGetPrd ${JSON.stringify(xResultGetPrd)}`);
-									// console.log(`>>> xTotalQtyRequest x xFpbItemQty ${JSON.stringify(xTotalQtyRequest)}`, xFpbItemQty);
+									console.log(`>>> xTotalQtyRequest x xFpbItemQty ${JSON.stringify(xTotalQtyRequest)}`, xFpbItemQty);
 									if (xTotalQtyRequest > xFpbItemQty) {
 										xJoResult = {
 											status_code: '-99',
