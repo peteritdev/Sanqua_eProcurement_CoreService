@@ -93,10 +93,11 @@ class PJCAService {
 							var xTotalDiscItem = 0;
 							var xTotalDiscWoTax = 0;
 							var xTaxes = 0;
+							var xDpp = 0
 								
 							// // looping detail item
 							for (var i in xPjcaDetail) {
-								// delete xPjcaDetail[i].price_total
+								delete xPjcaDetail[i].price_total
 								var xPricePerItem = xPjcaDetail[i].price_done
 								// var xTotalPrice = Math.round((xPjcaDetail[i].price_request * xPjcaDetail[i].qty_request) * 1000) / 1000
 								var xDiscAmount = xPjcaDetail[i].discount_amount || 0
@@ -122,11 +123,12 @@ class PJCAService {
 								xDiscWoTax = Math.round((xPricePerItem * (xDiscPercent / 100)) * 1000) / 1000
 
 								xPriceWithDisc = Math.round((xPricePerItem - xDiscWoTax) * 1000) / 1000
+
 								// calc price after tax
 								if (xPjcaDetail[i].tax != null) {
 									var taxValue = xPjcaDetail[i].tax.value / 100
 									if (xPjcaDetail[i].tax.type == 1) {
-										taxValue = 1 + taxValue
+										taxValue = 1 +(xPjcaDetail[i].tax.value / 100)
 										xPriceBeforeTax = Math.round((xPriceWithDisc / taxValue) * 1000) / 1000
 										xTax = Math.round((xPriceWithDisc - xPriceBeforeTax) * 1000) / 1000
 										// xTotalPriceWithTax = Math.round((xTotalPrice - xTax) * 1000) / 1000
@@ -135,8 +137,8 @@ class PJCAService {
 										}
 										xTotalPrice = Math.round((xPriceWithDisc - xTax) * 1000) / 1000
 									}else{
-										xPriceBeforeTax = Math.round((xPriceWithDisc / taxValue) * 1000) / 1000
-										xTax = Math.round((xPriceWithDisc - xPriceBeforeTax) * 1000) / 1000
+										// xPriceBeforeTax = Math.round((xPriceWithDisc / taxValue) * 1000) / 1000
+										xTax = Math.round((xPriceWithDisc * taxValue) * 1000) / 1000
 										xTotalDisc = xDiscWoTax
 										xTotalPrice = xPriceWithDisc
 									}
@@ -186,18 +188,25 @@ class PJCAService {
 
 							if (xGlobalAmount == 0) {
 								xDetail.data.untaxed_amount = Math.round((xDetail.data.total_base_price - xDetail.data.total_discount || 0 ) * 1000) / 1000
-								xDetail.data.total_tax_amount = Math.round(( xTaxes || 0 ) * 1000) / 1000
+								if (xPjcaDetail.every( ({ tax_type }) => tax_type == 6 || tax_type == 7)) {
+									xDpp = (Math.round((xDetail.data.untaxed_amount * (11/12)) * 1000 )  / 1000) || 0
+									xDetail.data.total_tax_amount = (Math.round((xDpp * 0.12) * 1000 )  / 1000) || 0
+								} else {
+									xDetail.data.total_tax_amount = Math.round(( xTaxes || 0 ) * 1000) / 1000
+								}
 							} else { 
 								xDetail.data.untaxed_amount = Math.round((xDetail.data.total_base_price - xGlobalAmount || 0) * 1000) / 1000
-								
-								if (xPjcaDetail.every( ({ tax_type }) => tax_type == 3 || tax_type == 4)) {
-									xDetail.data.total_tax_amount = (Math.round((xDetail.data.untaxed_amount * 0.11) * 1000 )  / 1000) || 0
+								if (xPjcaDetail.every( ({ tax_type }) => tax_type == 6 || tax_type == 7)) {
+									xDpp = (Math.round((xDetail.data.untaxed_amount * (11/12)) * 1000 )  / 1000) || 0
+									// before update ppn12%
+									// xDetail.data.total_tax_amount = (Math.round((xDetail.data.untaxed_amount * 0.11) * 1000 )  / 1000) || 0
+									xDetail.data.total_tax_amount = (Math.round((xDpp * 0.12) * 1000 )  / 1000) || 0
 								} else {
 									xDetail.data.total_tax_amount = (Math.round((xTaxes) * 1000 )  / 1000) || 0
 								}
 								// xDetail.data.total_tax_amount = (Math.round((xTaxes - (xTaxes * (xDetail.data.global_discount_percent / 100))) * 1000 )  / 1000) || 0
 							}
-
+							xDetail.data.total_dpp = xDpp
 							var xPreTotalPrice = xDetail.data.untaxed_amount + xDetail.data.total_tax_amount + xDetail.data.delivery_costs + xDetail.data.service_costs + xDetail.data.other_costs
 							xDetail.data.total_price = Math.round((xPreTotalPrice || 0) * 1000) / 1000
 
