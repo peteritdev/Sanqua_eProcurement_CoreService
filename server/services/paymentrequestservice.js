@@ -925,7 +925,7 @@ class PaymentRequestService {
 									canceled_reason: pParam.cancel_reason,
 									// approved_at: await _utilInstance.getCurrDateTime()
 								};
-								// var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
+								var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
 	
 								if (xUpdateResult.status_code == '00') {
 									if (xPayreqDetail.data.status != 0) {
