@@ -549,12 +549,25 @@
                     %>
               </td>
               <td class="border-rb">
+                <%
+                        if( qrCode.approval3 != null && qrCode.approval1.length > 0 ){
+
+                    %>
                 <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 45px;">
                   <tr>
+                    <% for(var i = 0; i < qrCode.approval3.length; i++ ) { %>
                     <td>
+                      <img
+                        src="<%=qrCode.qrPath%><%=qrCode.approval3[i]%>"
+                        width="80"
+                      />
                     </td>
+                    <% }%>
                   </tr>
                 </table>
+                <%
+                        }
+                    %>
               </td>
               <td class="border-b">
                 <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 45px;">
