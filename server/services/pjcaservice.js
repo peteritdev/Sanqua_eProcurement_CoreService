@@ -41,6 +41,8 @@ const _oAuthService = new OAuthService();
 
 const PaymentRequestService = require('./paymentrequestservice.js');
 const _paymentRequestServiceInstance = new PaymentRequestService();
+const CurrencyService = require('../services/currencyservice.js');
+const _currencyService = new CurrencyService();
 
 const _xClassName = 'PJCAService';
 
@@ -208,7 +210,9 @@ class PJCAService {
 							}
 							xDetail.data.total_dpp = xDpp
 							var xPreTotalPrice = xDetail.data.untaxed_amount + xDetail.data.total_tax_amount + xDetail.data.delivery_costs + xDetail.data.service_costs + xDetail.data.other_costs
-							xDetail.data.total_price = Math.round((xPreTotalPrice || 0) * 1000) / 1000
+							
+							const xTotalPriceRound = Math.round((xPreTotalPrice || 0) * 1000) / 1000
+							xDetail.data.total_price = xTotalPriceRound
 
 							// Get Payreq Total and find difference
 							let xPayreqDetail = await _paymentRequestServiceInstance.detail({
@@ -216,13 +220,19 @@ class PJCAService {
 							});
 							if (xPayreqDetail.status_code == '00') {
 								xDetail.data.payment_request.total_price = xPayreqDetail.data.total_price || 0
-								xDetail.data.difference_price = (Math.round(
-									Math.abs(
-									  xDetail.data.total_price - xPayreqDetail.data.total_price
-									) * 1000
-								  ) / 1000) || 0
+								const xDiffPrice = xDetail.data.total_price - xPayreqDetail.data.total_price
+
+								xDetail.data.difference_type = xDiffPrice > 0 ? 'Lebih' : 'Kurang'
+								// xDetail.data.difference_price = (Math.round(
+								// 	(xDetail.data.total_price - xPayreqDetail.data.total_price) * 1000
+								// ) / 1000) || 0
+								xDetail.data.difference_price =  (Math.round(Math.abs( xDiffPrice ) * 1000) / 1000) || 0
 							}
-							console.log(`>>> xPayreqDetail: ${JSON.stringify(xPayreqDetail)}`);
+							// console.log(`>>> xPayreqDetail: ${JSON.stringify(xPayreqDetail)}`);
+
+							// Convert nominal to trebilang
+							const xTerbilang = await _currencyService.terbilang(xTotalPriceRound)
+							xDetail.data.terbilang = xTerbilang
 
 							// Get Approval Matrix
 							var xParamApprovalMatrix = {

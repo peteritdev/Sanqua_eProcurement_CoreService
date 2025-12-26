@@ -370,7 +370,7 @@
               %>
 
               <%
-              if(data.data.difference_price != null && data.data.difference_price > 0){
+              if(data.data.difference_price != null && data.data.difference_price != 0){
               %>
                 <% for (let i = 0; i < 5; i++) { %>
                 <tr>
@@ -385,9 +385,9 @@
                     <td class="border-rb">
                       <table style="margin-left: auto;" cellspacing="0" cellpadding="0">
                         <tr>
-                          <td style="width: 50px; text-align: right; padding-right: 5px;">CA: </td>
+                          <td style="width: 50px; text-align: right; padding-right: 5px;">Realisasi: </td>
                           <td style="width: 10px; text-align: right;">Rp </td>
-                          <td style="width: 120px; text-align: right;"><%=data.data.payment_request.total_price != null ? data.data.payment_request.total_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                          <td style="width: 120px; text-align: right;"><%=data.data.total_price != null ? data.data.total_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                         </tr>
                       </table>
                     </td>
@@ -396,9 +396,9 @@
                     <td style="text-align: right" class="border-rb">
                       <table style="margin-left: auto;" cellspacing="0" cellpadding="0">
                         <tr>
-                          <td style="width: 50px; text-align: right; padding-right: 5px;">Realisasi: </td>
+                          <td style="width: 50px; text-align: right; padding-right: 5px;">CA: </td>
                           <td style="width: 10px; text-align: right;" class="border-b">Rp </td>
-                          <td style="width: 120px; text-align: right;" class="border-b"><%=data.data.total_price != null ? data.data.total_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                          <td style="width: 120px; text-align: right;" class="border-b"><%=data.data.payment_request.total_price != null ? data.data.payment_request.total_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                         </tr>
                       </table>
                     </td>
@@ -409,7 +409,7 @@
                         <tr>
                           <td style="width: 50px; text-align: right; padding-right: 5px;">Selisih: </td>
                           <td >Rp </td>
-                          <td style="width: 120px; text-align: right;"><%=data.data.difference_price != null ? data.data.difference_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                          <td style="width: 120px; text-align: right;">(<%=data.data.difference_type%>) <%=data.data.difference_price != null ? data.data.difference_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%> </td>
                         </tr>
                       </table>
                     </td>
@@ -477,7 +477,7 @@
               <tr>
                 <td colspan="4" style="text-align: left" class="border-b">
                   <span> Terbilang </span>
-                  <span style="margin: 0 5px">: </span>
+                  <span style="margin: 0 5px">: <%=data.data.terbilang%></span>
                 </td>
               </tr>
             </tbody>
@@ -609,11 +609,31 @@
               <th style="padding: 3px 0;"
                 class="border-rb" style="width: 50%;"
               >
+              <%
+                      if( qrCode.approval3 != null && qrCode.approval3.length > 0 ){
+
+                  %>
+              <table style="margin: auto; text-align: center;">
+                <tr>
+                  <% for(var i = 0; i < approver3.length; i++ ) { %>
+                  <td><%=approver3[i].user.name%></td>
+                  <% }%>
+                </tr>
+              </table>
+              <%
+                      } else {
+                  %>
               <table style="margin: auto; text-align: center;">
                 <tr>
                   <td></td>
                 </tr>
+                <tr>
+                  <td>(.............................)</td>
+                </tr>
               </table>
+              <%
+                      }
+                  %>
               </th>
               <th style="padding: 3px 0;"
                 class="border-b" style="width: 50%;"

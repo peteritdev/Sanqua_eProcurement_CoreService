@@ -81,7 +81,7 @@
               margin-left: -60px;
               font-weight: bold;
             "
-            ><strong>PAYMENT REQUEST</strong></span
+            ><strong>CASH ADVANCE</strong></span
           >
         </td>
         <td style="width: 20%; padding: 0; text-align: left;">
@@ -141,6 +141,8 @@
                           display: flex;
                           align-items: center;
                           justify-content: center;
+                          position: relative;
+                          top: 4px;
                         "
                       >
                         <% if( data.data.payment_type == 1 ){ %>
@@ -155,10 +157,10 @@
                           style="
                             margin-left: 5px;
                             position: relative;
-                            top: -5px;
+                            top: -8px;
                           "
                         >
-                          Tunai
+                          Tarik Tunai BDC
                         </span>
                       </span>
                     </td>
@@ -182,7 +184,7 @@
                           style="
                             margin-left: 5px;
                             position: relative;
-                            top: -5px;
+                            top: -7px;
                           "
                         >
                           Bank
@@ -193,30 +195,6 @@
                 </table>
               </td>
               <th style="text-align: left; width: 65%;">
-                <table style="margin-left: 15px">
-                  <tr>
-                    <td>
-                      <% if( data.data.payment_type == 3 ){ %>
-                      <img src="<%=imagePath%>box_checklist.png" width="15" />
-                      <% }else{ %>
-                      <img src="<%=imagePath%>blank_checklist.png" width="15" />
-                      <% } %>
-                    </td>
-                    <td style="width: 45px">Giro</td>
-                    <td>
-                      <% if( data.data.payment_type == 3 ){ %>
-                        <span>An. <%=data.data.account_name%></span>
-                      <% }else{ %>
-                        <span>An. </span>
-                      <% } %>
-                    </td>
-                  </tr>
-                </table>
-              </th>
-            </tr>
-            <tr>
-              <td colspan="1" style="text-align: left"></td>
-              <th style="text-align: left">
                 <table style="margin-left: 15px">
                   <tr>
                     <td>
@@ -653,7 +631,7 @@
               <tr>
                 <td colspan="6" style="text-align: left" class="border-b">
                   <span> Terbilang </span>
-                  <span style="margin: 0 5px">: </span>
+                  <span style="margin: 0 5px">: <%=data.data.terbilang%></span>
                 </td>
               </tr>
             </tbody>
@@ -673,7 +651,7 @@
               >
               </th>
               <th
-                class="border-b"
+                 colspan="2" class="border-b"
               >
               </th>
             </tr>
@@ -683,7 +661,7 @@
               >
               </th>
               <th
-                class="border-b" style="width: 50%;"
+                colspan="2" class="border-b" style="width: 50%;"
               >
                 Kolom Persetujuan
               </th>
@@ -691,7 +669,8 @@
             <tr>
               <th style="width: 25%;">Pemohon</th>
               <th class="border-r" style="width: 25%;">Ka. Department</th>
-              <th class="border-b" style="width: 50%;">Plant Manager / Direktur</th>
+              <th class="border-rb" style="width: 25%;">Finance</th>
+              <th class="border-b" style="width: 25%;">Plant Manager / Direktur</th>
             </tr>
             <tr>
               <td>
@@ -722,6 +701,14 @@
                 <%
                         }
                     %>
+              </td>
+              <td class="border-rb">
+                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 45px;">
+                  <tr>
+                    <td>
+                    </td>
+                  </tr>
+                </table>
               </td>
               <td class="border-b">
                 <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 45px;">
@@ -774,11 +761,41 @@
                   %>
               </th>
               <th style="padding: 3px 0;"
-                class="border-b" style="width: 50%;"
+                class="border-rb"
               >
+              <%
+                      if( qrCode.approval3 != null && qrCode.approval3.length > 0 ){
+
+                  %>
+              <table style="margin: auto; text-align: center;">
+                <tr>
+                  <% for(var i = 0; i < approver3.length; i++ ) { %>
+                  <td><%=approver3[i].user.name%></td>
+                  <% }%>
+                </tr>
+              </table>
+              <%
+                      } else {
+                  %>
               <table style="margin: auto; text-align: center;">
                 <tr>
                   <td></td>
+                </tr>
+                <tr>
+                  <td></td>
+                </tr>
+              </table>
+              <%
+                      }
+                  %>    
+              </th>
+              
+              <th style="padding: 3px 0;"
+                class="border-b"
+              >
+              <table style="margin: auto; text-align: center;">
+                <tr>
+                  <!-- <td>PM/Dirut</td> -->
                 </tr>
               </table>
               </th>
@@ -928,85 +945,6 @@
                           </td>
                         </tr>
                       </table>
-                    </th>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="3" style="padding: 0px; margin: 0px">
-          <table
-            cellspacing="0"
-            cellpadding="2"
-            style="width: 100%; border-width: 0.2px"
-          >
-            <tr>
-              <th style="text-align: left; width: 16%" class="border-tr">
-                Serah Terima Kas
-              </th>
-              <th style="text-align: left; width: 42%" class="border-tr">
-                Diserahkan Oleh Finance:
-              </th>
-              <th style="text-align: left; width: 42%" class="border-t">
-                Diterima Oleh:
-              </th>
-            </tr>
-            <tr>
-              <td class="border-r"></td>
-              <td class="border-r">
-                <table cellspacing="0" cellpadding="0" style="width: 100%;">
-                  <tr>
-                    <th style="height: 30px; vertical-align: top; text-align: right;" colspan="2">
-                      <span>
-                        Tgl :
-                        <span style="margin: 0 1px 0 0;">..........................</span>
-                      </span>
-                    </th>
-                  </tr>
-                  <tr>
-                    <th style="text-align: left !important;">
-                      <span
-                      >
-                        Nama :
-                        <span style="margin: 0 1px 0 0;">..........................</span>
-                      </span>
-                    </th>
-                    <th style="text-align: right !important;">
-                      <span>
-                        TTD
-                        <span style="margin: 0 1px 0 0;">..........................</span>
-                      </span>
-                    </th>
-                  </tr>
-                </table>
-              </td>
-              <td>
-                <table cellspacing="0" cellpadding="0" style="width: 100%;">
-                  <tr>
-                    <th style="height: 30px; vertical-align: top; text-align: right;" colspan="2">
-                      <span>
-                        Tgl :
-                        <span style="margin: 0 1px 0 0;">..........................</span>
-                      </span>
-                    </th>
-                  </tr>
-                  <tr>
-                    <th style="text-align: left !important;">
-                      <span
-                      >
-                        Nama :
-                        <span style="margin: 0 1px 0 0;">..........................</span>
-                      </span>
-                    </th>
-                    <th style="text-align: right !important;">
-                      <span
-                      >
-                        TTD 
-                        <span style="margin: 0 1px 0 0;">..........................</span>
-                      </span>
                     </th>
                   </tr>
                 </table>

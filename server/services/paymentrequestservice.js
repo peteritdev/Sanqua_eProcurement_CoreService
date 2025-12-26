@@ -48,6 +48,9 @@ const _pjcaRepoInstance = new PJCARepository();
 const OAuthService = require('../services/oauthservice.js');
 const _oAuthService = new OAuthService();
 
+const CurrencyService = require('../services/currencyservice.js');
+const _currencyService = new CurrencyService();
+
 // const PJCAService = require('../services/pjcaservice.js');
 // const _pjcaServiceInstance = new PJCAService();
 
@@ -224,13 +227,17 @@ class PaymentRequestService {
 								// xDetail.data.total_tax_amount = (Math.round((xTaxes - (xTaxes * (xDetail.data.global_discount_percent / 100))) * 1000 )  / 1000) || 0
 							}
 							xDetail.data.total_dpp = xDpp
-							var xPreTotalPrice = xDetail.data.untaxed_amount + xDetail.data.total_tax_amount + xDetail.data.delivery_costs + xDetail.data.service_costs + xDetail.data.other_costs
-							xDetail.data.total_price = Math.round((xPreTotalPrice || 0) * 1000) / 1000
+							const xPreTotalPrice = xDetail.data.untaxed_amount + xDetail.data.total_tax_amount + xDetail.data.delivery_costs + xDetail.data.service_costs + xDetail.data.other_costs
+							const xTotalPriceRound = Math.round((xPreTotalPrice || 0) * 1000) / 1000
+							xDetail.data.total_price = xTotalPriceRound
 							// get Detail FPB
 							// let xFpbDetail = await _purchaseRequestRepoInstance.getById({ id: xDetail.data.purchase_request_id })
 							// if (xFpbDetail != null) {
 							// 	xDetail.data.fpb_no = xFpbDetail.request_no
 							// }
+							// Convert nominal to trebilang
+							const xTerbilang = await _currencyService.terbilang(xTotalPriceRound)
+							xDetail.data.terbilang = xTerbilang
 							
 							// Get Approval Matrix
 							var xParamApprovalMatrix = {
@@ -572,6 +579,10 @@ class PaymentRequestService {
 					pParam.updatedAt = await _utilInstance.getCurrDateTime();
 					pParam.updated_by = pParam.user_id;
 					pParam.updated_by_name = pParam.user_name;
+					delete pParam.employee_id;
+					delete pParam.employee_name;
+					delete pParam.department_id;
+					delete pParam.department_name;
 					xFlagProcess = true;
 				} else {
 					xJoResult = xDecId;
