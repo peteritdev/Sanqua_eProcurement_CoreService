@@ -69,7 +69,6 @@ async function paymentRequest_Detail(req, res) {
 async function paymentRequest_List(req, res) {
 	var joResult;
 	var oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
-
 	if (oAuthResult.status_code == '00') {
 		if (oAuthResult.token_data.status_code == '00') {
 			// Validate first
@@ -89,8 +88,8 @@ async function paymentRequest_List(req, res) {
 				req.query.logged_is_admin = xLevel.is_admin;
 				req.query.user_id = oAuthResult.token_data.result_verify.id;
 
-				req.query.logged_company_id = oAuthResult.token_data.result_verify.employee_info.company.id;
-				req.query.logged_company_name = oAuthResult.token_data.result_verify.employee_info.company.name;
+				req.query.logged_company_id = oAuthResult.token_data.result_verify.employee_info.company != null ? oAuthResult.token_data.result_verify.employee_info.company.id : oAuthResult.token_data.result_verify.company.id;
+				req.query.logged_company_name = oAuthResult.token_data.result_verify.employee_info.company != null ? oAuthResult.token_data.result_verify.employee_info.company.name : oAuthResult.token_data.result_verify.company.name;
 				req.query.method = req.headers['x-method'];
 				req.query.token = req.headers['x-token'];
 				joResult = await _serviceInstance.list(req.query);
@@ -607,8 +606,8 @@ async function paymentRequest_FetchMatrix(req, res) {
 			} else {
 				req.body.user_id = oAuthResult.token_data.result_verify.id;
 				req.body.user_name = oAuthResult.token_data.result_verify.name;
-				req.body.logged_company_id = oAuthResult.token_data.result_verify.employee_info.company.id;
-				req.body.logged_company_name = oAuthResult.token_data.result_verify.employee_info.company.name;
+				req.query.logged_company_id = oAuthResult.token_data.result_verify.employee_info.company != null ? oAuthResult.token_data.result_verify.employee_info.company.id : oAuthResult.token_data.result_verify.company.id;
+				req.query.logged_company_name = oAuthResult.token_data.result_verify.employee_info.company != null ? oAuthResult.token_data.result_verify.employee_info.company.name : oAuthResult.token_data.result_verify.company.name;
 
 				req.body.logged_department_id =
 					oAuthResult.token_data.result_verify.employee_info.department.section.id;

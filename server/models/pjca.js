@@ -31,6 +31,7 @@ module.exports = (sequelize, DataTypes) => {
 		account_name: DataTypes.STRING,
 		account_number: DataTypes.STRING,
 		bank_name: DataTypes.STRING,
+		current_approval_ids: DataTypes.JSON,
 
 		is_delete: DataTypes.INTEGER,
 		deleted_at: DataTypes.DATE,

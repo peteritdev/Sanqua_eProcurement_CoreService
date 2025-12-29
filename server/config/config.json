@@ -70,6 +70,9 @@
       "odoo": "http://localhost:9898/api",
       "logging": {
         "url": "http://localhost:8191/api/esanqua/log/v1/ecatalog"
+      },
+      "hr": {
+        "url": "http://localhost:7190/api/esanqua/hr/v1"
       }
     },
 
@@ -192,6 +195,9 @@
       "odoo": "http://10.10.20.6:9898/api",
       "logging": {
         "url": "http://localhost:8191/api/esanqua/log/v1/ecatalog"
+      },
+      "hr": {
+        "url": "http://localhost:7190/api/esanqua/hr/v1"
       }
     },
 
@@ -312,6 +318,9 @@
       "odoo": "http://10.10.20.5:9898/api",
       "logging": {
         "url": "http://localhost:8191/api/esanqua/log/v1/ecatalog"
+      },
+      "hr": {
+        "url": "http://localhost:7190/api/esanqua/hr/v1"
       }
     },
 
@@ -430,6 +439,9 @@
       "odoo": "http://10.10.20.6:8989/api",
       "logging": {
         "url": "http://localhost:8191/api/esanqua/log/v1/ecatalog"
+      },
+      "hr": {
+        "url": "http://localhost:7190/api/esanqua/hr/v1"
       }
     },
 

@@ -461,7 +461,7 @@ class PurchaseRequestRepository {
 				let xSqlWhereStatusOwnedDoc = '';
 				if (pParam.hasOwnProperty('status')) {
 					if (pParam.status != '') {
-						xSqlWhereStatusOwnedDoc = ' AND pr.status = :status';
+						xSqlWhereStatusOwnedDoc = ' AND pr.status = :status ';
 					}
 				}
 
@@ -471,10 +471,15 @@ class PurchaseRequestRepository {
 						xSqlWhereRabOwnedDoc = ' AND pr.budget_plan_id = :budgetPlanId';
 					}
 				}
-
-				xSqlWhere = ` (( ${xSqlWhere} ) OR (${xSqlWhereOr} ${xSqlWhereCompanyOwnedDoc != ''
-					? xSqlWhereCompanyOwnedDoc
-					: ''} ${xSqlWhereProjectOwnedDoc} ${xSqlWhereCategoryOwnedDoc} ${xSqlWhereDepartmentOwnedDoc} ${xSqlWhereStatusOwnedDoc} ${xSqlWhereRabOwnedDoc}))`;
+				let joinedOr = `${xSqlWhereOr} ${xSqlWhereCompanyOwnedDoc != ''
+						? xSqlWhereCompanyOwnedDoc
+						: ''} ${xSqlWhereProjectOwnedDoc} ${xSqlWhereCategoryOwnedDoc} ${xSqlWhereDepartmentOwnedDoc} ${xSqlWhereStatusOwnedDoc} ${xSqlWhereRabOwnedDoc}`
+				
+				if (pParam.hasOwnProperty('inappnotif') && pParam.inappnotif) {
+					xSqlWhere = ` (${joinedOr})`;
+				} else {
+					xSqlWhere = ` (( ${xSqlWhere} ) OR (${joinedOr}))`;
+				}
 			}
 		}
 
@@ -655,11 +660,12 @@ class PurchaseRequestRepository {
 			LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
 			  LEFT JOIN ms_projects p ON p.id = pr.project_id
 		  WHERE ${xSqlWhere}`;
-
+		console.log('sql>>>', xSql);
+		
 		xData = await sequelize.query(xSql, {
 			replacements: xObjJsonWhere,
 			type: sequelize.QueryTypes.SELECT,
-			// logging: console.log
+			// logging: true
 		});
 
 		xTotalRecord = await sequelize.query(xSqlCount, {

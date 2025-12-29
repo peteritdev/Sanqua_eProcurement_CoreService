@@ -38,6 +38,7 @@ module.exports = (sequelize, DataTypes) => {
 		payment_desc: DataTypes.STRING,
 		description: DataTypes.STRING,
 		file: DataTypes.JSON,
+		current_approval_ids: DataTypes.JSON,
 
 		is_delete: DataTypes.INTEGER,
 		deleted_at: DataTypes.DATE,

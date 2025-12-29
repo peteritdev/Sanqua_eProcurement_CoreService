@@ -288,62 +288,106 @@ class PJCAService {
 		var xJoArrData = [];
 		var xDecId = null;
 		var xFlagProccess = false;
+		var xArrOwnedDocNo = [];
 
 		try {
-			if (pParam.hasOwnProperty('payment_request_id')) {
-				if (pParam.payment_request_id != '') {
-					// xEncId = pParam.payment_request_id;
-					let xDecId = await _utilInstance.decrypt(pParam.payment_request_id, config.cryptoKey.hashKey);
-					if (xDecId.status_code == '00') {
-						pParam.payment_request_id = xDecId.decrypted;
+			if (pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.user_id = xDecId.decrypted;
+					xFlagProccess = true
+					if (pParam.hasOwnProperty('payment_request_id')) {
+						if (pParam.payment_request_id != '') {
+							let xDecId = await _utilInstance.decrypt(pParam.payment_request_id, config.cryptoKey.hashKey);
+							if (xDecId.status_code == '00') {
+								pParam.payment_request_id = xDecId.decrypted;
+							}
+						}
+					}
+				} else {
+					xJoResult = xDecId;
+				}
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Invalid Logged User Id'
+				};
+			}
+			
+			if (pParam.hasOwnProperty('inappnotif') && pParam.inappnotif) {
+				const xOwnedDocumentPayload = {
+					application_id: 8,
+					table_name: config.dbTables.pjca,
+					document_id: '',
+					user_id: pParam.user_id
+				}
+			
+				xOwnedDocumentPayload.status = 0
+				
+				let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, xOwnedDocumentPayload);
+				console.log(`>>> xOwnedDocument : ${JSON.stringify(xOwnedDocument)}`);
+
+				if (xOwnedDocument.status_code == '00') {
+					if (xOwnedDocument.hasOwnProperty('token_data')) {
+						if (xOwnedDocument.token_data.status_code == '00') {
+							for (var i in xOwnedDocument.token_data.data) {
+								xArrOwnedDocNo.push(xOwnedDocument.token_data.data[i].document_no);
+							}
+							pParam.owned_document_no = xArrOwnedDocNo;
+							pParam.current_approval_ids = pParam.user_id;
+						}
 					}
 				}
 			}
-			var xResultList = await _repoInstance.list(pParam);
-			if (xResultList) {
-				console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
-				if (xResultList.status_code == '00') {
-					var xRows = xResultList.data.rows;
-					if (xRows.length > 0) {
-						for (var i in xRows) {
-							xJoArrData.push({
-								id: await _utilInstance.encrypt(xRows[i].id.toString(), config.cryptoKey.hashKey),
-								document_no: xRows[i].document_no,
-								company_id: xRows[i].company_id,
-								company_name: xRows[i].company_name,
-								employee_id: xRows[i].employee_id,
-								employee_name: xRows[i].employee_name,
-								department_id: xRows[i].department_id,
-								department_name: xRows[i].department_name,
-								to_department_id: xRows[i].to_department_id,
-								to_department_name: xRows[i].to_department_name,
-								total_qty_released: xRows[i].total_qty_released,
-								total_price_released: xRows[i].total_price_released,
-								status: xRows[i].status,
-								created_at: moment(xRows[i].createdAt).format('DD MMM YYYY HH:mm:ss'),
-								created_by_name: xRows[i].created_by_name,
-								updated_at: moment(xRows[i].updatedAt).format('DD MMM YYYY HH:mm:ss'),
-								updated_by_name: xRows[i].updated_by_name,
-								payment_request: xRows[i].payment_request,
-							});
-						}
 
-						xJoResult = {
-							status_code: '00',
-							status_msg: 'OK',
-							data: xJoArrData
-						};
+			if (xFlagProccess) {
+				var xResultList = await _repoInstance.list(pParam);
+				if (xResultList) {
+					console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
+					if (xResultList.status_code == '00') {
+						var xRows = xResultList.data.rows;
+						if (xRows.length > 0) {
+							for (var i in xRows) {
+								xJoArrData.push({
+									id: await _utilInstance.encrypt(xRows[i].id.toString(), config.cryptoKey.hashKey),
+									document_no: xRows[i].document_no,
+									company_id: xRows[i].company_id,
+									company_name: xRows[i].company_name,
+									employee_id: xRows[i].employee_id,
+									employee_name: xRows[i].employee_name,
+									department_id: xRows[i].department_id,
+									department_name: xRows[i].department_name,
+									to_department_id: xRows[i].to_department_id,
+									to_department_name: xRows[i].to_department_name,
+									total_qty_released: xRows[i].total_qty_released,
+									total_price_released: xRows[i].total_price_released,
+									status: xRows[i].status,
+									created_at: moment(xRows[i].createdAt).format('DD MMM YYYY HH:mm:ss'),
+									created_by_name: xRows[i].created_by_name,
+									updated_at: moment(xRows[i].updatedAt).format('DD MMM YYYY HH:mm:ss'),
+									updated_by_name: xRows[i].updated_by_name,
+									payment_request: xRows[i].payment_request,
+								});
+							}
+
+							xJoResult = {
+								status_code: '00',
+								status_msg: 'OK',
+								data: xJoArrData,
+								total_record: xResultList.total_record
+							};
+						} else {
+							xJoResult = {
+								status_code: '-99',
+								status_msg: 'Data not found'
+							};
+						}
 					} else {
-						xJoResult = {
-							status_code: '-99',
-							status_msg: 'Data not found'
-						};
+						xJoResult = xResultList;
 					}
 				} else {
 					xJoResult = xResultList;
 				}
-			} else {
-				xJoResult = xResultList;
 			}
 		} catch (e) {
 			_utilInstance.writeLog(`${_xClassName}.list`, `Exception error: ${e.message}`, 'error');

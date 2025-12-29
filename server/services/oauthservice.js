@@ -62,6 +62,10 @@ class OAuthService {
 		)
 			? `user_id=${pParam.user_id}`
 			: ''}`;
+			if (pParam.hasOwnProperty('status')) {
+				xQueryParam = xQueryParam + `&status=${pParam.status}`
+			}
+		
 		var xHeader = {
 			headers: {
 				'x-method': pMethod,
@@ -144,6 +148,20 @@ class OAuthService {
 		var xResultVerify = await _utilInstance.axiosRequestPost(xAPIUrl, 'POST', pParam, xHeader);
 
 		return xResultVerify;
+	}
+	
+	async getEmployeeDetail( pMethod, pToken, pId) {
+		var xAPIUrl = config.api.hr.url;
+		var xQueryParam = `/employee/detail/${pId}`;
+		var xHeader = {
+			headers: {
+				'x-method': pMethod,
+				'x-token': pToken
+			}
+		};
+		var xResult = await _utilInstance.axiosRequest(xAPIUrl + xQueryParam, xHeader);
+
+		return xResult;
 	}
 }
 

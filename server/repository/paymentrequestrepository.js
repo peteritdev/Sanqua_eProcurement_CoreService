@@ -181,6 +181,16 @@ class PaymentRequestRepository {
 					}
 				}
 			}
+			
+			if (pParam.hasOwnProperty('current_approval_ids')) {
+				if (pParam.current_approval_ids != '') {
+					xWhereAnd.push(
+						 Sequelize.literal(
+							`"tr_paymentrequests"."current_approval_ids"::jsonb @> '["${pParam.current_approval_ids}"]'::jsonb`
+						)
+					);
+				}
+			}
 			// if (pParam.hasOwnProperty('filter')) {
 			// 	if (pParam.filter != null && pParam.filter != undefined && pParam.filter != '') {
 			// 		var xFilter = JSON.parse(pParam.filter);
@@ -247,6 +257,18 @@ class PaymentRequestRepository {
 					);
 				}
 			}
+			
+			if (pParam.hasOwnProperty('owned_document_no')) {
+				if (pParam.owned_document_no != '') {
+					xWhereOr.push(
+						{
+							document_no: {
+								[Op.in]: pParam.owned_document_no
+							}
+						}
+					);
+				}
+			}
 
 			if (xWhereAnd.length > 0) {
 				xWhere.push({
@@ -270,7 +292,8 @@ class PaymentRequestRepository {
 				where: xWhere,
 				order: [ xOrder ],
 				include: xInclude,
-				subQuery: false
+				subQuery: false,
+				loging: true
 			};
 
 			var xCountDataWithoutLimit = await _modelDb.count(xParamQuery);
