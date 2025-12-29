@@ -80,13 +80,16 @@ class BudgetPlanService {
                 // Rules of show RAB List :
                 // - RAB that has same department
                 // - RAB that the user as an approver
-
-                let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, {
+                const xOwnedDocumentPayload = {
                     application_id: config.applicationId,
                     table_name: config.dbTables.rab,
                     document_id: '',
                     user_id: pParam.user_id
-                });
+                }
+                if (pParam.hasOwnProperty('inappnotif') && pParam.inappnotif) {
+                    xOwnedDocumentPayload.status = 0
+                }
+                let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, xOwnedDocumentPayload);
                 // console.log(`>>> xOwnedDocument : ${JSON.stringify(xOwnedDocument)}`);
 
                 if (xOwnedDocument.status_code == '00') {
@@ -109,11 +112,15 @@ class BudgetPlanService {
 
                     // Commented first for testing
                     if (!pParam.hasOwnProperty('company_id')) {
-                        pParam.company_id = pParam.logged_company_id;
+                        if (!pParam.hasOwnProperty('inappnotif')) {
+                            pParam.company_id = pParam.logged_company_id;
+                        }
                     }
 
                     if (!pParam.hasOwnProperty('department_id')) {
-                        pParam.department_id = pParam.logged_department_id;
+                        if (!pParam.hasOwnProperty('inappnotif')) {
+                            pParam.department_id = pParam.logged_department_id;
+                        }
                     }
 
                     if (pParam.hasOwnProperty("filter")) {

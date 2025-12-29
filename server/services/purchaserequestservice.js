@@ -432,13 +432,17 @@ class PurchaseRequestService {
 			// Rules of show FPB List :
 			// - FPB that has same department
 			// - FPB that the user as an approver
-
-			let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, {
+			const xOwnedDocumentPayload = {
 				application_id: config.applicationId,
 				table_name: config.dbTables.fpb,
 				document_id: '',
 				user_id: pParam.user_id
-			});
+			}
+			
+			if (pParam.hasOwnProperty('inappnotif') && pParam.inappnotif) {
+				xOwnedDocumentPayload.status = 0
+			}
+			let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, xOwnedDocumentPayload);
 			// console.log(`>>> xOwnedDocument : ${JSON.stringify(xOwnedDocument)}`);
 
 			if (xOwnedDocument.status_code == '00') {
@@ -483,11 +487,15 @@ class PurchaseRequestService {
 
 				// Commented first for testing
 				if (!pParam.hasOwnProperty('company_id')) {
-					pParam.company_id = pParam.logged_company_id;
+					if (!pParam.hasOwnProperty('inappnotif')) {
+						pParam.company_id = pParam.logged_company_id;
+					}
 				}
 
 				if (!pParam.hasOwnProperty('department_id')) {
-					pParam.department_id = pParam.logged_department_id;
+					if (!pParam.hasOwnProperty('inappnotif')) {
+						pParam.department_id = pParam.logged_department_id;
+					}
 				}
 
 				if (pParam.hasOwnProperty('pending_notif')) {
@@ -506,13 +514,11 @@ class PurchaseRequestService {
 					}
 				}
 
-				// console.log(`>>> pParam 2: ${JSON.stringify(pParam)}`);
 				var xResultList = await _repoInstance.list(pParam);
 
 				if (xResultList.total_record > 0) {
 					var fpbType = ["CA", "PO", "MIX"]
 					var xRows = xResultList.data;
-					// console.log('xRows>>>>>>>>', xRows);
 
 					if (pParam.hasOwnProperty('is_export')) {
 						if (pParam.is_export) {
@@ -929,8 +935,6 @@ class PurchaseRequestService {
 						xParamApprovalMatrix
 					);
 
-					// console.log(`>>> xResultApprovalMatrix: ${JSON.stringify(xResultApprovalMatrix)}`);
-
 					if (xResultApprovalMatrix != null) {
 						if (xResultApprovalMatrix.status_code == '00') {
 							let xListApprover = xResultApprovalMatrix.token_data.data;
@@ -993,6 +997,18 @@ class PurchaseRequestService {
 						}
 					}
 
+					// Get user company
+					var xGetUserDetail = await _oAuthService.getEmployeeDetail(
+						pParam.method,
+						pParam.token,
+						await _utilInstance.encrypt(xResult.employee_id.toString(), config.cryptoKey.hashKey)
+					);
+					
+					if (xGetUserDetail && xGetUserDetail.status == 0 && xGetUserDetail.token_data != undefined && xGetUserDetail.token_data.status_code == '00') {
+						xResult.employee_company_id = xGetUserDetail.token_data.data.company.plant_id
+						xResult.employee_company_name = xGetUserDetail.token_data.data.company.alias
+					}
+
 					xJoData = {
 						id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
 						project: xResult.project,
@@ -1001,7 +1017,9 @@ class PurchaseRequestService {
 						employee: {
 							// id: await _utilInstance.encrypt(xResult.employee_id.toString(), config.cryptoKey.hashKey),
 							id: xResult.employee_id,
-							name: xResult.employee_name
+							name: xResult.employee_name,
+							company_id: xResult.employee_company_id,
+							company_name: xResult.employee_company_name
 						},
 						department: {
 							id: xResult.department_id,

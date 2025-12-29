@@ -173,6 +173,16 @@ class PJCARepository {
 				}
 			}
 
+			if (pParam.hasOwnProperty('current_approval_ids')) {
+				if (pParam.current_approval_ids != '') {
+					xWhereAnd.push(
+						 Sequelize.literal(
+							`"tr_pjcas"."current_approval_ids"::jsonb @> '["${pParam.current_approval_ids}"]'::jsonb`
+						)
+					);
+				}
+			}
+
 			if (pParam.hasOwnProperty('keyword')) {
 				if (pParam.keyword != '') {
 					xWhereOr.push(
@@ -209,6 +219,18 @@ class PJCARepository {
 					);
 				}
 			}
+			
+			if (pParam.hasOwnProperty('owned_document_no')) {
+				if (pParam.owned_document_no != '') {
+					xWhereOr.push(
+						{
+							document_no: {
+								[Op.in]: pParam.owned_document_no
+							}
+						}
+					);
+				}
+			}
 
 			if (xWhereAnd.length > 0) {
 				xWhere.push({
@@ -232,7 +254,8 @@ class PJCARepository {
 				where: xWhere,
 				order: [ xOrder ],
 				include: xInclude,
-				subQuery: false
+				subQuery: false,
+				loging: true
 			};
 
 			var xCountDataWithoutLimit = await _modelDb.count(xParamQuery);

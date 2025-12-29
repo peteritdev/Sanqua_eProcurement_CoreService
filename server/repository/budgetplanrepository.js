@@ -46,6 +46,25 @@ class BudgetPlanRepository {
 				}
 			}
 
+
+			if (pParam.hasOwnProperty('status')) {
+				if (pParam.status != '') {
+					xWhereAnd.push({
+						status: pParam.status
+					});
+				}
+			}
+
+			if (pParam.hasOwnProperty('current_approval_ids')) {
+				if (pParam.current_approval_ids != '') {
+					xWhereAnd.push(
+						 Sequelize.literal(
+							`"tr_budgetplans"."current_approval_ids"::jsonb @> '["${pParam.current_approval_ids}"]'::jsonb`
+						)
+					);
+				}
+			}
+
 			if (pParam.hasOwnProperty('filter')) {
 				if (pParam.filter != null && pParam.filter != undefined && pParam.filter != '') {
 					var xFilter = JSON.parse(pParam.filter);
@@ -83,6 +102,18 @@ class BudgetPlanRepository {
 						{
 							employee_name: {
 								[Op.iLike]: '%' + pParam.keyword + '%'
+							}
+						}
+					);
+				}
+			}
+			
+			if (pParam.hasOwnProperty('owned_document_no')) {
+				if (pParam.owned_document_no != '') {
+					xWhereOr.push(
+						{
+							budget_no: {
+								[Op.in]: pParam.owned_document_no
 							}
 						}
 					);

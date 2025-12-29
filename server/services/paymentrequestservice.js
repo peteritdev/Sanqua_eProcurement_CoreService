@@ -51,6 +51,9 @@ const _oAuthService = new OAuthService();
 const CurrencyService = require('../services/currencyservice.js');
 const _currencyService = new CurrencyService();
 
+const NotificationService = require('../services/notificationservice.js');
+const _notificationService = new NotificationService();
+
 // const PJCAService = require('../services/pjcaservice.js');
 // const _pjcaServiceInstance = new PJCAService();
 
@@ -300,64 +303,106 @@ class PaymentRequestService {
 		var xJoArrData = [];
 		var xDecId = null;
 		var xFlagProccess = false;
+		var xArrOwnedDocNo = [];
 
 		try {
-			if (pParam.hasOwnProperty('purchase_request_id')) {
-				if (pParam.purchase_request_id != '') {
-					// xEncId = pParam.purchase_request_id;
-					let xDecId = await _utilInstance.decrypt(pParam.purchase_request_id, config.cryptoKey.hashKey);
-					if (xDecId.status_code == '00') {
-						pParam.purchase_request_id = xDecId.decrypted;
+			if (pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.user_id = xDecId.decrypted;
+					xFlagProccess = true
+					if (pParam.hasOwnProperty('purchase_request_id') && pParam.purchase_request_id != '') {
+						let xDecPrId = await _utilInstance.decrypt(pParam.purchase_request_id, config.cryptoKey.hashKey);
+						if (xDecPrId.status_code == '00') {
+							pParam.purchase_request_id = xDecPrId.decrypted;
+						}
+					}
+				} else {
+					xJoResult = xDecId;
+				}
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Invalid Logged User Id'
+				};
+			}
+			
+			if (pParam.hasOwnProperty('inappnotif') && pParam.inappnotif) {
+				const xOwnedDocumentPayload = {
+					application_id: 8,
+					table_name: config.dbTables.payreq,
+					document_id: '',
+					user_id: pParam.user_id
+				}
+			
+				xOwnedDocumentPayload.status = 0
+				
+				let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, xOwnedDocumentPayload);
+				console.log(`>>> xOwnedDocument : ${JSON.stringify(xOwnedDocument)}`);
+
+				if (xOwnedDocument.status_code == '00') {
+					if (xOwnedDocument.hasOwnProperty('token_data')) {
+						if (xOwnedDocument.token_data.status_code == '00') {
+							for (var i in xOwnedDocument.token_data.data) {
+								xArrOwnedDocNo.push(xOwnedDocument.token_data.data[i].document_no);
+							}
+							pParam.owned_document_no = xArrOwnedDocNo;
+							pParam.current_approval_ids = pParam.user_id;
+						}
 					}
 				}
 			}
 
-			var xResultList = await _repoInstance.list(pParam);
-			if (xResultList) {
-				// console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
-				if (xResultList.status_code == '00') {
-					var xRows = xResultList.data.rows;
-					if (xRows.length > 0) {
-						for (var i in xRows) {
-							xJoArrData.push({
-								id: await _utilInstance.encrypt(xRows[i].id.toString(), config.cryptoKey.hashKey),
-								document_no: xRows[i].document_no,
-								company_id: xRows[i].company_id,
-								company_name: xRows[i].company_name,
-								employee_id: xRows[i].employee_id,
-								employee_name: xRows[i].employee_name,
-								department_id: xRows[i].department_id,
-								department_name: xRows[i].department_name,
-								status: xRows[i].status,
-								vendor_id: xRows[i].vendor_id,
-								vendor_name: xRows[i].vendor_name,
-								vendor_code: xRows[i].vendor_code,
-								payreq_type: xRows[i].payreq_type,
-								payment_type: xRows[i].payment_type,
-								created_at: moment(xRows[i].createdAt).format('DD MMM YYYY HH:mm:ss'),
-								created_by_name: xRows[i].created_by_name,
-								updated_at: moment(xRows[i].updatedAt).format('DD MMM YYYY HH:mm:ss'),
-								updated_by_name: xRows[i].updated_by_name,
-								purchase_request: xRows[i].purchase_request,
-							});
-						}
+			if (xFlagProccess) {
+				var xResultList = await _repoInstance.list(pParam);
+				if (xResultList) {
+					// console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
+					if (xResultList.status_code == '00') {
+						var xRows = xResultList.data.rows;
+						if (xRows.length > 0) {
+							for (var i in xRows) {
+								xJoArrData.push({
+									id: await _utilInstance.encrypt(xRows[i].id.toString(), config.cryptoKey.hashKey),
+									document_no: xRows[i].document_no,
+									company_id: xRows[i].company_id,
+									company_name: xRows[i].company_name,
+									employee_id: xRows[i].employee_id,
+									employee_name: xRows[i].employee_name,
+									department_id: xRows[i].department_id,
+									department_name: xRows[i].department_name,
+									status: xRows[i].status,
+									vendor_id: xRows[i].vendor_id,
+									vendor_name: xRows[i].vendor_name,
+									vendor_code: xRows[i].vendor_code,
+									payreq_type: xRows[i].payreq_type,
+									payment_type: xRows[i].payment_type,
+									created_at: moment(xRows[i].createdAt).format('DD MMM YYYY HH:mm:ss'),
+									created_by_name: xRows[i].created_by_name,
+									updated_at: moment(xRows[i].updatedAt).format('DD MMM YYYY HH:mm:ss'),
+									updated_by_name: xRows[i].updated_by_name,
+									purchase_request: xRows[i].purchase_request,
+								});
+							}
 
-						xJoResult = {
-							status_code: '00',
-							status_msg: 'OK',
-							data: xJoArrData
-						};
+							xJoResult = {
+								status_code: '00',
+								status_msg: 'OK',
+								data: xJoArrData,
+								total_record: xResultList.total_record
+							};
+						} else {
+							xJoResult = {
+								status_code: '-99',
+								status_msg: 'Data not found'
+							};
+						}
 					} else {
-						xJoResult = {
-							status_code: '-99',
-							status_msg: 'Data not found'
-						};
+						xJoResult = xResultList;
 					}
 				} else {
 					xJoResult = xResultList;
 				}
-			} else {
-				xJoResult = xResultList;
+			
 			}
 		} catch (e) {
 			_utilInstance.writeLog(`${_xClassName}.list`, `Exception error: ${e.message}`, 'error');
@@ -560,7 +605,7 @@ class PaymentRequestService {
 				if (xResult.status_code == '00') {
 					var dt = dateTime.create();
 					var xDate = dt.format('ym');
-					var xPayreqNo = `${pParam.company_code}/PAYREQ/${xDate}/` + xResult.clear_id.toString().padStart(5,'0');
+					var xPayreqNo = `${pParam.company_code}/CA/${xDate}/` + xResult.clear_id.toString().padStart(5,'0');
 
 					var xParamUpdate = {
 						document_no: xPayreqNo,
@@ -639,7 +684,7 @@ class PaymentRequestService {
 							// check total qty is not exceed qty_paid in detail fpb
 							let xArrPrdId = []
 							let xPyrDetail = xDetail.data.payment_request_detail
-							console.log(`>>> xPyrDetail: ${JSON.stringify(xPyrDetail)}`);
+							// console.log(`>>> xPyrDetail: ${JSON.stringify(xPyrDetail)}`);
 							for (let i = 0; i < xPyrDetail.length; i++) {
 								xArrPrdId.push(xPyrDetail[i].prd_id)
 							}
@@ -692,8 +737,76 @@ class PaymentRequestService {
 										xParamAddApprovalMatrix
 									);
 									// console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
-
 									xJoResult.approval_matrix_result = xApprovalMatrixResult;
+									if (xApprovalMatrixResult.status_code == '00') {
+										if (xApprovalMatrixResult.approvers.length > 0) {
+											const xApproverIds = []
+											let xApproverSeq1 = xApprovalMatrixResult.approvers.find((el) => el.sequence === 1);
+											if (xApproverSeq1 != null) {
+												for (var i in xApproverSeq1.approver_user) {
+													xApproverIds.push(xApproverSeq1.approver_user[i].user_id)
+													// In App notification
+													let xInAppNotificationResult = await _notificationService.inAppNotification({
+														document_code: xDetail.data.document_no,
+														document_id: xEncId,
+														document_status: 1,
+														mode: 'request_approval_ca',
+														method: pParam.method,
+														token: pParam.token,
+														employee_id: await _utilInstance.encrypt(
+															xApproverSeq1.approver_user[i].employee_id.toString(),
+															config.cryptoKey.hashKey
+														)
+													});
+													console.log(`>>> xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`);
+			
+													_utilInstance.writeLog(
+														`${_xClassName}.submitPayreq`,
+														`xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`,
+														'info'
+													);
+													// Email Notification
+													let xParamEmailNotification,
+														xNotificationResult = {};
+			
+													if (xApproverSeq1.approver_user[i].notification_via_email) {
+														xParamEmailNotification = {
+															mode: 'request_approval_ca',
+															id: xEncId,
+															request_no: xDetail.data.document_no,
+															company_name: xDetail.data.company_name,
+															department_name: xDetail.data.department_name,
+															created_by: xDetail.data.employee_name,
+															created_at:
+																xDetail.data.createdAt != null
+																	? moment(xDetail.data.createdAt).format('DD MMM YYYY')
+																	: '',
+															items: xPyrDetail,
+															// body: xDetail.data,
+															approver_user: {
+																employee_name: xApproverSeq1.approver_user[i].user_name,
+																email: xApproverSeq1.approver_user[i].email
+															}
+														};
+														xNotificationResult = await _notificationService.sendNotificationEmail_CANeedApproval(
+															xParamEmailNotification,
+															pParam.method,
+															pParam.token
+														);
+														console.log(`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`);
+			
+													}
+												}
+											}
+											// update current approval id
+											let xPrdUpdateApprovalId = {
+												id: xDetail.data.id,
+												current_approval_ids: xApproverIds
+											}
+											
+											await _repoInstance.save(xPrdUpdateApprovalId, 'update')
+										}
+									}
 								} else {
 									xJoResult = xUpdate;
 								}
@@ -809,6 +922,7 @@ class PaymentRequestService {
 								set_to_draft_at: await _utilInstance.getCurrDateTime(),
 								set_to_draft_by: pParam.user_id,
 								set_to_draft_by_name: pParam.user_name,
+								// current_approval_ids: null
 							};
 							var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
 
@@ -1084,7 +1198,63 @@ class PaymentRequestService {
 											}
 										}
 									);
-
+									// Send to next approver...
+									const xApproverIds = []
+									let xNextApprover = xResultApprovalMatrixDocument.approvers[0].approver_user;
+									console.log(`>>> xNextApprover : ${JSON.stringify(xNextApprover)}`);
+									if (xNextApprover != null) {
+										for (var i in xNextApprover) {
+											xApproverIds.push(xNextApprover[i].user_id)
+											let xInAppNotificationResult = await _notificationService.inAppNotification({
+												document_code: xPayreqDetail.data.document_no,
+												document_id: xEncId,
+												document_status: xPayreqDetail.data.status,
+												mode: 'request_approval_ca',
+												method: pParam.method,
+												token: pParam.token,
+												employee_id: await _utilInstance.encrypt(
+													xNextApprover[i].employee_id.toString(),
+													config.cryptoKey.hashKey
+												)
+											});
+	
+											// Email Notification
+											let xParamEmailNotification,
+												xNotificationResult = {};
+	
+											if (xNextApprover[i].notification_via_email) {
+												xParamEmailNotification = {
+													mode: 'request_approval_ca',
+													id: xEncId,
+													request_no: xPayreqDetail.data.document_no,
+													company_name: xPayreqDetail.data.company_name,
+													department_name: xPayreqDetail.data.department_name,
+													created_by: xPayreqDetail.data.employee_name,
+													created_at:
+														xPayreqDetail.data.createdAt != null
+															? moment(xPayreqDetail.data.createdAt).format('DD MMM YYYY')
+															: '',
+													items: xPayreqDetail.data.payment_request_detail,
+													approver_user: {
+														employee_name: xNextApprover[i].user_name,
+														email: xNextApprover[i].email
+													}
+												};
+												xNotificationResult = await _notificationService.sendNotificationEmail_CANeedApproval(
+													xParamEmailNotification,
+													pParam.method,
+													pParam.token
+												);
+												console.log(`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`);
+											}
+										}
+										// update current approval id
+										let xPrdUpdateApprovalId = {
+											id: xPayreqDetail.data.id,
+											current_approval_ids: xApproverIds
+										}
+										await _repoInstance.save(xPrdUpdateApprovalId, 'update')
+									}
 									xJoResult = {
 										status_code: '00',
 										status_msg: 'Payreq successfully approved. Document available for next approver',
@@ -1404,7 +1574,8 @@ class PaymentRequestService {
 						id: xClearId,
 						approved_at: null,
 						user_id: pParam.user_id,
-						user_name: pParam.user_name
+						user_name: pParam.user_name,
+						current_approval_ids: null
 					}
 					var xUpdateResult = await _repoInstance.save(xUpdateParam, 'update');
 					console.log(`>>> xUpdateResult: ${JSON.stringify(xUpdateResult)}`);
