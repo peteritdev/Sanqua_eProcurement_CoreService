@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      html {
+        zoom: 0.8;
+        color: black !important;
+      }
+      .center {
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 15px;
+        width: 99%;
+        font-family: Arial, Helvetica, sans-serif;
+        /* border-collapse:collapse; */
+        text-align: center;
+        font-size: 8px;
+        border-style: solid;
+        border-color: #000000;
+      }
+
+      .center th,
+      .center td {
+        border-left: none;
+        border-bottom: none;
+      }
+
+      .col-item {
+        border-bottom: none;
+        border-top: none;
+      }
+
+      .border-b {
+        border-bottom: 1px solid #000000 !important;
+      }
+      .border-t {
+        border-top: 1px solid #000000;
+      }
+
+      .border-tr {
+        border-top: 1px solid #000000;
+        border-right: 1px solid #000000;
+      }
+      .border-r {
+        border-right: 1px solid #000000;
+      }
+
+      .border-rb {
+        border-right: 1px solid #000000;
+        border-bottom: 1px solid #000000 !important;
+      }
+
+      th.col-header-item {
+        border-bottom: 1px solid #000000;
+        border-right: 1px solid #000000;
+      }
+    </style>
+  </head>
+  <body style="margin-left: 25px; margin-top: 15px;">
+    <table
+      class="center"
+      cellspacing="0"
+      cellpadding="2"
+      style="border: 1px solid #000000; width: 100%;"
+    >
+      <tr>
+        <td style="width: 40%; text-align: left; padding-left: 20px">
+          <img src="<%=companyData.logo%>" height="60" />
+        </td>
+        <td style="text-align: left; width: 40%;">
+          
+          <span
+            style="
+              width: 210px;
+              font-size: 18px;
+              text-align: center;
+              padding: 7px 15px 7px 15px;
+              border-radius: 5px;
+              border:1px solid black;
+              margin-left: -60px;
+              font-weight: bold;
+            "
+            ><strong>CASH ADVANCE</strong></span
+          >
+        </td>
+        <td style="width: 20%; padding: 0; text-align: left;">
+          <table cellspacing="0" cellpadding="2" style="width: 140px;">
+            <tr>
+              <th style="vertical-align: bottom; padding-top: 10px;">No. : <span style="font-size: 14px; font-weight: bold; color: #414141;"><%=data.data.document_no.slice(data.data.document_no.lastIndexOf('/') + 1)%></span></th>
+            </tr>
+            <tr>
+              <th style="vertical-align: bottom; padding-top: 5px;">Tanggal : <span><%=data.data.createdAt%></th></span>
+            </tr>
+            <tr>
+              <th style="font-weight: bold; height: 15px; color: white; font-size: 6px; font-style: italic; vertical-align: bottom;"><span style="padding-left: 20px; color: #000000;">Doc No. FRM ACC.03.01 rev.01</th></span>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td
+          style="
+            text-align: left;
+            border-top: 1px solid #000000 !important;
+            border-right: 1px solid #000000 !important;
+          "
+        >
+          <table>
+            <tr>
+              <th style="text-align: left; width: 70px">Nama Pemohon</th>
+              <th style="text-align: left; width: 5px">:</th>
+              <td style="text-align: left"><%=data.data.employee_name%></td>
+            </tr>
+          </table>
+        </td>
+        <td
+          colspan="2"
+          rowspan="5"
+          style="text-align: left; border-top: 1px solid #000000 !important"
+        >
+          <table style="width: 100%; ">
+            <tr>
+              <th style="text-align: left">Jenis Pembayaran</th>
+              <th style="text-align: left">:</th>
+            </tr>
+            <tr>
+              <td
+                style="
+                  width: 35%;
+                  text-align: left;
+                  display: flex;
+                  justify-content: space-evenly;
+                "
+              >
+                <table style="width: 100%">
+                  <tr>
+                    <td style="width: 40%; text-align: center">
+                      <span
+                        style="
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          position: relative;
+                          top: 4px;
+                        "
+                      >
+                        <% if( data.data.payment_type == 1 ){ %>
+                        <img src="<%=imagePath%>box_checklist.png" width="15" />
+                        <% }else{ %>
+                        <img
+                          src="<%=imagePath%>blank_checklist.png"
+                          width="15"
+                        />
+                        <% } %>
+                        <span
+                          style="
+                            margin-left: 5px;
+                            position: relative;
+                            top: -8px;
+                          "
+                        >
+                          Tarik Tunai BDC
+                        </span>
+                      </span>
+                    </td>
+                    <td style="width: 60%; text-align: center">
+                      <span
+                        style="
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                        "
+                      >
+                        <% if( data.data.payment_type > 1 ){ %>
+                        <img src="<%=imagePath%>box_checklist.png" width="15" />
+                        <% }else{ %>
+                        <img
+                          src="<%=imagePath%>blank_checklist.png"
+                          width="15"
+                        />
+                        <% } %>
+                        <span
+                          style="
+                            margin-left: 5px;
+                            position: relative;
+                            top: -7px;
+                          "
+                        >
+                          Bank
+                        </span>
+                      </span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+              <th style="text-align: left; width: 65%;">
+                <table style="margin-left: 15px">
+                  <tr>
+                    <td>
+                      <% if( data.data.payment_type == 4 ){ %>
+                      <img src="<%=imagePath%>box_checklist.png" width="15" />
+                      <% }else{ %>
+                      <img src="<%=imagePath%>blank_checklist.png" width="15" />
+                      <% } %>
+                    </td>
+                    <td style="width: 45px">Check</td>
+                    <td>
+                      <% if( data.data.payment_type == 4 ){ %>
+                        <span>An. <%=data.data.account_name%></span>
+                      <% }else{ %>
+                        <span>An. </span>
+                      <% } %>
+                    </td>
+                  </tr>
+                </table>
+              </th>
+            </tr>
+            <tr>
+              <td colspan="0" style="text-align: left"></td>
+              <th style="text-align: left">
+                <table style="margin-left: 15px">
+                  <tr>
+                    <td>
+                      <% if( data.data.payment_type == 2 ){ %>
+                      <img src="<%=imagePath%>box_checklist.png" width="15" />
+                      <% }else{ %>
+                      <img src="<%=imagePath%>blank_checklist.png" width="15" />
+                      <% } %>
+                    </td>
+                    <td style="width: 45px">Transfer</td>
+                    <td>
+                      <% if( data.data.payment_type == 2 ){ %>
+                        <span>An. <%=data.data.account_name%></span>
+                      <% }else{ %>
+                        <span>An. </span>
+                      <% } %>
+                    </td>
+                  </tr>
+                </table>
+              </th>
+            </tr>
+            <tr>
+              <td colspan="1" style="text-align: left"></td>
+              <th style="text-align: left">
+                <table style="margin-left: 15px">
+                  <tr>
+                    <td style="width: 50px">Nama Bank</td>
+                    <td>:</td>
+                    <td><%=data.data.bank_name%></td>
+                  </tr>
+                </table>
+              </th>
+            </tr>
+            <tr>
+              <td colspan="1" style="text-align: left"></td>
+              <th style="text-align: left">
+                <table style="margin-left: 15px">
+                  <tr>
+                    <td style="width: 50px">No. Rek</td>
+                    <td>:</td>
+                    <td><%=data.data.account_number%></td>
+                  </tr>
+                </table>
+              </th>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td
+          style="
+            text-align: left;
+            border-top: 1px solid #000000 !important;
+            border-right: 1px solid #000000 !important;
+          "
+        >
+          <table>
+            <tr>
+              <th style="text-align: left; width: 70px">Department</th>
+              <th style="text-align: left; width: 5px">:</th>
+              <td style="text-align: left"><%=data.data.department_name%></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td
+          style="
+            text-align: left;
+            border-top: 1px solid #000000 !important;
+            border-right: 1px solid #000000 !important;
+          "
+        >
+          <table>
+            <tr>
+              <th style="text-align: left; width: 70px">Jabatan</th>
+              <th style="text-align: left; width: 5px">:</th>
+              <td style="text-align: left">-</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <th
+          style="
+            text-align: left;
+            border-top: 1px solid #000000 !important;
+            border-right: 1px solid #000000 !important;
+          "
+        >
+          Mohon Dibayarkan kepada :
+        </th>
+      </tr>
+      <tr>
+        <td
+          style="text-align: center; border-right: 1px solid #000000 !important"
+        >
+          <%=data.data.vendor_name%>
+        </td>
+      </tr>
+      <tr>
+        <td
+          colspan="3"
+          style="text-align: left; border-top: 1px solid #000000 !important"
+        >
+          <span> Untuk Pembayaran </span>
+          <span margin: 0 5px">: </span>
+          <span> <%=data.data.payment_desc%> </span>
+        </td>
+      </tr>
+      <tr>
+        <td
+          colspan="3"
+          style="
+            padding: 0px;
+            margin: 0px;
+            border-top: 1px solid #000000 !important;
+          "
+        >
+          <table
+            cellspacing="0"
+            cellpadding="5"
+            style="width: 100%; text-align: center"
+          >
+            <thead style="height: 30px;">
+              <tr>
+                <th style="width: 5%" class="col-header-item">No</th>
+                <th style="width: 55%" class="col-header-item">Uraian</th>
+                <th style="width: 20%" class="col-header-item">Jumlah</th>
+                <th
+                  style="width: 20%; border-right: none !important"
+                  class="col-header-item"
+                >
+                  Keterangan
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <%
+                  var index = 1;
+                  data.data.payment_request_detail.forEach( item => {
+              %>
+              <tr>
+                <td style="text-align: center" class="border-rb"><%=index%>.</td>
+                <td style="text-align: left" class="border-rb"><%=item.product_name + " (" + item.qty_request + " " + item.uom_name + ") "%> </td>
+                <td style="text-align: right" class="border-rb">
+                  <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td>Rp </td>
+                      <td style="text-align: right; width: 100%;"><%=item.subtotal != null ? item.subtotal.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                    </tr>
+                  </table>
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                  <%=item.description%>
+                  <%
+                  if(item.tax != null){
+                  %>
+                    <br/>
+                    <%=item.tax.name%>
+                  <%
+                      }
+                  %>
+                  
+                  <%
+                  if(item.discount_amount != null && item.discount_amount > 0){
+                  %>
+                    <br/>
+                    <%='Disc: Rp' + item.discount_amount%>
+                  <%
+                      }
+                  %>
+                </td>
+              </tr>
+              <%
+                      index++;
+                  } )
+              %>
+              
+              <!-- Biaya Pengiriman -->
+              <%
+              if(data.data.delivery_costs != null && data.data.delivery_costs > 0){
+              %>
+              <tr>
+                <td style="text-align: center" class="border-rb">
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  Biaya Pengiriman
+                </td>
+                <td style="text-align: right" class="border-rb">
+                  <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td>Rp </td>
+                      <td style="text-align: right; width: 100%;"><%=data.data.delivery_costs != null ? data.data.delivery_costs.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                    </tr>
+                  </table>
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                </td>
+              </tr>
+              <%
+                  } else {
+              %>
+              <tr style="height: 20px;">
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%>. -->
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                  <!-- <%=i%> -->
+                </td>
+              </tr>
+              <%
+                  }
+              %>
+              
+              <!-- Biaya admin / aplikasi -->
+              <%
+              if(data.data.service_costs != null && data.data.service_costs > 0){
+              %>
+              <tr>
+                <td style="text-align: center" class="border-rb">
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  Biaya Layanan
+                </td>
+                <td style="text-align: right" class="border-rb">
+                  <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td>Rp </td>
+                      <td style="text-align: right; width: 100%;"><%=data.data.service_costs != null ? data.data.service_costs.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                    </tr>
+                  </table>
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                </td>
+              </tr>
+              <%
+                  } else {
+              %>
+              <tr style="height: 20px;">
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%>. -->
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                  <!-- <%=i%> -->
+                </td>
+              </tr>
+              <%
+                  }
+              %>
+
+              <!-- Biaya Lain-lain -->
+              <%
+              if(data.data.other_costs != null && data.data.other_costs > 0){
+              %>
+              <tr>
+                <td style="text-align: center" class="border-rb">
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  Biaya Lain-lain
+                </td>
+                <td style="text-align: right" class="border-rb">
+                  <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td>Rp </td>
+                      <td style="text-align: right; width: 100%;"><%=data.data.other_costs != null ? data.data.other_costs.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                    </tr>
+                  </table>
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                </td>
+              </tr>
+              <%
+                  } else {
+              %>
+              <tr style="height: 20px;">
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%>. -->
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                  <!-- <%=i%> -->
+                </td>
+              </tr>
+              <%
+                  }
+              %>
+
+              <!-- Discount -->
+              <%
+              if(data.data.global_discount != null && data.data.global_discount > 0){
+              %>
+              <tr>
+                <td style="text-align: center" class="border-rb">
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  Discount Global (<%=data.data.global_discount_percent%>%)
+                </td>
+                <td style="text-align: right" class="border-rb">
+                  <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td>Rp </td>
+                      <td style="text-align: right; width: 100%;"><%=data.data.global_discount != null ? data.data.global_discount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                    </tr>
+                  </table>
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                </td>
+              </tr>
+              <%
+                  } else {
+              %>
+              <tr style="height: 20px;">
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%>. -->
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                  <!-- <%=i%> -->
+                </td>
+              </tr>
+              <%
+                  }
+              %>
+
+              <%
+                if(data.data.payment_request_detail.length < 9 ){
+              %>
+                <% for (let i = 0; i < 5 - data.data.payment_request_detail.length; i++) { %>
+                  <tr style="height: 23px;">
+                    <td style="text-align: center" class="border-rb"></td>
+                    <td style="text-align: left" class="border-rb"></td>
+                    <td style="text-align: right" class="border-rb"></td>
+                    <td
+                      style="text-align: center; border-right: none"
+                      class="border-rb"
+                    >
+                    </td>
+                  </tr>
+                <% } %>
+              <% } %>
+
+              <tr>
+                <th colspan="2" style="text-align: left" class="border-rb">
+                  TOTAL
+                </th>
+                <td style="text-align: right" class="border-rb">
+                  <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td>Rp </td>
+                      <td style="text-align: right; width: 100%;"><%=data.data.total_price != null ? data.data.total_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                    </tr>
+                  </table>
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                </td>
+              </tr>
+              <tr>
+                <td colspan="6" style="text-align: left" class="border-b">
+                  <span> Terbilang </span>
+                  <span style="margin: 0 5px">: <%=data.data.terbilang%></span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3" style="padding: 0px; margin: 0px">
+          <table
+            cellspacing="0"
+            cellpadding="2"
+            style="width: 100%; border-width: 0.2px"
+          >
+            <tr>
+              <th
+                colspan="2"
+              >
+              </th>
+              <th
+                 colspan="2" class="border-b"
+              >
+              </th>
+            </tr>
+            <tr>
+              <th
+                colspan="2" class="border-r" style="width: 50%;"
+              >
+              </th>
+              <th
+                colspan="2" class="border-b" style="width: 50%;"
+              >
+                Kolom Persetujuan
+              </th>
+            </tr>
+            <tr>
+              <th style="width: 25%;">Pemohon</th>
+              <th class="border-r" style="width: 25%;">Ka. Department</th>
+              <th class="border-rb" style="width: 25%;">Finance</th>
+              <th class="border-b" style="width: 25%;">Plant Manager / Direktur</th>
+            </tr>
+            <tr>
+              <td>
+                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 45px;">
+                  <tr>
+                    <td>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+              <td class="border-r">
+                <%
+                        if( qrCode.approval1 != null && qrCode.approval1.length > 0 ){
+
+                    %>
+                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 45px;">
+                  <tr>
+                    <% for(var i = 0; i < qrCode.approval1.length; i++ ) { %>
+                    <td>
+                      <img
+                        src="<%=qrCode.qrPath%><%=qrCode.approval1[i]%>"
+                        width="80"
+                      />
+                    </td>
+                    <% }%>
+                  </tr>
+                </table>
+                <%
+                        }
+                    %>
+              </td>
+              <td class="border-rb">
+                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 45px;">
+                  <tr>
+                    <td>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+              <td class="border-b">
+                <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 45px;">
+                  <tr>
+                    <td>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 3px 0;">
+                <table style="margin: auto; text-align: center;">
+                  <tr>
+                    <td>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><%=data.data.employee_name%></td>
+                  </tr>
+                </table>
+              </td>
+              <th style="padding: 3px 0;"
+                class="border-r"
+              >
+              <%
+                      if( qrCode.approval1 != null && qrCode.approval1.length > 0 ){
+
+                  %>
+              <table style="margin: auto; text-align: center;">
+                <tr>
+                  <% for(var i = 0; i < approver1.length; i++ ) { %>
+                  <td><%=approver1[i].user.name%></td>
+                  <% }%>
+                </tr>
+              </table>
+              <%
+                      } else {
+                  %>
+              <table style="margin: auto; text-align: center;">
+                <tr>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>(.............................)</td>
+                </tr>
+              </table>
+              <%
+                      }
+                  %>
+              </th>
+              <th style="padding: 3px 0;"
+                class="border-rb"
+              >
+              <%
+                      if( qrCode.approval3 != null && qrCode.approval3.length > 0 ){
+
+                  %>
+              <table style="margin: auto; text-align: center;">
+                <tr>
+                  <% for(var i = 0; i < approver3.length; i++ ) { %>
+                  <td><%=approver3[i].user.name%></td>
+                  <% }%>
+                </tr>
+              </table>
+              <%
+                      } else {
+                  %>
+              <table style="margin: auto; text-align: center;">
+                <tr>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td></td>
+                </tr>
+              </table>
+              <%
+                      }
+                  %>    
+              </th>
+              
+              <th style="padding: 3px 0;"
+                class="border-b"
+              >
+              <table style="margin: auto; text-align: center;">
+                <tr>
+                  <!-- <td>PM/Dirut</td> -->
+                </tr>
+              </table>
+              </th>
+            </tr>
+            <tr>
+              <th
+                colspan="2"
+              >
+              </th>
+              <th
+              >
+              </th>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3" style="padding: 0px; margin: 0px">
+          <table
+            cellspacing="0"
+            cellpadding="0"
+            style="width: 100%; border-width: 0.2px"
+          >
+            <tr>
+              <th style="text-align: left" colspan="4" class="border-t">
+                Diisi Oleh Bagian Finance
+              </th>
+            </tr>
+            <tr>
+              <th style="text-align: left; width: 23%">
+                Jenis Payment Request :
+              </th>
+              <th style="text-align: left; width: 36%">
+                
+                <table style="margin-left: 17.5px">
+                  <tr>
+                    <td>
+                      <% if( data.data.payreq_type == 1 ){ %>
+                      <img src="<%=imagePath%>box_checklist.png" width="15" />
+                      <% }else{ %>
+                      <img src="<%=imagePath%>blank_checklist.png" width="15" />
+                      <% } %>
+                    </td>
+                    <td style="width: 75px">Cash Advance</td>
+                  </tr>
+                </table>
+              </th>
+              <th
+                rowspan="2"
+                style="text-align: right; vertical-align: top; width: 15%"
+              >
+                Sumber Dana :
+              </th>
+              <th style="text-align: left; width: 25%">
+                
+                <table style="margin-left: 17.5px">
+                  <tr>
+                    <td>
+                      <% if( data.data.payreq_type == 2 ){ %>
+                      <img src="<%=imagePath%>box_checklist.png" width="15" />
+                      <% }else{ %>
+                      <img src="<%=imagePath%>blank_checklist.png" width="15" />
+                      <% } %>
+                    </td>
+                    <td style="width: 75px">Kas Kecil</td>
+                  </tr>
+                </table>
+              </th>
+            </tr>
+            <tr>
+              <td>
+              </td>
+              <td style="text-align: center">
+                <table style="width: 100%">
+                  <tr>
+                    <th style="text-align: left">
+                      <table style="margin-left: 15px">
+                        <tr>
+                          <td>
+                            <% if( data.data.payreq_type == 2 ){ %>
+                            <img src="<%=imagePath%>box_checklist.png" width="15" />
+                            <% }else{ %>
+                            <img src="<%=imagePath%>blank_checklist.png" width="15" />
+                            <% } %>
+                          </td>
+                          <td style="width: 75px">Reimbursement</td>
+                        </tr>
+                      </table>
+                    </th>
+                  </tr>
+                  <tr>
+                    <th style="text-align: left">
+                     
+                      <table style="margin-left: 15px">
+                        <tr>
+                          <td>
+                            <% if( data.data.payreq_type == 3 ){ %>
+                            <img src="<%=imagePath%>box_checklist.png" width="15" />
+                            <% }else{ %>
+                            <img src="<%=imagePath%>blank_checklist.png" width="15" />
+                            <% } %>
+                          </td>
+                          <td style="width: 120px">Pelunasan Purchase Order</td>
+                        </tr>
+                      </table>
+                    </th>
+                  </tr>
+                  <tr>
+                    <th style="text-align: left">
+                      
+                      <table style="margin-left: 15px">
+                        <tr>
+                          <td>
+                            <% if( data.data.payreq_type == 4){ %>
+                            <img src="<%=imagePath%>box_checklist.png" width="15" />
+                            <% }else{ %>
+                            <img src="<%=imagePath%>blank_checklist.png" width="15" />
+                            <% } %>
+                          </td>
+                          <td style="width: 75px">Lainnya</td>
+                        </tr>
+                      </table>
+                    </th>
+                  </tr>
+                </table>
+              </td>
+              <td style="text-align: center; vertical-align: top">
+                <table style="width: 100%">
+                  <tr>
+                    <th style="text-align: left">
+                      
+                      <table style="margin-left: 15px">
+                        <tr>
+                          <td>
+                            <% if( data.data.source_of_funds != null &&  data.data.source_of_funds != ''){ %>
+                            <img src="<%=imagePath%>box_checklist.png" width="15" />
+                            <% }else{ %>
+                            <img src="<%=imagePath%>blank_checklist.png" width="15" />
+                            <% } %>
+                          </td>
+                          <td style="width: 75px">
+                            <% if( data.data.source_of_funds != null &&  data.data.source_of_funds != ''){ %>
+                            <span><%=data.data.source_of_funds%></span>
+                            <% }else{ %>
+                            <span>.............................................</span>
+                            <% } %>
+                          </td>
+                        </tr>
+                      </table>
+                    </th>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

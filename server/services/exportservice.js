@@ -22,6 +22,15 @@ const config = require(__dirname + '/../config/config.json')[env];
 const PurchaseRequestHeader = require('../services/purchaserequestservice.js');
 const _purchaseRequestServiceInstance = new PurchaseRequestHeader();
 
+const PaymentRequestService = require('./paymentrequestservice.js');
+const _paymentRequestServiceInstance = new PaymentRequestService();
+
+const GoodsReceiptService = require('./goodsreceiptservice.js');
+const _goodsReceiptServiceInstance = new GoodsReceiptService();
+
+const PJCAService = require('./pjcaservice.js');
+const _pjcaServiceInstance = new PJCAService();
+
 const RABService = require('./budgetplanservice.js');
 const _rabServiceInstance = new RABService();
 
@@ -404,6 +413,586 @@ class ExportService {
 		}
 	}
 	
+	async generatePayreq(pId, pMethod, pToken, pRes) {
+		var xParam = {
+			id: pId,
+			method: pMethod,
+			token: pToken
+		};
+		var xCompanyData = {};
+		var xJoResultPayreq = await _paymentRequestServiceInstance.detail(xParam);
+		var xDecId = null;
+		var xFlagProcess = false;
+		let xPayreqId = 0;
+
+		if (xJoResultPayreq != null && xJoResultPayreq.status_code == '00') {
+			// Decrypt ID
+			if (xJoResultPayreq.data.id.length == 65) {
+				xDecId = await _utilInstance.decrypt(xJoResultPayreq.data.id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					xPayreqId = xDecId.decrypted;
+					xFlagProcess = true;
+				}
+			}
+
+			if (xFlagProcess) {
+				console.log(`>>> xJoResultPayreq: ${JSON.stringify(xJoResultPayreq)}`);
+				// Get Company Detail
+				var xEncCompanyId = await _utilInstance.encrypt(
+					xJoResultPayreq.data.company_id.toString(),
+					config.cryptoKey.hashKey
+				);
+				var xCompanyDetail = await _oAuthService.getCompanyDetail(pToken, pMethod, xEncCompanyId);
+				console.log(`>>> xCompanyDetail: ${JSON.stringify(xCompanyDetail)}`);
+				if (xCompanyDetail != null) {
+					if (xCompanyDetail.status_code == '00') {
+						xCompanyData = {
+							logo: config.basePathESanqua + '/company_logo/' + xCompanyDetail.token_data.data.logo,
+							// iso_purchase_request_no: xCompanyDetail.token_data.data.iso_purchase_request_no
+						};
+						console.log(`>>> xCompanyData: ${JSON.stringify(xCompanyData)}`);
+					}
+				}
+
+				let xCreator = null;
+				let xApprover1 = null;
+				let xApprover2 = null;
+				let xApprover3 = null;
+				let xStringQRCodeCreator = '';
+				let xStringQRCodeApprover1 = '';
+				let xStringQRCodeApprover2 = '';
+				let xStringQRCodeApprover3 = '';
+				let xApprovalFinanceAccounting = null;
+				let xFilePathQRCodeApproval = `${config.uploadBasePath}/digital_sign_qrcode/`;
+				let xQRCodeFileNameCreator,
+					xQRCodeFileName1 = [],
+					xQRCodeFileName2 = [],
+					xQRCodeFileName3 = [];
+
+				xApprover1 =
+					xJoResultPayreq.data.approval_matrix != null
+						? xJoResultPayreq.data.approval_matrix.find((el) => el.sequence === 1)
+						: null;
+				xApprover2 =
+					xJoResultPayreq.data.approval_matrix != null
+						? xJoResultPayreq.data.approval_matrix.find((el) => el.sequence === 2)
+						: null;
+				xApprover3 =
+					xJoResultPayreq.data.approval_matrix != null
+						? xJoResultPayreq.data.approval_matrix.find((el) => el.sequence === 3)
+						: null;
+				// Generate QRCode Digital Sign
+
+				let xApprovedUser1 =
+					xApprover1 != null ? xApprover1.approver_user.filter((el) => el.status === 1) : null;
+				if (xApprover1 != null && xApprovedUser1 != null) {
+					for (var i in xApprovedUser1) {
+						xStringQRCodeApprover1 =
+							`VALIDATE_SIGNATURE|PAYREQ|` +
+							(await _utilInstance.encrypt(
+								`${xPayreqId}|${xApprovedUser1[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
+
+						let xQRCodeApproval1 = await _qrCode.toDataURL(xStringQRCodeApprover1);
+						xQRCodeFileName1.push(`approval_${xPayreqId}${xApprovedUser1[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval1,
+							xFilePathQRCodeApproval + `approval_${xPayreqId}${xApprovedUser1[i].user.id}.png`
+						);
+					}
+					let xUser = xApprover1.approver_user.filter((el) => el.status === 1);
+					console.log(`>>> xUser: ${JSON.stringify(xUser)}`);
+				}
+				console.log(`>>> xApprovedUser 1: ${JSON.stringify(xApprovedUser1)}`);
+
+				let xApprovedUser2 =
+					xApprover2 != null ? xApprover2.approver_user.filter((el) => el.status === 1) : null;
+				if (xApprover2 != null && xApprovedUser2 != null) {
+					for (var i in xApprovedUser2) {
+						xStringQRCodeApprover2 =
+							`VALIDATE_SIGNATURE|PAYREQ|` +
+							(await _utilInstance.encrypt(
+								`${xPayreqId}|${xApprovedUser2[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
+
+						let xQRCodeApproval2 = await _qrCode.toDataURL(xStringQRCodeApprover2);
+						xQRCodeFileName2.push(`approval_${xPayreqId}${xApprovedUser2[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval2,
+							xFilePathQRCodeApproval + `approval_${xPayreqId}${xApprovedUser2[i].user.id}.png`
+						);
+					}
+				}
+				console.log(`>>> xApprovedUser 2: ${JSON.stringify(xApprovedUser2)}`);
+
+				let xApprovedUser3 =
+					xApprover3 != null ? xApprover3.approver_user.filter((el) => el.status === 1) : null;
+				if (xApprover3 != null && xApprovedUser3 != null) {
+					for (var i in xApprovedUser3) {
+						xStringQRCodeApprover3 =
+							`VALIDATE_SIGNATURE|PAYREQ|` +
+							(await _utilInstance.encrypt(
+								`${xPayreqId}|${xApprovedUser3[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
+
+						let xQRCodeApproval3 = await _qrCode.toDataURL(xStringQRCodeApprover3);
+						xQRCodeFileName3.push(`approval_${xPayreqId}${xApprovedUser3[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval3,
+							xFilePathQRCodeApproval + `approval_${xPayreqId}${xApprovedUser3[i].user.id}.png`
+						);
+					}
+				}
+				console.log(`>>> xApprovedUser 3: ${JSON.stringify(xApprovedUser3)}`);
+				ejs.renderFile(
+					path.join(__dirname, '../views/', 'payreq-pdf.ejs'),
+					{
+						data: xJoResultPayreq,
+						companyData: xCompanyData,
+						imagePath: config.imagePath,
+						approver1: xApprovedUser1,
+						approver2: xApprovedUser2,
+						approver3: xApprovedUser3,
+						qrCode: {
+							qrPath: `${config.imagePathESanQua_dev}/digital_sign_qrcode/`,
+							approval1: xQRCodeFileName1,
+							approval2: xQRCodeFileName2,
+							approval3: xQRCodeFileName3
+						}
+					},
+					(err, data) => {
+						var xOptions = {};
+
+						xOptions = {
+							height: '212mm',
+							// height: '148.5mm',
+							width: '156mm',
+							borders: '0.3cm'
+						};
+
+						var xPayreqNo = xJoResultPayreq.data.document_no.replace(/\//g, '-');
+						var xFileName = `payreq-${xPayreqNo}.pdf`;
+						var xPathFile = `./generated_files/payreq/${xFileName}`;
+
+						pdf.create(data, xOptions).toFile(xPathFile, function(err, data) {
+							if (err) {
+								pRes.send(err);
+							} else {
+								var xDirectoryPath = path.resolve(xPathFile);
+								pRes.download(xDirectoryPath, xFileName, (err) => {
+									if (err) {
+										pRes.status(500).send({
+											message: `Could not download the file. ${err}`
+										});
+									}
+								});
+							}
+						});
+					}
+				);
+			}
+		}
+	}
+
+	async generateGR(pId, pMethod, pToken, pRes) {
+		var xParam = {
+			id: pId,
+			method: pMethod,
+			token: pToken
+		};
+		var xCompanyData = {};
+		var xJoResultGR = await _goodsReceiptServiceInstance.detail(xParam);
+		var xDecId = null;
+		var xFlagProcess = false;
+		let xGRId = 0;
+
+		if (xJoResultGR != null && xJoResultGR.status_code == '00') {
+			// Decrypt ID
+			if (xJoResultGR.data.id.length == 65) {
+				xDecId = await _utilInstance.decrypt(xJoResultGR.data.id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					xGRId = xDecId.decrypted;
+					xFlagProcess = true;
+				}
+			}
+
+			if (xFlagProcess) {
+				// Get Company Detail
+				var xEncCompanyId = await _utilInstance.encrypt(
+					xJoResultGR.data.company_id.toString(),
+					config.cryptoKey.hashKey
+				);
+				var xCompanyDetail = await _oAuthService.getCompanyDetail(pToken, pMethod, xEncCompanyId);
+				if (xCompanyDetail != null) {
+					if (xCompanyDetail.status_code == '00') {
+						xCompanyData = {
+							logo: config.basePathESanqua + '/company_logo/' + xCompanyDetail.token_data.data.logo,
+							iso_purchase_request_no: xCompanyDetail.token_data.data.iso_purchase_request_no
+						};
+					}
+				}
+
+				let xCreator = null;
+				let xApprover1 = null;
+				let xApprover2 = null;
+				let xApprover3 = null;
+				let xStringQRCodeCreator = '';
+				let xStringQRCodeApprover1 = '';
+				let xStringQRCodeApprover2 = '';
+				let xStringQRCodeApprover3 = '';
+				let xApprovalFinanceAccounting = null;
+				let xFilePathQRCodeApproval = `${config.uploadBasePath}/digital_sign_qrcode/`;
+				let xQRCodeFileNameCreator,
+					xQRCodeFileName1 = [],
+					xQRCodeFileName2 = [],
+					xQRCodeFileName3 = [];
+
+				xApprover1 =
+					xJoResultGR.data.approval_matrix != null
+						? xJoResultGR.data.approval_matrix.find((el) => el.sequence === 1)
+						: null;
+				xApprover2 =
+					xJoResultGR.data.approval_matrix != null
+						? xJoResultGR.data.approval_matrix.find((el) => el.sequence === 2)
+						: null;
+				xApprover3 =
+					xJoResultGR.data.approval_matrix != null
+						? xJoResultGR.data.approval_matrix.find((el) => el.sequence === 3)
+						: null;
+
+				// Generate QRCode Digital Sign
+
+				let xApprovedUser1 =
+					xApprover1 != null ? xApprover1.approver_user.filter((el) => el.status === 1) : null;
+				if (xApprover1 != null && xApprovedUser1 != null) {
+					for (var i in xApprovedUser1) {
+						xStringQRCodeApprover1 =
+							`VALIDATE_SIGNATURE|GR|` +
+							(await _utilInstance.encrypt(
+								`${xGRId}|${xApprovedUser1[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
+
+						let xQRCodeApproval1 = await _qrCode.toDataURL(xStringQRCodeApprover1);
+						xQRCodeFileName1.push(`approval_${xGRId}${xApprovedUser1[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval1,
+							xFilePathQRCodeApproval + `approval_${xGRId}${xApprovedUser1[i].user.id}.png`
+						);
+					}
+					let xUser = xApprover1.approver_user.filter((el) => el.status === 1);
+					console.log(`>>> xUser: ${JSON.stringify(xUser)}`);
+				}
+				console.log(`>>> xApprovedUser 1: ${JSON.stringify(xApprovedUser1)}`);
+
+				let xApprovedUser2 =
+					xApprover2 != null ? xApprover2.approver_user.filter((el) => el.status === 1) : null;
+				if (xApprover2 != null && xApprovedUser2 != null) {
+					for (var i in xApprovedUser2) {
+						xStringQRCodeApprover2 =
+							`VALIDATE_SIGNATURE|GR|` +
+							(await _utilInstance.encrypt(
+								`${xGRId}|${xApprovedUser2[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
+
+						let xQRCodeApproval2 = await _qrCode.toDataURL(xStringQRCodeApprover2);
+						xQRCodeFileName2.push(`approval_${xGRId}${xApprovedUser2[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval2,
+							xFilePathQRCodeApproval + `approval_${xGRId}${xApprovedUser2[i].user.id}.png`
+						);
+					}
+				}
+				console.log(`>>> xApprovedUser 2: ${JSON.stringify(xApprovedUser2)}`);
+
+				let xApprovedUser3 =
+					xApprover3 != null ? xApprover3.approver_user.filter((el) => el.status === 1) : null;
+				if (xApprover3 != null && xApprovedUser3 != null) {
+					for (var i in xApprovedUser3) {
+						xStringQRCodeApprover3 =
+							`VALIDATE_SIGNATURE|GR|` +
+							(await _utilInstance.encrypt(
+								`${xGRId}|${xApprovedUser3[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
+
+						let xQRCodeApproval3 = await _qrCode.toDataURL(xStringQRCodeApprover3);
+						xQRCodeFileName3.push(`approval_${xGRId}${xApprovedUser3[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval3,
+							xFilePathQRCodeApproval + `approval_${xGRId}${xApprovedUser3[i].user.id}.png`
+						);
+					}
+				}
+				console.log(`>>> xApprovedUser 3: ${JSON.stringify(xApprovedUser3)}`);
+
+				ejs.renderFile(
+					path.join(__dirname, '../views/', 'gr-pdf.ejs'),
+					{
+						data: xJoResultGR,
+						companyData: xCompanyData,
+						imagePath: config.imagePath,
+						// xApprover1 != null
+						// 	? xApprover1.approver_user.find((el) => el.status === 1) == null
+						// 		? ''
+						// 		: xApprover1.approver_user.find((el) => el.status === 1).user.name
+						// 	: '',
+
+						approver1: xApprovedUser1,
+						approver2: xApprovedUser2,
+						approver3: xApprovedUser3,
+
+						// approver6:
+						// 	xApprover6 != null
+						// 		? xApprover6.approver_user.find((el) => el.status === 1) == null
+						// 			? ''
+						// 			: xApprover6.approver_user.find((el) => el.status === 1).user.name
+						// 		: '',
+						qrCode: {
+							qrPath: `${config.imagePathESanQua_dev}/digital_sign_qrcode/`,
+							approval1: xQRCodeFileName1,
+							approval2: xQRCodeFileName2,
+							approval3: xQRCodeFileName3
+						}
+					},
+					(err, data) => {
+						console.log(`>>> error pdf 0: ${err}`);
+						var xOptions = {};
+
+						xOptions = {
+							width: '209mm',
+							// height: '148.5mm',
+							height: '210mm',
+							borders: '0.3cm'
+						};
+
+						var xGRNo = xJoResultGR.data.document_no.replace(/\//g, '-');
+						var xFileName = `gr-${xGRNo}.pdf`;
+						var xPathFile = `./generated_files/gr/${xFileName}`;
+
+						pdf.create(data, xOptions).toFile(xPathFile, function(err, data) {
+							if (err) {
+								pRes.send(err);
+							} else {
+								var xDirectoryPath = path.resolve(xPathFile);
+								pRes.download(xDirectoryPath, xFileName, (err) => {
+									if (err) {
+										pRes.status(500).send({
+											message: `Could not download the file. ${err}`
+										});
+									}
+								});
+							}
+						});
+					}
+				);
+			}
+		}
+	}
+
+	async generatePJCA(pId, pMethod, pToken, pRes) {
+		var xParam = {
+			id: pId,
+			method: pMethod,
+			token: pToken
+		};
+		var xCompanyData = {};
+		var xJoResultPJCA = await _pjcaServiceInstance.detail(xParam);
+		var xDecId = null;
+		var xFlagProcess = false;
+		let xPJCAId = 0;
+
+		if (xJoResultPJCA != null && xJoResultPJCA.status_code == '00') {
+			// Decrypt ID
+			if (xJoResultPJCA.data.id.length == 65) {
+				xDecId = await _utilInstance.decrypt(xJoResultPJCA.data.id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					xPJCAId = xDecId.decrypted;
+					xFlagProcess = true;
+				}
+			}
+
+			if (xFlagProcess) {
+				// Get Company Detail
+				var xEncCompanyId = await _utilInstance.encrypt(
+					xJoResultPJCA.data.company_id.toString(),
+					config.cryptoKey.hashKey
+				);
+				var xCompanyDetail = await _oAuthService.getCompanyDetail(pToken, pMethod, xEncCompanyId);
+				if (xCompanyDetail != null) {
+					if (xCompanyDetail.status_code == '00') {
+						xCompanyData = {
+							logo: config.basePathESanqua + '/company_logo/' + xCompanyDetail.token_data.data.logo,
+							iso_purchase_request_no: xCompanyDetail.token_data.data.iso_purchase_request_no
+						};
+						console.log(`>>> xCompanyData: ${JSON.stringify(xCompanyData)}`);
+					}
+				}
+
+				let xCreator = null;
+				let xApprover1 = null;
+				let xApprover2 = null;
+				let xApprover3 = null;
+				let xStringQRCodeCreator = '';
+				let xStringQRCodeApprover1 = '';
+				let xStringQRCodeApprover2 = '';
+				let xStringQRCodeApprover3 = '';
+				let xApprovalFinanceAccounting = null;
+				let xFilePathQRCodeApproval = `${config.uploadBasePath}/digital_sign_qrcode/`;
+				let xQRCodeFileNameCreator,
+					xQRCodeFileName1 = [],
+					xQRCodeFileName2 = [],
+					xQRCodeFileName3 = [];
+
+				xApprover1 =
+					xJoResultPJCA.data.approval_matrix != null
+						? xJoResultPJCA.data.approval_matrix.find((el) => el.sequence === 1)
+						: null;
+				xApprover2 =
+					xJoResultPJCA.data.approval_matrix != null
+						? xJoResultPJCA.data.approval_matrix.find((el) => el.sequence === 2)
+						: null;
+				xApprover3 =
+					xJoResultPJCA.data.approval_matrix != null
+						? xJoResultPJCA.data.approval_matrix.find((el) => el.sequence === 3)
+						: null;
+
+				// Generate QRCode Digital Sign
+
+				let xApprovedUser1 =
+					xApprover1 != null ? xApprover1.approver_user.filter((el) => el.status === 1) : null;
+				if (xApprover1 != null && xApprovedUser1 != null) {
+					for (var i in xApprovedUser1) {
+						xStringQRCodeApprover1 =
+							`VALIDATE_SIGNATURE|PJCA|` +
+							(await _utilInstance.encrypt(
+								`${xPJCAId}|${xApprovedUser1[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
+
+						let xQRCodeApproval1 = await _qrCode.toDataURL(xStringQRCodeApprover1);
+						xQRCodeFileName1.push(`approval_${xPJCAId}${xApprovedUser1[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval1,
+							xFilePathQRCodeApproval + `approval_${xPJCAId}${xApprovedUser1[i].user.id}.png`
+						);
+					}
+					let xUser = xApprover1.approver_user.filter((el) => el.status === 1);
+					console.log(`>>> xUser: ${JSON.stringify(xUser)}`);
+				}
+				console.log(`>>> xApprovedUser 1: ${JSON.stringify(xApprovedUser1)}`);
+
+				let xApprovedUser2 =
+					xApprover2 != null ? xApprover2.approver_user.filter((el) => el.status === 1) : null;
+				if (xApprover2 != null && xApprovedUser2 != null) {
+					for (var i in xApprovedUser2) {
+						xStringQRCodeApprover2 =
+							`VALIDATE_SIGNATURE|PJCA|` +
+							(await _utilInstance.encrypt(
+								`${xPJCAId}|${xApprovedUser2[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
+
+						let xQRCodeApproval2 = await _qrCode.toDataURL(xStringQRCodeApprover2);
+						xQRCodeFileName2.push(`approval_${xPJCAId}${xApprovedUser2[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval2,
+							xFilePathQRCodeApproval + `approval_${xPJCAId}${xApprovedUser2[i].user.id}.png`
+						);
+					}
+				}
+				console.log(`>>> xApprovedUser 2: ${JSON.stringify(xApprovedUser2)}`);
+
+				let xApprovedUser3 =
+					xApprover3 != null ? xApprover3.approver_user.filter((el) => el.status === 1) : null;
+				if (xApprover3 != null && xApprovedUser3 != null) {
+					for (var i in xApprovedUser3) {
+						xStringQRCodeApprover3 =
+							`VALIDATE_SIGNATURE|PJCA|` +
+							(await _utilInstance.encrypt(
+								`${xPJCAId}|${xApprovedUser3[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
+
+						let xQRCodeApproval3 = await _qrCode.toDataURL(xStringQRCodeApprover3);
+						xQRCodeFileName3.push(`approval_${xPJCAId}${xApprovedUser3[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval3,
+							xFilePathQRCodeApproval + `approval_${xPJCAId}${xApprovedUser3[i].user.id}.png`
+						);
+					}
+				}
+				console.log(`>>> xApprovedUser 3: ${JSON.stringify(xApprovedUser3)}`);
+				ejs.renderFile(
+					path.join(__dirname, '../views/', 'pjca-pdf.ejs'),
+					{
+						data: xJoResultPJCA,
+						companyData: xCompanyData,
+						imagePath: config.imagePath,
+						// xApprover1 != null
+						// 	? xApprover1.approver_user.find((el) => el.status === 1) == null
+						// 		? ''
+						// 		: xApprover1.approver_user.find((el) => el.status === 1).user.name
+						// 	: '',
+
+						approver1: xApprovedUser1,
+						approver2: xApprovedUser2,
+						approver3: xApprovedUser3,
+
+						// approver6:
+						// 	xApprover6 != null
+						// 		? xApprover6.approver_user.find((el) => el.status === 1) == null
+						// 			? ''
+						// 			: xApprover6.approver_user.find((el) => el.status === 1).user.name
+						// 		: '',
+						qrCode: {
+							qrPath: `${config.imagePathESanQua_dev}/digital_sign_qrcode/`,
+							approval1: xQRCodeFileName1,
+							approval2: xQRCodeFileName2,
+							approval3: xQRCodeFileName3
+						}
+					},
+					(err, data) => {
+						console.log(`>>> error pdf 0: ${err}`);
+						var xOptions = {};
+
+						xOptions = {
+							width: '209mm',
+							// height: '148.5mm',
+							height: '210mm',
+							borders: '0.2cm'
+						};
+
+						var xPJCANo = xJoResultPJCA.data.document_no.replace(/\//g, '-');
+						var xFileName = `pjca-${xPJCANo}.pdf`;
+						var xPathFile = `./generated_files/pjca/${xFileName}`;
+
+						pdf.create(data, xOptions).toFile(xPathFile, function(err, data) {
+							if (err) {
+								console.log(`>>> error pdf 1: ${err}`);
+								pRes.send(err);
+							} else {
+								var xDirectoryPath = path.resolve(xPathFile);
+								pRes.download(xDirectoryPath, xFileName, (err) => {
+									if (err) {
+										console.log(`>>> error pdf 2: ${err}`);
+										pRes.status(500).send({
+											message: `Could not download the file. ${err}`
+										});
+									}
+								});
+							}
+						});
+					}
+				);
+			}
+		}
+	}
+	
 	async generateRAB(pId, pMethod, pToken, pRes) {
 		var xParam = {
 			id: pId,
@@ -657,203 +1246,478 @@ class ExportService {
 			}
 		}
 	}
-	// async generateRAB_Puppeteer(pId, pMethod, pToken, pRes) {
-	// 	var xParam = {
-	// 		id: pId,
-	// 		method: pMethod,
-	// 		token: pToken
-	// 	};
-	// 	var xCompanyData = {};
-	// 	var xJoResultRAB = await _rabServiceInstance.getById(xParam);
-	// 	var xDecId = null;
-	// 	var xFlagProcess = false;
-	// 	let xRABID = 0;
+	
+	async generateRAB_Puppeteer(pId, pMethod, pToken, pRes) {
+		var xParam = {
+			id: pId,
+			method: pMethod,
+			token: pToken
+		};
+		var xCompanyData = {};
+		var xJoResultRAB = await _rabServiceInstance.getById(xParam);
+		var xDecId = null;
+		var xFlagProcess = false;
+		let xRABID = 0;
 
-	// 	if (xJoResultRAB != null && xJoResultRAB.status_code == '00') {
-	// 		// Decrypt ID
-	// 		if (xJoResultRAB.data.id.length == 65) {
-	// 			xDecId = await _utilInstance.decrypt(xJoResultRAB.data.id, config.cryptoKey.hashKey);
-	// 			if (xDecId.status_code == '00') {
-	// 				xRABID = xDecId.decrypted;
-	// 				xFlagProcess = true;
-	// 			}
-	// 		}
+		if (xJoResultRAB != null && xJoResultRAB.status_code == '00') {
+			// Decrypt ID
+			if (xJoResultRAB.data.id.length == 65) {
+				xDecId = await _utilInstance.decrypt(xJoResultRAB.data.id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					xRABID = xDecId.decrypted;
+					xFlagProcess = true;
+				}
+			}
 
-	// 		if (xFlagProcess) {
-	// 			// Get Company Detail
-	// 			console.log(`>>> xJoResultRAB: ${JSON.stringify(xJoResultRAB.data)}`);
-	// 			var xEncCompanyId = await _utilInstance.encrypt(
-	// 				xJoResultRAB.data.company.id.toString(),
-	// 				config.cryptoKey.hashKey
-	// 			);
-	// 			var xCompanyDetail = await _oAuthService.getCompanyDetail(pToken, pMethod, xEncCompanyId);
-	// 			if (xCompanyDetail != null) {
-	// 				if (xCompanyDetail.status_code == '00') {
-	// 					xCompanyData = {
-	// 						logo: config.basePathESanqua + '/company_logo/' + xCompanyDetail.token_data.data.logo,
-	// 						iso_purchase_request_no: xCompanyDetail.token_data.data.iso_purchase_request_no
-	// 					};
-	// 					console.log(`>>> xCompanyData: ${JSON.stringify(xCompanyData)}`);
-	// 				}
-	// 			}
+			if (xFlagProcess) {
+				// Get Company Detail
+				console.log(`>>> xJoResultRAB: ${JSON.stringify(xJoResultRAB.data)}`);
+				var xEncCompanyId = await _utilInstance.encrypt(
+					xJoResultRAB.data.company.id.toString(),
+					config.cryptoKey.hashKey
+				);
+				var xCompanyDetail = await _oAuthService.getCompanyDetail(pToken, pMethod, xEncCompanyId);
+				if (xCompanyDetail != null) {
+					if (xCompanyDetail.status_code == '00') {
+						xCompanyData = {
+							logo: config.basePathESanqua + '/company_logo/' + xCompanyDetail.token_data.data.logo,
+							iso_purchase_request_no: xCompanyDetail.token_data.data.iso_purchase_request_no
+						};
+						console.log(`>>> xCompanyData: ${JSON.stringify(xCompanyData)}`);
+					}
+				}
 
-	// 			let xCreator = null;
-	// 			let xApprover1 = null;
-	// 			let xApprover2 = null;
-	// 			let xApprover3 = null;
-	// 			let xStringQRCodeCreator = '';
-	// 			let xStringQRCodeApprover1 = '';
-	// 			let xStringQRCodeApprover2 = '';
-	// 			let xStringQRCodeApprover3 = '';
-	// 			let xApprovalFinanceAccounting = null;
-	// 			let xFilePathQRCodeApproval = `${config.uploadBasePath}/digital_sign_qrcode/`;
-	// 			let xQRCodeFileNameCreator,
-	// 				xQRCodeFileName1 = [],
-	// 				xQRCodeFileName2 = [],
-	// 				xQRCodeFileName3 = [];
+				let xCreator = null;
+				let xApprover1 = null;
+				let xApprover2 = null;
+				let xApprover3 = null;
+				let xStringQRCodeCreator = '';
+				let xStringQRCodeApprover1 = '';
+				let xStringQRCodeApprover2 = '';
+				let xStringQRCodeApprover3 = '';
+				let xApprovalFinanceAccounting = null;
+				let xFilePathQRCodeApproval = `${config.uploadBasePath}/digital_sign_qrcode/`;
+				let xQRCodeFileNameCreator,
+					xQRCodeFileName1 = [],
+					xQRCodeFileName2 = [],
+					xQRCodeFileName3 = [];
 
-	// 			xApprover1 =
-	// 				xJoResultRAB.data.approval_matrix != null
-	// 					? xJoResultRAB.data.approval_matrix.find((el) => el.sequence === 1)
-	// 					: null;
-	// 			xApprover2 =
-	// 				xJoResultRAB.data.approval_matrix != null
-	// 					? xJoResultRAB.data.approval_matrix.find((el) => el.sequence === 2)
-	// 					: null;
-	// 			xApprover3 =
-	// 				xJoResultRAB.data.approval_matrix != null
-	// 					? xJoResultRAB.data.approval_matrix.find((el) => el.sequence === 3)
-	// 					: null;
+				xApprover1 =
+					xJoResultRAB.data.approval_matrix != null
+						? xJoResultRAB.data.approval_matrix.find((el) => el.sequence === 1)
+						: null;
+				xApprover2 =
+					xJoResultRAB.data.approval_matrix != null
+						? xJoResultRAB.data.approval_matrix.find((el) => el.sequence === 2)
+						: null;
+				xApprover3 =
+					xJoResultRAB.data.approval_matrix != null
+						? xJoResultRAB.data.approval_matrix.find((el) => el.sequence === 3)
+						: null;
 
-	// 			// Generate QRCode Digital Sign
+				// Generate QRCode Digital Sign
 
-	// 			let xApprovedUser1 =
-	// 				xApprover1 != null ? xApprover1.approver_user.filter((el) => el.status === 1) : null;
-	// 			if (xApprover1 != null && xApprovedUser1 != null) {
-	// 				for (var i in xApprovedUser1) {
-	// 					xStringQRCodeApprover1 =
-	// 						`VALIDATE_SIGNATURE|PJCA|` +
-	// 						(await _utilInstance.encrypt(
-	// 							`${xRABID}|${xApprovedUser1[i].user.id}`,
-	// 							config.cryptoKey.hashKey
-	// 						));
+				let xApprovedUser1 =
+					xApprover1 != null ? xApprover1.approver_user.filter((el) => el.status === 1) : null;
+				if (xApprover1 != null && xApprovedUser1 != null) {
+					for (var i in xApprovedUser1) {
+						xStringQRCodeApprover1 =
+							`VALIDATE_SIGNATURE|PJCA|` +
+							(await _utilInstance.encrypt(
+								`${xRABID}|${xApprovedUser1[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
 
-	// 					let xQRCodeApproval1 = await _qrCode.toDataURL(xStringQRCodeApprover1);
-	// 					xQRCodeFileName1.push(`approval_${xRABID}${xApprovedUser1[i].user.id}.png`);
-	// 					_imageDataURI.outputFile(
-	// 						xQRCodeApproval1,
-	// 						xFilePathQRCodeApproval + `approval_${xRABID}${xApprovedUser1[i].user.id}.png`
-	// 					);
-	// 				}
-	// 				let xUser = xApprover1.approver_user.filter((el) => el.status === 1);
-	// 				console.log(`>>> xUser: ${JSON.stringify(xUser)}`);
-	// 			}
-	// 			console.log(`>>> xApprovedUser 1: ${JSON.stringify(xApprovedUser1)}`);
+						let xQRCodeApproval1 = await _qrCode.toDataURL(xStringQRCodeApprover1);
+						xQRCodeFileName1.push(`approval_${xRABID}${xApprovedUser1[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval1,
+							xFilePathQRCodeApproval + `approval_${xRABID}${xApprovedUser1[i].user.id}.png`
+						);
+					}
+					let xUser = xApprover1.approver_user.filter((el) => el.status === 1);
+					console.log(`>>> xUser: ${JSON.stringify(xUser)}`);
+				}
+				console.log(`>>> xApprovedUser 1: ${JSON.stringify(xApprovedUser1)}`);
 
-	// 			let xApprovedUser2 =
-	// 				xApprover2 != null ? xApprover2.approver_user.filter((el) => el.status === 1) : null;
-	// 			if (xApprover2 != null && xApprovedUser2 != null) {
-	// 				for (var i in xApprovedUser2) {
-	// 					xStringQRCodeApprover2 =
-	// 						`VALIDATE_SIGNATURE|PJCA|` +
-	// 						(await _utilInstance.encrypt(
-	// 							`${xRABID}|${xApprovedUser2[i].user.id}`,
-	// 							config.cryptoKey.hashKey
-	// 						));
+				let xApprovedUser2 =
+					xApprover2 != null ? xApprover2.approver_user.filter((el) => el.status === 1) : null;
+				if (xApprover2 != null && xApprovedUser2 != null) {
+					for (var i in xApprovedUser2) {
+						xStringQRCodeApprover2 =
+							`VALIDATE_SIGNATURE|PJCA|` +
+							(await _utilInstance.encrypt(
+								`${xRABID}|${xApprovedUser2[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
 
-	// 					let xQRCodeApproval2 = await _qrCode.toDataURL(xStringQRCodeApprover2);
-	// 					xQRCodeFileName2.push(`approval_${xRABID}${xApprovedUser2[i].user.id}.png`);
-	// 					_imageDataURI.outputFile(
-	// 						xQRCodeApproval2,
-	// 						xFilePathQRCodeApproval + `approval_${xRABID}${xApprovedUser2[i].user.id}.png`
-	// 					);
-	// 				}
-	// 			}
-	// 			console.log(`>>> xApprovedUser 2: ${JSON.stringify(xApprovedUser2)}`);
+						let xQRCodeApproval2 = await _qrCode.toDataURL(xStringQRCodeApprover2);
+						xQRCodeFileName2.push(`approval_${xRABID}${xApprovedUser2[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval2,
+							xFilePathQRCodeApproval + `approval_${xRABID}${xApprovedUser2[i].user.id}.png`
+						);
+					}
+				}
+				console.log(`>>> xApprovedUser 2: ${JSON.stringify(xApprovedUser2)}`);
 
-	// 			let xApprovedUser3 =
-	// 				xApprover3 != null ? xApprover3.approver_user.filter((el) => el.status === 1) : null;
-	// 			if (xApprover3 != null && xApprovedUser3 != null) {
-	// 				for (var i in xApprovedUser3) {
-	// 					xStringQRCodeApprover3 =
-	// 						`VALIDATE_SIGNATURE|PJCA|` +
-	// 						(await _utilInstance.encrypt(
-	// 							`${xRABID}|${xApprovedUser3[i].user.id}`,
-	// 							config.cryptoKey.hashKey
-	// 						));
+				let xApprovedUser3 =
+					xApprover3 != null ? xApprover3.approver_user.filter((el) => el.status === 1) : null;
+				if (xApprover3 != null && xApprovedUser3 != null) {
+					for (var i in xApprovedUser3) {
+						xStringQRCodeApprover3 =
+							`VALIDATE_SIGNATURE|PJCA|` +
+							(await _utilInstance.encrypt(
+								`${xRABID}|${xApprovedUser3[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
 
-	// 					let xQRCodeApproval3 = await _qrCode.toDataURL(xStringQRCodeApprover3);
-	// 					xQRCodeFileName3.push(`approval_${xRABID}${xApprovedUser3[i].user.id}.png`);
-	// 					_imageDataURI.outputFile(
-	// 						xQRCodeApproval3,
-	// 						xFilePathQRCodeApproval + `approval_${xRABID}${xApprovedUser3[i].user.id}.png`
-	// 					);
-	// 				}
-	// 			}
-	// 			console.log(`>>> xApprovedUser 3: ${JSON.stringify(xApprovedUser3)}`);
-	// 			console.log(`>>> xJoResultRAB: ${JSON.stringify(xJoResultRAB.data.budget_plan_detail)}`);
-	// 			(async () => {
-  	// 				try {
-	// 					const html = await ejs.renderFile(
-	// 						path.join(__dirname, '../views/', 'rab-pdf-puppeteer.ejs'),
-	// 						{
-	// 							data: xJoResultRAB,
-	// 							companyData: xCompanyData,
-	// 							imagePath: config.imagePath,
+						let xQRCodeApproval3 = await _qrCode.toDataURL(xStringQRCodeApprover3);
+						xQRCodeFileName3.push(`approval_${xRABID}${xApprovedUser3[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval3,
+							xFilePathQRCodeApproval + `approval_${xRABID}${xApprovedUser3[i].user.id}.png`
+						);
+					}
+				}
+				console.log(`>>> xApprovedUser 3: ${JSON.stringify(xApprovedUser3)}`);
+				console.log(`>>> xJoResultRAB: ${JSON.stringify(xJoResultRAB.data.budget_plan_detail)}`);
+				(async () => {
+  					try {
+						const html = await ejs.renderFile(
+							path.join(__dirname, '../views/', 'rab-pdf-puppeteer.ejs'),
+							{
+								data: xJoResultRAB,
+								companyData: xCompanyData,
+								imagePath: config.imagePath,
 
-	// 							approver1: xApprovedUser1,
-	// 							approver2: xApprovedUser2,
-	// 							approver3: xApprovedUser3,
+								approver1: xApprovedUser1,
+								approver2: xApprovedUser2,
+								approver3: xApprovedUser3,
 
-	// 							qrCode: {
-	// 								qrPath: `${config.imagePathESanQua_dev}/digital_sign_qrcode/`,
-	// 								approval1: xQRCodeFileName1,
-	// 								approval2: xQRCodeFileName2,
-	// 								approval3: xQRCodeFileName3
-	// 							}
-	// 						}
-	// 					);
+								qrCode: {
+									qrPath: `${config.imagePathESanQua_dev}/digital_sign_qrcode/`,
+									approval1: xQRCodeFileName1,
+									approval2: xQRCodeFileName2,
+									approval3: xQRCodeFileName3
+								}
+							}
+						);
+						const puppeteerConfig = {
+							headless: true,
+							args: ['--no-sandbox', '--disable-setuid-sandbox']
+						}
+						if (config.puppeteerExecutablePath != null) {
+							puppeteerConfig.executablePath = config.puppeteerExecutablePath;
+						}
+						const browser = await puppeteer.launch(puppeteerConfig);
+
+						const page = await browser.newPage();
+						await page.setContent(html, { waitUntil: 'networkidle0' });
+
+						const xRABNo = xJoResultRAB.data.budget_no.replace(/\//g, '-');
+						const xFileName = `rab-${xRABNo}.pdf`;
+						var xPathFile = `./generated_files/rab/${xFileName}`;
+						await page.pdf({
+							path: xPathFile,
+							format: 'A4',
+							landscape: true,
+							printBackground: true,
+							margin: {
+								top: '2mm',
+								bottom: '2mm',
+								left: '2mm',
+								right: '2mm'
+							}
+						});
+
+						await browser.close();
+						pRes.download(xPathFile, xFileName, (err) => {
+							if (err) {
+								console.log(`>>> error pdf 2: ${err}`);
+								pRes.status(500).send({
+									message: `Could	 not download the file. ${err}`
+								});
+							}
+						});
+					} catch (err) {
+						console.error('❌ Gagal generate PDF:', err);
+						pRes.status(500).send(err);
+					}
+				})();
+			}
+		}
+	}
+	
+	async generateFPB_Puppeteer(pId, pMethod, pToken, pRes) {
+		var xParam = {
+			id: pId,
+			method: pMethod,
+			token: pToken
+		};
+		var xCompanyData = {};
+		var xJoResultFPB = await _purchaseRequestServiceInstance.getById(xParam);
+		var xDecId = null;
+		var xFlagProcess = false;
+		let xFPBId = 0;
+
+		if (xJoResultFPB != null && xJoResultFPB.status_code == '00') {
+			// Decrypt ID
+			if (xJoResultFPB.data.id.length == 65) {
+				xDecId = await _utilInstance.decrypt(xJoResultFPB.data.id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					xFPBId = xDecId.decrypted;
+					xFlagProcess = true;
+				}
+			}
+
+			if (xFlagProcess) {
+				// Get Company Detail
+				var xEncCompanyId = await _utilInstance.encrypt(
+					xJoResultFPB.data.company.id.toString(),
+					config.cryptoKey.hashKey
+				);
+				var xCompanyDetail = await _oAuthService.getCompanyDetail(pToken, pMethod, xEncCompanyId);
+				if (xCompanyDetail != null) {
+					if (xCompanyDetail.status_code == '00') {
+						xCompanyData = {
+							logo: config.basePathESanqua + '/company_logo/' + xCompanyDetail.token_data.data.logo,
+							iso_purchase_request_no: xCompanyDetail.token_data.data.iso_purchase_request_no
+						};
+					}
+				}
+
+				let xCreator = null;
+				let xApprover1 = null;
+				let xApprover2 = null;
+				let xApprover3 = null;
+				let xApprover4 = null;
+				let xApprover5 = null;
+				let xApprover6 = null;
+				let xStringQRCodeCreator = '';
+				let xStringQRCodeApprover1 = '';
+				let xStringQRCodeApprover2 = '';
+				let xStringQRCodeApprover3 = '';
+				let xStringQRCodeApprover4 = '';
+				let xStringQRCodeApprover5 = '';
+				let xStringQRCodeApprover6 = '';
+				let xApprovalFinanceAccounting = null;
+				let xFilePathQRCodeApproval = `${config.uploadBasePath}/digital_sign_qrcode/`;
+				let xQRCodeFileNameCreator,
+					xQRCodeFileName1 = [],
+					xQRCodeFileName2 = [],
+					xQRCodeFileName3 = [],
+					xQRCodeFileName4 = [],
+					xQRCodeFileName5 = [],
+					xQRCodeFileName6 = [];
+
+				xApprover1 =
+					xJoResultFPB.data.approval_matrix != null
+						? xJoResultFPB.data.approval_matrix.find((el) => el.sequence === 1)
+						: null;
+				xApprover2 =
+					xJoResultFPB.data.approval_matrix != null
+						? xJoResultFPB.data.approval_matrix.find((el) => el.sequence === 2)
+						: null;
+				xApprover3 =
+					xJoResultFPB.data.approval_matrix != null
+						? xJoResultFPB.data.approval_matrix.find((el) => el.sequence === 3)
+						: null;
+				xApprover4 =
+					xJoResultFPB.data.approval_matrix != null
+						? xJoResultFPB.data.approval_matrix.find((el) => el.sequence === 4)
+						: null;
+				xApprover5 =
+					xJoResultFPB.data.approval_matrix != null
+						? xJoResultFPB.data.approval_matrix.find((el) => el.sequence === 5)
+						: null;
+
+				let xApprovedUser1 =
+					xApprover1 != null ? xApprover1.approver_user.filter((el) => el.status === 1) : null;
+				if (xApprover1 != null && xApprovedUser1 != null) {
+					for (var i in xApprovedUser1) {
+						xStringQRCodeApprover1 =
+							`VALIDATE_SIGNATURE|PROC|` +
+							(await _utilInstance.encrypt(
+								`${xFPBId}|${xApprovedUser1[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
+
+						let xQRCodeApproval1 = await _qrCode.toDataURL(xStringQRCodeApprover1);
+						xQRCodeFileName1.push(`approval_${xFPBId}${xApprovedUser1[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval1,
+							xFilePathQRCodeApproval + `approval_${xFPBId}${xApprovedUser1[i].user.id}.png`
+						);
+					}
+					
+					let xUser = xApprover1.approver_user.filter((el) => el.status === 1);
+					console.log(`>>> xUser: ${JSON.stringify(xUser)}`);
+				}
+				console.log(`>>> xApprovedUser 1: ${JSON.stringify(xApprovedUser1)}`);
+
+				let xApprovedUser2 =
+					xApprover2 != null ? xApprover2.approver_user.filter((el) => el.status === 1) : null;
+				if (xApprover2 != null && xApprovedUser2 != null) {
+					for (var i in xApprovedUser2) {
+						xStringQRCodeApprover2 =
+							`VALIDATE_SIGNATURE|PROC|` +
+							(await _utilInstance.encrypt(
+								`${xFPBId}|${xApprovedUser2[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
+
+						let xQRCodeApproval2 = await _qrCode.toDataURL(xStringQRCodeApprover2);
+						xQRCodeFileName2.push(`approval_${xFPBId}${xApprovedUser2[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval2,
+							xFilePathQRCodeApproval + `approval_${xFPBId}${xApprovedUser2[i].user.id}.png`
+						);
+					}
+				}
+				console.log(`>>> xApprovedUser 2: ${JSON.stringify(xApprovedUser2)}`);
+
+				let xApprovedUser3 =
+					xApprover3 != null ? xApprover3.approver_user.filter((el) => el.status === 1) : null;
+				if (xApprover3 != null && xApprovedUser3 != null) {
+					for (var i in xApprovedUser3) {
+						xStringQRCodeApprover3 =
+							`VALIDATE_SIGNATURE|PROC|` +
+							(await _utilInstance.encrypt(
+								`${xFPBId}|${xApprovedUser3[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
+
+						let xQRCodeApproval3 = await _qrCode.toDataURL(xStringQRCodeApprover3);
+						xQRCodeFileName3.push(`approval_${xFPBId}${xApprovedUser3[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval3,
+							xFilePathQRCodeApproval + `approval_${xFPBId}${xApprovedUser3[i].user.id}.png`
+						);
+					}
+				}
+				console.log(`>>> xApprovedUser 3: ${JSON.stringify(xApprovedUser3)}`);
+
+				let xApprovedUser4 =
+					xApprover4 != null ? xApprover4.approver_user.filter((el) => el.status === 1) : null;
+				if (xApprover4 != null && xApprovedUser4 != null) {
+					for (var i in xApprovedUser4) {
+						xStringQRCodeApprover4 =
+							`VALIDATE_SIGNATURE|PROC|` +
+							(await _utilInstance.encrypt(
+								`${xFPBId}|${xApprovedUser4[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
+
+						let xQRCodeApproval4 = await _qrCode.toDataURL(xStringQRCodeApprover4);
+						xQRCodeFileName4.push(`approval_${xFPBId}${xApprovedUser4[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval4,
+							xFilePathQRCodeApproval + `approval_${xFPBId}${xApprovedUser4[i].user.id}.png`
+						);
+					}
+				}
+				console.log(`>>> xApprovedUser 4: ${JSON.stringify(xApprovedUser4)}`);
+
+				let xApprovedUser5 =
+					xApprover5 != null ? xApprover5.approver_user.filter((el) => el.status === 1) : null;
+				if (xApprover5 != null && xApprovedUser5 != null) {
+					for (var i in xApprovedUser5) {
+						xStringQRCodeApprover5 =
+							`VALIDATE_SIGNATURE|PROC|` +
+							(await _utilInstance.encrypt(
+								`${xFPBId}|${xApprovedUser5[i].user.id}`,
+								config.cryptoKey.hashKey
+							));
+
+						let xQRCodeApproval5 = await _qrCode.toDataURL(xStringQRCodeApprover5);
+						xQRCodeFileName5.push(`approval_${xFPBId}${xApprovedUser5[i].user.id}.png`);
+						_imageDataURI.outputFile(
+							xQRCodeApproval5,
+							xFilePathQRCodeApproval + `approval_${xFPBId}${xApprovedUser5[i].user.id}.png`
+						);
+					}
+				}
+				console.log(`>>> xApprovedUser 5: ${JSON.stringify(xApprovedUser5)}`);
+
+				(async () => {
+					try {
+						const html = await ejs.renderFile(
+							path.join(__dirname, '../views/', 'fpb-pdf-puppeteer_v2.ejs'),
+							{
+								data: xJoResultFPB,
+								companyData: xCompanyData,
+								imagePath: config.imagePath,
+
+								approver1: xApprovedUser1,
+								approver2: xApprovedUser2,
+								approver3: xApprovedUser3,
+								approver4: xApprovedUser4,
+								approver5: xApprovedUser5,
+
+								qrCode: {
+									qrPath: `${config.imagePathESanQua_dev}/digital_sign_qrcode/`,
+									approval1: xQRCodeFileName1,
+									approval2: xQRCodeFileName2,
+									approval3: xQRCodeFileName3,
+									approval4: xQRCodeFileName4,
+									approval5: xQRCodeFileName5
+								}
+							}
+						);
 						
-	// 					const browser = await puppeteer.launch({
-	// 						headless: true,
-	// 						args: ['--no-sandbox', '--disable-setuid-sandbox']
-	// 					});
-	// 					const page = await browser.newPage();
-	// 					await page.setContent(html, { waitUntil: 'networkidle0' });
+						const puppeteerConfig = {
+							headless: true,
+							args: ['--no-sandbox', '--disable-setuid-sandbox']
+						}
+						
+						if (config.puppeteerExecutablePath != null) {
+							puppeteerConfig.executablePath = config.puppeteerExecutablePath;
+						}
+						
+						const browser = await puppeteer.launch(puppeteerConfig);
 
-	// 					const xRABNo = xJoResultRAB.data.budget_no.replace(/\//g, '-');
-	// 					const xFileName = `rab-${xRABNo}.pdf`;
-	// 					var xPathFile = `./generated_files/rab/${xFileName}`;
-	// 					await page.pdf({
-	// 						path: xPathFile,
-	// 						format: 'A4',
-	// 						landscape: true,
-	// 						printBackground: true,
-	// 						margin: {
-	// 							top: '2mm',
-	// 							bottom: '2mm',
-	// 							left: '2mm',
-	// 							right: '2mm'
-	// 						}
-	// 					});
+						const page = await browser.newPage();
+						await page.setContent(html, { waitUntil: 'networkidle0' });
 
-	// 					await browser.close();
-	// 					pRes.download(xPathFile, xFileName, (err) => {
-	// 						if (err) {
-	// 							console.log(`>>> error pdf 2: ${err}`);
-	// 							pRes.status(500).send({
-	// 								message: `Could	 not download the file. ${err}`
-	// 							});
-	// 						}
-	// 					});
-	// 				} catch (err) {
-	// 					console.error('❌ Gagal generate PDF:', err);
-	// 					pRes.status(500).send(err);
-	// 				}
-	// 			})();
-	// 		}
-	// 	}
-	// }
+						var xFPBNo = xJoResultFPB.data.request_no.replace(/\//g, '-');
+						var xFileName = `fpb-${xFPBNo}.pdf`;
+						var xPathFile = `./generated_files/fpb/${xFileName}`;
+						const xOptions = {
+							width: '210mm',   // Lebar A4
+							height: '297mm',  // Tinggi A4
+							margins: {
+								top: '0.3cm',
+								bottom: '0.3cm',
+								left: '0.3cm',
+								right: '0.3cm'
+							}
+						};
+						await page.pdf({
+							path: xPathFile,
+							format: 'A4',
+							// landscape: false,
+							printBackground: true,
+							...xOptions
+						});
+
+						await browser.close();
+						pRes.download(xPathFile, xFileName, (err) => {
+							if (err) {
+								console.log(`>>> error pdf 2: ${err}`);
+								pRes.status(500).send({
+									message: `Could	 not download the file. ${err}`
+								});
+							}
+						});
+					} catch (err) {
+						console.error('❌ Gagal generate PDF:', err);
+						pRes.status(500).send(err);
+					}
+				})();
+			}
+		}
+	}
 }
 
 module.exports = ExportService;

@@ -1,0 +1,1650 @@
+const jwt = require('jsonwebtoken');
+const md5 = require('md5');
+const crypto = require('crypto');
+const moment = require('moment');
+const sequelize = require('sequelize');
+const dateFormat = require('dateformat');
+const dateTime = require("node-datetime");
+const Op = sequelize.Op;
+const bcrypt = require('bcrypt');
+const fs = require('fs');
+const _ = require('lodash');
+
+const env = process.env.NODE_ENV || 'localhost';
+const config = require(__dirname + '/../config/config.json')[env];
+
+// Utility
+const Utility = require('peters-globallib-v2');
+const _utilInstance = new Utility();
+
+const GlobalUtility = require('../utils/globalutility.js');
+const _globalUtilInstance = new GlobalUtility();
+
+// Repository
+const PaymentRequestRepository = require('../repository/paymentrequestrepository.js');
+const _repoInstance = new PaymentRequestRepository();
+
+const PaymentRequestDetailRepository = require('../repository/paymentrequestdetailrepository.js');
+const _paymentRequestDetailRepoInstance = new PaymentRequestDetailRepository();
+
+const PurchaseRequestRepository = require('../repository/purchaserequestrepository.js');
+const _purchaseRequestRepoInstance = new PurchaseRequestRepository();
+
+const PurchaseRequestDetailRepository = require('../repository/purchaserequestdetailrepository.js');
+const _purchaseRequestDetailRepoInstance = new PurchaseRequestDetailRepository();
+
+const GoodsReceiptRepository = require('../repository/goodsreceiptrepository.js');
+const _goodsReceiptRepoInstance = new GoodsReceiptRepository();
+
+const GoodsReceiptDetailRepository = require('../repository/goodsreceiptdetailrepository.js');
+const _goodsReceiptDetailRepository = new GoodsReceiptDetailRepository();
+
+const PJCARepository = require('../repository/pjcarepository.js');
+const _pjcaRepoInstance = new PJCARepository();
+// const PaymentRequestDetailRepository = require('../repository/paymentrequestdetailrepository.js');
+// const _repoDetailInstance = new PaymentRequestDetailRepository();
+
+// OAuth Service
+const OAuthService = require('../services/oauthservice.js');
+const _oAuthService = new OAuthService();
+
+const CurrencyService = require('../services/currencyservice.js');
+const _currencyService = new CurrencyService();
+
+const NotificationService = require('../services/notificationservice.js');
+const _notificationService = new NotificationService();
+
+// const PJCAService = require('../services/pjcaservice.js');
+// const _pjcaServiceInstance = new PJCAService();
+
+// const VendorCatalogueService = require('../services/vendorcatalogueservice.js');
+// const _catalogueService = new VendorCatalogueService();
+
+// const PurchaseRequestService = require('../services/purchaserequestservice.js');
+// const _purchaseRequestServiceInstance = new PurchaseRequestService();
+
+const _xClassName = 'PaymentRequestService';
+
+class PaymentRequestService {
+	constructor() {}
+
+	async detail(pParam) {
+		var xJoResult = {};
+		var xFlagProcess = false;
+		var xDecId = null;
+		var xEncId = null;
+		var xJoData = {};
+		var xArrUserCanCancel = [];
+
+		try {
+			if (pParam.hasOwnProperty('id')) {
+				if (pParam.id != '') {
+					xEncId = pParam.id;
+					xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.id = xDecId.decrypted;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xDecId;
+					}
+				}
+
+				if (xFlagProcess) {
+					let xDetail = await _repoInstance.getByParameter(pParam);
+					xDetail = await _utilInstance.changeIdToEncryptedId(xDetail, config.cryptoKey.hashKey);
+					console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`);
+					if (xDetail != null) {
+						if (xDetail.status_code == '00') {
+								
+							let xFileArr = [];
+							for (var j in xDetail.data.file) {
+								xFileArr.push({
+									subject: xDetail.data.file[j].subject,
+									file:
+										xDetail.data.file[j].file != null
+											? `${config.imagePathESanQua}/eprocurement/payreq/${xDetail.data.file[j].file}`
+											: null
+								});
+							}
+							xDetail.data.file = xFileArr
+							xDetail.data.createdAt = xDetail.data.createdAt != null ? moment(xDetail.data.createdAt).format('DD MMM YYYY') : ''
+
+							var xPayreqDetail = xDetail.data.payment_request_detail;
+							var xGlobalAmount = xDetail.data.global_discount 
+							var xGlobalPercent = xDetail.data.global_discount_percent
+							var xTotalBasePrice = 0;
+							var xTotalDiscItem = 0;
+							var xTotalDiscWoTax = 0;
+							var xTaxes = 0;
+							var xDpp = 0
+								
+							// // looping detail item
+							for (var i in xPayreqDetail) {
+								delete xPayreqDetail[i].price_total
+								var xPricePerItem = xPayreqDetail[i].price_request
+								// var xTotalPrice = Math.round((xPayreqDetail[i].price_request * xPayreqDetail[i].qty_request) * 1000) / 1000
+								var xDiscAmount = xPayreqDetail[i].discount_amount || 0
+								var xDiscPercent = xPayreqDetail[i].discount_percent || 0
+								var xDiscWoTax = 0
+								var xTotalDisc = 0
+								var xTax = 0
+								var xPriceWithDisc = 0
+								var xPriceBeforeTax = 0
+								var xTotalPrice = 0
+								var xSubtotal = 0
+
+								// calc discount
+								if (xPayreqDetail[i].discount_percent != null && xPayreqDetail[i].discount_percent != 0) {
+									xDiscAmount = Math.round((xPricePerItem * (xPayreqDetail[i].discount_percent / 100)) * 1000) / 1000
+									xPayreqDetail[i].discount_amount = Math.round(xDiscAmount * 1000) / 1000
+								}
+								if (xPayreqDetail[i].discount_amount != null && xPayreqDetail[i].discount_amount != 0) {
+									xDiscPercent = (xPayreqDetail[i].discount_amount / xPricePerItem) * 100
+									xPayreqDetail[i].discount_percent = Math.round(xDiscPercent * 1000) / 1000
+								}
+								
+								xDiscWoTax = Math.round((xPricePerItem * (xDiscPercent / 100)) * 1000) / 1000
+
+								xPriceWithDisc = Math.round((xPricePerItem - xDiscWoTax) * 1000) / 1000
+								
+								// calc price after tax
+								if (xPayreqDetail[i].tax != null) {
+									var taxValue = xPayreqDetail[i].tax.value / 100
+									if (xPayreqDetail[i].tax.type == 1) {
+										taxValue = 1 + (xPayreqDetail[i].tax.value / 100)
+										xPriceBeforeTax = Math.round((xPriceWithDisc / taxValue) * 1000) / 1000
+										xTax = Math.round((xPriceWithDisc - xPriceBeforeTax) * 1000) / 1000
+										// xTotalPriceWithTax = Math.round((xTotalPrice - xTax) * 1000) / 1000
+										if (xDiscPercent != 0) {
+											xTotalDisc = Math.round((xDiscWoTax / taxValue) * 1000) / 1000
+										}
+										xTotalPrice = Math.round((xPriceWithDisc - xTax) * 1000) / 1000
+									}else{
+										// xPriceBeforeTax = Math.round((xPriceWithDisc * taxValue) * 1000) / 1000
+										xTax = Math.round((xPriceWithDisc * taxValue) * 1000) / 1000
+										xTotalDisc = xDiscWoTax
+										xTotalPrice = xPriceWithDisc
+									}
+								} else {
+									xTotalDisc = xDiscWoTax
+									xTotalPrice = xPriceWithDisc
+								}
+
+								// xTotalDisc = 
+								xSubtotal = Math.round((xTotalPrice * xPayreqDetail[i].qty_request) * 1000) / 1000
+								xPayreqDetail[i].subtotal = xSubtotal
+
+								xTotalDiscWoTax += Math.round((xDiscWoTax * xPayreqDetail[i].qty_request) * 1000) / 1000
+								xTotalDiscItem += Math.round((xTotalDisc * xPayreqDetail[i].qty_request) * 1000) / 1000
+								xPayreqDetail[i].total_discount = Math.round((xTotalDisc * xPayreqDetail[i].qty_request) * 1000) / 1000
+
+								xTaxes += Math.round((xTax * xPayreqDetail[i].qty_request) * 1000) / 1000
+
+								xTotalBasePrice += xSubtotal
+
+								xPayreqDetail[i].tax_amount = xTax
+							}
+							
+							delete xDetail.data.purchase_request_id;
+							xDetail.data.total_discount_wo_tax = xTotalDiscWoTax
+							xDetail.data.total_base_price = Math.round((xTotalBasePrice + xTotalDiscItem || 0) * 1000) / 1000
+							xDetail.data.total_discount = Math.round((xTotalDiscItem || 0) * 1000) / 1000
+
+							if (xDetail.data.global_discount != null & xDetail.data.global_discount != 0) {
+								if (xTotalDiscItem != 0) {
+									xGlobalPercent = (xDetail.data.global_discount / xTotalDiscItem) * 100
+								} else {
+									xGlobalPercent = (xDetail.data.global_discount / xTotalBasePrice) * 100
+								}
+							}
+							
+							if (xDetail.data.global_discount_percent != null & xDetail.data.global_discount_percent != 0) {
+								if (xTotalDiscItem != 0) {
+									xGlobalAmount = (xDetail.data.global_discount_percent * xTotalDiscWoTax ) / 100
+								} else {
+									xGlobalAmount = (xDetail.data.global_discount_percent * xTotalBasePrice) / 100
+								}
+							}
+							
+							xDetail.data.global_discount_percent = Math.round(xGlobalPercent * 1000) / 1000
+							xDetail.data.global_discount = Math.round(xGlobalAmount * 1000) / 1000
+
+							if (xGlobalAmount == 0) {
+								xDetail.data.untaxed_amount = Math.round((xDetail.data.total_base_price - xDetail.data.total_discount || 0 ) * 1000) / 1000
+								if (xPayreqDetail.every( ({ tax_type }) => tax_type == 6 || tax_type == 7)) {
+									xDpp = (Math.round((xDetail.data.untaxed_amount * (11/12)) * 1000 )  / 1000) || 0
+									xDetail.data.total_tax_amount = (Math.round((xDpp * 0.12) * 1000 )  / 1000) || 0
+								} else {
+									xDetail.data.total_tax_amount = Math.round(( xTaxes || 0 ) * 1000) / 1000
+								}
+							} else {
+								xDetail.data.untaxed_amount = Math.round((xDetail.data.total_base_price - xGlobalAmount || 0) * 1000) / 1000
+								if (xPayreqDetail.every( ({ tax_type }) => tax_type == 6 || tax_type == 7)) {
+									xDpp = (Math.round((xDetail.data.untaxed_amount * (11/12)) * 1000 )  / 1000) || 0
+									// before update ppn12%
+									// xDetail.data.total_tax_amount = (Math.round((xDetail.data.untaxed_amount * 0.11) * 1000 )  / 1000) || 0
+									xDetail.data.total_tax_amount = (Math.round((xDpp * 0.12) * 1000 )  / 1000) || 0
+								} else {
+									xDetail.data.total_tax_amount = (Math.round((xTaxes) * 1000 )  / 1000) || 0
+								}
+								// xDetail.data.total_tax_amount = (Math.round((xTaxes - (xTaxes * (xDetail.data.global_discount_percent / 100))) * 1000 )  / 1000) || 0
+							}
+							xDetail.data.total_dpp = xDpp
+							const xPreTotalPrice = xDetail.data.untaxed_amount + xDetail.data.total_tax_amount + xDetail.data.delivery_costs + xDetail.data.service_costs + xDetail.data.other_costs
+							const xTotalPriceRound = Math.round((xPreTotalPrice || 0) * 1000) / 1000
+							xDetail.data.total_price = xTotalPriceRound
+							// get Detail FPB
+							// let xFpbDetail = await _purchaseRequestRepoInstance.getById({ id: xDetail.data.purchase_request_id })
+							// if (xFpbDetail != null) {
+							// 	xDetail.data.fpb_no = xFpbDetail.request_no
+							// }
+							// Convert nominal to trebilang
+							const xTerbilang = await _currencyService.terbilang(xTotalPriceRound)
+							xDetail.data.terbilang = xTerbilang
+							
+							// Get Approval Matrix
+							var xParamApprovalMatrix = {
+								application_id: 8,
+								table_name: config.dbTables.payreq,
+								document_id: xEncId
+							};
+							var xResultApprovalMatrix = await _oAuthService.getApprovalMatrix(
+								pParam.method,
+								pParam.token,
+								xParamApprovalMatrix
+							);
+
+							console.log(`>>> xResultApprovalMatrix: ${JSON.stringify(xResultApprovalMatrix)}`);
+
+							if (xResultApprovalMatrix != null) {
+								if (xResultApprovalMatrix.status_code == '00') {
+									let xListApprover = xResultApprovalMatrix.token_data.data;
+									console.log(`>>> xListApprover: ${JSON.stringify(xListApprover)}`);
+									for (var i in xListApprover) {
+										console.log(`>>> approver_user[${i}]: ${JSON.stringify(xListApprover[i].approver_user)}`);
+										let xApproverUsers = _.filter(xListApprover[i].approver_user, { status: 0 }).map(
+											// update 08/08/2023 prevent user is null
+											(v) => (v.user != null ? v.user.email : v.user)
+										);
+										console.log(`>>> xApproverUsers: ${JSON.stringify(xApproverUsers)}`);
+										xArrUserCanCancel.push.apply(xArrUserCanCancel, xApproverUsers);
+									}
+								}
+							}
+							console.log(`>>> xArrUserCanCancel: ${JSON.stringify(xArrUserCanCancel)}`);
+							xDetail.data.approver_users = xArrUserCanCancel
+							xDetail.data.approval_matrix = xResultApprovalMatrix.status_code == '00' && xResultApprovalMatrix.token_data.status_code == '00' ? xResultApprovalMatrix.token_data.data : null
+
+						}
+					} else {
+						
+						xJoResult = {
+							status_code: '-99',
+							status_msg: 'Data not found'
+						};
+					}
+					xJoResult = xDetail;
+				}
+			}
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.detail`, `Exception error: ${e.message}`, 'error');
+
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.detail: Exception error: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
+
+	async list(pParam) {
+		var xJoResult = {};
+		var xJoArrData = [];
+		var xDecId = null;
+		var xFlagProccess = false;
+		var xArrOwnedDocNo = [];
+
+		try {
+			if (pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.user_id = xDecId.decrypted;
+					xFlagProccess = true
+					if (pParam.hasOwnProperty('purchase_request_id') && pParam.purchase_request_id != '') {
+						let xDecPrId = await _utilInstance.decrypt(pParam.purchase_request_id, config.cryptoKey.hashKey);
+						if (xDecPrId.status_code == '00') {
+							pParam.purchase_request_id = xDecPrId.decrypted;
+						}
+					}
+				} else {
+					xJoResult = xDecId;
+				}
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Invalid Logged User Id'
+				};
+			}
+			
+			if (pParam.hasOwnProperty('inappnotif') && pParam.inappnotif) {
+				const xOwnedDocumentPayload = {
+					application_id: 8,
+					table_name: config.dbTables.payreq,
+					document_id: '',
+					user_id: pParam.user_id
+				}
+			
+				xOwnedDocumentPayload.status = 0
+				
+				let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, xOwnedDocumentPayload);
+				console.log(`>>> xOwnedDocument : ${JSON.stringify(xOwnedDocument)}`);
+
+				if (xOwnedDocument.status_code == '00') {
+					if (xOwnedDocument.hasOwnProperty('token_data')) {
+						if (xOwnedDocument.token_data.status_code == '00') {
+							for (var i in xOwnedDocument.token_data.data) {
+								xArrOwnedDocNo.push(xOwnedDocument.token_data.data[i].document_no);
+							}
+							pParam.owned_document_no = xArrOwnedDocNo;
+							pParam.current_approval_ids = pParam.user_id;
+						}
+					}
+				}
+			}
+
+			if (xFlagProccess) {
+				var xResultList = await _repoInstance.list(pParam);
+				if (xResultList) {
+					// console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
+					if (xResultList.status_code == '00') {
+						var xRows = xResultList.data.rows;
+						if (xRows.length > 0) {
+							for (var i in xRows) {
+								xJoArrData.push({
+									id: await _utilInstance.encrypt(xRows[i].id.toString(), config.cryptoKey.hashKey),
+									document_no: xRows[i].document_no,
+									company_id: xRows[i].company_id,
+									company_name: xRows[i].company_name,
+									employee_id: xRows[i].employee_id,
+									employee_name: xRows[i].employee_name,
+									department_id: xRows[i].department_id,
+									department_name: xRows[i].department_name,
+									status: xRows[i].status,
+									vendor_id: xRows[i].vendor_id,
+									vendor_name: xRows[i].vendor_name,
+									vendor_code: xRows[i].vendor_code,
+									payreq_type: xRows[i].payreq_type,
+									payment_type: xRows[i].payment_type,
+									created_at: moment(xRows[i].createdAt).format('DD MMM YYYY HH:mm:ss'),
+									created_by_name: xRows[i].created_by_name,
+									updated_at: moment(xRows[i].updatedAt).format('DD MMM YYYY HH:mm:ss'),
+									updated_by_name: xRows[i].updated_by_name,
+									purchase_request: xRows[i].purchase_request,
+								});
+							}
+
+							xJoResult = {
+								status_code: '00',
+								status_msg: 'OK',
+								data: xJoArrData,
+								total_record: xResultList.total_record
+							};
+						} else {
+							xJoResult = {
+								status_code: '-99',
+								status_msg: 'Data not found'
+							};
+						}
+					} else {
+						xJoResult = xResultList;
+					}
+				} else {
+					xJoResult = xResultList;
+				}
+			
+			}
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.list`, `Exception error: ${e.message}`, 'error');
+
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.list: Exception error: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
+	
+	async dropdown(pParam) {
+		var xJoResult = {};
+		var xJoArrData = [];
+
+		try {
+			if (pParam.hasOwnProperty('purchase_request_id')) {
+				if (pParam.purchase_request_id != '') {
+					// xEncId = pParam.purchase_request_id;
+					let xDecId = await _utilInstance.decrypt(pParam.purchase_request_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.purchase_request_id = xDecId.decrypted;
+					}
+				}
+			}
+
+			var xResultList = await _repoInstance.list(pParam);
+			if (xResultList) {
+				// console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
+				if (xResultList.status_code == '00') {
+					var xRows = xResultList.data.rows;
+					if (xRows.length > 0) {
+						for (var i in xRows) {
+							// if (xJoArrData.find(({ vendor_id, vendor_name }) => vendor_id == xRows[i].vendor_id && vendor_name == xRows[i].vendor_name) == undefined) {
+								xJoArrData.push({
+									// id: await _utilInstance.encrypt(xRows[i].id.toString(), config.cryptoKey.hashKey),
+									// document_no: xRows[i].document_no,
+									vendor_id: xRows[i].vendor_id,
+									vendor_name: xRows[i].vendor_name,
+									vendor_code: xRows[i].vendor_code
+								});
+							// }
+						}
+
+						xJoResult = {
+							status_code: '00',
+							status_msg: 'OK',
+							data: xJoArrData
+						};
+					} else {
+						xJoResult = {
+							status_code: '-99',
+							status_msg: 'Data not found'
+						};
+					}
+				} else {
+					xJoResult = xResultList;
+				}
+			} else {
+				xJoResult = xResultList;
+			}
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.list`, `Exception error: ${e.message}`, 'error');
+
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.list: Exception error: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
+
+	async save(pParam) {
+		var xJoResult;
+		var xAct = pParam.act;
+		var xFlagProcess = false;
+		var xDecId = null;
+
+		delete pParam.act;
+
+		if (pParam.hasOwnProperty('user_id')) {
+			
+			if (pParam.user_id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.user_id = xDecId.decrypted;
+					if (pParam.hasOwnProperty('purchase_request_id')) {
+						if (pParam.purchase_request_id != '') {
+							if (pParam.purchase_request_id.length == 65) {
+								xDecId = await _utilInstance.decrypt(pParam.purchase_request_id, config.cryptoKey.hashKey);
+								if (xDecId.status_code == '00') {
+									pParam.purchase_request_id = xDecId.decrypted;
+									// xFlagProcess = true;
+									var xPurchaseRequest = await _purchaseRequestRepoInstance.getById({id: xDecId.decrypted});
+						
+									if (xPurchaseRequest != null) {
+										
+										if (xPurchaseRequest.status == 2) {
+											pParam.company_id = xPurchaseRequest.company_id
+											pParam.company_code = xPurchaseRequest.company_code
+											pParam.company_name = xPurchaseRequest.company_name
+											pParam.department_id = xPurchaseRequest.department_id
+											pParam.department_name = xPurchaseRequest.department_name
+											xFlagProcess = true;
+										} else {
+											xJoResult = {
+												status_code: '-99',
+												status_msg: 'This fpb cannot ready for payreq yet.'
+											};
+										}
+									} else {
+										xJoResult = {
+											status_code: '-99',
+											status_msg: 'Invalid FPB ID'
+										};
+									}
+								} else {
+									xJoResult = xDecId;
+								}
+							} else {
+								xFlagProcess = true;
+							}
+						}
+					} else {
+						xFlagProcess = true;
+					}
+				} else {
+					xJoResult = xDecId;
+				}
+			}
+		}
+
+		if (xFlagProcess) {
+			if (xAct == 'add' || xAct == 'add_batch_in_item') {
+				var xJoArrItems = [];
+
+				if (pParam.hasOwnProperty('payment_request_detail')) {
+					xJoArrItems = pParam.payment_request_detail;
+					if (xJoArrItems.length > 0) {
+						for (var i in xJoArrItems) {
+							var xPrdId = await _utilInstance.decrypt(xJoArrItems[i].prd_id, config.cryptoKey.hashKey);
+							if (xPrdId.status_code == '00') {
+								xJoArrItems[i].prd_id = xPrdId.decrypted;
+								// delete xJoArrItems[i].prd_id
+							}
+							console.log(`>>> xPrdId ${JSON.stringify(xPrdId)}`);
+							if (
+								xJoArrItems[i].hasOwnProperty('qty_request') &&
+								xJoArrItems[i].hasOwnProperty('price_request')
+							) {
+								xJoArrItems[i].price_total =
+									xJoArrItems[i].qty_request * xJoArrItems[i].price_request;
+							}
+							// check item with same prd_id in other payment request with status not cancel and reject already created or not
+							// if already created then calculate all qty_request from other payreq item and this item then
+							// check if total qty_request is exceed qty on fpb item or not
+							// if exceed then return cannot create payreq if not then continue
+							const xResultCheckItem = await _paymentRequestDetailRepoInstance.list({prd_id: xJoArrItems[i].prd_id});
+							// console.log(`>>> xResultCheckItem ${JSON.stringify(xResultCheckItem)}`);
+							if (xResultCheckItem.status_code == '00') {
+								if (xResultCheckItem.data.count > 0) {
+									let xArrItem = xResultCheckItem.data.rows;
+									let xTotalQtyRequest = 0;
+									let xFpbItemQty = 0
+									let xArrPayreqNo = []
+									for (let j = 0; j < xArrItem.length; j++) {
+										if (j == 0) {
+											xFpbItemQty = xArrItem[j].purchase_request_detail.qty;
+										}
+
+										if (xArrItem[j].payment_request != null && xArrItem[j].payment_request.status != 4 && xArrItem[j].payment_request.status != 5) {
+											xTotalQtyRequest += Number(xArrItem[j].qty_request || 0);
+											
+											xArrPayreqNo.push(xArrItem[j].payment_request.document_no);
+										}
+									}
+									xTotalQtyRequest += Number(xJoArrItems[i].qty_request || 0);
+									// const xResultGetPrd = await _purchaseRequestDetailRepoInstance.list({id: xJoArrItems[i].prd_id});
+									// console.log(`>>> xResultGetPrd ${JSON.stringify(xResultGetPrd)}`);
+									// console.log(`>>> xTotalQtyRequest x xFpbItemQty ${JSON.stringify(xTotalQtyRequest)}`, xFpbItemQty);
+									if (xTotalQtyRequest > xFpbItemQty) {
+										xJoResult = {
+											status_code: '-99',
+											status_msg: `Terdeteksi payreq lain yang sudah terbentuk dengan total qty request (${xTotalQtyRequest}) sudah melebihi qty pada FPB (${xFpbItemQty}) untuk item ${xJoArrItems[i].product_name}. Silahkan cek payreq dengan nomor ${xArrPayreqNo.join(', ')}`
+										};
+										return xJoResult;
+									}
+								}
+							}
+						}
+					}
+					// console.log(`>>> xJoArrItems ${JSON.stringify(xJoArrItems)}`);
+					pParam.purchase_request_detail = xJoArrItems;
+				}
+
+				let xResult = await _repoInstance.save(pParam, xAct);
+				if (xResult.status_code == '00') {
+					var dt = dateTime.create();
+					var xDate = dt.format('ym');
+					var xPayreqNo = `${pParam.company_code}/CA/${xDate}/` + xResult.clear_id.toString().padStart(5,'0');
+
+					var xParamUpdate = {
+						document_no: xPayreqNo,
+						id: xResult.clear_id
+					};
+
+					var xUpdate = await _repoInstance.save(xParamUpdate, 'update');
+				}
+
+				xJoResult = xResult;
+
+			} else if (xAct == 'update') {
+				var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.id = xDecId.decrypted;
+					pParam.updatedAt = await _utilInstance.getCurrDateTime();
+					pParam.updated_by = pParam.user_id;
+					pParam.updated_by_name = pParam.user_name;
+					delete pParam.employee_id;
+					delete pParam.employee_name;
+					delete pParam.department_id;
+					delete pParam.department_name;
+					xFlagProcess = true;
+				} else {
+					xJoResult = xDecId;
+				}
+
+				if (xFlagProcess) {
+					let xResult = await _repoInstance.save(pParam, xAct);
+					xJoResult = xResult;
+				}
+			}
+		}
+
+		return xJoResult;
+	}
+
+	async submit(pParam) {
+		var xJoResult = {};
+		var xFlagProcess = false;
+		var xDecId = null;
+		var xEncId = null;
+		var xJoData = {};
+
+		try {
+			if (pParam.id != '' && pParam.user_id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					xFlagProcess = true;
+					xEncId = pParam.id;
+					pParam.id = xDecId.decrypted;
+					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.user_id = xDecId.decrypted;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xDecId;
+					}
+				} else {
+					xJoResult = xDecId;
+				}
+			}
+
+			if (xFlagProcess) {
+				var xDetail = await _repoInstance.getByParameter({
+					id: pParam.id
+				});
+				console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`);
+				
+
+				if (xDetail != null) {
+					if (xDetail.status_code == '00') {
+						if (xDetail.data.status == 0) {
+							pParam.status = 1;
+							pParam.requested_at = await _utilInstance.getCurrDateTime();
+							// check total qty is not exceed qty_paid in detail fpb
+							let xArrPrdId = []
+							let xPyrDetail = xDetail.data.payment_request_detail
+							// console.log(`>>> xPyrDetail: ${JSON.stringify(xPyrDetail)}`);
+							for (let i = 0; i < xPyrDetail.length; i++) {
+								xArrPrdId.push(xPyrDetail[i].prd_id)
+							}
+							let xUniq = [...new Set(xArrPrdId)];
+							for (let i = 0; i < xUniq.length; i++) {
+								let xPrDetailItem = await _purchaseRequestDetailRepoInstance.getByParam({id: xUniq[i]})
+								if (xPrDetailItem.status_code = '00') {
+									let xPrdQtyPaid = xPrDetailItem.data.qty_paid
+									let xArrPyrd = xPyrDetail.filter(({ prd_id }) => prd_id == xUniq[i])
+									let xPyrdTotalQty = xArrPyrd.reduce((accum, item) => accum + item.qty_request, 0)
+									if ( xPyrdTotalQty > xPrDetailItem.data.qty - xPrdQtyPaid) {
+										xFlagProcess = false
+										xJoResult = {
+											status_code: '-99',
+											status_msg: `Total qty of item ${xArrPyrd[0].product_code} (${xPyrdTotalQty}) is exceed Paid Qty on FPB (${xPrdQtyPaid})`
+										};
+										break;
+									}
+								}
+							}
+
+							if (xFlagProcess) {
+								var xUpdate = await _repoInstance.save(pParam, 'submit');
+								xJoResult = xUpdate;
+								
+								// Next Phase : Approval Matrix & Notification to admin
+								if (xUpdate.status_code == '00') {
+
+									if (xDetail.data.payreq_type == 2) {
+										// if payreq is reimburst then divide qty_paid on fpb
+										this.updatePrdItemQtyLeft(xDetail.data, 'add')
+									}
+									// this.updatePrdItemQtyLeft(xDetail.data, 'submit')
+									
+									var xParamAddApprovalMatrix = {
+										act: 'add',
+										document_id: xEncId,
+										document_no: xDetail.data.document_no,
+										application_id: 8,
+										table_name: config.dbTables.payreq,
+										company_id: xDetail.data.company_id,
+										department_id: xDetail.data.department_id,
+										ecatalogue_fpb_category_item: null,
+										logged_company_id: pParam.logged_company_id
+									};
+
+									var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
+										pParam.method,
+										pParam.token,
+										xParamAddApprovalMatrix
+									);
+									// console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
+									xJoResult.approval_matrix_result = xApprovalMatrixResult;
+									if (xApprovalMatrixResult.status_code == '00') {
+										if (xApprovalMatrixResult.approvers.length > 0) {
+											const xApproverIds = []
+											let xApproverSeq1 = xApprovalMatrixResult.approvers.find((el) => el.sequence === 1);
+											if (xApproverSeq1 != null) {
+												for (var i in xApproverSeq1.approver_user) {
+													xApproverIds.push(xApproverSeq1.approver_user[i].user_id)
+													// In App notification
+													let xInAppNotificationResult = await _notificationService.inAppNotification({
+														document_code: xDetail.data.document_no,
+														document_id: xEncId,
+														document_status: 1,
+														mode: 'request_approval_ca',
+														method: pParam.method,
+														token: pParam.token,
+														employee_id: await _utilInstance.encrypt(
+															xApproverSeq1.approver_user[i].employee_id.toString(),
+															config.cryptoKey.hashKey
+														)
+													});
+													console.log(`>>> xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`);
+			
+													_utilInstance.writeLog(
+														`${_xClassName}.submitPayreq`,
+														`xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`,
+														'info'
+													);
+													// Email Notification
+													let xParamEmailNotification,
+														xNotificationResult = {};
+			
+													if (xApproverSeq1.approver_user[i].notification_via_email) {
+														xParamEmailNotification = {
+															mode: 'request_approval_ca',
+															id: xEncId,
+															request_no: xDetail.data.document_no,
+															company_name: xDetail.data.company_name,
+															department_name: xDetail.data.department_name,
+															created_by: xDetail.data.employee_name,
+															created_at:
+																xDetail.data.createdAt != null
+																	? moment(xDetail.data.createdAt).format('DD MMM YYYY')
+																	: '',
+															items: xPyrDetail,
+															// body: xDetail.data,
+															approver_user: {
+																employee_name: xApproverSeq1.approver_user[i].user_name,
+																email: xApproverSeq1.approver_user[i].email
+															}
+														};
+														xNotificationResult = await _notificationService.sendNotificationEmail_CANeedApproval(
+															xParamEmailNotification,
+															pParam.method,
+															pParam.token
+														);
+														console.log(`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`);
+			
+													}
+												}
+											}
+											// update current approval id
+											let xPrdUpdateApprovalId = {
+												id: xDetail.data.id,
+												current_approval_ids: xApproverIds
+											}
+											
+											await _repoInstance.save(xPrdUpdateApprovalId, 'update')
+										}
+									}
+								} else {
+									xJoResult = xUpdate;
+								}
+							}
+						} else {
+							xJoResult = {
+								status_code: '-99',
+								status_msg: `Payment request already in process`
+							};
+						}
+					} else {
+						xJoResult = xDetail;
+					}
+				} else {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: `Payment request id not found`
+					};
+				}
+			}
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.submit`, `Exception error: ${e.message}`, 'error');
+
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.submit: Exception error: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
+
+	async setToDraft(pParam) {
+		var xJoResult = {};
+		var xFlagProcess = false;
+		var xDecId = null;
+		var xEncId = null;
+		var xJoData = {};
+
+		try {
+			if (pParam.id != '' && pParam.user_id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					xFlagProcess = true;
+					xEncId = pParam.id;
+					pParam.id = xDecId.decrypted;
+					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.user_id = xDecId.decrypted;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xDecId;
+					}
+				} else {
+					xJoResult = xDecId;
+				}
+			}
+
+			if (xFlagProcess) {
+				var xPayreqDetail = await _repoInstance.getByParameter({ id: pParam.id });
+				if (xPayreqDetail != null) {
+					if (xPayreqDetail.status_code == '00') {
+						if (xPayreqDetail.data.status == 0) {
+							xJoResult = {
+								status_code: '-99',
+								status_msg: 'This document already draft'
+							};
+						} else {
+
+							// first check item on this payreq have created on other payreq or not
+							// if not created then continue to set to draft
+							// if already created then calculate all qty from other payreq item and this item
+							// then check if total qty payreq item is exceed qty on fpb item or not
+							// if exceed then return cannot create payreq if not then continue
+							// console.log(`>>> xPayreqDetail ${JSON.stringify(xPayreqDetail.data.payment_request_detail)}`);
+							if (xPayreqDetail.data.payment_request_detail != null && xPayreqDetail.data.payment_request_detail.length > 0) {
+								for (let i = 0; i < xPayreqDetail.data.payment_request_detail.length; i++) {
+									const xResultCheckItem = await _paymentRequestDetailRepoInstance.list({prd_id: xPayreqDetail.data.payment_request_detail[i].prd_id});
+									// console.log(`>>> xResultCheckItem 2 ${JSON.stringify(xResultCheckItem)}`);
+									if (xResultCheckItem.status_code == '00') {
+										if (xResultCheckItem.data.count > 0) {
+											let xArrItem = xResultCheckItem.data.rows;
+											// console.log(`>>> xArrItem ${JSON.stringify(xArrItem)}`);
+											let xTotalQtyRequest = 0;
+											let xFpbItemQty = 0
+											let xArrPayreqNo = []
+											for (let j = 0; j < xArrItem.length; j++) {
+												if (j == 0) {
+													xFpbItemQty = xArrItem[j].purchase_request_detail.qty;
+												}
+												if (xArrItem[j].payment_request != null && xArrItem[j].payment_request.status != 4 && xArrItem[j].payment_request.status != 5) {
+													xTotalQtyRequest += xArrItem[j].qty_request;
+													xArrPayreqNo.push(xArrItem[j].payment_request.document_no);
+												}
+											}
+											xTotalQtyRequest += xPayreqDetail.data.payment_request_detail[i].qty_request;
+											// console.log(`>>> xTotalQtyRequest x xFpbItemQty ${JSON.stringify(xTotalQtyRequest)}`, xFpbItemQty);
+											if (xTotalQtyRequest > xFpbItemQty) {
+												xJoResult = {
+													status_code: '-99',
+													status_msg: `Terdeteksi payreq lain yang sudah terbentuk dengan total qty request (${xTotalQtyRequest}) sudah melebihi qty pada FPB (${xFpbItemQty}) untuk item ${xPayreqDetail.data.payment_request_detail[i].product_name}. Silahkan cek payreq dengan nomor ${xArrPayreqNo.join(', ')}`
+												};
+												return xJoResult;
+											}
+										}
+									}
+								}
+							}
+
+							var xParamUpdate = {
+								id: pParam.id,
+								status: 0,
+								set_to_draft_at: await _utilInstance.getCurrDateTime(),
+								set_to_draft_by: pParam.user_id,
+								set_to_draft_by_name: pParam.user_name,
+								// current_approval_ids: null
+							};
+							var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
+
+							if (xUpdateResult.status_code == '00') {
+								xJoResult = {
+									status_code: '00',
+									status_msg: 'Payreq successfully set to draft'
+								};
+							} else {
+								xJoResult = xUpdateResult;
+							}
+						}
+					
+					} else {
+						xJoResult = xPayreqDetail
+					}
+				} else {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Data not found'
+					};
+				}
+			}
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.setToDraft`, `Exception error: ${e.message}`, 'error');
+
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.setToDraft: Exception error: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
+
+	async cancel(pParam) {
+		var xJoResult = {};
+		var xFlagProcess = false;
+		var xDecId = null;
+		var xEncId = null;
+		var xJoData = {};
+
+		try {
+			if (pParam.id != '' && pParam.user_id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					xFlagProcess = true;
+					xEncId = pParam.id;
+					pParam.id = xDecId.decrypted;
+					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.user_id = xDecId.decrypted;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xDecId;
+					}
+				} else {
+					xJoResult = xDecId;
+				}
+			}
+
+			if (xFlagProcess) {
+				var xPayreqDetail = await _repoInstance.getByParameter({ id: pParam.id });
+				console.log(`>>> xPayreqDetail: ${JSON.stringify(xPayreqDetail)}`);
+				if (xPayreqDetail != null) {
+					if (xPayreqDetail.status_code == '00') {
+						if (xPayreqDetail.data.status == 4) {
+							xJoResult = {
+								status_code: '-99',
+								status_msg: 'This document already cancel'
+							};
+						} else {
+							// check if payreq have submited PJCA
+							const xParamPjca = {
+								payment_request_id: xPayreqDetail.data.id,
+								status: [0, 1, 2]
+							}
+							var xPJCAResult = await _pjcaRepoInstance.list(xParamPjca);
+							console.log(`>>> xPJCAResult: ${JSON.stringify(xPJCAResult)}`);
+							if (xPJCAResult.status_code == '00') {
+								if (xPJCAResult.data.rows.length > 0) {
+									xJoResult = {
+										status_code: '-99',
+										status_msg: "You cannot cancel this document, There is already processed PJCA "
+									};
+									xFlagProcess = false
+								} else {
+									// // check if product have submited GR
+									// const xArrId = []
+									// for (let i = 0; i < xPayreqDetail.data.payment_request_detail.length; i++) {
+									// 	xArrId.push(xPayreqDetail.data.payment_request_detail[i].product_id)
+									// }
+									// const xParamGr = {
+									// 	purchase_request_id: xPayreqDetail.data.purchase_request_id,
+									// 	product_id: xArrId,
+									// 	status: 1
+									// }
+									// console.log(`>>> xParamGr: ${JSON.stringify(xParamGr)}`);
+									// var xGrResultList = await _goodsReceiptRepoInstance.list(xParamGr);
+									// console.log(`>>> xGrResultList: ${JSON.stringify(xGrResultList)}`);
+									// if (xGrResultList.status_code == '00') {
+									// 	if (xGrResultList.data.rows.length > 0) {
+									// 		const xGrData = xGrResultList.data.rows
+									// 		xJoResult = {
+									// 			status_code: '-99',
+									// 			status_msg: "Cancel failed, this document already have some processed receipt"
+									// 		};
+									// 		xFlagProcess = false
+									// 	}
+									// } else {
+									// 	xFlagProcess = false
+									// 	xJoResult = xGrResultList
+									// }
+								}
+							} else {
+								xFlagProcess = false
+								xJoResult = xPJCAResult
+							}
+
+							if (xFlagProcess) {
+								var xParamUpdate = {
+									id: pParam.id,
+									status: 4,
+									canceled_at: await _utilInstance.getCurrDateTime(),
+									canceled_reason: pParam.cancel_reason,
+									// approved_at: await _utilInstance.getCurrDateTime()
+								};
+								var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
+	
+								if (xUpdateResult.status_code == '00') {
+									if (xPayreqDetail.data.status != 0) {
+										this.updatePrdItemQtyLeft(xPayreqDetail.data, 'delete')
+										if (xPayreqDetail.data.payreq_type == 2) { //reimburst
+											let xDetailItem = xPayreqDetail.data.payment_request_detail
+											for (let i = 0; i < xDetailItem.length; i++) {
+												let xQtyRelease = xDetailItem[i].qty_done || 0
+												let xCalculatedQty = 0
+												xCalculatedQty = xQtyRelease - xDetailItem[i].qty_request
+												let xPyrdUpdateParam = {
+													id: xDetailItem[i].id,
+													qty_done: xCalculatedQty
+												}
+												
+												let xUpdatePyrdItem = await _paymentRequestDetailRepoInstance.save(xPyrdUpdateParam, 'update')
+											}
+										}
+										
+									}
+									
+									xJoResult = {
+										status_code: '00',
+										status_msg: 'Payreq successfully canceled'
+									};
+								} else {
+									xJoResult = xUpdateResult;
+								}
+							}
+
+						}
+					
+					} else {
+						xJoResult = xPayreqDetail
+					}
+				} else {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Data not found'
+					};
+				}
+			}
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.cancel`, `Exception error: ${e.message}`, 'error');
+
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.cancel: Exception error: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
+	
+	async confirm(pParam) {
+		var xJoResult = {};
+		var xDecId = null;
+		var xFlagProcess = false;
+		var xEncId = '';
+
+		if (pParam.document_id != '' && pParam.user_id != '') {
+			xEncId = pParam.document_id;
+			xDecId = await _utilInstance.decrypt(pParam.document_id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				xFlagProcess = true;
+				pParam.document_id = xDecId.decrypted;
+				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.user_id = xDecId.decrypted;
+					xFlagProcess = true;
+				} else {
+					xJoResult = xDecId;
+				}
+			} else {
+				xJoResult = xDecId;
+			}
+		}
+
+		if (xFlagProcess) {
+			// Check if this request id valid or not
+			var xPayreqDetail = await _repoInstance.getByParameter({ id: pParam.document_id });
+			if (xPayreqDetail != null) {
+				if (xPayreqDetail.status_code == '00') {
+					// console.log(`>>> xPayreqDetail: ${JSON.stringify(xPayreqDetail)}`);
+					if (xPayreqDetail.data.status != 1) {
+						xJoResult = {
+							status_code: '-99',
+							status_msg: 'This document already confirmed before.'
+						};
+					} else {
+						var xParamApprovalMatrixDocument = {
+							document_id: xEncId,
+							status: 1,
+							application_id: 8,
+							table_name: config.dbTables.payreq
+						};
+	
+						var xResultApprovalMatrixDocument = await _oAuthService.confirmApprovalMatrix(
+							pParam.method,
+							pParam.token,
+							xParamApprovalMatrixDocument
+						);
+	
+						if (xResultApprovalMatrixDocument != null) {
+							if (xResultApprovalMatrixDocument.status_code == '00') {
+								if (xResultApprovalMatrixDocument.status_document_approved == true) {
+									// Update status payreq to be confirmed
+									var xParamUpdatePR = {
+										id: pParam.document_id,
+										status: 2,
+										reject_reason: pParam.reject_reason
+									};
+									var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
+		
+									if (xUpdateResult.status_code == '00') {
+										if (xPayreqDetail.data.payreq_type != 2) {
+											this.updatePrdItemQtyLeft(xPayreqDetail.data, 'add')
+										} else {
+											let xDetailItem = xPayreqDetail.data.payment_request_detail
+											for (let i = 0; i < xDetailItem.length; i++) {
+												let xQtyRelease = xDetailItem[i].qty_done || 0
+												let xCalculatedQty = 0
+												xCalculatedQty = xQtyRelease + xDetailItem[i].qty_request
+												let xPyrdUpdateParam = {
+													id: xDetailItem[i].id,
+													qty_done: xCalculatedQty
+												}
+												
+												let xUpdatePyrdItem = await _paymentRequestDetailRepoInstance.save(xPyrdUpdateParam, 'update')
+											}
+										}
+										xJoResult = {
+											status_code: '00',
+											status_msg: 'Payreq successfully confirmed'
+										};
+									} else {
+										xJoResult = xUpdateResult;
+									}
+								} else {
+									// Sort first
+									xResultApprovalMatrixDocument.approvers = xResultApprovalMatrixDocument.approvers.sort(
+										(a, b) => {
+											if (a.sequence < b.sequence) {
+												return -1;
+											}
+										}
+									);
+									// Send to next approver...
+									const xApproverIds = []
+									let xNextApprover = xResultApprovalMatrixDocument.approvers[0].approver_user;
+									console.log(`>>> xNextApprover : ${JSON.stringify(xNextApprover)}`);
+									if (xNextApprover != null) {
+										for (var i in xNextApprover) {
+											xApproverIds.push(xNextApprover[i].user_id)
+											let xInAppNotificationResult = await _notificationService.inAppNotification({
+												document_code: xPayreqDetail.data.document_no,
+												document_id: xEncId,
+												document_status: xPayreqDetail.data.status,
+												mode: 'request_approval_ca',
+												method: pParam.method,
+												token: pParam.token,
+												employee_id: await _utilInstance.encrypt(
+													xNextApprover[i].employee_id.toString(),
+													config.cryptoKey.hashKey
+												)
+											});
+	
+											// Email Notification
+											let xParamEmailNotification,
+												xNotificationResult = {};
+	
+											if (xNextApprover[i].notification_via_email) {
+												xParamEmailNotification = {
+													mode: 'request_approval_ca',
+													id: xEncId,
+													request_no: xPayreqDetail.data.document_no,
+													company_name: xPayreqDetail.data.company_name,
+													department_name: xPayreqDetail.data.department_name,
+													created_by: xPayreqDetail.data.employee_name,
+													created_at:
+														xPayreqDetail.data.createdAt != null
+															? moment(xPayreqDetail.data.createdAt).format('DD MMM YYYY')
+															: '',
+													items: xPayreqDetail.data.payment_request_detail,
+													approver_user: {
+														employee_name: xNextApprover[i].user_name,
+														email: xNextApprover[i].email
+													}
+												};
+												xNotificationResult = await _notificationService.sendNotificationEmail_CANeedApproval(
+													xParamEmailNotification,
+													pParam.method,
+													pParam.token
+												);
+												console.log(`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`);
+											}
+										}
+										// update current approval id
+										let xPrdUpdateApprovalId = {
+											id: xPayreqDetail.data.id,
+											current_approval_ids: xApproverIds
+										}
+										await _repoInstance.save(xPrdUpdateApprovalId, 'update')
+									}
+									xJoResult = {
+										status_code: '00',
+										status_msg: 'Payreq successfully approved. Document available for next approver',
+										result_approval_matrix: xResultApprovalMatrixDocument
+									};
+								}
+							} else {
+								xJoResult = xResultApprovalMatrixDocument;
+							}
+						} else {
+							xJoResult = {
+								status_code: '-99',
+								status_msg: 'There is problem on approval matrix processing. Please try again'
+							};
+						}
+					}
+				} else {
+					xJoResult = xPayreqDetail
+				}
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Data not found'
+				};
+			}
+		}
+
+		return xJoResult;
+	}
+
+	async reject(pParam) {
+		var xJoResult = {};
+		var xDecId = null;
+		var xFlagProcess = false;
+		var xEncId = '';
+
+		if (pParam.document_id != '' && pParam.user_id != '') {
+			xEncId = pParam.document_id;
+			xDecId = await _utilInstance.decrypt(pParam.document_id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				xFlagProcess = true;
+				pParam.document_id = xDecId.decrypted;
+				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.user_id = xDecId.decrypted;
+					xFlagProcess = true;
+				} else {
+					xJoResult = xDecId;
+				}
+			} else {
+				xJoResult = xDecId;
+			}
+		}
+
+		if (xFlagProcess) {
+			// Check if this request id valid or not
+			var xPayreqDetail = await _repoInstance.getByParameter({ id: pParam.document_id });
+			if (xPayreqDetail != null) {
+				if (xPayreqDetail.data.status != 1) {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'This document already confirmed before.'
+					};
+				} else {
+					var xParamApprovalMatrixDocument = {
+						document_id: xEncId,
+						status: -1,
+						application_id: 8,
+						table_name: config.dbTables.payreq
+					};
+
+					var xResultApprovalMatrixDocument = await _oAuthService.confirmApprovalMatrix(
+						pParam.method,
+						pParam.token,
+						xParamApprovalMatrixDocument
+					);
+
+					// await _utilInstance.writeLog(
+					// 	`${_xClassName}.rejectPayreq`,
+					// 	`xResultApprovalMatrixDocument: ${xResultApprovalMatrixDocument}`,
+					// 	'debug'
+					// );
+
+					if (xResultApprovalMatrixDocument != null) {
+						if (xResultApprovalMatrixDocument.status_code == '00') {
+							// Update status Payreq to be confirmed
+							var xParamUpdatePR = {
+								id: pParam.document_id,
+								status: 5,
+								rejected_at: await _utilInstance.getCurrDateTime(),
+								rejected_reason: pParam.reject_reason
+							};
+							var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
+
+							if (xUpdateResult.status_code == '00') {
+								if (xPayreqDetail.data.payreq_type == 2) {
+									this.updatePrdItemQtyLeft(xPayreqDetail.data, 'delete')
+								}
+
+								xJoResult = {
+									status_code: '00',
+									status_msg: 'Payreq successfully rejected'
+								};
+							} else {
+								xJoResult = xUpdateResult;
+							}
+						} else {
+							xJoResult = xResultApprovalMatrixDocument;
+						}
+					} else {
+						xJoResult = {
+							status_code: '-99',
+							status_msg: 'There is problem on approval matrix processing. Please try again'
+						};
+					}
+				}
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Data not found'
+				};
+			}
+		}
+
+		return xJoResult;
+	}
+	
+	async paid(pParam) {
+		var xJoResult = {};
+		var xFlagProcess = false;
+		var xDecId = null;
+		var xEncId = null;
+		var xJoData = {};
+
+		try {
+			if (pParam.id != '' && pParam.user_id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					xFlagProcess = true;
+					xEncId = pParam.id;
+					pParam.id = xDecId.decrypted;
+					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.user_id = xDecId.decrypted;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xDecId;
+					}
+				} else {
+					xJoResult = xDecId;
+				}
+			}
+
+			if (xFlagProcess) {
+				var xPayreqDetail = await _repoInstance.getByParameter({ id: pParam.id });
+				if (xPayreqDetail != null) {
+					if (xPayreqDetail.status_code == '00') {
+						if (xPayreqDetail.data.status != 2) {
+							xJoResult = {
+								status_code: '-99',
+								status_msg: 'This document cannot be processed'
+							};
+						} else {
+							var xParamUpdate = {
+								id: pParam.id,
+								status: 3
+								// approved_at: await _utilInstance.getCurrDateTime()
+							};
+							var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
+
+							if (xUpdateResult.status_code == '00') {
+								// this.updatePrdItemQtyLeft(xPayreqDetail.data, 'paid')
+								xJoResult = {
+									status_code: '00',
+									status_msg: 'Payreq successfully paid'
+								};
+							} else {
+								xJoResult = xUpdateResult;
+							}
+						}
+					
+					} else {
+						xJoResult = xPayreqDetail
+					}
+				} else {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Data not found'
+					};
+				}
+			}
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.paid`, `Exception error: ${e.message}`, 'error');
+
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.paid: Exception error: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
+	// async done(pParam) {
+	// 	var xJoResult = {};
+	// 	var xFlagProcess = false;
+	// 	var xDecId = null;
+	// 	var xEncId = null;
+	// 	var xJoData = {};
+
+	// 	try {
+	// 		if (pParam.id != '' && pParam.user_id != '') {
+	// 			xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+	// 			if (xDecId.status_code == '00') {
+	// 				xFlagProcess = true;
+	// 				xEncId = pParam.id;
+	// 				pParam.id = xDecId.decrypted;
+	// 				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+	// 				if (xDecId.status_code == '00') {
+	// 					pParam.user_id = xDecId.decrypted;
+	// 					xFlagProcess = true;
+	// 				} else {
+	// 					xJoResult = xDecId;
+	// 				}
+	// 			} else {
+	// 				xJoResult = xDecId;
+	// 			}
+	// 		}
+
+	// 		if (xFlagProcess) {
+	// 			var xPayreqDetail = await _repoInstance.getByParameter({ id: pParam.id });
+	// 			if (xPayreqDetail != null) {
+	// 				if (xPayreqDetail.status_code == '00') {
+	// 					if (xPayreqDetail.data.status != 3) {
+	// 						xJoResult = {
+	// 							status_code: '-99',
+	// 							status_msg: 'This document cannot be processed'
+	// 						};
+	// 					} else {
+	// 						var xParamUpdate = {
+	// 							id: pParam.id,
+	// 							status: 4
+	// 							// approved_at: await _utilInstance.getCurrDateTime()
+	// 						};
+	// 						var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update');
+
+	// 						if (xUpdateResult.status_code == '00') {
+	// 							xJoResult = {
+	// 								status_code: '00',
+	// 								status_msg: 'Payreq successfully done'
+	// 							};
+	// 						} else {
+	// 							xJoResult = xUpdateResult;
+	// 						}
+	// 					}
+					
+	// 				} else {
+	// 					xJoResult = xPayreqDetail
+	// 				}
+	// 			} else {
+	// 				xJoResult = {
+	// 					status_code: '-99',
+	// 					status_msg: 'Data not found'
+	// 				};
+	// 			}
+	// 		}
+	// 	} catch (e) {
+	// 		_utilInstance.writeLog(`${_xClassName}.cancel`, `Exception error: ${e.message}`, 'error');
+
+	// 		xJoResult = {
+	// 			status_code: '-99',
+	// 			status_msg: `${_xClassName}.cancel: Exception error: ${e.message}`
+	// 		};
+	// 	}
+
+	// 	return xJoResult;
+	// }
+	
+	async fetchMatrixPayreq(pParam) {
+		var xJoResult = {};
+		var xDecId = null;
+		var xFlagProcess = false;
+		var xEncId = '';
+		var xClearId = '';
+
+		if (pParam.id != '' && pParam.user_id != '') {
+			xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				xFlagProcess = true;
+				xEncId = pParam.id;
+				pParam.id = xDecId.decrypted;
+				xClearId = xDecId.decrypted;
+				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.user_id = xDecId.decrypted;
+					xFlagProcess = true;
+				} else {
+					xJoResult = xDecId;
+				}
+			} else {
+				xJoResult = xDecId;
+			}
+		}
+
+		if (xFlagProcess) {
+			// Get PR Detail
+			var xPayreqDetail = await _repoInstance.getByParameter({ id: xClearId });
+			console.log(`>>> xFetchPayreqDetail: ${JSON.stringify(xPayreqDetail)}`);
+			if (xPayreqDetail != null) {
+				if (xPayreqDetail.data.status != 1) {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Fetch matrix cannot be processed, please check again'
+					};
+				} else {
+					pParam.approved_at = null;
+					const xUpdateParam = {
+						id: xClearId,
+						approved_at: null,
+						user_id: pParam.user_id,
+						user_name: pParam.user_name,
+						current_approval_ids: null
+					}
+					var xUpdateResult = await _repoInstance.save(xUpdateParam, 'update');
+					console.log(`>>> xUpdateResult: ${JSON.stringify(xUpdateResult)}`);
+					xJoResult = xUpdateResult;
+					// Next Phase : Approval Matrix & Notification to admin
+					if (xUpdateResult.status_code == '00') {
+						// Fetch Approval Matrix
+						var xParamAddApprovalMatrix = {
+							act: 'fetch_matrix',
+							document_id: xEncId,
+							document_no: xPayreqDetail.data.document_no,
+							application_id: 8,//ecatalog app id
+							table_name: config.dbTables.payreq,
+							company_id: xPayreqDetail.data.company_id,
+							department_id: xPayreqDetail.data.department_id,
+							// ecatalogue_fpb_category_item: null,
+							logged_company_id: pParam.logged_company_id,
+							approval_matrix_id: pParam.approval_matrix_id
+						};
+						
+						console.log(`>>> xParamAddApprovalMatrix: ${JSON.stringify(xParamAddApprovalMatrix)}`)
+
+						var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
+							pParam.method,
+							pParam.token,
+							xParamAddApprovalMatrix
+						);
+						console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
+						xJoResult.approval_matrix_result = xApprovalMatrixResult;
+	
+					} else {
+						xJoResult = xUpdateResult;
+					}
+				}
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Data not found. Please supply valid identifier'
+				};
+			}
+		}
+
+		return xJoResult;
+	}
+
+	async updatePrdItemQtyLeft(pParam, pAct){
+		let xPaymentRequestDetail = pParam.payment_request_detail
+		console.log(`>>> xPaymentRequestDetail: ${JSON.stringify(xPaymentRequestDetail)}`);
+		for (let i = 0; i < xPaymentRequestDetail.length; i++) {
+			var xPrDetailItem = await _purchaseRequestDetailRepoInstance.getByParam({id: xPaymentRequestDetail[i].prd_id})
+			console.log(`>>> xPrDetailItem: ${JSON.stringify(xPrDetailItem)}`);
+			if (xPrDetailItem.status_code == '00') {
+				let xQtyLeft = xPrDetailItem.data.qty_paid || 0
+				let xCalculatedQty = 0
+				if (pAct == 'add') {
+					xCalculatedQty = xQtyLeft + xPaymentRequestDetail[i].qty_request
+				} else if (pAct == 'delete'){
+					xCalculatedQty = xQtyLeft - xPaymentRequestDetail[i].qty_request
+				}
+				let xPrdUpdateParam = {
+					id: xPaymentRequestDetail[i].prd_id,
+					qty_paid: xCalculatedQty
+				}
+				
+				let xUpdatePrdItem = await _purchaseRequestDetailRepoInstance.save(xPrdUpdateParam, 'update')
+				console.log(`>>> xUpdatePrdItem: ${JSON.stringify(xUpdatePrdItem)}`);
+			}
+		}
+	}
+}
+
+module.exports = PaymentRequestService;
