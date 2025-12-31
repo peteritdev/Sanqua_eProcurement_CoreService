@@ -80,13 +80,16 @@ class BudgetPlanService {
                 // Rules of show RAB List :
                 // - RAB that has same department
                 // - RAB that the user as an approver
-
-                let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, {
+                const xOwnedDocumentPayload = {
                     application_id: config.applicationId,
                     table_name: config.dbTables.rab,
                     document_id: '',
                     user_id: pParam.user_id
-                });
+                }
+                if (pParam.hasOwnProperty('inappnotif') && pParam.inappnotif) {
+                    xOwnedDocumentPayload.status = 0
+                }
+                let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, xOwnedDocumentPayload);
                 // console.log(`>>> xOwnedDocument : ${JSON.stringify(xOwnedDocument)}`);
 
                 if (xOwnedDocument.status_code == '00') {
@@ -109,11 +112,15 @@ class BudgetPlanService {
 
                     // Commented first for testing
                     if (!pParam.hasOwnProperty('company_id')) {
-                        pParam.company_id = pParam.logged_company_id;
+                        if (!pParam.hasOwnProperty('inappnotif')) {
+                            pParam.company_id = pParam.logged_company_id;
+                        }
                     }
 
                     if (!pParam.hasOwnProperty('department_id')) {
-                        pParam.department_id = pParam.logged_department_id;
+                        if (!pParam.hasOwnProperty('inappnotif')) {
+                            pParam.department_id = pParam.logged_department_id;
+                        }
                     }
 
                     if (pParam.hasOwnProperty("filter")) {
@@ -348,14 +355,9 @@ class BudgetPlanService {
                         var xAddResult = await _repoInstance.save(pParam, xAct);
                         if (xAddResult.status_code == '00' && xAddResult.created_id != '' && xAddResult.clear_id != '') {
                             // Generate RAB No
-                            
                             var dt = dateTime.create();
                             var xDate = dt.format('ym');
                             var xRABNo = `${pParam.company_code}/RAB/${xDate}/` + xAddResult.clear_id.padStart(5, '0');
-                            // var xRABNo = await _globalUtilInstance.generatePurchaseRequestNo(
-                            // 	xAddResult.clear_id,
-                            // 	pParam.company_code
-                            // );
                             
                             var xParamUpdate = {
                                 budget_no: xRABNo,
@@ -464,8 +466,6 @@ class BudgetPlanService {
 		if (xFlagProcess) {
 			var xResult = await _repoInstance.getById(pParam);
 
-			console.log(`>>> xResult: ${JSON.stringify(xResult)}`);
-
 			if (xResult != null) {
 				var xJoArrBudgetDetailData = [];
 				var xDetail = xResult.budget_plan_detail;
@@ -542,18 +542,18 @@ class BudgetPlanService {
 					xParamApprovalMatrix
 				);
 
-                if (xResultApprovalMatrix != null) {
-                    if (xResultApprovalMatrix.status_code == '00') {
-                        let xListApprover = xResultApprovalMatrix.token_data.data;
-                        for (var i in xListApprover) {
-                            let xApproverUsers = _.filter(xListApprover[i].approver_user, { status: 0 }).map(
-                                (v) => (v.user != null ? v.user.email : v.user)
-                            );
-                            // console.log(`>>> xApproverUsers: ${JSON.stringify(xApproverUsers)}`);
-                            xArrUserCanCancel.push.apply(xArrUserCanCancel, xApproverUsers);
-                        }
-                    }
-                }
+				if (xResultApprovalMatrix != null) {
+					if (xResultApprovalMatrix.status_code == '00') {
+						let xListApprover = xResultApprovalMatrix.token_data.data;
+						for (var i in xListApprover) {
+							let xApproverUsers = _.filter(xListApprover[i].approver_user, { status: 0 }).map(
+								(v) => (v.user != null ? v.user.email : v.user)
+							);
+				            console.log(`>>> xApproverUsers: ${JSON.stringify(xApproverUsers)}`);
+							xArrUserCanCancel.push.apply(xArrUserCanCancel, xApproverUsers);
+						}
+					}
+				}
 
 				xJoData = {
 					id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
@@ -1506,6 +1506,7 @@ class BudgetPlanService {
 
 		return xJoResult;
 	}
+    
     async fetchMatrixRAB(pParam) {
         var xJoResult = {};
         var xDecId = null;
@@ -1572,20 +1573,13 @@ class BudgetPlanService {
                             // logged_company_id: pParam.logged_company_id,
                             approval_matrix_id: pParam.approval_matrix_id
                         };
-                        // if (xBudgetDetail.company_id == 5 && xBudgetDetail.company_id == 14) {
-                        //     xParamAddApprovalMatrix.ecatalogue_fpb_category_item = xBudgetDetail.category_item
-                        // } else {
-                        //     xParamAddApprovalMatrix.ecatalogue_fpb_category_item = xBudgetDetail.category_item >= 7 ? xBudgetDetail.category_item : null
-                        // }
-                        // console.log(`>>> xParamAddApprovalMatrix : ${JSON.stringify(xParamAddApprovalMatrix)}`);
-
+                        
                         var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
                             pParam.method,
                             pParam.token,
                             xParamAddApprovalMatrix
                         );
                         xJoResult.approval_matrix_result = xApprovalMatrixResult;
-                        console.log(`>>> xApprovalMatrixResult : ${JSON.stringify(xApprovalMatrixResult)}`);
 
                         if (xApprovalMatrixResult.status_code == '00') {
                             if (xApprovalMatrixResult.approvers.length > 0) {

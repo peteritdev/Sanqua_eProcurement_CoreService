@@ -9,6 +9,9 @@ const Op = Sequelize.Op;
 const _modelDb = require('../models').tr_budgetplans;
 const _modelProject = require('../models').ms_projects;
 const _modelBudgetPlanDetail = require('../models').tr_budgetplandetails;
+// const _modelPurchaseRequest = require('../models').tr_purchaserequests;
+// const _modelPurchaseRequestDetail = require('../models').tr_purchaserequestdetails;
+// const _modelLogSubtitute = require('../models').log_fpbitemsubtitutes;
 // const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 
 const Utility = require('peters-globallib-v2');
@@ -28,13 +31,37 @@ class BudgetPlanRepository {
 		var xJoResult = {};
 
 		try {
-			xInclude = [];
+			xInclude = [
+				{
+					model: _modelBudgetPlanDetail,
+					as: 'budget_plan_detail'
+				}
+			];
 
 			if (pParam.hasOwnProperty('company_id')) {
 				if (pParam.company_id != '') {
 					xWhereAnd.push({
 						company_id: pParam.company_id
 					});
+				}
+			}
+
+
+			if (pParam.hasOwnProperty('status')) {
+				if (pParam.status != '') {
+					xWhereAnd.push({
+						status: pParam.status
+					});
+				}
+			}
+
+			if (pParam.hasOwnProperty('current_approval_ids')) {
+				if (pParam.current_approval_ids != '') {
+					xWhereAnd.push(
+						 Sequelize.literal(
+							`"tr_budgetplans"."current_approval_ids"::jsonb @> '["${pParam.current_approval_ids}"]'::jsonb`
+						)
+					);
 				}
 			}
 
@@ -75,6 +102,18 @@ class BudgetPlanRepository {
 						{
 							employee_name: {
 								[Op.iLike]: '%' + pParam.keyword + '%'
+							}
+						}
+					);
+				}
+			}
+			
+			if (pParam.hasOwnProperty('owned_document_no')) {
+				if (pParam.owned_document_no != '') {
+					xWhereOr.push(
+						{
+							budget_no: {
+								[Op.in]: pParam.owned_document_no
 							}
 						}
 					);
@@ -319,8 +358,39 @@ class BudgetPlanRepository {
 				as: 'budget_plan_detail',
 				// include: [
 				// 	{
-				// 		model: _modelVendorCatalogueDb,
-				// 		as: 'vendor_catalogue'
+				// 		model: _modelDb,
+				// 		as: 'rab_origin',
+				// 		attributes: [ 'id', 'name', 'budget_no' ],
+				// 	},
+				// 	{
+				// 		model: _modelPurchaseRequestDetail,
+				// 		as: 'purchase_request_detail',
+				// 		attributes: [ 'id', 'product_code', 'product_name', 'qty'],
+				// 		include: [
+				// 			{
+				// 				model: _modelPurchaseRequest,
+				// 				as: 'purchase_request',
+				// 				// rubah nama menjadi alias yang pendek agar dapat tertampil, karena pada level include seperti ini object tidak dapat terbaca
+				// 				attributes: [ 'id', ['request_no', 'no'], ['status', 'stt'] ]
+				// 			}
+				// 		]
+				// 	},
+				// 	{
+				// 		model: _modelPurchaseRequestDetail,
+				// 		as: 'deviation_fpb_item',
+				// 		attributes: [ 'id', 'product_code', 'product_name', 'qty', 'rab_qty_gap'],
+				// 		include: [
+				// 			{
+				// 				model: _modelPurchaseRequest,
+				// 				as: 'purchase_request',
+				// 				// rubah nama menjadi alias yang pendek agar dapat tertampil, karena pada level include seperti ini object tidak dapat terbaca
+				// 				attributes: [ 'id', ['request_no', 'no'], ['status', 'stt'] ]
+				// 			}
+				// 		]
+				// 	},
+				// 	{
+				// 		model: _modelLogSubtitute,
+				// 		as: 'log_subtitute'
 				// 	}
 				// ]
 			},

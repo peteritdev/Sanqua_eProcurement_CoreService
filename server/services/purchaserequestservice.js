@@ -23,7 +23,6 @@ const _globalUtilInstance = new GlobalUtility();
 const PurchaseRequestRepository = require('../repository/purchaserequestrepository.js');
 const _repoInstance = new PurchaseRequestRepository();
 
-// Repository
 const PurchaseRequestDetailRepository = require('../repository/purchaserequestdetailrepository.js');
 const _repoDetailInstance = new PurchaseRequestDetailRepository();
 const RabRepository = require('../repository/budgetplanrepository.js');
@@ -167,6 +166,7 @@ class PurchaseRequestService {
 					if (xAct == 'add' || xAct == 'add_batch_in_item') {
 						// Calculate the total
 						var xJoArrItems = [];
+						// var xRabItemsIDs = [];
 
 						if (pParam.hasOwnProperty('purchase_request_detail')) {
 							xJoArrItems = pParam.purchase_request_detail;
@@ -388,13 +388,17 @@ class PurchaseRequestService {
 			// Rules of show FPB List :
 			// - FPB that has same department
 			// - FPB that the user as an approver
-
-			let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, {
+			const xOwnedDocumentPayload = {
 				application_id: config.applicationId,
 				table_name: config.dbTables.fpb,
 				document_id: '',
 				user_id: pParam.user_id
-			});
+			}
+			
+			if (pParam.hasOwnProperty('inappnotif') && pParam.inappnotif) {
+				xOwnedDocumentPayload.status = 0
+			}
+			let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, xOwnedDocumentPayload);
 			// console.log(`>>> xOwnedDocument : ${JSON.stringify(xOwnedDocument)}`);
 
 			if (xOwnedDocument.status_code == '00') {
@@ -439,11 +443,15 @@ class PurchaseRequestService {
 
 				// Commented first for testing
 				if (!pParam.hasOwnProperty('company_id')) {
-					pParam.company_id = pParam.logged_company_id;
+					if (!pParam.hasOwnProperty('inappnotif')) {
+						pParam.company_id = pParam.logged_company_id;
+					}
 				}
 
 				if (!pParam.hasOwnProperty('department_id')) {
-					pParam.department_id = pParam.logged_department_id;
+					if (!pParam.hasOwnProperty('inappnotif')) {
+						pParam.department_id = pParam.logged_department_id;
+					}
 				}
 
 				if (pParam.hasOwnProperty('pending_notif')) {
@@ -462,13 +470,11 @@ class PurchaseRequestService {
 					}
 				}
 
-				// console.log(`>>> pParam 2: ${JSON.stringify(pParam)}`);
 				var xResultList = await _repoInstance.list(pParam);
 
 				if (xResultList.total_record > 0) {
 					var fpbType = ["CA", "PO", "MIX"]
 					var xRows = xResultList.data;
-					// console.log('xRows>>>>>>>>', xRows);
 
 					if (pParam.hasOwnProperty('is_export')) {
 						if (pParam.is_export) {
@@ -859,12 +865,18 @@ class PurchaseRequestService {
 							currency_id: xDetail[index].currency_id,
 							currency_code: xDetail[index].currency_code,
 							currency_symbol: xDetail[index].currency_symbol,
-							// qty_paid: xDetail[index].qty_paid,
-							// qty_done: xDetail[index].qty_done
+							qty_paid: xDetail[index].qty_paid,
+							qty_done: xDetail[index].qty_done,
 							// paid_at: xDetail[index].paid_at,
 							// paid_by: xDetail[index].paid_by,
 							// paid_by_name: xDetail[index].paid_by_name,
 							// paid_note: xDetail[index].paid_note
+							// rab_item: xDetail[index].rab_item,
+							// rab_qty_gap: xDetail[index].rab_qty_gap,
+							// rab_revision_item: xDetail[index].rab_revision_item,
+							// is_deviation_fulfilled: xDetail[index].is_deviation_fulfilled,
+							// is_subtitute: xDetail[index].is_subtitute,
+                        	// log_subtitute: xDetail[index].log_subtitute
 						});
 					}
 					// Get Approval Matrix
@@ -878,8 +890,6 @@ class PurchaseRequestService {
 						pParam.token,
 						xParamApprovalMatrix
 					);
-
-					// console.log(`>>> xResultApprovalMatrix: ${JSON.stringify(xResultApprovalMatrix)}`);
 
 					if (xResultApprovalMatrix != null) {
 						if (xResultApprovalMatrix.status_code == '00') {
@@ -943,6 +953,18 @@ class PurchaseRequestService {
 						}
 					}
 
+					// Get user company
+					var xGetUserDetail = await _oAuthService.getEmployeeDetail(
+						pParam.method,
+						pParam.token,
+						await _utilInstance.encrypt(xResult.employee_id.toString(), config.cryptoKey.hashKey)
+					);
+					
+					if (xGetUserDetail && xGetUserDetail.status == 0 && xGetUserDetail.token_data != undefined && xGetUserDetail.token_data.status_code == '00') {
+						xResult.employee_company_id = xGetUserDetail.token_data.data.company.plant_id
+						xResult.employee_company_name = xGetUserDetail.token_data.data.company.alias
+					}
+
 					xJoData = {
 						id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
 						project: xResult.project,
@@ -951,7 +973,9 @@ class PurchaseRequestService {
 						employee: {
 							// id: await _utilInstance.encrypt(xResult.employee_id.toString(), config.cryptoKey.hashKey),
 							id: xResult.employee_id,
-							name: xResult.employee_name
+							name: xResult.employee_name,
+							company_id: xResult.employee_company_id,
+							company_name: xResult.employee_company_name
 						},
 						department: {
 							id: xResult.department_id,
@@ -1367,7 +1391,6 @@ class PurchaseRequestService {
 					status_msg: 'Update failed, Document not found.'
 				};
 			}
-
 			// var xUpdateResult = await _repoInstance.save(pParam, 'set_to_draft_fpb');
 			xJoResult = xUpdateResult;
 			// Next Phase : Notification to adamin

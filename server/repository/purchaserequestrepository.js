@@ -13,6 +13,8 @@ const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
 const _modelBudgetPlan = require('../models').tr_budgetplans;
+// const _modelBudgetPlanDetail = require('../models').tr_budgetplandetails;
+// const _modelLogSubtitute = require('../models').log_fpbitemsubtitutes;
 
 const Utility = require('peters-globallib-v2');
 const { param } = require('express-validator');
@@ -49,6 +51,34 @@ class PurchaseRequestRepository {
 							}
 						]
 					},
+					{
+						model: _modelBudgetPlanDetail,
+						as: 'rab_item',
+						attributes: [ 'id', 'product_code', 'product_name', 'qty', 'qty_remain'],
+						include: [
+							{
+								model: _modelBudgetPlan,
+								as: 'rab_origin',
+								attributes: [ 'id', 'budget_no'],
+							}
+						]
+					},
+					{
+						model: _modelBudgetPlanDetail,
+						as: 'rab_revision_item',
+						attributes: [ 'id', 'product_code', 'product_name', 'qty', 'qty_remain'],
+						include: [
+							{
+								model: _modelBudgetPlan,
+								as: 'budget_plan',
+								attributes: [ 'id', 'budget_no', 'status'],
+							}
+						]
+					},
+					{
+						model: _modelLogSubtitute,
+						as: 'log_subtitute'
+					}
 				]
 			},
 			{
@@ -431,7 +461,7 @@ class PurchaseRequestRepository {
 				let xSqlWhereStatusOwnedDoc = '';
 				if (pParam.hasOwnProperty('status')) {
 					if (pParam.status != '') {
-						xSqlWhereStatusOwnedDoc = ' AND pr.status = :status';
+						xSqlWhereStatusOwnedDoc = ' AND pr.status = :status ';
 					}
 				}
 
@@ -441,10 +471,15 @@ class PurchaseRequestRepository {
 						xSqlWhereRabOwnedDoc = ' AND pr.budget_plan_id = :budgetPlanId';
 					}
 				}
-
-				xSqlWhere = ` (( ${xSqlWhere} ) OR (${xSqlWhereOr} ${xSqlWhereCompanyOwnedDoc != ''
-					? xSqlWhereCompanyOwnedDoc
-					: ''} ${xSqlWhereProjectOwnedDoc} ${xSqlWhereCategoryOwnedDoc} ${xSqlWhereDepartmentOwnedDoc} ${xSqlWhereStatusOwnedDoc} ${xSqlWhereRabOwnedDoc}))`;
+				let joinedOr = `${xSqlWhereOr} ${xSqlWhereCompanyOwnedDoc != ''
+						? xSqlWhereCompanyOwnedDoc
+						: ''} ${xSqlWhereProjectOwnedDoc} ${xSqlWhereCategoryOwnedDoc} ${xSqlWhereDepartmentOwnedDoc} ${xSqlWhereStatusOwnedDoc} ${xSqlWhereRabOwnedDoc}`
+				
+				if (pParam.hasOwnProperty('inappnotif') && pParam.inappnotif) {
+					xSqlWhere = ` (${joinedOr})`;
+				} else {
+					xSqlWhere = ` (( ${xSqlWhere} ) OR (${joinedOr}))`;
+				}
 			}
 		}
 
@@ -625,11 +660,12 @@ class PurchaseRequestRepository {
 			LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
 			  LEFT JOIN ms_projects p ON p.id = pr.project_id
 		  WHERE ${xSqlWhere}`;
-
+		console.log('sql>>>', xSql);
+		
 		xData = await sequelize.query(xSql, {
 			replacements: xObjJsonWhere,
 			type: sequelize.QueryTypes.SELECT,
-			// logging: console.log
+			// logging: true
 		});
 
 		xTotalRecord = await sequelize.query(xSqlCount, {
@@ -964,23 +1000,8 @@ class PurchaseRequestRepository {
 				var xSql = "";
 				var xSqlErrMsg = ""
 				// SELECT calc_rab_item_remain_qty
-				if (pParam.hasOwnProperty('budget_plan_id')) {
+				if (pParam.hasOwnProperty('budget_plan_id') && pParam.budget_plan_id != null) {
 					// // Sanitize the input
-					// const sanitizedPurchaseRequestDetail = pParam.purchase_request_detail.map(item => {
-					// 	item.uom_name = item.uom_name.replace(/'/g, "''"); // Escape single quotes
-					// 	return item;
-					// });
-					
-					// console.log(`>>> sanitizedPurchaseRequestDetail : ${JSON.stringify(sanitizedPurchaseRequestDetail)}`);
-					// xSql = `SELECT calc_rab_item_remain_qty_v2('{
-					// 		"pAct": "${pAct}",
-					// 		"budget_plan_id" : ${pParam.budget_plan_id},
-					// 		"purchase_request_detail" : ${JSON.stringify(sanitizedPurchaseRequestDetail)}
-					// 	}'::json)`;
-
-					// var xDtQuery = await sequelize.query(xSql, {
-					// 	type: sequelize.QueryTypes.SELECT,
-					// });
 					// Gunakan parameter binding agar Sequelize dan PostgreSQL menangani escape karakter-karakter khusus dengan aman.
 					const payload = {
 						pAct: pAct,
