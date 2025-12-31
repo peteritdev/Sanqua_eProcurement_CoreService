@@ -51,34 +51,34 @@ class PurchaseRequestRepository {
 							}
 						]
 					},
-					{
-						model: _modelBudgetPlanDetail,
-						as: 'rab_item',
-						attributes: [ 'id', 'product_code', 'product_name', 'qty', 'qty_remain'],
-						include: [
-							{
-								model: _modelBudgetPlan,
-								as: 'rab_origin',
-								attributes: [ 'id', 'budget_no'],
-							}
-						]
-					},
-					{
-						model: _modelBudgetPlanDetail,
-						as: 'rab_revision_item',
-						attributes: [ 'id', 'product_code', 'product_name', 'qty', 'qty_remain'],
-						include: [
-							{
-								model: _modelBudgetPlan,
-								as: 'budget_plan',
-								attributes: [ 'id', 'budget_no', 'status'],
-							}
-						]
-					},
-					{
-						model: _modelLogSubtitute,
-						as: 'log_subtitute'
-					}
+					// {
+					// 	model: _modelBudgetPlanDetail,
+					// 	as: 'rab_item',
+					// 	attributes: [ 'id', 'product_code', 'product_name', 'qty', 'qty_remain'],
+					// 	include: [
+					// 		{
+					// 			model: _modelBudgetPlan,
+					// 			as: 'rab_origin',
+					// 			attributes: [ 'id', 'budget_no'],
+					// 		}
+					// 	]
+					// },
+					// {
+					// 	model: _modelBudgetPlanDetail,
+					// 	as: 'rab_revision_item',
+					// 	attributes: [ 'id', 'product_code', 'product_name', 'qty', 'qty_remain'],
+					// 	include: [
+					// 		{
+					// 			model: _modelBudgetPlan,
+					// 			as: 'budget_plan',
+					// 			attributes: [ 'id', 'budget_no', 'status'],
+					// 		}
+					// 	]
+					// },
+					// {
+					// 	model: _modelLogSubtitute,
+					// 	as: 'log_subtitute'
+					// }
 				]
 			},
 			{
