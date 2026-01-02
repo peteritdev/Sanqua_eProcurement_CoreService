@@ -330,7 +330,7 @@ class PaymentRequestRepository {
 		var xJoResult = {};
 
 		try {
-			console.log(`>>> before xSave:end ${JSON.stringify(pParam)}`, pAct);
+			// console.log(`>>> before xSave:end ${JSON.stringify(pParam)}`, pAct);
 			var xSaved = null;
 			xTransaction = await sequelize.transaction();
 
@@ -375,24 +375,24 @@ class PaymentRequestRepository {
 				xSaved = await _modelDb.create(
 					pParam,
 					{
+						transaction: xTransaction,
 						include: [
 							{
 								model: _modelPaymentRequestDetail,
 								as: 'payment_request_detail'
 							}
 						]
-					},
-					{ transaction: xTransaction }
+					}
 				);
 
 				if (xSaved != null && xSaved.id != null) {
 					xJoResult = {
 						status_code: '00',
 						status_msg: 'Data has been successfully saved',
-						created_id: await _utilInstance.encrypt(xSaved.id, config.cryptoKey.hashKey),
+						created_id: await _utilInstance.encrypt(xSaved.id.toString(), config.cryptoKey.hashKey),
 						clear_id: xSaved.id
 					};
-					console.log(`>>> after xSave:end ${JSON.stringify(xJoResult)}`);
+					// console.log(`>>> after xSave:end ${JSON.stringify(xJoResult)}`);
 
 					// sequelize.query(
 					// 	'ALTER TABLE "tr_paymentrequestdetails" ENABLE TRIGGER "trg_update_total_item_afterinsert"'
@@ -454,7 +454,7 @@ class PaymentRequestRepository {
 				}
 			}
 		} catch (e) {
-			console.log(`>>> after xSave:error ${JSON.stringify(e)}`);
+			// console.log(`>>> after xSave:error ${JSON.stringify(e)}`);
 			if (xTransaction) await xTransaction.rollback();
 			xJoResult = {
 				status_code: '-99',
