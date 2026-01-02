@@ -1578,7 +1578,7 @@ class PaymentRequestService {
 						current_approval_ids: null
 					}
 					var xUpdateResult = await _repoInstance.save(xUpdateParam, 'update');
-					console.log(`>>> xUpdateResult: ${JSON.stringify(xUpdateResult)}`, config.dbTables);
+					console.log(`>>> xUpdateResult: ${JSON.stringify(xUpdateResult)}`);
 					xJoResult = xUpdateResult;
 					// Next Phase : Approval Matrix & Notification to admin
 					if (xUpdateResult.status_code == '00') {
