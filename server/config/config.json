@@ -371,7 +371,7 @@
     "puppeteerExecutablePath": "/usr/bin/chromium-browser"
   },
 
-  "localhost": {
+  "production": {
     "applicationId": 2,
     "applicationCode": "PROC",
     "applicationName": "eProcurement",
