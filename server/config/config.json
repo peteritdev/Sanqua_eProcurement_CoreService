@@ -371,7 +371,7 @@
     "puppeteerExecutablePath": "/usr/bin/chromium-browser"
   },
 
-  "production": {
+  "localhost": {
     "applicationId": 2,
     "applicationCode": "PROC",
     "applicationName": "eProcurement",
@@ -379,7 +379,10 @@
     "dbTables": {
       "procurement": "tr_procurements",
       "fpb": "tr_purchaserequests",
-      "rab": "tr_budgetplans"
+      "rab": "tr_budgetplans",
+      "payreq": "tr_paymentrequests",
+      "gr": "tr_goodsreceipts",
+      "pjca": "tr_pjcas"
     },
     "username": "postgres",
     "password": "T0b3L1k3Jesus^^)ok",
