@@ -434,13 +434,16 @@ class PaymentRequestRepository {
 				var xWhere = {
 					where: {
 						id: xId
-					}
+					},
+					transaction: xTransaction,
+					logging: true
 				};
-
-				xSaved = await _modelDb.update(pParam, xWhere, { xTransaction });
-				if (xSaved.length > 0) {
+				
+				// console.log(`>>> xUpdateApproval.pParam: ${JSON.stringify(pParam)}`);
+				xSaved = await _modelDb.update(pParam, xWhere);
+				// console.log(`>>> xSaved: ${JSON.stringify(xSaved)}`);
+				if (xSaved[0] > 0) {
 					await xTransaction.commit();
-
 					xJoResult = {
 						status_code: '00',
 						status_msg: `Data has been successfully ${pAct}`

@@ -85,9 +85,10 @@ class BudgetPlanService {
                         application_id: config.applicationId,
                         table_name: config.dbTables.rab,
                         document_id: '',
-                        user_id: pParam.user_id
+                        user_id: pParam.user_id,
+                        status: 0
                     }
-                    xOwnedDocumentPayload.status = 0
+                    // xOwnedDocumentPayload.status = 0
 
                     let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, xOwnedDocumentPayload);
                     // console.log(`>>> xOwnedDocument : ${JSON.stringify(xOwnedDocument)}`);
@@ -101,8 +102,9 @@ class BudgetPlanService {
                             }
                         }
                     }
-                    
+                    // if (xArrOwnedDocNo.length > 0) {
                     pParam.owned_document_no = xArrOwnedDocNo;
+                    // }
                 }
 
                 // Commented first for testing

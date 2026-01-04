@@ -109,15 +109,16 @@ class BudgetPlanRepository {
 			}
 			
 			if (pParam.hasOwnProperty('owned_document_no')) {
-				if (pParam.owned_document_no != '') {
-					xWhereOr.push(
-						{
-							budget_no: {
-								[Op.in]: pParam.owned_document_no
-							}
+				// console.log('pParam.owned_document_no>>', pParam.owned_document_no);
+				// if (pParam.owned_document_no != '') {
+				xWhereOr.push(
+					{
+						budget_no: {
+							[Op.in]: pParam.owned_document_no
 						}
-					);
-				}
+					}
+				);
+				// }
 			}
 
 			if (xWhereAnd.length > 0) {
