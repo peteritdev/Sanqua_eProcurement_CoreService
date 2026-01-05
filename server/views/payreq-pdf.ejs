@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <style>
       html {
-        zoom: 0.8;
+        zoom: 0.7;
         color: black !important;
       }
       .center {
@@ -135,7 +135,7 @@
               >
                 <table style="width: 100%">
                   <tr>
-                    <td style="width: 40%; text-align: center">
+                    <td style="text-align: left">
                       <span
                         style="
                           display: flex;
@@ -143,6 +143,7 @@
                           justify-content: center;
                           position: relative;
                           top: 4px;
+                          left: 20px;
                         "
                       >
                         <% if( data.data.payment_type == 1 ){ %>
@@ -164,12 +165,17 @@
                         </span>
                       </span>
                     </td>
-                    <td style="width: 60%; text-align: center">
+                  </tr>
+                  <tr>
+                    <td style="text-align: left">
                       <span
                         style="
                           display: flex;
                           align-items: center;
                           justify-content: center;
+                          position: relative;
+                          top: 6px;
+                          left: 20px;
                         "
                       >
                         <% if( data.data.payment_type > 1 ){ %>
@@ -184,7 +190,7 @@
                           style="
                             margin-left: 5px;
                             position: relative;
-                            top: -7px;
+                            top: -5px;
                           "
                         >
                           Bank
@@ -194,32 +200,10 @@
                   </tr>
                 </table>
               </td>
-              <th style="text-align: left; width: 65%;">
-                <table style="margin-left: 15px">
-                  <tr>
-                    <td>
-                      <% if( data.data.payment_type == 4 ){ %>
-                      <img src="<%=imagePath%>box_checklist.png" width="15" />
-                      <% }else{ %>
-                      <img src="<%=imagePath%>blank_checklist.png" width="15" />
-                      <% } %>
-                    </td>
-                    <td style="width: 45px">Check</td>
-                    <td>
-                      <% if( data.data.payment_type == 4 ){ %>
-                        <span>An. <%=data.data.account_name%></span>
-                      <% }else{ %>
-                        <span>An. </span>
-                      <% } %>
-                    </td>
-                  </tr>
-                </table>
-              </th>
-            </tr>
-            <tr>
-              <td colspan="0" style="text-align: left"></td>
               <th style="text-align: left">
-                <table style="margin-left: 15px">
+                <table style="margin-left: 15px; 
+                          position: relative;
+                          top: -7px;">
                   <tr>
                     <td>
                       <% if( data.data.payment_type == 2 ){ %>
@@ -239,11 +223,32 @@
                   </tr>
                 </table>
               </th>
+              <!-- <th style="text-align: left; width: 65%;">
+                <table style="margin-left: 15px">
+                  <tr>
+                    <td>
+                      <% if( data.data.payment_type == 4 ){ %>
+                      <img src="<%=imagePath%>box_checklist.png" width="15" />
+                      <% }else{ %>
+                      <img src="<%=imagePath%>blank_checklist.png" width="15" />
+                      <% } %>
+                    </td>
+                    <td style="width: 45px">Check</td>
+                    <td>
+                      <% if( data.data.payment_type == 4 ){ %>
+                        <span>An. <%=data.data.account_name%></span>
+                      <% }else{ %>
+                        <span>An. </span>
+                      <% } %>
+                    </td>
+                  </tr>
+                </table>
+              </th> -->
             </tr>
             <tr>
               <td colspan="1" style="text-align: left"></td>
               <th style="text-align: left">
-                <table style="margin-left: 15px">
+                <table style="margin-left: 15px; position: relative; top: -15px;">
                   <tr>
                     <td style="width: 50px">Nama Bank</td>
                     <td>:</td>
@@ -255,7 +260,7 @@
             <tr>
               <td colspan="1" style="text-align: left"></td>
               <th style="text-align: left">
-                <table style="margin-left: 15px">
+                <table style="position: relative; top: -7px; margin-left: 15px">
                   <tr>
                     <td style="width: 50px">No. Rek</td>
                     <td>:</td>
@@ -703,12 +708,25 @@
                     %>
               </td>
               <td class="border-rb">
+                <%
+                        if( qrCode.approval3 != null && qrCode.approval3.length > 0 ){
+
+                    %>
                 <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 45px;">
                   <tr>
+                    <% for(var i = 0; i < qrCode.approval3.length; i++ ) { %>
                     <td>
+                      <img
+                        src="<%=qrCode.qrPath%><%=qrCode.approval3[i]%>"
+                        width="80"
+                      />
                     </td>
+                    <% }%>
                   </tr>
                 </table>
+                <%
+                        }
+                    %>
               </td>
               <td class="border-b">
                 <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 45px;">
@@ -829,8 +847,7 @@
                 Jenis Payment Request :
               </th>
               <th style="text-align: left; width: 36%">
-                
-                <table style="margin-left: 17.5px">
+                <!-- <table style="margin-left: 17.5px">
                   <tr>
                     <td>
                       <% if( data.data.payreq_type == 1 ){ %>
@@ -841,7 +858,7 @@
                     </td>
                     <td style="width: 75px">Cash Advance</td>
                   </tr>
-                </table>
+                </table> -->
               </th>
               <th
                 rowspan="2"
@@ -850,8 +867,7 @@
                 Sumber Dana :
               </th>
               <th style="text-align: left; width: 25%">
-                
-                <table style="margin-left: 17.5px">
+                <!-- <table style="margin-left: 17.5px">
                   <tr>
                     <td>
                       <% if( data.data.payreq_type == 2 ){ %>
@@ -862,17 +878,31 @@
                     </td>
                     <td style="width: 75px">Kas Kecil</td>
                   </tr>
-                </table>
+                </table> -->
               </th>
             </tr>
             <tr>
               <td>
-              </td>
-              <td style="text-align: center">
                 <table style="width: 100%">
                   <tr>
                     <th style="text-align: left">
-                      <table style="margin-left: 15px">
+                      <table style="margin-left: 5px">
+                        <tr>
+                          <td>
+                            <% if( data.data.payreq_type == 1 ){ %>
+                            <img src="<%=imagePath%>box_checklist.png" width="15" />
+                            <% }else{ %>
+                            <img src="<%=imagePath%>blank_checklist.png" width="15" />
+                            <% } %>
+                          </td>
+                          <td style="width: 75px">Cash Advance</td>
+                        </tr>
+                      </table>
+                    </th>
+                  </tr>
+                  <tr>
+                    <th style="text-align: left">
+                      <table style="margin-left: 5px">
                         <tr>
                           <td>
                             <% if( data.data.payreq_type == 2 ){ %>
@@ -886,10 +916,13 @@
                       </table>
                     </th>
                   </tr>
+                </table>
+              </td>
+              <td style="text-align: left">
+                <table style="width: 100%">
                   <tr>
                     <th style="text-align: left">
-                     
-                      <table style="margin-left: 15px">
+                      <table style="margin-left: 5px">
                         <tr>
                           <td>
                             <% if( data.data.payreq_type == 3 ){ %>
@@ -905,8 +938,7 @@
                   </tr>
                   <tr>
                     <th style="text-align: left">
-                      
-                      <table style="margin-left: 15px">
+                      <table style="margin-left: 5px">
                         <tr>
                           <td>
                             <% if( data.data.payreq_type == 4){ %>
@@ -926,7 +958,6 @@
                 <table style="width: 100%">
                   <tr>
                     <th style="text-align: left">
-                      
                       <table style="margin-left: 15px">
                         <tr>
                           <td>
@@ -943,6 +974,22 @@
                             <span>.............................................</span>
                             <% } %>
                           </td>
+                        </tr>
+                      </table>
+                    </th>
+                  </tr>
+                  <tr>
+                    <th style="text-align: left">
+                      <table style="margin-left: 15px">
+                        <tr>
+                          <td>
+                            <% if( data.data.payreq_type == 2 ){ %>
+                            <img src="<%=imagePath%>box_checklist.png" width="15" />
+                            <% }else{ %>
+                            <img src="<%=imagePath%>blank_checklist.png" width="15" />
+                            <% } %>
+                          </td>
+                          <td style="width: 75px">Kas Kecil</td>
                         </tr>
                       </table>
                     </th>

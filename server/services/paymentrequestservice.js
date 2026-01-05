@@ -1456,7 +1456,7 @@ class PaymentRequestService {
 								pParam.token,
 								await _utilInstance.encrypt(xPayreqDetail.data.employee_id.toString(), config.cryptoKey.hashKey)
 							);
-							// console.log(`>>> xGetUserDetail.token_data: ${JSON.stringify(xGetUserDetail.token_data.data)}`);
+							console.log(`>>> xGetUserDetail.token_data: ${JSON.stringify(xGetUserDetail)}`);
 							if (xGetUserDetail && xGetUserDetail.status_code == '00' && xGetUserDetail.token_data != undefined && xGetUserDetail.token_data.status_code == '00') {
 								xUserEmail = xGetUserDetail.token_data.data.email
 							}
@@ -1477,6 +1477,7 @@ class PaymentRequestService {
 							if (xResultApprovalMatrix != null) {
 								if (xResultApprovalMatrix.status_code == '00') {
 									let xListApprover = xResultApprovalMatrix.token_data.data;
+									console.log(`>>> xListApprover: ${JSON.stringify(xListApprover)}`);
 									for (var i in xListApprover) {
 										let xApproverUsers = _.filter(xListApprover[i].approver_user).map(
 											// update 08/08/2023 prevent user is null
