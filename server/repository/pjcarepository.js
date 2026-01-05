@@ -349,7 +349,7 @@ class PJCARepository {
 					xJoResult = {
 						status_code: '00',
 						status_msg: 'Data has been successfully saved',
-						created_id: await _utilInstance.encrypt(xSaved.id, config.cryptoKey.hashKey),
+						created_id: await _utilInstance.encrypt(xSaved.id.toString(), config.cryptoKey.hashKey),
 						clear_id: xSaved.id
 					};
 
