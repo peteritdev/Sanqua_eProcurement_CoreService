@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
     <style>
       html {
-        zoom: 0.7;
+        /* zoom: 0.8; */
+        zoom: 0.6;
         color: black !important;
       }
       .center {
@@ -143,7 +144,7 @@
                           justify-content: center;
                           position: relative;
                           top: 4px;
-                          left: 20px;
+                          left: 15px;
                         "
                       >
                         <% if( data.data.payment_type == 1 ){ %>
@@ -158,7 +159,7 @@
                           style="
                             margin-left: 5px;
                             position: relative;
-                            top: -8px;
+                            top: -7px;
                           "
                         >
                           Tarik Tunai BDC
@@ -175,7 +176,7 @@
                           justify-content: center;
                           position: relative;
                           top: 6px;
-                          left: 20px;
+                          left: 15px;
                         "
                       >
                         <% if( data.data.payment_type > 1 ){ %>
@@ -250,7 +251,7 @@
               <th style="text-align: left">
                 <table style="margin-left: 15px; position: relative; top: -15px;">
                   <tr>
-                    <td style="width: 50px">Nama Bank</td>
+                    <td style="width: 70px">Nama Bank</td>
                     <td>:</td>
                     <td><%=data.data.bank_name%></td>
                   </tr>
@@ -260,9 +261,9 @@
             <tr>
               <td colspan="1" style="text-align: left"></td>
               <th style="text-align: left">
-                <table style="position: relative; top: -7px; margin-left: 15px">
+                <table style="position: relative; top: -10px; margin-left: 15px">
                   <tr>
-                    <td style="width: 50px">No. Rek</td>
+                    <td style="width: 70px">No. Rek</td>
                     <td>:</td>
                     <td><%=data.data.account_number%></td>
                   </tr>
@@ -931,7 +932,7 @@
                             <img src="<%=imagePath%>blank_checklist.png" width="15" />
                             <% } %>
                           </td>
-                          <td style="width: 120px">Pelunasan Purchase Order</td>
+                          <td style="width: 140px">Pelunasan Purchase Order</td>
                         </tr>
                       </table>
                     </th>
