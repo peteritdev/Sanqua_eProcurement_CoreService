@@ -43,6 +43,8 @@ const PaymentRequestService = require('./paymentrequestservice.js');
 const _paymentRequestServiceInstance = new PaymentRequestService();
 const CurrencyService = require('../services/currencyservice.js');
 const _currencyService = new CurrencyService();
+const NotificationService = require('../services/notificationservice.js');
+const _notificationService = new NotificationService();
 
 const _xClassName = 'PJCAService';
 
@@ -216,6 +218,8 @@ class PJCAService {
 
 							// Get Payreq Total and find difference
 							let xPayreqDetail = await _paymentRequestServiceInstance.detail({
+								method: pParam.method,
+								token: pParam.token,
 								id: xDetail.data.payment_request.id
 							});
 							if (xPayreqDetail.status_code == '00') {
@@ -334,10 +338,10 @@ class PJCAService {
 								xArrOwnedDocNo.push(xOwnedDocument.token_data.data[i].document_no);
 							}
 							pParam.owned_document_no = xArrOwnedDocNo;
-							pParam.current_approval_ids = pParam.user_id;
 						}
 					}
 				}
+				pParam.current_approval_ids = pParam.user_id;
 			}
 
 			if (xFlagProccess) {
@@ -406,139 +410,148 @@ class PJCAService {
 		var xAct = pParam.act;
 		var xFlagProcess = false;
 		var xDecId = null;
+		try {
+		
+			delete pParam.act;
 
-		delete pParam.act;
-
-		if (pParam.hasOwnProperty('user_id')) {
-			
-			if (pParam.user_id != '') {
-				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
-				if (xDecId.status_code == '00') {
-					pParam.user_id = xDecId.decrypted;
-					if (pParam.hasOwnProperty('payment_request_id')) {
-						if (pParam.payment_request_id != '') {
-							if (pParam.payment_request_id.length == 65) {
-								xDecId = await _utilInstance.decrypt(pParam.payment_request_id, config.cryptoKey.hashKey);
-								if (xDecId.status_code == '00') {
-									pParam.payment_request_id = xDecId.decrypted;
-									// xFlagProcess = true;
-									var xPaymentRequest = await _paymentRequestRepoInstance.getByParameter({id: xDecId.decrypted});
-									console.log(`>>> xPaymentRequest ${JSON.stringify(xPaymentRequest)}`);
-									if (xPaymentRequest != null) {
-										if (xPaymentRequest.status_code == '00') {
-											if (xPaymentRequest.data.status == 3) {
-												pParam.company_id = xPaymentRequest.data.company_id
-												pParam.company_code = xPaymentRequest.data.company_code
-												pParam.company_name = xPaymentRequest.data.company_name
-												pParam.department_id = xPaymentRequest.data.department_id
-												pParam.department_name = xPaymentRequest.data.department_name
-												xFlagProcess = true;
+			if (pParam.hasOwnProperty('user_id')) {
+				
+				if (pParam.user_id != '') {
+					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.user_id = xDecId.decrypted;
+						if (pParam.hasOwnProperty('payment_request_id')) {
+							if (pParam.payment_request_id != '') {
+								if (pParam.payment_request_id.length == 65) {
+									xDecId = await _utilInstance.decrypt(pParam.payment_request_id, config.cryptoKey.hashKey);
+									if (xDecId.status_code == '00') {
+										pParam.payment_request_id = xDecId.decrypted;
+										// xFlagProcess = true;
+										var xPaymentRequest = await _paymentRequestRepoInstance.getByParameter({id: xDecId.decrypted});
+										console.log(`>>> xPaymentRequest ${JSON.stringify(xPaymentRequest)}`);
+										if (xPaymentRequest != null) {
+											if (xPaymentRequest.status_code == '00') {
+												if (xPaymentRequest.data.status == 3) {
+													pParam.company_id = xPaymentRequest.data.company_id
+													pParam.company_code = xPaymentRequest.data.company_code
+													pParam.company_name = xPaymentRequest.data.company_name
+													pParam.department_id = xPaymentRequest.data.department_id
+													pParam.department_name = xPaymentRequest.data.department_name
+													xFlagProcess = true;
+												} else {
+													xJoResult = {
+														status_code: '-99',
+														status_msg: 'Cannot be processed yet'
+													};
+												}
 											} else {
-												xJoResult = {
-													status_code: '-99',
-													status_msg: 'Cannot be processed yet'
-												};
+												xJoResult = xPaymentRequest
 											}
 										} else {
-											xJoResult = xPaymentRequest
+											xJoResult = {
+												status_code: '-99',
+												status_msg: 'Payreq not found / Invalid ID'
+											};
 										}
 									} else {
-										xJoResult = {
-											status_code: '-99',
-											status_msg: 'Payreq not found / Invalid ID'
-										};
+										xJoResult = xDecId;
 									}
 								} else {
-									xJoResult = xDecId;
+									xFlagProcess = true;
 								}
-							} else {
-								xFlagProcess = true;
 							}
+						} else {
+							xFlagProcess = true;
 						}
 					} else {
-						xFlagProcess = true;
+						xJoResult = xDecId;
 					}
-				} else {
-					xJoResult = xDecId;
 				}
 			}
-		}
 
-		if (xFlagProcess) {
-			if (xAct == 'add' || xAct == 'add_batch_in_item') {
-				
-				var xPjcaDetail = await _repoInstance.list({payment_request_id: xDecId.decrypted,});
-				console.log(`>>> xPjcaDetail ${JSON.stringify(xPjcaDetail)}`);
-				if (xPjcaDetail.data.rows.length > 0) {
-					if (xPjcaDetail.data.rows.find(({ status }) => status < 3) != undefined) {
-						xJoResult = {
-							status_code: '-99',
-							status_msg: 'PJCA Already created, You cannot create PJCA from this document again'
-						};
-						xFlagProcess = false
+			if (xFlagProcess) {
+				if (xAct == 'add' || xAct == 'add_batch_in_item') {
+					
+					var xPjcaDetail = await _repoInstance.list({payment_request_id: xDecId.decrypted,});
+					console.log(`>>> xPjcaDetail ${JSON.stringify(xPjcaDetail)}`);
+					if (xPjcaDetail.data.rows.length > 0) {
+						if (xPjcaDetail.data.rows.find(({ status }) => status < 3) != undefined) {
+							xJoResult = {
+								status_code: '-99',
+								status_msg: 'PJCA Already created, You cannot create PJCA from this document again'
+							};
+							xFlagProcess = false
+						}
 					}
-				}
-				
-				if (xFlagProcess) {
-					var xJoArrItems = [];
+					
+					if (xFlagProcess) {
+						var xJoArrItems = [];
 
-					if (pParam.hasOwnProperty('pjca_detail')) {
-						xJoArrItems = pParam.pjca_detail;
-						if (xJoArrItems.length > 0) {
-							for (var i in xJoArrItems) {
-								var xPrdId = await _utilInstance.decrypt(xJoArrItems[i].prd_id, config.cryptoKey.hashKey);
-								if (xPrdId.status_code == '00') {
-									xJoArrItems[i].prd_id = xPrdId.decrypted;
-									// delete xJoArrItems[i].prd_id
-								}
-								console.log(`>>> xPrdId ${JSON.stringify(xPrdId)}`);
-								if (
-									xJoArrItems[i].hasOwnProperty('price_done') &&
-									xJoArrItems[i].hasOwnProperty('qty_done')
-								) {
-									xJoArrItems[i].price_total =
-										xJoArrItems[i].qty_done * xJoArrItems[i].price_done;
+						if (pParam.hasOwnProperty('pjca_detail')) {
+							xJoArrItems = pParam.pjca_detail;
+							if (xJoArrItems.length > 0) {
+								for (var i in xJoArrItems) {
+									var xPrdId = await _utilInstance.decrypt(xJoArrItems[i].prd_id, config.cryptoKey.hashKey);
+									if (xPrdId.status_code == '00') {
+										xJoArrItems[i].prd_id = xPrdId.decrypted;
+										// delete xJoArrItems[i].prd_id
+									}
+									console.log(`>>> xPrdId ${JSON.stringify(xPrdId)}`);
+									if (
+										xJoArrItems[i].hasOwnProperty('price_done') &&
+										xJoArrItems[i].hasOwnProperty('qty_done')
+									) {
+										xJoArrItems[i].price_total =
+											xJoArrItems[i].qty_done * xJoArrItems[i].price_done;
+									}
 								}
 							}
+
+							console.log(`>>> xJoArrItems ${JSON.stringify(xJoArrItems)}`);
+							pParam.pjca_detail = xJoArrItems;
 						}
 
-						console.log(`>>> xJoArrItems ${JSON.stringify(xJoArrItems)}`);
-						pParam.pjca_detail = xJoArrItems;
+						let xResult = await _repoInstance.save(pParam, xAct);
+						if (xResult.status_code == '00') {
+							var dt = dateTime.create();
+							var xDate = dt.format('ym');
+							var xPJCANo = `${pParam.company_code}/PJCA/${xDate}/` + xResult.clear_id.toString().padStart(5,'0');
+
+							var xParamUpdate = {
+								document_no: xPJCANo,
+								id: xResult.clear_id
+							};
+
+							var xUpdate = await _repoInstance.save(xParamUpdate, 'update');
+						}
+						xJoResult = xResult;
+					}
+				} else if (xAct == 'update') {
+					var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.id = xDecId.decrypted;
+						pParam.updated_by = pParam.user_id;
+						pParam.updated_by_name = pParam.user_name;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xDecId;
 					}
 
-					let xResult = await _repoInstance.save(pParam, xAct);
-					if (xResult.status_code == '00') {
-						var dt = dateTime.create();
-						var xDate = dt.format('ym');
-						var xPJCANo = `${pParam.company_code}/PJCA/${xDate}/` + xResult.clear_id.toString().padStart(5,'0');
-
-						var xParamUpdate = {
-							document_no: xPJCANo,
-							id: xResult.clear_id
-						};
-
-						var xUpdate = await _repoInstance.save(xParamUpdate, 'update');
+					if (xFlagProcess) {
+						let xResult = await _repoInstance.save(pParam, xAct);
+						xJoResult = xResult;
 					}
-					xJoResult = xResult;
-				}
-			} else if (xAct == 'update') {
-				var xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
-				if (xDecId.status_code == '00') {
-					pParam.id = xDecId.decrypted;
-					pParam.updated_by = pParam.user_id;
-					pParam.updated_by_name = pParam.user_name;
-					xFlagProcess = true;
-				} else {
-					xJoResult = xDecId;
-				}
-
-				if (xFlagProcess) {
-					let xResult = await _repoInstance.save(pParam, xAct);
-					xJoResult = xResult;
 				}
 			}
-		}
+	
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.save`, `Exception error: ${e.message}`, 'error');
 
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.save: Exception error: ${e.message}`
+			};
+		}
 		return xJoResult;
 	}
 
@@ -573,10 +586,7 @@ class PJCAService {
 				var xDetail = await _repoInstance.getByParameter({
 					id: pParam.id
 				});
-				
-
 				if (xDetail != null) {
-					console.log(`>>> xDetail: ${JSON.stringify(xDetail.status)}`, pParam.id);
 					if (xDetail.status_code == '00') {
 						// check if Payreq already paid ?
 						const xParamPayreq = {
@@ -614,14 +624,87 @@ class PJCAService {
 										ecatalogue_fpb_category_item: null,
 										logged_company_id: pParam.logged_company_id
 									};
+									console.log(`>>> xParamAddApprovalMatrix: ${JSON.stringify(xParamAddApprovalMatrix)}`);
 
 									var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
 										pParam.method,
 										pParam.token,
 										xParamAddApprovalMatrix
 									);
+									console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
 
 									xJoResult.approval_matrix_result = xApprovalMatrixResult;
+									if (xApprovalMatrixResult.status_code == '00') {
+										if (xApprovalMatrixResult.approvers.length > 0) {
+											const xApproverIds = []
+											let xApproverSeq1 = xApprovalMatrixResult.approvers.find((el) => el.sequence === 1);
+											if (xApproverSeq1 != null) {
+												for (var i in xApproverSeq1.approver_user) {
+													xApproverIds.push(xApproverSeq1.approver_user[i].user_id)
+													// In App notification
+													let xInAppNotificationResult = await _notificationService.inAppNotification({
+														document_code: xDetail.data.document_no,
+														document_id: xEncId,
+														document_status: 1,
+														mode: 'request_approval_pjca',
+														method: pParam.method,
+														token: pParam.token,
+														employee_id: await _utilInstance.encrypt(
+															xApproverSeq1.approver_user[i].employee_id.toString(),
+															config.cryptoKey.hashKey
+														)
+													});
+													console.log(`>>> xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`);
+			
+													_utilInstance.writeLog(
+														`${_xClassName}.submitPjca`,
+														`xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`,
+														'info'
+													);
+													// Email Notification
+													let xParamEmailNotification,
+														xNotificationResult = {};
+			
+													if (xApproverSeq1.approver_user[i].notification_via_email) {
+														xParamEmailNotification = {
+															mode: 'request_approval_pjca',
+															id: xEncId,
+															request_no: xDetail.data.document_no,
+															company_name: xDetail.data.company_name,
+															department_name: xDetail.data.department_name,
+															created_by: xDetail.data.employee_name,
+															created_at:
+																xDetail.data.createdAt != null
+																	? moment(xDetail.data.createdAt).format('DD MMM YYYY')
+																	: '',
+															items: xDetail.data.pjca_detail,
+															// body: xDetail.data,
+															approver_user: {
+																employee_name: xApproverSeq1.approver_user[i].user_name,
+																email: xApproverSeq1.approver_user[i].email
+															}
+														};
+														console.log(`>>> xParamEmailNotification: ${JSON.stringify(xParamEmailNotification)}`);
+														xNotificationResult = await _notificationService.sendNotificationEmail_PJCANeedApproval(
+															xParamEmailNotification,
+															pParam.method,
+															pParam.token
+														);
+														console.log(`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`);
+													}
+												}
+											}
+											// console.log(`>>> xApproverIds: ${JSON.stringify(xApproverIds)}`);
+											// update current approval id
+											let xPrdUpdateApprovalId = {
+												id: xDetail.data.id,
+												current_approval_ids: xApproverIds
+											}
+											// console.log(`>>> xPrdUpdateApprovalId: ${JSON.stringify(xPrdUpdateApprovalId)}`);
+											const xUpdateApproval = await _repoInstance.save(xPrdUpdateApprovalId, 'update')
+											// console.log(`>>> xUpdateApproval: ${JSON.stringify(xUpdateApproval)}`);
+										}
+									}
 								} else {
 									xJoResult = xUpdate;
 								}
@@ -845,30 +928,204 @@ class PJCAService {
 		var xDecId = null;
 		var xFlagProcess = false;
 		var xEncId = '';
-
-		if (pParam.document_id != '' && pParam.user_id != '') {
-			xEncId = pParam.document_id;
-			xDecId = await _utilInstance.decrypt(pParam.document_id, config.cryptoKey.hashKey);
-			if (xDecId.status_code == '00') {
-				xFlagProcess = true;
-				pParam.document_id = xDecId.decrypted;
-				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+		try {
+				
+			if (pParam.document_id != '' && pParam.user_id != '') {
+				xEncId = pParam.document_id;
+				xDecId = await _utilInstance.decrypt(pParam.document_id, config.cryptoKey.hashKey);
 				if (xDecId.status_code == '00') {
-					pParam.user_id = xDecId.decrypted;
 					xFlagProcess = true;
+					pParam.document_id = xDecId.decrypted;
+					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.user_id = xDecId.decrypted;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xDecId;
+					}
 				} else {
 					xJoResult = xDecId;
 				}
-			} else {
-				xJoResult = xDecId;
 			}
-		}
 
-		if (xFlagProcess) {
-			// Check if this request id valid or not
-			var xPjcaDetail = await _repoInstance.getByParameter({ id: pParam.document_id });
-			if (xPjcaDetail != null) {
-				if (xPjcaDetail.status_code == '00') {
+			if (xFlagProcess) {
+				// Check if this request id valid or not
+				var xPjcaDetail = await _repoInstance.getByParameter({ id: pParam.document_id });
+				if (xPjcaDetail != null) {
+					if (xPjcaDetail.status_code == '00') {
+						if (xPjcaDetail.data.status != 1) {
+							xJoResult = {
+								status_code: '-99',
+								status_msg: 'This document already confirmed before.'
+							};
+						} else {
+							var xParamApprovalMatrixDocument = {
+								document_id: xEncId,
+								status: 1,
+								application_id: 8,
+								table_name: config.dbTables.pjca
+							};
+		
+							var xResultApprovalMatrixDocument = await _oAuthService.confirmApprovalMatrix(
+								pParam.method,
+								pParam.token,
+								xParamApprovalMatrixDocument
+							);
+		
+							if (xResultApprovalMatrixDocument != null) {
+								if (xResultApprovalMatrixDocument.status_code == '00') {
+									if (xResultApprovalMatrixDocument.status_document_approved == true) {
+										// Update status Pjca to be confirmed
+										var xParamUpdatePR = {
+											id: pParam.document_id,
+											status: 2,
+											reject_reason: pParam.reject_reason
+										};
+										var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
+			
+										if (xUpdateResult.status_code == '00') {
+											
+											this.updatePyrdItemQtyRelease(xPjcaDetail.data, 'add')
+											xJoResult = {
+												status_code: '00',
+												status_msg: 'PJCA successfully confirmed'
+											};
+										} else {
+											xJoResult = xUpdateResult;
+										}
+									} else {
+										// Sort first
+										xResultApprovalMatrixDocument.approvers = xResultApprovalMatrixDocument.approvers.sort(
+											(a, b) => {
+												if (a.sequence < b.sequence) {
+													return -1;
+												}
+											}
+										);
+										// Send to next approver...
+										const xApproverIds = []
+										let xNextApprover = xResultApprovalMatrixDocument.approvers[0].approver_user;
+										console.log(`>>> xNextApprover : ${JSON.stringify(xNextApprover)}`);
+										if (xNextApprover != null) {
+											for (var i in xNextApprover) {
+												xApproverIds.push(xNextApprover[i].user_id)
+												let xInAppNotificationResult = await _notificationService.inAppNotification({
+													document_code: xPjcaDetail.data.document_no,
+													document_id: xEncId,
+													document_status: xPjcaDetail.data.status,
+													mode: 'request_approval_pjca',
+													method: pParam.method,
+													token: pParam.token,
+													employee_id: await _utilInstance.encrypt(
+														xNextApprover[i].employee_id.toString(),
+														config.cryptoKey.hashKey
+													)
+												});
+		
+												// Email Notification
+												let xParamEmailNotification,
+													xNotificationResult = {};
+		
+												if (xNextApprover[i].notification_via_email) {
+													xParamEmailNotification = {
+														mode: 'request_approval_pjca',
+														id: xEncId,
+														request_no: xPjcaDetail.data.document_no,
+														company_name: xPjcaDetail.data.company_name,
+														department_name: xPjcaDetail.data.department_name,
+														created_by: xPjcaDetail.data.employee_name,
+														created_at:
+															xPjcaDetail.data.createdAt != null
+																? moment(xPjcaDetail.data.createdAt).format('DD MMM YYYY')
+																: '',
+														items: xPjcaDetail.data.pjca_cetail,
+														approver_user: {
+															employee_name: xNextApprover[i].user_name,
+															email: xNextApprover[i].email
+														}
+													};
+													xNotificationResult = await _notificationService.sendNotificationEmail_PJCANeedApproval(
+														xParamEmailNotification,
+														pParam.method,
+														pParam.token
+													);
+													console.log(`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`);
+												}
+											}
+											// update current approval id
+											let xPrdUpdateApprovalId = {
+												id: xPjcaDetail.data.id,
+												current_approval_ids: xApproverIds
+											}
+											await _repoInstance.save(xPrdUpdateApprovalId, 'update')
+										}
+										xJoResult = {
+											status_code: '00',
+											status_msg: 'PJCA successfully approved. Document available for next approver',
+											result_approval_matrix: xResultApprovalMatrixDocument
+										};
+									}
+								} else {
+									xJoResult = xResultApprovalMatrixDocument;
+								}
+							} else {
+								xJoResult = {
+									status_code: '-99',
+									status_msg: 'There is problem on approval matrix processing. Please try again'
+								};
+							}
+						}
+					} else {
+						xJoResult = xPjcaDetail
+					}
+				} else {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Data not found'
+					};
+				}
+			}
+			
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.confirm`, `Exception error: ${e.message}`, 'error');
+
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.confirm: Exception error: ${e.message}`
+			};
+		}
+		return xJoResult;
+	}
+
+	async reject(pParam) {
+		var xJoResult = {};
+		var xDecId = null;
+		var xFlagProcess = false;
+		var xEncId = '';
+		try {
+			
+			if (pParam.document_id != '' && pParam.user_id != '') {
+				xEncId = pParam.document_id;
+				xDecId = await _utilInstance.decrypt(pParam.document_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					xFlagProcess = true;
+					pParam.document_id = xDecId.decrypted;
+					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.user_id = xDecId.decrypted;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xDecId;
+					}
+				} else {
+					xJoResult = xDecId;
+				}
+			}
+
+			if (xFlagProcess) {
+				// Check if this request id valid or not
+				var xPjcaDetail = await _repoInstance.getByParameter({ id: pParam.document_id });
+				if (xPjcaDetail != null) {
 					if (xPjcaDetail.data.status != 1) {
 						xJoResult = {
 							status_code: '-99',
@@ -877,53 +1134,41 @@ class PJCAService {
 					} else {
 						var xParamApprovalMatrixDocument = {
 							document_id: xEncId,
-							status: 1,
+							status: -1,
 							application_id: 8,
 							table_name: config.dbTables.pjca
 						};
-	
+
 						var xResultApprovalMatrixDocument = await _oAuthService.confirmApprovalMatrix(
 							pParam.method,
 							pParam.token,
 							xParamApprovalMatrixDocument
 						);
-	
+
+						// await _utilInstance.writeLog(
+						// 	`${_xClassName}.rejectPayreq`,
+						// 	`xResultApprovalMatrixDocument: ${xResultApprovalMatrixDocument}`,
+						// 	'debug'
+						// );
+
 						if (xResultApprovalMatrixDocument != null) {
 							if (xResultApprovalMatrixDocument.status_code == '00') {
-								if (xResultApprovalMatrixDocument.status_document_approved == true) {
-									// Update status Pjca to be confirmed
-									var xParamUpdatePR = {
-										id: pParam.document_id,
-										status: 2,
-										reject_reason: pParam.reject_reason
-									};
-									var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
-		
-									if (xUpdateResult.status_code == '00') {
-										
-										this.updatePyrdItemQtyRelease(xPjcaDetail.data, 'add')
-										xJoResult = {
-											status_code: '00',
-											status_msg: 'PJCA successfully confirmed'
-										};
-									} else {
-										xJoResult = xUpdateResult;
-									}
-								} else {
-																	// Sort first
-									xResultApprovalMatrixDocument.approvers = xResultApprovalMatrixDocument.approvers.sort(
-										(a, b) => {
-											if (a.sequence < b.sequence) {
-												return -1;
-											}
-										}
-									);
+								// Update status Pjca to be confirmed
+								var xParamUpdatePR = {
+									id: pParam.document_id,
+									status: 4,
+									rejected_at: await _utilInstance.getCurrDateTime(),
+									rejected_reason: pParam.reject_reason
+								};
+								var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
 
+								if (xUpdateResult.status_code == '00') {
 									xJoResult = {
 										status_code: '00',
-										status_msg: 'PJCA successfully approved. Document available for next approver',
-										result_approval_matrix: xResultApprovalMatrixDocument
+										status_msg: 'PJCA successfully rejected'
 									};
+								} else {
+									xJoResult = xUpdateResult;
 								}
 							} else {
 								xJoResult = xResultApprovalMatrixDocument;
@@ -936,109 +1181,20 @@ class PJCAService {
 						}
 					}
 				} else {
-					xJoResult = xPjcaDetail
-				}
-			} else {
-				xJoResult = {
-					status_code: '-99',
-					status_msg: 'Data not found'
-				};
-			}
-		}
-
-		return xJoResult;
-	}
-
-	async reject(pParam) {
-		var xJoResult = {};
-		var xDecId = null;
-		var xFlagProcess = false;
-		var xEncId = '';
-
-		if (pParam.document_id != '' && pParam.user_id != '') {
-			xEncId = pParam.document_id;
-			xDecId = await _utilInstance.decrypt(pParam.document_id, config.cryptoKey.hashKey);
-			if (xDecId.status_code == '00') {
-				xFlagProcess = true;
-				pParam.document_id = xDecId.decrypted;
-				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
-				if (xDecId.status_code == '00') {
-					pParam.user_id = xDecId.decrypted;
-					xFlagProcess = true;
-				} else {
-					xJoResult = xDecId;
-				}
-			} else {
-				xJoResult = xDecId;
-			}
-		}
-
-		if (xFlagProcess) {
-			// Check if this request id valid or not
-			var xPjcaDetail = await _repoInstance.getByParameter({ id: pParam.document_id });
-			if (xPjcaDetail != null) {
-				if (xPjcaDetail.data.status != 1) {
 					xJoResult = {
 						status_code: '-99',
-						status_msg: 'This document already confirmed before.'
+						status_msg: 'Data not found'
 					};
-				} else {
-					var xParamApprovalMatrixDocument = {
-						document_id: xEncId,
-						status: -1,
-						application_id: 8,
-						table_name: config.dbTables.pjca
-					};
-
-					var xResultApprovalMatrixDocument = await _oAuthService.confirmApprovalMatrix(
-						pParam.method,
-						pParam.token,
-						xParamApprovalMatrixDocument
-					);
-
-					// await _utilInstance.writeLog(
-					// 	`${_xClassName}.rejectPayreq`,
-					// 	`xResultApprovalMatrixDocument: ${xResultApprovalMatrixDocument}`,
-					// 	'debug'
-					// );
-
-					if (xResultApprovalMatrixDocument != null) {
-						if (xResultApprovalMatrixDocument.status_code == '00') {
-							// Update status Pjca to be confirmed
-							var xParamUpdatePR = {
-								id: pParam.document_id,
-								status: 4,
-								rejected_at: await _utilInstance.getCurrDateTime(),
-								rejected_reason: pParam.reject_reason
-							};
-							var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
-
-							if (xUpdateResult.status_code == '00') {
-								xJoResult = {
-									status_code: '00',
-									status_msg: 'PJCA successfully rejected'
-								};
-							} else {
-								xJoResult = xUpdateResult;
-							}
-						} else {
-							xJoResult = xResultApprovalMatrixDocument;
-						}
-					} else {
-						xJoResult = {
-							status_code: '-99',
-							status_msg: 'There is problem on approval matrix processing. Please try again'
-						};
-					}
 				}
-			} else {
-				xJoResult = {
-					status_code: '-99',
-					status_msg: 'Data not found'
-				};
 			}
-		}
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.reject`, `Exception error: ${e.message}`, 'error');
 
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.reject: Exception error: ${e.message}`
+			};
+		}
 		return xJoResult;
 	}
 	// async done(pParam) {
@@ -1144,61 +1300,53 @@ class PJCAService {
 		var xFlagProcess = false;
 		var xEncId = '';
 		var xClearId = '';
-
-		if (pParam.id != '' && pParam.user_id != '') {
-			xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
-			if (xDecId.status_code == '00') {
-				xFlagProcess = true;
-				xEncId = pParam.id;
-				pParam.id = xDecId.decrypted;
-				xClearId = xDecId.decrypted;
-				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+		try {
+				
+			if (pParam.id != '' && pParam.user_id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
 				if (xDecId.status_code == '00') {
-					pParam.user_id = xDecId.decrypted;
 					xFlagProcess = true;
+					xEncId = pParam.id;
+					pParam.id = xDecId.decrypted;
+					xClearId = xDecId.decrypted;
+					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.user_id = xDecId.decrypted;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xDecId;
+					}
 				} else {
 					xJoResult = xDecId;
 				}
-			} else {
-				xJoResult = xDecId;
 			}
-		}
 
-		if (xFlagProcess) {
-			// Get PJCA Detail
-			var xPjcaDetail = await _repoInstance.getByParameter({ id: xClearId });
-			console.log(`>>> xFetchPayreqDetail: ${JSON.stringify(xPjcaDetail)}`);
-			if (xPjcaDetail != null) {
-				if (xPjcaDetail.data.status != 1) {
-					xJoResult = {
-						status_code: '-99',
-						status_msg: 'Fetch matrix cannot be processed, please check again'
-					};
-				} else {
-					pParam.approved_at = null;
-					const xUpdateParam = {
-						id: xClearId,
-						approved_at: null,
-						user_id: pParam.user_id,
-						user_name: pParam.user_name
-					}
-					var xUpdateResult = await _repoInstance.save(xUpdateParam, 'update');
-					console.log(`>>> xUpdateResult: ${JSON.stringify(xUpdateResult)}`);
-					xJoResult = xUpdateResult;
-					// Next Phase : Approval Matrix & Notification to admin
-					if (xUpdateResult.status_code == '00') {
+			if (xFlagProcess) {
+				// Get PJCA Detail
+				var xPjcaDetail = await _repoInstance.getByParameter({ id: xClearId });
+				console.log(`>>> xFetchPayreqDetail: ${JSON.stringify(xPjcaDetail)}`);
+				if (xPjcaDetail != null) {
+					if (xPjcaDetail.data.status != 1) {
+						xJoResult = {
+							status_code: '-99',
+							status_msg: 'Fetch matrix cannot be processed, please check again'
+						};
+					} else {
 						// Fetch Approval Matrix
 						var xParamAddApprovalMatrix = {
 							act: 'fetch_matrix',
 							document_id: xEncId,
 							document_no: xPjcaDetail.data.document_no,
-							application_id: 8,
+							application_id: 8,//ecatalog app id
 							table_name: config.dbTables.pjca,
 							company_id: xPjcaDetail.data.company_id,
 							department_id: xPjcaDetail.data.department_id,
-							ecatalogue_fpb_category_item: null,
-							logged_company_id: pParam.logged_company_id
+							// ecatalogue_fpb_category_item: null,
+							logged_company_id: pParam.logged_company_id,
+							approval_matrix_id: pParam.approval_matrix_id
 						};
+						
+						console.log(`>>> xParamAddApprovalMatrix: ${JSON.stringify(xParamAddApprovalMatrix)}`)
 
 						var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
 							pParam.method,
@@ -1206,20 +1354,48 @@ class PJCAService {
 							xParamAddApprovalMatrix
 						);
 						console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
-						xJoResult.approval_matrix_result = xApprovalMatrixResult;
-	
-					} else {
+						const xApproverIds = []
+						if (xApprovalMatrixResult.status_code == '00') {
+							if (xApprovalMatrixResult.approvers.length > 0) {
+								
+								let xApproverSeq1 = xApprovalMatrixResult.approvers.find((el) => el.sequence === 1);
+								if (xApproverSeq1 != null) {
+									for (var i in xApproverSeq1.approver_user) {
+										xApproverIds.push(xApproverSeq1.approver_user[i].user_id)
+									}
+								}
+							}
+						}
+						pParam.approved_at = null;
+						const xUpdateParam = {
+							id: xClearId,
+							approved_at: null,
+							user_id: pParam.user_id,
+							user_name: pParam.user_name,
+							current_approval_ids: xApproverIds
+						}
+						var xUpdateResult = await _repoInstance.save(xUpdateParam, 'update');
+						console.log(`>>> xUpdateResult: ${JSON.stringify(xUpdateResult)}`);
 						xJoResult = xUpdateResult;
+						xJoResult.approval_matrix_result = xApprovalMatrixResult;
 					}
+				} else {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Data not found. Please supply valid identifier'
+					};
 				}
-			} else {
-				xJoResult = {
-					status_code: '-99',
-					status_msg: 'Data not found. Please supply valid identifier'
-				};
 			}
-		}
+			
+		} catch (e) {
+			
+			_utilInstance.writeLog(`${_xClassName}.fetchMatrix`, `Exception error: ${e.message}`, 'error');
 
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.fetchMatrix: Exception error: ${e.message}`
+			};
+		}
 		return xJoResult;
 	}
 	

@@ -375,9 +375,8 @@ class PJCARepository {
 				};
 
 				xSaved = await _modelDb.update(pParam, xWhere, { xTransaction });
-				if (xSaved.length > 0) {
+				if (xSaved[0] > 0) {
 					await xTransaction.commit();
-
 					xJoResult = {
 						status_code: '00',
 						status_msg: `Data has been successfully ${pAct}`

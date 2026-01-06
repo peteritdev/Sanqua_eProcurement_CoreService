@@ -546,7 +546,7 @@ class ExportService {
 						);
 					}
 				}
-				console.log(`>>> xApprovedUser 3: ${JSON.stringify(xApprovedUser3)}`);
+				console.log(`>>> xApprovedUser 3: ${JSON.stringify(xApprovedUser3)}`, xStringQRCodeApprover3);
 				ejs.renderFile(
 					path.join(__dirname, '../views/', 'payreq-pdf.ejs'),
 					{

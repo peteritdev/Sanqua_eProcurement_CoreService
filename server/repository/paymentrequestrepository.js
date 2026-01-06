@@ -15,6 +15,7 @@ const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
 const _modelTax = require('../models').ms_taxes;
+const _modelPJCADb = require('../models').tr_pjcas;
 // const _modelBudgetPlan = require('../models').tr_budgetplans;
 
 const Utility = require('peters-globallib-v2');
@@ -57,6 +58,11 @@ class PaymentRequestRepository {
 						},
 					]
 				},
+				{
+					model: _modelPJCADb,
+					as: 'pjca',
+					attributes: ['id', 'document_no', 'status'],
+				}
 			]
 
 			if (pParam.hasOwnProperty('id')) {
@@ -116,6 +122,11 @@ class PaymentRequestRepository {
 					model: _modelPurchaseRequest,
 					as: 'purchase_request',
 					attributes: [ 'id', 'request_no' ]
+				},
+				{
+					model: _modelPJCADb,
+					as: 'pjca',
+					attributes: ['id', 'document_no', 'status'],
 				}
 			];
 

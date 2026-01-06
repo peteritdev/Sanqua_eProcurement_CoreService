@@ -381,6 +381,7 @@ class PaymentRequestService {
 									updated_at: moment(xRows[i].updatedAt).format('DD MMM YYYY HH:mm:ss'),
 									updated_by_name: xRows[i].updated_by_name,
 									purchase_request: xRows[i].purchase_request,
+									pjca: xRows[i].pjca
 								});
 							}
 
@@ -1710,7 +1711,6 @@ class PaymentRequestService {
 							xParamAddApprovalMatrix
 						);
 						console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
-						xJoResult.approval_matrix_result = xApprovalMatrixResult;
 						const xApproverIds = []
 						if (xApprovalMatrixResult.status_code == '00') {
 							if (xApprovalMatrixResult.approvers.length > 0) {
@@ -1734,7 +1734,7 @@ class PaymentRequestService {
 						var xUpdateResult = await _repoInstance.save(xUpdateParam, 'update');
 						console.log(`>>> xUpdateResult: ${JSON.stringify(xUpdateResult)}`);
 						xJoResult = xUpdateResult;
-					
+						xJoResult.approval_matrix_result = xApprovalMatrixResult;
 					}
 				} else {
 					xJoResult = {
