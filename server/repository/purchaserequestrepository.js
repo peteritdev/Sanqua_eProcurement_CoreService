@@ -480,6 +480,12 @@ class PurchaseRequestRepository {
 				} else {
 					xSqlWhere = ` (( ${xSqlWhere} ) OR (${joinedOr}))`;
 				}
+			} else {
+				xSqlWhereOr.push(' request_no IN (null) ');
+				xObjJsonWhere.ownedDocNo = pParam.owned_document_no;
+				if (pParam.hasOwnProperty('inappnotif') && pParam.inappnotif) {
+					xSqlWhere = ` ${xSqlWhereOr} `;
+				}
 			}
 		}
 
