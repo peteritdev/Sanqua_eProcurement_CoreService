@@ -516,7 +516,7 @@
               >
               </th>
               <th class="border-rb" style="width: 25%; font-weight: 400;">Finance</th>
-              <th class="border-b" style="width: 25%; font-weight: 400;">Plant Manager / Direktur</th>
+              <th class="border-b" style="width: 25%; font-weight: 400;">Head / Plant Manager / Direktur</th>
             </tr>
             <tr>
               <td>
@@ -550,7 +550,7 @@
               </td>
               <td class="border-rb">
                 <%
-                        if( qrCode.approval3 != null && qrCode.approval1.length > 0 ){
+                        if( qrCode.approval3 != null && qrCode.approval3.length > 0 ){
 
                     %>
                 <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 45px;">
@@ -570,12 +570,25 @@
                     %>
               </td>
               <td class="border-b">
+                <%
+                        if( qrCode.approval2 != null && qrCode.approval2.length > 0 ){
+
+                    %>
                 <table style="margin-left: auto; margin-right: auto; text-align: center; min-height: 45px;">
                   <tr>
+                    <% for(var i = 0; i < qrCode.approval2.length; i++ ) { %>
                     <td>
+                      <img
+                        src="<%=qrCode.qrPath%><%=qrCode.approval2[i]%>"
+                        width="80"
+                      />
                     </td>
+                    <% }%>
                   </tr>
                 </table>
+                <%
+                        }
+                    %>
               </td>
             </tr>
             <tr>
@@ -649,11 +662,33 @@
                   %>
               </th>
               <th style="padding: 3px 0;"
-                class="border-b" style="width: 50%;"
+                class="border-rb" style="width: 50%;"
               >
+              <%
+                      if( qrCode.approval2 != null && qrCode.approval2.length > 0 ){
+
+                  %>
+              <table style="margin: auto; text-align: center;">
+                <tr>
+                  <% for(var i = 0; i < approver2.length; i++ ) { %>
+                  <td><%=approver2[i].user.name%></td>
+                  <% }%>
+                </tr>
+              </table>
+              <%
+                      } else {
+                  %>
+              <table style="margin: auto; text-align: center;">
                 <tr>
                   <td></td>
                 </tr>
+                <tr>
+                  <td>(.............................)</td>
+                </tr>
+              </table>
+              <%
+                      }
+                  %>
               </th>
             </tr>
             <tr>
