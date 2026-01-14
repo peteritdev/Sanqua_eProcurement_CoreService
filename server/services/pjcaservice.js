@@ -16,6 +16,7 @@ const config = require(__dirname + '/../config/config.json')[env];
 // Utility
 const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
+const _xTerbilang = require('../utils/terbilang');
 
 const GlobalUtility = require('../utils/globalutility.js');
 const _globalUtilInstance = new GlobalUtility();
@@ -235,7 +236,8 @@ class PJCAService {
 							// console.log(`>>> xPayreqDetail: ${JSON.stringify(xPayreqDetail)}`);
 
 							// Convert nominal to trebilang
-							const xTerbilang = await _currencyService.terbilang(xTotalPriceRound)
+							// const xTerbilang = await _currencyService.terbilang(xTotalPriceRound)
+							const xTerbilang = _xTerbilang(xTotalPriceRound)
 							xDetail.data.terbilang = xTerbilang
 
 							// Get Approval Matrix
