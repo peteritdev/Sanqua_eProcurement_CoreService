@@ -13,6 +13,7 @@ const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
 const _modelBudgetPlan = require('../models').tr_budgetplans;
+const _modelVendor = require('../models').ms_vendors;
 // const _modelBudgetPlanDetail = require('../models').tr_budgetplandetails;
 // const _modelLogSubtitute = require('../models').log_fpbitemsubtitutes;
 
@@ -35,6 +36,11 @@ class PurchaseRequestRepository {
 				model: _modelPurchaseRequestDetail,
 				as: 'purchase_request_detail',
 				include: [
+					{
+						model: _modelVendor,
+						attributes: [ 'id', 'code', 'name', 'is_onlineshop'],
+						as: 'vendor'
+					},
 					{
 						model: _modelVendorCatalogueDb,
 						as: 'vendor_catalogue'
@@ -624,6 +630,7 @@ class PurchaseRequestRepository {
 								prd.currency_symbol,
 								prd.paid_at,
 								prd.paid_by_name,
+								prd.store_link,
 								p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 				xSqlGroupBy = ` `;
@@ -923,6 +930,7 @@ class PurchaseRequestRepository {
 			prd.currency_symbol,
 			prd.paid_at,
 			prd.paid_by_name,
+			prd.store_link,
 			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 		xSqlGroupBy = ` `;
@@ -1338,7 +1346,7 @@ class PurchaseRequestRepository {
 					p.id as "project_id", p.odoo_project_code, p.name as "project_name", prd.qty, prd.uom_id, prd.uom_name,
 					prd.last_price, prd.budget_price_per_unit, prd.budget_price_total, prd.status as "item_status",
 					prd.product_id, prd.product_code, prd.product_name, prd.vendor_id, prd.vendor_code, prd.vendor_name,
-					prd.currency_id, prd.currency_code, prd.currency_symbol,
+					prd.currency_id, prd.currency_code, prd.currency_symbol, prd.store_link,
 					pr.created_at, pr.requested_at`;
 
 		xSqlGroupBy = ``;
@@ -1502,6 +1510,7 @@ class PurchaseRequestRepository {
 			prd.currency_id,
 			prd.currency_code,
 			prd.currency_symbol,
+			prd.store_link,
 			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 		xSqlGroupBy = ` `;

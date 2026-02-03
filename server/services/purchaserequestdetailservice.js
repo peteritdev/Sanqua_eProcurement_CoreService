@@ -1517,7 +1517,8 @@ class PurchaseRequestDetailService {
 						prj_id: xRows[index].prj_id,
 						prj_name: xRows[index].prj_name,
 						created_at: xRows[index].created_at,
-						is_po_created: xRows[index].is_po_created
+						is_po_created: xRows[index].is_po_created,
+						store_link: xRows[index].store_link
 					});
 				}
 				console.log(`>>> xJoArrData: ${JSON.stringify(xJoArrData)}`);
