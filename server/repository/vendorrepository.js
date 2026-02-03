@@ -692,6 +692,65 @@ class VendorRepository{
 			return xJoResult;
 		}
 	}
+    
+	async getByParameter(pParam) {
+		var xInclude = [];
+		var xWhereOr = [];
+		var xWhereAnd = [];
+		var xWhere = [];
+		var xAttributes = [];
+		var xJoResult = {};
+		try {
+			if (pParam.hasOwnProperty('code')) {
+				if (pParam.code != '') {
+					xWhereAnd.push({
+						code: pParam.code
+					});
+				}
+			}
+
+			if (pParam.hasOwnProperty('name')) {
+				if (pParam.name != '') {
+					xWhereAnd.push({
+						name: pParam.name
+					});
+				}
+			}
+
+			if (xWhereAnd.length > 0) {
+				xWhere.push({
+					[Op.and]: xWhereAnd
+				});
+			}
+
+			var xData = await _modelVendor.findOne({
+				where: xWhere,
+				include: xInclude,
+				subQuery: false
+			});
+
+			if (xData) {
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					data: xData
+				};
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Data not found'
+				};
+			}
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.getByParameter`, `Exception error: ${e.message}`, 'error');
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Failed get data. Error : ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
 }
 
 module.exports = VendorRepository;

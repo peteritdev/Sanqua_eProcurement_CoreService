@@ -15,6 +15,7 @@ const _modelUnit = require('../models').ms_units;
 const _modelBudgetPlan = require('../models').tr_budgetplans;
 const _modelBudgetPlanDetail = require('../models').tr_budgetplandetails;
 const _modelLogSubtitute = require('../models').log_fpbitemsubtitutes;
+const _modelVendor = require('../models').ms_vendors;
 
 const Utility = require('peters-globallib-v2');
 const { param } = require('express-validator');
@@ -36,6 +37,11 @@ class PurchaseRequestRepository {
 				as: 'purchase_request_detail',
 				include: [
 					{
+						model: _modelVendor,
+						attributes: [ 'id', 'code', 'name', 'is_onlineshop'],
+						as: 'vendor'
+					},
+					{
 						model: _modelVendorCatalogueDb,
 						as: 'vendor_catalogue'
 					},
@@ -51,34 +57,34 @@ class PurchaseRequestRepository {
 							}
 						]
 					},
-					{
-						model: _modelBudgetPlanDetail,
-						as: 'rab_item',
-						attributes: [ 'id', 'product_code', 'product_name', 'qty', 'qty_remain'],
-						include: [
-							{
-								model: _modelBudgetPlan,
-								as: 'rab_origin',
-								attributes: [ 'id', 'budget_no'],
-							}
-						]
-					},
-					{
-						model: _modelBudgetPlanDetail,
-						as: 'rab_revision_item',
-						attributes: [ 'id', 'product_code', 'product_name', 'qty', 'qty_remain'],
-						include: [
-							{
-								model: _modelBudgetPlan,
-								as: 'budget_plan',
-								attributes: [ 'id', 'budget_no', 'status'],
-							}
-						]
-					},
-					{
-						model: _modelLogSubtitute,
-						as: 'log_subtitute'
-					}
+					// {
+					// 	model: _modelBudgetPlanDetail,
+					// 	as: 'rab_item',
+					// 	attributes: [ 'id', 'product_code', 'product_name', 'qty', 'qty_remain'],
+					// 	include: [
+					// 		{
+					// 			model: _modelBudgetPlan,
+					// 			as: 'rab_origin',
+					// 			attributes: [ 'id', 'budget_no'],
+					// 		}
+					// 	]
+					// },
+					// {
+					// 	model: _modelBudgetPlanDetail,
+					// 	as: 'rab_revision_item',
+					// 	attributes: [ 'id', 'product_code', 'product_name', 'qty', 'qty_remain'],
+					// 	include: [
+					// 		{
+					// 			model: _modelBudgetPlan,
+					// 			as: 'budget_plan',
+					// 			attributes: [ 'id', 'budget_no', 'status'],
+					// 		}
+					// 	]
+					// },
+					// {
+					// 	model: _modelLogSubtitute,
+					// 	as: 'log_subtitute'
+					// }
 				]
 			},
 			{
@@ -480,6 +486,12 @@ class PurchaseRequestRepository {
 				} else {
 					xSqlWhere = ` (( ${xSqlWhere} ) OR (${joinedOr}))`;
 				}
+			} else {
+				xSqlWhereOr.push(' request_no IN (null) ');
+				xObjJsonWhere.ownedDocNo = pParam.owned_document_no;
+				if (pParam.hasOwnProperty('inappnotif') && pParam.inappnotif) {
+					xSqlWhere = ` ${xSqlWhereOr} `;
+				}
 			}
 		}
 
@@ -618,6 +630,7 @@ class PurchaseRequestRepository {
 								prd.currency_symbol,
 								prd.paid_at,
 								prd.paid_by_name,
+								prd.store_link,
 								p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 				xSqlGroupBy = ` `;
@@ -917,6 +930,7 @@ class PurchaseRequestRepository {
 			prd.currency_symbol,
 			prd.paid_at,
 			prd.paid_by_name,
+			prd.store_link,
 			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 		xSqlGroupBy = ` `;
@@ -1332,7 +1346,7 @@ class PurchaseRequestRepository {
 					p.id as "project_id", p.odoo_project_code, p.name as "project_name", prd.qty, prd.uom_id, prd.uom_name,
 					prd.last_price, prd.budget_price_per_unit, prd.budget_price_total, prd.status as "item_status",
 					prd.product_id, prd.product_code, prd.product_name, prd.vendor_id, prd.vendor_code, prd.vendor_name,
-					prd.currency_id, prd.currency_code, prd.currency_symbol,
+					prd.currency_id, prd.currency_code, prd.currency_symbol, prd.store_link,
 					pr.created_at, pr.requested_at`;
 
 		xSqlGroupBy = ``;
@@ -1496,6 +1510,7 @@ class PurchaseRequestRepository {
 			prd.currency_id,
 			prd.currency_code,
 			prd.currency_symbol,
+			prd.store_link,
 			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 		xSqlGroupBy = ` `;

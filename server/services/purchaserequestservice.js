@@ -603,10 +603,11 @@ class PurchaseRequestService {
 										currency_code: xRows[index].currency_code,
 										currency_symbol: xRows[index].currency_symbol,
 										paid_at: xRows[index].paid_at,
-										paid_by_name: xRows[index].paid_by_name
+										paid_by_name: xRows[index].paid_by_name,
+										store_link: xRows[index].store_link,
 									},
 									approved_at: xRows[index].approved_at,
-									budget_plan_no: xRows[index].budget_plan_no
+									budget_plan_no: xRows[index].budget_plan_no,
 								});
 							}
 						} else {
@@ -869,7 +870,8 @@ class PurchaseRequestService {
 							vendor: {
 								id: xDetail[index].vendor_id,
 								code: xDetail[index].vendor_code,
-								name: xDetail[index].vendor_name
+								name: xDetail[index].vendor_name,
+								is_onlineshop: xDetail[index].vendor.is_onlineshop
 							},
 							vendor_rec: {
 								id: xDetail[index].vendor_rec_id != null ? xDetail[index].vendor_rec_id.toString() : null,
@@ -911,16 +913,17 @@ class PurchaseRequestService {
 							currency_symbol: xDetail[index].currency_symbol,
 							qty_paid: xDetail[index].qty_paid,
 							qty_done: xDetail[index].qty_done,
+							store_link: xDetail[index].store_link,
 							// paid_at: xDetail[index].paid_at,
 							// paid_by: xDetail[index].paid_by,
 							// paid_by_name: xDetail[index].paid_by_name,
-							paid_note: xDetail[index].paid_note,
-							rab_item: xDetail[index].rab_item,
-							rab_qty_gap: xDetail[index].rab_qty_gap,
-							rab_revision_item: xDetail[index].rab_revision_item,
-							is_deviation_fulfilled: xDetail[index].is_deviation_fulfilled,
-							is_subtitute: xDetail[index].is_subtitute,
-                        	log_subtitute: xDetail[index].log_subtitute
+							// paid_note: xDetail[index].paid_note
+							// rab_item: xDetail[index].rab_item,
+							// rab_qty_gap: xDetail[index].rab_qty_gap,
+							// rab_revision_item: xDetail[index].rab_revision_item,
+							// is_deviation_fulfilled: xDetail[index].is_deviation_fulfilled,
+							// is_subtitute: xDetail[index].is_subtitute,
+                        	// log_subtitute: xDetail[index].log_subtitute
 						});
 					}
 					// Get Approval Matrix
@@ -2262,7 +2265,8 @@ class PurchaseRequestService {
 						currency_id: xRows[index].currency_id,
 						currency_code: xRows[index].currency_code,
 						currency_symbol: xRows[index].currency_symbol,
-						budget_plan_no: xRows[index].budget_plan_no
+						budget_plan_no: xRows[index].budget_plan_no,
+						store_link: xRows[index].store_link
 					});
 				}
 

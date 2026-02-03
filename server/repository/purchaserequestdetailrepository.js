@@ -921,7 +921,7 @@ class PurchaseRequestDetailRepository {
 			prd.qty, prd.qty_paid, prd.qty_done, prd.uom_id, prd.uom_name, prd.budget_price_per_unit, 
 			prd.budget_price_total, prd.estimate_date_use, pr.created_at, pr.created_by, pr.created_by_name,
 			pr.status as "pr_status", pr.category_item, pr.category_pr, pr.fpb_type,
-			pr.project_id as "prj_id", prj.name as "prj_name", prd.is_po_created`;
+			pr.project_id as "prj_id", prj.name as "prj_name", prd.store_link, prd.is_po_created`;
 
 			xSql = ` SELECT ${xSqlFields}
 			FROM tr_purchaserequestdetails as prd

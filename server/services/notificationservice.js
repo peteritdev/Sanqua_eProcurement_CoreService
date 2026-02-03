@@ -208,6 +208,62 @@ class NotificationService {
 					status_msg: 'OK',
 					notification_result: xAddNotifResult
 				};
+			} else if (pParam.mode == 'ca_paid_notification') {
+				xParam = {
+					act: 'add',
+					subject: `Pengajuan CA Telah Dibayar`,
+					body: `Pengajuan CA degan nomor ${pParam.document_code}`,
+					module: 'Cash Advance',
+					document_id: pParam.document_id,
+					document_status: pParam.document_status,
+					document_code: pParam.document_code,
+					status: 0,
+					application_id: config.applicationId,
+					application_code: config.applicationCode,
+					channel: 1,
+					employee_id: pParam.employee_id
+				};
+
+				let xAddNotifResult = await _oAuthService.eSanQuaNotification(
+					pParam.method,
+					pParam.token,
+					xParam,
+					'/notification/save'
+				);
+
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					notification_result: xAddNotifResult
+				};
+			} else if (pParam.mode == 'request_approval_pjca') {
+				xParam = {
+					act: 'add',
+					subject: `Permohonan Approval PJCA`,
+					body: `Permohonan Approval PJCA ${pParam.document_code}`,
+					module: 'pjca',
+					document_id: pParam.document_id,
+					document_status: pParam.document_status,
+					document_code: pParam.document_code,
+					status: 0,
+					application_id: config.applicationId,
+					application_code: config.applicationCode,
+					channel: 1,
+					employee_id: pParam.employee_id
+				};
+
+				let xAddNotifResult = await _oAuthService.eSanQuaNotification(
+					pParam.method,
+					pParam.token,
+					xParam,
+					'/notification/save'
+				);
+
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					notification_result: xAddNotifResult
+				};
 			}
 		} catch (e) {
 			xJoResult = {
@@ -352,6 +408,64 @@ class NotificationService {
 			xJoResult = {
 				status_code: '-99',
 				status_msg: `Exception error ${_xClassName}.sendNotificationEmail_CANeedApproval: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
+
+	async sendNotificationEmail_CAAlreadyPaid(pParam, pMethod, pToken) {
+		var xJoResult = {};
+
+		try {
+			console.log('pParam.mode>>>', pParam.mode)
+			if (pParam.mode == 'ca_paid_notification') {
+				let xAddNotifResult = await _oAuthService.eSanQuaNotification(
+					pMethod,
+					pToken,
+					pParam,
+					'/notification/email/ca_paid'
+				);
+
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					notification_result: xAddNotifResult
+				};
+			}
+		} catch (e) {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Exception error ${_xClassName}.sendNotificationEmail_CAAlreadyPaid: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
+	
+	async sendNotificationEmail_PJCANeedApproval(pParam, pMethod, pToken) {
+		var xJoResult = {};
+
+		try {
+			console.log('pParam.mode>>>', pParam.mode)
+			if (pParam.mode == 'request_approval_pjca') {
+				let xAddNotifResult = await _oAuthService.eSanQuaNotification(
+					pMethod,
+					pToken,
+					pParam,
+					'/notification/email/pjca_approval'
+				);
+
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					notification_result: xAddNotifResult
+				};
+			}
+		} catch (e) {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Exception error ${_xClassName}.sendNotificationEmail_PJCANeedApproval: ${e.message}`
 			};
 		}
 

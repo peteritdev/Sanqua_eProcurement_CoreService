@@ -160,7 +160,7 @@ class PurchaseRequestDetailService {
 				var xPurchaseRequestDetail = null,
 					xProductDetail = null,
 					xVendorDetail = null;
-				
+
 				if (pParam.hasOwnProperty('product_id') && pParam.hasOwnProperty('vendor_id')) {
 					if (pParam.product_id != null && pParam.vendor_id != null) {
 						// Check first whether product_id and vendor_id already exists in detail or not
@@ -433,13 +433,6 @@ class PurchaseRequestDetailService {
 								Math.round(pParam.qty * pParam.quotation_price_per_unit * 1000) / 1000;
 						}
 						pParam.qty_left = pParam.qty
-						
-						if (xItem.status_code == '00') {
-							const xItemDetail = xItem.data
-							// console.log(`>>> xItemDetail : ${JSON.stringify(xItemDetail)}`);
-							// if (pParam.hasOwnProperty('qty_rab_left') && pParam.qty_rab_left != null) {
-							pParam.rab_qty_gap = xItemDetail.rab_qty_gap - (pParam.qty - xItemDetail.qty)
-						}
 					}
 
 					if (pParam.hasOwnProperty('estimate_date_use')) {
@@ -1564,7 +1557,8 @@ class PurchaseRequestDetailService {
 						prj_id: xRows[index].prj_id,
 						prj_name: xRows[index].prj_name,
 						created_at: xRows[index].created_at,
-						is_po_created: xRows[index].is_po_created
+						is_po_created: xRows[index].is_po_created,
+						store_link: xRows[index].store_link
 					});
 				}
 				console.log(`>>> xJoArrData: ${JSON.stringify(xJoArrData)}`);
