@@ -631,6 +631,7 @@ class PurchaseRequestRepository {
 								prd.paid_at,
 								prd.paid_by_name,
 								prd.store_link,
+								prd.purchase_type,
 								p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 				xSqlGroupBy = ` `;
@@ -931,6 +932,7 @@ class PurchaseRequestRepository {
 			prd.paid_at,
 			prd.paid_by_name,
 			prd.store_link,
+			prd.purchase_type,
 			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 		xSqlGroupBy = ` `;
@@ -1338,7 +1340,20 @@ class PurchaseRequestRepository {
 				xObjJsonWhere.vendor_id = pParam.vendor_id;
 			}
 		}
-		xSqlWhere += ' AND prd.is_po_created = true AND prd.status = 4 ';
+		// xSqlWhere += ' AND prd.is_po_created = true AND prd.status = 4 '; before 04/02/2025
+		
+		// tampilkan history dari 
+		// 1. fpb item tipe ca / po yang status itemnya sudah close (4) dan status fpb sudah close, atau
+		// 2. fpb item tipe ca / po yang status itemnya sudah close (4) tapi status fpb masih inproggress, atau
+		// 3. fpb item tipe ca / po yang status itemnya belum close tapi status fpb masih inproggress, atau
+		// 4. fpb item tipe ca / po yang status itemnya belum close tapi status fpb sudah close, atau
+		// 5. fpb item status ca (3) yang status pr nya sudah close atau masih inprogress
+		xSqlWhere += ` AND (
+						(((prd.is_po_created = true OR prd.purchase_type = 'po') OR prd.purchase_type = 'ca') AND prd.status = 4) AND pr.status = 3
+						OR (((prd.is_po_created = true OR prd.purchase_type = 'po') OR prd.purchase_type = 'ca') AND prd.status = 4) AND pr.status = 2
+						OR ((prd.is_po_created = true OR prd.purchase_type = 'po' OR prd.status = 2) OR (prd.purchase_type = 'ca' OR prd.status = 3)) AND pr.status = 2 
+						OR ((prd.is_po_created = true OR prd.purchase_type = 'po' OR prd.status = 2) OR (prd.purchase_type = 'ca' OR prd.status = 3)) AND pr.status = 3 
+					)`;
 
 		xSqlFields = ` pr.id, pr.request_no, pr.employee_id, pr.employee_name, pr.company_id, pr.company_name,
 					pr.department_id, pr.department_name, pr.category_item, pr.category_pr, pr.status as "fpb_status",
@@ -1346,7 +1361,7 @@ class PurchaseRequestRepository {
 					p.id as "project_id", p.odoo_project_code, p.name as "project_name", prd.qty, prd.uom_id, prd.uom_name,
 					prd.last_price, prd.budget_price_per_unit, prd.budget_price_total, prd.status as "item_status",
 					prd.product_id, prd.product_code, prd.product_name, prd.vendor_id, prd.vendor_code, prd.vendor_name,
-					prd.currency_id, prd.currency_code, prd.currency_symbol, prd.store_link,
+					prd.currency_id, prd.currency_code, prd.currency_symbol, prd.store_link, prd.purchase_type,
 					pr.created_at, pr.requested_at`;
 
 		xSqlGroupBy = ``;
@@ -1511,6 +1526,7 @@ class PurchaseRequestRepository {
 			prd.currency_code,
 			prd.currency_symbol,
 			prd.store_link,
+			prd.purchase_type,
 			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 		xSqlGroupBy = ` `;

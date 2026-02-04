@@ -95,6 +95,7 @@ module.exports = (sequelize, DataTypes) => {
 		vendor_rec_name: DataTypes.STRING,
 		vendor_rec_code: DataTypes.STRING,
 		store_link: DataTypes.STRING,
+		purchase_type: DataTypes.STRING
 	});
 
 	PurchaseRequestDetail.associate = function(models) {

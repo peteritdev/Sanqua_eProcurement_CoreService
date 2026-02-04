@@ -140,7 +140,8 @@ class VendorService {
                     website: xRows[index].website,
                     status: xRows[index].status,
                     currency: xRows[index].currency,
-                    review_status: xRows[index].review_status
+                    review_status: xRows[index].review_status,
+                    is_onlineshop: xRows[index].is_onlineshop
                 });
             }
 
@@ -275,7 +276,8 @@ class VendorService {
                         year_founded: xData.year_founded,
                         urlPath: `${config.imagePathESanQua}/vendors/logo/`,
                         documents: documents,
-                        review_status: xData.review_status
+                        review_status: xData.review_status,
+                        is_onlineshop: xData.is_onlineshop
                     }
                 }
             }
