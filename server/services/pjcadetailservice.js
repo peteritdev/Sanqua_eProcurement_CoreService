@@ -168,6 +168,12 @@ class PJCADetailService {
 					}
 
 					pParam.price_total = Math.round(pParam.qty_done * pParam.price_done * 1000) / 1000;
+					if (pParam.hasOwnProperty('cad_id')) {
+						const xCadId = await _utilInstance.decrypt(pParam.cad_id, config.cryptoKey.hashKey);
+						if (xCadId.status_code == '00') {
+							pParam.cad_id = xCadId.decrypted;
+						}
+					}
 				}
 				// Validate if product_id is null (free keyin for project), estimate_fulfillment
 

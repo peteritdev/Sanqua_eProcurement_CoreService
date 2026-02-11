@@ -55,6 +55,11 @@ class PaymentRequestRepository {
 							as: 'purchase_request_detail',
 							attributes: ['id', 'request_id', 'product_id', 'product_code', 'product_name', 'qty', 'qty_done', 'qty_paid', ['budget_price_per_unit', 'unit_price'], 'uom_name', 'uom_id'],
 						},
+						{
+							model: _modelPaymentRequestDetail,
+							as: 'origin_detail',
+							attributes: [ 'id', 'origin_id', 'description', 'discount_amount', 'discount_percent', 'item_type', 'price_request', 'price_total', 'product_code', 'product_id', 'product_name', 'qty_done', 'qty_request', 'status', 'tax_type', 'uom_id', 'uom_name'],
+						},
 					]
 				},
 			]

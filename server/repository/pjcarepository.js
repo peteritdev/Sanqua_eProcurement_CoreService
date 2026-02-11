@@ -9,6 +9,7 @@ const Op = Sequelize.Op;
 const _modelDb = require('../models').tr_pjcas;
 const _modelPJCADetail = require('../models').tr_pjcadetails;
 const _modelPaymentRequest = require('../models').tr_paymentrequests;
+const _modelPayreqDetail = require('../models').tr_paymentrequestdetails;
 const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
@@ -37,7 +38,13 @@ class PJCARepository {
 				{
 					model: _modelPaymentRequest,
 					as: 'payment_request',
-					attributes: [ 'id', 'document_no', 'created_at' ]
+					attributes: [ 'id', 'document_no', 'created_at' ],
+					include: [
+						{
+							model: _modelPayreqDetail,
+							as: 'payment_request_detail',
+						}
+					]
 				},
 				{
 					model: _modelPJCADetail,
@@ -47,6 +54,18 @@ class PJCARepository {
 							model: _modelTax,
 							as: 'tax',
 							attributes: [['id', 'tax_id'], 'name', 'type', 'value'],
+						},
+						{
+							model: _modelPayreqDetail,
+							as: 'payment_request_detail',
+							attributes: [ 'id', 'discount_amount', 'discount_percent', 'item_type', 'price_request', 'price_total', 'qty_done', 'qty_request', 'status', 'tax_type'],
+							include: [
+								{
+									model: _modelPayreqDetail,
+									as: 'origin_detail',
+									attributes: [ 'id', 'discount_amount', 'discount_percent', 'item_type', 'price_request', 'price_total', 'qty_done', 'qty_request', 'status', 'tax_type']
+								}
+							]
 						}
 					]
 				},
@@ -334,14 +353,14 @@ class PJCARepository {
 				xSaved = await _modelDb.create(
 					pParam,
 					{
+						transaction: xTransaction,
 						include: [
 							{
 								model: _modelPJCADetail,
 								as: 'pjca_detail'
 							}
 						]
-					},
-					{ transaction: xTransaction }
+					}
 				);
 				console.log(`>>> after xSave:end ${JSON.stringify(xSaved)}`);
 

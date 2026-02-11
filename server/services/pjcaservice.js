@@ -499,10 +499,16 @@ class PJCAService {
 									xJoArrItems[i].price_total =
 										xJoArrItems[i].qty_done * xJoArrItems[i].price_done;
 								}
+								if (xJoArrItems[i].hasOwnProperty('cad_id') && xJoArrItems[i].cad_id) {
+									var xCadId = await _utilInstance.decrypt(xJoArrItems[i].cad_id, config.cryptoKey.hashKey);
+									if (xCadId.status_code == '00') {
+										xJoArrItems[i].cad_id = xCadId.decrypted;
+									}
+								}
 							}
 						}
 
-						console.log(`>>> xJoArrItems ${JSON.stringify(xJoArrItems)}`);
+						// console.log(`>>> xJoArrItems ${JSON.stringify(xJoArrItems)}`);
 						pParam.pjca_detail = xJoArrItems;
 					}
 
@@ -1230,7 +1236,9 @@ class PJCAService {
 			var xPyrDetailItem = await _paymentRequestDetailRepoInstance.getByParam(
 				{
 					payment_request_id: pParam.payment_request_id,
-					prd_id: xPjcaDetail[i].prd_id
+					prd_id: xPjcaDetail[i].prd_id,
+					// status: 0,
+					id: xPjcaDetail[i].cad_id
 				}
 			)
 			console.log(`>>> xPyrDetailItem: ${JSON.stringify(xPyrDetailItem)}`);

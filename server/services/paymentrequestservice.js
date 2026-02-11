@@ -171,18 +171,25 @@ class PaymentRequestService {
 								}
 
 								// xTotalDisc = 
+								
+								// show data only with status == 0
 								xSubtotal = Math.round((xTotalPrice * xPayreqDetail[i].qty_request) * 1000) / 1000
 								xPayreqDetail[i].subtotal = xSubtotal
 
-								xTotalDiscWoTax += Math.round((xDiscWoTax * xPayreqDetail[i].qty_request) * 1000) / 1000
-								xTotalDiscItem += Math.round((xTotalDisc * xPayreqDetail[i].qty_request) * 1000) / 1000
-								xPayreqDetail[i].total_discount = Math.round((xTotalDisc * xPayreqDetail[i].qty_request) * 1000) / 1000
+								if (xPayreqDetail[i].status != -1) {
+									xTotalDiscWoTax += Math.round((xDiscWoTax * xPayreqDetail[i].qty_request) * 1000) / 1000
+									xTotalDiscItem += Math.round((xTotalDisc * xPayreqDetail[i].qty_request) * 1000) / 1000
+									xPayreqDetail[i].total_discount = Math.round((xTotalDisc * xPayreqDetail[i].qty_request) * 1000) / 1000
 
-								xTaxes += Math.round((xTax * xPayreqDetail[i].qty_request) * 1000) / 1000
+									xTaxes += Math.round((xTax * xPayreqDetail[i].qty_request) * 1000) / 1000
 
-								xTotalBasePrice += xSubtotal
+									xTotalBasePrice += xSubtotal
 
-								xPayreqDetail[i].tax_amount = xTax
+									xPayreqDetail[i].tax_amount = xTax
+								} else {
+									xPayreqDetail[i].total_discount = Math.round((xTotalDisc * xPayreqDetail[i].qty_request) * 1000) / 1000
+									xPayreqDetail[i].tax_amount = xTax
+								}
 							}
 							
 							delete xDetail.data.purchase_request_id;
@@ -595,6 +602,7 @@ class PaymentRequestService {
 									}
 								}
 							}
+							xJoArrItems[i].item_type ? xJoArrItems[i].item_type : 1 
 						}
 					}
 					// console.log(`>>> xJoArrItems ${JSON.stringify(xJoArrItems)}`);
@@ -1625,23 +1633,26 @@ class PaymentRequestService {
 		let xPaymentRequestDetail = pParam.payment_request_detail
 		console.log(`>>> xPaymentRequestDetail: ${JSON.stringify(xPaymentRequestDetail)}`);
 		for (let i = 0; i < xPaymentRequestDetail.length; i++) {
-			var xPrDetailItem = await _purchaseRequestDetailRepoInstance.getByParam({id: xPaymentRequestDetail[i].prd_id})
-			console.log(`>>> xPrDetailItem: ${JSON.stringify(xPrDetailItem)}`);
-			if (xPrDetailItem.status_code == '00') {
-				let xQtyLeft = xPrDetailItem.data.qty_paid || 0
-				let xCalculatedQty = 0
-				if (pAct == 'add') {
-					xCalculatedQty = xQtyLeft + xPaymentRequestDetail[i].qty_request
-				} else if (pAct == 'delete'){
-					xCalculatedQty = xQtyLeft - xPaymentRequestDetail[i].qty_request
+			if (xPaymentRequestDetail[i].status == 0) {
+				var xPrDetailItem = await _purchaseRequestDetailRepoInstance.getByParam({id: xPaymentRequestDetail[i].prd_id})
+				console.log(`>>> xPrDetailItem: ${JSON.stringify(xPrDetailItem)}`);
+				if (xPrDetailItem.status_code == '00') {
+					let xQtyLeft = xPrDetailItem.data.qty_paid || 0
+					let xCalculatedQty = 0
+					if (pAct == 'add') {
+						xCalculatedQty = xQtyLeft + xPaymentRequestDetail[i].qty_request
+					} else if (pAct == 'delete'){
+						xCalculatedQty = xQtyLeft - xPaymentRequestDetail[i].qty_request
+					}
+					let xPrdUpdateParam = {
+						id: xPaymentRequestDetail[i].prd_id,
+						qty_paid: xCalculatedQty
+					}
+					
+					let xUpdatePrdItem = await _purchaseRequestDetailRepoInstance.save(xPrdUpdateParam, 'update')
+					console.log(`>>> xUpdatePrdItem: ${JSON.stringify(xUpdatePrdItem)}`);
 				}
-				let xPrdUpdateParam = {
-					id: xPaymentRequestDetail[i].prd_id,
-					qty_paid: xCalculatedQty
-				}
-				
-				let xUpdatePrdItem = await _purchaseRequestDetailRepoInstance.save(xPrdUpdateParam, 'update')
-				console.log(`>>> xUpdatePrdItem: ${JSON.stringify(xUpdatePrdItem)}`);
+			
 			}
 		}
 	}
