@@ -303,60 +303,70 @@ class PaymentRequestDetailService {
 						console.log(`>>> update and create new item .>>>`);
 						// get detail old item first
 						const xGetCaItem = await _repoInstance.getByParam({id: pParam.id});
-						if (xGetCaItem.status_code == '00') {	
-							// then check if there are already created revision item with same origin_id or not
-							// if yes then return error
-							const xCheckRevisionItem = await _repoInstance.getByParam({origin_id: pParam.id});
-							console.log(`>>> xCheckRevisionItem .>>>`, xCheckRevisionItem);
-							if (xCheckRevisionItem.status_code == '00') {
+						if (xGetCaItem.status_code == '00') {
+							// check old item already used by pjca or not, if there's one then must be deleted first
+							const xCheckCreatedPJCA = await _pjcaDetailRepoInstance.getByParam({cad_id: pParam.id});
+							if (xCheckCreatedPJCA.status_code == '00') {
 								xUpdateResult = {
 									status_code: '-99',
-									status_msg: 'Revision item already exists, You cannot create revision item with this item anymore'
+									status_msg: 'Item already used in PJCA, You cannot create revision item for this item'
 								}
+								// please cancel the PJCA then delete this item from its detail first
 							} else {
-								const xUpdateOldItem = {
-									id: pParam.id,
-									status: -1
-								}
-								console.log(`>>> xUpdateOldItem .>>>`, xUpdateOldItem);
-								xUpdateResult = await _repoInstance.save(xUpdateOldItem, 'update');
-								if (xUpdateResult.status_code == '00') {
-									// update purchase request detail item qty_done with revised qty_request - old qty_request
-									var xPrDetailItem = await _purchaseRequestDetailRepoInstance.getByParam({id: pParam.prd_id})
-									if (xPrDetailItem.status_code == '00') {
-										let xQtyLeft = xPrDetailItem.data.qty_paid || 0
-										let xPrdUpdateParam = {
-											id: pParam.prd_id,
-											qty_paid: xQtyLeft - (xGetCaItem.data.qty_request - pParam.qty_request)
-										}
-										
-										let xUpdatePrdItem = await _purchaseRequestDetailRepoInstance.save(xPrdUpdateParam, 'update')
-										console.log(`>>> xUpdatePrdItem .>>>`, xUpdatePrdItem);
-										if (xUpdatePrdItem.status_code == '00') {
-											// create new revision item
-											const xAddRevisionItem = {
-												origin_id: pParam.id,
-												payment_request_id: pParam.payment_request_id,
-												prd_id: pParam.prd_id,
-												qty_request: pParam.qty_request,
-												price_request: pParam.price_request,
-												discount_amount: pParam.discount_amount,
-												discount_percent: pParam.discount_percent,
-												tax_type: pParam.tax_type,
-												description: pParam.description,
-												item_type: pParam.item_type,
-												price_total: pParam.price_total,
-												product_id: xGetCaItem.data.product_id,
-												product_code: xGetCaItem.data.product_code,
-												product_name: xGetCaItem.data.product_name,
-												uom_id: xGetCaItem.data.uom_id,
-												uom_name: xGetCaItem.data.uom_name,
-												qty_done: xGetCaItem.data.qty_done
+								// then check if there are already created revision item with same origin_id or not
+								// if yes then return error
+								const xCheckRevisionItem = await _repoInstance.getByParam({origin_id: pParam.id});
+								console.log(`>>> xCheckRevisionItem .>>>`, xCheckRevisionItem);
+								if (xCheckRevisionItem.status_code == '-99' && xCheckRevisionItem.status_msg == 'Data not found') {
+									const xUpdateOldItem = {
+										id: pParam.id,
+										status: -1
+									}
+									console.log(`>>> xUpdateOldItem .>>>`, xUpdateOldItem);
+									xUpdateResult = await _repoInstance.save(xUpdateOldItem, 'update');
+									if (xUpdateResult.status_code == '00') {
+										// update purchase request detail item qty_done with revised qty_request - old qty_request
+										var xPrDetailItem = await _purchaseRequestDetailRepoInstance.getByParam({id: pParam.prd_id})
+										if (xPrDetailItem.status_code == '00') {
+											let xQtyLeft = xPrDetailItem.data.qty_paid || 0
+											let xPrdUpdateParam = {
+												id: pParam.prd_id,
+												qty_paid: xQtyLeft - (xGetCaItem.data.qty_request - pParam.qty_request)
 											}
 											
-											console.log(`>>> xAddRevisionItem .>>>`, xAddRevisionItem);
-											xUpdateResult = await _repoInstance.save(xAddRevisionItem, 'add');
+											let xUpdatePrdItem = await _purchaseRequestDetailRepoInstance.save(xPrdUpdateParam, 'update')
+											console.log(`>>> xUpdatePrdItem .>>>`, xUpdatePrdItem);
+											if (xUpdatePrdItem.status_code == '00') {
+												// create new revision item
+												const xAddRevisionItem = {
+													origin_id: pParam.id,
+													payment_request_id: pParam.payment_request_id,
+													prd_id: pParam.prd_id,
+													qty_request: pParam.qty_request,
+													price_request: pParam.price_request,
+													discount_amount: pParam.discount_amount,
+													discount_percent: pParam.discount_percent,
+													tax_type: pParam.tax_type,
+													description: pParam.description,
+													item_type: pParam.item_type,
+													price_total: pParam.price_total,
+													product_id: xGetCaItem.data.product_id,
+													product_code: xGetCaItem.data.product_code,
+													product_name: xGetCaItem.data.product_name,
+													uom_id: xGetCaItem.data.uom_id,
+													uom_name: xGetCaItem.data.uom_name,
+													qty_done: xGetCaItem.data.qty_done
+												}
+												
+												console.log(`>>> xAddRevisionItem .>>>`, xAddRevisionItem);
+												xUpdateResult = await _repoInstance.save(xAddRevisionItem, 'add');
+											}
 										}
+									}
+								} else {
+									xUpdateResult = {
+										status_code: '-99',
+										status_msg: 'Revision item already exists, You cannot create revision item with this item anymore'
 									}
 								}
 							}
@@ -372,10 +382,6 @@ class PaymentRequestDetailService {
 					}
 					console.log(`>>> save payreq item : ${JSON.stringify(pParam)}`);
 					xJoResult = xUpdateResult;
-					// xJoResult = {
-					// 	status_code: '-99',
-					// 	status_msg: 'failedddddd'
-					// }
 				}
 			}
 		}
