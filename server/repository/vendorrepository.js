@@ -15,6 +15,7 @@ const _modelProvince = require('../models').ms_provinces;
 const _modelCity = require('../models').ms_cities;
 const _modelVendorDocument = require('../models').ms_vendordocuments;
 const _modelCurrency = require('../models').ms_currencies;
+const _modelDocumentType = require('../models').ms_documenttypes;
 
 const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
@@ -35,13 +36,33 @@ class VendorRepository{
     } 
 
     async getVendorDocumentByDocumentTypeId( pParam ){
-        var xData = await _modelVendorDocument.findOne({
-            where: {
-                document_type_id: pParam.document_type_id,
-                vendor_id: pParam.vendor_id,
-            },
+        var xWhere = {}
+        
+        var xInclude = [
+            {
+            	model: _modelDocumentType,
+            	as: 'document_type',
+            	attributes: [ 'id', 'name' ]
+            }
+        ];
+
+        if (pParam.hasOwnProperty('document_type_id') && pParam.document_type_id != '' && pParam.document_type_id != null) {
+            Object.assign(xWhere, {
+                document_type_id: pParam.document_type_id
+            })
+        }
+
+        if (pParam.hasOwnProperty('vendor_id') && pParam.vendor_id != '' && pParam.vendor_id != null) {
+            Object.assign(xWhere, {
+                vendor_id: pParam.vendor_id
+            })
+        }
+
+        var xData = await _modelVendorDocument.findAndCountAll({
+            where: xWhere,
             limit: pParam.limit,
             offset: pParam.offset,
+            include: xInclude,
         });
 
         return xData;
@@ -354,7 +375,7 @@ class VendorRepository{
                 if( pParam.logo == "" ){
                     delete pParam.logo;
                 }
-    
+                
                 saved = await _modelVendor.update(pParam, { where: { id: xId } }, {transaction: xTransaction});
 
                 await xTransaction.commit();
@@ -385,6 +406,7 @@ class VendorRepository{
 
             }
         } catch (e){
+            console.log(`>>> catch: ${JSON.stringify(e)}`);
             if( xTransaction ) await xTransaction.rollback();
             joResult = {
                 status_code: "-99",
@@ -542,22 +564,31 @@ class VendorRepository{
                 delete pParam.user_name;
 
                 saved = await _modelVendorDocument.create(pParam,{transaction});
-    
-                await transaction.commit();
-    
-                joResult = {
-                    status_code: "00",
-                    status_msg: "Data has been successfully saved",
-                    created_id: (await _utilInstance.encrypt(saved.id))
-                }
+                if (saved.id != null) {
+					joResult = {
+						status_code: '00',
+						status_msg: 'Data has been successfully saved',
+						created_id: await _utilInstance.encrypt(saved.id, config.cryptoKey.hashKey),
+						clear_id: saved.id
+					};
+
+					await transaction.commit();
+				} else {
+					if (transaction) await transaction.rollback();
+
+					joResult = {
+						status_code: '-99',
+						status_msg: 'Failed save to database'
+					};
+				}
             }else if( xAct == "update" ){
 
-                xId = pParam.vendor_id;
+                xId = pParam.id;
                 xDocumentTypeId = pParam.document_type_id;
                 delete pParam.id;
                 delete pParam.document_type_id;
     
-                saved = await _modelVendorDocument.update(pParam, { where: { vendor_id: xId, document_type_id: xDocumentTypeId  } }, {transaction});
+                saved = await _modelVendorDocument.update(pParam, { where: { id: xId } }, {transaction});
 
                 await transaction.commit();
 
@@ -625,6 +656,101 @@ class VendorRepository{
         }
     }
 
+	async deleteVendorDocument(pParam) {
+		let xTransaction;
+		var xJoResult = {};
+
+		try {
+			var xSaved = null;
+			xTransaction = await sequelize.transaction();
+
+			xSaved = await _modelVendorDocument.destroy(
+				{
+					where: {
+						id: pParam.id
+					}
+				},
+				{ xTransaction }
+			);
+
+			await xTransaction.commit();
+
+			xJoResult = {
+				status_code: '00',
+				status_msg: 'Data has been successfully deleted'
+			};
+
+			return xJoResult;
+		} catch (e) {
+			if (xTransaction) await xTransaction.rollback();
+			xJoResult = {
+				status_code: '-99',
+				status_msg: 'Failed save or update data',
+				err_msg: e
+			};
+
+			return xJoResult;
+		}
+	}
+    
+	async getByParameter(pParam) {
+		var xInclude = [];
+		var xWhereOr = [];
+		var xWhereAnd = [];
+		var xWhere = [];
+		var xAttributes = [];
+		var xJoResult = {};
+		try {
+			if (pParam.hasOwnProperty('code')) {
+				if (pParam.code != '') {
+					xWhereAnd.push({
+						code: pParam.code
+					});
+				}
+			}
+
+			if (pParam.hasOwnProperty('name')) {
+				if (pParam.name != '') {
+					xWhereAnd.push({
+						name: pParam.name
+					});
+				}
+			}
+
+			if (xWhereAnd.length > 0) {
+				xWhere.push({
+					[Op.and]: xWhereAnd
+				});
+			}
+
+			var xData = await _modelVendor.findOne({
+				where: xWhere,
+				include: xInclude,
+				subQuery: false
+			});
+
+			if (xData) {
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					data: xData
+				};
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Data not found'
+				};
+			}
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.getByParameter`, `Exception error: ${e.message}`, 'error');
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Failed get data. Error : ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
 }
 
 module.exports = VendorRepository;

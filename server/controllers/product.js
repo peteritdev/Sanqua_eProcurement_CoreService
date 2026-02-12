@@ -8,6 +8,7 @@ const OAuthService = require('../services/oauthservice.js');
 const _oAuthServiceInstance = new OAuthService();
 
 const { check, validationResult } = require('express-validator');
+const { product } = require('./index.js');
 
 module.exports = {product_Save, product_List, product_Delete, product_DropDown, product_Upload, product_BatchSave, product_GetById, product_Similarity};
 

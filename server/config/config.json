@@ -4,7 +4,10 @@
     "dbTables": {
       "procurement": "tr_procurements",
       "fpb": "tr_purchaserequests",
-      "rab": "tr_budgetplans"
+      "rab": "tr_budgetplans",
+      "payreq": "tr_paymentrequests",
+      "gr": "tr_goodsreceipts",
+      "pjca": "tr_pjcas"
     },
     "logging": true,
     "username": "postgres",
@@ -46,9 +49,9 @@
 
     "api":{
       "notification": {
-        "emailVerification": "http://10.10.20.5:1190/api/notification/v1/email_verification",
-        "forgotPassword": "http://10.10.20.5:1190/api/notification/v1/forgot_password",
-        "notificationTemplate": "http://10.10.20.5:9189/api/oauth/v1/notification_template/detail/code"
+        "emailVerification": "http://localhost:1190/api/notification/v1/email_verification",
+        "forgotPassword": "http://localhost:1190/api/notification/v1/forgot_password",
+        "notificationTemplate": "http://localhost:9189/api/oauth/v1/notification_template/detail/code"
       },
 
       "oAuth": {
@@ -63,10 +66,13 @@
         }
       },
 
-      "eSanqua": "http://10.10.20.5:2193/api/esanqua/v1",
-      "odoo": "http://10.10.20.5:9898/api",
+      "eSanqua": "http://localhost:2193/api/esanqua/v1",
+      "odoo": "http://localhost:9898/api",
       "logging": {
-        "url": "http://10.10.20.5:8191/api/esanqua/log/v1/ecatalog"
+        "url": "http://localhost:8191/api/esanqua/log/v1/ecatalog"
+      },
+      "hr": {
+        "url": "http://localhost:7190/api/esanqua/hr/v1"
       }
     },
 
@@ -94,13 +100,16 @@
     "applicationName": "eProcurement",
     "imagePath": "http://10.10.20.8:8020/assets/icon/",
     "imagePathESanQua": "http://10.10.20.8:8020",
-
+    "imagePathESanQuaDomain": "https://dev-esanqua.sanquawater.co.id/image/ecatalogue",
     "qrCodeImagePath": "C:\\MIS-PETER\\SanQuaApp\\eProcurement\\Sanqua_eProcurement_CoreService\\generated_files",
 
     "statusDescription":{
       "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel", "Pending"],
       "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel", "Paid"],
       "budgetPlan":["Draft", "Waiting Approval", "Pending", "In Progress", "Done", "Cancel", "Reject"],
+      "paymentRequest":["Draft", "Waiting Approval", "In Progress", "Paid", "Cancel", "Reject"],
+      "goodsReceipt":["Draft", "Done", "Cancel"],
+      "pjca":["Draft", "Waiting Approval", "Done", "Cancel", "Reject"],
       "vendorRegistration":["Draft", "Waiting", "Inprogress", "Done", "Cancel"],
       "project":["Draft", "Submitted", "Done", "Cancel"]
     },
@@ -112,7 +121,8 @@
       }
       
     },
-    "pendingNotifDay": 1
+    "pendingNotifDay": 1,
+    "puppeteerExecutablePath": null
   },
 
   "development": {
@@ -120,7 +130,10 @@
     "dbTables": {
       "procurement": "tr_procurements",
       "fpb": "tr_purchaserequests",
-      "rab": "tr_budgetplans"
+      "rab": "tr_budgetplans",
+      "payreq": "tr_paymentrequests",
+      "gr": "tr_goodsreceipts",
+      "pjca": "tr_pjcas"
     },
     "username": "postgres",
     "password": "P455uu0rd^^ok",
@@ -182,6 +195,9 @@
       "odoo": "http://10.10.20.6:9898/api",
       "logging": {
         "url": "http://localhost:8191/api/esanqua/log/v1/ecatalog"
+      },
+      "hr": {
+        "url": "http://localhost:7190/api/esanqua/hr/v1"
       }
     },
 
@@ -208,12 +224,15 @@
     "applicationName": "eProcurement",
 
     "imagePath": "http://10.10.20.8:8020/assets/icon/",
-    "imagePathESanQua": "http://10.10.20.8:8020",
+    "imagePathESanQua": "https://dev-esanqua.sanquawater.co.id/image/ecatalogue",
     "imagePathESanQua_dev": "http://10.10.20.5:83/eprocurement",
     "uploadBasePath": "/var/www/esanqua_upload/eprocurement",
     "statusDescription":{
       "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel", "Pending"],
       "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel", "Paid"],
+      "paymentRequest":["Draft", "Waiting Approval", "In Progress", "Paid", "Done", "Cancel", "Reject"],
+      "goodsReceipt":["Draft", "Done", "Cancel"],
+      "pjca":["Draft", "Waiting Approval", "In Progress", "Done", "Cancel", "Reject"],
       "budgetPlan":["Draft", "Waiting Approval", "Pending", "In Progress", "Done", "Cancel", "Reject"],
       "vendorRegistration":["Draft", "Waiting", "Inprogress", "Done", "Cancel"],
       "project":["Draft", "Submitted", "Done", "Cancel"]
@@ -225,7 +244,8 @@
       }
       
     },
-    "pendingNotifDay": 1
+    "pendingNotifDay": 1,
+    "puppeteerExecutablePath": "/usr/bin/chromium-browser"
   },  
 
   "staging": {
@@ -233,7 +253,10 @@
     "dbTables": {
       "procurement": "tr_procurements",
       "fpb": "tr_purchaserequests",
-      "rab": "tr_budgetplans"
+      "rab": "tr_budgetplans",
+      "payreq": "tr_paymentrequests",
+      "gr": "tr_goodsreceipts",
+      "pjca": "tr_pjcas"
     },
     "username": "postgres",
     "password": "P455uu0rd^^ok",
@@ -295,6 +318,9 @@
       "odoo": "http://10.10.20.5:9898/api",
       "logging": {
         "url": "http://localhost:8191/api/esanqua/log/v1/ecatalog"
+      },
+      "hr": {
+        "url": "http://localhost:7190/api/esanqua/hr/v1"
       }
     },
 
@@ -321,13 +347,16 @@
     "applicationName": "eProcurement",
 
     "imagePath": "http://10.10.20.8:8020/assets/icon/",
-    "imagePathESanQua": "http://10.10.20.8:8020",
+    "imagePathESanQua": "https://dev-esanqua.sanquawater.co.id/image/ecatalogue",
     "imagePathESanQua_dev": "http://10.10.20.5:83/eprocurement",
     "uploadBasePath": "/var/www/esanqua_upload/eprocurement",
     "statusDescription":{
       "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel"],
       "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel", "Paid"],
       "budgetPlan":["Draft", "Waiting Approval", "Pending", "In Progress", "Done", "Cancel", "Reject"],
+      "paymentRequest":["Draft", "Waiting Approval", "In Progress", "Paid", "Done", "Cancel", "Reject"],
+      "goodsReceipt":["Draft", "Done", "Cancel"],
+      "pjca":["Draft", "Waiting Approval", "In Progress", "Done", "Cancel", "Reject"],
       "vendorRegistration":["Draft", "Waiting", "Inprogress", "Done", "Cancel"],
       "project":["Draft", "Submitted", "Done", "Cancel"]
     },
@@ -338,7 +367,8 @@
       }
       
     },
-    "pendingNotifDay": 1
+    "pendingNotifDay": 1,
+    "puppeteerExecutablePath": "/usr/bin/chromium-browser"
   },
 
   "production": {
@@ -349,7 +379,10 @@
     "dbTables": {
       "procurement": "tr_procurements",
       "fpb": "tr_purchaserequests",
-      "rab": "tr_budgetplans"
+      "rab": "tr_budgetplans",
+      "payreq": "tr_paymentrequests",
+      "gr": "tr_goodsreceipts",
+      "pjca": "tr_pjcas"
     },
     "username": "postgres",
     "password": "T0b3L1k3Jesus^^)ok",
@@ -409,6 +442,9 @@
       "odoo": "http://10.10.20.6:8989/api",
       "logging": {
         "url": "http://localhost:8191/api/esanqua/log/v1/ecatalog"
+      },
+      "hr": {
+        "url": "http://localhost:7190/api/esanqua/hr/v1"
       }
     },
 
@@ -439,7 +475,11 @@
       "purchaseRequest":["Draft", "Waiting Approval", "In Progress", "Close", "Cancel", "Pending"],
       "purchaseRequestDetail":["Draft", "Waiting Approval", "PR", "CA","Close", "Cancel", "Paid"],
       "budgetPlan":["Draft", "Waiting Approval", "Pending", "In Progress", "Done", "Cancel", "Reject"],
-      "vendorRegistration":["Draft", "Waiting", "Inprogress", "Done", "Cancel"]
+      "paymentRequest":["Draft", "Waiting Approval", "In Progress", "Paid", "Cancel", "Reject"],
+      "goodsReceipt":["Draft", "Done", "Cancel"],
+      "pjca":["Draft", "Waiting Approval", "Done", "Cancel", "Reject"],
+      "vendorRegistration":["Draft", "Waiting", "Inprogress", "Done", "Cancel"],
+      "project":["Draft", "Submitted", "Done", "Cancel"]
     },
     "categoryItem": ["", "Raw Material", "Factory Supply", "Office Supply", "Sparepart", "Jasa", "Maintenance Repair", "Investment / Asset", "Office Supply (< 1jt)", "Office Supply (1jt-5jt)", "Office Supply (> 5j)", "Marketing Material (< 1jt)", "Marketing Material (1jt-5jt)", "Marketing Material (> 5j)", "Sparepart (< 1jt)", "Sparepart (1jt-5jt)", "Sparepart (> 5j)", "Jasa (< 1jt)", "Jasa (1jt-5jt)", "Jasa (> 5j)", "Maintenance Repair (< 1jt)", "Maintenance Repair (1jt-5jt)", "Maintenance Repair (> 5j)"],
     "notification": {
@@ -447,6 +487,7 @@
         "accounting": "peter.susanto@sanqua.co.id,ecatalog.sanqua@gmail.com,setiawan.banjar@sanqua.co.id,audit.division@sanqua.co.id"
       }
     },
-    "pendingNotifDay": 1
+    "pendingNotifDay": 1,
+    "puppeteerExecutablePath": "/usr/bin/chromium-browser"
   }  
 }

@@ -543,7 +543,7 @@ async function budgetPlan_Delete(req, res) {
 				req.params.user_name = oAuthResult.token_data.result_verify.name;
 				req.params.token = req.headers['x-token'];
 				req.params.method = req.headers['x-method'];
-				console.log('bodyy delete >>>>', req.body);
+				// console.log('body delete >>>>', req);
 				joResult = await _serviceInstance.deleteRAB(req.params);
 				joResult = JSON.stringify(joResult);
 			}

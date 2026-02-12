@@ -33,8 +33,14 @@ module.exports = ( sequelize, DataTypes ) => {
         },
         updated_by: DataTypes.INTEGER,
         updated_by_name: DataTypes.STRING,
+        combined_file_type: DataTypes.JSON
+    });
 
-    }  );
-
+    VendorDocument.associate = function(models) {
+		VendorDocument.belongsTo(models.ms_documenttypes, {
+			foreignKey: 'document_type_id',
+			as: 'document_type'
+		});
+	};
     return VendorDocument;
 }
