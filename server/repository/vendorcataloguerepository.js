@@ -66,7 +66,7 @@ class VendorCatalogueRepository {
 		var xInclude = [];
 		xInclude = [
 			{
-				attributes: [ 'id', 'name', 'photo_1', 'photo_2', 'photo_3', 'photo_4', 'photo_5' ],
+				attributes: [ 'id', 'name', 'photo_1', 'photo_2', 'photo_3', 'photo_4', 'photo_5', 'spesification' ],
 				model: _modelProduct,
 				as: 'product',
 				include: [
@@ -78,7 +78,7 @@ class VendorCatalogueRepository {
 				]
 			},
 			{
-				attributes: [ 'id', 'code', 'name', 'location_lat', 'location_long', 'avg_rate' ],
+				attributes: [ 'id', 'code', 'name', 'location_lat', 'location_long', 'avg_rate', 'is_onlineshop' ],
 				model: _modelVendor,
 				as: 'vendor'
 			},
@@ -166,7 +166,7 @@ class VendorCatalogueRepository {
 				]
 			},
 			{
-				attributes: [ 'id', 'code', 'name', 'avg_rate' ],
+				attributes: [ 'id', 'code', 'name', 'avg_rate', 'is_onlineshop' ],
 				model: _modelVendor,
 				as: 'vendor'
 			},

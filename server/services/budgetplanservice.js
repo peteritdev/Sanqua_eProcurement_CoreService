@@ -77,143 +77,147 @@ class BudgetPlanService {
             }
 
             if (xFlagProcess) {
-                // Rules of show RAB List :
-                // - RAB that has same department
-                // - RAB that the user as an approver
+                if (pParam.hasOwnProperty('inappnotif') && pParam.inappnotif) {
+                    // Rules of show RAB List :
+                    // - RAB that has same department
+                    // - RAB that the user as an approver
+                    const xOwnedDocumentPayload = {
+                        application_id: config.applicationId,
+                        table_name: config.dbTables.rab,
+                        document_id: '',
+                        user_id: pParam.user_id,
+                        status: 0
+                    }
+                    // xOwnedDocumentPayload.status = 0
 
-                let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, {
-                    application_id: config.applicationId,
-                    table_name: config.dbTables.rab,
-                    document_id: '',
-                    user_id: pParam.user_id
-                });
-                // console.log(`>>> xOwnedDocument : ${JSON.stringify(xOwnedDocument)}`);
+                    let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, xOwnedDocumentPayload);
+                    // console.log(`>>> xOwnedDocument : ${JSON.stringify(xOwnedDocument)}`);
 
-                if (xOwnedDocument.status_code == '00') {
-                    if (xOwnedDocument.hasOwnProperty('token_data')) {
-                        if (xOwnedDocument.token_data.status_code == '00') {
-                            xFlagAPIResult = true;
-                            for (var i in xOwnedDocument.token_data.data) {
-                                xArrOwnedDocNo.push(xOwnedDocument.token_data.data[i].document_no);
+                    if (xOwnedDocument.status_code == '00') {
+                        if (xOwnedDocument.hasOwnProperty('token_data')) {
+                            if (xOwnedDocument.token_data.status_code == '00') {
+                                for (var i in xOwnedDocument.token_data.data) {
+                                    xArrOwnedDocNo.push(xOwnedDocument.token_data.data[i].document_no);
+                                }
                             }
-                        } else {
-                            xFlagAPIResult = true;
                         }
                     }
-                } else {
-                    xFlagAPIResult = true;
+                    // if (xArrOwnedDocNo.length > 0) {
+                    pParam.owned_document_no = xArrOwnedDocNo;
+                    // }
                 }
 
-                if (xFlagAPIResult) {
-                    pParam.owned_document_no = xArrOwnedDocNo;
-
-                    // Commented first for testing
-                    if (!pParam.hasOwnProperty('company_id')) {
+                // Commented first for testing
+                if (!pParam.hasOwnProperty('company_id')) {
+                    if (!pParam.hasOwnProperty('inappnotif')) {
                         pParam.company_id = pParam.logged_company_id;
                     }
+                }
 
-                    if (!pParam.hasOwnProperty('department_id')) {
+                if (!pParam.hasOwnProperty('department_id')) {
+                    if (!pParam.hasOwnProperty('inappnotif')) {
                         pParam.department_id = pParam.logged_department_id;
                     }
+                }
 
-                    if (pParam.hasOwnProperty("filter")) {
-                        let filter = JSON.parse(pParam.filter)
-                        // console.log('Filter raw >>>>', filter);
-                        for (let i = 0; i < filter.length; i++) {
-                            if (filter[i]['project_id'] !== undefined) {
-                                if (typeof filter[i]['project_id'] === 'string') {
-                                    const xId = await _utilInstance.decrypt(filter[i]['project_id'], config.cryptoKey.hashKey)
-                                    filter[i].project_id = Number(xId.decrypted)
-                                    break
-                                }
+                if (pParam.hasOwnProperty("filter")) {
+                    let filter = JSON.parse(pParam.filter)
+                    // console.log('Filter raw >>>>', filter);
+                    for (let i = 0; i < filter.length; i++) {
+                        if (filter[i]['project_id'] !== undefined) {
+                            if (typeof filter[i]['project_id'] === 'string') {
+                                const xId = await _utilInstance.decrypt(filter[i]['project_id'], config.cryptoKey.hashKey)
+                                filter[i].project_id = Number(xId.decrypted)
+                                break
                             }
                         }
-                        pParam.filter = JSON.stringify(filter)
                     }
-                    
-                    var xResultList = await _repoInstance.list(pParam);
-                    if (xResultList) {
-                        // console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
-                        if (xResultList.status_code == '00') {
-                            var xRows = xResultList.data.rows;
-                            if (xRows.length > 0) {
-                                for (var i in xRows) {
-                                    xJoArrData.push({
-                                        id: await _utilInstance.encrypt(xRows[i].id.toString(), config.cryptoKey.hashKey),
-                                        name: xRows[i].name,
-                                        budget_no: xRows[i].budget_no,
-                                        project: {
-                                            id: xRows[i].project_id,
-                                            code: xRows[i].project_code,
-                                            name: xRows[i].project_name,
-                                            // odoo_project_code: xRows[i].odoo_project_code
-                                        },
-                                        company: {
-                                            id: xRows[i].company_id,
-                                            // code: xRows[i].company_code,
-                                            name: xRows[i].company_name
-                                        },
-                                        department: {
-                                            id: xRows[i].department_id,
-                                            name: xRows[i].department_name
-                                        },
-                                        employee: {
-                                            id: xRows[i].employee_id,
-                                            nik: xRows[i].employee_nik,
-                                            name: xRows[i].employee_name
-                                        },
-                                        pic_employee: {
-                                            id: xRows[i].pic_employee_id,
-                                            nik: xRows[i].pic_employee_nik,
-                                            name: xRows[i].pic_employee_name
-                                        },
-                                        total_plan_qty: xRows[i].total_plan_qty,
-                                        total_budget_plan: xRows[i].total_budget_plan,
-                                        // reject_reason: xRows[i].reject_reason,
-                                        // cancel_reason: xRows[i].cancel_reason,
-                                        status: {
-                                            id: xRows[i].status,
-                                            name: config.statusDescription.budgetPlan[xRows[i].status]
-                                        },
-                                        created_at: xRows[i].createdAt != null ? moment(xRows[i].createdAt).format('DD MMM YYYY HH:mm:ss') : null,
-                                        created_by_name: xRows[i].created_by_name,
-                                        updated_at: xRows[i].updatedAt != null ? moment(xRows[i].updatedAt).format('DD MMM YYYY HH:mm:ss') : null,
-                                        updated_by_name: xRows[i].updated_by_name,
-                                        submited_at: xRows[i].submitedAt != null ? moment(xRows[i].submitedAt).format('DD MMM YYYY HH:mm:ss') : null,
-                                        submited_by_name: xRows[i].submited_by_name,
-                                        // received_at: moment(xRows[i].receivedAt).format('DD MMM YYYY HH:mm:ss'),
-                                        // received_by_name: xRows[i].received_by_name,
-                                        // done_at: moment(xRows[i].doneAt).format('DD MMM YYYY HH:mm:ss'),
-                                        // done_by_name: xRows[i].done_by_name,
-                                        // cancel_at: moment(xRows[i].cancelAt).format('DD MMM YYYY HH:mm:ss'),
-                                        // cancel_by_name: xRows[i].cancel_by_name,
-                                        // set_to_draft_at: moment(xRows[i].set_to_draftAt).format('DD MMM YYYY HH:mm:ss'),
-                                        // set_to_draft_by_name: xRows[i].set_to_draft_by_name,
-                                        // deleted_at: moment(xRows[i].deletedAt).format('DD MMM YYYY HH:mm:ss'),
-                                        // deleted_by_name: xRows[i].deleted_by_name
-                                        // rab_type: xRows[i].rab_type,
-                                    });
-                                }
-        
-                                xJoResult = {
-                                    status_code: '00',
-                                    status_msg: 'OK',
-                                    filtered_record: xResultList.data.count,
-                                    total_record: xResultList.total_record,
-                                    data: xJoArrData,
-                                };
-                            } else {
-                                xJoResult = {
-                                    status_code: '-99',
-                                    status_msg: 'Data not found'
-                                };
+                    pParam.filter = JSON.stringify(filter)
+                }
+                
+                var xResultList = await _repoInstance.list(pParam);
+                if (xResultList) {
+                    // console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
+                    if (xResultList.status_code == '00') {
+                        var xRows = xResultList.data.rows;
+                        if (xRows.length > 0) {
+                            for (var i in xRows) {
+                                xJoArrData.push({
+                                    id: await _utilInstance.encrypt(xRows[i].id.toString(), config.cryptoKey.hashKey),
+                                    name: xRows[i].name,
+                                    budget_no: xRows[i].budget_no,
+                                    project: {
+                                        id: xRows[i].project_id,
+                                        code: xRows[i].project_code,
+                                        name: xRows[i].project_name,
+                                        // odoo_project_code: xRows[i].odoo_project_code
+                                    },
+                                    company: {
+                                        id: xRows[i].company_id,
+                                        // code: xRows[i].company_code,
+                                        name: xRows[i].company_name
+                                    },
+                                    department: {
+                                        id: xRows[i].department_id,
+                                        name: xRows[i].department_name
+                                    },
+                                    employee: {
+                                        id: xRows[i].employee_id,
+                                        nik: xRows[i].employee_nik,
+                                        name: xRows[i].employee_name
+                                    },
+                                    pic_employee: {
+                                        id: xRows[i].pic_employee_id,
+                                        nik: xRows[i].pic_employee_nik,
+                                        name: xRows[i].pic_employee_name
+                                    },
+                                    total_plan_qty: xRows[i].total_plan_qty,
+                                    total_budget_plan: xRows[i].total_budget_plan,
+                                    // reject_reason: xRows[i].reject_reason,
+                                    // cancel_reason: xRows[i].cancel_reason,
+                                    status: {
+                                        id: xRows[i].status,
+                                        name: config.statusDescription.budgetPlan[xRows[i].status]
+                                    },
+                                    created_at: xRows[i].createdAt != null ? moment(xRows[i].createdAt).format('DD MMM YYYY HH:mm:ss') : null,
+                                    created_by_name: xRows[i].created_by_name,
+                                    updated_at: xRows[i].updatedAt != null ? moment(xRows[i].updatedAt).format('DD MMM YYYY HH:mm:ss') : null,
+                                    updated_by_name: xRows[i].updated_by_name,
+                                    submited_at: xRows[i].submitedAt != null ? moment(xRows[i].submitedAt).format('DD MMM YYYY HH:mm:ss') : null,
+                                    submited_by_name: xRows[i].submited_by_name,
+                                    // received_at: moment(xRows[i].receivedAt).format('DD MMM YYYY HH:mm:ss'),
+                                    // received_by_name: xRows[i].received_by_name,
+                                    // done_at: moment(xRows[i].doneAt).format('DD MMM YYYY HH:mm:ss'),
+                                    // done_by_name: xRows[i].done_by_name,
+                                    // cancel_at: moment(xRows[i].cancelAt).format('DD MMM YYYY HH:mm:ss'),
+                                    // cancel_by_name: xRows[i].cancel_by_name,
+                                    // set_to_draft_at: moment(xRows[i].set_to_draftAt).format('DD MMM YYYY HH:mm:ss'),
+                                    // set_to_draft_by_name: xRows[i].set_to_draft_by_name,
+                                    // deleted_at: moment(xRows[i].deletedAt).format('DD MMM YYYY HH:mm:ss'),
+                                    // deleted_by_name: xRows[i].deleted_by_name
+                                    // rab_type: xRows[i].rab_type,
+                                    budget_category: xRows[i].budget_category
+                                });
                             }
+    
+                            xJoResult = {
+                                status_code: '00',
+                                status_msg: 'OK',
+                                filtered_record: xResultList.data.count,
+                                total_record: xResultList.total_record,
+                                data: xJoArrData,
+                            };
                         } else {
-                            xJoResult = xResultList;
+                            xJoResult = {
+                                status_code: '-99',
+                                status_msg: 'Data not found'
+                            };
                         }
                     } else {
                         xJoResult = xResultList;
                     }
+                } else {
+                    xJoResult = xResultList;
                 }
             }
         } catch (e) {
@@ -347,14 +351,9 @@ class BudgetPlanService {
                         var xAddResult = await _repoInstance.save(pParam, xAct);
                         if (xAddResult.status_code == '00' && xAddResult.created_id != '' && xAddResult.clear_id != '') {
                             // Generate RAB No
-                            
                             var dt = dateTime.create();
                             var xDate = dt.format('ym');
                             var xRABNo = `${pParam.company_code}/RAB/${xDate}/` + xAddResult.clear_id.padStart(5, '0');
-                            // var xRABNo = await _globalUtilInstance.generatePurchaseRequestNo(
-                            // 	xAddResult.clear_id,
-                            // 	pParam.company_code
-                            // );
                             
                             var xParamUpdate = {
                                 budget_no: xRABNo,
@@ -463,8 +462,6 @@ class BudgetPlanService {
 		if (xFlagProcess) {
 			var xResult = await _repoInstance.getById(pParam);
 
-			console.log(`>>> xResult: ${JSON.stringify(xResult)}`);
-
 			if (xResult != null) {
 				var xJoArrBudgetDetailData = [];
 				var xDetail = xResult.budget_plan_detail;
@@ -541,26 +538,26 @@ class BudgetPlanService {
 					xParamApprovalMatrix
 				);
 
-                if (xResultApprovalMatrix != null) {
-                    if (xResultApprovalMatrix.status_code == '00') {
-                        let xListApprover = xResultApprovalMatrix.token_data.data;
-                        for (var i in xListApprover) {
-                            let xApproverUsers = _.filter(xListApprover[i].approver_user, { status: 0 }).map(
-                                (v) => (v.user != null ? v.user.email : v.user)
-                            );
-                            // console.log(`>>> xApproverUsers: ${JSON.stringify(xApproverUsers)}`);
-                            xArrUserCanCancel.push.apply(xArrUserCanCancel, xApproverUsers);
-                        }
-                    }
-                }
+				if (xResultApprovalMatrix != null) {
+					if (xResultApprovalMatrix.status_code == '00') {
+						let xListApprover = xResultApprovalMatrix.token_data.data;
+						for (var i in xListApprover) {
+							let xApproverUsers = _.filter(xListApprover[i].approver_user, { status: 0 }).map(
+								(v) => (v.user != null ? v.user.email : v.user)
+							);
+				            console.log(`>>> xApproverUsers: ${JSON.stringify(xApproverUsers)}`);
+							xArrUserCanCancel.push.apply(xArrUserCanCancel, xApproverUsers);
+						}
+					}
+				}
 
 				xJoData = {
 					id: await _utilInstance.encrypt(xResult.id.toString(), config.cryptoKey.hashKey),
-                    project: {
-                      id: xResult.project != null ? xResult.project.id : xResult.project_id,
-                      code: xResult.project != null ? xResult.project.odoo_project_code : null,
-                      name: xResult.project != null ? xResult.project.name : xResult.project_name,    
-                    },
+                    project: xResult.project != null ? {
+                      id: xResult.project.id,
+                      code: xResult.project.odoo_project_code,
+                      name: xResult.project.name,    
+                    } : null,
 					name: xResult.name,
 					budget_no: xResult.budget_no,
 					employee: {
@@ -624,6 +621,7 @@ class BudgetPlanService {
                     done_by_name: xResult.done_by_name,
                     file: xFileArr,
                     note: xResult.note,
+                    budget_category: xResult.budget_category,
 				};
 
 				xJoResult = {
@@ -1504,6 +1502,7 @@ class BudgetPlanService {
 
 		return xJoResult;
 	}
+    
     async fetchMatrixRAB(pParam) {
         var xJoResult = {};
         var xDecId = null;
@@ -1570,20 +1569,13 @@ class BudgetPlanService {
                             // logged_company_id: pParam.logged_company_id,
                             approval_matrix_id: pParam.approval_matrix_id
                         };
-                        // if (xBudgetDetail.company_id == 5 && xBudgetDetail.company_id == 14) {
-                        //     xParamAddApprovalMatrix.ecatalogue_fpb_category_item = xBudgetDetail.category_item
-                        // } else {
-                        //     xParamAddApprovalMatrix.ecatalogue_fpb_category_item = xBudgetDetail.category_item >= 7 ? xBudgetDetail.category_item : null
-                        // }
-                        // console.log(`>>> xParamAddApprovalMatrix : ${JSON.stringify(xParamAddApprovalMatrix)}`);
-
+                        
                         var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
                             pParam.method,
                             pParam.token,
                             xParamAddApprovalMatrix
                         );
                         xJoResult.approval_matrix_result = xApprovalMatrixResult;
-                        console.log(`>>> xApprovalMatrixResult : ${JSON.stringify(xApprovalMatrixResult)}`);
 
                         if (xApprovalMatrixResult.status_code == '00') {
                             if (xApprovalMatrixResult.approvers.length > 0) {

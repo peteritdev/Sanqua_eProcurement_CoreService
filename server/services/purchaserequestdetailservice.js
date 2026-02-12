@@ -21,6 +21,10 @@ const _repoInstance = new PurchaseRequestDetailRepository();
 
 const PurchaseRequestRepository = require('../repository/purchaserequestrepository.js');
 const _purchaseRequestRepoInstance = new PurchaseRequestRepository();
+// const BudgetPlanDetailRepository = require('../repository/budgetplandetailrepository.js');
+// const _budgetPlanDetailRepository = new BudgetPlanDetailRepository();
+// const SubtituteItemRepository = require('../repository/subtituteitemrepository.js');
+// const _subtituteRepoInstance = new SubtituteItemRepository();
 
 // Service
 const ProductServiceRepository = require('../services/productservice.js');
@@ -367,6 +371,7 @@ class PurchaseRequestDetailService {
 				xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
 				if (xDecId.status_code == '00') {
 					pParam.id = xDecId.decrypted;
+					pParam.xId = xDecId.decrypted;
 					xClearId = xDecId.decrypted;
 					xFlagProcess = true;
 				} else {
@@ -1512,7 +1517,8 @@ class PurchaseRequestDetailService {
 						prj_id: xRows[index].prj_id,
 						prj_name: xRows[index].prj_name,
 						created_at: xRows[index].created_at,
-						is_po_created: xRows[index].is_po_created
+						is_po_created: xRows[index].is_po_created,
+						store_link: xRows[index].store_link
 					});
 				}
 				console.log(`>>> xJoArrData: ${JSON.stringify(xJoArrData)}`);
@@ -1599,6 +1605,293 @@ class PurchaseRequestDetailService {
 
 		return xJoResult;
 	}
+	
+	// async deviationItemList(pParam) {
+	// 	// console.log(`>>> heree: ${JSON.stringify(pParam)}`);
+	// 	var xJoResult = {};
+	// 	var xJoArrData = [];
+
+	// 	try {
+	// 		var xResultList = await _repoInstance.deviationItemList(pParam);
+	// 		// console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
+	// 		if (xResultList.total_record > 0) {
+	// 			var xRows = xResultList.data;
+	// 			for (var index in xRows) {
+	// 				xJoArrData.push({
+	// 					id: await _utilInstance.encrypt(xRows[index].pr_id.toString(), config.cryptoKey.hashKey),
+	// 					prd_id: xRows[index].prd_id,
+	// 					request_no: xRows[index].request_no,
+	// 					employee: xRows[index].employee_id != null ? {
+	// 						id: xRows[index].employee_id,
+	// 						name: xRows[index].employee_name
+	// 					} : null,
+	// 					company: xRows[index].company_id != null ? {
+	// 						id: xRows[index].company_id,
+	// 						name: xRows[index].company_name,
+	// 						code: xRows[index].company_code
+	// 					} : null,
+	// 					department: xRows[index].department_id != null ? {
+	// 						id: xRows[index].department_id,
+	// 						name: xRows[index].department_name
+	// 					} : null,
+	// 					prd_status: xRows[index].prd_status != null ? {
+	// 						id: xRows[index].prd_status,
+	// 						name:
+	// 							xRows[index].prd_status == -1
+	// 								? 'Rejected'
+	// 								: config.statusDescription.purchaseRequestDetail[xRows[index].prd_status]
+	// 					} : null,
+	// 					product: {
+	// 						id: xRows[index].product_id,
+	// 						name: xRows[index].product_name,
+	// 						code: xRows[index].product_code
+	// 					},
+	// 					qty: xRows[index].qty,
+	// 					uom: xRows[index].uom_id != null ? {
+	// 						id: xRows[index].uom_id,
+	// 						name: xRows[index].uom_name
+	// 					} : null,
+	// 					budget_price_per_unit: xRows[index].budget_price_per_unit,
+	// 					budget_price_total: xRows[index].budget_price_total,
+	// 					pr_status: xRows[index].pr_status != null ? {
+	// 						id: xRows[index].pr_status,
+	// 						name:
+	// 							xRows[index].pr_status == -1
+	// 								? 'Rejected'
+	// 								: config.statusDescription.purchaseRequest[xRows[index].pr_status]
+	// 					} : null,
+	// 					category_item: xRows[index].category_item != null ? {
+	// 						id: xRows[index].category_item,
+	// 						name: config.categoryItem[xRows[index].category_item]
+	// 					} : null,
+	// 					category_pr: xRows[index].category_pr,
+	// 					fpb_type: xRows[index].fpb_type,
+	// 					project: xRows[index].prj_id != null ? {
+	// 						id: xRows[index].prj_id,
+	// 						name: xRows[index].prj_name,
+	// 						code: xRows[index].prj_code
+	// 					} : null,
+	// 					rab_item: xRows[index].rab_item_id != null ? {
+	// 						id: xRows[index].rab_item_id,
+	// 						qty: xRows[index].rab_qty,
+	// 						qty_remain: xRows[index].rab_qty_remain,
+	// 						product_code: xRows[index].rab_product_code,
+	// 						product_name: xRows[index].rab_product_name
+	// 					} : null,
+	// 					rab: xRows[index].bp_id != null ? {
+	// 						id: xRows[index].bp_id,
+	// 						name: xRows[index].bp_name,
+	// 						budget_no: xRows[index].bp_budget_no
+	// 					} : null,
+	// 					rab_origin: xRows[index].rab_origin_id != null ? {
+	// 						id: xRows[index].rab_origin_id,
+	// 						budget_no: xRows[index].rab_origin_no
+	// 					} : null,
+	// 					rab_qty_gap: xRows[index].rab_qty_gap < 0 ? xRows[index].rab_qty_gap : 0,
+	// 					is_po_created: xRows[index].is_po_created,
+	// 					vendor: xRows[index].vendor_id != null ? {
+	// 						id: xRows[index].vendor_id,
+	// 						name: xRows[index].vendor_name,
+	// 						code: xRows[index].vendor_code
+	// 					} : null,
+	// 					estimate_date_use: xRows[index].estimate_date_use,
+	// 					is_subtitute: xRows[index].is_subtitute,
+	// 					is_deviation_fulfilled: xRows[index].is_deviation_fulfilled
+	// 				});
+	// 			}
+	// 			console.log(`>>> xJoArrData: ${JSON.stringify(xJoArrData)}`);
+
+	// 			xJoResult = {
+	// 				status_code: '00',
+	// 				status_msg: 'OK',
+	// 				total_record: xResultList.total_record,
+	// 				data: xJoArrData
+	// 			};
+	// 		}
+	// 	} catch (e) {
+	// 		xJoResult = {
+	// 			status_code: '-99',
+	// 			status_msg: `Exception error <${_xClassName}.deviationItemList>: ${e.message}`
+	// 		};
+	// 	}
+
+	// 	return xJoResult;
+	// }
+	
+	// async subtitute(pParam) {
+	// 	var xJoResult;
+	// 	var xAct = pParam.act;
+	// 	var xFlagProcess = false;
+	// 	var xDecId = null;
+	// 	delete pParam.act;
+	// 	var xMethod = pParam.method;
+	// 	var xToken = pParam.token;
+
+	// 	if (pParam.hasOwnProperty('user_id') && pParam.hasOwnProperty('request_id')) {
+	// 		if (pParam.user_id != '') {
+	// 			xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+	// 			if (xDecId.status_code == '00') {
+	// 				pParam.user_id = xDecId.decrypted;
+	// 				xFlagProcess = true;
+	// 				xDecId = await _utilInstance.decrypt(pParam.request_id, config.cryptoKey.hashKey);
+	// 				if (xDecId.status_code == '00') {
+	// 					pParam.request_id = xDecId.decrypted;
+	// 					xFlagProcess = true;
+	// 				} else {
+	// 					xJoResult = xDecId;
+	// 				}
+	// 			} else {
+	// 				xJoResult = xDecId;
+	// 			}
+	// 		} else {
+	// 			xJoResult = {
+	// 				status_code: '-99',
+	// 				status_msg: 'Parameter user_id can not be empty'
+	// 			};
+	// 		}
+	// 	} else {
+	// 		xJoResult = {
+	// 			status_code: '-99',
+	// 			status_msg: 'You need to supply correct parameter'
+	// 		};
+	// 	}
+
+	// 	if (xFlagProcess) {
+	// 		let xClearId = null;
+	// 		xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+	// 		if (xDecId.status_code == '00') {
+	// 			pParam.id = xDecId.decrypted;
+	// 			pParam.xId = xDecId.decrypted;
+	// 			xFlagProcess = true;
+	// 		} else {
+	// 			xJoResult = xDecId;
+	// 		}
+
+	// 		if (xFlagProcess) {
+	// 			let xItem = await _repoInstance.getByParam({ id: pParam.id });
+
+	// 			if (pParam.hasOwnProperty('qty')) {
+	// 				if (pParam.hasOwnProperty('budget_price_per_unit')) {
+	// 					pParam.budget_price_total =
+	// 						Math.round(pParam.qty * pParam.budget_price_per_unit * 1000) / 1000;
+	// 				}
+
+	// 				if (pParam.hasOwnProperty('quotation_price_per_unit')) {
+	// 					pParam.quotation_price_total =
+	// 						Math.round(pParam.qty * pParam.quotation_price_per_unit * 1000) / 1000;
+	// 				}
+	// 				pParam.qty_left = pParam.qty
+					
+	// 				if (xItem.status_code == '00') {
+	// 					const xItemDetail = xItem.data
+	// 					// console.log(`>>> xItemDetail : ${JSON.stringify(xItemDetail)}`);
+	// 					// if (pParam.hasOwnProperty('qty_rab_left') && pParam.qty_rab_left != null) {
+	// 					pParam.rab_qty_gap = xItemDetail.rab_qty_gap - (pParam.qty - xItemDetail.qty)
+	// 				}
+	// 			}
+
+	// 			if (pParam.estimate_date_use == '') {
+	// 				pParam.estimate_date_use = null;
+	// 			}
+	// 			pParam.is_subtitute = true
+	// 			// console.log(`>>> pParam : ${JSON.stringify(pParam)}`);
+	// 			var xUpdateResult = await _repoInstance.save(pParam, 'update');
+	// 			// console.log(`>>> xUpdateResult : ${JSON.stringify(xUpdateResult)}`);
+	// 			xJoResult = xUpdateResult;
+	// 			if (xUpdateResult.status_code == '00') {
+	// 				// add to log_subtitute
+	// 				if (xItem.status_code == '00') {
+	// 					let xSubtituteParam = {
+	// 						act: 'add',
+	// 						pr_item_id: pParam.xId,
+	// 						rab_item_id: pParam.rab_item_id,
+	// 						reason: pParam.subtitute_reason,
+	// 						before: {
+	// 							// qty: xItem.data.qty,
+	// 							// budget_price_per_unit: xItem.data.budget_price_per_unit,
+	// 							// quotation_price_per_unit: xItem.data.quotation_price_per_unit,
+	// 							product_id: xItem.data.product_id,
+	// 							product_name: xItem.data.product_name,
+	// 							product_code: xItem.data.product_code
+	// 							// uom_id: xItem.data.uom_id,
+	// 							// uom_name: xItem.data.uom_name
+	// 						},
+	// 						after: {
+	// 							// qty: pParam.qty,
+	// 							// budget_price_per_unit: pParam.budget_price_per_unit,
+	// 							// quotation_price_per_unit: pParam.quotation_price_per_unit,
+	// 							product_id: pParam.product_id,
+	// 							product_name: pParam.product_name,
+	// 							product_code: pParam.product_code
+	// 							// uom_id: pParam.uom_id,
+	// 							// uom_name: pParam.uom_name
+	// 						}
+	// 					}
+	// 					console.log(`>>> _subtituteRepoInstance.save : ${JSON.stringify(xSubtituteParam)}`);
+	// 					var xResultSubtitute = await _subtituteRepoInstance.save(xSubtituteParam, 'add');
+	// 					console.log(`>>> xResultSubtitute : ${JSON.stringify(xResultSubtitute)}`);
+	// 				}
+	// 				// ---------------- Start: Add to log ----------------
+	// 				if (xItem.status_code == '00') {
+	// 					let xParamLog = {
+	// 						act: 'add',
+	// 						employee_id: pParam.employee_id,
+	// 						employee_name: pParam.employee_name,
+	// 						request_id: pParam.request_id,
+	// 						request_no: pParam.request_id,
+	// 						body: {
+	// 							act: 'update',
+	// 							msg: 'FPB item changed',
+	// 							before: {
+	// 								qty: xItem.data.qty,
+	// 								budget_price_per_unit: xItem.data.budget_price_per_unit,
+	// 								quotation_price_per_unit: xItem.data.quotation_price_per_unit,
+	// 								has_budget: xItem.data.has_budget,
+	// 								estimate_date_use: xItem.data.estimate_date_use,
+	// 								description: xItem.data.description,
+	// 								product_id: parseInt(xItem.data.product_id),
+	// 								product_name: xItem.data.product_name,
+	// 								vendor_id: parseInt(xItem.data.vendor_id),
+	// 								vendor_name: xItem.data.vendor_name,
+	// 								vendor_code: xItem.data.vendor_code,
+	// 								employee_id: xItem.data.employee_id,
+	// 								employee_name: xItem.data.employee_name,
+	// 								budget_price_total: xItem.data.budget_price_total,
+	// 								currency_id: xItem.data.currency_id,
+	// 								currency_code: xItem.data.currency_code,
+	// 								currency_symbol: xItem.data.currency_symbol
+	// 							},
+	// 							after: {
+	// 								qty: pParam.qty,
+	// 								budget_price_per_unit: pParam.budget_price_per_unit,
+	// 								quotation_price_per_unit: pParam.quotation_price_per_unit,
+	// 								has_budget: pParam.has_budget,
+	// 								estimate_date_use: pParam.estimate_date_use,
+	// 								description: pParam.description,
+	// 								product_id: pParam.product_id,
+	// 								product_name: pParam.product_name,
+	// 								vendor_id: pParam.vendor_id,
+	// 								vendor_name: pParam.vendor_name,
+	// 								vendor_code: pParam.vendor_code,
+	// 								employee_id: pParam.employee_id,
+	// 								employee_name: pParam.employee_name,
+	// 								budget_price_total: pParam.budget_price_total,
+	// 								currency_id: pParam.currency_id,
+	// 								currency_code: pParam.currency_code,
+	// 								currency_symbol: pParam.currency_symbol
+	// 							}
+	// 						}
+	// 					};
+	// 					var xResultLog = await _logServiceInstance.addLog(pParam.method, pParam.token, xParamLog);
+	// 					xJoResult.log_result = xResultLog;
+	// 				}
+	// 				// ---------------- End: Add to log ----------------
+	// 			}
+	// 		}
+	// 	}
+
+	// 	return xJoResult;
+	// }
 }
 
 module.exports = PurchaseRequestDetailService;
