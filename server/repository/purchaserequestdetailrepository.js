@@ -11,6 +11,9 @@ const _modelPurchaseRequest = require('../models').tr_purchaserequests;
 const _modelEmployee = require('../models').ms_employees;
 const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
+// const _modelBudgetPlan = require('../models').tr_budgetplans;
+// const _modelBudgetPlanDetail = require('../models').tr_budgetplandetails;
+// const _modelLogSubtitute = require('../models').log_fpbitemsubtitutes;
 
 const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
@@ -29,7 +32,18 @@ class PurchaseRequestDetailRepository {
 		var xJoResult = {};
 
 		try {
-			xInclude = [];
+			xInclude = [
+				// {
+				// 	model: _modelPurchaseRequest,
+				// 	as: 'purchase_request',
+				// 	// rubah nama menjadi alias yang pendek agar dapat tertampil, karena pada level include seperti ini object tidak dapat terbaca
+				// 	attributes: [ 'id', 'request_no', 'status' ]
+				// },
+				// {
+				// 	model: _modelLogSubtitute,
+				// 	as: 'log_subtitute'
+				// }
+			];
 
 			if (pParam.hasOwnProperty('filter')) {
 				if (pParam.filter != null && pParam.filter != undefined && pParam.filter != '') {
@@ -42,6 +56,14 @@ class PurchaseRequestDetailRepository {
 					}
 				}
 			}
+			
+			// if (pParam.hasOwnProperty('rab_item_id')) {
+			// 	if (pParam.rab_item_id != '') {
+			// 		xWhereAnd.push({
+			// 			rab_item_id: pParam.rab_item_id
+			// 		});
+			// 	}
+			// }
 
 			if (pParam.hasOwnProperty('keyword')) {
 				if (pParam.keyword != '') {
@@ -105,15 +127,21 @@ class PurchaseRequestDetailRepository {
 			}
 
 			var xData = await _modelDb.findAndCountAll(xParamQuery);
+			if (xData) {
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					data: xData,
+					total_record: xCountDataWithoutLimit
+				};
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'No data found'
+				};
+			}
+			console.log(`>>> xData: ${JSON.stringify(xData)}`);
 
-			// console.log(`>>> xData: ${JSON.stringify(xData)}`);
-
-			xJoResult = {
-				status_code: '00',
-				status_msg: 'OK',
-				data: xData,
-				total_record: xCountDataWithoutLimit
-			};
 		} catch (e) {
 			_utilInstance.writeLog(`${_xClassName}.list`, `Exception error: ${e.message}`, 'error');
 			xJoResult = {
@@ -140,6 +168,7 @@ class PurchaseRequestDetailRepository {
 				pAct: pAct,
 				purchase_request_detail: pParam,
 			};
+			console.log(`>>> payload : ${JSON.stringify(payload)}`, payload.purchase_request_detail.id);
 			xSql = `SELECT calc_rab_item_remain_qty_v2(:payload::json)`;
 			// xSql = `SELECT calc_rab_item_remain_qty_v2('{
 			// 	"pAct": "${pAct}",
@@ -201,20 +230,6 @@ class PurchaseRequestDetailRepository {
 					};
 				}
 			} else if (pAct == 'update') {
-				// var xFlag = false
-				pParam.updatedAt = await _utilInstance.getCurrDateTime();
-				var xId = pParam.id;
-				delete pParam.id;
-				var xWhere = {
-					where: {
-						id: xId
-					},
-					transaction: xTransaction
-				};
-
-				pParam.updated_by = pParam.user_id;
-				pParam.updated_by_name = pParam.user_name;
-
 				const xDtQuery = await sequelize.query(xSql, {
 					replacements: { payload: JSON.stringify(payload) },
 					type: sequelize.QueryTypes.SELECT,
@@ -234,7 +249,20 @@ class PurchaseRequestDetailRepository {
 				} else {
 					xFlag = false
 				}
+				// var xFlag = false
+				pParam.updatedAt = await _utilInstance.getCurrDateTime();
+				var xId = pParam.id;
+				delete pParam.id;
+				var xWhere = {
+					where: {
+						id: xId
+					},
+					transaction: xTransaction
+				};
 
+				pParam.updated_by = pParam.user_id;
+				pParam.updated_by_name = pParam.user_name;
+				
 				if (xFlag) {
 					xSaved = await _modelDb.update(pParam, xWhere);
 
@@ -373,13 +401,33 @@ class PurchaseRequestDetailRepository {
 				delete pParam.id;
 				pParam.updated_by = pParam.user_id;
 				pParam.updated_by_name = pParam.user_name;
+				// console.log(`>>> pParam : ${JSON.stringify(pParam)}`);
 				var xWhere = {
 					where: {
 						id: xId
 					},
 					transaction: xTransaction
 				};
+				xSaved = await _modelDb.update(pParam, xWhere);
 
+				await xTransaction.commit();
+
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'Data has been successfully updated'
+				};
+			} else if (pAct == 'update_by_setDraftPrProject') {
+				var xId = pParam.id;
+				delete pParam.id;
+				// pParam.updated_by = pParam.user_id;
+				// pParam.updated_by_name = pParam.user_name;
+				// console.log(`>>> pParam : ${JSON.stringify(pParam)}`);
+				var xWhere = {
+					where: {
+						id: xId
+					},
+					transaction: xTransaction
+				};
 				xSaved = await _modelDb.update(pParam, xWhere);
 
 				await xTransaction.commit();
@@ -916,6 +964,198 @@ class PurchaseRequestDetailRepository {
 		}
 		return xJoResult;
 	}
+	
+	// async deviationItemList(pParam) {
+	// 	var xJoResult = {};
+	// 	var xSql = '';
+	// 	var xSqlCount = '';
+	// 	var xTotalRecord = [];
+	// 	var xObjJsonWhere = {};
+	// 	var xSqlWhere = ' (1=1) ';
+	// 	var xSqlWhereOr = [];
+	// 	var xSqlOrderBy = '';
+	// 	var xSqlLimit = '';
+	// 	var xSqlGroupBy = '';
+	// 	var xSqlFields = '';
+
+	// 	try {
+	// 		if (pParam.hasOwnProperty('order_by')) {
+	// 			if (pParam.order_by != '') {
+	// 				xSqlOrderBy = ` ORDER BY ${pParam.order_by} ${pParam.order_type != '' ? pParam.order_type : 'ASC'}`;
+	// 			} else {
+	// 				xSqlOrderBy = ` ORDER BY pr.budget_plan_id DESC`;
+	// 			}
+	// 		} else {
+	// 			xSqlOrderBy = ` ORDER BY pr.budget_plan_id DESC`;
+	// 		}
+
+	// 		// xSqlWhere += ' AND pr.status <> -1 AND pr.status <> 4 AND prd.rab_qty_gap < 0 AND (prd.is_gap_paid_off is null OR prd.is_gap_paid_off = false)';
+	// 		xSqlWhere += ' AND (pr.status = 2 OR pr.status = 3 OR pr.status = 5) AND ((prd.rab_qty_gap < 0 AND prd.is_deviation_fulfilled is not true) OR (prd.is_subtitute is true AND prd.is_deviation_fulfilled is not true))';
+
+	// 		if (pParam.hasOwnProperty('company_id')) {
+	// 			if (pParam.company_id != '') {
+	// 				xSqlWhere += ' AND pr.company_id = :companyId ';
+	// 				xObjJsonWhere.companyId = pParam.company_id;
+	// 			}
+	// 		}
+
+	// 		if (pParam.hasOwnProperty('department_id')) {
+	// 			if (pParam.department_id != '') {
+	// 				xSqlWhere += ' AND pr.department_id = :departmentId ';
+	// 				xObjJsonWhere.departmentId = pParam.department_id;
+	// 			}
+	// 		}
+
+	// 		if (pParam.hasOwnProperty('project_id')) {
+	// 			if (pParam.project_id != '') {
+	// 				xSqlWhere += ' AND pr.project_id = :projectId ';
+	// 				xObjJsonWhere.projectId = pParam.project_id;
+	// 			}
+	// 		}
+
+	// 		if (pParam.hasOwnProperty('budget_plan_id')) {
+	// 			if (pParam.budget_plan_id != '') {
+	// 				xSqlWhere += ' AND pr.budget_plan_id = :budgetPlanId ';
+	// 				xObjJsonWhere.budgetPlanId = pParam.budget_plan_id;
+	// 			}
+	// 		} else {
+	// 			xSqlWhere += ' AND pr.budget_plan_id is not null ';
+	// 		}
+
+	// 		if (pParam.hasOwnProperty('category_item')) {
+	// 			if (pParam.category_item != '') {
+	// 				xSqlWhere += ' AND pr.category_item = :categoryItem ';
+	// 				xObjJsonWhere.categoryItem = pParam.category_item;
+	// 			}
+	// 		}
+
+	// 		// if (pParam.hasOwnProperty('pr_status')) {
+	// 		// 	if (pParam.pr_status != '') {
+	// 		// 		xSqlWhere += ' AND pr.status = :prStatus ';
+	// 		// 		xObjJsonWhere.prStatus = pParam.pr_status;
+	// 		// 	}
+	// 		// }
+
+	// 		if (pParam.hasOwnProperty('keyword')) {
+	// 			if (pParam.keyword != '') {
+	// 				let xSqlWhereKeyword = ` 
+	// 						pr.request_no ILIKE :keyword OR
+	// 						prd.product_code ILIKE :keyword OR
+	// 						prd.product_name ILIKE :keyword OR
+	// 						pr.company_name ILIKE :keyword OR
+	// 						pr.company_code ILIKE :keyword OR
+	// 						pr.department_name ILIKE :keyword OR
+	// 						pr.employee_name ILIKE :keyword OR
+	// 						prj.name ILIKE :keywordOR
+	// 						bp.name ILIKE :keyword
+	// 					`;
+	// 				xObjJsonWhere.keyword = `%${pParam.keyword}%`;
+	// 				xSqlWhere = ` ${xSqlWhere} AND (${xSqlWhereKeyword}) `;
+	// 			}
+	// 		}
+
+	// 		if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
+	// 			if (pParam.offset != '' && pParam.limit != '') {
+	// 				xSqlLimit = ` OFFSET ${pParam.offset} LIMIT ${pParam.limit} `;
+	// 			}
+	// 		}
+
+	// 		xSqlFields = ` prd.id as "prd_id", pr.id as "pr_id", pr.request_no, pr.employee_id, pr.employee_name,
+	// 		pr.company_id, pr.company_name, pr.company_code, pr.department_id, pr.department_name, 
+	// 		pr.status as "pr_status", pr.category_item, pr.category_pr, pr.fpb_type, 
+	// 		pr.project_id as "prj_id", prj.name as "prj_name", prj.odoo_project_code as "prj_code",
+	// 		pr.budget_plan_id as "bp_id", bp.name as "bp_name", bp.budget_no as "bp_budget_no",
+	// 		prd.status as "prd_status", prd.product_id, prd.product_code, prd.product_name, prd.uom_id, prd.uom_name,
+	// 		prd.vendor_id, prd.vendor_code, prd.vendor_name, prd.estimate_date_use,
+	// 		prd.budget_price_per_unit, prd.budget_price_total, prd.rab_qty_gap, prd.qty, prd.rab_item_id,
+	// 		prd.is_deviation_fulfilled, prd.is_subtitute,
+	// 		bpd.product_code as "rab_product_code", bpd.product_name as "rab_product_name", bpd.qty as "rab_qty",
+	// 		bpd.qty_remain as "rab_qty_remain", bpd.rab_origin_id, bpo.budget_no as "rab_origin_no"`;
+
+	// 		xSql = ` SELECT ${xSqlFields}
+	// 		FROM tr_purchaserequestdetails as prd
+	// 		LEFT JOIN tr_purchaserequests as pr on pr.id = prd.request_id
+	// 		LEFT JOIN ms_projects as prj on prj.id = pr.project_id
+	// 		LEFT JOIN tr_budgetplans as bp on bp.id = pr.budget_plan_id
+	// 		LEFT JOIN tr_budgetplandetails as bpd on bpd.id = prd.rab_item_id
+	// 		LEFT JOIN tr_budgetplans as bpo on bpo.id = bpd.rab_origin_id
+	// 		WHERE ${xSqlWhere} ${xSqlOrderBy} ${xSqlLimit} `;
+
+	// 		xSqlCount = ` SELECT count(distinct pr.request_no) AS total_record
+	// 		FROM tr_purchaserequestdetails as prd
+	// 		LEFT JOIN tr_purchaserequests as pr on pr.id = prd.request_id
+	// 		LEFT JOIN ms_projects as prj on prj.id = pr.project_id
+	// 		LEFT JOIN tr_budgetplans as bp on bp.id = pr.budget_plan_id
+	// 		LEFT JOIN tr_budgetplandetails as bpd on bpd.id = prd.rab_item_id
+	// 		LEFT JOIN tr_budgetplans as bpo on bpo.id = bpd.rab_origin_id
+	// 		WHERE ${xSqlWhere} `;
+
+	// 		console.log(`>>> xSql: ${xSql}`);
+	// 		let xData = await sequelize.query(xSql, {
+	// 			replacements: xObjJsonWhere,
+	// 			type: sequelize.QueryTypes.SELECT,
+	// 			// logging: console.log
+	// 		});
+
+	// 		xTotalRecord = await sequelize.query(xSqlCount, {
+	// 			replacements: xObjJsonWhere,
+	// 			type: sequelize.QueryTypes.SELECT
+	// 		});
+	// 		if (xData != null && xData.length > 0) {
+	// 			xJoResult = {
+	// 				status_code: '00',
+	// 				status_msg: 'OK',
+	// 				total_record: xTotalRecord[0].total_record,
+	// 				data: xData
+	// 			};
+	// 		} else {
+	// 			xJoResult = {
+	// 				status_code: '-99',
+	// 				status_msg: 'Data Not Found'
+	// 			};
+	// 		}
+
+	// 	} catch (e) {
+	// 		_utilInstance.writeLog(`${_xClassName}.deviationItemList`, `Exception error: ${e.message}`, 'error');
+	// 		xJoResult = {
+	// 			status_code: '-99',
+	// 			status_msg: `${_xClassName}.deviationItemList: Exception error: ${e.message}`
+	// 		};
+	// 	}
+	// 	return xJoResult;
+	// }
+	
+	// async getById(pParam) {
+	// 	var xData = {};
+	// 	var xInclude = [];
+	// 	var xWhere = {};
+	// 	var xWhereAnd = [],
+	// 		xWhereOr = [];
+
+	// 	xInclude = [
+	// 		{
+	// 			model: _modelBudgetPlanDetail,
+	// 			as: 'rab_revision_item',
+	// 			attributes: [ 'id', 'product_code', 'product_name', 'qty', 'qty_remain'],
+	// 			include: [
+	// 				{
+	// 					model: _modelBudgetPlan,
+	// 					as: 'budget_plan',
+	// 					attributes: [ 'id', 'budget_no'],
+	// 				}
+	// 			]
+	// 		}
+	// 	];
+
+	// 	var xData = await _modelDb.findOne({
+	// 		where: {
+	// 			id: pParam.id
+	// 		},
+	// 		include: xInclude
+	// 	});
+
+	// 	return xData;
+	// }
 }
 
 module.exports = PurchaseRequestDetailRepository;

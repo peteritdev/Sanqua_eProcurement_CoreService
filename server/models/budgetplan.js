@@ -30,6 +30,8 @@ module.exports = (sequelize, DataTypes) => {
 		approver_ids: DataTypes.JSONB,
 		file: DataTypes.JSON,
 		note: DataTypes.STRING,
+		rab_type: DataTypes.INTEGER, // 1: Original, 2: Revisi
+		current_approval_ids: DataTypes.JSON,
 
 		submitedAt: {
 			type: DataTypes.DATE,
@@ -90,13 +92,16 @@ module.exports = (sequelize, DataTypes) => {
 		currency_id: DataTypes.INTEGER,
 		currency_symbol: DataTypes.STRING,
 		currency_code: DataTypes.STRING,
-		note: DataTypes.STRING
+		note: DataTypes.STRING,
+		budget_category: DataTypes.STRING
 	});
 
 	BudgetPlan.associate = function(models) {
 		BudgetPlan.hasMany(models.tr_budgetplandetails, {
 			foreignKey: 'request_id',
-			as: 'budget_plan_detail'
+			as: 'budget_plan_detail',
+			onDelete: 'CASCADE',
+			hooks: true
 		});
 
 		BudgetPlan.belongsTo(models.ms_projects, {

@@ -66,7 +66,7 @@ class VendorCatalogueRepository {
 		var xInclude = [];
 		xInclude = [
 			{
-				attributes: [ 'id', 'name', 'photo_1', 'photo_2', 'photo_3', 'photo_4', 'photo_5' ],
+				attributes: [ 'id', 'name', 'photo_1', 'photo_2', 'photo_3', 'photo_4', 'photo_5', 'spesification' ],
 				model: _modelProduct,
 				as: 'product',
 				include: [

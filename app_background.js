@@ -28,6 +28,9 @@ const port = parseInt(process.env.PORT, 10) || (config.appPort);
 app.set('port', port);
 
 const server = http.createServer(app);
-server.listen(port);
+
+server.listen(port, () => {
+  console.log(`Express is now running on ${port}`);
+});
 
 module.exports = app;
