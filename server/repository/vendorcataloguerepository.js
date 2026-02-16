@@ -78,7 +78,7 @@ class VendorCatalogueRepository {
 				]
 			},
 			{
-				attributes: [ 'id', 'code', 'name', 'location_lat', 'location_long', 'avg_rate' ],
+				attributes: [ 'id', 'code', 'name', 'location_lat', 'location_long', 'avg_rate', 'is_onlineshop' ],
 				model: _modelVendor,
 				as: 'vendor'
 			},
@@ -166,7 +166,7 @@ class VendorCatalogueRepository {
 				]
 			},
 			{
-				attributes: [ 'id', 'code', 'name', 'avg_rate' ],
+				attributes: [ 'id', 'code', 'name', 'avg_rate', 'is_onlineshop' ],
 				model: _modelVendor,
 				as: 'vendor'
 			},

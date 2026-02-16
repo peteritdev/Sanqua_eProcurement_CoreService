@@ -337,6 +337,7 @@ class VendorCatalogueService {
 							longitude: xResultList.vendor.location_long,
 							latitude: xResultList.vendor.location_lat
 						},
+						is_onlineshop: xResultList.vendor.is_onlineshop,
 						product_id: xResultList.product_id,
 						product_code: xResultList.product.code,
 						product_name: xResultList.product.name,
@@ -376,7 +377,7 @@ class VendorCatalogueService {
 							: null,
 						photo: [xResultList.product_photo_1, xResultList.product_photo_2, xResultList.product_photo_3, xResultList.product_photo_4, xResultList.product_photo_5],
 						spesification: xResultList.product.spesification,
-					
+						store_link: xResultList.product.store_link
 					}
 				};
 			} else {
