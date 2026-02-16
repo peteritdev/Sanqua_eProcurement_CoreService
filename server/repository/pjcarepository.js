@@ -144,6 +144,10 @@ class PJCARepository {
 					xWhereAnd.push({
 						company_id: pParam.company_id
 					});
+				} else {
+					xWhereAnd.push({
+						company_id: pParam.logged_company_id
+					});
 				}
 			}
 
