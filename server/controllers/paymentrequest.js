@@ -88,7 +88,7 @@ async function paymentRequest_List(req, res) {
 				req.query.logged_is_admin = xLevel.is_admin;
 				req.query.user_id = oAuthResult.token_data.result_verify.id;
 
-				req.query.logged_company_id = oAuthResult.token_data.result_verify.employee_info.company != null ? oAuthResult.token_data.result_verify.employee_info.company.id : oAuthResult.token_data.result_verify.company.id;
+				req.query.logged_company_id = oAuthResult.token_data.result_verify.employee_info.company != null ? oAuthResult.token_data.result_verify.employee_info.company.plant_id : oAuthResult.token_data.result_verify.company.plant_id;
 				req.query.logged_company_name = oAuthResult.token_data.result_verify.employee_info.company != null ? oAuthResult.token_data.result_verify.employee_info.company.name : oAuthResult.token_data.result_verify.company.name;
 				req.query.method = req.headers['x-method'];
 				req.query.token = req.headers['x-token'];
