@@ -14,8 +14,6 @@ const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
 const _modelBudgetPlan = require('../models').tr_budgetplans;
 const _modelVendor = require('../models').ms_vendors;
-// const _modelBudgetPlanDetail = require('../models').tr_budgetplandetails;
-// const _modelLogSubtitute = require('../models').log_fpbitemsubtitutes;
 
 const Utility = require('peters-globallib-v2');
 const { param } = require('express-validator');
@@ -1338,7 +1336,20 @@ class PurchaseRequestRepository {
 				xObjJsonWhere.vendor_id = pParam.vendor_id;
 			}
 		}
-		xSqlWhere += ' AND prd.is_po_created = true AND prd.status = 4 ';
+		// xSqlWhere += ' AND prd.is_po_created = true AND prd.status = 4 '; before 04/02/2025
+		
+		// tampilkan history dari 
+		// 1. fpb item tipe ca / po yang status itemnya sudah close (4) dan status fpb sudah close, atau
+		// 2. fpb item tipe ca / po yang status itemnya sudah close (4) tapi status fpb masih inproggress, atau
+		// 3. fpb item tipe ca / po yang status itemnya belum close tapi status fpb masih inproggress, atau
+		// 4. fpb item tipe ca / po yang status itemnya belum close tapi status fpb sudah close, atau
+		// 5. fpb item status ca (3) yang status pr nya sudah close atau masih inprogress
+		xSqlWhere += ` AND (
+						(((prd.is_po_created = true OR prd.purchase_type = 'po') OR prd.purchase_type = 'ca') AND prd.status = 4) AND pr.status = 3
+						OR (((prd.is_po_created = true OR prd.purchase_type = 'po') OR prd.purchase_type = 'ca') AND prd.status = 4) AND pr.status = 2
+						OR ((prd.is_po_created = true OR prd.purchase_type = 'po' OR prd.status = 2) OR (prd.purchase_type = 'ca' OR prd.status = 3)) AND pr.status = 2 
+						OR ((prd.is_po_created = true OR prd.purchase_type = 'po' OR prd.status = 2) OR (prd.purchase_type = 'ca' OR prd.status = 3)) AND pr.status = 3 
+					)`;
 
 		xSqlFields = ` pr.id, pr.request_no, pr.employee_id, pr.employee_name, pr.company_id, pr.company_name,
 					pr.department_id, pr.department_name, pr.category_item, pr.category_pr, pr.status as "fpb_status",
