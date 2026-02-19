@@ -356,7 +356,7 @@ class VendorService {
                         }
                     }
 
-                    // param = await _secureInstance.encryptCriticalField(param);
+                    param = await _secureInstance.encryptCriticalField(param);
                     console.log(
                         `>>> paramSave: ${JSON.stringify(param)}`
                     );
