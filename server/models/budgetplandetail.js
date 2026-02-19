@@ -55,8 +55,24 @@ module.exports = (sequelize, DataTypes) => {
 		currency_symbol: DataTypes.STRING,
 		currency_code: DataTypes.STRING,
 		last_price: DataTypes.DOUBLE,
-		section_title: DataTypes.STRING
+		section_title: DataTypes.STRING,
+		// rab_origin_id: DataTypes.INTEGER,
+		// deviation_fpb_item_id: DataTypes.INTEGER
+		// fpb_ids: DataTypes.JSONB
 	});
+	// BudgetPlanDetail.beforeCreate(async (item, options) => {
+	// 	if (!item.rab_origin_id && item.request_id) {
+	// 		item.rab_origin_id = item.request_id;
+	// 	}
+	// });
+
+	// BudgetPlanDetail.beforeBulkCreate(async (items, options) => {
+	// 	for (const item of items) {
+	// 		if (!item.rab_origin_id && item.request_id) {
+	// 		item.rab_origin_id = item.request_id;
+	// 		}
+	// 	}
+	// });
 
 	BudgetPlanDetail.associate = function(models) {
 		BudgetPlanDetail.belongsTo(models.ms_products, {
@@ -73,8 +89,8 @@ module.exports = (sequelize, DataTypes) => {
 
 		BudgetPlanDetail.belongsTo(models.tr_budgetplans, {
 			foreignKey: 'request_id',
-			as: 'budget_plan',
-			onDelete: 'CASCADE'
+			as: 'budget_plan'
+			// onDelete: 'CASCADE'
 		});
 
 		BudgetPlanDetail.belongsTo(models.ms_vendorcatalogues, {
@@ -82,6 +98,29 @@ module.exports = (sequelize, DataTypes) => {
 			as: 'vendor_catalogue',
 			onDelete: 'CASCADE'
 		});
+
+		// BudgetPlanDetail.belongsTo(models.tr_budgetplans, {
+		// 	foreignKey: 'rab_origin_id',
+		// 	as: 'rab_origin',
+		// 	onDelete: 'CASCADE'
+		// });
+
+		// BudgetPlanDetail.hasMany(models.tr_purchaserequestdetails, {
+		// 	foreignKey: 'rab_item_id',
+		// 	as: 'purchase_request_detail'
+		// });
+		
+		// BudgetPlanDetail.belongsTo(models.tr_purchaserequestdetails, {
+		// 	foreignKey: 'deviation_fpb_item_id',
+		// 	as: 'deviation_fpb_item',
+		// 	onDelete: 'CASCADE'
+		// });
+		
+		// BudgetPlanDetail.hasMany(models.log_fpbitemsubtitutes, {
+		// 	foreignKey: 'rab_item_id',
+		// 	as: 'log_subtitute',
+		// 	onDelete: 'CASCADE'
+		// });
 	};
 
 	return BudgetPlanDetail;

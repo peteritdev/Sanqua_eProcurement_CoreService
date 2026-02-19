@@ -19,6 +19,10 @@ module.exports = (app) => {
 	});
 
 	app.get(`${_rootAPIPath}fpb/export_to_pdf/:id`, exportController.generateFPB);
+	app.get(`${_rootAPIPath}payreq/export_to_pdf/:id`, exportController.generatePayreq);
+	app.get(`${_rootAPIPath}gr/export_to_pdf/:id`, exportController.generateGR);
+	app.get(`${_rootAPIPath}pjca/export_to_pdf/:id`, exportController.generatePJCA);
 	app.get(`${_rootAPIPath}rab/export_to_pdf/:id`, exportController.generateRAB);
-	// app.get(`${_rootAPIPath}rab_v2/export_to_pdf/:id`, exportController.generateRAB_V2);
+	app.get(`${_rootAPIPath}rab_v2/export_to_pdf/:id`, exportController.generateRAB_V2);
+	app.get(`${_rootAPIPath}fpb_v2/export_to_pdf/:id`, exportController.generateFPB_V2);
 };

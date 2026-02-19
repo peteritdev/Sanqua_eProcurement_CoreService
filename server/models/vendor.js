@@ -68,6 +68,28 @@ module.exports = ( sequelize, DataTypes ) => {
         },
         updated_by: DataTypes.INTEGER,
         updated_by_name: DataTypes.STRING,
+        
+        is_pkp: DataTypes.BOOLEAN,
+        cp_name: DataTypes.STRING,
+        cp_phone: DataTypes.STRING,
+        cp_position: DataTypes.STRING,
+        cp_email: DataTypes.STRING,
+        finance_name: DataTypes.STRING,
+        finance_phone: DataTypes.STRING,
+        finance_account_no: DataTypes.STRING,
+        finance_bank_name: DataTypes.STRING,
+        finance_bank_kcu: DataTypes.STRING,
+        finance_account_name: DataTypes.STRING,
+        payment_method: DataTypes.INTEGER,
+        product_description: DataTypes.STRING,
+        average_turnover: DataTypes.INTEGER,
+        service_coverage: DataTypes.JSON,
+        number_products: DataTypes.INTEGER,
+        experience: DataTypes.STRING,
+        current_employee: DataTypes.INTEGER,
+        year_founded: DataTypes.INTEGER,
+        review_status: DataTypes.INTEGER,
+        is_onlineshop: DataTypes.BOOLEAN
     });
 
     Vendor.associate = function(models){

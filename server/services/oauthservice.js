@@ -41,7 +41,7 @@ class OAuthService {
 
 	async addApprovalMatrix(pMethod, pToken, pParam) {
 		var xAPIUrl = config.api.oAuth.url.approval_matrix_document.save;
-		// console.log(">>> API URL : " + xAPIUrl);
+		console.log(">>> API URL : " + xAPIUrl);
 		var xHeader = {
 			headers: {
 				'x-method': pMethod,
@@ -62,6 +62,10 @@ class OAuthService {
 		)
 			? `user_id=${pParam.user_id}`
 			: ''}`;
+			if (pParam.hasOwnProperty('status')) {
+				xQueryParam = xQueryParam + `&status=${pParam.status}`
+			}
+		
 		var xHeader = {
 			headers: {
 				'x-method': pMethod,
@@ -127,6 +131,7 @@ class OAuthService {
 
 	async eSanQuaNotification(pMethod, pToken, pParam, pPath) {
 		var xAPIUrl = `${config.api.eSanqua}${pPath}`;
+		console.log('xAPIUrl.eSanQuaNotification>>>', xAPIUrl)
 		var xHeader = {
 			headers: {
 				'x-method': pMethod,
@@ -144,6 +149,20 @@ class OAuthService {
 		var xResultVerify = await _utilInstance.axiosRequestPost(xAPIUrl, 'POST', pParam, xHeader);
 
 		return xResultVerify;
+	}
+	
+	async getEmployeeDetail( pMethod, pToken, pId) {
+		var xAPIUrl = config.api.hr.url;
+		var xQueryParam = `/employee/detail/${pId}`;
+		var xHeader = {
+			headers: {
+				'x-method': pMethod,
+				'x-token': pToken
+			}
+		};
+		var xResult = await _utilInstance.axiosRequest(xAPIUrl + xQueryParam, xHeader);
+
+		return xResult;
 	}
 }
 

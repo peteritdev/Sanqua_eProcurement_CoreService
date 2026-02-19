@@ -14,6 +14,7 @@ const config      = require(__dirname + '/../config/config.json')[env];
 const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
 
+
 // Repository
 const CurrencyRepository = require('../repository/currencyrepository.js');
 const _repoInstance = new CurrencyRepository();
@@ -205,6 +206,71 @@ class CurrencyService {
         }        
 
         return (xJoResult);
+    }
+
+    async terbilang(pParam) {
+        const bilangan = [
+            "", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan",
+            "Sepuluh", "Sebelas"
+        ];
+        const pecahan = ["", "Ribu", "Juta", "Miliar", "Triliun"];
+
+        function convert(number) {
+            if (number == 0) return "";
+            if (number < 12) return bilangan[number];
+            if (number < 20) return bilangan[number - 10] + " Belas";
+            if (number < 100) {
+                const sisa = number % 10;
+                return bilangan[Math.floor(number / 10)] + " Puluh" + (sisa ? " " + convert(sisa) : "");
+            }
+            if (number < 1000) {
+                const sisa = number % 100;
+                if (Math.floor(number / 100) === 1) {
+                    return "Seratus" + (sisa ? " " + convert(sisa) : "");
+                }
+                return bilangan[Math.floor(number / 100)] + " Ratus" + (sisa ? " " + convert(sisa) : "");
+            }
+            for (let i = pecahan.length - 1; i >= 0; i--) {
+                const divider = Math.pow(1000, i);
+                if (number >= divider) {
+                    const sisa = number % divider;
+                    if (i === 1 && Math.floor(number / divider) === 1) {
+                        // 1000–1999 → Seribu
+                        return "Seribu" + (sisa ? " " + convert(sisa) : "");
+                    }
+                    return convert(Math.floor(number / divider)) + " " + pecahan[i] + " " + (sisa ? " " + convert(sisa) : "");
+                }
+            }
+        }
+
+        function terbilangDesimal(number) {
+            let result = '';
+            if (number < 1) {
+                return '';
+            } else {
+                // Mengubah desimal menjadi angka terbilang (Sen atau Persepuluhan)
+                let strNumber = number.toString();
+                let desimal = strNumber.split('.')[1]; // Ambil bagian desimal
+                let desimalTerbilang = convert(parseInt(desimal));
+
+                result = desimalTerbilang;
+            }
+            return result;
+        }
+
+        if (pParam == 0) return bilangan[0];
+        
+        let bagianInteger = Math.floor(pParam);
+        let bagianDesimal = pParam % 1;
+
+        let hasilInteger = convert(bagianInteger).trim();
+        
+        if (bagianDesimal > 0) {
+            let hasilDesimal = terbilangDesimal(bagianDesimal);
+            return `${hasilInteger} koma ${hasilDesimal} Rupiah`;
+        } else {
+            return `${hasilInteger} Rupiah`;
+        }
     }
 }
 
