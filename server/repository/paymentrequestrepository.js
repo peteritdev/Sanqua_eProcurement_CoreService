@@ -54,7 +54,7 @@ class PaymentRequestRepository {
 						{
 							model: _modelPurchaseRequestDetail,
 							as: 'purchase_request_detail',
-							attributes: ['id', 'request_id', 'product_id', 'product_code', 'product_name', 'qty', 'qty_done', 'qty_paid', ['budget_price_per_unit', 'unit_price'], 'uom_name', 'uom_id'],
+							attributes: ['id', 'request_id', 'product_id', 'product_code', 'product_name', 'qty', 'qty_done', 'qty_paid', ['budget_price_per_unit', 'unit_price'], 'uom_name', 'uom_id', 'store_link'],
 						},
 					]
 				},
