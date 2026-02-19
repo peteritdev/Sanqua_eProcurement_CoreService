@@ -354,7 +354,7 @@ class VendorService {
                         }
                     }
 
-                    // param = await _secureInstance.encryptCriticalField(param);
+                    param = await _secureInstance.encryptCriticalField(param);
                     joResult = await _vendorRepoInstance.save( param );
                 // }
             }
