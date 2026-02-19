@@ -872,7 +872,7 @@ class PurchaseRequestService {
 								id: xDetail[index].vendor_id,
 								code: xDetail[index].vendor_code,
 								name: xDetail[index].vendor_name,
-								is_onlineshop: xDetail[index].vendor.is_onlineshop
+								is_onlineshop: xDetail[index].vendor != null ? xDetail[index].vendor.is_onlineshop : null
 							},
 							vendor_rec: {
 								id: xDetail[index].vendor_rec_id != null ? xDetail[index].vendor_rec_id.toString() : null,
