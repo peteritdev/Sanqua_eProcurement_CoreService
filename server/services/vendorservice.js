@@ -355,7 +355,6 @@ class VendorService {
                     }
 
                     param = await _secureInstance.encryptCriticalField(param);
-                    console.log(`>>> encryptCriticalField: ${JSON.stringify(param)}`);
                     joResult = await _vendorRepoInstance.save( param );
                 // }
             }
