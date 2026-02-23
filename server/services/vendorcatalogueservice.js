@@ -762,15 +762,15 @@ class VendorCatalogueService {
 			
 			// then update store link in FPB Item
 			var link = xRows[index].linked_item
+			console.log(`_____>>> pParam : ${JSON.stringify(pParam)}`);
+			console.log(`_____>>> xRows : ${JSON.stringify(xRows[index])}`);
+			console.log(`_____>>> LinkedStore : ${JSON.stringify(link)}`);
 			if (link != undefined &&link != null && link != '') {
 				var xFindPrItem = await _purchaseRequestDetailRepo.getByParam({
 					product_code: xRows[index].code,
 					pr_no: xRows[index].pr_number,
 					// request_id: xRows[index].fpb_number
 				})
-				console.log(`>>> pParam : ${JSON.stringify(pParam)}`);
-				console.log(`>>> xRows : ${JSON.stringify(xRows[index])}`);
-				console.log(`>>> LinkedStore : ${JSON.stringify(link)}`);
 				console.log(`>>> xFindPrItem : ${JSON.stringify(xFindPrItem)}`);
 
 				// Note: if the item is found then we will update the store link with the link from odoo
