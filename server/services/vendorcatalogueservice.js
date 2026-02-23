@@ -665,9 +665,11 @@ class VendorCatalogueService {
 		var xJoDataResult = [];
 
 		var xRows = pParam.product;
+		console.log(`_____>>> pParam : ${JSON.stringify(pParam)}`);
 
 		// Loop each line
 		for (var index in xRows) {
+			console.log(`_____>>> xRows : ${JSON.stringify(xRows[index])}`, index);
 			// Check Vendor Code and Product Code
 			var xVendorCatalogue = await _vendorCatalogueRepoInstance.getByVendorCodeAndProductCode({
 				vendor_code: pParam.vendor.code,
@@ -762,8 +764,6 @@ class VendorCatalogueService {
 			
 			// then update store link in FPB Item
 			var link = xRows[index].linked_item
-			console.log(`_____>>> pParam : ${JSON.stringify(pParam)}`);
-			console.log(`_____>>> xRows : ${JSON.stringify(xRows[index])}`);
 			console.log(`_____>>> LinkedStore : ${JSON.stringify(link)}`);
 			if (link != undefined &&link != null && link != '') {
 				var xFindPrItem = await _purchaseRequestDetailRepo.getByParam({
