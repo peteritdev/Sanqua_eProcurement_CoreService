@@ -245,6 +245,14 @@ module.exports = (app) => {
 	];
 	app.get(rootAPIPath + 'gr-outstanding/list', arrValidate, purchaseRequestController.purchaseRequestDetail_OutstandingItemList);
 	
+	// Edit Linked Item
+	arrValidate = [
+		check('act').not().isEmpty().withMessage('Parameter act cannot be empty'),
+		check('store_link').not().isEmpty().withMessage('Parameter link cannot be empty'),
+		check('id', 'Parameter id must be array and cannot be empty').not().isEmpty().isArray()
+	];
+	app.post(rootAPIPath + 'save_detail_link', arrValidate, purchaseRequestController.purchaseRequestDetail_SaveLink);
+
 	arrValidate = [];
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
 	app.post(

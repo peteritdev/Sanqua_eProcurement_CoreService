@@ -10,6 +10,7 @@ const _modelDb = require('../models').tr_pjcas;
 const _modelPJCADetail = require('../models').tr_pjcadetails;
 const _modelPaymentRequest = require('../models').tr_paymentrequests;
 const _modelPayreqDetail = require('../models').tr_paymentrequestdetails;
+const _modelPurchaseRequestDetail = require('../models').tr_purchaserequestdetails;
 const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
@@ -54,6 +55,11 @@ class PJCARepository {
 							model: _modelTax,
 							as: 'tax',
 							attributes: [['id', 'tax_id'], 'name', 'type', 'value'],
+						},
+						{
+							model: _modelPurchaseRequestDetail,
+							as: 'purchase_request_detail',
+							attributes: ['id', 'request_id', 'product_id', 'product_code', 'product_name', 'qty', 'qty_done', 'qty_paid', ['budget_price_per_unit', 'unit_price'], 'uom_name', 'uom_id', 'store_link'],
 						},
 						{
 							model: _modelPayreqDetail,
