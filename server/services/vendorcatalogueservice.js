@@ -768,6 +768,7 @@ class VendorCatalogueService {
 				pr_no: xRows[index].pr_number,
 				// request_id: xRows[index].fpb_number
 			})
+			console.log(`>>> pParam : ${JSON.stringify(pParam)}`);
 			console.log(`>>> xRows : ${JSON.stringify(xRows[index])}`);
 			console.log(`>>> LinkedStore : ${JSON.stringify(link)}`);
 			console.log(`>>> xFindPrItem : ${JSON.stringify(xFindPrItem)}`);
