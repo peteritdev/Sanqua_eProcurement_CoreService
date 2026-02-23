@@ -1892,6 +1892,63 @@ class PurchaseRequestDetailService {
 
 	// 	return xJoResult;
 	// }
+	
+	async save_link(pParam) {
+		var xJoResult;
+		var xAct = pParam.act;
+		var xFlagProcess = false;
+		var xDecId = null;
+		var xArrIds = []
+
+		delete pParam.act;
+
+		var xMethod = pParam.method;
+		var xToken = pParam.token;
+
+		if (pParam.hasOwnProperty('user_id') && pParam.user_id && pParam.hasOwnProperty('ids') && Array.isArray(pParam.ids) && pParam.ids.length > 0) {
+			xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				pParam.user_id = xDecId.decrypted;
+				for (let i = 0; i < pParam.ids.length; i++) {
+					const element = pParam.ids[i];
+					xDecId = await _utilInstance.decrypt(element, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						xArrIds.push(xDecId.decrypted);
+						xFlagProcess = true;
+					} else {
+						xJoResult = xDecId;
+						xFlagProcess = false;
+						break;
+					}
+				}
+			} else {
+				xJoResult = xDecId;
+			}
+		} else {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: 'You need to supply correct parameter'
+			};
+		}
+
+		if (xFlagProcess) {
+			if (xAct == 'update') {
+
+				if (xFlagProcess) {
+					const payload = {
+						id: xArrIds,
+						store_link: pParam.store_link
+					}
+					// let xItem = await _repoInstance.getByParam({ id: pParam.id });
+					console.log(`>>> xUpdateResult : ${JSON.stringify(payload)}`);
+					var xUpdateResult = await _repoInstance.save(payload, 'update_link');
+					xJoResult = xUpdateResult;
+				}
+			}
+		}
+
+		return xJoResult;
+	}
 }
 
 module.exports = PurchaseRequestDetailService;

@@ -31,6 +31,9 @@ const _unitRepoInstance = new UnitRepository();
 const CurrencyRepository = require('../repository/currencyrepository.js');
 const _currencyRepoInstance = new CurrencyRepository();
 
+const PurchaseRequestDetailRepository = require('../repository/purchaserequestdetailrepository.js');
+const _purchaseRequestDetailRepo = new PurchaseRequestDetailRepository();
+
 const multer = require('multer');
 const _xlsToJson = require('xls-to-json-lc');
 const _xlsxToJson = require('xlsx-to-json-lc');
@@ -698,6 +701,7 @@ class VendorCatalogueService {
 					sync_from_odoo_at: await _utilInstance.getCurrDateTime()
 				};
 				var xUpdate = await _vendorCatalogueRepoInstance.save(xParamUpdate, 'update');
+				
 				xJoDataResult.push({
 					product_code: xRows[index].code,
 					status: true
@@ -754,6 +758,27 @@ class VendorCatalogueService {
 
 					// console.log(`>>> Product: ${JSON.stringify(xProduct)}`);
 				}
+			}
+			
+			// then update store link in FPB Item
+			if (xUpdate.status_code == '00') {
+				var link = xRows[index].linked_item
+				var xFindPrItem = await _purchaseRequestDetailRepo.getByParam({
+					product_code: xRows[index].code,
+					pr_no: xRows[index].pr_number,
+					// request_id: xRows[index].fpb_number
+				})
+				console.log(`>>> LinkedStore : ${JSON.stringify(link)}`);
+				console.log(`>>> xFindPrItem : ${JSON.stringify(xFindPrItem)}`);
+				
+
+				// Note: if the item is found then we will update the store link with the link from odoo
+				// if (xFindPrItem.status_code == '00') {
+				// 	var xUpdatePrItem = await _purchaseRequestDetailRepo.updateStoreLink({
+				// 		id: xFindPrItem.data.id,
+				// 		store_link: link
+				// 	});
+				// }
 			}
 		}
 
