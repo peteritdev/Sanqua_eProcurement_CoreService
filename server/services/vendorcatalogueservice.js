@@ -765,7 +765,7 @@ class VendorCatalogueService {
 			// then update store link in FPB Item
 			var link = xRows[index].linked_item
 			console.log(`_____>>> LinkedStore : ${JSON.stringify(link)}`);
-			if (link != undefined &&link != null && link != '') {
+			if (link != undefined && link != null && link != '') {
 				var xFindPrItem = await _purchaseRequestDetailRepo.getByParam({
 					product_code: xRows[index].code,
 					pr_no: xRows[index].pr_number,
