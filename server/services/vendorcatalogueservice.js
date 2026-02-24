@@ -671,6 +671,7 @@ class VendorCatalogueService {
 		for (var index in xRows) {
 			console.log(`_____>>> xRows : ${JSON.stringify(xRows[index])}`, index);
 			// Check Vendor Code and Product Code
+			// if vendor code or product code is empty it will return error. so it must be handled next time
 			var xVendorCatalogue = await _vendorCatalogueRepoInstance.getByVendorCodeAndProductCode({
 				vendor_code: pParam.vendor.code,
 				product_code: xRows[index].code
