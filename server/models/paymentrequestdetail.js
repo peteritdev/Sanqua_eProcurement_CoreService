@@ -44,6 +44,8 @@ module.exports = (sequelize, DataTypes) => {
 		},
 		updated_by: DataTypes.INTEGER,
 		updated_by_name: DataTypes.STRING,
+		item_type: DataTypes.INTEGER, //1:original, 2:revision
+		origin_id: DataTypes.INTEGER
 	});
 
 	PaymentRequestDetail.associate = function(models) {
@@ -68,6 +70,12 @@ module.exports = (sequelize, DataTypes) => {
 		PaymentRequestDetail.belongsTo(models.ms_taxes, {
 			foreignKey: 'tax_type',
 			as: 'tax',
+			onDelete: 'CASCADE'
+		});
+		
+		PaymentRequestDetail.belongsTo(models.tr_paymentrequestdetails, {
+			foreignKey: 'origin_id',
+			as: 'origin_detail',
 			onDelete: 'CASCADE'
 		});
 		// PaymentRequestDetail.belongsTo(models.ms_vendorcatalogues, {
