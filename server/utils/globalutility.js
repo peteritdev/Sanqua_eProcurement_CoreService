@@ -123,7 +123,9 @@ class GlobalUtility{
         var xNo = `V-${pCurrencyCode}-` + pId.padStart(3,'0');
         return xNo;
     }
-
+    async cleanText(text) {
+        return typeof text === "string" ? text.replace(/\s+/g, "") : text;
+    }
 }
 
 module.exports = GlobalUtility;

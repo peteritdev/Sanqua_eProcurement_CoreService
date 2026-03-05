@@ -14,6 +14,8 @@ const config = require(__dirname + '/../config/config.json')[env];
 // Utility
 const Utility = require('peters-globallib-v2');
 const _utilInstance = new Utility();
+const Utils = require('../utils/globalutility.js');
+const _utils = new Utils();
 
 // Repository
 const PurchaseRequestDetailRepository = require('../repository/purchaserequestdetailrepository.js');
@@ -693,7 +695,7 @@ class PurchaseRequestDetailService {
 															product_code: pParam.items[i].product_code,
 															product_name: `[${pParam.items[i].product_code}] ${pParam
 																.items[i].product_name}`,
-															product_name_odoo: pParam.items[i].product_name,
+															product_name_odoo: _utils.cleanText(pParam.items[i].product_name),
 															qty: pParam.items[i].qty,
 															note: `${pParam.items[i].description}`,
 															uom: pParam.items[i].uom,
