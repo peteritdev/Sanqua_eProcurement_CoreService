@@ -124,15 +124,9 @@ class GlobalUtility{
         return xNo;
     }
     async cleanText(text) {
-        console.log('oldText>>>>', JSON.stringify(text))
-        const newText = text.replace(/[\r\n\t\s]+/g, '');
-        // newText = newText
-        //     .replace(/[\r\n\t\s]+/g, '');
-            // .replace(/\\r\\n|\\n|\\t/g, '') // hapus escape string
-            // .replace(/[\r\n\t]/g, '')       // hapus real newline/tab
-            // .replace(/\s+/g, '');           // hapus spasi
-        console.log('newText>>>>', newText)
-        return newText ? newText : text
+        if (typeof text !== "string") return text;
+
+        return text.replace(/[\r\n\t\s]+/g, '');
     }
 }
 
