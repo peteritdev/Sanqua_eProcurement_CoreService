@@ -1125,15 +1125,21 @@ class PaymentRequestService {
 				xEncId = pParam.document_id;
 				xDecId = await _utilInstance.decrypt(pParam.document_id, config.cryptoKey.hashKey);
 				if (xDecId.status_code == '00') {
-					pParam.user_id = xDecId.decrypted;
-					xFlagProcess = true;
+					pParam.document_id = xDecId.decrypted;
+					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.user_id = xDecId.decrypted;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xDecId;
+					}
 				} else {
 					xJoResult = xDecId;
 				}
 			} else {
 				xJoResult = xDecId;
 			}
-
+			
 			if (xFlagProcess) {
 				// Check if this request id valid or not
 				var xPayreqDetail = await _repoInstance.getByParameter({ id: pParam.document_id });
@@ -1309,8 +1315,14 @@ class PaymentRequestService {
 				xEncId = pParam.document_id;
 				xDecId = await _utilInstance.decrypt(pParam.document_id, config.cryptoKey.hashKey);
 				if (xDecId.status_code == '00') {
-					pParam.user_id = xDecId.decrypted;
-					xFlagProcess = true;
+					pParam.document_id = xDecId.decrypted;
+					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.user_id = xDecId.decrypted;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xDecId;
+					}
 				} else {
 					xJoResult = xDecId;
 				}
@@ -1560,13 +1572,20 @@ class PaymentRequestService {
 			if (pParam.id != '' && pParam.user_id != '') {
 				xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
 				if (xDecId.status_code == '00') {
-					pParam.user_id = xDecId.decrypted;
 					xFlagProcess = true;
+					xEncId = pParam.id;
+					pParam.id = xDecId.decrypted;
+					xClearId = xDecId.decrypted;
+					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.user_id = xDecId.decrypted;
+						xFlagProcess = true;
+					} else {
+						xJoResult = xDecId;
+					}
 				} else {
 					xJoResult = xDecId;
 				}
-			} else {
-				xJoResult = xDecId;
 			}
 		
 
