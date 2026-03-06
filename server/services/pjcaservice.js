@@ -1311,7 +1311,8 @@ class PJCAService {
 							company_id: xPjcaDetail.data.company_id,
 							department_id: xPjcaDetail.data.department_id,
 							ecatalogue_fpb_category_item: null,
-							logged_company_id: pParam.logged_company_id
+							logged_company_id: pParam.logged_company_id,
+							approval_matrix_id: pParam.approval_matrix_id
 						};
 
 						var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
