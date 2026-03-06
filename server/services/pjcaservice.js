@@ -44,6 +44,9 @@ const _paymentRequestServiceInstance = new PaymentRequestService();
 const CurrencyService = require('../services/currencyservice.js');
 const _currencyService = new CurrencyService();
 
+const NotificationService = require('../services/notificationservice.js');
+const _notificationService = new NotificationService();
+
 const _xClassName = 'PJCAService';
 
 class PJCAService {
@@ -432,6 +435,8 @@ class PJCAService {
 												pParam.company_name = xPaymentRequest.data.company_name
 												pParam.department_id = xPaymentRequest.data.department_id
 												pParam.department_name = xPaymentRequest.data.department_name
+												pParam.employee_id = xPaymentRequest.data.employee_id
+												pParam.employee_name = xPaymentRequest.data.employee_name
 												xFlagProcess = true;
 											} else {
 												xJoResult = {
@@ -543,6 +548,18 @@ class PJCAService {
 					pParam.updated_by = pParam.user_id;
 					pParam.updated_by_name = pParam.user_name;
 					xFlagProcess = true;
+					var xPjcaDetail = await _repoInstance.getByParameter({id: pParam.id});
+					if (xPjcaDetail != null && xPjcaDetail.status_code == '00') {
+						if (xPjcaDetail.data.status == 0) {
+							pParam.company_id = xPjcaDetail.data.company_id
+							pParam.company_code = xPjcaDetail.data.company_code
+							pParam.company_name = xPjcaDetail.data.company_name
+							pParam.department_id = xPjcaDetail.data.department_id
+							pParam.department_name = xPjcaDetail.data.department_name
+							pParam.employee_id = xPjcaDetail.data.employee_id
+							pParam.employee_name = xPjcaDetail.data.employee_name
+						}
+					}
 				} else {
 					xJoResult = xDecId;
 				}
@@ -952,23 +969,6 @@ class PJCAService {
 				}
 			}
 
-			if (pParam.document_id != '' && pParam.user_id != '') {
-				xEncId = pParam.document_id;
-				xDecId = await _utilInstance.decrypt(pParam.document_id, config.cryptoKey.hashKey);
-				if (xDecId.status_code == '00') {
-					xFlagProcess = true;
-					pParam.document_id = xDecId.decrypted;
-					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
-					if (xDecId.status_code == '00') {
-						pParam.user_id = xDecId.decrypted;
-						xFlagProcess = true;
-					} else {
-						xJoResult = xDecId;
-					}
-				} else {
-					xJoResult = xDecId;
-				}
-			}
 
 			if (xFlagProcess) {
 				// Check if this request id valid or not
@@ -1016,14 +1016,63 @@ class PJCAService {
 											xJoResult = xUpdateResult;
 										}
 									} else {
-																		// Sort first
-										xResultApprovalMatrixDocument.approvers = xResultApprovalMatrixDocument.approvers.sort(
-											(a, b) => {
-												if (a.sequence < b.sequence) {
-													return -1;
+										// Send to next approver...
+										const xApproverIds = []
+										let xNextApprover = xResultApprovalMatrixDocument.approvers[0].approver_user;
+										console.log(`>>> xNextApprover : ${JSON.stringify(xNextApprover)}`);
+										if (xNextApprover != null) {
+											for (var i in xNextApprover) {
+												xApproverIds.push(xNextApprover[i].user_id)
+												let xInAppNotificationResult = await _notificationService.inAppNotification({
+													document_code: xPjcaDetail.data.document_no,
+													document_id: xEncId,
+													document_status: xPjcaDetail.data.status,
+													mode: 'request_approval_pjca',
+													method: pParam.method,
+													token: pParam.token,
+													employee_id: await _utilInstance.encrypt(
+														xNextApprover[i].employee_id.toString(),
+														config.cryptoKey.hashKey
+													)
+												});
+
+												// Email Notification
+												let xParamEmailNotification,
+													xNotificationResult = {};
+
+												if (xNextApprover[i].notification_via_email) {
+													xParamEmailNotification = {
+														mode: 'request_approval_pjca',
+														id: xEncId,
+														request_no: xPjcaDetail.data.document_no,
+														company_name: xPjcaDetail.data.company_name,
+														department_name: xPjcaDetail.data.department_name,
+														created_by: xPjcaDetail.data.employee_name,
+														created_at:
+															xPjcaDetail.data.createdAt != null
+																? moment(xPjcaDetail.data.createdAt).format('DD MMM YYYY')
+																: '',
+														items: xPjcaDetail.data.pjca_detail,
+														approver_user: {
+															employee_name: xNextApprover[i].user_name,
+															email: xNextApprover[i].email
+														}
+													};
+													xNotificationResult = await _notificationService.sendNotificationEmail_CANeedApproval(
+														xParamEmailNotification,
+														pParam.method,
+														pParam.token
+													);
+													console.log(`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`);
 												}
 											}
-										);
+											// update current approval id
+											let xPrdUpdateApprovalId = {
+												id: xPayreqDetail.data.id,
+												current_approval_ids: xApproverIds
+											}
+											await _repoInstance.save(xPrdUpdateApprovalId, 'update')
+										}
 
 										xJoResult = {
 											status_code: '00',
