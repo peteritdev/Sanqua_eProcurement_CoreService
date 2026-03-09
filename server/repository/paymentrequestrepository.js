@@ -458,9 +458,7 @@ class PaymentRequestRepository {
 					logging: true
 				};
 				
-				// console.log(`>>> xUpdateApproval.pParam: ${JSON.stringify(pParam)}`);
 				xSaved = await _modelDb.update(pParam, xWhere);
-				// console.log(`>>> xSaved: ${JSON.stringify(xSaved)}`);
 				if (xSaved[0] > 0) {
 					await xTransaction.commit();
 					xJoResult = {

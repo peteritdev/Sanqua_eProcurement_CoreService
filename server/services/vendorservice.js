@@ -140,7 +140,8 @@ class VendorService {
                     website: xRows[index].website,
                     status: xRows[index].status,
                     currency: xRows[index].currency,
-                    review_status: xRows[index].review_status
+                    review_status: xRows[index].review_status,
+                    is_onlineshop: xRows[index].is_onlineshop
                 });
             }
 
@@ -194,7 +195,7 @@ class VendorService {
                 if( xData.email != null && xData.email != '' && xData.email.length > 60) {
                     // if (xData.email.length == 65) {
                         const dec = await _utilInstance.decrypt( xData.email, config.cryptoKey.hashKey);
-                        if (dec) {
+                        if (dec != null && dec.status_code == '00') {
                             email = dec.decrypted; 
                         } else {
                             email = xData.email
@@ -275,7 +276,8 @@ class VendorService {
                         year_founded: xData.year_founded,
                         urlPath: `${config.imagePathESanQua}/vendors/logo/`,
                         documents: documents,
-                        review_status: xData.review_status
+                        review_status: xData.review_status,
+                        is_onlineshop: xData.is_onlineshop
                     }
                 }
             }
@@ -357,6 +359,11 @@ class VendorService {
                     param = await _secureInstance.encryptCriticalField(param);
                     joResult = await _vendorRepoInstance.save( param );
                 // }
+            } else {
+                joResult = {
+                    status_code: "-99",
+                    status_msg: "Invalid user ID"
+                }
             }
 
         }else{

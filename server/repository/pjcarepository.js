@@ -404,6 +404,7 @@ class PJCARepository {
 				};
 
 				xSaved = await _modelDb.update(pParam, xWhere, { xTransaction });
+				// console.log
 				if (xSaved[0] > 0) {
 					await xTransaction.commit();
 					xJoResult = {
