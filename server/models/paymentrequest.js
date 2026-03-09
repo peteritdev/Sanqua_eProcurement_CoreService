@@ -74,6 +74,10 @@ module.exports = (sequelize, DataTypes) => {
 			foreignKey: 'purchase_request_id',
 			as: 'purchase_request'
 		});
+		PaymentRequest.hasMany(models.tr_pjcas, {
+			foreignKey: 'payment_request_id',
+			as: 'pjca'
+		});
 	};
 
 	return PaymentRequest;
