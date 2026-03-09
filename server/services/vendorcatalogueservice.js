@@ -31,6 +31,9 @@ const _unitRepoInstance = new UnitRepository();
 const CurrencyRepository = require('../repository/currencyrepository.js');
 const _currencyRepoInstance = new CurrencyRepository();
 
+const PurchaseRequestDetailRepository = require('../repository/purchaserequestdetailrepository.js');
+const _purchaseRequestDetailRepo = new PurchaseRequestDetailRepository();
+
 const multer = require('multer');
 const _xlsToJson = require('xls-to-json-lc');
 const _xlsxToJson = require('xlsx-to-json-lc');
@@ -662,10 +665,13 @@ class VendorCatalogueService {
 		var xJoDataResult = [];
 
 		var xRows = pParam.product;
+		console.log(`_____>>> pParam : ${JSON.stringify(pParam)}`);
 
 		// Loop each line
 		for (var index in xRows) {
+			console.log(`_____>>> xRows : ${JSON.stringify(xRows[index])}`, index);
 			// Check Vendor Code and Product Code
+			// if vendor code or product code is empty it will return error. so it must be handled next time
 			var xVendorCatalogue = await _vendorCatalogueRepoInstance.getByVendorCodeAndProductCode({
 				vendor_code: pParam.vendor.code,
 				product_code: xRows[index].code
@@ -698,6 +704,7 @@ class VendorCatalogueService {
 					sync_from_odoo_at: await _utilInstance.getCurrDateTime()
 				};
 				var xUpdate = await _vendorCatalogueRepoInstance.save(xParamUpdate, 'update');
+				
 				xJoDataResult.push({
 					product_code: xRows[index].code,
 					status: true
@@ -753,6 +760,28 @@ class VendorCatalogueService {
 					}
 
 					// console.log(`>>> Product: ${JSON.stringify(xProduct)}`);
+				}
+			}
+			
+			// then update store link in FPB Item
+			var link = xRows[index].linked_item
+			console.log(`_____>>> LinkedStore : ${JSON.stringify(link)}`);
+			if (link != undefined && link != null && link != '') {
+				var xFindPrItem = await _purchaseRequestDetailRepo.getByParam({
+					product_code: xRows[index].code,
+					pr_no: xRows[index].pr_number,
+					// request_id: xRows[index].fpb_number
+				})
+				console.log(`>>> xFindPrItem : ${JSON.stringify(xFindPrItem)}`);
+
+				// Note: if the item is found then we will update the store link with the link from odoo
+				if (xFindPrItem.status_code == '00') {
+					const xPayload = {
+						id: [xFindPrItem.data.id],
+						store_link: link
+					}
+					var xUpdatePrItem = await _purchaseRequestDetailRepo.save(xPayload, 'update_link');
+					console.log(`>>> xUpdatePrItem : ${JSON.stringify(xUpdatePrItem)}`);
 				}
 			}
 		}

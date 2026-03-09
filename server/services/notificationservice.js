@@ -359,6 +359,32 @@ class NotificationService {
 		return xJoResult;
 	}
 
+	// async sendNotificationEmail_VendorRegistration(pParam, pMethod, pToken) {
+	// 	var xJoResult = {};
+
+	// 	try {
+	// 		let xAddNotifResult = await _oAuthService.eSanQuaNotification(
+	// 			pMethod,
+	// 			pToken,
+	// 			pParam,
+	// 			'/notification/email/vendor_registration'
+	// 		);
+
+	// 		xJoResult = {
+	// 			status_code: '00',
+	// 			status_msg: 'OK',
+	// 			notification_result: xAddNotifResult
+	// 		};
+	// 	} catch (e) {
+	// 		xJoResult = {
+	// 			status_code: '-99',
+	// 			status_msg: `Exception error ${_xClassName}.sendNotificationEmail_VendorRegistration: ${e.message}`
+	// 		};
+	// 	}
+
+	// 	return xJoResult;
+	// }
+	
 	async sendNotificationEmail_CANeedApproval(pParam, pMethod, pToken) {
 		var xJoResult = {};
 

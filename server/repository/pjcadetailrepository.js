@@ -116,6 +116,81 @@ class PJCADetailRepository {
 		return xData;
 	}
 
+	async getByParam(pParam) {
+		var xInclude = [];
+		var xWhereOr = [];
+		var xWhereAnd = [];
+		var xWhere = [];
+		var xAttributes = [];
+		var xJoResult = {};
+
+		try {
+			xInclude = [
+				{
+					model: _modelPJCA,
+					as: 'pjca',
+					attributes: [ 'id', 'document_no', 'status' ]
+				}
+			];
+
+			if (pParam.hasOwnProperty('id')) {
+				if (pParam.id != '') {
+					xWhereAnd.push({
+						id: pParam.id
+					});
+				}
+			}
+
+			if (pParam.hasOwnProperty('prd_id')) {
+				if (pParam.prd_id != '') {
+					xWhereAnd.push({
+						prd_id: pParam.prd_id
+					});
+				}
+			}
+
+			if (pParam.hasOwnProperty('cad_id')) {
+				if (pParam.cad_id != '') {
+					xWhereAnd.push({
+						cad_id: pParam.cad_id
+					});
+				}
+			}
+
+			if (xWhereAnd.length > 0) {
+				xWhere.push({
+					[Op.and]: xWhereAnd
+				});
+			}
+			var xData = await _modelDb.findOne({
+				where: xWhere,
+				include: xInclude,
+				subQuery: false
+			});
+
+			if (xData) {
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					data: xData
+				};
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Data not found'
+				};
+			}
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.getById`, `Exception error: ${e.message}`, 'error');
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `Failed get data. Error : ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
+	
 	async delete(pParam) {
 		let xTransaction;
 		var xJoResult = {};
