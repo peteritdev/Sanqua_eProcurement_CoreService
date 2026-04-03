@@ -16,7 +16,8 @@ const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
 const _modelTax = require('../models').ms_taxes;
 const _modelPJCADb = require('../models').tr_pjcas;
-// const _modelBudgetPlan = require('../models').tr_budgetplans;
+const _modelProject = require('../models').ms_projects;
+const _modelBudgetPlan = require('../models').tr_budgetplans;
 
 const Utility = require('peters-globallib-v2');
 const { param } = require('express-validator');
@@ -40,7 +41,19 @@ class PaymentRequestRepository {
 				{
 					model: _modelPurchaseRequest,
 					as: 'purchase_request',
-					attributes: [ 'id', 'request_no' ]
+					attributes: [ 'id', 'request_no' ],
+					include: [
+						{
+							model: _modelBudgetPlan,
+							as: 'budget_plan',
+							attributes: [ 'id', 'name', 'budget_no' ]
+						},
+						{
+							model: _modelProject,
+							as: 'project',
+							attributes: [ 'id', 'code', 'name', 'odoo_project_code' ]
+						},
+					]
 				},
 				{
 					model: _modelPaymentRequestDetail,

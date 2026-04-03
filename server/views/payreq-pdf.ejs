@@ -338,7 +338,7 @@
         >
           <span> Untuk Pembayaran </span>
           <span margin: 0 5px">: </span>
-          <span> <%=data.data.payment_desc%> </span>
+          <span> <%=data.data.purchase_request.project ? "(" + data.data.purchase_request.project.odoo_project_code + "/" + data.data.purchase_request.project.name +") " + data.data.purchase_request.budget_plan.name : data.data.payment_desc%> </span>
         </td>
       </tr>
       <tr>
@@ -372,7 +372,8 @@
               <!-- tabel body -->
               <%
                   var index = 1;
-                  data.data.payment_request_detail.forEach( item => {
+                  const filteredData = data.data.payment_request_detail.filter(item => item.status != -1);
+                  filteredData .forEach( item => {
               %>
               <tr>
                 <td style="text-align: center;" class="border-rb p-relative"><%=index%>.
