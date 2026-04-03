@@ -455,6 +455,32 @@ class PurchaseRequestDetailRepository {
 					status_code: '00',
 					status_msg: 'Data has been successfully updated'
 				};
+			} else if (pAct == 'revision') {
+				var xId = pParam.id;
+				delete pParam.id;
+				var xWhere = {
+					where: {
+						id: xId
+					},
+					transaction: xTransaction
+				};
+				
+				xSaved = await _modelDb.update(pParam, xWhere);
+
+				if (xSaved) {
+					await xTransaction.commit();
+					xJoResult = {
+						status_code: '00',
+						status_msg: 'Data has been successfully updated'
+					};
+				} else {
+					if (xTransaction) await xTransaction.rollback();
+
+					xJoResult = {
+						status_code: '-99',
+						status_msg: `Failed save to database ${xSqlErrMsg}`
+					};
+				}
 			}
 		} catch (e) {
 			if (xTransaction) await xTransaction.rollback();
