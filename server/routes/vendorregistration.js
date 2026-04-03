@@ -81,20 +81,4 @@ module.exports = (app) => {
 		check('id').not().isEmpty().withMessage('Parameter id cannot be empty')
 	];
 	app.delete(rootAPIPath + 'delete/:id', arrValidate, vendorRegistrationController.vendorRegistration_Delete);
-
-	arrValidate = [];
-	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
-	app.post(rootAPIPath + 'fetch_matrix', arrValidate, vendorRegistrationController.vendorRegistration_FetchMatrix);
-
-	arrValidate = [];
-	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
-	app.post(rootAPIPath + 'confirm', arrValidate, vendorRegistrationController.vendorRegistration_Confirm);
-
-	// Reject RAB
-	arrValidate = [];
-	arrValidate = [
-		check('id').not().isEmpty().withMessage('Parameter id cannot be empty'),
-		check('reject_reason').not().isEmpty().withMessage('Parameter reject_reason cannot be empty')
-	];
-	app.post(rootAPIPath + 'reject', arrValidate, vendorRegistrationController.vendorRegistration_Reject);
 };

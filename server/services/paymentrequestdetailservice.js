@@ -299,6 +299,7 @@ class PaymentRequestDetailService {
 					}
 					// check if given param item_type = 2 then update status payreq item to -1 (revision) 
 					// and create new item with item_type = 2
+					console.log(`>>> ItemType : ${JSON.stringify(pParam)}`);
 					if (pParam.hasOwnProperty('item_type') && pParam.item_type == 2) {
 						console.log(`>>> update and create new item .>>>`);
 						// get detail old item first
@@ -322,7 +323,6 @@ class PaymentRequestDetailService {
 										id: pParam.id,
 										status: -1
 									}
-									console.log(`>>> xUpdateOldItem .>>>`, xUpdateOldItem);
 									xUpdateResult = await _repoInstance.save(xUpdateOldItem, 'update');
 									if (xUpdateResult.status_code == '00') {
 										// update purchase request detail item qty_done with revised qty_request - old qty_request
@@ -333,8 +333,7 @@ class PaymentRequestDetailService {
 												id: pParam.prd_id,
 												qty_paid: xQtyLeft - (xGetCaItem.data.qty_request - pParam.qty_request)
 											}
-											
-											let xUpdatePrdItem = await _purchaseRequestDetailRepoInstance.save(xPrdUpdateParam, 'update')
+											let xUpdatePrdItem = await _purchaseRequestDetailRepoInstance.save(xPrdUpdateParam, 'revision')
 											console.log(`>>> xUpdatePrdItem .>>>`, xUpdatePrdItem);
 											if (xUpdatePrdItem.status_code == '00') {
 												// create new revision item

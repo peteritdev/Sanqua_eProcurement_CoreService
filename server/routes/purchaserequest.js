@@ -252,27 +252,26 @@ module.exports = (app) => {
 		check('id', 'Parameter id must be array and cannot be empty').not().isEmpty().isArray()
 	];
 	app.post(rootAPIPath + 'save_detail_link', arrValidate, purchaseRequestController.purchaseRequestDetail_SaveLink);
+	// arrValidate = [];
+	// arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
+	// app.post(
+	// 	rootAPIPath + 'item/paid', arrValidate, purchaseRequestController.purchaseRequestDetail_PaidItem
+	// );
 
-	arrValidate = [];
-	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
-	app.post(
-		rootAPIPath + 'item/paid', arrValidate, purchaseRequestController.purchaseRequestDetail_PaidItem
-	);
-
-	// List Deviasi item FPB dengan RAB
-	arrValidate = [];
-	arrValidate = [
-		check('offset', 'Parameter offset must be integer and cannot be empty').not().isEmpty().isInt(),
-		check('limit').not().isEmpty().withMessage('Parameter limit cannot be empty')
-	];
-	app.get(rootAPIPath + 'item/deviation/list', arrValidate, purchaseRequestController.purchaseRequestDetail_DeviationList);
+	// // List Deviasi item FPB dengan RAB
+	// arrValidate = [];
+	// arrValidate = [
+	// 	check('offset', 'Parameter offset must be integer and cannot be empty').not().isEmpty().isInt(),
+	// 	check('limit').not().isEmpty().withMessage('Parameter limit cannot be empty')
+	// ];
+	// app.get(rootAPIPath + 'item/deviation/list', arrValidate, purchaseRequestController.purchaseRequestDetail_DeviationList);
 	
-	// Subtitute Item
-	arrValidate = [];
-	arrValidate = [
-		check('act').not().isEmpty().withMessage('Parameter act cannot be empty'),
-		check('id').not().isEmpty().withMessage('Parameter item_id cannot be empty'),
-		check('request_id').not().isEmpty().withMessage('Parameter request_id cannot be empty')
-	];
-	app.post(rootAPIPath + 'item/subtitute', arrValidate, purchaseRequestController.purchaseRequestDetail_Subtitute);
+	// // Subtitute Item
+	// arrValidate = [];
+	// arrValidate = [
+	// 	check('act').not().isEmpty().withMessage('Parameter act cannot be empty'),
+	// 	check('id').not().isEmpty().withMessage('Parameter item_id cannot be empty'),
+	// 	check('request_id').not().isEmpty().withMessage('Parameter request_id cannot be empty')
+	// ];
+	// app.post(rootAPIPath + 'item/subtitute', arrValidate, purchaseRequestController.purchaseRequestDetail_Subtitute);
 };

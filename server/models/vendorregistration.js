@@ -9,7 +9,6 @@ module.exports = (sequelize, DataTypes) => {
 		},
 		request_no: DataTypes.STRING,
 		name: DataTypes.STRING,
-		code: DataTypes.STRING(15),
 		business_entity: DataTypes.SMALLINT, // 1:UD, 2:CV, 3:PT, 4:Lain-lain
 		year_founded: DataTypes.STRING(4),
 		address: DataTypes.STRING,
@@ -56,7 +55,6 @@ module.exports = (sequelize, DataTypes) => {
 			defaultValue: 0
 		},
 		created_by_name: DataTypes.STRING,
-		created_by_email: DataTypes.STRING,
 		updatedAt: {
 			type: DataTypes.DATE,
 			field: 'updated_at'
@@ -68,8 +66,6 @@ module.exports = (sequelize, DataTypes) => {
 		updated_by_name: DataTypes.STRING,
 		created_by_company_id: DataTypes.INTEGER,
 		created_by_company_name: DataTypes.STRING,
-		created_by_department_id: DataTypes.INTEGER,
-		created_by_department_name: DataTypes.STRING,
         takeAt: {
 			type: DataTypes.DATE,
 			field: 'take_at'
@@ -84,8 +80,6 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.INTEGER,
 			defaultValue: 0
 		}, // 0: Draft, 1: Waiting, 2: Inprogress, 3: Done, 4: Cancel
-		approver_ids: DataTypes.JSONB,
-		logo: DataTypes.STRING,
 	});
 
 	// Jika ingin relasi ditambahkan, bisa diatur di sini

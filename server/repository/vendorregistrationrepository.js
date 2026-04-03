@@ -232,11 +232,8 @@ class VendorRegistrationRepository {
 				pParam.is_delete = 0;
 				pParam.created_by = pParam.user_id;
 				pParam.created_by_name = pParam.user_name;
-				pParam.created_by_email = pParam.logged_user_email;
 				pParam.created_by_company_id = pParam.logged_company_id
 				pParam.created_by_company_name = pParam.logged_company_name
-				pParam.created_by_department_id = pParam.logged_department_id
-				pParam.created_by_department_name = pParam.logged_department_name
 
 				var xSaved = await _modelDb.create(pParam, { transaction: xTransaction });
 
@@ -272,12 +269,6 @@ class VendorRegistrationRepository {
 					status_code: '00',
 					status_msg: 'Data has been successfully updated'
 				};
-			} else {
-				xJoResult = {
-					status_code: '-99',
-					status_msg: 'Invalid save action'
-				};
-				if (xTransaction) await xTransaction.rollback();
 			}
 		} catch (e) {
 			if (xTransaction) await xTransaction.rollback();

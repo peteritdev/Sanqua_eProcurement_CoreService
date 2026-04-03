@@ -15,6 +15,7 @@ const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
 const _modelTax = require('../models').ms_taxes;
+const _modelPJCADb = require('../models').tr_pjcas;
 // const _modelBudgetPlan = require('../models').tr_budgetplans;
 
 const Utility = require('peters-globallib-v2');
@@ -62,6 +63,11 @@ class PaymentRequestRepository {
 						},
 					]
 				},
+				{
+					model: _modelPJCADb,
+					as: 'pjca',
+					attributes: ['id', 'document_no', 'status'],
+				}
 			]
 
 			if (pParam.hasOwnProperty('id')) {
@@ -121,6 +127,11 @@ class PaymentRequestRepository {
 					model: _modelPurchaseRequest,
 					as: 'purchase_request',
 					attributes: [ 'id', 'request_no' ]
+				},
+				{
+					model: _modelPJCADb,
+					as: 'pjca',
+					attributes: ['id', 'document_no', 'status'],
 				}
 			];
 
@@ -381,26 +392,24 @@ class PaymentRequestRepository {
 				// 	'ALTER TABLE "tr_paymentrequestdetails" DISABLE TRIGGER "trg_update_total_item_afterinsert"'
 				// );
 
-				console.log(`>>> before xSave:end ${JSON.stringify(pParam)}`, pAct);
 				xSaved = await _modelDb.create(
 					pParam,
 					{
+						transaction: xTransaction,
 						include: [
 							{
 								model: _modelPaymentRequestDetail,
 								as: 'payment_request_detail'
 							}
 						]
-					},
-					{ transaction: xTransaction }
+					}
 				);
-				console.log(`>>> after xSave:end ${JSON.stringify(xSaved)}`);
 
 				if (xSaved != null && xSaved.id != null) {
 					xJoResult = {
 						status_code: '00',
 						status_msg: 'Data has been successfully saved',
-						created_id: await _utilInstance.encrypt(xSaved.id, config.cryptoKey.hashKey),
+						created_id: await _utilInstance.encrypt(xSaved.id.toString(), config.cryptoKey.hashKey),
 						clear_id: xSaved.id
 					};
 
@@ -444,13 +453,14 @@ class PaymentRequestRepository {
 				var xWhere = {
 					where: {
 						id: xId
-					}
+					},
+					transaction: xTransaction,
+					logging: true
 				};
-
-				xSaved = await _modelDb.update(pParam, xWhere, { xTransaction });
-				if (xSaved.length > 0) {
+				
+				xSaved = await _modelDb.update(pParam, xWhere);
+				if (xSaved[0] > 0) {
 					await xTransaction.commit();
-
 					xJoResult = {
 						status_code: '00',
 						status_msg: `Data has been successfully ${pAct}`

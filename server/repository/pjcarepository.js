@@ -339,7 +339,7 @@ class PJCARepository {
 					xJoResult = {
 						status_code: '00',
 						status_msg: 'Data has been successfully saved',
-						created_id: await _utilInstance.encrypt(xSaved.id, config.cryptoKey.hashKey),
+						created_id: await _utilInstance.encrypt(xSaved.id.toString(), config.cryptoKey.hashKey),
 						clear_id: xSaved.id
 					};
 					await xTransaction.commit();
@@ -363,14 +363,14 @@ class PJCARepository {
 				xSaved = await _modelDb.create(
 					pParam,
 					{
-						transaction: xTransaction,
 						include: [
 							{
 								model: _modelPJCADetail,
 								as: 'pjca_detail'
 							}
 						]
-					}
+					},
+					{ transaction: xTransaction }
 				);
 				console.log(`>>> after xSave:end ${JSON.stringify(xSaved)}`);
 
@@ -378,7 +378,7 @@ class PJCARepository {
 					xJoResult = {
 						status_code: '00',
 						status_msg: 'Data has been successfully saved',
-						created_id: await _utilInstance.encrypt(xSaved.id, config.cryptoKey.hashKey),
+						created_id: await _utilInstance.encrypt(xSaved.id.toString(), config.cryptoKey.hashKey),
 						clear_id: xSaved.id
 					};
 
@@ -404,9 +404,9 @@ class PJCARepository {
 				};
 
 				xSaved = await _modelDb.update(pParam, xWhere, { xTransaction });
-				if (xSaved.length > 0) {
+				// console.log
+				if (xSaved[0] > 0) {
 					await xTransaction.commit();
-
 					xJoResult = {
 						status_code: '00',
 						status_msg: `Data has been successfully ${pAct}`

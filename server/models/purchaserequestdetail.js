@@ -86,10 +86,10 @@ module.exports = (sequelize, DataTypes) => {
 		paid_by: DataTypes.INTEGER,
 		paid_by_name: DataTypes.STRING,
 		paid_note: DataTypes.STRING,
-		rab_item_id: DataTypes.INTEGER,
-		rab_qty_gap: DataTypes.INTEGER,
-		is_deviation_fulfilled: DataTypes.BOOLEAN,
-		is_subtitute: DataTypes.BOOLEAN,
+		// rab_item_id: DataTypes.INTEGER,
+		// rab_qty_gap: DataTypes.INTEGER,
+		// is_deviation_fulfilled: DataTypes.BOOLEAN,
+		// is_subtitute: DataTypes.BOOLEAN,
 		
 		vendor_rec_id: DataTypes.INTEGER,
 		vendor_rec_name: DataTypes.STRING,
@@ -123,23 +123,23 @@ module.exports = (sequelize, DataTypes) => {
 			onDelete: 'CASCADE'
 		});
 
-		PurchaseRequestDetail.belongsTo(models.tr_budgetplandetails, {
-			foreignKey: 'rab_item_id',
-			as: 'rab_item',
-			onDelete: 'CASCADE'
-		});
+		// PurchaseRequestDetail.belongsTo(models.tr_budgetplandetails, {
+		// 	foreignKey: 'rab_item_id',
+		// 	as: 'rab_item',
+		// 	onDelete: 'CASCADE'
+		// });
 
-		PurchaseRequestDetail.hasMany(models.tr_budgetplandetails, {
-			foreignKey: 'deviation_fpb_item_id',
-			as: 'rab_revision_item',
-			onDelete: 'CASCADE'
-		});
+		// PurchaseRequestDetail.hasMany(models.tr_budgetplandetails, {
+		// 	foreignKey: 'deviation_fpb_item_id',
+		// 	as: 'rab_revision_item',
+		// 	onDelete: 'CASCADE'
+		// });
 		
-		PurchaseRequestDetail.hasMany(models.log_fpbitemsubtitutes, {
-			foreignKey: 'pr_item_id',
-			as: 'log_subtitute',
-			onDelete: 'CASCADE'
-		});
+		// PurchaseRequestDetail.hasMany(models.log_fpbitemsubtitutes, {
+		// 	foreignKey: 'pr_item_id',
+		// 	as: 'log_subtitute',
+		// 	onDelete: 'CASCADE'
+		// });
 	};
 
 	return PurchaseRequestDetail;

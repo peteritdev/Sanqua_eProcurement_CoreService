@@ -2,7 +2,7 @@ let ejs = require('ejs');
 let pdf = require('html-pdf');
 let path = require('path');
 
-const puppeteer = require('puppeteer');
+// const puppeteer = require('puppeteer');
 const jwt = require('jsonwebtoken');
 const md5 = require('md5');
 const crypto = require('crypto');
@@ -546,7 +546,7 @@ class ExportService {
 						);
 					}
 				}
-				console.log(`>>> xApprovedUser 3: ${JSON.stringify(xApprovedUser3)}`);
+				console.log(`>>> xApprovedUser 3: ${JSON.stringify(xApprovedUser3)}`, xStringQRCodeApprover3);
 				ejs.renderFile(
 					path.join(__dirname, '../views/', 'payreq-pdf.ejs'),
 					{

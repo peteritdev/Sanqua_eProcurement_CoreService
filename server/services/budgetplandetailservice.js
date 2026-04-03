@@ -91,14 +91,6 @@ class BudgetPlanDetailService {
 								vendor_recomendation_code: xRows[i].vendor_recomendation_code,
 								budget_plan: xRows[i].budget_plan,
 								section_title: xRows[i].section_title,
-								// fpb_ids: xRows[i].fpb_ids,
-								rab_origin: xRows[i].rab_origin != null ? {
-									id: await _utilInstance.encrypt(xRows[i].rab_origin.id.toString(), config.cryptoKey.hashKey),
-									name: xDetail[index].rab_origin.name,
-									document_no: xDetail[index].rab_origin.budget_no,
-								} : null,
-								deviation_fpb_item_id: xRows[i].deviation_fpb_item_id,
-								log_subtitute: xRows[i].log_subtitute,
 								currency_id: xRows[i].currency_id,
 								currency_code: xRows[i].currency_code,
 								currency_symbol: xRows[i].currency_symbol
@@ -183,19 +175,7 @@ class BudgetPlanDetailService {
 						if (xDecId.status_code == '00') {
 							pParam.request_id = xDecId.decrypted;
 							xRequestIdClear = xDecId.decrypted;
-							// xFlagProcess = true;
-							if (pParam.hasOwnProperty('rab_origin_id') && pParam.rab_origin_id != '' && pParam.rab_origin_id != null) {
-								// Check if rab_origin_id is encrypted or not
-								xDecId = await _utilInstance.decrypt(pParam.rab_origin_id, config.cryptoKey.hashKey);
-								if (xDecId.status_code == '00') {
-									pParam.rab_origin_id = xDecId.decrypted;
-									xFlagProcess = true;
-								} else {
-									xJoResult = xDecId;
-								}
-							} else {
-								xFlagProcess = true;
-							}
+							xFlagProcess = true;
 						} else {
 							xJoResult = xDecId;
 						}
@@ -315,14 +295,6 @@ class BudgetPlanDetailService {
 							xItems[i].request_id = xRequestIdClear;
 							xItems[i].user_id = pParam.user_id;
 							xItems[i].user_name = pParam.user_name;
-							if (xItems[i].hasOwnProperty('rab_origin_id') && xItems[i].rab_origin_id != '' && xItems[i].rab_origin_id != null) {
-								// Check if rab_origin_id is encrypted or not
-								let origin_id = await _utilInstance.decrypt(xItems[i].rab_origin_id, config.cryptoKey.hashKey);
-								if (origin_id.status_code == '00') {
-									xItems[i].rab_origin_id = origin_id.decrypted;
-								}
-								
-							}
 
 							xAct = 'add';
 						}
@@ -463,8 +435,6 @@ class BudgetPlanDetailService {
 										name: xRows[i].vendor_name
 									},
 									qty: xRows[i].qty,
-									qty_remain: xRows[i].qty_remain,
-									id: await _utilInstance.encrypt(xRows[i].id.toString(), config.cryptoKey.hashKey),
 									estimate_date_use: moment(xRows[i].estimate_date_use).format('DD MMM YYYY HH:mm:ss'),
 									budget_price_per_unit: xRows[i].budget_price_per_unit
 								});
@@ -511,33 +481,27 @@ class BudgetPlanDetailService {
 			// check rab
 			var xRabDetail = rab || await _budgetPlanRepoInstance.getById({id: xRabId})
 			if (xRabDetail != null) {
-				// let xRabDetailItem = xRabDetail.budget_plan_detail
+				let xRabDetailItem = xRabDetail.budget_plan_detail
 				// console.log(`>>> xRabDetailItem: ${JSON.stringify(xRabDetailItem)}`);
 				for (let i = 0; i < xPurchaseRequestDetail.length; i++) {
-					// let xCheckRabItem = xRabDetailItem.find(({ product_id, product_code, product_name }) => product_id == xPurchaseRequestDetail[i].product_id && product_code == xPurchaseRequestDetail[i].product_code && product_name == xPurchaseRequestDetail[i].product_name)
-					if (xPurchaseRequestDetail[i].rab_item != null) {
-						let xCheckRabItem = await _repoInstance.getByParam({id: xPurchaseRequestDetail[i].rab_item.id})
-						// console.log(`>>> xCheckRabItem: ${JSON.stringify(xCheckRabItem)}`);
-						// console.log(`>>> pr.product_id: ${JSON.stringify(xPurchaseRequestDetail[i].product_id)}`);
-						// console.log(`>>> pr.product_code: ${JSON.stringify(xPurchaseRequestDetail[i].product_code)}`);
-						// console.log(`>>> pr.product_name: ${JSON.stringify(xPurchaseRequestDetail[i].product_name)}`);
-						if (xCheckRabItem != null && xCheckRabItem.length > 0) {
-							for (let j = 0; j < xCheckRabItem.length; j++) {
-								let xQtyLeft = xCheckRabItem[j].qty_remain || 0
-								let xCalculatedQty = 0
-								if (pAct == 'return') {
-									xCalculatedQty = xQtyLeft + xPurchaseRequestDetail[i].qty
-								} else if (pAct == 'decrease') {
-									xCalculatedQty = xQtyLeft - xPurchaseRequestDetail[i].qty
-								}
-								let xUpdateItemParam = {
-									id: xCheckRabItem[j].id,
-									qty_remain: xCalculatedQty
-								}
-								// console.log(`>>> xUpdateItem[${i+1}]: ${JSON.stringify(xUpdateItemParam)}`);
-								let xUpdateItem = await _repoInstance.save(xUpdateItemParam, 'update')
-							}
+					let xCheckRabItem = xRabDetailItem.find(({ product_id, product_code, product_name, budget_price_per_unit }) => budget_price_per_unit == xPurchaseRequestDetail[i].budget_price_per_unit && product_id == xPurchaseRequestDetail[i].product_id && product_code == xPurchaseRequestDetail[i].product_code && product_name == xPurchaseRequestDetail[i].product_name)
+					// console.log(`>>> xCheckRabItem: ${JSON.stringify(xCheckRabItem)}`);
+					// console.log(`>>> pr.product_id: ${JSON.stringify(xPurchaseRequestDetail[i].product_id)}`);
+					// console.log(`>>> pr.product_code: ${JSON.stringify(xPurchaseRequestDetail[i].product_code)}`);
+					// console.log(`>>> pr.product_name: ${JSON.stringify(xPurchaseRequestDetail[i].product_name)}`);
+					if (xCheckRabItem != undefined) {
+						let xQtyLeft = xCheckRabItem.qty_remain || 0
+						let xCalculatedQty = 0
+						if (pAct == 'return') {
+							xCalculatedQty = xQtyLeft + xPurchaseRequestDetail[i].qty
+						} else if (pAct == 'decrease') {
+							xCalculatedQty = xQtyLeft - xPurchaseRequestDetail[i].qty
 						}
+						let xUpdateItemParam = {
+							id: xCheckRabItem.id,
+							qty_remain: xCalculatedQty
+						}
+						let xUpdateItem = await _repoInstance.save(xUpdateItemParam, 'update')
 					}
 				}
 			}

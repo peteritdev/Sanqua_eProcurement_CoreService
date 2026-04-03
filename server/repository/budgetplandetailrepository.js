@@ -13,9 +13,9 @@ const Op = Sequelize.Op;
 // Model
 const _modelDb = require("../models").tr_budgetplandetails;
 const _modelBudgetPlan = require("../models").tr_budgetplans;
-const _modelPurchaseRequest = require('../models').tr_purchaserequests;
-const _modelPurchaseRequestDetail = require('../models').tr_purchaserequestdetails;
-const _modelLogSubtitute = require('../models').log_fpbitemsubtitutes;
+// const _modelPurchaseRequest = require('../models').tr_purchaserequests;
+// const _modelPurchaseRequestDetail = require('../models').tr_purchaserequestdetails;
+// const _modelLogSubtitute = require('../models').log_fpbitemsubtitutes;
 
 const Utility = require("peters-globallib-v2");
 const _utilInstance = new Utility();
@@ -40,33 +40,33 @@ class BudgetPlanDetailRepository {
           as: "budget_plan",
           attributes: ["budget_no", "name"],
         },
-        {
-          model: _modelBudgetPlan,
-          as: "rab_origin",
-          attributes: ["id", "budget_no", "name"],
-        },
-        {
-          model: _modelPurchaseRequestDetail,
-          as: "purchase_request_detail",
-          // attributes: ["id", "budget_no", "name"],
-        },
-        {
-          model: _modelPurchaseRequestDetail,
-          as: 'deviation_fpb_item',
-          attributes: [ 'id', 'product_code', 'product_name', 'qty'],
-          include: [
-            {
-              model: _modelPurchaseRequest,
-              as: 'purchase_request',
-              // rubah nama menjadi alias yang pendek agar dapat tertampil, karena pada level include seperti ini object tidak dapat terbaca
-              attributes: [ 'id', ['request_no', 'no'], ['status', 'stt'] ]
-            }
-          ]
-        },
-        {
-          model: _modelLogSubtitute,
-          as: 'log_subtitute'
-        }
+        // {
+        //   model: _modelBudgetPlan,
+        //   as: "rab_origin",
+        //   attributes: ["id", "budget_no", "name"],
+        // },
+        // {
+        //   model: _modelPurchaseRequestDetail,
+        //   as: "purchase_request_detail",
+        //   // attributes: ["id", "budget_no", "name"],
+        // },
+        // {
+        //   model: _modelPurchaseRequestDetail,
+        //   as: 'deviation_fpb_item',
+        //   attributes: [ 'id', 'product_code', 'product_name', 'qty'],
+        //   include: [
+        //     {
+        //       model: _modelPurchaseRequest,
+        //       as: 'purchase_request',
+        //       // rubah nama menjadi alias yang pendek agar dapat tertampil, karena pada level include seperti ini object tidak dapat terbaca
+        //       attributes: [ 'id', ['request_no', 'no'], ['status', 'stt'] ]
+        //     }
+        //   ]
+        // },
+        // {
+        //   model: _modelLogSubtitute,
+        //   as: 'log_subtitute'
+        // }
       ];
 
       if (pParam.hasOwnProperty("request_id")) {
@@ -377,13 +377,13 @@ class BudgetPlanDetailRepository {
         });
       }
     }
-    if (pParam.hasOwnProperty("deviation_fpb_item_id")) {
-      if (pParam.deviation_fpb_item_id != "") {
-        xWhereAnd.push({
-          deviation_fpb_item_id: pParam.deviation_fpb_item_id,
-        });
-      }
-    }
+    // if (pParam.hasOwnProperty("deviation_fpb_item_id")) {
+    //   if (pParam.deviation_fpb_item_id != "") {
+    //     xWhereAnd.push({
+    //       deviation_fpb_item_id: pParam.deviation_fpb_item_id,
+    //     });
+    //   }
+    // }
 
     if (xWhereAnd.length > 0) {
       xWhere.push({
