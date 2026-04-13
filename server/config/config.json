@@ -198,7 +198,7 @@
         }
       },
       "eSanqua": "http://localhost:1193/api/esanqua/v1",
-      "odoo": "http://10.10.20.6:9898/api",
+      "odoo": "http://localhost:9898/api",
       "logging": {
         "url": "http://localhost:8191/api/esanqua/log/v1/ecatalog"
       },
