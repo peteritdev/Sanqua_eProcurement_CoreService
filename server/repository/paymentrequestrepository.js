@@ -197,6 +197,14 @@ class PaymentRequestRepository {
 				}
 			}
 			
+			if (pParam.hasOwnProperty('vendor_id')) {
+				if (pParam.vendor_id != '') {
+					xWhereAnd.push({
+						vendor_id: pParam.vendor_id
+					});
+				}
+			}
+			
 			if (pParam.hasOwnProperty('status')) {
 				if (pParam.status != null && pParam.status != undefined && pParam.status != '') {
 					var xStatus = JSON.parse(pParam.status);
