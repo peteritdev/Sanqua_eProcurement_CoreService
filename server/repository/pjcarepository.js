@@ -216,6 +216,11 @@ class PJCARepository {
 				if (pParam.keyword != '') {
 					xWhereOr.push(
 						{
+							'$payment_request.document_no$': {
+								[Op.iLike]: '%' + pParam.keyword + '%'
+							}
+						},
+						{
 							document_no: {
 								[Op.iLike]: '%' + pParam.keyword + '%'
 							}
