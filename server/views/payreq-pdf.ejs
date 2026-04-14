@@ -338,7 +338,7 @@
         >
           <span> Untuk Pembayaran </span>
           <span margin: 0 5px">: </span>
-          <span> <%=data.data.purchase_request.project ? "(" + data.data.purchase_request.project.odoo_project_code + "/" + data.data.purchase_request.project.name +") " + data.data.purchase_request.budget_plan.name : data.data.payment_desc%> </span>
+          <span> <%=data.data.purchase_request.project ? "(" + data.data.purchase_request.project.odoo_project_code + "/" + data.data.purchase_request.project.name +") " : data.data.payment_desc%> </span>
         </td>
       </tr>
       <tr>
@@ -427,7 +427,7 @@
                   if(item.discount_amount != null && item.discount_amount > 0){
                   %>
                     <br/>
-                    <%='Disc: Rp' + item.discount_amount%>
+                    <%='Pph/Disc: Rp' + item.discount_amount%>
                   <%
                       }
                   %>
@@ -597,7 +597,7 @@
                 <td style="text-align: center" class="border-rb">
                 </td>
                 <td style="text-align: left" class="border-rb">
-                  Discount Global (<%=data.data.global_discount_percent%>%)
+                  Pph/Discount Global (<%=data.data.global_discount_percent%>%)
                 </td>
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
