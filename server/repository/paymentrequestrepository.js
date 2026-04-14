@@ -275,6 +275,11 @@ class PaymentRequestRepository {
 								[Op.iLike]: '%' + pParam.keyword + '%'
 							}
 						},
+						{
+							vendor_name: {
+								[Op.iLike]: '%' + pParam.keyword + '%'
+							}
+						},
 						// {
 						// 	product_name: {
 						// 		[Op.iLike]: '%' + pParam.keyword + '%'
