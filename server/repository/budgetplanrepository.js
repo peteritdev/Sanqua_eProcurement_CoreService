@@ -32,11 +32,21 @@ class BudgetPlanRepository {
 
 		try {
 			xInclude = [
-				{
-					model: _modelBudgetPlanDetail,
-					as: 'budget_plan_detail'
-				}
+				// {
+				// 	model: _modelBudgetPlanDetail,
+				// 	as: 'budget_plan_detail'
+				// }
 			];
+			// if (pParam.hasOwnProperty('export_detail') && pParam.export_detail) {
+			// 	xInclude.push(
+			// 		{
+			// 			model: _modelBudgetPlanDetail,
+			// 			as: 'budget_plan_detail',
+			// 			attributes: []
+    		// 			// attributes: ['id', 'product_id', 'product_id', 'product_code', 'product_name', 'category_id', 'category_name', 'uom_id', 'uom_name', 'qty', 'qty_remain', 'budget_price_per_unit', 'budget_price_total', 'qty','last_price','estimate_date_use','section_title','description','dimension','merk','type','material','currency_id','currency_code','currency_symbol','vendor_id','vendor_code','vendor_name','vendor_recomendation','vendor_recomendation_id','vendor_recomendation_code']
+			// 		}
+			// 	);
+			// }
 
 			if (pParam.hasOwnProperty('company_id')) {
 				if (pParam.company_id != '') {
@@ -53,6 +63,15 @@ class BudgetPlanRepository {
 						status: pParam.status
 					});
 				}
+			}
+
+			if (pParam.hasOwnProperty('start_date') && pParam.hasOwnProperty('end_date') && pParam.start_date != '' && pParam.end_date != '') {
+				// where and between date
+				xWhereAnd.push({
+					created_at: {
+						[Op.between]: [ pParam.start_date, pParam.end_date ]
+					}
+				});
 			}
 
 			if (pParam.hasOwnProperty('current_approval_ids')) {
@@ -143,7 +162,7 @@ class BudgetPlanRepository {
 				include: xInclude,
 				subQuery: false
 			};
-
+			
 			var xCountDataWithoutLimit = await _modelDb.count(xParamQuery);
 
 			if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
@@ -480,6 +499,137 @@ class BudgetPlanRepository {
 		});
 
 		return xData;
+	}
+	
+	async exportData(pParam) {
+		var xData,
+			xTotalRecord = [];
+		var xSql,
+			xSqlCount = '';
+		var xObjJsonWhere = {};
+		var xSqlWhere = ' (1=1) ';
+		var xSqlWhereOr = [];
+		var xSqlWhereOrOwnedDocument = [];
+		var xSqlOrderBy = '';
+		var xSqlLimit = '';
+		var xFlagFilterDepartment = false;
+		var xSqlGroupBy = '';
+		var xSqlFields = '';
+
+		if (pParam.hasOwnProperty('order_by')) {
+			if (pParam.order_by != '') {
+				xSqlOrderBy = ` ORDER BY a.${pParam.order_by} ${pParam.order_type != '' ? pParam.order_type : 'ASC'}`;
+			} else {
+				xSqlOrderBy = ` ORDER BY a.requested_at DESC`;
+			}
+		} else {
+			xSqlOrderBy = ` ORDER BY a.requested_at DESC`;
+		}
+
+		if (pParam.hasOwnProperty('department_id')) {
+			if (pParam.department_id != '') {
+				xSqlWhere += ' AND a.department_id = :departmentId ';
+				xObjJsonWhere.departmentId = pParam.department_id;
+			}
+		}
+
+		if (pParam.hasOwnProperty('project_id')) {
+			if (pParam.project_id != '') {
+				xSqlWhere += ' AND a.project_id = :projectId ';
+				xObjJsonWhere.projectId = pParam.project_id;
+			}
+		}
+
+		if (pParam.hasOwnProperty('start_date') && pParam.hasOwnProperty('end_date')) {
+			if (pParam.start_date != '' && pParam.end_date != '') {
+				xSqlWhere += ' AND a.created_at BETWEEN :startDate AND :endDate ';
+				xObjJsonWhere.startDate = pParam.start_date;
+				xObjJsonWhere.endDate = pParam.end_date;
+			}
+		}
+
+		if (pParam.hasOwnProperty('is_archived')) {
+			if (pParam.is_archived != '') {
+				xSqlWhere += ' AND a.is_delete = :isArchived ';
+				xObjJsonWhere.isArchived = pParam.is_archived;
+			} else {
+				xSqlWhere += ' AND a.is_delete = 0 ';
+			}
+		} else {
+			xSqlWhere += ' AND a.is_delete = 0 ';
+		}
+
+		if (pParam.hasOwnProperty('status')) {
+			if (pParam.status != '') {
+				xSqlWhere += ' AND a.status = :status ';
+				xObjJsonWhere.status = pParam.status;
+			}
+		}
+
+		// if (pParam.hasOwnProperty('user_id') && (pParam.is_admin == 0 || pParam.logged_is_admin == 0)) {
+		// 	if (pParam.user_id != '') {
+		// 		// xSqlWhereOr.push(' pr.created_by = :createdBy ');
+		// 		xSqlWhere += ' AND a.created_by = :createdBy ';
+		// 		xObjJsonWhere.createdBy = pParam.user_id;
+		// 	}
+		// }
+
+		if (pParam.hasOwnProperty('company_id')) {
+			if (pParam.company_id != '') {
+				xSqlWhere += ' AND a.company_id = :companyId ';
+				xObjJsonWhere.companyId = pParam.company_id;
+			}
+		}
+
+		xSqlFields = ` a.id, a.budget_no, a.project_id, a.project_name, a.project_code, a.company_id, a.company_name,
+			a.department_id, a.department_name, a.employee_id, a.employee_nik, a.employee_name, a.pic_employee_id, 
+			a.pic_employee_nik, a.pic_employee_name, a.total_budget_plan, a.total_plan_qty, a.status, a.reject_reason, 
+			a.approver_ids, a.file, a.note, a.rab_type, a.current_approval_ids, a.submited_at AS submitedAt, 
+			a.submited_by, a.submited_by_name, a.is_delete, a.deleted_at AS deletedAt, a.deleted_by, a.deleted_by_name, 
+			a.cancel_at AS cancelAt, a.cancel_by, a.cancel_by_name, a.cancel_reason, a.set_to_draft_at AS set_to_draftAt, 
+			a.set_to_draft_by, a.set_to_draft_by_name, a.created_at AS createdAt, a.created_by, a.created_by_name, 
+			a.updated_at AS updatedAt, a.updated_by, a.updated_by_name,a.received_at AS receivedAt,a.received_by,
+			a.received_by_name, a.done_at AS doneAt, a.done_by, a.done_by_name, a.currency_id,
+			a.currency_symbol, a.currency_code,a.budget_category,
+			b.id AS "rab_id", b.product_id, b.product_code, b.product_name, 
+			b.category_id, b.category_name, b.uom_id, b.uom_name, b.qty, b.qty_remain, 
+			b.budget_price_per_unit, b.budget_price_total, 
+			b.last_price, b.estimate_date_use,b.section_title, b.description, b.dimension,b.merk, 
+			b.type, b.material, b.currency_id,b.currency_code, b.currency_symbol, b.vendor_id, 
+			b.vendor_code, b.vendor_name, b.vendor_recomendation, b.vendor_recomendation_id,
+			b.vendor_recomendation_code`;
+
+		xSqlGroupBy = ` `;
+
+		xSql = ` SELECT ${xSqlFields}
+				 FROM tr_budgetplans a 
+						LEFT JOIN tr_budgetplandetails b ON a.id = b.request_id
+				 WHERE ${xSqlWhere} ${xSqlGroupBy}
+				  ${xSqlOrderBy}${xSqlLimit} `;
+
+		xSqlCount = ` SELECT count(distinct a.budget_no) AS total_record
+		  FROM tr_budgetplans a
+			LEFT JOIN tr_budgetplandetails b ON b.request_id = a.id
+		  WHERE ${xSqlWhere}`;
+		console.log('sql>>>', xSql);
+		
+		xData = await sequelize.query(xSql, {
+			replacements: xObjJsonWhere,
+			type: sequelize.QueryTypes.SELECT,
+			logging: true
+		});
+
+		xTotalRecord = await sequelize.query(xSqlCount, {
+			replacements: xObjJsonWhere,
+			type: sequelize.QueryTypes.SELECT
+		});
+
+		return {
+			status_code: '00',
+			status_msg: 'OK',
+			data: xData,
+			total_record: xTotalRecord[0].total_record
+		};
 	}
 }
 

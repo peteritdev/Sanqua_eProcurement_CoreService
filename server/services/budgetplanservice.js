@@ -135,14 +135,25 @@ class BudgetPlanService {
                     pParam.filter = JSON.stringify(filter)
                 }
                 
-                var xResultList = await _repoInstance.list(pParam);
+                var xResultList = null
+                if (pParam.hasOwnProperty('export_detail') && pParam.export_detail) {
+                    xResultList = await _repoInstance.exportData(pParam);
+                } else {
+                    xResultList = await _repoInstance.list(pParam);
+                }
                 if (xResultList) {
-                    // console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
+                    console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
                     if (xResultList.status_code == '00') {
-                        var xRows = xResultList.data.rows;
+                        var xRows = []
+                        if (pParam.hasOwnProperty('export_detail') && pParam.export_detail) {
+                            xRows = xResultList.data;
+                        } else {
+                            xRows = xResultList.data.rows;
+                        }
+                        // console.log(`>>> xRows: ${JSON.stringify(xRows)}`);
                         if (xRows.length > 0) {
                             for (var i in xRows) {
-                                xJoArrData.push({
+                                const xData = {
                                     id: await _utilInstance.encrypt(xRows[i].id.toString(), config.cryptoKey.hashKey),
                                     name: xRows[i].name,
                                     budget_no: xRows[i].budget_no,
@@ -197,7 +208,43 @@ class BudgetPlanService {
                                     // deleted_by_name: xRows[i].deleted_by_name
                                     // rab_type: xRows[i].rab_type,
                                     budget_category: xRows[i].budget_category
-                                });
+                                }
+                                if (pParam.hasOwnProperty('export_detail') && pParam.export_detail) {
+                                    Object.assign(xData, {
+                                        item: {
+                                            // id: xRows[i].budget_plan_detail.id,
+                                            product_id: xRows[i].product_id,
+                                            product_code: xRows[i].product_code,
+                                            product_name: xRows[i].product_name,
+                                            category_id: xRows[i].category_id,
+                                            category_name: xRows[i].category_name,
+                                            qty: xRows[i].qty,
+                                            qty_remain: xRows[i].qty_remain,
+                                            budget_price_per_unit: xRows[i].budget_price_per_unit,
+                                            budget_price_total: xRows[i].budget_price_total,
+                                            last_price: xRows[i].last_price,
+                                            uom_id: xRows[i].uom_id,
+                                            uom_name: xRows[i].uom_name,
+                                            estimate_date_use: xRows[i].estimate_date_use,
+                                            section_title: xRows[i].section_title,
+                                            description: xRows[i].description,
+                                            dimension: xRows[i].dimension,
+                                            merk: xRows[i].merk,
+                                            type: xRows[i].type,
+                                            material: xRows[i].material,
+                                            currency_id: xRows[i].currency_id,
+                                            currency_code: xRows[i].currency_code,
+                                            currency_symbol: xRows[i].currency_symbol,
+                                            vendor_id: xRows[i].vendor_id,
+                                            vendor_code: xRows[i].vendor_code,
+                                            vendor_name: xRows[i].vendor_name,
+                                            vendor_recomendation: xRows[i].vendor_recomendation,
+                                            vendor_recomendation_id: xRows[i].vendor_recomendation_id,
+                                            vendor_recomendation_name: xRows[i].vendor_recomendation_name,
+                                        }
+                                    })
+                                }
+                                xJoArrData.push(xData);
                             }
     
                             xJoResult = {
