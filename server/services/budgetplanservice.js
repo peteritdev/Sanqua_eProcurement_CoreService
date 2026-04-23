@@ -931,69 +931,70 @@ class BudgetPlanService {
 		var xClearId = '';
 
         try {
-			if (pParam.logged_is_admin !== 1) {
-				xJoResult = {
-					status_msg: "You don't have permission of this access.",
-					status_code: '-99'
-				};
-			} else {
-				if (pParam.id != '' && pParam.user_id != '') {
-					xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
-					if (xDecId.status_code == '00') {
-						xFlagProcess = true;
-						xEncId = pParam.id;
-						pParam.id = xDecId.decrypted;
-						xClearId = xDecId.decrypted;
-						xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
-						if (xDecId.status_code == '00') {
-							pParam.user_id = xDecId.decrypted;
-							xFlagProcess = true;
-						} else {
-							xJoResult = xDecId;
-						}
-					} else {
-						xJoResult = xDecId;
-					}
-				}
-
-				if (xFlagProcess) {
-					// Check if this request id valid or not
-					var xRABDetail = await _repoInstance.getById({ id: xClearId });
-					if (xRABDetail != null) {
-						if (xRABDetail.status != 2) {
-							xJoResult = {
-								status_code: '-99',
-								status_msg: 'This document can not take since the status is not Pending.'
-							};
-						} else {
-                            pParam.receivedAt = await _utilInstance.getCurrDateTime();
-                            pParam.status = 3;
-							// var xParamUpdatePR = {
-							// 	id: pParam.document_id,
-							// 	status: 3,
-							// 	user_id: pParam.user_id,
-                            //     user_name: pParam.user_name,
-                            //     rece
-							// };
-							var xUpdateResult = await _repoInstance.save(pParam, 'take');
-
-							if (xUpdateResult.status_code == '00') {
-								xJoResult = {
-									status_code: '00',
-									status_msg: 'RAB successfully received'
-								};
-							} else {
-								xJoResult = xUpdateResult;
-							}
-						}
+			
+            if (pParam.id != '' && pParam.user_id != '') {
+                xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+                if (xDecId.status_code == '00') {
+                    xFlagProcess = true;
+                    xEncId = pParam.id;
+                    pParam.id = xDecId.decrypted;
+                    xClearId = xDecId.decrypted;
+                    xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+                    if (xDecId.status_code == '00') {
+                        pParam.user_id = xDecId.decrypted;
+                        xFlagProcess = true;
                     } else {
+                        xJoResult = xDecId;
+                    }
+                } else {
+                    xJoResult = xDecId;
+                }
+            }
+
+            if (xFlagProcess) {
+                // Check if this request id valid or not
+                var xRABDetail = await _repoInstance.getById({ id: xClearId });
+                if (xRABDetail != null) {
+                    if (xRABDetail.status != 2) {
                         xJoResult = {
                             status_code: '-99',
-                            status_msg: 'Data not found. Please supply valid identifier'
+                            status_msg: 'This document can not take since the status is not Pending.'
                         };
+                    } else {
+                        if (pParam.logged_is_admin == 1 || pParam.user_id == xRABDetail.created_by) {
+                            pParam.receivedAt = await _utilInstance.getCurrDateTime();
+                            pParam.status = 3;
+                            // var xParamUpdatePR = {
+                            // 	id: pParam.document_id,
+                            // 	status: 3,
+                            // 	user_id: pParam.user_id,
+                            //     user_name: pParam.user_name,
+                            //     rece
+                            // };
+                            var xUpdateResult = await _repoInstance.save(pParam, 'take');
+
+                            if (xUpdateResult.status_code == '00') {
+                                xJoResult = {
+                                    status_code: '00',
+                                    status_msg: 'RAB successfully received'
+                                };
+                            } else {
+                                xJoResult = xUpdateResult;
+                            }
+                        } else {
+                            xJoResult = {
+                                status_msg: "You don't have permission of this access.",
+                                status_code: '-99'
+                            };
+                        }
                     }
-				}
-			}
+                } else {
+                    xJoResult = {
+                        status_code: '-99',
+                        status_msg: 'Data not found. Please supply valid identifier'
+                    };
+                }
+            }
 		} catch (e) {
 			xJoResult = {
 				status_code: '-99',
