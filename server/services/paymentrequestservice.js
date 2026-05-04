@@ -586,7 +586,7 @@ class PaymentRequestService {
 												xFpbItemQty = xArrItem[j].purchase_request_detail.qty;
 											}
 
-											if (xArrItem[j].payment_request != null && xArrItem[j].payment_request.status != 4 && xArrItem[j].payment_request.status != 5) {
+											if (xArrItem[j].payment_request != null && xArrItem[j].payment_request.status != 4 && xArrItem[j].payment_request.status != 5 && xArrItem[j].status == 0) {
 												xTotalQtyRequest += Number(xArrItem[j].qty_request || 0);
 												
 												xArrPayreqNo.push(xArrItem[j].payment_request.document_no);
@@ -909,7 +909,7 @@ class PaymentRequestService {
 									if (xResultCheckItem.status_code == '00') {
 										if (xResultCheckItem.data.count > 0) {
 											let xArrItem = xResultCheckItem.data.rows;
-											// console.log(`>>> xArrItem ${JSON.stringify(xArrItem)}`);
+											console.log(`>>> xArrItem ${JSON.stringify(xArrItem)}`);
 											let xTotalQtyRequest = 0;
 											let xFpbItemQty = 0
 											let xArrPayreqNo = []
@@ -917,7 +917,7 @@ class PaymentRequestService {
 												if (j == 0) {
 													xFpbItemQty = xArrItem[j].purchase_request_detail.qty;
 												}
-												if (xArrItem[j].payment_request != null && xArrItem[j].payment_request.status != 4 && xArrItem[j].payment_request.status != 5) {
+												if (xArrItem[j].payment_request != null && xArrItem[j].payment_request.status != 4 && xArrItem[j].payment_request.status != 5 && xArrItem[j].status == 0) {
 													xTotalQtyRequest += xArrItem[j].qty_request;
 													xArrPayreqNo.push(xArrItem[j].payment_request.document_no);
 												}
