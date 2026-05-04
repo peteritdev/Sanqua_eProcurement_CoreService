@@ -216,7 +216,7 @@ class CurrencyService {
         const pecahan = ["", "Ribu", "Juta", "Miliar", "Triliun"];
 
         function convert(number) {
-            if (number == 0) return "";
+            if (number <= 0) return "";
             if (number < 12) return bilangan[number];
             if (number < 20) return bilangan[number - 10] + " Belas";
             if (number < 100) {

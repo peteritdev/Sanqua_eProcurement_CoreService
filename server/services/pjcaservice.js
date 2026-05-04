@@ -226,7 +226,7 @@ class PJCAService {
 							});
 							if (xPayreqDetail.status_code == '00') {
 								xDetail.data.payment_request.total_price = xPayreqDetail.data.total_price || 0
-								const xDiffPrice = xDetail.data.total_price - xPayreqDetail.data.total_price
+								const xDiffPrice = xPayreqDetail.data.total_price - xDetail.data.total_price
 
 								xDetail.data.difference_type = xDiffPrice > 0 ? 'Lebih' : 'Kurang'
 								// xDetail.data.difference_price = (Math.round(
