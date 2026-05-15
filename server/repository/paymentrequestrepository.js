@@ -264,40 +264,49 @@ class PaymentRequestRepository {
 
 			if (pParam.hasOwnProperty('keyword')) {
 				if (pParam.keyword != '') {
+					let keywordArray = [];
+
+					if (Array.isArray(pParam.keyword)) {
+						keywordArray = pParam.keyword;
+					} else {
+						keywordArray = pParam.keyword
+							.split(',')
+							.map(item => item.trim())
+							.filter(item => item !== '');
+					}
+					const keywords = keywordArray.map(
+						(item) => `%${item}%`
+					);
+
 					xWhereOr.push(
 						{
 							'$purchase_request.request_no$': {
-								[Op.iLike]: '%' + pParam.keyword + '%'
+								[Op.iLike]: {[Op.any]: keywords}
+								// [Op.iLike]: '%' + pParam.keyword + '%'
 							}
 						},
 						{
 							document_no: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
+								[Op.iLike]: {[Op.any]: keywords}
+								// [Op.iLike]: '%' + pParam.keyword + '%'
 							}
 						},
 						{
 							vendor_name: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
+								[Op.iLike]: {[Op.any]: keywords}
+								// [Op.iLike]: '%' + pParam.keyword + '%'
 							}
 						},
-						// {
-						// 	product_name: {
-						// 		[Op.iLike]: '%' + pParam.keyword + '%'
-						// 	}
-						// },
-						// {
-						// 	code: {
-						// 		[Op.iLike]: '%' + pParam.keyword + '%'
-						// 	}
-						// },
 						{
 							employee_name: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
+								[Op.iLike]: {[Op.any]: keywords}
+								// [Op.iLike]: '%' + pParam.keyword + '%'
 							}
 						},
 						{
 							description: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
+								[Op.iLike]: {[Op.any]: keywords}
+								// [Op.iLike]: '%' + pParam.keyword + '%'
 							}
 						}
 					);

@@ -385,9 +385,9 @@
                     <td class="border-rb">
                       <table style="margin-left: auto;" cellspacing="0" cellpadding="0">
                         <tr>
-                          <td style="width: 50px; text-align: right; padding-right: 5px;">Realisasi: </td>
+                          <td style="width: 50px; text-align: right; padding-right: 5px;">CA: </td>
                           <td style="width: 10px; text-align: right;">Rp </td>
-                          <td style="width: 120px; text-align: right;"><%=data.data.total_price != null ? data.data.total_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                          <td style="width: 120px; text-align: right;"><%=data.data.payment_request.total_price != null ? data.data.payment_request.total_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                         </tr>
                       </table>
                     </td>
@@ -396,9 +396,9 @@
                     <td style="text-align: right" class="border-rb">
                       <table style="margin-left: auto;" cellspacing="0" cellpadding="0">
                         <tr>
-                          <td style="width: 50px; text-align: right; padding-right: 5px;">CA: </td>
+                          <td style="width: 50px; text-align: right; padding-right: 5px;">PJCA: </td>
                           <td style="width: 10px; text-align: right;" class="border-b">Rp </td>
-                          <td style="width: 120px; text-align: right;" class="border-b"><%=data.data.payment_request.total_price != null ? data.data.payment_request.total_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                          <td style="width: 120px; text-align: right;" class="border-b"><%=data.data.total_price != null ? data.data.total_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                         </tr>
                       </table>
                     </td>
