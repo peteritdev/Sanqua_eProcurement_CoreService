@@ -761,6 +761,18 @@ class PurchaseRequestDetailService {
 													let xCompanyId = xDetail.data.company.id;
 													if (xCompanyId == 10) {
 														xCompanyId = 1;
+													} else if (xCompanyId == 15) {
+														xCompanyId = 4;
+													} else if (xCompanyId == 17) {
+														xCompanyId = 3;
+													} else if (xCompanyId == 19) {
+														xCompanyId = 1;
+													} else if (xCompanyId == 20) {
+														xCompanyId = 1;
+													} else if (xCompanyId == 21) {
+														xCompanyId = 3;
+													} else if (xCompanyId == 22) {
+														xCompanyId = 3;
 													}
 
 													let xParamOdoo = {
