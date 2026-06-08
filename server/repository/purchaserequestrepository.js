@@ -351,12 +351,13 @@ class PurchaseRequestRepository {
 
 		if (pParam.hasOwnProperty('order_by')) {
 			if (pParam.order_by != '') {
-				xSqlOrderBy = ` ORDER BY ${pParam.order_by} ${pParam.order_type != '' ? pParam.order_type : 'ASC'}`;
+				// xSqlOrderBy = ` ORDER BY ${pParam.order_by} ${pParam.order_type != '' ? pParam.order_type : 'ASC'}`;
+				xSqlOrderBy = ` ORDER BY pr.created_at DESC`;
 			} else {
-				xSqlOrderBy = ` ORDER BY pr.requested_at DESC`;
+				xSqlOrderBy = ` ORDER BY pr.created_at DESC`;
 			}
 		} else {
-			xSqlOrderBy = ` ORDER BY pr.requested_at DESC`;
+			xSqlOrderBy = ` ORDER BY pr.created_at DESC`;
 		}
 
 		if (pParam.hasOwnProperty('department_id')) {
