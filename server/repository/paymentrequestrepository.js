@@ -167,6 +167,21 @@ class PaymentRequestRepository {
 					}
 				}
 			}
+			if (pParam.hasOwnProperty('prd_id')) {
+				if (pParam.prd_id != null && pParam.prd_id != undefined && pParam.prd_id != '') {
+					xInclude.push(
+						{
+							model: _modelPaymentRequestDetail,
+							as: 'payment_request_detail'
+						}
+					)
+					xWhereAnd.push({
+						'$payment_request_detail.prd_id$': {
+							[Op.in]: [pParam.prd_id]
+						}
+					});
+				}
+			}
 
 			if (pParam.hasOwnProperty('purchase_request_id')) {
 				if (pParam.purchase_request_id != '') {

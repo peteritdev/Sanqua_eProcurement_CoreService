@@ -351,12 +351,13 @@ class PurchaseRequestRepository {
 
 		if (pParam.hasOwnProperty('order_by')) {
 			if (pParam.order_by != '') {
-				xSqlOrderBy = ` ORDER BY ${pParam.order_by} ${pParam.order_type != '' ? pParam.order_type : 'ASC'}`;
+				xSqlOrderBy = ` ORDER BY pr.created_at DESC`;
+				// xSqlOrderBy = ` ORDER BY ${pParam.order_by} ${pParam.order_type != '' ? pParam.order_type : 'ASC'}`;
 			} else {
-				xSqlOrderBy = ` ORDER BY pr.requested_at DESC`;
+				xSqlOrderBy = ` ORDER BY pr.created_at DESC`;
 			}
 		} else {
-			xSqlOrderBy = ` ORDER BY pr.requested_at DESC`;
+			xSqlOrderBy = ` ORDER BY pr.created_at DESC`;
 		}
 
 		if (pParam.hasOwnProperty('department_id')) {
@@ -653,6 +654,9 @@ class PurchaseRequestRepository {
 								prd.paid_by_name,
 								prd.store_link,
 								prd.purchase_type,
+								prd.ca_manual_no,
+								prd.ca_manual_date,
+								prd.ca_type,
 								p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 				xSqlGroupBy = ` `;
@@ -954,6 +958,9 @@ class PurchaseRequestRepository {
 			prd.paid_by_name,
 			prd.store_link,
 			prd.purchase_type,
+			prd.ca_manual_no,
+			prd.ca_manual_date,
+			prd.ca_type,
 			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 		xSqlGroupBy = ` `;
@@ -1382,7 +1389,7 @@ class PurchaseRequestRepository {
 					p.id as "project_id", p.odoo_project_code, p.name as "project_name", prd.qty, prd.uom_id, prd.uom_name,
 					prd.last_price, prd.budget_price_per_unit, prd.budget_price_total, prd.status as "item_status",
 					prd.product_id, prd.product_code, prd.product_name, prd.vendor_id, prd.vendor_code, prd.vendor_name,
-					prd.currency_id, prd.currency_code, prd.currency_symbol, prd.store_link, prd.purchase_type,
+					prd.currency_id, prd.currency_code, prd.currency_symbol, prd.store_link, prd.purchase_type, prd.ca_manual_no, prd.ca_manual_date, prd.ca_type,
 					pr.created_at, pr.requested_at`;
 
 		xSqlGroupBy = ``;
@@ -1548,6 +1555,9 @@ class PurchaseRequestRepository {
 			prd.currency_symbol,
 			prd.store_link,
 			prd.purchase_type,
+			prd.ca_manual_no,
+			prd.ca_manual_date,
+			prd.ca_type,
 			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 		xSqlGroupBy = ` `;

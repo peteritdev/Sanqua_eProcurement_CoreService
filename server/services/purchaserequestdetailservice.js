@@ -761,7 +761,20 @@ class PurchaseRequestDetailService {
 													let xCompanyId = xDetail.data.company.id;
 													if (xCompanyId == 10) {
 														xCompanyId = 1;
+													} else if (xCompanyId == 15) {
+														xCompanyId = 4;
+													} else if (xCompanyId == 17) {
+														xCompanyId = 3;
+													} else if (xCompanyId == 19) {
+														xCompanyId = 1;
+													} else if (xCompanyId == 20) {
+														xCompanyId = 1;
+													} else if (xCompanyId == 21) {
+														xCompanyId = 3;
+													} else if (xCompanyId == 22) {
+														xCompanyId = 3;
 													}
+														
 
 													let xParamOdoo = {
 														name: 'New',
@@ -1481,7 +1494,7 @@ class PurchaseRequestDetailService {
 				id: pParam.id
 			});
 			if (xDetail.status_code == '00') {
-				if (xDetail.data.status != 0 && xDetail.data.status != 6) {
+				if (xDetail.data.status != 0 && xDetail.data.status != 6 && xDetail.data.status != 3) {
 					xJoResult = {
 						status_code: '-99',
 						status_msg: 'Item already proccessed, You cannot cancel this item'
@@ -1494,7 +1507,8 @@ class PurchaseRequestDetailService {
 					let xParamUpdate = {
 						id: pParam.id,
 						status: 5,
-						cancel_reason: updateAt
+						cancel_reason: updateAt,
+						ca_type: null
 					};
 					var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update_status');
 					if (xUpdateResult.status_code == '00') {
@@ -1563,7 +1577,10 @@ class PurchaseRequestDetailService {
 						prj_name: xRows[index].prj_name,
 						created_at: xRows[index].created_at,
 						is_po_created: xRows[index].is_po_created,
-						store_link: xRows[index].store_link
+						store_link: xRows[index].store_link,
+						ca_manual_no: xRows[index].ca_manual_no,
+						ca_manual_date: xRows[index].ca_manual_date,
+						ca_type: xRows[index].ca_type
 					});
 				}
 				console.log(`>>> xJoArrData: ${JSON.stringify(xJoArrData)}`);
@@ -1986,6 +2003,59 @@ class PurchaseRequestDetailService {
 					// let xItem = await _repoInstance.getByParam({ id: pParam.id });
 					console.log(`>>> xUpdateResult : ${JSON.stringify(payload)}`);
 					var xUpdateResult = await _repoInstance.save(payload, 'update_link');
+					xJoResult = xUpdateResult;
+				}
+			}
+		}
+
+		return xJoResult;
+	}
+	async updateCA(pParam) {
+		var xJoResult;
+		var xAct = pParam.act;
+		var xFlagProcess = false;
+		var xDecId = null;
+		var xArrIds = []
+
+		delete pParam.act;
+
+		var xMethod = pParam.method;
+		var xToken = pParam.token;
+
+		if (pParam.hasOwnProperty('user_id') && pParam.user_id && pParam.hasOwnProperty('request_id') && pParam.request_id) {
+			xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				pParam.user_id = xDecId.decrypted;
+				xDecId = await _utilInstance.decrypt(pParam.request_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.request_id = xDecId.decrypted;
+					xFlagProcess = true;
+				} else {
+					xJoResult = xDecId;
+					xFlagProcess = false;
+				}
+			} else {
+				xJoResult = xDecId;
+			}
+		} else {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: 'You need to supply correct parameter'
+			};
+		}
+
+		if (xFlagProcess) {
+			if (xAct == 'update') {
+				if (xFlagProcess) {
+					const payload = {
+						id: pParam.prd_ids,
+						ca_manual_date: pParam.ca_manual_date,
+						ca_manual_no: pParam.ca_manual_no,
+						ca_type: 2
+					}
+					// let xItem = await _repoInstance.getByParam({ id: pParam.id });
+					console.log(`>>> xUpdateResult : ${JSON.stringify(payload)}`);
+					var xUpdateResult = await _repoInstance.save(payload, 'update_ca');
 					xJoResult = xUpdateResult;
 				}
 			}

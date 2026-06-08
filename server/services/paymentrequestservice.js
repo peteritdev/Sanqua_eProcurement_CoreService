@@ -61,9 +61,6 @@ const _notificationService = new NotificationService();
 // const VendorCatalogueService = require('../services/vendorcatalogueservice.js');
 // const _catalogueService = new VendorCatalogueService();
 
-// const PurchaseRequestService = require('../services/purchaserequestservice.js');
-// const _purchaseRequestServiceInstance = new PurchaseRequestService();
-
 const _xClassName = 'PaymentRequestService';
 
 class PaymentRequestService {
@@ -613,6 +610,7 @@ class PaymentRequestService {
 					}
 
 					let xResult = await _repoInstance.save(pParam, xAct);
+					console.log(`>>> Save Param..>>> : ${JSON.stringify(pParam)}`);
 					if (xResult.status_code == '00') {
 						var dt = dateTime.create();
 						var xDate = dt.format('ym');
@@ -624,6 +622,22 @@ class PaymentRequestService {
 						};
 
 						var xUpdate = await _repoInstance.save(xParamUpdate, 'update');
+						console.log(`>>> Payreq Save Success>>> : ${JSON.stringify(xUpdate)}`);
+						// update fpb item ca_type to 1 = ca digital
+						if (xUpdate.status_code == '00') {
+							const xArrIds = []
+							for (let i = 0; i < pParam.purchase_request_detail.length; i++) {
+								xArrIds.push(pParam.purchase_request_detail[i].prd_id)
+							}
+							const xPayload = {
+								id: xArrIds,
+								// request_id: pParam.purchase_request_id,
+								ca_type: 1 //1:digital,2:manual
+							}
+							console.log(`>>> xPayload>>> : ${JSON.stringify(xPayload)}`);
+							var xUpdatePrdCaType = await _purchaseRequestDetailRepoInstance.save(xPayload, 'update_ca');
+						}
+
 					}
 
 					xJoResult = xResult;

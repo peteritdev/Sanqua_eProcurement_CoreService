@@ -481,6 +481,25 @@ class PurchaseRequestDetailRepository {
 						status_msg: `Failed save to database ${xSqlErrMsg}`
 					};
 				}
+			} else if (pAct == 'update_ca') {
+				var xArrIds = pParam.id;
+				delete pParam.id;
+				var xWhere = {
+					where: {
+						id: {
+							[Op.in]: xArrIds
+						}
+					},
+					transaction: xTransaction,
+					logging: true
+				};
+				xSaved = await _modelDb.update(pParam, xWhere);
+
+				await xTransaction.commit();
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'Data has been successfully updated'
+				};
 			}
 		} catch (e) {
 			if (xTransaction) await xTransaction.rollback();
@@ -962,7 +981,8 @@ class PurchaseRequestDetailRepository {
 			prd.qty, prd.qty_paid, prd.qty_done, prd.uom_id, prd.uom_name, prd.budget_price_per_unit, 
 			prd.budget_price_total, prd.estimate_date_use, pr.created_at, pr.created_by, pr.created_by_name,
 			pr.status as "pr_status", pr.category_item, pr.category_pr, pr.fpb_type,
-			pr.project_id as "prj_id", prj.name as "prj_name", prd.store_link, prd.is_po_created`;
+			pr.project_id as "prj_id", prj.name as "prj_name", prd.store_link, prd.is_po_created,
+			prd.ca_manual_no, prd.ca_manual_date, prd.ca_type`;
 
 			xSql = ` SELECT ${xSqlFields}
 			FROM tr_purchaserequestdetails as prd
