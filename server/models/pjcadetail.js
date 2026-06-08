@@ -42,7 +42,10 @@ module.exports = (sequelize, DataTypes) => {
 		updated_by: DataTypes.INTEGER,
 		updated_by_name: DataTypes.STRING,
 		prd_id: DataTypes.INTEGER,
-		cad_id: DataTypes.INTEGER
+		cad_id: DataTypes.INTEGER,
+		delivery_costs: DataTypes.DOUBLE,
+		service_costs: DataTypes.DOUBLE,
+		other_costs: DataTypes.DOUBLE
 	});
 
 	PJCADetail.associate = function(models) {

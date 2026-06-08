@@ -115,6 +115,8 @@ class PaymentRequestService {
 							var xTotalDiscWoTax = 0;
 							var xTaxes = 0;
 							var xDpp = 0
+							var xPphAmount = xDetail.data.pph_amount 
+							var xPphPercent = xDetail.data.pph_percent
 								
 							// // looping detail item
 							for (var i in xPayreqDetail) {
@@ -217,25 +219,44 @@ class PaymentRequestService {
 							if (xGlobalAmount == 0) {
 								xDetail.data.untaxed_amount = Math.round((xDetail.data.total_base_price - xDetail.data.total_discount || 0 ) * 1000) / 1000
 								if (xPayreqDetail.every( ({ tax_type }) => tax_type == 6 || tax_type == 7)) {
-									xDpp = (Math.round((xDetail.data.untaxed_amount * (11/12)) * 1000 )  / 1000) || 0
-									xDetail.data.total_tax_amount = (Math.round((xDpp * 0.12) * 1000 )  / 1000) || 0
+									if (xPayreqDetail.every( ({ tax_type }) => tax_type == 6)) {
+										xDpp = (Math.round((xDetail.data.untaxed_amount * (11/12)) * 1000 )  / 1000) || 0
+										xDetail.data.total_tax_amount = (Math.round((xDpp * 0.12) * 1000 )  / 1000) || 0
+									} else {
+										xDpp = (Math.round((xDetail.data.untaxed_amount) * 1000 )  / 1000) || 0
+										xDetail.data.total_tax_amount = (Math.round((xDpp * 0.11) * 1000 )  / 1000) || 0
+									}
 								} else {
 									xDetail.data.total_tax_amount = Math.round(( xTaxes || 0 ) * 1000) / 1000
 								}
 							} else {
 								xDetail.data.untaxed_amount = Math.round((xDetail.data.total_base_price - xGlobalAmount || 0) * 1000) / 1000
 								if (xPayreqDetail.every( ({ tax_type }) => tax_type == 6 || tax_type == 7)) {
-									xDpp = (Math.round((xDetail.data.untaxed_amount * (11/12)) * 1000 )  / 1000) || 0
 									// before update ppn12%
 									// xDetail.data.total_tax_amount = (Math.round((xDetail.data.untaxed_amount * 0.11) * 1000 )  / 1000) || 0
-									xDetail.data.total_tax_amount = (Math.round((xDpp * 0.12) * 1000 )  / 1000) || 0
+									if (xPayreqDetail.every( ({ tax_type }) => tax_type == 6)) {
+										xDpp = (Math.round((xDetail.data.untaxed_amount * (11/12)) * 1000 )  / 1000) || 0
+										xDetail.data.total_tax_amount = (Math.round((xDpp * 0.12) * 1000 )  / 1000) || 0
+									} else {
+										xDpp = (Math.round((xDetail.data.untaxed_amount) * 1000 )  / 1000) || 0
+										xDetail.data.total_tax_amount = (Math.round((xDpp * 0.11) * 1000 )  / 1000) || 0
+									}
 								} else {
 									xDetail.data.total_tax_amount = (Math.round((xTaxes) * 1000 )  / 1000) || 0
 								}
 								// xDetail.data.total_tax_amount = (Math.round((xTaxes - (xTaxes * (xDetail.data.global_discount_percent / 100))) * 1000 )  / 1000) || 0
 							}
+							
+							if (xPphAmount == 0) {
+								xDetail.data.total_pph_amount =  (Math.round((xDpp * (xDetail.data.pph_percent / 100)) * 1000 )  / 1000) || 0
+								xDetail.data.pph_amount = xDetail.data.total_pph_amount
+							} else {
+								xDetail.data.total_pph_amount =  (Math.round((xDetail.data.pph_amount) * 1000 )  / 1000) || 0
+								xDetail.data.pph_percent = (Math.round(((xDetail.data.pph_amount/xDpp) * 100) * 1000 )  / 1000) || 0
+							}
+							
 							xDetail.data.total_dpp = xDpp
-							const xPreTotalPrice = xDetail.data.untaxed_amount + xDetail.data.total_tax_amount + xDetail.data.delivery_costs + xDetail.data.service_costs + xDetail.data.other_costs
+							const xPreTotalPrice = (xDetail.data.untaxed_amount + xDetail.data.total_tax_amount + xDetail.data.delivery_costs + xDetail.data.service_costs + xDetail.data.other_costs) - xDetail.data.total_pph_amount
 							const xTotalPriceRound = Math.round((xPreTotalPrice || 0) * 1000) / 1000
 							xDetail.data.total_price = xTotalPriceRound
 							// get Detail FPB
