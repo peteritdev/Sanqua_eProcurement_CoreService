@@ -27,6 +27,8 @@ const _purchaseRequestRepoInstance = new PurchaseRequestRepository();
 // const _budgetPlanDetailRepository = new BudgetPlanDetailRepository();
 // const SubtituteItemRepository = require('../repository/subtituteitemrepository.js');
 // const _subtituteRepoInstance = new SubtituteItemRepository();
+const PaymentRequestDetailRepository = require('../repository/paymentrequestdetailrepository.js');
+const _paymentRequestDetailRepo = new PaymentRequestDetailRepository();
 
 // Service
 const ProductServiceRepository = require('../services/productservice.js');
@@ -545,22 +547,43 @@ class PurchaseRequestDetailService {
 						status_msg: 'You only can change to draft when item in CA or Cancel'
 					};
 				} else {
-					let xParamUpdate = {
-						id: pParam.id,
-						status: 0,
-						settodraft_at: await _utilInstance.getCurrDateTime(),
-						settodraft_by: pParam.logged_user_id,
-						settodraft_by_name: pParam.logged_user_name,
-						settodraft_reason: pParam.settodraft_reason
-					};
-					var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update_status');
-					if (xUpdateResult.status_code == '00') {
-						xJoResult = {
-							status_code: '00',
-							status_msg: 'Data has successfully set to draft'
+					let xFlag = true
+					// check if the item have processed in ca digital or not, if yes then must cancel ca digital first
+					const xCheckItemInCaDigital = await _paymentRequestDetailRepo.getByParam({
+						prd_id: xDetail.data.id
+					});
+					console.log(`>>> xCheckItemInCaDigital: ${JSON.stringify(xCheckItemInCaDigital)}`);
+					if (xCheckItemInCaDigital.status_code == '00') {
+						if (xCheckItemInCaDigital.data.payment_request.status != 4 && xCheckItemInCaDigital.data.payment_request.status != 5) {
+							xJoResult = {
+								status_code: '-99',
+								status_msg: 'This item already processed in CA Digital'
+							};
+							xFlag = false;
+						}
+					}
+
+					if (xFlag) {
+						let xParamUpdate = {
+							id: pParam.id,
+							status: 0,
+							settodraft_at: await _utilInstance.getCurrDateTime(),
+							settodraft_by: pParam.logged_user_id,
+							settodraft_by_name: pParam.logged_user_name,
+							settodraft_reason: pParam.settodraft_reason,
+							ca_type: null,
+							ca_manual_no: null,
+							ca_manual_date: null
 						};
-					} else {
-						xJoResult = xUpdateResult;
+						var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update_status');
+						if (xUpdateResult.status_code == '00') {
+							xJoResult = {
+								status_code: '00',
+								status_msg: 'Data has successfully set to draft'
+							};
+						} else {
+							xJoResult = xUpdateResult;
+						}
 					}
 				}
 			} else {
@@ -1493,6 +1516,7 @@ class PurchaseRequestDetailService {
 			let xDetail = await _repoInstance.getByParam({
 				id: pParam.id
 			});
+			console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`);
 			if (xDetail.status_code == '00') {
 				if (xDetail.data.status != 0 && xDetail.data.status != 6 && xDetail.data.status != 3) {
 					xJoResult = {
@@ -1500,24 +1524,42 @@ class PurchaseRequestDetailService {
 						status_msg: 'Item already proccessed, You cannot cancel this item'
 					};
 				} else {
-					const date = new Date();
-					const local = date.toLocaleString('id');
-					const updateAt = `[${local} | ${pParam.logged_user_name}]\n${pParam.cancel_reason}`;
+					let xFlag = true
+					// check if the item have processed in ca digital or not, if yes then must cancel ca digital first
+					const xCheckItemInCaDigital = await _paymentRequestDetailRepo.getByParam({
+						prd_id: xDetail.data.id
+					});
+					console.log(`>>> xCheckItemInCaDigital: ${JSON.stringify(xCheckItemInCaDigital)}`);
+					if (xCheckItemInCaDigital.status_code == '00') {
+						if (xCheckItemInCaDigital.data.payment_request.status != 4 && xCheckItemInCaDigital.data.payment_request.status != 5) {
+							xJoResult = {
+								status_code: '-99',
+								status_msg: 'This item already processed in CA Digital'
+							};
+							xFlag = false;
+						}
+					}
 
-					let xParamUpdate = {
-						id: pParam.id,
-						status: 5,
-						cancel_reason: updateAt,
-						ca_type: null
-					};
-					var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update_status');
-					if (xUpdateResult.status_code == '00') {
-						xJoResult = {
-							status_code: '00',
-							status_msg: 'Data has successfully canceled'
+					if (xFlag) {
+						const date = new Date();
+						const local = date.toLocaleString('id');
+						const updateAt = `[${local} | ${pParam.logged_user_name}]\n${pParam.cancel_reason}`;
+
+						let xParamUpdate = {
+							id: pParam.id,
+							status: 5,
+							cancel_reason: updateAt,
+							ca_type: null
 						};
-					} else {
-						xJoResult = xUpdateResult;
+						var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update_status');
+						if (xUpdateResult.status_code == '00') {
+							xJoResult = {
+								status_code: '00',
+								status_msg: 'Data has successfully canceled'
+							};
+						} else {
+							xJoResult = xUpdateResult;
+						}
 					}
 				}
 			} else {
