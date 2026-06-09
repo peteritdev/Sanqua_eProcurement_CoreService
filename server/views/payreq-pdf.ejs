@@ -88,7 +88,13 @@
               margin-left: -60px;
               font-weight: bold;
             "
-            ><strong>CASH ADVANCE</strong></span
+            >
+              <% if( data.data.company_id == 5 ){ %>
+              <strong>PAYMENT REQUEST</strong>
+              <% }else{ %>
+              <strong>CASH ADVANCE</strong>
+              <% } %>
+            </span
           >
         </td>
         <td style="width: 20%; padding: 0; text-align: left;">
@@ -604,6 +610,102 @@
                     <tr>
                       <td>Rp </td>
                       <td style="text-align: right; width: 100%;"><%=data.data.global_discount != null ? data.data.global_discount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                    </tr>
+                  </table>
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                </td>
+              </tr>
+              <%
+                  } else {
+              %>
+              <tr style="height: 20px;">
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%>. -->
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                  <!-- <%=i%> -->
+                </td>
+              </tr>
+              <%
+                  }
+              %>
+
+              <!-- PPN -->
+              <%
+              if(data.data.total_tax_amount != null && data.data.total_tax_amount > 0){
+              %>
+              <tr>
+                <td style="text-align: center" class="border-rb">
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  PPN
+                </td>
+                <td style="text-align: right" class="border-rb">
+                  <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td>Rp </td>
+                      <td style="text-align: right; width: 100%;"><%=data.data.total_tax_amount != null ? data.data.total_tax_amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                    </tr>
+                  </table>
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                </td>
+              </tr>
+              <%
+                  } else {
+              %>
+              <tr style="height: 20px;">
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%>. -->
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                  <!-- <%=i%> -->
+                </td>
+              </tr>
+              <%
+                  }
+              %>
+
+              <!-- Pph -->
+              <%
+              if(data.data.total_pph_amount != null && data.data.total_pph_amount > 0){
+              %>
+              <tr>
+                <td style="text-align: center" class="border-rb">
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  PPh (<%=data.data.pph_percent%>%)
+                </td>
+                <td style="text-align: right" class="border-rb">
+                  <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td>Rp </td>
+                      <td style="text-align: right; width: 100%;"><%=data.data.total_pph_amount != null ? data.data.total_pph_amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
                 </td>

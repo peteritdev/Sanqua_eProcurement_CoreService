@@ -45,7 +45,10 @@ module.exports = (sequelize, DataTypes) => {
 		updated_by: DataTypes.INTEGER,
 		updated_by_name: DataTypes.STRING,
 		item_type: DataTypes.INTEGER, //1:original, 2:revision
-		origin_id: DataTypes.INTEGER
+		origin_id: DataTypes.INTEGER,
+		delivery_costs: DataTypes.DOUBLE,
+		service_costs: DataTypes.DOUBLE,
+		other_costs: DataTypes.DOUBLE
 	});
 
 	PaymentRequestDetail.associate = function(models) {

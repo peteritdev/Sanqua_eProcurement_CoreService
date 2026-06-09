@@ -63,6 +63,8 @@ module.exports = (sequelize, DataTypes) => {
 		canceled_reason: DataTypes.STRING,
 		rejected_at: DataTypes.DATE,
 		rejected_reason: DataTypes.STRING,
+		pph_amount: DataTypes.DOUBLE,
+		pph_percent: DataTypes.DOUBLE
 	});
 
 	PaymentRequest.associate = function(models) {

@@ -606,6 +606,9 @@ class PurchaseRequestService {
 										paid_by_name: xRows[index].paid_by_name,
 										store_link: xRows[index].store_link,
 										purchase_type: xRows[index].purchase_type,
+										ca_manual_no: xRows[index].ca_manual_no,
+										ca_manual_date: xRows[index].ca_manual_date,
+										ca_type: xRows[index].ca_type
 									},
 									approved_at: xRows[index].approved_at,
 									budget_plan_no: xRows[index].budget_plan_no,
@@ -916,6 +919,9 @@ class PurchaseRequestService {
 							qty_done: xDetail[index].qty_done,
 							store_link: xDetail[index].store_link,
 							purchase_type: xDetail[index].purchase_type,
+							ca_manual_no: xDetail[index].ca_manual_no,
+							ca_manual_date: xDetail[index].ca_manual_date,
+							ca_type: xDetail[index].ca_type
 							// paid_at: xDetail[index].paid_at,
 							// paid_by: xDetail[index].paid_by,
 							// paid_by_name: xDetail[index].paid_by_name,
@@ -2265,7 +2271,10 @@ class PurchaseRequestService {
 						currency_code: xRows[index].currency_code,
 						currency_symbol: xRows[index].currency_symbol,
 						budget_plan_no: xRows[index].budget_plan_no,
-						store_link: xRows[index].store_link
+						store_link: xRows[index].store_link,
+						ca_manual_no: xRows[index].ca_manual_no,
+						ca_manual_date: xRows[index].ca_manual_date,
+						ca_type: xRows[index].ca_type
 					});
 				}
 
