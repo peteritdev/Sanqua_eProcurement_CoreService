@@ -27,6 +27,8 @@ const _purchaseRequestRepoInstance = new PurchaseRequestRepository();
 // const _budgetPlanDetailRepository = new BudgetPlanDetailRepository();
 // const SubtituteItemRepository = require('../repository/subtituteitemrepository.js');
 // const _subtituteRepoInstance = new SubtituteItemRepository();
+const PaymentRequestDetailRepository = require('../repository/paymentrequestdetailrepository.js');
+const _paymentRequestDetailRepo = new PaymentRequestDetailRepository();
 
 // Service
 const ProductServiceRepository = require('../services/productservice.js');
@@ -545,22 +547,43 @@ class PurchaseRequestDetailService {
 						status_msg: 'You only can change to draft when item in CA or Cancel'
 					};
 				} else {
-					let xParamUpdate = {
-						id: pParam.id,
-						status: 0,
-						settodraft_at: await _utilInstance.getCurrDateTime(),
-						settodraft_by: pParam.logged_user_id,
-						settodraft_by_name: pParam.logged_user_name,
-						settodraft_reason: pParam.settodraft_reason
-					};
-					var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update_status');
-					if (xUpdateResult.status_code == '00') {
-						xJoResult = {
-							status_code: '00',
-							status_msg: 'Data has successfully set to draft'
+					let xFlag = true
+					// check if the item have processed in ca digital or not, if yes then must cancel ca digital first
+					const xCheckItemInCaDigital = await _paymentRequestDetailRepo.getByParam({
+						prd_id: xDetail.data.id
+					});
+					console.log(`>>> xCheckItemInCaDigital: ${JSON.stringify(xCheckItemInCaDigital)}`);
+					if (xCheckItemInCaDigital.status_code == '00') {
+						if (xCheckItemInCaDigital.data.payment_request.status != 4 && xCheckItemInCaDigital.data.payment_request.status != 5) {
+							xJoResult = {
+								status_code: '-99',
+								status_msg: 'This item already processed in CA Digital'
+							};
+							xFlag = false;
+						}
+					}
+
+					if (xFlag) {
+						let xParamUpdate = {
+							id: pParam.id,
+							status: 0,
+							settodraft_at: await _utilInstance.getCurrDateTime(),
+							settodraft_by: pParam.logged_user_id,
+							settodraft_by_name: pParam.logged_user_name,
+							settodraft_reason: pParam.settodraft_reason,
+							ca_type: null,
+							ca_manual_no: null,
+							ca_manual_date: null
 						};
-					} else {
-						xJoResult = xUpdateResult;
+						var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update_status');
+						if (xUpdateResult.status_code == '00') {
+							xJoResult = {
+								status_code: '00',
+								status_msg: 'Data has successfully set to draft'
+							};
+						} else {
+							xJoResult = xUpdateResult;
+						}
 					}
 				}
 			} else {
@@ -774,6 +797,7 @@ class PurchaseRequestDetailService {
 													} else if (xCompanyId == 22) {
 														xCompanyId = 3;
 													}
+														
 
 													let xParamOdoo = {
 														name: 'New',
@@ -1492,30 +1516,50 @@ class PurchaseRequestDetailService {
 			let xDetail = await _repoInstance.getByParam({
 				id: pParam.id
 			});
+			console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`);
 			if (xDetail.status_code == '00') {
-				if (xDetail.data.status != 0 && xDetail.data.status != 6) {
+				if (xDetail.data.status != 0 && xDetail.data.status != 6 && xDetail.data.status != 3) {
 					xJoResult = {
 						status_code: '-99',
 						status_msg: 'Item already proccessed, You cannot cancel this item'
 					};
 				} else {
-					const date = new Date();
-					const local = date.toLocaleString('id');
-					const updateAt = `[${local} | ${pParam.logged_user_name}]\n${pParam.cancel_reason}`;
+					let xFlag = true
+					// check if the item have processed in ca digital or not, if yes then must cancel ca digital first
+					const xCheckItemInCaDigital = await _paymentRequestDetailRepo.getByParam({
+						prd_id: xDetail.data.id
+					});
+					console.log(`>>> xCheckItemInCaDigital: ${JSON.stringify(xCheckItemInCaDigital)}`);
+					if (xCheckItemInCaDigital.status_code == '00') {
+						if (xCheckItemInCaDigital.data.payment_request.status != 4 && xCheckItemInCaDigital.data.payment_request.status != 5) {
+							xJoResult = {
+								status_code: '-99',
+								status_msg: 'This item already processed in CA Digital'
+							};
+							xFlag = false;
+						}
+					}
 
-					let xParamUpdate = {
-						id: pParam.id,
-						status: 5,
-						cancel_reason: updateAt
-					};
-					var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update_status');
-					if (xUpdateResult.status_code == '00') {
-						xJoResult = {
-							status_code: '00',
-							status_msg: 'Data has successfully canceled'
+					if (xFlag) {
+						const date = new Date();
+						const local = date.toLocaleString('id');
+						const updateAt = `[${local} | ${pParam.logged_user_name}]\n${pParam.cancel_reason}`;
+
+						let xParamUpdate = {
+							id: pParam.id,
+							status: 5,
+							cancel_reason: updateAt,
+							ca_type: null
 						};
-					} else {
-						xJoResult = xUpdateResult;
+						var xUpdateResult = await _repoInstance.save(xParamUpdate, 'update_status');
+						if (xUpdateResult.status_code == '00') {
+							xJoResult = {
+								status_code: '00',
+								status_msg: 'Data has successfully canceled'
+							};
+						} else {
+							xJoResult = xUpdateResult;
+						}
 					}
 				}
 			} else {
@@ -1575,7 +1619,10 @@ class PurchaseRequestDetailService {
 						prj_name: xRows[index].prj_name,
 						created_at: xRows[index].created_at,
 						is_po_created: xRows[index].is_po_created,
-						store_link: xRows[index].store_link
+						store_link: xRows[index].store_link,
+						ca_manual_no: xRows[index].ca_manual_no,
+						ca_manual_date: xRows[index].ca_manual_date,
+						ca_type: xRows[index].ca_type
 					});
 				}
 				console.log(`>>> xJoArrData: ${JSON.stringify(xJoArrData)}`);
@@ -1998,6 +2045,59 @@ class PurchaseRequestDetailService {
 					// let xItem = await _repoInstance.getByParam({ id: pParam.id });
 					console.log(`>>> xUpdateResult : ${JSON.stringify(payload)}`);
 					var xUpdateResult = await _repoInstance.save(payload, 'update_link');
+					xJoResult = xUpdateResult;
+				}
+			}
+		}
+
+		return xJoResult;
+	}
+	async updateCA(pParam) {
+		var xJoResult;
+		var xAct = pParam.act;
+		var xFlagProcess = false;
+		var xDecId = null;
+		var xArrIds = []
+
+		delete pParam.act;
+
+		var xMethod = pParam.method;
+		var xToken = pParam.token;
+
+		if (pParam.hasOwnProperty('user_id') && pParam.user_id && pParam.hasOwnProperty('request_id') && pParam.request_id) {
+			xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				pParam.user_id = xDecId.decrypted;
+				xDecId = await _utilInstance.decrypt(pParam.request_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.request_id = xDecId.decrypted;
+					xFlagProcess = true;
+				} else {
+					xJoResult = xDecId;
+					xFlagProcess = false;
+				}
+			} else {
+				xJoResult = xDecId;
+			}
+		} else {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: 'You need to supply correct parameter'
+			};
+		}
+
+		if (xFlagProcess) {
+			if (xAct == 'update') {
+				if (xFlagProcess) {
+					const payload = {
+						id: pParam.prd_ids,
+						ca_manual_date: pParam.ca_manual_date,
+						ca_manual_no: pParam.ca_manual_no,
+						ca_type: 2
+					}
+					// let xItem = await _repoInstance.getByParam({ id: pParam.id });
+					console.log(`>>> xUpdateResult : ${JSON.stringify(payload)}`);
+					var xUpdateResult = await _repoInstance.save(payload, 'update_ca');
 					xJoResult = xUpdateResult;
 				}
 			}

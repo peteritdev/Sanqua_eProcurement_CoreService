@@ -351,8 +351,8 @@ class PurchaseRequestRepository {
 
 		if (pParam.hasOwnProperty('order_by')) {
 			if (pParam.order_by != '') {
-				// xSqlOrderBy = ` ORDER BY ${pParam.order_by} ${pParam.order_type != '' ? pParam.order_type : 'ASC'}`;
 				xSqlOrderBy = ` ORDER BY pr.created_at DESC`;
+				// xSqlOrderBy = ` ORDER BY ${pParam.order_by} ${pParam.order_type != '' ? pParam.order_type : 'ASC'}`;
 			} else {
 				xSqlOrderBy = ` ORDER BY pr.created_at DESC`;
 			}
@@ -505,16 +505,37 @@ class PurchaseRequestRepository {
 
 		if (pParam.hasOwnProperty('keyword')) {
 			if (pParam.keyword != '') {
+				let keywordArray = [];
+				if (Array.isArray(pParam.keyword)) {
+					keywordArray = pParam.keyword;
+				} else {
+					keywordArray = pParam.keyword
+						.split(',')
+						.map(item => item.trim())
+						.filter(item => item !== '');
+				}
+				const keywords = keywordArray.map(
+					(item) => `%${item}%`
+				);
+				// let xSqlWhereKeyword = ` 
+				// 		pr.request_no ILIKE :keyword OR
+				// 		pr.employee_name ILIKE :keyword OR
+				// 		pr.department_name ILIKE :keyword OR
+				// 		prd.product_code ILIKE :keyword OR
+				// 		prd.product_name ILIKE :keyword OR 
+				// 		pr.budget_plan_no ILIKE :keyword
+				// 	`;
 				let xSqlWhereKeyword = ` 
-						pr.request_no ILIKE :keyword OR
-						pr.employee_name ILIKE :keyword OR
-						pr.department_name ILIKE :keyword OR
-						prd.product_code ILIKE :keyword OR
-						prd.product_name ILIKE :keyword OR 
-						pr.budget_plan_no ILIKE :keyword
+						pr.request_no ILIKE ANY (ARRAY[:keywords])  OR
+						pr.employee_name ILIKE ANY (ARRAY[:keywords])  OR
+						pr.department_name ILIKE ANY (ARRAY[:keywords])  OR
+						prd.product_code ILIKE ANY (ARRAY[:keywords])  OR
+						prd.product_name ILIKE ANY (ARRAY[:keywords])  OR
+						pr.budget_plan_no ILIKE ANY (ARRAY[:keywords])
 					`;
 
-				xObjJsonWhere.keyword = `%${pParam.keyword}%`;
+				// xObjJsonWhere.keyword = `%${pParam.keyword}%`;
+				xObjJsonWhere.keywords = keywords;
 				xSqlWhere = ` ${xSqlWhere} AND (${xSqlWhereKeyword}) `;
 			}
 		}
@@ -633,6 +654,9 @@ class PurchaseRequestRepository {
 								prd.paid_by_name,
 								prd.store_link,
 								prd.purchase_type,
+								prd.ca_manual_no,
+								prd.ca_manual_date,
+								prd.ca_type,
 								p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 				xSqlGroupBy = ` `;
@@ -934,6 +958,9 @@ class PurchaseRequestRepository {
 			prd.paid_by_name,
 			prd.store_link,
 			prd.purchase_type,
+			prd.ca_manual_no,
+			prd.ca_manual_date,
+			prd.ca_type,
 			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 		xSqlGroupBy = ` `;
@@ -1362,7 +1389,7 @@ class PurchaseRequestRepository {
 					p.id as "project_id", p.odoo_project_code, p.name as "project_name", prd.qty, prd.uom_id, prd.uom_name,
 					prd.last_price, prd.budget_price_per_unit, prd.budget_price_total, prd.status as "item_status",
 					prd.product_id, prd.product_code, prd.product_name, prd.vendor_id, prd.vendor_code, prd.vendor_name,
-					prd.currency_id, prd.currency_code, prd.currency_symbol, prd.store_link, prd.purchase_type,
+					prd.currency_id, prd.currency_code, prd.currency_symbol, prd.store_link, prd.purchase_type, prd.ca_manual_no, prd.ca_manual_date, prd.ca_type,
 					pr.created_at, pr.requested_at`;
 
 		xSqlGroupBy = ``;
@@ -1528,6 +1555,9 @@ class PurchaseRequestRepository {
 			prd.currency_symbol,
 			prd.store_link,
 			prd.purchase_type,
+			prd.ca_manual_no,
+			prd.ca_manual_date,
+			prd.ca_type,
 			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
 
 		xSqlGroupBy = ` `;

@@ -95,39 +95,85 @@ class BudgetPlanRepository {
 				}
 			}
 
+			// if (pParam.hasOwnProperty('keyword')) {
+			// 	if (pParam.keyword != '') {
+			// 		xWhereOr.push(
+			// 			{
+			// 				name: {
+			// 					[Op.iLike]: '%' + pParam.keyword + '%'
+			// 				}
+			// 			},
+			// 			{
+			// 				budget_no: {
+			// 					[Op.iLike]: '%' + pParam.keyword + '%'
+			// 				}
+			// 			},
+			// 			{
+			// 				project_name: {
+			// 					[Op.iLike]: '%' + pParam.keyword + '%'
+			// 				}
+			// 			},
+			// 			{
+			// 				project_code: {
+			// 					[Op.iLike]: '%' + pParam.keyword + '%'
+			// 				}
+			// 			},
+			// 			{
+			// 				employee_name: {
+			// 					[Op.iLike]: '%' + pParam.keyword + '%'
+			// 				}
+			// 			}
+			// 		);
+			// 	}
+			// }
 			if (pParam.hasOwnProperty('keyword')) {
 				if (pParam.keyword != '') {
+					let keywordArray = [];
+
+					if (Array.isArray(pParam.keyword)) {
+						keywordArray = pParam.keyword;
+					} else {
+						keywordArray = pParam.keyword
+							.split(',')
+							.map(item => item.trim())
+							.filter(item => item !== '');
+					}
+
+					const keywords = keywordArray.map(
+						(item) => `%${item}%`
+					);
+
 					xWhereOr.push(
 						{
 							name: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
+								[Op.iLike]: {[Op.any]: keywords}
 							}
 						},
 						{
 							budget_no: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
+								[Op.iLike]: {[Op.any]: keywords}
 							}
 						},
 						{
 							project_name: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
+								[Op.iLike]: {[Op.any]: keywords}
 							}
 						},
 						{
 							project_code: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
+								[Op.iLike]: {[Op.any]: keywords}
 							}
 						},
 						{
 							employee_name: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
+								[Op.iLike]: {[Op.any]: keywords}
 							}
 						}
 					);
 				}
 			}
 			
-			if (pParam.hasOwnProperty('owned_document_no')) {
+			if (pParam.hasOwnProperty('owned_document_no') && !pParam.keyword) {
 				// console.log('pParam.owned_document_no>>', pParam.owned_document_no);
 				// if (pParam.owned_document_no != '') {
 				xWhereOr.push(
