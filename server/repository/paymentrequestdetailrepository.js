@@ -155,6 +155,15 @@ class PaymentRequestDetailRepository {
 					status_code: '00',
 					status_msg: 'Data has been successfully updated'
 				};
+			} else if (pAct == 'add_batch') {
+				xSaved = await _modelDb.bulkCreate(pParam, { transaction: xTransaction });
+				//if (xSaved.id != null) {
+				await xTransaction.commit();
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'Data has been successfully saved'
+				};
+				//}
 			}
 		} catch (e) {
 			if (xTransaction) await xTransaction.rollback();
