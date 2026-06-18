@@ -59,13 +59,32 @@ module.exports = (app) => {
 	arrValidate = [];
 	arrValidate = [
 		check('act').not().isEmpty().withMessage('Parameter act cannot be empty'),
-		check('qty_request', 'Parameter qty_request must be decimal and cannot be empty').not().isEmpty().isDecimal(),
-		check('price_request', 'Parameter price_request must be decimal and cannot be empty')
-			.not()
-			.isEmpty()
-			.isDecimal()	
+		// check('qty_request', 'Parameter qty_request must be decimal and cannot be empty').not().isEmpty().isDecimal(),
+		check('qty_request')
+			.if((value, { req }) => req.body.prd_id != undefined)
+			.notEmpty().isFloat({ gt: 0 }).withMessage('Parameter qty_request must be decimal and cannot be empty'),
+		check('price_request')
+			.if((value, { req }) => req.body.prd_id != undefined)
+			.notEmpty().isFloat({ gt: 0 }).withMessage('Parameter price_request must be decimal and cannot be empty'),
+		check('odoo_bill_no')
+			.if((value, { req }) => req.body.odoo_bill_no != undefined)
+			.not().isEmpty().withMessage('Parameter odoo_bill_no cannot be empty'),
+		check('invoice_no')
+			.if((value, { req }) => req.body.odoo_bill_no != undefined)
+			.not().isEmpty().withMessage('Parameter invoice_no cannot be empty'),
+		check('total_after_tax')
+			.if((value, { req }) => req.body.odoo_bill_no != undefined)
+			.notEmpty().isFloat({ gt: 0 }).withMessage('Parameter total_after_tax must be decimal and cannot be empty'),
 	];
 	app.post(rootAPIPath + 'detail/save', arrValidate, paymentRequestController.paymentRequestDetail_Save);
+	
+	arrValidate = [];
+	arrValidate = [
+		check('act').not().isEmpty().withMessage('Parameter act cannot be empty'),
+		check('payment_request_id').not().isEmpty().withMessage('Parameter request_id cannot be empty'),
+		check('items', 'Parameter items must be array and cannot be empty').not().isEmpty().isArray()
+	];
+	app.post(rootAPIPath + 'detail/add_batch', arrValidate, paymentRequestController.paymentRequestDetail_AddBatch);
 
 	arrValidate = [];
 	arrValidate = [ check('document_id').not().isEmpty().withMessage('Parameter document_id cannot be empty') ];
