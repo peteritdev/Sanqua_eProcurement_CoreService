@@ -588,57 +588,71 @@ class PaymentRequestService {
 								}
 								pParam.total_price = xTotalFaktur
 							} else {
-								for (var i in xJoArrItems) {
-									var xPrdId = await _utilInstance.decrypt(xJoArrItems[i].prd_id, config.cryptoKey.hashKey);
-									if (xPrdId.status_code == '00') {
-										xJoArrItems[i].prd_id = xPrdId.decrypted;
-										// delete xJoArrItems[i].prd_id
-									}
-									console.log(`>>> xPrdId ${JSON.stringify(xPrdId)}`);
-									if (
-										xJoArrItems[i].hasOwnProperty('qty_request') &&
-										xJoArrItems[i].hasOwnProperty('price_request')
-									) {
-										xJoArrItems[i].price_total =
-											xJoArrItems[i].qty_request * xJoArrItems[i].price_request;
-									}
-									// check item with same prd_id in other payment request with status not cancel and reject already created or not
-									// if already created then calculate all qty_request from other payreq item and this item then
-									// check if total qty_request is exceed qty on fpb item or not
-									// if exceed then return cannot create payreq if not then continue
-									const xResultCheckItem = await _paymentRequestDetailRepoInstance.list({prd_id: xJoArrItems[i].prd_id});
-									// console.log(`>>> xResultCheckItem ${JSON.stringify(xResultCheckItem)}`);
-									if (xResultCheckItem.status_code == '00') {
-										if (xResultCheckItem.data.count > 0) {
-											let xArrItem = xResultCheckItem.data.rows;
-											let xTotalQtyRequest = 0;
-											let xFpbItemQty = 0
-											let xArrPayreqNo = []
-											for (let j = 0; j < xArrItem.length; j++) {
-												if (j == 0) {
-													xFpbItemQty = xArrItem[j].purchase_request_detail.qty;
-												}
+								// line below to sparate payreq from FPB or w/o FPB (21/06/2026)
+								if (pParam.hasOwnProperty('purchase_request_id')) {
+									for (var i in xJoArrItems) {
+										var xPrdId = await _utilInstance.decrypt(xJoArrItems[i].prd_id, config.cryptoKey.hashKey);
+										if (xPrdId.status_code == '00') {
+											xJoArrItems[i].prd_id = xPrdId.decrypted;
+											// delete xJoArrItems[i].prd_id
+										}
+										console.log(`>>> xPrdId ${JSON.stringify(xPrdId)}`);
+										if (
+											xJoArrItems[i].hasOwnProperty('qty_request') &&
+											xJoArrItems[i].hasOwnProperty('price_request')
+										) {
+											xJoArrItems[i].price_total =
+												xJoArrItems[i].qty_request * xJoArrItems[i].price_request;
+										}
+										// check item with same prd_id in other payment request with status not cancel and reject already created or not
+										// if already created then calculate all qty_request from other payreq item and this item then
+										// check if total qty_request is exceed qty on fpb item or not
+										// if exceed then return cannot create payreq if not then continue
+										const xResultCheckItem = await _paymentRequestDetailRepoInstance.list({prd_id: xJoArrItems[i].prd_id});
+										// console.log(`>>> xResultCheckItem ${JSON.stringify(xResultCheckItem)}`);
+										if (xResultCheckItem.status_code == '00') {
+											if (xResultCheckItem.data.count > 0) {
+												let xArrItem = xResultCheckItem.data.rows;
+												let xTotalQtyRequest = 0;
+												let xFpbItemQty = 0
+												let xArrPayreqNo = []
+												for (let j = 0; j < xArrItem.length; j++) {
+													if (j == 0) {
+														xFpbItemQty = xArrItem[j].purchase_request_detail.qty;
+													}
 
-												if (xArrItem[j].payment_request != null && xArrItem[j].payment_request.status != 4 && xArrItem[j].payment_request.status != 5 && xArrItem[j].status == 0) {
-													xTotalQtyRequest += Number(xArrItem[j].qty_request || 0);
-													
-													xArrPayreqNo.push(xArrItem[j].payment_request.document_no);
+													if (xArrItem[j].payment_request != null && xArrItem[j].payment_request.status != 4 && xArrItem[j].payment_request.status != 5 && xArrItem[j].status == 0) {
+														xTotalQtyRequest += Number(xArrItem[j].qty_request || 0);
+														
+														xArrPayreqNo.push(xArrItem[j].payment_request.document_no);
+													}
 												}
-											}
-											xTotalQtyRequest += Number(xJoArrItems[i].qty_request || 0);
-											// const xResultGetPrd = await _purchaseRequestDetailRepoInstance.list({id: xJoArrItems[i].prd_id});
-											// console.log(`>>> xResultGetPrd ${JSON.stringify(xResultGetPrd)}`);
-											// console.log(`>>> xTotalQtyRequest x xFpbItemQty ${JSON.stringify(xTotalQtyRequest)}`, xFpbItemQty);
-											if (xTotalQtyRequest > xFpbItemQty) {
-												xJoResult = {
-													status_code: '-99',
-													status_msg: `Terdeteksi payreq lain yang sudah terbentuk dengan total qty request (${xTotalQtyRequest}) sudah melebihi qty pada FPB (${xFpbItemQty}) untuk item ${xJoArrItems[i].product_name}. Silahkan cek payreq dengan nomor ${xArrPayreqNo.join(', ')}`
-												};
-												return xJoResult;
+												xTotalQtyRequest += Number(xJoArrItems[i].qty_request || 0);
+												// const xResultGetPrd = await _purchaseRequestDetailRepoInstance.list({id: xJoArrItems[i].prd_id});
+												// console.log(`>>> xResultGetPrd ${JSON.stringify(xResultGetPrd)}`);
+												// console.log(`>>> xTotalQtyRequest x xFpbItemQty ${JSON.stringify(xTotalQtyRequest)}`, xFpbItemQty);
+												if (xTotalQtyRequest > xFpbItemQty) {
+													xJoResult = {
+														status_code: '-99',
+														status_msg: `Terdeteksi payreq lain yang sudah terbentuk dengan total qty request (${xTotalQtyRequest}) sudah melebihi qty pada FPB (${xFpbItemQty}) untuk item ${xJoArrItems[i].product_name}. Silahkan cek payreq dengan nomor ${xArrPayreqNo.join(', ')}`
+													};
+													return xJoResult;
+												}
 											}
 										}
+										xJoArrItems[i].item_type ? xJoArrItems[i].item_type : 1 
 									}
-									xJoArrItems[i].item_type ? xJoArrItems[i].item_type : 1 
+								} else {
+									for (var i in xJoArrItems) {
+										if (
+											xJoArrItems[i].hasOwnProperty('qty_request') &&
+											xJoArrItems[i].hasOwnProperty('price_request')
+										) {
+											xJoArrItems[i].price_total =
+												xJoArrItems[i].qty_request * xJoArrItems[i].price_request;
+										}
+										xJoArrItems[i].item_type ? xJoArrItems[i].item_type : 1 
+									}
 								}
 								pParam.purchase_request_detail = xJoArrItems;
 							}
@@ -666,23 +680,25 @@ class PaymentRequestService {
 
 						var xUpdate = await _repoInstance.save(xParamUpdate, 'update');
 						console.log(`>>> Payreq Save Success>>> : ${JSON.stringify(xUpdate)}`);
-						// update fpb item ca_type to 1 = ca digital
-						if (xUpdate.status_code == '00') {
-							if (pParam.app_category != 2) {
-								const xArrIds = []
-								for (let i = 0; i < pParam.purchase_request_detail.length; i++) {
-									xArrIds.push(pParam.purchase_request_detail[i].prd_id)
+						//21/06/2026
+						if (pParam.hasOwnProperty('purchase_request_id')) {
+							// update fpb item ca_type to 1 = ca digital
+							if (xUpdate.status_code == '00') {
+								if (pParam.app_category != 2) {
+									const xArrIds = []
+									for (let i = 0; i < pParam.purchase_request_detail.length; i++) {
+										xArrIds.push(pParam.purchase_request_detail[i].prd_id)
+									}
+									const xPayload = {
+										id: xArrIds,
+										// request_id: pParam.purchase_request_id,
+										ca_type: 1 //1:digital,2:manual
+									}
+									console.log(`>>> xPayload>>> : ${JSON.stringify(xPayload)}`);
+									var xUpdatePrdCaType = await _purchaseRequestDetailRepoInstance.save(xPayload, 'update_ca');
 								}
-								const xPayload = {
-									id: xArrIds,
-									// request_id: pParam.purchase_request_id,
-									ca_type: 1 //1:digital,2:manual
-								}
-								console.log(`>>> xPayload>>> : ${JSON.stringify(xPayload)}`);
-								var xUpdatePrdCaType = await _purchaseRequestDetailRepoInstance.save(xPayload, 'update_ca');
 							}
 						}
-
 					}
 
 					xJoResult = xResult;
@@ -763,7 +779,7 @@ class PaymentRequestService {
 							let xArrPrdId = []
 							let xPyrDetail = xDetail.data.payment_request_detail
 							// check if app_category is not bill then execute line below
-							if (xDetail.data.app_category != 2) {
+							if (xDetail.data.app_category != 2 && xDetail.data.purchase_request != null) {
 								// check total qty is not exceed qty_paid in detail fpb
 								// console.log(`>>> xPyrDetail: ${JSON.stringify(xPyrDetail)}`);
 								for (let i = 0; i < xPyrDetail.length; i++) {
@@ -795,7 +811,7 @@ class PaymentRequestService {
 								// Next Phase : Approval Matrix & Notification to admin
 								if (xUpdate.status_code == '00') {
 
-									if (xDetail.data.app_category != 2 && xDetail.data.payreq_type == 2) {
+									if (xDetail.data.app_category != 2 && xDetail.data.payreq_type == 2 && xDetail.data.purchase_request != null) {
 										// if payreq is reimburst then divide qty_paid on fpb
 										this.updatePrdItemQtyLeft(xDetail.data, 'add')
 									}
@@ -958,7 +974,7 @@ class PaymentRequestService {
 							};
 						} else {
 							// check if app_category is not bill then execute line below
-							if (xPayreqDetail.data.app_category != 2) {
+							if (xPayreqDetail.data.app_category != 2 && xPayreqDetail.data.purchase_request != null) {
 								// first check item on this payreq have created on other payreq or not
 								// if not created then continue to set to draft
 								// if already created then calculate all qty from other payreq item and this item
@@ -1143,7 +1159,9 @@ class PaymentRequestService {
 	
 								if (xUpdateResult.status_code == '00') {
 									if (xPayreqDetail.data.status != 0) {
-										this.updatePrdItemQtyLeft(xPayreqDetail.data, 'delete')
+										if (xPayreqDetail.data.purchase_request != null) {
+											this.updatePrdItemQtyLeft(xPayreqDetail.data, 'delete')
+										}
 										if (xPayreqDetail.data.payreq_type == 2) { //reimburst
 											let xDetailItem = xPayreqDetail.data.payment_request_detail
 											for (let i = 0; i < xDetailItem.length; i++) {
@@ -1260,7 +1278,9 @@ class PaymentRequestService {
 											// check if app_category is not bill then execute line below
 											if (xPayreqDetail.data.app_category != 2) {
 												if (xPayreqDetail.data.payreq_type != 2) {
-													this.updatePrdItemQtyLeft(xPayreqDetail.data, 'add')
+													if (xPayreqDetail.data.purchase_request != null) {
+														this.updatePrdItemQtyLeft(xPayreqDetail.data, 'add')
+													}
 												} else {
 													let xDetailItem = xPayreqDetail.data.payment_request_detail
 													for (let i = 0; i < xDetailItem.length; i++) {
@@ -1454,7 +1474,7 @@ class PaymentRequestService {
 								var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
 
 								if (xUpdateResult.status_code == '00') {
-									if (xPayreqDetail.data.app_category != 2 && xPayreqDetail.data.payreq_type == 2) {
+									if (xPayreqDetail.data.app_category != 2 && xPayreqDetail.data.payreq_type == 2 && xPayreqDetail.data.purchase_request != null) {
 										this.updatePrdItemQtyLeft(xPayreqDetail.data, 'delete')
 									}
 
