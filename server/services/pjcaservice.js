@@ -516,12 +516,14 @@ class PJCAService {
 							xJoArrItems = pParam.pjca_detail;
 							if (xJoArrItems.length > 0) {
 								for (var i in xJoArrItems) {
-									var xPrdId = await _utilInstance.decrypt(xJoArrItems[i].prd_id, config.cryptoKey.hashKey);
-									if (xPrdId.status_code == '00') {
-										xJoArrItems[i].prd_id = xPrdId.decrypted;
-										// delete xJoArrItems[i].prd_id
+									if (xJoArrItems[i].prd_id != null) {
+										var xPrdId = await _utilInstance.decrypt(xJoArrItems[i].prd_id, config.cryptoKey.hashKey);
+										if (xPrdId.status_code == '00') {
+											xJoArrItems[i].prd_id = xPrdId.decrypted;
+											// delete xJoArrItems[i].prd_id
+										}
+										console.log(`>>> xPrdId ${JSON.stringify(xPrdId)}`);
 									}
-									console.log(`>>> xPrdId ${JSON.stringify(xPrdId)}`);
 									if (
 										xJoArrItems[i].hasOwnProperty('price_done') &&
 										xJoArrItems[i].hasOwnProperty('qty_done')
