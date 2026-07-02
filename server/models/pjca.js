@@ -55,7 +55,10 @@ module.exports = (sequelize, DataTypes) => {
 		rejected_at: DataTypes.DATE,
 		rejected_reason: DataTypes.STRING,
 		pph_amount: DataTypes.DOUBLE,
-		pph_percent: DataTypes.DOUBLE
+		pph_percent: DataTypes.DOUBLE,
+		vendor_id: DataTypes.INTEGER,
+		vendor_name: DataTypes.STRING,
+		vendor_code: DataTypes.STRING
 	});
 
 	PJCA.associate = function(models) {

@@ -143,6 +143,11 @@ module.exports = (sequelize, DataTypes) => {
 		// 	as: 'log_subtitute',
 		// 	onDelete: 'CASCADE'
 		// });
+		PurchaseRequestDetail.hasMany(models.tr_paymentrequestdetails, {
+			foreignKey: "prd_id",
+			as: "payment_request_detail",
+			onDelete: "CASCADE",
+		});
 	};
 
 	return PurchaseRequestDetail;
