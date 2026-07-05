@@ -16,6 +16,8 @@ const _modelBudgetPlan = require('../models').tr_budgetplans;
 // const _modelBudgetPlanDetail = require('../models').tr_budgetplandetails;
 // const _modelLogSubtitute = require('../models').log_fpbitemsubtitutes;
 const _modelVendor = require('../models').ms_vendors;
+const _modelPaymentRequest = require('../models').tr_paymentrequests;
+const _modelPaymentRequestDetail = require('../models').tr_paymentrequestdetails;
 
 const Utility = require('peters-globallib-v2');
 const { param } = require('express-validator');
@@ -84,7 +86,19 @@ class PurchaseRequestRepository {
 					// {
 					// 	model: _modelLogSubtitute,
 					// 	as: 'log_subtitute'
-					// }
+					// },
+					{
+						model: _modelPaymentRequestDetail,
+						as: 'payment_request_detail',
+						attributes: [ 'id', 'product_code', 'product_name'],
+						include: [
+							{
+								model: _modelPaymentRequest,
+								as: 'payment_request',
+								attributes: [ 'id', 'document_no', 'status' ]
+							}
+						]
+					},
 				]
 			},
 			{
