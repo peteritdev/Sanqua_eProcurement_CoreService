@@ -3,10 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <style>
+      @media print {
+        .page-break {
+          page-break-before: always;
+        }
+
+        .no-break {
+          page-break-inside: avoid;
+        }
+      }
       html {
         /* zoom: 0.8; */
         zoom: 0.6;
         color: black !important;
+      }
+      tr, td, th {
+        page-break-inside: avoid; /* hindari potongan di tengah baris */
       }
       .center {
         margin-left: auto;
@@ -155,8 +167,8 @@
                           align-items: center;
                           justify-content: center;
                           position: relative;
-                          top: 4px;
-                          left: 15px;
+                          top: 0px;
+                          left: 35px;
                         "
                       >
                         <% if( data.data.payment_type == 1 ){ %>
@@ -171,7 +183,7 @@
                           style="
                             margin-left: 5px;
                             position: relative;
-                            top: -7px;
+                            top: 0px;
                           "
                         >
                           Tarik Tunai BDC
@@ -203,7 +215,7 @@
                           style="
                             margin-left: 5px;
                             position: relative;
-                            top: -5px;
+                            top: -3px;
                           "
                         >
                           Bank
