@@ -3,10 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <style>
+      @media print {
+        .page-break {
+          page-break-before: always;
+        }
+
+        .no-break {
+          page-break-inside: avoid;
+        }
+      }
       html {
         /* zoom: 0.8; */
         zoom: 0.6;
         color: black !important;
+      }
+      tr, td, th {
+        page-break-inside: avoid; /* hindari potongan di tengah baris */
       }
       .center {
         margin-left: auto;

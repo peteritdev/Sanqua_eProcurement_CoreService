@@ -41,7 +41,7 @@ async function generatePayreq( req, res ){
 
     if( oAuthResult.status_code == "00" ){
         if( oAuthResult.token_data.status_code == "00" ){
-            await _serviceInstance.generatePayreq(req.params.id, req.headers['x-method'], req.headers['x-token'], res);
+            await _serviceInstance.generatePayreq_Puppeteer(req.params.id, req.headers['x-method'], req.headers['x-token'], res);
         }else{
             joResult = JSON.stringify(oAuthResult);
             res.setHeader('Content-Type','application/json');
