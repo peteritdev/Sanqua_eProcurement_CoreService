@@ -1892,22 +1892,22 @@ class ExportService {
 						var xFileName = `payreq-${xPayreqNo}.pdf`;
 						var xPathFile = `./generated_files/payreq/${xFileName}`;
 						const xOptions = {
-							width: '210mm',   // Lebar A4
-							// width: '156mm',
-							// height: '212mm',
-							height: '297mm',
+							// width: '210mm',   // Lebar A4
+							width: '156mm',
+							height: '212mm',
+							// height: '297mm',
 							borders: '0.3cm',
-							margins: {
-								top: '0.3cm',
-								bottom: '0.3cm',
-								left: '0.3cm',
-								right: '0.3cm'
-							}
+							// margins: {
+							// 	top: '0.3cm',
+							// 	bottom: '0.3cm',
+							// 	left: '0.3cm',
+							// 	right: '0.3cm'
+							// }
 						};
 						
 						await page.pdf({
 							path: xPathFile,
-							format: 'A4',
+							// format: 'A4',
 							// landscape: false,
 							printBackground: true,
 							...xOptions
