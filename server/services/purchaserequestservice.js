@@ -29,6 +29,10 @@ const RabRepository = require('../repository/budgetplanrepository.js');
 const _rabRepoInstance = new RabRepository();
 const ProjectRepository = require('../repository/projectrepository.js');
 const _projectRepoInstance = new ProjectRepository();
+const PaymentRequestRepo = require('../repository/paymentrequestrepository.js');
+const _paymentRequestRepo = new PaymentRequestRepo();
+const PaymentRequestDetailRepo = require('../repository/paymentrequestdetailrepository.js');
+const _paymentRequestDetailRepo = new PaymentRequestDetailRepo();
 
 // OAuth Service
 const OAuthService = require('../services/oauthservice.js');
@@ -163,7 +167,7 @@ class PurchaseRequestService {
 				}
 
 				if (xFlagProcess) {
-					if (xAct == 'add' || xAct == 'add_batch_in_item') {
+					if (xAct == 'add' || xAct == 'add_batch_in_item' || xAct == 'add_batch_from_ca') {
 						// Calculate the total
 						var xJoArrItems = [];
 						// var xRabItemsIDs = [];
@@ -185,18 +189,22 @@ class PurchaseRequestService {
 											xJoArrItems[i].estimate_date_use = new Date().toISOString().split('T')[0];
 										}
 									}
-									// Get Last price from etalase ecatalogue
-									let xCatalogue = await _catalogueService.getByVendorCodeAndProductCode({
-										vendor_code: xJoArrItems[i].vendor_code,
-										product_code: xJoArrItems[i].product_code
-									});
+									if (xAct != 'add_batch_from_ca') {
+										// Get Last price from etalase ecatalogue
+										let xCatalogue = await _catalogueService.getByVendorCodeAndProductCode({
+											vendor_code: xJoArrItems[i].vendor_code,
+											product_code: xJoArrItems[i].product_code
+										});
 
-									if (xCatalogue.status_code == '00') {
-										xJoArrItems[i].last_price = xCatalogue.data.last_price;
-										xJoArrItems[i].uom_id = xCatalogue.data.uom_id;
-										xJoArrItems[i].uom_name = xCatalogue.data.uom_name;
+										if (xCatalogue.status_code == '00') {
+											xJoArrItems[i].last_price = xCatalogue.data.last_price;
+											xJoArrItems[i].uom_id = xCatalogue.data.uom_id;
+											xJoArrItems[i].uom_name = xCatalogue.data.uom_name;
+										}
+										xJoArrItems[i].qty_left = xJoArrItems[i].qty;
+									} else {
+										xJoArrItems[i].qty_left = 0
 									}
-									xJoArrItems[i].qty_left = xJoArrItems[i].qty;
 									// xJoArrItems[i].qty_done = 0;
 									// if (xJoArrItems[i].hasOwnProperty('rab_item_id') && xJoArrItems[i].rab_item_id != null && xJoArrItems[i].rab_item_id != '') {
 									// 	const xRabItemId = await _utilInstance.decrypt(xJoArrItems[i].rab_item_id, config.cryptoKey.hashKey);
@@ -279,7 +287,39 @@ class PurchaseRequestService {
 								var xResultLog = await _logServiceInstance.addLog(pParam.method, pParam.token, xParamLog);
 								xJoResult.log_result = xResultLog;
 								// ---------------- End: Add to log ----------------
+								if (xAct == 'add_batch_from_ca') {
+									// update purchase_request_id = xAddResult.clear_id into ca headers
+									if (pParam.hasOwnProperty('payment_request_id')) {
+										if (pParam.payment_request_id != null && pParam.payment_request_id.length > 15) {
+											const xCaidDec = await _utilInstance.decrypt(pParam.payment_request_id, config.cryptoKey.hashKey);
+											console.log(`>>> update pr id into payreq headers:`);
+											console.log(`>>> xCaidDec: ${JSON.stringify(xCaidDec)}`);
+											if (xCaidDec.status_code == '00') {
+												let xPayloadPayreq = {
+													id: xCaidDec.decrypted,
+													purchase_request_id: xAddResult.clear_id
+												}
+												const xUpdateCA = _paymentRequestRepo.save(xPayloadPayreq, 'update')
+												console.log(`>>> xUpdateCA: ${JSON.stringify(xUpdateCA)}`);
 
+												// update prd_id into ca detail
+												for (let i = 0; i < xAddResult.purchase_request_detail.length; i++) {
+													let xUpdateCaItem = {
+														payment_request_id: xCaidDec.decrypted,
+														product_id: xAddResult.purchase_request_detail[i].product_id,
+														product_name: xAddResult.purchase_request_detail[i].product_name,
+														product_code: xAddResult.purchase_request_detail[i].product_code,
+														uom_id: xAddResult.purchase_request_detail[i].uom_id,
+														qty_request: xAddResult.purchase_request_detail[i].qty,
+														prd_id: xAddResult.purchase_request_detail[i].id
+													}
+													const xUpdateCA = _paymentRequestDetailRepo.save(xUpdateCaItem, 'update_from_fpb')
+												}
+											}
+											
+										}
+									}
+								}
 								delete xJoResult.clear_id;
 							} else {
 								xJoResult = xUpdate;
