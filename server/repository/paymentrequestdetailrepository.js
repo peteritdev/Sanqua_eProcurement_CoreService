@@ -164,6 +164,46 @@ class PaymentRequestDetailRepository {
 					status_msg: 'Data has been successfully saved'
 				};
 				//}
+			} else if (pAct == 'update_from_fpb') {
+				// var xFlag = false
+				pParam.updatedAt = await _utilInstance.getCurrDateTime();
+				var xPyrId = pParam.payment_request_id;
+				var xProduct = {
+					id: pParam.product_id,
+					name: pParam.product_name,
+					code: pParam.product_code,
+				}
+				var xUomId = pParam.uom_id
+				var xQty = pParam.qty_request
+				delete pParam.payment_request_id;
+				delete pParam.product_id;
+				delete pParam.product_name;
+				delete pParam.product_code;
+				delete pParam.uom_id;
+				delete pParam.qty_request;
+				var xWhere = {
+					where: {
+						payment_request_id: xPyrId,
+						product_id: xProduct.id,
+						product_name: xProduct.name,
+						product_code: xProduct.code,
+						uom_id: xUomId,
+						qty_request: xQty
+					},
+					transaction: xTransaction
+				};
+
+				pParam.updated_by = pParam.user_id;
+				pParam.updated_by_name = pParam.user_name;
+
+				xSaved = await _modelDb.update(pParam, xWhere);
+
+				await xTransaction.commit();
+
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'Data has been successfully updated'
+				};
 			}
 		} catch (e) {
 			if (xTransaction) await xTransaction.rollback();
