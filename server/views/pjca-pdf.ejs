@@ -9,6 +9,15 @@
       html {
         zoom: 0.70;
       }
+      @media print {
+        .page-break {
+          page-break-before: always;
+        }
+
+        .no-break {
+          page-break-inside: avoid;
+        }
+      }
       .center {
         margin-left: auto;
         margin-right: auto;

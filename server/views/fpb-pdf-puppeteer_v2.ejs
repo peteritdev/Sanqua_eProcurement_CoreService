@@ -7,7 +7,7 @@
                 zoom: 0.75; style="width: 95%; border-width: thin; border-spacing: 0px;font-size: 9px;border-color: grey;" border="1" 
             }*/
             html {
-                zoom: 0.80;
+                zoom: 0.80; 
             }
 
             @media print {
@@ -30,10 +30,10 @@
                 width:99%;
                 /* border-collapse:collapse; */
                 text-align:center;
-                font-size: 8px;
+                font-size: 10px;
                 font-family: 'Arial';
                 border-style: solid;
-                border-color: #000000;
+                border-color: #000000c9;
             }
 
             .center th, .center td {
@@ -46,6 +46,14 @@
                 padding-bottom: 0px !important;
                 border-bottom: none;
                 border-top: none;
+            }
+
+            .col-item-border {
+                padding-top: 0px !important;
+                padding-bottom: 0px !important;
+                border-bottom: none;
+                /* border-top: none; */
+                border-color: 1px solid #adadad9a;
             }
 
             th.col-header-item {
@@ -250,14 +258,14 @@
                     data.data.purchase_request_detail.forEach( item => {
                 %>
                     <tr>
-                        <td style="text-align:right;" class="col-item"><%=index%>.</td>
-                        <td style="text-align: left;" class="col-item"><%=item.product.name%></td>
-                        <td class="col-item"><%=item.current_stock%></td>
-                        <td class="col-item"><%=item.qty%></td>
-                        <td class="col-item"><%=item.uom%></td>
-                        <td style="text-align: right;" class="col-item"><%=item.budget_price_per_unit != null ? item.budget_price_per_unit.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
-                        <td style="text-align: left;" class="col-item"><%=item.vendor.name%></td>
-                        <td class="col-item">
+                        <td style="text-align:right;" class="col-item-border"><%=index%>.</td>
+                        <td style="text-align: left;" class="col-item-border"><%=item.product.name%></td>
+                        <td class="col-item-border"><%=item.current_stock%></td>
+                        <td class="col-item-border"><%=item.qty%></td>
+                        <td class=" col-item-border"><%=item.uom%></td>
+                        <td style="text-align: right;" class="col-item-border"><%=item.budget_price_per_unit != null ? item.budget_price_per_unit.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                        <td style="text-align: left;" class="col-item-border"><%=item.vendor.name%></td>
+                        <td class="col-item-border">
                             <%
                                 if( item.has_budget == 1 ){
                             %>
@@ -266,7 +274,7 @@
                                 }
                             %>
                         </td>
-                        <td class="col-item">
+                        <td class="col-item-border">
                             <%
                                 if( item.has_budget == 0 ){
                             %>
@@ -275,8 +283,8 @@
                                 }
                             %>
                         </td>
-                        <td nowrap="nowrap" class="col-item"><%=item.estimate_date_use%></td>
-                        <td style="border-right: none !important;text-align: left;" class="col-item"><%=item.description%></td>
+                        <td nowrap="nowrap" class="col-item-border"><%=item.estimate_date_use%></td>
+                        <td style="border-right: none !important;text-align: left;" class="col-item-border"><%=item.description%></td>
                     </tr>
                 <%
                         index++;
