@@ -1883,6 +1883,71 @@ class PaymentRequestService {
 			}
 		}
 	}
+	
+	async mergeWithFPB(pParam) {
+		var xJoResult;
+		var xAct = pParam.act;
+		var xFlagProcess = false;
+		var xDecId = null;
+		var xDetailPayreq = null
+		var xDetailFPB = null
+		try {
+				
+			delete pParam.act;
+
+			if (pParam.user_id && pParam.user_id.length == 65) {
+				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.user_id = xDecId.decrypted;
+				}
+			}
+			if (pParam.purchase_request_id && pParam.purchase_request_id.length == 65) {
+				xDecId = await _utilInstance.decrypt(pParam.purchase_request_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.purchase_request_id = xDecId.decrypted;
+				}
+			}
+			if (pParam.payment_request_id && pParam.payment_request_id.length == 65) {
+				xDecId = await _utilInstance.decrypt(pParam.payment_request_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.payment_request_id = xDecId.decrypted;
+				}
+			}
+			if (!pParam.user_id || pParam.purchase_request_id || !pParam.payment_request_id ) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: 'Invalid or Failed to decrypt param Ids '
+				};
+			}
+
+			if (pParam.payment_request_id != null && pParam.purchase_request_id != null) {
+				// get detail fpb & its item
+				xDetailFPB = await _purchaseRequestRepoInstance.getById({id: pParam.purchase_request_id});
+
+				// get detail payreq & its item
+				xDetailPayreq = await _repoInstance.getByParameter({id: pParam.payment_request_id});
+			}
+			if (!xDetailFPB || !xDetailPayreq) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: 'Invalid FPB or Payment Request not found'
+				};
+			}
+
+			// TO.DO: merge proses heree, add code below ....
+
+			// =====================================
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.mergeWithFPB`, `Exception error: ${e.message}`, 'error');
+
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.mergeWithFPB: Exception error: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
 }
 
 module.exports = PaymentRequestService;
