@@ -148,13 +148,23 @@ class PaymentRequestDetailRepository {
 				pParam.updated_by_name = pParam.user_name;
 
 				xSaved = await _modelDb.update(pParam, xWhere);
+				if (xSaved) {
+					xJoResult = {
+						status_code: '00',
+						status_msg: 'Data has been successfully saved',
+						// created_id: await _utilInstance.encrypt(toString(xSaved.id), config.cryptoKey.hashKey)
+						//// clear_id: xSaved.id,
+					};
 
-				await xTransaction.commit();
+					await xTransaction.commit();
+				} else {
+					if (xTransaction) await xTransaction.rollback();
 
-				xJoResult = {
-					status_code: '00',
-					status_msg: 'Data has been successfully updated'
-				};
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Failed save to database'
+					};
+				}
 			} else if (pAct == 'add_batch') {
 				xSaved = await _modelDb.bulkCreate(pParam, { transaction: xTransaction });
 				//if (xSaved.id != null) {
