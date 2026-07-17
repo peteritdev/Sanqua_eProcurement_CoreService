@@ -133,5 +133,5 @@ module.exports = (app) => {
 		check('payment_request_id').not().isEmpty().withMessage('Parameter payreqID cannot be empty'),
 		check('purchase_request_id').not().isEmpty().withMessage('Parameter prID cannot be empty'),
 	];
-	app.post(rootAPIPath + 'detail/merge_ca_fpb', arrValidate, paymentRequestController.paymentRequest_MergeWithFPB);
+	app.post(rootAPIPath + 'merge_ca_fpb', arrValidate, paymentRequestController.paymentRequest_MergeWithFPB);
 };

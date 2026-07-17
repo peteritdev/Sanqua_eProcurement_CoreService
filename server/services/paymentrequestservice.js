@@ -1913,7 +1913,7 @@ class PaymentRequestService {
 					pParam.payment_request_id = xDecId.decrypted;
 				}
 			}
-			if (!pParam.user_id || pParam.purchase_request_id || !pParam.payment_request_id ) {
+			if (!pParam.user_id || !pParam.purchase_request_id || !pParam.payment_request_id) {
 				return xJoResult = {
 					status_code: '-99',
 					status_msg: 'Invalid or Failed to decrypt param Ids '
@@ -1934,8 +1934,206 @@ class PaymentRequestService {
 				};
 			}
 
-			// TO.DO: merge proses heree, add code below ....
+			// getById kadang return object langsung, kadang wrapped {status_code, data} tergantung repo,
+			// jadi di-handle dua-duanya biar aman
+			var xFpbData = xDetailFPB.data ? xDetailFPB.data : xDetailFPB;
 
+			if (xDetailPayreq.status_code != '00' || !xDetailPayreq.data) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: 'Invalid Payment Request or Payment Request not found'
+				};
+			}
+			var xPayreqData = xDetailPayreq.data;
+
+			if (!xFpbData || !xFpbData.id) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: 'Invalid FPB or FPB not found'
+				};
+			}
+
+			// payreq yang sudah terhubung ke FPB lain tidak boleh di-merge ulang ke FPB berbeda
+			if (xPayreqData.purchase_request_id != null && xPayreqData.purchase_request_id != pParam.purchase_request_id) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: 'Payment request sudah terhubung dengan FPB lain'
+				};
+			}
+
+			var xFpbItems = (xFpbData.purchase_request_detail || []).filter((el) => el.is_delete != 1 && el.status != -1);
+			var xPayreqItems = (xPayreqData.payment_request_detail || []).filter((el) => el.is_delete != 1 && el.status != -1);
+
+			if (xPayreqItems.length == 0) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: 'Tidak ada item pada payment request untuk digabungkan'
+				};
+			}
+			if (xFpbItems.length == 0) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: 'Tidak ada item pada FPB'
+				};
+			}
+
+			const xNormalizeName = (pName) => (pName || '').toString().trim().toLowerCase();
+
+			// map fpb item by product_name utk lookup cepat
+			var xFpbItemByName = {};
+			for (let i = 0; i < xFpbItems.length; i++) {
+				xFpbItemByName[xNormalizeName(xFpbItems[i].product_name)] = xFpbItems[i];
+			}
+
+			// total qty payreq per product_name (support multi baris produk yang sama dlm 1 payreq)
+			var xPayreqQtyByName = {};
+			var xMatchedPairs = [];
+			var xArrErrorNotFound = [];
+
+			for (let i = 0; i < xPayreqItems.length; i++) {
+				let xKey = xNormalizeName(xPayreqItems[i].product_name);
+				let xFpbItem = xFpbItemByName[xKey];
+
+				if (!xFpbItem) {
+					xArrErrorNotFound.push(xPayreqItems[i].product_name);
+					continue;
+				}
+
+				xPayreqQtyByName[xKey] = (xPayreqQtyByName[xKey] || 0) + Number(xPayreqItems[i].qty_request || 0);
+				xMatchedPairs.push({ payreq_item: xPayreqItems[i], fpb_item: xFpbItem });
+			}
+
+			// requirement: kalau ada item payreq yang product_name-nya tidak ada di FPB, tolak semua
+			if (xArrErrorNotFound.length > 0) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: `Item berikut tidak ditemukan pada FPB, merge dibatalkan: ${xArrErrorNotFound.join(', ')}`
+				};
+			}
+
+			// requirement: total qty per product di payreq (termasuk payreq lain yg sudah nempel ke item fpb yg sama)
+			// tidak boleh melebihi qty item FPB
+			var xArrErrorExceed = [];
+			for (let xKey in xPayreqQtyByName) {
+				let xFpbItem = xFpbItemByName[xKey];
+				let xTotalPayreqQty = xPayreqQtyByName[xKey];
+
+				let xExistingQty = 0;
+				const xResultCheckItem = await _paymentRequestDetailRepoInstance.list({ prd_id: xFpbItem.id });
+				if (xResultCheckItem.status_code == '00' && xResultCheckItem.data.count > 0) {
+					let xArrItem = xResultCheckItem.data.rows;
+					for (let j = 0; j < xArrItem.length; j++) {
+						// jangan hitung dobel item milik payreq yg sedang di-merge ini sendiri
+						if (
+							xArrItem[j].payment_request_id != pParam.payment_request_id &&
+							xArrItem[j].status != -1 &&
+							xArrItem[j].payment_request != null &&
+							xArrItem[j].payment_request.status != 4 &&
+							xArrItem[j].payment_request.status != 5
+						) {
+							xExistingQty += Number(xArrItem[j].qty_request || 0);
+						}
+					}
+				}
+
+				let xTotalQty = xExistingQty + xTotalPayreqQty;
+				if (xTotalQty > Number(xFpbItem.qty || 0)) {
+					xArrErrorExceed.push(
+						`${xFpbItem.product_name} (qty payreq ini: ${xTotalPayreqQty}${xExistingQty > 0 ? `, qty payreq lain yg sudah nempel: ${xExistingQty}` : ''}, qty tersedia di FPB: ${xFpbItem.qty})`
+					);
+				}
+			}
+
+			if (xArrErrorExceed.length > 0) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: `Total qty payment request melebihi qty pada FPB untuk item: ${xArrErrorExceed.join('; ')}`
+				};
+			}
+
+			// ==== semua validasi lolos, lanjut proses merge ====
+			var xArrFailedUpdate = [];
+
+			// 1. update tiap item payreq -> prd_id nunjuk ke item FPB yg matching
+			for (let i = 0; i < xMatchedPairs.length; i++) {
+				let xPayreqItem = xMatchedPairs[i].payreq_item;
+				let xFpbItem = xMatchedPairs[i].fpb_item;
+
+				let xUpdatePyrdItem = await _paymentRequestDetailRepoInstance.save(
+					{
+						id: xPayreqItem.id,
+						prd_id: xFpbItem.id
+					},
+					'update'
+				);
+
+				if (!xUpdatePyrdItem || xUpdatePyrdItem.status_code != '00') {
+					xArrFailedUpdate.push(`payment_request_detail#${xPayreqItem.id}`);
+					_utilInstance.writeLog(
+						`${_xClassName}.mergeWithFPB`,
+						`Failed updating payment_request_detail id ${xPayreqItem.id}: ${JSON.stringify(xUpdatePyrdItem)}`,
+						'error'
+					);
+				}
+			}
+
+			// 2. update header payreq -> purchase_request_id nempel ke FPB
+			var xUpdatePayreq = await _repoInstance.save(
+				{
+					id: pParam.payment_request_id,
+					purchase_request_id: pParam.purchase_request_id,
+					updated_by: pParam.user_id,
+					updated_by_name: pParam.user_name,
+					updatedAt: await _utilInstance.getCurrDateTime()
+				},
+				'update'
+			);
+
+			if (!xUpdatePayreq || xUpdatePayreq.status_code != '00') {
+				xArrFailedUpdate.push(`payment_request#${pParam.payment_request_id}`);
+				_utilInstance.writeLog(
+					`${_xClassName}.mergeWithFPB`,
+					`Failed updating payment request header: ${JSON.stringify(xUpdatePayreq)}`,
+					'error'
+				);
+			}
+
+			// 3. update qty_paid tiap item FPB, akumulasi (bukan overwrite) supaya aman kalau nanti ada
+			// payreq lain yang di-merge lagi ke item FPB yang sama
+			for (let xKey in xPayreqQtyByName) {
+				let xFpbItem = xFpbItemByName[xKey];
+				let xAddQty = xPayreqQtyByName[xKey];
+				let xNewQtyPaid = Number(xFpbItem.qty_paid || 0) + Number(xAddQty || 0);
+
+				let xUpdatePrdItem = await _purchaseRequestDetailRepoInstance.save(
+					{
+						id: xFpbItem.id,
+						qty_paid: xNewQtyPaid
+					},
+					'update'
+				);
+
+				if (!xUpdatePrdItem || xUpdatePrdItem.status_code != '00') {
+					xArrFailedUpdate.push(`purchase_request_detail#${xFpbItem.id}`);
+					_utilInstance.writeLog(
+						`${_xClassName}.mergeWithFPB`,
+						`Failed updating purchase_request_detail id ${xFpbItem.id}: ${JSON.stringify(xUpdatePrdItem)}`,
+						'error'
+					);
+				}
+			}
+
+			xJoResult = {
+				status_code: '00',
+				status_msg: xArrFailedUpdate.length == 0
+					? 'Success merge payment request with FPB'
+					: `Merge selesai dengan sebagian gagal update: ${xArrFailedUpdate.join(', ')}`,
+				data: {
+					payment_request_id: pParam.payment_request_id,
+					purchase_request_id: pParam.purchase_request_id,
+					merged_items: xMatchedPairs.length
+				}
+			};
 			// =====================================
 		} catch (e) {
 			_utilInstance.writeLog(`${_xClassName}.mergeWithFPB`, `Exception error: ${e.message}`, 'error');
