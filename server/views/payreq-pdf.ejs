@@ -415,7 +415,7 @@
                 <td style="text-align: right" class="border-rb p-relative">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td>Rp </td>
+                      <td><!--Rp  -->  </td>
                       <td style="text-align: right; width: 100%;"><%=item.subtotal != null ? item.subtotal.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -445,7 +445,8 @@
                   if(item.discount_amount != null && item.discount_amount > 0){
                   %>
                     <br/>
-                    <%='Pph/Disc: Rp' + item.discount_amount%>
+                    <!-- <%='Pph/Disc: Rp' + item.discount_amount%> -->
+                    <%='Pph/Disc: ' + item.discount_amount%>
                   <%
                       }
                   %>
@@ -476,7 +477,7 @@
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td>Rp </td>
+                      <td><!--Rp  --> </td>
                       <td style="text-align: right; width: 100%;"><%=data.data.delivery_costs != null ? data.data.delivery_costs.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -524,7 +525,7 @@
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td>Rp </td>
+                      <td><!--Rp  --> </td>
                       <td style="text-align: right; width: 100%;"><%=data.data.service_costs != null ? data.data.service_costs.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -572,7 +573,7 @@
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td>Rp </td>
+                      <td><!--Rp  --> </td>
                       <td style="text-align: right; width: 100%;"><%=data.data.other_costs != null ? data.data.other_costs.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -620,7 +621,7 @@
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td>Rp </td>
+                      <td><!--Rp  --> </td>
                       <td style="text-align: right; width: 100%;"><%=data.data.global_discount != null ? data.data.global_discount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -668,7 +669,7 @@
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td>Rp </td>
+                      <td><!--Rp  --> </td>
                       <td style="text-align: right; width: 100%;"><%=data.data.total_tax_amount != null ? data.data.total_tax_amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -711,12 +712,13 @@
                 <td style="text-align: center" class="border-rb">
                 </td>
                 <td style="text-align: left" class="border-rb">
-                  PPh (<%=data.data.pph_percent%>%)
+                  <!-- PPh (<%=data.data.pph_percent%>%) -->
+                   PPh
                 </td>
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td>Rp </td>
+                       <td><!--Rp  --></td>
                       <td style="text-align: right; width: 100%;"><%=data.data.total_pph_amount != null ? data.data.total_pph_amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -775,7 +777,7 @@
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td>Rp </td>
+                      <td><!--Rp  -->  </td>
                       <td style="text-align: right; width: 100%;"><%=data.data.total_price != null ? data.data.total_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
