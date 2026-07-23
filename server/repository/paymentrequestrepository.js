@@ -276,6 +276,14 @@ class PaymentRequestRepository {
 					// );
 				}
 			}
+			
+			if (pParam.hasOwnProperty('app_category')) {
+				if (pParam.app_category != '') {
+					xWhereAnd.push({
+						app_category: pParam.app_category
+					});
+				}
+			}
 
 			if (pParam.hasOwnProperty('keyword')) {
 				if (pParam.keyword != '') {

@@ -412,7 +412,8 @@ class PaymentRequestService {
 									updated_at: moment(xRows[i].updatedAt).format('DD MMM YYYY HH:mm:ss'),
 									updated_by_name: xRows[i].updated_by_name,
 									purchase_request: xRows[i].purchase_request,
-									pjca: xRows[i].pjca
+									pjca: xRows[i].pjca,
+									app_category: xRows[i].app_category
 								});
 							}
 
@@ -669,7 +670,7 @@ class PaymentRequestService {
 						var xDate = dt.format('ym');
 						var xCode = 'CA'
 						if (pParam.app_category == 2) {
-							xCode = 'BILL'
+							xCode = 'PAYBILL'
 						}
 						var xPayreqNo = `${pParam.company_code}/${xCode}/${xDate}/` + xResult.clear_id.toString().padStart(5,'0');
 
@@ -778,136 +779,146 @@ class PaymentRequestService {
 							pParam.requested_at = await _utilInstance.getCurrDateTime();
 							let xArrPrdId = []
 							let xPyrDetail = xDetail.data.payment_request_detail
-							// check if app_category is not bill then execute line below
-							if (xDetail.data.app_category != 2 && xDetail.data.purchase_request != null) {
-								// check total qty is not exceed qty_paid in detail fpb
-								// console.log(`>>> xPyrDetail: ${JSON.stringify(xPyrDetail)}`);
-								for (let i = 0; i < xPyrDetail.length; i++) {
-									xArrPrdId.push(xPyrDetail[i].prd_id)
-								}
-								let xUniq = [...new Set(xArrPrdId)];
-								for (let i = 0; i < xUniq.length; i++) {
-									let xPrDetailItem = await _purchaseRequestDetailRepoInstance.getByParam({id: xUniq[i]})
-									if (xPrDetailItem.status_code = '00') {
-										let xPrdQtyPaid = xPrDetailItem.data.qty_paid
-										let xArrPyrd = xPyrDetail.filter(({ prd_id }) => prd_id == xUniq[i])
-										let xPyrdTotalQty = xArrPyrd.reduce((accum, item) => accum + item.qty_request, 0)
-										if ( xPyrdTotalQty > xPrDetailItem.data.qty - xPrdQtyPaid) {
-											xFlagProcess = false
-											xJoResult = {
-												status_code: '-99',
-												status_msg: `Total qty of item ${xArrPyrd[0].product_code} (${xPyrdTotalQty}) is exceed Paid Qty on FPB (${xPrdQtyPaid})`
-											};
-											break;
+							console.log(`>>> xPyrDetail: ${JSON.stringify(xPyrDetail)}`);
+				
+							// if there is no item reject submit
+							if (xPyrDetail != null && xPyrDetail.length > 0) {
+								// check if app_category is not bill then execute line below
+								if (xDetail.data.app_category != 2 && xDetail.data.purchase_request != null) {
+									// check total qty is not exceed qty_paid in detail fpb
+									// console.log(`>>> xPyrDetail: ${JSON.stringify(xPyrDetail)}`);
+									for (let i = 0; i < xPyrDetail.length; i++) {
+										xArrPrdId.push(xPyrDetail[i].prd_id)
+									}
+									let xUniq = [...new Set(xArrPrdId)];
+									for (let i = 0; i < xUniq.length; i++) {
+										let xPrDetailItem = await _purchaseRequestDetailRepoInstance.getByParam({id: xUniq[i]})
+										if (xPrDetailItem.status_code = '00') {
+											let xPrdQtyPaid = xPrDetailItem.data.qty_paid
+											let xArrPyrd = xPyrDetail.filter(({ prd_id }) => prd_id == xUniq[i])
+											let xPyrdTotalQty = xArrPyrd.reduce((accum, item) => accum + item.qty_request, 0)
+											if ( xPyrdTotalQty > xPrDetailItem.data.qty - xPrdQtyPaid) {
+												xFlagProcess = false
+												xJoResult = {
+													status_code: '-99',
+													status_msg: `Total qty of item ${xArrPyrd[0].product_code} (${xPyrdTotalQty}) is exceed Paid Qty on FPB (${xPrdQtyPaid})`
+												};
+												break;
+											}
 										}
 									}
 								}
-							}
 
-							if (xFlagProcess) {
-								var xUpdate = await _repoInstance.save(pParam, 'submit');
-								xJoResult = xUpdate;
-								
-								// Next Phase : Approval Matrix & Notification to admin
-								if (xUpdate.status_code == '00') {
-
-									if (xDetail.data.app_category != 2 && xDetail.data.payreq_type == 2 && xDetail.data.purchase_request != null) {
-										// if payreq is reimburst then divide qty_paid on fpb
-										this.updatePrdItemQtyLeft(xDetail.data, 'add')
-									}
-									// this.updatePrdItemQtyLeft(xDetail.data, 'submit')
+								if (xFlagProcess) {
+									var xUpdate = await _repoInstance.save(pParam, 'submit');
+									xJoResult = xUpdate;
 									
-									var xParamAddApprovalMatrix = {
-										act: 'add',
-										document_id: xEncId,
-										document_no: xDetail.data.document_no,
-										application_id: 8,
-										table_name: config.dbTables.payreq,
-										company_id: xDetail.data.company_id,
-										department_id: xDetail.data.department_id,
-										ecatalogue_fpb_category_item: null,
-										logged_company_id: pParam.logged_company_id
-									};
+									// Next Phase : Approval Matrix & Notification to admin
+									if (xUpdate.status_code == '00') {
 
-									var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
-										pParam.method,
-										pParam.token,
-										xParamAddApprovalMatrix
-									);
-									console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
-									xJoResult.approval_matrix_result = xApprovalMatrixResult;
-									if (xApprovalMatrixResult.status_code == '00') {
-										if (xApprovalMatrixResult.approvers.length > 0) {
-											const xApproverIds = []
-											let xApproverSeq1 = xApprovalMatrixResult.approvers.find((el) => el.sequence === 1);
-											if (xApproverSeq1 != null) {
-												for (var i in xApproverSeq1.approver_user) {
-													xApproverIds.push(xApproverSeq1.approver_user[i].user_id)
-													// In App notification
-													let xInAppNotificationResult = await _notificationService.inAppNotification({
-														document_code: xDetail.data.document_no,
-														document_id: xEncId,
-														document_status: 1,
-														mode: 'request_approval_ca',
-														method: pParam.method,
-														token: pParam.token,
-														employee_id: await _utilInstance.encrypt(
-															xApproverSeq1.approver_user[i].employee_id.toString(),
-															config.cryptoKey.hashKey
-														)
-													});
-													console.log(`>>> xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`);
-			
-													_utilInstance.writeLog(
-														`${_xClassName}.submitPayreq`,
-														`xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`,
-														'info'
-													);
-													// Email Notification
-													let xParamEmailNotification,
-														xNotificationResult = {};
-			
-													if (xApproverSeq1.approver_user[i].notification_via_email) {
-														xParamEmailNotification = {
+										if (xDetail.data.app_category != 2 && xDetail.data.payreq_type == 2 && xDetail.data.purchase_request != null) {
+											// if payreq is reimburst then divide qty_paid on fpb
+											this.updatePrdItemQtyLeft(xDetail.data, 'add')
+										}
+										// this.updatePrdItemQtyLeft(xDetail.data, 'submit')
+										
+										var xParamAddApprovalMatrix = {
+											act: 'add',
+											document_id: xEncId,
+											document_no: xDetail.data.document_no,
+											application_id: 8,
+											table_name: config.dbTables.payreq,
+											company_id: xDetail.data.company_id,
+											department_id: xDetail.data.department_id,
+											ecatalogue_fpb_category_item: null,
+											logged_company_id: pParam.logged_company_id
+										};
+
+										var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
+											pParam.method,
+											pParam.token,
+											xParamAddApprovalMatrix
+										);
+										console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
+										xJoResult.approval_matrix_result = xApprovalMatrixResult;
+										if (xApprovalMatrixResult.status_code == '00') {
+											if (xApprovalMatrixResult.approvers.length > 0) {
+												const xApproverIds = []
+												let xApproverSeq1 = xApprovalMatrixResult.approvers.find((el) => el.sequence === 1);
+												if (xApproverSeq1 != null) {
+													for (var i in xApproverSeq1.approver_user) {
+														xApproverIds.push(xApproverSeq1.approver_user[i].user_id)
+														// In App notification
+														let xInAppNotificationResult = await _notificationService.inAppNotification({
+															document_code: xDetail.data.document_no,
+															document_id: xEncId,
+															document_status: 1,
 															mode: 'request_approval_ca',
-															id: xEncId,
-															request_no: xDetail.data.document_no,
-															company_name: xDetail.data.company_name,
-															department_name: xDetail.data.department_name,
-															created_by: xDetail.data.employee_name,
-															created_at:
-																xDetail.data.createdAt != null
-																	? moment(xDetail.data.createdAt).format('DD MMM YYYY')
-																	: '',
-															items: xPyrDetail,
-															// body: xDetail.data,
-															approver_user: {
-																employee_name: xApproverSeq1.approver_user[i].user_name,
-																email: xApproverSeq1.approver_user[i].email
-															}
-														};
-														xNotificationResult = await _notificationService.sendNotificationEmail_CANeedApproval(
-															xParamEmailNotification,
-															pParam.method,
-															pParam.token
+															method: pParam.method,
+															token: pParam.token,
+															employee_id: await _utilInstance.encrypt(
+																xApproverSeq1.approver_user[i].employee_id.toString(),
+																config.cryptoKey.hashKey
+															)
+														});
+														console.log(`>>> xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`);
+				
+														_utilInstance.writeLog(
+															`${_xClassName}.submitPayreq`,
+															`xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`,
+															'info'
 														);
-														console.log(`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`);
-			
+														// Email Notification
+														let xParamEmailNotification,
+															xNotificationResult = {};
+				
+														if (xApproverSeq1.approver_user[i].notification_via_email) {
+															xParamEmailNotification = {
+																mode: 'request_approval_ca',
+																id: xEncId,
+																request_no: xDetail.data.document_no,
+																company_name: xDetail.data.company_name,
+																department_name: xDetail.data.department_name,
+																created_by: xDetail.data.employee_name,
+																created_at:
+																	xDetail.data.createdAt != null
+																		? moment(xDetail.data.createdAt).format('DD MMM YYYY')
+																		: '',
+																items: xPyrDetail,
+																// body: xDetail.data,
+																approver_user: {
+																	employee_name: xApproverSeq1.approver_user[i].user_name,
+																	email: xApproverSeq1.approver_user[i].email
+																}
+															};
+															xNotificationResult = await _notificationService.sendNotificationEmail_CANeedApproval(
+																xParamEmailNotification,
+																pParam.method,
+																pParam.token
+															);
+															console.log(`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`);
+				
+														}
 													}
 												}
+												// update current approval id
+												let xPrdUpdateApprovalId = {
+													id: xDetail.data.id,
+													current_approval_ids: xApproverIds
+												}
+												
+												const xUpdateApproval = await _repoInstance.save(xPrdUpdateApprovalId, 'update')
 											}
-											// update current approval id
-											let xPrdUpdateApprovalId = {
-												id: xDetail.data.id,
-												current_approval_ids: xApproverIds
-											}
-											
-											const xUpdateApproval = await _repoInstance.save(xPrdUpdateApprovalId, 'update')
 										}
+									} else {
+										xJoResult = xUpdate;
 									}
-								} else {
-									xJoResult = xUpdate;
 								}
+							} else {
+								xJoResult = {
+									status_code: '-99',
+									status_msg: `Tidak dapat submit, silahkan isi item dahulu`
+								};
 							}
 						} else {
 							xJoResult = {

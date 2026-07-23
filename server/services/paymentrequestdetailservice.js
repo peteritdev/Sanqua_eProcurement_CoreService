@@ -214,6 +214,17 @@ class PaymentRequestDetailService {
 				} else {
 					// if payreq category is billing
 					// type code hereee............
+					// check invoice/bill already inputed on other payreq or not
+					var xCheckInvoiceNo = await _repoInstance.getByParam({
+						invoice_no: pParam.invoice_no,
+						odoo_bill_no: pParam.odoo_bill_no
+					})
+					if (xCheckInvoiceNo.status_code == '00') {
+						return {
+							status_code: '-99',
+							status_msg: `Invoice sudah digunakan pada payreq ${xCheckInvoiceNo.data.payment_request.document_no}`
+						};
+					}
 				}
 				var xAddResult = await _repoInstance.save(pParam, xAct);
 				xJoResult = xAddResult;
@@ -289,6 +300,19 @@ class PaymentRequestDetailService {
 					} else {
 						// let xParamAddItemBatcj = [];
 						for (var i in xItems) {
+							// Check first whether invoice already exists in other payreq or not
+							var xPaymentRequestDetail = await _repoInstance.getByParam({
+								invoice_no: xItems[i].invoice_no,
+								odoo_bill_no: xItems[i].odoo_bill_no
+							});
+							if (xPaymentRequestDetail.status_code == '00') {
+								return {
+									status_code: '-99',
+									status_msg: `Invoice ${xItems[i].invoice_no} sudah digunakan pada payreq ${xPaymentRequestDetail.data.payment_request.document_no}`
+								};
+								break
+							}
+
 							Object.assign(xItems[i], {
 								payment_request_id: pParam.payment_request_id,
 								created_at: await _utilInstance.getCurrDateTime(),

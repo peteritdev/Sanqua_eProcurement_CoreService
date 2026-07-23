@@ -342,6 +342,20 @@ class PaymentRequestDetailRepository {
 					});
 				}
 			}
+			if (pParam.hasOwnProperty('invoice_no')) {
+				if (pParam.invoice_no != '') {
+					xWhereAnd.push({
+						invoice_no: pParam.invoice_no
+					});
+				}
+			}
+			if (pParam.hasOwnProperty('odoo_bill_no')) {
+				if (pParam.odoo_bill_no != '') {
+					xWhereAnd.push({
+						odoo_bill_no: pParam.odoo_bill_no
+					});
+				}
+			}
 			if (pParam.hasOwnProperty('origin_id')) {
 				if (pParam.origin_id != '') {
 					xWhereAnd.push({
