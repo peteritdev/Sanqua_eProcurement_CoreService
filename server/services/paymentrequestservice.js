@@ -820,6 +820,8 @@ class PaymentRequestService {
 														`xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`,
 														'info'
 													);
+													
+													// check if notification_via_email is true
 													// Email Notification
 													let xParamEmailNotification,
 														xNotificationResult = {};
@@ -849,7 +851,6 @@ class PaymentRequestService {
 															pParam.token
 														);
 														console.log(`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`);
-			
 													}
 												}
 											}
@@ -1524,8 +1525,11 @@ class PaymentRequestService {
 									for (var i in xListApprover) {
 										let xApproverUsers = _.filter(xListApprover[i].approver_user).map(
 											// update 08/08/2023 prevent user is null
-											(v) => (v.user != null ? v.user.email : v.user)
+											(v) => (v.user != null && v.user.notification_via_email ? v.user.email : v.user)
 										);
+										if (xApproverUsers) {
+											
+										}
 										xArrApproverUsers.push.apply(xArrApproverUsers, xApproverUsers);
 									}
 								}
