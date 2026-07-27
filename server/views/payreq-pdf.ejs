@@ -168,7 +168,7 @@
                           justify-content: center;
                           position: relative;
                           top: 0px;
-                          left: 35px;
+                          left: 15px;
                         "
                       >
                         <% if( data.data.payment_type == 1 ){ %>
@@ -356,8 +356,16 @@
           style="text-align: left; border-top: 1px solid #000000 !important"
         >
           <span> Untuk Pembayaran </span>
-          <span margin: 0 5px">: </span>
-          <span> <%=data.data.purchase_request.project ? "(" + data.data.purchase_request.project.odoo_project_code + "/" + data.data.purchase_request.project.name +") " : data.data.payment_desc%> </span>
+          <span style="margin: 0 5px">: </span>
+          <% if( data.data.purchase_request !=){ %>
+            <% if( data.data.purchase_request.project != null ){ %>
+              <span>"(" + data.data.purchase_request.project.odoo_project_code + "/" + data.data.purchase_request.project.name +") "</span>
+            <% }else{ %>
+              <span> data.data.payment_desc</span>
+            <% } %>
+          <% }else{ %>
+            <span> data.data.payment_desc</span>
+          <% } %>
         </td>
       </tr>
       <tr>
