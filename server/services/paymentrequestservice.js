@@ -1527,9 +1527,6 @@ class PaymentRequestService {
 											// update 08/08/2023 prevent user is null
 											(v) => (v.user != null && v.user.notification_via_email ? v.user.email : v.user)
 										);
-										if (xApproverUsers) {
-											
-										}
 										xArrApproverUsers.push.apply(xArrApproverUsers, xApproverUsers);
 									}
 								}
