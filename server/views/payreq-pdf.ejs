@@ -357,7 +357,11 @@
         >
           <span> Untuk Pembayaran </span>
           <span style="margin: 0 5px">: </span>
-          <span> <%=data.data.purchase_request.project != null ? ("(" + data.data.purchase_request.project.odoo_project_code + "/" + data.data.purchase_request.project.name +") ") : data.data.payment_desc%> </span>
+          <% if( data.data.purchase_request.project != null ){ %>
+            <span>"(" + data.data.purchase_request.project.odoo_project_code + "/" + data.data.purchase_request.project.name +") "</span>
+          <% }else{ %>
+            <span> data.data.payment_desc</span>
+          <% } %>
         </td>
       </tr>
       <tr>
