@@ -115,7 +115,7 @@ class PaymentRequestService {
 								var xTotalDiscItem = 0;
 								var xTotalDiscWoTax = 0;
 								var xTaxes = 0;
-								var xDpp = 0
+								var xDpp = 0;
 								var xPphAmount = xDetail.data.pph_amount 
 								var xPphPercent = xDetail.data.pph_percent
 									
@@ -248,15 +248,20 @@ class PaymentRequestService {
 									// xDetail.data.total_tax_amount = (Math.round((xTaxes - (xTaxes * (xDetail.data.global_discount_percent / 100))) * 1000 )  / 1000) || 0
 								}
 								
+								xDetail.data.total_dpp = xDpp
 								if (xPphAmount == 0) {
-									xDetail.data.total_pph_amount =  (Math.round((xDpp * (xDetail.data.pph_percent / 100)) * 1000 )  / 1000) || 0
+									if (xDpp != 0) {
+										xDetail.data.total_pph_amount =  (Math.round((xDpp * (xDetail.data.pph_percent / 100)) * 1000 )  / 1000) || 0
+									} else {
+										if (xDetail.data.pph_percent != 0) {
+											xDetail.data.total_pph_amount = ((Math.round((xDetail.data.untaxed_amount * xDetail.data.pph_percent) / 100) * 1000 ) / 1000) || 0
+										}
+									}
 									xDetail.data.pph_amount = xDetail.data.total_pph_amount
 								} else {
 									xDetail.data.total_pph_amount =  (Math.round((xDetail.data.pph_amount) * 1000 )  / 1000) || 0
 									xDetail.data.pph_percent = (Math.round(((xDetail.data.pph_amount/xDpp) * 100) * 1000 )  / 1000) || 0
 								}
-								
-								xDetail.data.total_dpp = xDpp
 								const xPreTotalPrice = (xDetail.data.untaxed_amount + xDetail.data.total_tax_amount + xDetail.data.delivery_costs + xDetail.data.service_costs + xDetail.data.other_costs) - xDetail.data.total_pph_amount
 								const xTotalPriceRound = Math.round((xPreTotalPrice || 0) * 1000) / 1000
 								xDetail.data.total_price = xTotalPriceRound
@@ -583,6 +588,19 @@ class PaymentRequestService {
 								var xTotalFaktur = 0
 								// when payreq category is 2 = billing then insert invoice here
 								for (var i in xJoArrItems) {
+									// Check first whether invoice already exists in other payreq or not
+									var xPaymentRequestDetail = await _paymentRequestDetailRepoInstance.getByParam({
+										invoice_no: xJoArrItems[i].invoice_no,
+										odoo_bill_no: xJoArrItems[i].odoo_bill_no
+									});
+									if (xPaymentRequestDetail.status_code == '00') {
+										return {
+											status_code: '-99',
+											status_msg: `Invoice ${xJoArrItems[i].invoice_no} sudah digunakan pada payreq ${xPaymentRequestDetail.data.payment_request.document_no}`
+										};
+										break
+									}
+
 									if (xJoArrItems[i].total_after_tax) {
 										xTotalFaktur +=  parseFloat(xJoArrItems[i].total_after_tax)
 									}
@@ -2119,7 +2137,11 @@ class PaymentRequestService {
 				let xUpdatePrdItem = await _purchaseRequestDetailRepoInstance.save(
 					{
 						id: xFpbItem.id,
-						qty_paid: xNewQtyPaid
+						qty_paid: xNewQtyPaid,
+						purchase_type: 'ca',
+						ca_type: 1,
+						status: 3
+						// store_link: ""
 					},
 					'update'
 				);
