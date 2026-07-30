@@ -204,6 +204,10 @@ class PurchaseRequestService {
 										xJoArrItems[i].qty_left = xJoArrItems[i].qty;
 									} else {
 										xJoArrItems[i].qty_left = 0
+										// direct assign ca type and status into prd
+										xJoArrItems[i].ca_type = 1;
+										xJoArrItems[i].purchase_type = 'ca';
+										xJoArrItems[i].status = 3;
 									}
 									// xJoArrItems[i].qty_done = 0;
 									// if (xJoArrItems[i].hasOwnProperty('rab_item_id') && xJoArrItems[i].rab_item_id != null && xJoArrItems[i].rab_item_id != '') {

@@ -61,7 +61,8 @@ module.exports = (sequelize, DataTypes) => {
 		debt_value: DataTypes.DOUBLE,
 		receive_invoice_date: DataTypes.DATE,
 		invoice_due_date: DataTypes.DATE,
-		company_id: DataTypes.INTEGER
+		company_id: DataTypes.INTEGER,
+		store_link: DataTypes.STRING
 	});
 
 	PaymentRequestDetail.associate = function(models) {
