@@ -198,6 +198,7 @@ class PaymentRequestService {
 								xDetail.data.total_base_price = Math.round((xTotalBasePrice + xTotalDiscItem || 0) * 1000) / 1000
 								xDetail.data.total_discount = Math.round((xTotalDiscItem || 0) * 1000) / 1000
 
+								console.log(`>>> xDetail.data.global_discount: ${JSON.stringify(xDetail.data.global_discount)}`);
 								if (xDetail.data.global_discount != null & xDetail.data.global_discount != 0) {
 									if (xTotalDiscItem != 0) {
 										xGlobalPercent = (xDetail.data.global_discount / xTotalDiscItem) * 100
@@ -205,7 +206,7 @@ class PaymentRequestService {
 										xGlobalPercent = (xDetail.data.global_discount / xTotalBasePrice) * 100
 									}
 								}
-								
+								console.log(`>>> xDetail.data.global_discount_percent: ${JSON.stringify(xDetail.data.global_discount_percent)}`);
 								if (xDetail.data.global_discount_percent != null & xDetail.data.global_discount_percent != 0) {
 									if (xTotalDiscItem != 0) {
 										xGlobalAmount = (xDetail.data.global_discount_percent * xTotalDiscWoTax ) / 100
@@ -214,6 +215,7 @@ class PaymentRequestService {
 									}
 								}
 								
+								console.log(`>>> xGlobalAmount: ${JSON.stringify(xGlobalAmount)}`);
 								xDetail.data.global_discount_percent = Math.round(xGlobalPercent * 1000) / 1000
 								xDetail.data.global_discount = Math.round(xGlobalAmount * 1000) / 1000
 

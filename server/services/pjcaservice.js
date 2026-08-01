@@ -175,6 +175,7 @@ class PJCAService {
 							xDetail.data.total_base_price = Math.round((xTotalBasePrice + xTotalDiscItem || 0) * 1000) / 1000
 							xDetail.data.total_discount = Math.round((xTotalDiscItem || 0) * 1000) / 1000
 
+							console.log(`>>> xDetail.data.global_discount: ${JSON.stringify(xDetail.data.global_discount)}`);
 							if (xDetail.data.global_discount != null & xDetail.data.global_discount != 0) {
 								if (xTotalDiscItem != 0) {
 									xGlobalPercent = (xDetail.data.global_discount / xTotalDiscItem) * 100
@@ -183,6 +184,7 @@ class PJCAService {
 								}
 							}
 							
+							console.log(`>>> xDetail.data.global_discount_percent: ${JSON.stringify(xDetail.data.global_discount_percent)}`);
 							if (xDetail.data.global_discount_percent != null & xDetail.data.global_discount_percent != 0) {
 								if (xTotalDiscItem != 0) {
 									xGlobalAmount = (xDetail.data.global_discount_percent * xTotalDiscWoTax ) / 100
@@ -190,6 +192,7 @@ class PJCAService {
 									xGlobalAmount = (xDetail.data.global_discount_percent * xTotalBasePrice) / 100
 								}
 							}
+							console.log(`>>> xGlobalAmount: ${JSON.stringify(xGlobalAmount)}`);
 							
 							xDetail.data.global_discount_percent = Math.round(xGlobalPercent * 1000) / 1000
 							xDetail.data.global_discount = Math.round(xGlobalAmount * 1000) / 1000
@@ -212,7 +215,7 @@ class PJCAService {
 								if (xPjcaDetail.every( ({ tax_type }) => tax_type == 6 || tax_type == 7)) {
 									// before update ppn12%
 									// xDetail.data.total_tax_amount = (Math.round((xDetail.data.untaxed_amount * 0.11) * 1000 )  / 1000) || 0
-									if (xPayreqDetail.every( ({ tax_type }) => tax_type == 6)) {
+									if (xPjcaDetail.every( ({ tax_type }) => tax_type == 6)) {
 										xDpp = (Math.round((xDetail.data.untaxed_amount * (11/12)) * 1000 )  / 1000) || 0
 										xDetail.data.total_tax_amount = (Math.round((xDpp * 0.12) * 1000 )  / 1000) || 0
 									} else {
@@ -462,6 +465,8 @@ class PJCAService {
 													pParam.department_name = xPaymentRequest.data.department_name
 													pParam.employee_id = xPaymentRequest.data.employee_id
 													pParam.employee_name = xPaymentRequest.data.employee_name
+													pParam.global_discount = xPaymentRequest.data.global_discount
+													pParam.global_discount_percent = xPaymentRequest.data.global_discount_percent
 													xFlagProcess = true;
 												} else {
 													xJoResult = {
