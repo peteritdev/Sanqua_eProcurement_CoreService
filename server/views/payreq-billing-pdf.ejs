@@ -199,9 +199,15 @@
                         <td style="font-size:10px;padding: 2px;width:7%;text-align: center;white-space:nowrap;"><%= item.invoice_date %></td>
                         <td style="font-size:10px;padding: 2px;width:7%;text-align: center;"><%= item.receive_invoice_date %></td>
                         <td style="font-size:10px;padding: 2px;width:7%;text-align: center;" colspan="2"><%= item.invoice_due_date %></td>
-                        <td style="font-size:10px;padding: 2px;text-align: right;" colspan="2"><%= item.total_after_tax %></td>
-                        <td style="font-size:10px;padding: 2px;text-align: right;"><%= item.deduction %></td>
-                        <td style="font-size:10px;padding: 2px;text-align: right;" colspan="2"><%= item.debt_value %></td>
+                        <td style="font-size:10px;padding: 2px;text-align: right;" colspan="2">
+                            <%=item.total_after_tax != null ? item.total_after_tax.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%>
+                        </td>
+                        <td style="font-size:10px;padding: 2px;text-align: right;">
+                            <%=item.deduction != null ? item.deduction.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%>
+                        </td>
+                        <td style="font-size:10px;padding: 2px;text-align: right;" colspan="2">
+                            <%=item.debt_value != null ? item.debt_value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%>
+                        </td>
                     </tr>
             <%
                     if( header.payment_request_detail.length > xMaxLinePerPage && index == xMaxLinePerPage ){
