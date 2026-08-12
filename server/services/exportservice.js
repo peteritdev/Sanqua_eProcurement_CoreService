@@ -1856,72 +1856,110 @@ class ExportService {
 				
 				(async () => {
 					try {
-						const html = await ejs.renderFile(
-							path.join(__dirname, '../views/', 'payreq-pdf.ejs'),
-							{
+						let html = null;
+						let xPayload = {
+							companyData: xCompanyData,
+							imagePath: config.imagePath,
+							approver1: xApprovedUser1,
+							approver2: xApprovedUser2,
+							approver3: xApprovedUser3,
+							qrCode: {
+								qrPath: `${config.imagePathESanQua_dev}/digital_sign_qrcode/`,
+								approval1: xQRCodeFileName1,
+								approval2: xQRCodeFileName2,
+								approval3: xQRCodeFileName3
+							}
+						}
+						console.log(`>>> app_category 3: ${JSON.stringify(xJoResultPayreq.data.app_category)}`);
+
+						if (xJoResultPayreq.data.app_category != 2) {
+							Object.assign(xPayload, {
 								data: xJoResultPayreq,
-								companyData: xCompanyData,
-								imagePath: config.imagePath,
-								approver1: xApprovedUser1,
-								approver2: xApprovedUser2,
-								approver3: xApprovedUser3,
-								qrCode: {
-									qrPath: `${config.imagePathESanQua_dev}/digital_sign_qrcode/`,
-									approval1: xQRCodeFileName1,
-									approval2: xQRCodeFileName2,
-									approval3: xQRCodeFileName3
+							})
+							html = await ejs.renderFile(
+								path.join(__dirname, '../views/', 'payreq-pdf.ejs'),
+								xPayload
+							);
+						} else {
+							Object.assign(xPayload, {
+								header: xJoResultPayreq.data,
+								detail: xJoResultPayreq.data.payment_request_detail,
+								data: xJoResultPayreq,
+							})
+							html = await ejs.renderFile( 
+								path.join(__dirname, '../views/', "payreq-billing-pdf.ejs"), 
+								xPayload
+							);
+						}
+						if (html != null) {
+							const puppeteerConfig = {
+								headless: true,
+								args: ['--no-sandbox', '--disable-setuid-sandbox']
+							}
+							
+							if (config.puppeteerExecutablePath != null) {
+								puppeteerConfig.executablePath = config.puppeteerExecutablePath;
+							}
+							
+							const browser = await puppeteer.launch(puppeteerConfig);
+
+							const page = await browser.newPage();
+							await page.setContent(html, { waitUntil: 'networkidle0' });
+							
+							var xPayreqNo = xJoResultPayreq.data.document_no.replace(/\//g, '-');
+							var xFileName = null;
+							var xPathFile = null;
+
+							let xOptions = null
+							if (xJoResultPayreq.data.app_category != 2) {
+								xFileName = `payreq-${xPayreqNo}.pdf`;
+								xPathFile = `./generated_files/payreq/${xFileName}`;
+								xOptions = {
+									// width: '210mm',   // Lebar A4
+									width: '156mm',
+									height: '212mm',
+									// height: '297mm',
+									borders: '0.3cm',
+									// margins: {
+									// 	top: '0.3cm',
+									// 	bottom: '0.3cm',
+									// 	left: '0.3cm',
+									// 	right: '0.3cm'
+									// }
+								};
+							} else {
+								xFileName = `payreq-bill-${xPayreqNo}.pdf`;
+								xPathFile = `./generated_files/payreq/${xFileName}`;
+								xOptions =	{
+									width: '210mm',
+									height: '297mm',
+									borders: '0.3cm',
+								};
+							}
+							
+							await page.pdf({
+								path: xPathFile,
+								// format: 'A4',
+								// landscape: false,
+								printBackground: true,
+								...xOptions
+							});
+
+							await browser.close();
+							pRes.download(xPathFile, xFileName, (err) => {
+								if (err) {
+									console.log(`>>> error pdf 2: ${err}`);
+									pRes.status(500).send({
+										message: `Could	 not download the file. ${err}`
+									});
 								}
-							}
-						);
-						
-						const puppeteerConfig = {
-							headless: true,
-							args: ['--no-sandbox', '--disable-setuid-sandbox']
+							});
+						} else {
+							pRes.status(500).send({
+								message: `Could not generate the PDF.`
+							});
+							return;
 						}
-						
-						if (config.puppeteerExecutablePath != null) {
-							puppeteerConfig.executablePath = config.puppeteerExecutablePath;
-						}
-						
-						const browser = await puppeteer.launch(puppeteerConfig);
-
-						const page = await browser.newPage();
-						await page.setContent(html, { waitUntil: 'networkidle0' });
-						
-						var xPayreqNo = xJoResultPayreq.data.document_no.replace(/\//g, '-');
-						var xFileName = `payreq-${xPayreqNo}.pdf`;
-						var xPathFile = `./generated_files/payreq/${xFileName}`;
-						const xOptions = {
-							// width: '210mm',   // Lebar A4
-							width: '156mm',
-							height: '212mm',
-							// height: '297mm',
-							borders: '0.3cm',
-							// margins: {
-							// 	top: '0.3cm',
-							// 	bottom: '0.3cm',
-							// 	left: '0.3cm',
-							// 	right: '0.3cm'
-							// }
-						};
-						
-						await page.pdf({
-							path: xPathFile,
-							// format: 'A4',
-							// landscape: false,
-							printBackground: true,
-							...xOptions
-						});
-
-						await browser.close();
-						pRes.download(xPathFile, xFileName, (err) => {
-							if (err) {
-								console.log(`>>> error pdf 2: ${err}`);
-								pRes.status(500).send({
-									message: `Could	 not download the file. ${err}`
-								});
-							}
-						});
 					} catch (err) {
 						console.error('❌ Gagal generate PDF:', err);
 						pRes.status(500).send(err);
