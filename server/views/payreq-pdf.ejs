@@ -160,7 +160,7 @@
               >
                 <table style="width: 100%">
                   <tr>
-                    <td style="text-align: right">
+                    <td style="text-align: center">
                       <span
                         style="
                           display: flex;
@@ -171,14 +171,16 @@
                           left: 15px;
                         "
                       >
-                        <% if( data.data.payment_type == 1 ){ %>
-                        <img src="<%=imagePath%>box_checklist.png" width="15" />
-                        <% }else{ %>
-                        <img
-                          src="<%=imagePath%>blank_checklist.png"
-                          width="15"
-                        />
-                        <% } %>
+                        <span style="width: 20px;">
+                          <% if( data.data.payment_type == 1 ){ %>
+                          <img src="<%=imagePath%>box_checklist.png" width="15" />
+                          <% }else{ %>
+                          <img
+                            src="<%=imagePath%>blank_checklist.png"
+                            width="15"
+                          />
+                          <% } %>
+                        </span>
                         <span
                           style="
                             margin-left: 5px;
