@@ -68,62 +68,48 @@
                     <% }else{ %>
                         <img src="<%=imagePath%>blank_checklist.png" width="13">
                     <% } %>
-                    <!--div style="display: block; width: 10px; height: 10px; border: 1px solid #000000;" /-->
+                    
                     <span style="padding-left:5px;padding-bottom:10px !important;font-size:9px;position: absolute;">Tunai</span>                
                    
                 </td>
                 <td style="padding: 3px;text-align: left;" colspan="2">
                     <% if(header.payment_type == 2){ %>
                         <img src="<%=imagePath%>checklist.png" width="15">
-                        <!--div style="display: block; width: 10px; height: 10px; border: 1px solid #000000;"></div-->                           
+                                        
                         <span style="padding-left:5px;padding-bottom:10px !important;font-size:9px;position: absolute;">Bank</span>   
                     <% }else{ %>
                         <img src="<%=imagePath%>blank_checklist.png" width="13">
                     <% } %>        
                 </td>
                 <td style="padding: 3px;text-align: left;white-space:nowrap;width:20%;">
-                    <!--div style="display: block; width: 10px; height: 10px; border: 1px solid #000000;" /-->
-                    <!-- <% if(header.payment_type > 2){ %>
-                        <img src="<%=imagePath%>checklist.png" width="15">
-                        <span style="padding-left:5px;padding-bottom:10px !important;font-size:9px;position: absolute;">Giro</span>  
-                    <% }else{ %> -->
+                    
                     <img src="<%=imagePath%>blank_checklist.png" width="15">
                     <span style="padding-left:5px;padding-bottom:10px !important;font-size:9px;position: absolute;">Giro</span>
-                    <!-- <% } %> -->
+                    
                 </td>
                 <td style="padding: 2px;text-align: left;font-size:9px;" colspan="4">
-                    <!-- <% if(header.payment_type == 2){ %>
-                        An. <%= header.account_name%>
-                    <% }else{ %> -->
+                    
                     An. ...............................................................
-                    <!-- <% } %> -->
+                    
                 </td>
             </tr>
-            <!-- JABATAN -->
+            
             <tr>
                 <td style="font-size:9px;padding: 2px;text-align: left;border-right: none;" colspan="2">Jabatan</td>
                 <td style="padding: 2px;border-right: none;border-left: none;">:</td>
                 <td style="font-size:9px;padding: 2px;border-left: none;text-align: left;">
-                    <!-- <%= header.position_name %> -->
+                    
                 </td>
                 <td style="padding: 2px;width:3%;text-align: center;font-size: 20px; font-weight: bold;" colspan="4" rowspan="4">
                     
                 </td>
                 <td style="padding: 3px;text-align: left;white-space:nowrap;">
-                    <!-- <% if(header.payment_method == 3){ %>
-                        <img src="<%=imagePath%>checklist.png" width="15">
-                        <span style="padding-left:5px;padding-bottom:10px !important;font-size:9px;position: absolute;">Check</span> 
-                    <% }else{ %> -->
                     <img src="<%=imagePath%>blank_checklist.png" width="15">
                     <span style="padding-left:5px;padding-bottom:10px !important;font-size:9px;position: absolute;">Check</span>
-                    <!-- <% } %> -->
+                    
                 </td>
                 <td style="font-size:9px;padding: 2px;text-align: left;" colspan="4">
-                    <!-- <% if(header.payment_method == 3){ %>
-                        An. <%= header.account_name%>
-                    <% }else{ %> -->
-                        An. ...............................................................
-                    <!-- <% } %> -->
+                    An. ...............................................................
                 </td>
             </tr>
             <tr>
@@ -176,29 +162,23 @@
                 <td style="font-size:9px;padding: 2px;width:3%;text-align: left;" colspan="8">
                     Untuk Pembayaran 
                     <span style="margin: 0 5px">: </span>
-                    <% if( header.purchase_request !=){ %>
+                    <% if( header.purchase_request != null){ %>
                         <% if( header.purchase_request.project != null ){ %>
-                        <span>"(" + header.purchase_request.project.odoo_project_code + "/" + header.purchase_request.project.name +") "</span>
+                        (<%= header.purchase_request.project.odoo_project_code %>/<%= header.purchase_request.project.name %>)
                         <% }else{ %>
-                        <span> header.payment_desc</span>
+                        <span><%= header.payment_desc %></span>
                         <% } %>
                     <% }else{ %>
-                        <span> header.payment_desc</span>
+                        <span><%= header.payment_desc %></span>
                     <% } %>
                 </td>
                 <td style="font-size:9px;padding: 2px;width:3%;text-align: left;white-space:nowrap;">
                     Currency
                 </td>
                 <td style="font-size:9px;padding: 2px;text-align: left;" colspan="4">
-                    <!-- <% if(header.currency != null){ %>
-                        <%= header.currency.code%>
-                    <% }else {%>
-                        
-                    <% } %> -->
                 </td>
             </tr>
             <tr>
-                <!--td style="padding: 3px;text-align: center;font-weight: bold;">No. Akun</td-->
                 <td style="font-size:9px;padding: 2px;text-align: center;font-weight: bold;" colspan="2">No. Bill</td>
                 <td style="font-size:9px;padding: 2px;width:7%;text-align: center;font-weight: bold;" colspan="2">No. Faktur</td>
                 <td style="font-size:9px;padding: 2px;width:7%;text-align: center;font-weight: bold;white-space:nowrap;">Tgl. Faktur</td>
@@ -211,10 +191,9 @@
             <%
                 var index = 1;
                 var xMaxLinePerPage = 47;
-                detail.payment_request_detail.forEach( item => {
+                header.payment_request_detail.forEach( item => {
             %>
                     <tr>
-                        <!--td style="padding: 3px;text-align: left;font-size:9px;">&nbsp;</td-->
                         <td style="font-size:10px;padding: 2px;text-align: center;" colspan="2"><%= item.odoo_bill_no %></td>
                         <td style="font-size:10px;padding: 2px;text-align: center;white-space:nowrap;" colspan="2"><%= item.invoice_no %></td>
                         <td style="font-size:10px;padding: 2px;width:7%;text-align: center;white-space:nowrap;"><%= item.invoice_date %></td>
@@ -225,7 +204,7 @@
                         <td style="font-size:10px;padding: 2px;text-align: right;" colspan="2"><%= item.debt_value %></td>
                     </tr>
             <%
-                    if( detail.payment_request_detail.length > xMaxLinePerPage && index == xMaxLinePerPage ){
+                    if( header.payment_request_detail.length > xMaxLinePerPage && index == xMaxLinePerPage ){
             %>
                         </table>
             <%
@@ -237,7 +216,6 @@
             %>
                         <table class="center" cellspacing="0" border="1">
                             <tr>
-                                <!--td style="padding: 3px;text-align: center;font-weight: bold;">No. Akun</td-->
                                 <td style="font-size:9px;padding: 2px;text-align: center;font-weight: bold;" colspan="2">No. Bill</td>
                                 <td style="font-size:9px;padding: 2px;width:7%;text-align: center;font-weight: bold;" colspan="2">No. Faktur</td>
                                 <td style="font-size:9px;padding: 2px;width:7%;text-align: center;font-weight: bold;white-space:nowrap;">Tgl. Faktur</td>
@@ -263,9 +241,8 @@
                 <td style="font-size:10px;padding: 3px;text-align:right;" colspan="2"><%=header.total_price != null ? header.total_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
             </tr>
             <tr>
-                <td colspan="13" style="padding:1px;text-align: left;font-size: 10px;">Terbilang: <%= header.terbilang %><% if(header.currency != null){ %>
-                    <!-- <%= header.currency.name%> -->
-                <% }%>
+                <td colspan="13" style="padding:1px;text-align: left;font-size: 10px;">Terbilang: <%= header.terbilang %>
+
                 </td>
             </tr>
             <tr>
