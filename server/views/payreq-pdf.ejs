@@ -359,12 +359,12 @@
           <span style="margin: 0 5px">: </span>
           <% if( data.data.purchase_request != null){ %>
             <% if( data.data.purchase_request.project != null ){ %>
-              <span>"(" + data.data.purchase_request.project.odoo_project_code + "/" + data.data.purchase_request.project.name +") "</span>
+              (<%= data.data.purchase_request.project.odoo_project_code %>/<%= data.data.purchase_request.project.name %>)
             <% }else{ %>
-              <span> data.data.payment_desc</span>
+              <span><%= data.data.payment_desc %></span>
             <% } %>
           <% }else{ %>
-            <span> data.data.payment_desc</span>
+            <span><%= data.data.payment_desc %></span>
           <% } %>
         </td>
       </tr>
