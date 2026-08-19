@@ -56,6 +56,7 @@ class PaymentRequestDetailService {
 		var xDecId = null;
 		var xRequestIdClear = 0;
 		var xPrDetailItem = null
+		var xPaymentRequest = null
 
 		// console.log(`>>> pParam [PaymentRequestDetailService] : ${JSON.stringify(pParam)}`);
 
@@ -71,7 +72,7 @@ class PaymentRequestDetailService {
 				xDecId = await _utilInstance.decrypt(pParam.payment_request_id, config.cryptoKey.hashKey);
 				if (xDecId.status_code == '00') {
 					pParam.payment_request_id = xDecId.decrypted;
-					var xPaymentRequest = await _paymentRequestRepoInstance.getByParameter({
+					xPaymentRequest = await _paymentRequestRepoInstance.getByParameter({
 						id: pParam.payment_request_id,
 						method: xMethod,
 						token: xToken
@@ -152,130 +153,176 @@ class PaymentRequestDetailService {
 		// xFlagProcess = false;
 		if (xFlagProcess) {
 			if (xAct == 'add') {
-				var xPaymentRequestDetail = null;
-				var	xProductDetail = null;
-				var	xVendorDetail = null;
+				if (xPaymentRequest.data.app_category != 2) {
+					// if payreq category no billing
+					var xPaymentRequestDetail = null;
+					var	xProductDetail = null;
+					var	xVendorDetail = null;
 
-				if (pParam.hasOwnProperty('product_id')) {
-					if (pParam.product_id != null) {
-						// Check first whether product_id and vendor_id already exists in detail or not
-						xPaymentRequestDetail = await _repoInstance.getByProductId({
-							product_id: pParam.product_id,	
-							payment_request_id: pParam.payment_request_id
-						});
-					}
-				}
-				// console.log(`>>> xPaymentRequestDetail : ${JSON.stringify(xPaymentRequestDetail)}`);
-				// console.log(Math.round((xPaymentRequestDetail.qty_request + pParam.qty_request) * 1000) / 1000);
-
-				if (
-					xPaymentRequestDetail != null &&
-					xPaymentRequestDetail.prd_id == pParam.prd_id
-				) {
-					var xParamUpdate = {
-						id: xPaymentRequestDetail.id,
-						qty_request: Math.round((xPaymentRequestDetail.qty_request + pParam.qty_request) * 1000) / 1000,
-						price_total:
-							Math.round(
-								(xPaymentRequestDetail.qty_request + pParam.qty_request) *
-									xPaymentRequestDetail.price_request *
-									1000
-							) / 1000
-					};
-					pParam = null;
-					pParam = xParamUpdate;
-
-					xAct = 'update';
-				} else {
-					console.log(`>>> pParam CEK CEK CEK : ${JSON.stringify(pParam)}`);
 					if (pParam.hasOwnProperty('product_id')) {
 						if (pParam.product_id != null) {
-							// Get Product detail by Id
-							xProductDetail = await _productServiceInstance.getById({
-								id: await _utilInstance.encrypt(pParam.product_id.toString(), config.cryptoKey.hashKey)
+							// Check first whether product_id and vendor_id already exists in detail or not
+							xPaymentRequestDetail = await _repoInstance.getByProductId({
+								product_id: pParam.product_id,	
+								payment_request_id: pParam.payment_request_id
 							});
-							if (xProductDetail != null) {
-								// console.log(JSON.stringify(xProductDetail));
-								pParam.product_code = xProductDetail.data.code;
-								pParam.product_name = xProductDetail.data.name;
-							}
 						}
 					}
+					// console.log(`>>> xPaymentRequestDetail : ${JSON.stringify(xPaymentRequestDetail)}`);
+					// console.log(Math.round((xPaymentRequestDetail.qty_request + pParam.qty_request) * 1000) / 1000);
 
-					pParam.price_total = Math.round(pParam.qty_request * pParam.price_request * 1000) / 1000;
-					
-					pParam.item_type = pParam.item_type ? pParam.item_type : 1
+					if (
+						xPaymentRequestDetail != null &&
+						xPaymentRequestDetail.prd_id == pParam.prd_id
+					) {
+						var xParamUpdate = {
+							id: xPaymentRequestDetail.id,
+							qty_request: Math.round((xPaymentRequestDetail.qty_request + pParam.qty_request) * 1000) / 1000,
+							price_total:
+								Math.round(
+									(xPaymentRequestDetail.qty_request + pParam.qty_request) *
+										xPaymentRequestDetail.price_request *
+										1000
+								) / 1000
+						};
+						pParam = null;
+						pParam = xParamUpdate;
+
+						xAct = 'update';
+					} else {
+						console.log(`>>> pParam CEK CEK CEK : ${JSON.stringify(pParam)}`);
+						if (pParam.hasOwnProperty('product_id')) {
+							if (pParam.product_id != null) {
+								// Get Product detail by Id
+								xProductDetail = await _productServiceInstance.getById({
+									id: await _utilInstance.encrypt(pParam.product_id.toString(), config.cryptoKey.hashKey)
+								});
+								if (xProductDetail != null) {
+									// console.log(JSON.stringify(xProductDetail));
+									pParam.product_code = xProductDetail.data.code;
+									pParam.product_name = xProductDetail.data.name;
+								}
+							}
+						}
+
+						pParam.price_total = Math.round(pParam.qty_request * pParam.price_request * 1000) / 1000;
+						
+						pParam.item_type = pParam.item_type ? pParam.item_type : 1
+					}
+					// Validate if product_id is null (free keyin for project), estimate_fulfillment
+
+				} else {
+					// if payreq category is billing
+					// type code hereee............
+					// check invoice/bill already inputed on other payreq or not
+					var xCheckInvoiceNo = await _repoInstance.getByParam({
+						invoice_no: pParam.invoice_no,
+						odoo_bill_no: pParam.odoo_bill_no
+					})
+					if (xCheckInvoiceNo.status_code == '00') {
+						return {
+							status_code: '-99',
+							status_msg: `Invoice sudah digunakan pada payreq ${xCheckInvoiceNo.data.payment_request.document_no}`
+						};
+					}
 				}
-				// Validate if product_id is null (free keyin for project), estimate_fulfillment
-
 				var xAddResult = await _repoInstance.save(pParam, xAct);
 				xJoResult = xAddResult;
 			} else if (xAct == 'add_batch') {
 				if (pParam.hasOwnProperty('items')) {
 					var xItems = pParam.items;
 					var arrMsg = [];
-					for (var i in xItems) {
-						// Check first whether product_id and vendor_id already exists in detail or not
-						var xPaymentRequestDetail = await _repoInstance.getByProductId({
-							payment_request_id: pParam.payment_request_id,
-							product_id: xItems[i].product_id
-						});
+					if (xPaymentRequest.data.app_category != 2) {
+						for (var i in xItems) {
+							// Check first whether product_id and vendor_id already exists in detail or not
+							var xPaymentRequestDetail = await _repoInstance.getByProductId({
+								payment_request_id: pParam.payment_request_id,
+								product_id: xItems[i].product_id
+							});
 
-						if (
-							xPaymentRequestDetail != null &&
-							xPaymentRequestDetail.price_request == xItems[i].price_request
-						) {
-							var xParamUpdate = {
-								id: xPaymentRequestDetail.id,
-								qty: Math.round((xPaymentRequestDetail.qty_request + xItems[i].qty_request) * 1000) / 1000,
-								price_total:
-									Math.round(
-										(xPaymentRequestDetail.qty_request + xItems[i].qty_request) *
-											xPaymentRequestDetail.price_request *
-											1000
-									) / 1000
-							};
+							if (
+								xPaymentRequestDetail != null &&
+								xPaymentRequestDetail.price_request == xItems[i].price_request
+							) {
+								var xParamUpdate = {
+									id: xPaymentRequestDetail.id,
+									qty: Math.round((xPaymentRequestDetail.qty_request + xItems[i].qty_request) * 1000) / 1000,
+									price_total:
+										Math.round(
+											(xPaymentRequestDetail.qty_request + xItems[i].qty_request) *
+												xPaymentRequestDetail.price_request *
+												1000
+										) / 1000
+								};
 
-							xItems[i] = null;
-							xItems[i] = xParamUpdate;
-							xItems[i].payment_request_id = xRequestIdClear;
+								xItems[i] = null;
+								xItems[i] = xParamUpdate;
+								xItems[i].payment_request_id = xRequestIdClear;
 
-							xAct = 'update';
-						} else {
-							// Get Product detail by Id
-							if (xItems[i].product_id !== null) {
-								var xProductDetail = await _productServiceInstance.getById({
-									id: await _utilInstance.encrypt(
-										xItems[i].product_id.toString(),
-										config.cryptoKey.hashKey
-									)
-								});
-								if (xProductDetail != null) {
-									// console.log(JSON.stringify(xProductDetail));
-									xItems[i].product_code = xProductDetail.data.code;
-									xItems[i].product_name = xProductDetail.data.name;
+								xAct = 'update';
+							} else {
+								// Get Product detail by Id
+								if (xItems[i].product_id !== null) {
+									var xProductDetail = await _productServiceInstance.getById({
+										id: await _utilInstance.encrypt(
+											xItems[i].product_id.toString(),
+											config.cryptoKey.hashKey
+										)
+									});
+									if (xProductDetail != null) {
+										// console.log(JSON.stringify(xProductDetail));
+										xItems[i].product_code = xProductDetail.data.code;
+										xItems[i].product_name = xProductDetail.data.name;
+									}
 								}
+
+								xItems[i].price_total =
+									Math.round(xItems[i].qty_request * xItems[i].price_request * 1000) / 1000;
+								xItems[i].payment_request_id = xRequestIdClear;
+								xItems[i].user_id = pParam.user_id;
+								xItems[i].user_name = pParam.user_name;
+								xItems[i].item_type = xItems[i].item_type ? xItems[i].item_type : 1
+
+								xAct = 'add';
+							}
+							// if (xCatalogue.status_code == '00') {
+							// 	xItems[i].last_price = xCatalogue.data.last_price;
+							// }
+							var xAddResult = await _repoInstance.save(xItems[i], xAct);
+							arrMsg.push({
+								index: i,
+								status_code: xAddResult.status_code,
+								status_msg: xAddResult.status_msg
+							});
+							xJoResult = xAddResult;
+							
+						}
+					} else {
+						// let xParamAddItemBatcj = [];
+						for (var i in xItems) {
+							// Check first whether invoice already exists in other payreq or not
+							var xPaymentRequestDetail = await _repoInstance.getByParam({
+								invoice_no: xItems[i].invoice_no,
+								odoo_bill_no: xItems[i].odoo_bill_no
+							});
+							if (xPaymentRequestDetail.status_code == '00') {
+								return {
+									status_code: '-99',
+									status_msg: `Invoice ${xItems[i].invoice_no} sudah digunakan pada payreq ${xPaymentRequestDetail.data.payment_request.document_no}`
+								};
+								break
 							}
 
-							xItems[i].price_total =
-								Math.round(xItems[i].qty_request * xItems[i].price_request * 1000) / 1000;
-							xItems[i].payment_request_id = xRequestIdClear;
-							xItems[i].user_id = pParam.user_id;
-							xItems[i].user_name = pParam.user_name;
-							xItems[i].item_type = xItems[i].item_type ? xItems[i].item_type : 1
-
-							xAct = 'add';
+							Object.assign(xItems[i], {
+								payment_request_id: pParam.payment_request_id,
+								created_at: await _utilInstance.getCurrDateTime(),
+								created_by: pParam.user_id,
+								created_by_name: pParam.user_name,
+								status: 0,
+								is_delete: 0
+							})
 						}
-
-						// if (xCatalogue.status_code == '00') {
-						// 	xItems[i].last_price = xCatalogue.data.last_price;
-						// }
-						var xAddResult = await _repoInstance.save(xItems[i], xAct);
-						arrMsg.push({
-							index: i,
-							status_code: xAddResult.status_code,
-							status_msg: xAddResult.status_msg
-						});
+						var xAddResult = await _repoInstance.save(xItems, xAct);
 						xJoResult = xAddResult;
 					}
 				}

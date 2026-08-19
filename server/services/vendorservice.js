@@ -159,13 +159,16 @@ class VendorService {
     async getVendorById( pParam ){
         var xJoResult;
         var xFlag = true;
-
-        var xDecId = await _utilInstance.decrypt( pParam.id, config.cryptoKey.hashKey );
-        if( xDecId.status_code == '00' ){
-            pParam.id = xDecId.decrypted;
-        }else{
-            xFlag = false;
-            xJoResult = xDecId;
+        if (pParam.hasOwnProperty('id') && pParam.id != '') {
+            if (pParam.id.length > 60) {
+                var xDecId = await _utilInstance.decrypt( pParam.id, config.cryptoKey.hashKey );
+                if ( xDecId.status_code == '00' ){
+                    pParam.id = xDecId.decrypted;
+                } else {
+                    xFlag = false;
+                    xJoResult = xDecId;
+                }
+            }
         }
 
         if( xFlag ){

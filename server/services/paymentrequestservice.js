@@ -108,164 +108,176 @@ class PaymentRequestService {
 							xDetail.data.createdAt = xDetail.data.createdAt != null ? moment(xDetail.data.createdAt).format('DD MMM YYYY') : ''
 
 							var xPayreqDetail = xDetail.data.payment_request_detail;
-							var xGlobalAmount = xDetail.data.global_discount 
-							var xGlobalPercent = xDetail.data.global_discount_percent
-							var xTotalBasePrice = 0;
-							var xTotalDiscItem = 0;
-							var xTotalDiscWoTax = 0;
-							var xTaxes = 0;
-							var xDpp = 0
-							var xPphAmount = xDetail.data.pph_amount 
-							var xPphPercent = xDetail.data.pph_percent
-								
-							// // looping detail item
-							for (var i in xPayreqDetail) {
-								delete xPayreqDetail[i].price_total
-								var xPricePerItem = xPayreqDetail[i].price_request
-								// var xTotalPrice = Math.round((xPayreqDetail[i].price_request * xPayreqDetail[i].qty_request) * 1000) / 1000
-								var xDiscAmount = xPayreqDetail[i].discount_amount || 0
-								var xDiscPercent = xPayreqDetail[i].discount_percent || 0
-								var xDiscWoTax = 0
-								var xTotalDisc = 0
-								var xTax = 0
-								var xPriceWithDisc = 0
-								var xPriceBeforeTax = 0
-								var xTotalPrice = 0
-								var xSubtotal = 0
+							if (xDetail.data.app_category != 2) {
+								var xGlobalAmount = xDetail.data.global_discount 
+								var xGlobalPercent = xDetail.data.global_discount_percent
+								var xTotalBasePrice = 0;
+								var xTotalDiscItem = 0;
+								var xTotalDiscWoTax = 0;
+								var xTaxes = 0;
+								var xDpp = 0;
+								var xPphAmount = xDetail.data.pph_amount 
+								var xPphPercent = xDetail.data.pph_percent
+									
+								// // looping detail item
+								for (var i in xPayreqDetail) {
+									delete xPayreqDetail[i].price_total
+									var xPricePerItem = xPayreqDetail[i].price_request
+									// var xTotalPrice = Math.round((xPayreqDetail[i].price_request * xPayreqDetail[i].qty_request) * 1000) / 1000
+									var xDiscAmount = xPayreqDetail[i].discount_amount || 0
+									var xDiscPercent = xPayreqDetail[i].discount_percent || 0
+									var xDiscWoTax = 0
+									var xTotalDisc = 0
+									var xTax = 0
+									var xPriceWithDisc = 0
+									var xPriceBeforeTax = 0
+									var xTotalPrice = 0
+									var xSubtotal = 0
 
-								// calc discount
-								if (xPayreqDetail[i].discount_percent != null && xPayreqDetail[i].discount_percent != 0) {
-									xDiscAmount = Math.round((xPricePerItem * (xPayreqDetail[i].discount_percent / 100)) * 1000) / 1000
-									xPayreqDetail[i].discount_amount = Math.round(xDiscAmount * 1000) / 1000
-								}
-								if (xPayreqDetail[i].discount_amount != null && xPayreqDetail[i].discount_amount != 0) {
-									xDiscPercent = (xPayreqDetail[i].discount_amount / xPricePerItem) * 100
-									xPayreqDetail[i].discount_percent = Math.round(xDiscPercent * 1000) / 1000
-								}
-								
-								xDiscWoTax = Math.round((xPricePerItem * (xDiscPercent / 100)) * 1000) / 1000
+									// calc discount
+									if (xPayreqDetail[i].discount_percent != null && xPayreqDetail[i].discount_percent != 0) {
+										xDiscAmount = Math.round((xPricePerItem * (xPayreqDetail[i].discount_percent / 100)) * 1000) / 1000
+										xPayreqDetail[i].discount_amount = Math.round(xDiscAmount * 1000) / 1000
+									}
+									if (xPayreqDetail[i].discount_amount != null && xPayreqDetail[i].discount_amount != 0) {
+										xDiscPercent = (xPayreqDetail[i].discount_amount / xPricePerItem) * 100
+										xPayreqDetail[i].discount_percent = Math.round(xDiscPercent * 1000) / 1000
+									}
+									
+									xDiscWoTax = Math.round((xPricePerItem * (xDiscPercent / 100)) * 1000) / 1000
 
-								xPriceWithDisc = Math.round((xPricePerItem - xDiscWoTax) * 1000) / 1000
-								
-								// calc price after tax
-								if (xPayreqDetail[i].tax != null) {
-									var taxValue = xPayreqDetail[i].tax.value / 100
-									if (xPayreqDetail[i].tax.type == 1) {
-										taxValue = 1 + (xPayreqDetail[i].tax.value / 100)
-										xPriceBeforeTax = Math.round((xPriceWithDisc / taxValue) * 1000) / 1000
-										xTax = Math.round((xPriceWithDisc - xPriceBeforeTax) * 1000) / 1000
-										// xTotalPriceWithTax = Math.round((xTotalPrice - xTax) * 1000) / 1000
-										if (xDiscPercent != 0) {
-											xTotalDisc = Math.round((xDiscWoTax / taxValue) * 1000) / 1000
+									xPriceWithDisc = Math.round((xPricePerItem - xDiscWoTax) * 1000) / 1000
+									
+									// calc price after tax
+									if (xPayreqDetail[i].tax != null) {
+										var taxValue = xPayreqDetail[i].tax.value / 100
+										if (xPayreqDetail[i].tax.type == 1) {
+											taxValue = 1 + (xPayreqDetail[i].tax.value / 100)
+											xPriceBeforeTax = Math.round((xPriceWithDisc / taxValue) * 1000) / 1000
+											xTax = Math.round((xPriceWithDisc - xPriceBeforeTax) * 1000) / 1000
+											// xTotalPriceWithTax = Math.round((xTotalPrice - xTax) * 1000) / 1000
+											if (xDiscPercent != 0) {
+												xTotalDisc = Math.round((xDiscWoTax / taxValue) * 1000) / 1000
+											}
+											xTotalPrice = Math.round((xPriceWithDisc - xTax) * 1000) / 1000
+										}else{
+											// xPriceBeforeTax = Math.round((xPriceWithDisc * taxValue) * 1000) / 1000
+											xTax = Math.round((xPriceWithDisc * taxValue) * 1000) / 1000
+											xTotalDisc = xDiscWoTax
+											xTotalPrice = xPriceWithDisc
 										}
-										xTotalPrice = Math.round((xPriceWithDisc - xTax) * 1000) / 1000
-									}else{
-										// xPriceBeforeTax = Math.round((xPriceWithDisc * taxValue) * 1000) / 1000
-										xTax = Math.round((xPriceWithDisc * taxValue) * 1000) / 1000
+									} else {
 										xTotalDisc = xDiscWoTax
 										xTotalPrice = xPriceWithDisc
 									}
-								} else {
-									xTotalDisc = xDiscWoTax
-									xTotalPrice = xPriceWithDisc
-								}
 
-								// xTotalDisc = 
+									// xTotalDisc = 
+									
+									// show data only with status == 0
+									xSubtotal = Math.round((xTotalPrice * xPayreqDetail[i].qty_request) * 1000) / 1000
+									xPayreqDetail[i].subtotal = xSubtotal
+
+									if (xPayreqDetail[i].status != -1) {
+										xTotalDiscWoTax += Math.round((xDiscWoTax * xPayreqDetail[i].qty_request) * 1000) / 1000
+										xTotalDiscItem += Math.round((xTotalDisc * xPayreqDetail[i].qty_request) * 1000) / 1000
+										xPayreqDetail[i].total_discount = Math.round((xTotalDisc * xPayreqDetail[i].qty_request) * 1000) / 1000
+
+										xTaxes += Math.round((xTax * xPayreqDetail[i].qty_request) * 1000) / 1000
+
+										xTotalBasePrice += xSubtotal
+
+										xPayreqDetail[i].tax_amount = xTax
+									} else {
+										xPayreqDetail[i].total_discount = Math.round((xTotalDisc * xPayreqDetail[i].qty_request) * 1000) / 1000
+										xPayreqDetail[i].tax_amount = xTax
+									}
+								}
 								
-								// show data only with status == 0
-								xSubtotal = Math.round((xTotalPrice * xPayreqDetail[i].qty_request) * 1000) / 1000
-								xPayreqDetail[i].subtotal = xSubtotal
+								delete xDetail.data.purchase_request_id;
+								xDetail.data.total_discount_wo_tax = xTotalDiscWoTax
+								xDetail.data.total_base_price = Math.round((xTotalBasePrice + xTotalDiscItem || 0) * 1000) / 1000
+								xDetail.data.total_discount = Math.round((xTotalDiscItem || 0) * 1000) / 1000
 
-								if (xPayreqDetail[i].status != -1) {
-									xTotalDiscWoTax += Math.round((xDiscWoTax * xPayreqDetail[i].qty_request) * 1000) / 1000
-									xTotalDiscItem += Math.round((xTotalDisc * xPayreqDetail[i].qty_request) * 1000) / 1000
-									xPayreqDetail[i].total_discount = Math.round((xTotalDisc * xPayreqDetail[i].qty_request) * 1000) / 1000
-
-									xTaxes += Math.round((xTax * xPayreqDetail[i].qty_request) * 1000) / 1000
-
-									xTotalBasePrice += xSubtotal
-
-									xPayreqDetail[i].tax_amount = xTax
-								} else {
-									xPayreqDetail[i].total_discount = Math.round((xTotalDisc * xPayreqDetail[i].qty_request) * 1000) / 1000
-									xPayreqDetail[i].tax_amount = xTax
-								}
-							}
-							
-							delete xDetail.data.purchase_request_id;
-							xDetail.data.total_discount_wo_tax = xTotalDiscWoTax
-							xDetail.data.total_base_price = Math.round((xTotalBasePrice + xTotalDiscItem || 0) * 1000) / 1000
-							xDetail.data.total_discount = Math.round((xTotalDiscItem || 0) * 1000) / 1000
-
-							if (xDetail.data.global_discount != null & xDetail.data.global_discount != 0) {
-								if (xTotalDiscItem != 0) {
-									xGlobalPercent = (xDetail.data.global_discount / xTotalDiscItem) * 100
-								} else {
-									xGlobalPercent = (xDetail.data.global_discount / xTotalBasePrice) * 100
-								}
-							}
-							
-							if (xDetail.data.global_discount_percent != null & xDetail.data.global_discount_percent != 0) {
-								if (xTotalDiscItem != 0) {
-									xGlobalAmount = (xDetail.data.global_discount_percent * xTotalDiscWoTax ) / 100
-								} else {
-									xGlobalAmount = (xDetail.data.global_discount_percent * xTotalBasePrice) / 100
-								}
-							}
-							
-							xDetail.data.global_discount_percent = Math.round(xGlobalPercent * 1000) / 1000
-							xDetail.data.global_discount = Math.round(xGlobalAmount * 1000) / 1000
-
-							if (xGlobalAmount == 0) {
-								xDetail.data.untaxed_amount = Math.round((xDetail.data.total_base_price - xDetail.data.total_discount || 0 ) * 1000) / 1000
-								if (xPayreqDetail.every( ({ tax_type }) => tax_type == 6 || tax_type == 7)) {
-									if (xPayreqDetail.every( ({ tax_type }) => tax_type == 6)) {
-										xDpp = (Math.round((xDetail.data.untaxed_amount * (11/12)) * 1000 )  / 1000) || 0
-										xDetail.data.total_tax_amount = (Math.round((xDpp * 0.12) * 1000 )  / 1000) || 0
+								console.log(`>>> xDetail.data.global_discount: ${JSON.stringify(xDetail.data.global_discount)}`);
+								if (xDetail.data.global_discount != null & xDetail.data.global_discount != 0) {
+									if (xTotalDiscItem != 0) {
+										xGlobalPercent = (xDetail.data.global_discount / xTotalDiscItem) * 100
 									} else {
-										xDpp = (Math.round((xDetail.data.untaxed_amount) * 1000 )  / 1000) || 0
-										xDetail.data.total_tax_amount = (Math.round((xDpp * 0.11) * 1000 )  / 1000) || 0
+										xGlobalPercent = (xDetail.data.global_discount / xTotalBasePrice) * 100
+									}
+								}
+								console.log(`>>> xDetail.data.global_discount_percent: ${JSON.stringify(xDetail.data.global_discount_percent)}`);
+								if (xDetail.data.global_discount_percent != null & xDetail.data.global_discount_percent != 0) {
+									if (xTotalDiscItem != 0) {
+										xGlobalAmount = (xDetail.data.global_discount_percent * xTotalDiscWoTax ) / 100
+									} else {
+										xGlobalAmount = (xDetail.data.global_discount_percent * xTotalBasePrice) / 100
+									}
+								}
+								
+								console.log(`>>> xGlobalAmount: ${JSON.stringify(xGlobalAmount)}`);
+								xDetail.data.global_discount_percent = Math.round(xGlobalPercent * 1000) / 1000
+								xDetail.data.global_discount = Math.round(xGlobalAmount * 1000) / 1000
+
+								if (xGlobalAmount == 0) {
+									xDetail.data.untaxed_amount = Math.round((xDetail.data.total_base_price - xDetail.data.total_discount || 0 ) * 1000) / 1000
+									if (xPayreqDetail.every( ({ tax_type }) => tax_type == 6 || tax_type == 7)) {
+										if (xPayreqDetail.every( ({ tax_type }) => tax_type == 6)) {
+											xDpp = (Math.round((xDetail.data.untaxed_amount * (11/12)) * 1000 )  / 1000) || 0
+											xDetail.data.total_tax_amount = (Math.round((xDpp * 0.12) * 1000 )  / 1000) || 0
+										} else {
+											xDpp = (Math.round((xDetail.data.untaxed_amount) * 1000 )  / 1000) || 0
+											xDetail.data.total_tax_amount = (Math.round((xDpp * 0.11) * 1000 )  / 1000) || 0
+										}
+									} else {
+										xDetail.data.total_tax_amount = Math.round(( xTaxes || 0 ) * 1000) / 1000
 									}
 								} else {
-									xDetail.data.total_tax_amount = Math.round(( xTaxes || 0 ) * 1000) / 1000
-								}
-							} else {
-								xDetail.data.untaxed_amount = Math.round((xDetail.data.total_base_price - xGlobalAmount || 0) * 1000) / 1000
-								if (xPayreqDetail.every( ({ tax_type }) => tax_type == 6 || tax_type == 7)) {
-									// before update ppn12%
-									// xDetail.data.total_tax_amount = (Math.round((xDetail.data.untaxed_amount * 0.11) * 1000 )  / 1000) || 0
-									if (xPayreqDetail.every( ({ tax_type }) => tax_type == 6)) {
-										xDpp = (Math.round((xDetail.data.untaxed_amount * (11/12)) * 1000 )  / 1000) || 0
-										xDetail.data.total_tax_amount = (Math.round((xDpp * 0.12) * 1000 )  / 1000) || 0
+									xDetail.data.untaxed_amount = Math.round((xDetail.data.total_base_price - xGlobalAmount || 0) * 1000) / 1000
+									if (xPayreqDetail.every( ({ tax_type }) => tax_type == 6 || tax_type == 7)) {
+										// before update ppn12%
+										// xDetail.data.total_tax_amount = (Math.round((xDetail.data.untaxed_amount * 0.11) * 1000 )  / 1000) || 0
+										if (xPayreqDetail.every( ({ tax_type }) => tax_type == 6)) {
+											xDpp = (Math.round((xDetail.data.untaxed_amount * (11/12)) * 1000 )  / 1000) || 0
+											xDetail.data.total_tax_amount = (Math.round((xDpp * 0.12) * 1000 )  / 1000) || 0
+										} else {
+											xDpp = (Math.round((xDetail.data.untaxed_amount) * 1000 )  / 1000) || 0
+											xDetail.data.total_tax_amount = (Math.round((xDpp * 0.11) * 1000 )  / 1000) || 0
+										}
 									} else {
-										xDpp = (Math.round((xDetail.data.untaxed_amount) * 1000 )  / 1000) || 0
-										xDetail.data.total_tax_amount = (Math.round((xDpp * 0.11) * 1000 )  / 1000) || 0
+										xDetail.data.total_tax_amount = (Math.round((xTaxes) * 1000 )  / 1000) || 0
 									}
-								} else {
-									xDetail.data.total_tax_amount = (Math.round((xTaxes) * 1000 )  / 1000) || 0
+									// xDetail.data.total_tax_amount = (Math.round((xTaxes - (xTaxes * (xDetail.data.global_discount_percent / 100))) * 1000 )  / 1000) || 0
 								}
-								// xDetail.data.total_tax_amount = (Math.round((xTaxes - (xTaxes * (xDetail.data.global_discount_percent / 100))) * 1000 )  / 1000) || 0
-							}
-							
-							if (xPphAmount == 0) {
-								xDetail.data.total_pph_amount =  (Math.round((xDpp * (xDetail.data.pph_percent / 100)) * 1000 )  / 1000) || 0
-								xDetail.data.pph_amount = xDetail.data.total_pph_amount
+								
+								xDetail.data.total_dpp = xDpp
+								if (xPphAmount == 0) {
+									if (xDpp != 0) {
+										xDetail.data.total_pph_amount =  (Math.round((xDpp * (xDetail.data.pph_percent / 100)) * 1000 )  / 1000) || 0
+									} else {
+										if (xDetail.data.pph_percent != 0) {
+											xDetail.data.total_pph_amount = ((Math.round((xDetail.data.untaxed_amount * xDetail.data.pph_percent) / 100) * 1000 ) / 1000) || 0
+										}
+									}
+									xDetail.data.pph_amount = xDetail.data.total_pph_amount
+								} else {
+									xDetail.data.total_pph_amount =  (Math.round((xDetail.data.pph_amount) * 1000 )  / 1000) || 0
+									xDetail.data.pph_percent = (Math.round(((xDetail.data.pph_amount/xDpp) * 100) * 1000 )  / 1000) || 0
+								}
+								const xPreTotalPrice = (xDetail.data.untaxed_amount + xDetail.data.total_tax_amount + xDetail.data.delivery_costs + xDetail.data.service_costs + xDetail.data.other_costs) - xDetail.data.total_pph_amount
+								const xTotalPriceRound = Math.round((xPreTotalPrice || 0) * 1000) / 1000
+								xDetail.data.total_price = xTotalPriceRound
 							} else {
-								xDetail.data.total_pph_amount =  (Math.round((xDetail.data.pph_amount) * 1000 )  / 1000) || 0
-								xDetail.data.pph_percent = (Math.round(((xDetail.data.pph_amount/xDpp) * 100) * 1000 )  / 1000) || 0
+							// code line below for payreq from billing
+
 							}
-							
-							xDetail.data.total_dpp = xDpp
-							const xPreTotalPrice = (xDetail.data.untaxed_amount + xDetail.data.total_tax_amount + xDetail.data.delivery_costs + xDetail.data.service_costs + xDetail.data.other_costs) - xDetail.data.total_pph_amount
-							const xTotalPriceRound = Math.round((xPreTotalPrice || 0) * 1000) / 1000
-							xDetail.data.total_price = xTotalPriceRound
 							// get Detail FPB
 							// let xFpbDetail = await _purchaseRequestRepoInstance.getById({ id: xDetail.data.purchase_request_id })
 							// if (xFpbDetail != null) {
 							// 	xDetail.data.fpb_no = xFpbDetail.request_no
 							// }
 							// Convert nominal to trebilang
-							const xTerbilang = await _currencyService.terbilang(xTotalPriceRound)
+							const xTerbilang = await _currencyService.terbilang(xDetail.data.total_price)
 							xDetail.data.terbilang = xTerbilang
 							
 							// Get Approval Matrix
@@ -407,7 +419,8 @@ class PaymentRequestService {
 									updated_at: moment(xRows[i].updatedAt).format('DD MMM YYYY HH:mm:ss'),
 									updated_by_name: xRows[i].updated_by_name,
 									purchase_request: xRows[i].purchase_request,
-									pjca: xRows[i].pjca
+									pjca: xRows[i].pjca,
+									app_category: xRows[i].app_category
 								});
 							}
 
@@ -569,73 +582,117 @@ class PaymentRequestService {
 			if (xFlagProcess) {
 				if (xAct == 'add' || xAct == 'add_batch_in_item') {
 					var xJoArrItems = [];
-
 					if (pParam.hasOwnProperty('payment_request_detail')) {
 						xJoArrItems = pParam.payment_request_detail;
 						if (xJoArrItems.length > 0) {
-							for (var i in xJoArrItems) {
-								var xPrdId = await _utilInstance.decrypt(xJoArrItems[i].prd_id, config.cryptoKey.hashKey);
-								if (xPrdId.status_code == '00') {
-									xJoArrItems[i].prd_id = xPrdId.decrypted;
-									// delete xJoArrItems[i].prd_id
-								}
-								console.log(`>>> xPrdId ${JSON.stringify(xPrdId)}`);
-								if (
-									xJoArrItems[i].hasOwnProperty('qty_request') &&
-									xJoArrItems[i].hasOwnProperty('price_request')
-								) {
-									xJoArrItems[i].price_total =
-										xJoArrItems[i].qty_request * xJoArrItems[i].price_request;
-								}
-								// check item with same prd_id in other payment request with status not cancel and reject already created or not
-								// if already created then calculate all qty_request from other payreq item and this item then
-								// check if total qty_request is exceed qty on fpb item or not
-								// if exceed then return cannot create payreq if not then continue
-								const xResultCheckItem = await _paymentRequestDetailRepoInstance.list({prd_id: xJoArrItems[i].prd_id});
-								// console.log(`>>> xResultCheckItem ${JSON.stringify(xResultCheckItem)}`);
-								if (xResultCheckItem.status_code == '00') {
-									if (xResultCheckItem.data.count > 0) {
-										let xArrItem = xResultCheckItem.data.rows;
-										let xTotalQtyRequest = 0;
-										let xFpbItemQty = 0
-										let xArrPayreqNo = []
-										for (let j = 0; j < xArrItem.length; j++) {
-											if (j == 0) {
-												xFpbItemQty = xArrItem[j].purchase_request_detail.qty;
-											}
+							
+							if (pParam.app_category == 2 && !pParam.hasOwnProperty('purchase_request_id')) {
+								var xTotalFaktur = 0
+								// when payreq category is 2 = billing then insert invoice here
+								for (var i in xJoArrItems) {
+									// Check first whether invoice already exists in other payreq or not
+									var xPaymentRequestDetail = await _paymentRequestDetailRepoInstance.getByParam({
+										invoice_no: xJoArrItems[i].invoice_no,
+										odoo_bill_no: xJoArrItems[i].odoo_bill_no
+									});
+									if (xPaymentRequestDetail.status_code == '00') {
+										return {
+											status_code: '-99',
+											status_msg: `Invoice ${xJoArrItems[i].invoice_no} sudah digunakan pada payreq ${xPaymentRequestDetail.data.payment_request.document_no}`
+										};
+										break
+									}
 
-											if (xArrItem[j].payment_request != null && xArrItem[j].payment_request.status != 4 && xArrItem[j].payment_request.status != 5 && xArrItem[j].status == 0) {
-												xTotalQtyRequest += Number(xArrItem[j].qty_request || 0);
-												
-												xArrPayreqNo.push(xArrItem[j].payment_request.document_no);
-											}
-										}
-										xTotalQtyRequest += Number(xJoArrItems[i].qty_request || 0);
-										// const xResultGetPrd = await _purchaseRequestDetailRepoInstance.list({id: xJoArrItems[i].prd_id});
-										// console.log(`>>> xResultGetPrd ${JSON.stringify(xResultGetPrd)}`);
-										// console.log(`>>> xTotalQtyRequest x xFpbItemQty ${JSON.stringify(xTotalQtyRequest)}`, xFpbItemQty);
-										if (xTotalQtyRequest > xFpbItemQty) {
-											xJoResult = {
-												status_code: '-99',
-												status_msg: `Terdeteksi payreq lain yang sudah terbentuk dengan total qty request (${xTotalQtyRequest}) sudah melebihi qty pada FPB (${xFpbItemQty}) untuk item ${xJoArrItems[i].product_name}. Silahkan cek payreq dengan nomor ${xArrPayreqNo.join(', ')}`
-											};
-											return xJoResult;
-										}
+									if (xJoArrItems[i].total_after_tax) {
+										xTotalFaktur +=  parseFloat(xJoArrItems[i].total_after_tax)
 									}
 								}
-								xJoArrItems[i].item_type ? xJoArrItems[i].item_type : 1 
+								pParam.total_price = xTotalFaktur
+							} else {
+								// line below to sparate payreq from FPB or w/o FPB (21/06/2026)
+								if (pParam.hasOwnProperty('purchase_request_id')) {
+									for (var i in xJoArrItems) {
+										var xPrdId = await _utilInstance.decrypt(xJoArrItems[i].prd_id, config.cryptoKey.hashKey);
+										if (xPrdId.status_code == '00') {
+											xJoArrItems[i].prd_id = xPrdId.decrypted;
+											// delete xJoArrItems[i].prd_id
+										}
+										console.log(`>>> xPrdId ${JSON.stringify(xPrdId)}`);
+										if (
+											xJoArrItems[i].hasOwnProperty('qty_request') &&
+											xJoArrItems[i].hasOwnProperty('price_request')
+										) {
+											xJoArrItems[i].price_total =
+												xJoArrItems[i].qty_request * xJoArrItems[i].price_request;
+										}
+										// check item with same prd_id in other payment request with status not cancel and reject already created or not
+										// if already created then calculate all qty_request from other payreq item and this item then
+										// check if total qty_request is exceed qty on fpb item or not
+										// if exceed then return cannot create payreq if not then continue
+										const xResultCheckItem = await _paymentRequestDetailRepoInstance.list({prd_id: xJoArrItems[i].prd_id});
+										// console.log(`>>> xResultCheckItem ${JSON.stringify(xResultCheckItem)}`);
+										if (xResultCheckItem.status_code == '00') {
+											if (xResultCheckItem.data.count > 0) {
+												let xArrItem = xResultCheckItem.data.rows;
+												let xTotalQtyRequest = 0;
+												let xFpbItemQty = 0
+												let xArrPayreqNo = []
+												for (let j = 0; j < xArrItem.length; j++) {
+													if (j == 0) {
+														xFpbItemQty = xArrItem[j].purchase_request_detail.qty;
+													}
+
+													if (xArrItem[j].payment_request != null && xArrItem[j].payment_request.status != 4 && xArrItem[j].payment_request.status != 5 && xArrItem[j].status == 0) {
+														xTotalQtyRequest += Number(xArrItem[j].qty_request || 0);
+														
+														xArrPayreqNo.push(xArrItem[j].payment_request.document_no);
+													}
+												}
+												xTotalQtyRequest += Number(xJoArrItems[i].qty_request || 0);
+												// const xResultGetPrd = await _purchaseRequestDetailRepoInstance.list({id: xJoArrItems[i].prd_id});
+												// console.log(`>>> xResultGetPrd ${JSON.stringify(xResultGetPrd)}`);
+												// console.log(`>>> xTotalQtyRequest x xFpbItemQty ${JSON.stringify(xTotalQtyRequest)}`, xFpbItemQty);
+												if (xTotalQtyRequest > xFpbItemQty) {
+													xJoResult = {
+														status_code: '-99',
+														status_msg: `Terdeteksi payreq lain yang sudah terbentuk dengan total qty request (${xTotalQtyRequest}) sudah melebihi qty pada FPB (${xFpbItemQty}) untuk item ${xJoArrItems[i].product_name}. Silahkan cek payreq dengan nomor ${xArrPayreqNo.join(', ')}`
+													};
+													return xJoResult;
+												}
+											}
+										}
+										xJoArrItems[i].item_type ? xJoArrItems[i].item_type : 1 
+									}
+								} else {
+									for (var i in xJoArrItems) {
+										if (
+											xJoArrItems[i].hasOwnProperty('qty_request') &&
+											xJoArrItems[i].hasOwnProperty('price_request')
+										) {
+											xJoArrItems[i].price_total =
+												xJoArrItems[i].qty_request * xJoArrItems[i].price_request;
+										}
+										xJoArrItems[i].item_type ? xJoArrItems[i].item_type : 1 
+									}
+								}
+								pParam.purchase_request_detail = xJoArrItems;
 							}
 						}
 						// console.log(`>>> xJoArrItems ${JSON.stringify(xJoArrItems)}`);
-						pParam.purchase_request_detail = xJoArrItems;
 					}
+					console.log(`>>> pParam ${JSON.stringify(pParam)}`, xAct);
+					console.log(`>>> pParam.total_price ${JSON.stringify(pParam.total_price)}`, xAct);
 
 					let xResult = await _repoInstance.save(pParam, xAct);
-					console.log(`>>> Save Param..>>> : ${JSON.stringify(pParam)}`);
+					console.log(`>>> Save Param..>>> : ${JSON.stringify(xResult)}`);
 					if (xResult.status_code == '00') {
 						var dt = dateTime.create();
 						var xDate = dt.format('ym');
-						var xPayreqNo = `${pParam.company_code}/CA/${xDate}/` + xResult.clear_id.toString().padStart(5,'0');
+						var xCode = 'CA'
+						if (pParam.app_category == 2) {
+							xCode = 'PAYBILL'
+						}
+						var xPayreqNo = `${pParam.company_code}/${xCode}/${xDate}/` + xResult.clear_id.toString().padStart(5,'0');
 
 						var xParamUpdate = {
 							document_no: xPayreqNo,
@@ -644,21 +701,25 @@ class PaymentRequestService {
 
 						var xUpdate = await _repoInstance.save(xParamUpdate, 'update');
 						console.log(`>>> Payreq Save Success>>> : ${JSON.stringify(xUpdate)}`);
-						// update fpb item ca_type to 1 = ca digital
-						if (xUpdate.status_code == '00') {
-							const xArrIds = []
-							for (let i = 0; i < pParam.purchase_request_detail.length; i++) {
-								xArrIds.push(pParam.purchase_request_detail[i].prd_id)
+						//21/06/2026
+						if (pParam.hasOwnProperty('purchase_request_id')) {
+							// update fpb item ca_type to 1 = ca digital
+							if (xUpdate.status_code == '00') {
+								if (pParam.app_category != 2) {
+									const xArrIds = []
+									for (let i = 0; i < pParam.purchase_request_detail.length; i++) {
+										xArrIds.push(pParam.purchase_request_detail[i].prd_id)
+									}
+									const xPayload = {
+										id: xArrIds,
+										// request_id: pParam.purchase_request_id,
+										ca_type: 1 //1:digital,2:manual
+									}
+									console.log(`>>> xPayload>>> : ${JSON.stringify(xPayload)}`);
+									var xUpdatePrdCaType = await _purchaseRequestDetailRepoInstance.save(xPayload, 'update_ca');
+								}
 							}
-							const xPayload = {
-								id: xArrIds,
-								// request_id: pParam.purchase_request_id,
-								ca_type: 1 //1:digital,2:manual
-							}
-							console.log(`>>> xPayload>>> : ${JSON.stringify(xPayload)}`);
-							var xUpdatePrdCaType = await _purchaseRequestDetailRepoInstance.save(xPayload, 'update_ca');
 						}
-
 					}
 
 					xJoResult = xResult;
@@ -736,136 +797,148 @@ class PaymentRequestService {
 						if (xDetail.data.status == 0) {
 							pParam.status = 1;
 							pParam.requested_at = await _utilInstance.getCurrDateTime();
-							// check total qty is not exceed qty_paid in detail fpb
 							let xArrPrdId = []
 							let xPyrDetail = xDetail.data.payment_request_detail
-							// console.log(`>>> xPyrDetail: ${JSON.stringify(xPyrDetail)}`);
-							for (let i = 0; i < xPyrDetail.length; i++) {
-								xArrPrdId.push(xPyrDetail[i].prd_id)
-							}
-							let xUniq = [...new Set(xArrPrdId)];
-							for (let i = 0; i < xUniq.length; i++) {
-								let xPrDetailItem = await _purchaseRequestDetailRepoInstance.getByParam({id: xUniq[i]})
-								if (xPrDetailItem.status_code = '00') {
-									let xPrdQtyPaid = xPrDetailItem.data.qty_paid
-									let xArrPyrd = xPyrDetail.filter(({ prd_id }) => prd_id == xUniq[i])
-									let xPyrdTotalQty = xArrPyrd.reduce((accum, item) => accum + item.qty_request, 0)
-									if ( xPyrdTotalQty > xPrDetailItem.data.qty - xPrdQtyPaid) {
-										xFlagProcess = false
-										xJoResult = {
-											status_code: '-99',
-											status_msg: `Total qty of item ${xArrPyrd[0].product_code} (${xPyrdTotalQty}) is exceed Paid Qty on FPB (${xPrdQtyPaid})`
-										};
-										break;
+							console.log(`>>> xPyrDetail: ${JSON.stringify(xPyrDetail)}`);
+				
+							// if there is no item reject submit
+							if (xPyrDetail != null && xPyrDetail.length > 0) {
+								// check if app_category is not bill then execute line below
+								if (xDetail.data.app_category != 2 && xDetail.data.purchase_request != null) {
+									// check total qty is not exceed qty_paid in detail fpb
+									// console.log(`>>> xPyrDetail: ${JSON.stringify(xPyrDetail)}`);
+									for (let i = 0; i < xPyrDetail.length; i++) {
+										xArrPrdId.push(xPyrDetail[i].prd_id)
 									}
-								}
-							}
-
-							if (xFlagProcess) {
-								var xUpdate = await _repoInstance.save(pParam, 'submit');
-								xJoResult = xUpdate;
-								
-								// Next Phase : Approval Matrix & Notification to admin
-								if (xUpdate.status_code == '00') {
-
-									if (xDetail.data.payreq_type == 2) {
-										// if payreq is reimburst then divide qty_paid on fpb
-										this.updatePrdItemQtyLeft(xDetail.data, 'add')
-									}
-									// this.updatePrdItemQtyLeft(xDetail.data, 'submit')
-									
-									var xParamAddApprovalMatrix = {
-										act: 'add',
-										document_id: xEncId,
-										document_no: xDetail.data.document_no,
-										application_id: 8,
-										table_name: config.dbTables.payreq,
-										company_id: xDetail.data.company_id,
-										department_id: xDetail.data.department_id,
-										ecatalogue_fpb_category_item: null,
-										logged_company_id: pParam.logged_company_id
-									};
-
-									var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
-										pParam.method,
-										pParam.token,
-										xParamAddApprovalMatrix
-									);
-									// console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
-									xJoResult.approval_matrix_result = xApprovalMatrixResult;
-									if (xApprovalMatrixResult.status_code == '00') {
-										if (xApprovalMatrixResult.approvers.length > 0) {
-											const xApproverIds = []
-											let xApproverSeq1 = xApprovalMatrixResult.approvers.find((el) => el.sequence === 1);
-											if (xApproverSeq1 != null) {
-												for (var i in xApproverSeq1.approver_user) {
-													xApproverIds.push(xApproverSeq1.approver_user[i].user_id)
-													// In App notification
-													let xInAppNotificationResult = await _notificationService.inAppNotification({
-														document_code: xDetail.data.document_no,
-														document_id: xEncId,
-														document_status: 1,
-														mode: 'request_approval_ca',
-														method: pParam.method,
-														token: pParam.token,
-														employee_id: await _utilInstance.encrypt(
-															xApproverSeq1.approver_user[i].employee_id.toString(),
-															config.cryptoKey.hashKey
-														)
-													});
-													console.log(`>>> xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`);
-			
-													_utilInstance.writeLog(
-														`${_xClassName}.submitPayreq`,
-														`xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`,
-														'info'
-													);
-													
-													// check if notification_via_email is true
-													// Email Notification
-													let xParamEmailNotification,
-														xNotificationResult = {};
-			
-													if (xApproverSeq1.approver_user[i].notification_via_email) {
-														xParamEmailNotification = {
-															mode: 'request_approval_ca',
-															id: xEncId,
-															request_no: xDetail.data.document_no,
-															company_name: xDetail.data.company_name,
-															department_name: xDetail.data.department_name,
-															created_by: xDetail.data.employee_name,
-															created_at:
-																xDetail.data.createdAt != null
-																	? moment(xDetail.data.createdAt).format('DD MMM YYYY')
-																	: '',
-															items: xPyrDetail,
-															// body: xDetail.data,
-															approver_user: {
-																employee_name: xApproverSeq1.approver_user[i].user_name,
-																email: xApproverSeq1.approver_user[i].email
-															}
-														};
-														xNotificationResult = await _notificationService.sendNotificationEmail_CANeedApproval(
-															xParamEmailNotification,
-															pParam.method,
-															pParam.token
-														);
-														console.log(`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`);
-													}
-												}
+									let xUniq = [...new Set(xArrPrdId)];
+									for (let i = 0; i < xUniq.length; i++) {
+										let xPrDetailItem = await _purchaseRequestDetailRepoInstance.getByParam({id: xUniq[i]})
+										if (xPrDetailItem.status_code = '00') {
+											let xPrdQtyPaid = xPrDetailItem.data.qty_paid
+											let xArrPyrd = xPyrDetail.filter(({ prd_id }) => prd_id == xUniq[i])
+											let xPyrdTotalQty = xArrPyrd.reduce((accum, item) => accum + item.qty_request, 0)
+											if ( xPyrdTotalQty > xPrDetailItem.data.qty - xPrdQtyPaid) {
+												xFlagProcess = false
+												xJoResult = {
+													status_code: '-99',
+													status_msg: `Total qty of item ${xArrPyrd[0].product_code} (${xPyrdTotalQty}) is exceed Paid Qty on FPB (${xPrdQtyPaid})`
+												};
+												break;
 											}
-											// update current approval id
-											let xPrdUpdateApprovalId = {
-												id: xDetail.data.id,
-												current_approval_ids: xApproverIds
-											}
-											
-											const xUpdateApproval = await _repoInstance.save(xPrdUpdateApprovalId, 'update')
 										}
 									}
-								} else {
-									xJoResult = xUpdate;
 								}
+
+								if (xFlagProcess) {
+									var xUpdate = await _repoInstance.save(pParam, 'submit');
+									xJoResult = xUpdate;
+									
+									// Next Phase : Approval Matrix & Notification to admin
+									if (xUpdate.status_code == '00') {
+
+										if (xDetail.data.app_category != 2 && xDetail.data.payreq_type == 2 && xDetail.data.purchase_request != null) {
+											// if payreq is reimburst then divide qty_paid on fpb
+											this.updatePrdItemQtyLeft(xDetail.data, 'add')
+										}
+										// this.updatePrdItemQtyLeft(xDetail.data, 'submit')
+										
+										var xParamAddApprovalMatrix = {
+											act: 'add',
+											document_id: xEncId,
+											document_no: xDetail.data.document_no,
+											application_id: 8,
+											table_name: config.dbTables.payreq,
+											company_id: xDetail.data.company_id,
+											department_id: xDetail.data.department_id,
+											ecatalogue_fpb_category_item: null,
+											logged_company_id: pParam.logged_company_id
+										};
+
+										var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
+											pParam.method,
+											pParam.token,
+											xParamAddApprovalMatrix
+										);
+										console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
+										xJoResult.approval_matrix_result = xApprovalMatrixResult;
+										if (xApprovalMatrixResult.status_code == '00') {
+											if (xApprovalMatrixResult.approvers.length > 0) {
+												const xApproverIds = []
+												let xApproverSeq1 = xApprovalMatrixResult.approvers.find((el) => el.sequence === 1);
+												if (xApproverSeq1 != null) {
+													for (var i in xApproverSeq1.approver_user) {
+														xApproverIds.push(xApproverSeq1.approver_user[i].user_id)
+														// In App notification
+														let xInAppNotificationResult = await _notificationService.inAppNotification({
+															document_code: xDetail.data.document_no,
+															document_id: xEncId,
+															document_status: 1,
+															mode: 'request_approval_ca',
+															method: pParam.method,
+															token: pParam.token,
+															employee_id: await _utilInstance.encrypt(
+																xApproverSeq1.approver_user[i].employee_id.toString(),
+																config.cryptoKey.hashKey
+															)
+														});
+														console.log(`>>> xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`);
+				
+														_utilInstance.writeLog(
+															`${_xClassName}.submitPayreq`,
+															`xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`,
+															'info'
+														);
+														// Email Notification
+														let xParamEmailNotification,
+															xNotificationResult = {};
+				
+														if (xApproverSeq1.approver_user[i].notification_via_email) {
+															xParamEmailNotification = {
+																mode: 'request_approval_ca',
+																id: xEncId,
+																request_no: xDetail.data.document_no,
+																company_name: xDetail.data.company_name,
+																department_name: xDetail.data.department_name,
+																created_by: xDetail.data.employee_name,
+																created_at:
+																	xDetail.data.createdAt != null
+																		? moment(xDetail.data.createdAt).format('DD MMM YYYY')
+																		: '',
+																items: xPyrDetail,
+																// body: xDetail.data,
+																approver_user: {
+																	employee_name: xApproverSeq1.approver_user[i].user_name,
+																	email: xApproverSeq1.approver_user[i].email
+																}
+															};
+															xNotificationResult = await _notificationService.sendNotificationEmail_CANeedApproval(
+																xParamEmailNotification,
+																pParam.method,
+																pParam.token
+															);
+															console.log(`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`);
+				
+														}
+													}
+												}
+												// update current approval id
+												let xPrdUpdateApprovalId = {
+													id: xDetail.data.id,
+													current_approval_ids: xApproverIds
+												}
+												
+												const xUpdateApproval = await _repoInstance.save(xPrdUpdateApprovalId, 'update')
+											}
+										}
+									} else {
+										xJoResult = xUpdate;
+									}
+								}
+							} else {
+								xJoResult = {
+									status_code: '-99',
+									status_msg: `Tidak dapat submit, silahkan isi item dahulu`
+								};
 							}
 						} else {
 							xJoResult = {
@@ -931,41 +1004,43 @@ class PaymentRequestService {
 								status_msg: 'This document already draft'
 							};
 						} else {
-
-							// first check item on this payreq have created on other payreq or not
-							// if not created then continue to set to draft
-							// if already created then calculate all qty from other payreq item and this item
-							// then check if total qty payreq item is exceed qty on fpb item or not
-							// if exceed then return cannot create payreq if not then continue
-							// console.log(`>>> xPayreqDetail ${JSON.stringify(xPayreqDetail.data.payment_request_detail)}`);
-							if (xPayreqDetail.data.payment_request_detail != null && xPayreqDetail.data.payment_request_detail.length > 0) {
-								for (let i = 0; i < xPayreqDetail.data.payment_request_detail.length; i++) {
-									const xResultCheckItem = await _paymentRequestDetailRepoInstance.list({prd_id: xPayreqDetail.data.payment_request_detail[i].prd_id});
-									// console.log(`>>> xResultCheckItem 2 ${JSON.stringify(xResultCheckItem)}`);
-									if (xResultCheckItem.status_code == '00') {
-										if (xResultCheckItem.data.count > 0) {
-											let xArrItem = xResultCheckItem.data.rows;
-											console.log(`>>> xArrItem ${JSON.stringify(xArrItem)}`);
-											let xTotalQtyRequest = 0;
-											let xFpbItemQty = 0
-											let xArrPayreqNo = []
-											for (let j = 0; j < xArrItem.length; j++) {
-												if (j == 0) {
-													xFpbItemQty = xArrItem[j].purchase_request_detail.qty;
+							// check if app_category is not bill then execute line below
+							if (xPayreqDetail.data.app_category != 2 && xPayreqDetail.data.purchase_request != null) {
+								// first check item on this payreq have created on other payreq or not
+								// if not created then continue to set to draft
+								// if already created then calculate all qty from other payreq item and this item
+								// then check if total qty payreq item is exceed qty on fpb item or not
+								// if exceed then return cannot create payreq if not then continue
+								// console.log(`>>> xPayreqDetail ${JSON.stringify(xPayreqDetail.data.payment_request_detail)}`);
+								if (xPayreqDetail.data.payment_request_detail != null && xPayreqDetail.data.payment_request_detail.length > 0) {
+									for (let i = 0; i < xPayreqDetail.data.payment_request_detail.length; i++) {
+										const xResultCheckItem = await _paymentRequestDetailRepoInstance.list({prd_id: xPayreqDetail.data.payment_request_detail[i].prd_id});
+										// console.log(`>>> xResultCheckItem 2 ${JSON.stringify(xResultCheckItem)}`);
+										if (xResultCheckItem.status_code == '00') {
+											if (xResultCheckItem.data.count > 0) {
+												let xArrItem = xResultCheckItem.data.rows;
+												console.log(`>>> xArrItem ${JSON.stringify(xArrItem)}`);
+												let xTotalQtyRequest = 0;
+												let xFpbItemQty = 0
+												let xArrPayreqNo = []
+												for (let j = 0; j < xArrItem.length; j++) {
+													if (j == 0) {
+														xFpbItemQty = xArrItem[j].purchase_request_detail.qty;
+													}
+													if (xArrItem[j].payment_request != null && xArrItem[j].payment_request.status != 4 && xArrItem[j].payment_request.status != 5 && xArrItem[j].status == 0) {
+														xTotalQtyRequest += xArrItem[j].qty_request;
+														xArrPayreqNo.push(xArrItem[j].payment_request.document_no);
+													}
 												}
-												if (xArrItem[j].payment_request != null && xArrItem[j].payment_request.status != 4 && xArrItem[j].payment_request.status != 5 && xArrItem[j].status == 0) {
-													xTotalQtyRequest += xArrItem[j].qty_request;
-													xArrPayreqNo.push(xArrItem[j].payment_request.document_no);
+												xTotalQtyRequest += xPayreqDetail.data.payment_request_detail[i].qty_request;
+												// console.log(`>>> xTotalQtyRequest x xFpbItemQty ${JSON.stringify(xTotalQtyRequest)}`, xFpbItemQty);
+												if (xTotalQtyRequest > xFpbItemQty) {
+													xJoResult = {
+														status_code: '-99',
+														status_msg: `Terdeteksi payreq lain yang sudah terbentuk dengan total qty request (${xTotalQtyRequest}) sudah melebihi qty pada FPB (${xFpbItemQty}) untuk item ${xPayreqDetail.data.payment_request_detail[i].product_name}. Silahkan cek payreq dengan nomor ${xArrPayreqNo.join(', ')}`
+													};
+													return xJoResult;
 												}
-											}
-											xTotalQtyRequest += xPayreqDetail.data.payment_request_detail[i].qty_request;
-											// console.log(`>>> xTotalQtyRequest x xFpbItemQty ${JSON.stringify(xTotalQtyRequest)}`, xFpbItemQty);
-											if (xTotalQtyRequest > xFpbItemQty) {
-												xJoResult = {
-													status_code: '-99',
-													status_msg: `Terdeteksi payreq lain yang sudah terbentuk dengan total qty request (${xTotalQtyRequest}) sudah melebihi qty pada FPB (${xFpbItemQty}) untuk item ${xPayreqDetail.data.payment_request_detail[i].product_name}. Silahkan cek payreq dengan nomor ${xArrPayreqNo.join(', ')}`
-												};
-												return xJoResult;
 											}
 										}
 									}
@@ -1051,51 +1126,56 @@ class PaymentRequestService {
 								status_msg: 'This document already cancel'
 							};
 						} else {
-							// check if payreq have submited PJCA
-							const xParamPjca = {
-								payment_request_id: xPayreqDetail.data.id,
-								status: [0, 1, 2]
-							}
-							var xPJCAResult = await _pjcaRepoInstance.list(xParamPjca);
-							console.log(`>>> xPJCAResult: ${JSON.stringify(xPJCAResult)}`);
-							if (xPJCAResult.status_code == '00') {
-								if (xPJCAResult.data.rows.length > 0) {
-									xJoResult = {
-										status_code: '-99',
-										status_msg: "You cannot cancel this document, There is already processed PJCA "
-									};
-									xFlagProcess = false
+							// check if app_category is not bill then execute line below
+							if (xPayreqDetail.data.app_category != 2) {
+								// check if payreq have submited PJCA
+								const xParamPjca = {
+									payment_request_id: xPayreqDetail.data.id,
+									status: [0, 1, 2]
+								}
+								var xPJCAResult = await _pjcaRepoInstance.list(xParamPjca);
+								console.log(`>>> xPJCAResult: ${JSON.stringify(xPJCAResult)}`);
+								if (xPJCAResult.status_code == '00') {
+									if (xPJCAResult.data.rows.length > 0) {
+										xJoResult = {
+											status_code: '-99',
+											status_msg: "You cannot cancel this document, There is already processed PJCA "
+										};
+										xFlagProcess = false
+									} else {
+										// // check if product have submited GR
+										// const xArrId = []
+										// for (let i = 0; i < xPayreqDetail.data.payment_request_detail.length; i++) {
+										// 	xArrId.push(xPayreqDetail.data.payment_request_detail[i].product_id)
+										// }
+										// const xParamGr = {
+										// 	purchase_request_id: xPayreqDetail.data.purchase_request_id,
+										// 	product_id: xArrId,
+										// 	status: 1
+										// }
+										// console.log(`>>> xParamGr: ${JSON.stringify(xParamGr)}`);
+										// var xGrResultList = await _goodsReceiptRepoInstance.list(xParamGr);
+										// console.log(`>>> xGrResultList: ${JSON.stringify(xGrResultList)}`);
+										// if (xGrResultList.status_code == '00') {
+										// 	if (xGrResultList.data.rows.length > 0) {
+										// 		const xGrData = xGrResultList.data.rows
+										// 		xJoResult = {
+										// 			status_code: '-99',
+										// 			status_msg: "Cancel failed, this document already have some processed receipt"
+										// 		};
+										// 		xFlagProcess = false
+										// 	}
+										// } else {
+										// 	xFlagProcess = false
+										// 	xJoResult = xGrResultList
+										// }
+									}
 								} else {
-									// // check if product have submited GR
-									// const xArrId = []
-									// for (let i = 0; i < xPayreqDetail.data.payment_request_detail.length; i++) {
-									// 	xArrId.push(xPayreqDetail.data.payment_request_detail[i].product_id)
-									// }
-									// const xParamGr = {
-									// 	purchase_request_id: xPayreqDetail.data.purchase_request_id,
-									// 	product_id: xArrId,
-									// 	status: 1
-									// }
-									// console.log(`>>> xParamGr: ${JSON.stringify(xParamGr)}`);
-									// var xGrResultList = await _goodsReceiptRepoInstance.list(xParamGr);
-									// console.log(`>>> xGrResultList: ${JSON.stringify(xGrResultList)}`);
-									// if (xGrResultList.status_code == '00') {
-									// 	if (xGrResultList.data.rows.length > 0) {
-									// 		const xGrData = xGrResultList.data.rows
-									// 		xJoResult = {
-									// 			status_code: '-99',
-									// 			status_msg: "Cancel failed, this document already have some processed receipt"
-									// 		};
-									// 		xFlagProcess = false
-									// 	}
-									// } else {
-									// 	xFlagProcess = false
-									// 	xJoResult = xGrResultList
-									// }
+									xFlagProcess = false
+									xJoResult = xPJCAResult
 								}
 							} else {
-								xFlagProcess = false
-								xJoResult = xPJCAResult
+								xFlagProcess = true
 							}
 
 							if (xFlagProcess) {
@@ -1110,7 +1190,9 @@ class PaymentRequestService {
 	
 								if (xUpdateResult.status_code == '00') {
 									if (xPayreqDetail.data.status != 0) {
-										this.updatePrdItemQtyLeft(xPayreqDetail.data, 'delete')
+										if (xPayreqDetail.data.purchase_request != null) {
+											this.updatePrdItemQtyLeft(xPayreqDetail.data, 'delete')
+										}
 										if (xPayreqDetail.data.payreq_type == 2) { //reimburst
 											let xDetailItem = xPayreqDetail.data.payment_request_detail
 											for (let i = 0; i < xDetailItem.length; i++) {
@@ -1221,22 +1303,28 @@ class PaymentRequestService {
 											reject_reason: pParam.reject_reason
 										};
 										var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
-			
+										console.log(`>>> xUpdateResult: ${JSON.stringify(xUpdateResult)}`);
 										if (xUpdateResult.status_code == '00') {
-											if (xPayreqDetail.data.payreq_type != 2) {
-												this.updatePrdItemQtyLeft(xPayreqDetail.data, 'add')
-											} else {
-												let xDetailItem = xPayreqDetail.data.payment_request_detail
-												for (let i = 0; i < xDetailItem.length; i++) {
-													let xQtyRelease = xDetailItem[i].qty_done || 0
-													let xCalculatedQty = 0
-													xCalculatedQty = xQtyRelease + xDetailItem[i].qty_request
-													let xPyrdUpdateParam = {
-														id: xDetailItem[i].id,
-														qty_done: xCalculatedQty
+											console.log(`>>> xPayreqDetail: ${JSON.stringify(xPayreqDetail)}`);
+											// check if app_category is not bill then execute line below
+											if (xPayreqDetail.data.app_category != 2) {
+												if (xPayreqDetail.data.payreq_type != 2) {
+													if (xPayreqDetail.data.purchase_request != null) {
+														this.updatePrdItemQtyLeft(xPayreqDetail.data, 'add')
 													}
-													
-													let xUpdatePyrdItem = await _paymentRequestDetailRepoInstance.save(xPyrdUpdateParam, 'update')
+												} else {
+													let xDetailItem = xPayreqDetail.data.payment_request_detail
+													for (let i = 0; i < xDetailItem.length; i++) {
+														let xQtyRelease = xDetailItem[i].qty_done || 0
+														let xCalculatedQty = 0
+														xCalculatedQty = xQtyRelease + xDetailItem[i].qty_request
+														let xPyrdUpdateParam = {
+															id: xDetailItem[i].id,
+															qty_done: xCalculatedQty
+														}
+														
+														let xUpdatePyrdItem = await _paymentRequestDetailRepoInstance.save(xPyrdUpdateParam, 'update')
+													}
 												}
 											}
 											xJoResult = {
@@ -1274,6 +1362,7 @@ class PaymentRequestService {
 														config.cryptoKey.hashKey
 													)
 												});
+												console.log(`>>> xInAppNotificationResult : ${JSON.stringify(xInAppNotificationResult)}`);
 		
 												// Email Notification
 												let xParamEmailNotification,
@@ -1416,7 +1505,7 @@ class PaymentRequestService {
 								var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
 
 								if (xUpdateResult.status_code == '00') {
-									if (xPayreqDetail.data.payreq_type == 2) {
+									if (xPayreqDetail.data.app_category != 2 && xPayreqDetail.data.payreq_type == 2 && xPayreqDetail.data.purchase_request != null) {
 										this.updatePrdItemQtyLeft(xPayreqDetail.data, 'delete')
 									}
 
@@ -1824,6 +1913,273 @@ class PaymentRequestService {
 			
 			}
 		}
+	}
+	
+	async mergeWithFPB(pParam) {
+		var xJoResult;
+		var xAct = pParam.act;
+		var xFlagProcess = false;
+		var xDecId = null;
+		var xDetailPayreq = null
+		var xDetailFPB = null
+		try {
+				
+			delete pParam.act;
+
+			if (pParam.user_id && pParam.user_id.length == 65) {
+				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.user_id = xDecId.decrypted;
+				}
+			}
+			if (pParam.purchase_request_id && pParam.purchase_request_id.length == 65) {
+				xDecId = await _utilInstance.decrypt(pParam.purchase_request_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.purchase_request_id = xDecId.decrypted;
+				}
+			}
+			if (pParam.payment_request_id && pParam.payment_request_id.length == 65) {
+				xDecId = await _utilInstance.decrypt(pParam.payment_request_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.payment_request_id = xDecId.decrypted;
+				}
+			}
+			if (!pParam.user_id || !pParam.purchase_request_id || !pParam.payment_request_id) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: 'Invalid or Failed to decrypt param Ids '
+				};
+			}
+
+			if (pParam.payment_request_id != null && pParam.purchase_request_id != null) {
+				// get detail fpb & its item
+				xDetailFPB = await _purchaseRequestRepoInstance.getById({id: pParam.purchase_request_id});
+
+				// get detail payreq & its item
+				xDetailPayreq = await _repoInstance.getByParameter({id: pParam.payment_request_id});
+			}
+			if (!xDetailFPB || !xDetailPayreq) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: 'Invalid FPB or Payment Request not found'
+				};
+			}
+
+			// getById kadang return object langsung, kadang wrapped {status_code, data} tergantung repo,
+			// jadi di-handle dua-duanya biar aman
+			var xFpbData = xDetailFPB.data ? xDetailFPB.data : xDetailFPB;
+
+			if (xDetailPayreq.status_code != '00' || !xDetailPayreq.data) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: 'Invalid Payment Request or Payment Request not found'
+				};
+			}
+			var xPayreqData = xDetailPayreq.data;
+
+			if (!xFpbData || !xFpbData.id) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: 'Invalid FPB or FPB not found'
+				};
+			}
+
+			// payreq yang sudah terhubung ke FPB lain tidak boleh di-merge ulang ke FPB berbeda
+			if (xPayreqData.purchase_request_id != null && xPayreqData.purchase_request_id != pParam.purchase_request_id) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: 'Payment request sudah terhubung dengan FPB lain'
+				};
+			}
+
+			var xFpbItems = (xFpbData.purchase_request_detail || []).filter((el) => el.is_delete != 1 && el.status != -1);
+			var xPayreqItems = (xPayreqData.payment_request_detail || []).filter((el) => el.is_delete != 1 && el.status != -1);
+
+			if (xPayreqItems.length == 0) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: 'Tidak ada item pada payment request untuk digabungkan'
+				};
+			}
+			if (xFpbItems.length == 0) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: 'Tidak ada item pada FPB'
+				};
+			}
+
+			const xNormalizeName = (pName) => (pName || '').toString().trim().toLowerCase();
+
+			// map fpb item by product_name utk lookup cepat
+			var xFpbItemByName = {};
+			for (let i = 0; i < xFpbItems.length; i++) {
+				xFpbItemByName[xNormalizeName(xFpbItems[i].product_name)] = xFpbItems[i];
+			}
+
+			// total qty payreq per product_name (support multi baris produk yang sama dlm 1 payreq)
+			var xPayreqQtyByName = {};
+			var xMatchedPairs = [];
+			var xArrErrorNotFound = [];
+
+			for (let i = 0; i < xPayreqItems.length; i++) {
+				let xKey = xNormalizeName(xPayreqItems[i].product_name);
+				let xFpbItem = xFpbItemByName[xKey];
+
+				if (!xFpbItem) {
+					xArrErrorNotFound.push(xPayreqItems[i].product_name);
+					continue;
+				}
+
+				xPayreqQtyByName[xKey] = (xPayreqQtyByName[xKey] || 0) + Number(xPayreqItems[i].qty_request || 0);
+				xMatchedPairs.push({ payreq_item: xPayreqItems[i], fpb_item: xFpbItem });
+			}
+
+			// requirement: kalau ada item payreq yang product_name-nya tidak ada di FPB, tolak semua
+			if (xArrErrorNotFound.length > 0) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: `Item berikut tidak ditemukan pada FPB, merge dibatalkan: ${xArrErrorNotFound.join(', ')}`
+				};
+			}
+
+			// requirement: total qty per product di payreq (termasuk payreq lain yg sudah nempel ke item fpb yg sama)
+			// tidak boleh melebihi qty item FPB
+			var xArrErrorExceed = [];
+			for (let xKey in xPayreqQtyByName) {
+				let xFpbItem = xFpbItemByName[xKey];
+				let xTotalPayreqQty = xPayreqQtyByName[xKey];
+
+				let xExistingQty = 0;
+				const xResultCheckItem = await _paymentRequestDetailRepoInstance.list({ prd_id: xFpbItem.id });
+				if (xResultCheckItem.status_code == '00' && xResultCheckItem.data.count > 0) {
+					let xArrItem = xResultCheckItem.data.rows;
+					for (let j = 0; j < xArrItem.length; j++) {
+						// jangan hitung dobel item milik payreq yg sedang di-merge ini sendiri
+						if (
+							xArrItem[j].payment_request_id != pParam.payment_request_id &&
+							xArrItem[j].status != -1 &&
+							xArrItem[j].payment_request != null &&
+							xArrItem[j].payment_request.status != 4 &&
+							xArrItem[j].payment_request.status != 5
+						) {
+							xExistingQty += Number(xArrItem[j].qty_request || 0);
+						}
+					}
+				}
+
+				let xTotalQty = xExistingQty + xTotalPayreqQty;
+				if (xTotalQty > Number(xFpbItem.qty || 0)) {
+					xArrErrorExceed.push(
+						`${xFpbItem.product_name} (qty payreq ini: ${xTotalPayreqQty}${xExistingQty > 0 ? `, qty payreq lain yg sudah nempel: ${xExistingQty}` : ''}, qty tersedia di FPB: ${xFpbItem.qty})`
+					);
+				}
+			}
+
+			if (xArrErrorExceed.length > 0) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: `Total qty payment request melebihi qty pada FPB untuk item: ${xArrErrorExceed.join('; ')}`
+				};
+			}
+
+			// ==== semua validasi lolos, lanjut proses merge ====
+			var xArrFailedUpdate = [];
+
+			// 1. update tiap item payreq -> prd_id nunjuk ke item FPB yg matching
+			for (let i = 0; i < xMatchedPairs.length; i++) {
+				let xPayreqItem = xMatchedPairs[i].payreq_item;
+				let xFpbItem = xMatchedPairs[i].fpb_item;
+
+				let xUpdatePyrdItem = await _paymentRequestDetailRepoInstance.save(
+					{
+						id: xPayreqItem.id,
+						prd_id: xFpbItem.id
+					},
+					'update'
+				);
+
+				if (!xUpdatePyrdItem || xUpdatePyrdItem.status_code != '00') {
+					xArrFailedUpdate.push(`payment_request_detail#${xPayreqItem.id}`);
+					_utilInstance.writeLog(
+						`${_xClassName}.mergeWithFPB`,
+						`Failed updating payment_request_detail id ${xPayreqItem.id}: ${JSON.stringify(xUpdatePyrdItem)}`,
+						'error'
+					);
+				}
+			}
+
+			// 2. update header payreq -> purchase_request_id nempel ke FPB
+			var xUpdatePayreq = await _repoInstance.save(
+				{
+					id: pParam.payment_request_id,
+					purchase_request_id: pParam.purchase_request_id,
+					updated_by: pParam.user_id,
+					updated_by_name: pParam.user_name,
+					updatedAt: await _utilInstance.getCurrDateTime()
+				},
+				'update'
+			);
+
+			if (!xUpdatePayreq || xUpdatePayreq.status_code != '00') {
+				xArrFailedUpdate.push(`payment_request#${pParam.payment_request_id}`);
+				_utilInstance.writeLog(
+					`${_xClassName}.mergeWithFPB`,
+					`Failed updating payment request header: ${JSON.stringify(xUpdatePayreq)}`,
+					'error'
+				);
+			}
+
+			// 3. update qty_paid tiap item FPB, akumulasi (bukan overwrite) supaya aman kalau nanti ada
+			// payreq lain yang di-merge lagi ke item FPB yang sama
+			for (let xKey in xPayreqQtyByName) {
+				let xFpbItem = xFpbItemByName[xKey];
+				let xAddQty = xPayreqQtyByName[xKey];
+				let xNewQtyPaid = Number(xFpbItem.qty_paid || 0) + Number(xAddQty || 0);
+
+				let xUpdatePrdItem = await _purchaseRequestDetailRepoInstance.save(
+					{
+						id: xFpbItem.id,
+						qty_paid: xNewQtyPaid,
+						purchase_type: 'ca',
+						ca_type: 1,
+						status: 3
+						// store_link: ""
+					},
+					'update'
+				);
+
+				if (!xUpdatePrdItem || xUpdatePrdItem.status_code != '00') {
+					xArrFailedUpdate.push(`purchase_request_detail#${xFpbItem.id}`);
+					_utilInstance.writeLog(
+						`${_xClassName}.mergeWithFPB`,
+						`Failed updating purchase_request_detail id ${xFpbItem.id}: ${JSON.stringify(xUpdatePrdItem)}`,
+						'error'
+					);
+				}
+			}
+
+			xJoResult = {
+				status_code: '00',
+				status_msg: xArrFailedUpdate.length == 0
+					? 'Success merge payment request with FPB'
+					: `Merge selesai dengan sebagian gagal update: ${xArrFailedUpdate.join(', ')}`,
+				data: {
+					payment_request_id: pParam.payment_request_id,
+					purchase_request_id: pParam.purchase_request_id,
+					merged_items: xMatchedPairs.length
+				}
+			};
+			// =====================================
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.mergeWithFPB`, `Exception error: ${e.message}`, 'error');
+
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.mergeWithFPB: Exception error: ${e.message}`
+			};
+		}
+
+		return xJoResult;
 	}
 }
 

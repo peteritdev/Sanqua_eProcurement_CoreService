@@ -80,7 +80,7 @@ module.exports = ( sequelize, DataTypes ) => {
         finance_bank_name: DataTypes.STRING,
         finance_bank_kcu: DataTypes.STRING,
         finance_account_name: DataTypes.STRING,
-        payment_method: DataTypes.INTEGER,
+        payment_method: DataTypes.INTEGER, //1:cash. 2:CBD, 3:TOP, 4:lain-lain
         product_description: DataTypes.STRING,
         average_turnover: DataTypes.INTEGER,
         service_coverage: DataTypes.JSON,

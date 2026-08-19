@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+                /*html {
+                  zoom: 0.75; style="width: 95%; border-width: thin; border-spacing: 0px;font-size: 9px;border-color: grey;" border="1" 
+                }*/
+                html {
+                    zoom: 0.75;
+                }
+                .center {
+                    margin-left: auto;
+                    margin-right: auto;
+                    margin-top: 15px;
+                    width:95%;
+                    border-collapse:collapse;
+                    text-align:center;
+                    font-size: 8px;
+                    font-family: 'Arial';
+                    border-style: solid;
+                    border-color: #000000;
+                }
+        </style>
+    </head>
+    <body>
+        <table class="center" cellspacing="0" border="1">
+            <tr>
+                <td colspan="4" style="width:25%; border-right: none;" rowspan="3">
+                    <img src="<%=companyData.logo%>" height="70">
+                </td>
+                <td colspan="5" style="text-align: left; border-left: none; width:30%;" rowspan="3">
+                    <span style="font-size: 18px;text-align: center;"><strong>PAYMENT REQUEST</strong></span>
+                </td>
+                <td style="width:25%;padding: 3px; font-size: 10px;text-align: left;" colspan="4">
+                    Doc No. <%=header.document_no%>
+                </td> 
+            </tr>
+            <tr>
+                <td style="padding: 3px; font-size: 10px;width: 45%;text-align: left;" colspan="4">
+                    Tanggal. <%=header.createdAt%>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" style="width: 25%; padding: 3px; font-size: 10px;text-align: left;">
+                    No. <strong style="font-size:14px;"><%= header.document_no.slice(header.document_no.lastIndexOf('/') + 1) %></strong>
+                </td>
+            </tr>
+            <tr>
+                <td style="font-size:9px;padding: 2px;text-align: left;border-right: none;" colspan="2">Nama Pemohon</td>
+                <td style="padding: 2px;border-right: none;border-left: none;">:</td>
+                <td style="font-size:9px;padding: 2px;border-left: none;text-align: left;"><%= header.employee_name %></td>
+                <% if( header.payment_type == 1 ){ %>
+                <td style="font-size:9px;padding: 2px;" colspan="9">Jenis Pembayaran : Tunai</td>
+                <% } else if( header.payment_type == 2 ){ %>
+                <td style="font-size:9px;padding: 2px;" colspan="9">Jenis Pembayaran : Transfer</td>
+                <% } else { %>
+                <td style="font-size:9px;padding: 2px;" colspan="9">Jenis Pembayaran : </td>
+                <% } %>
+            </tr>
+            <tr>
+                <td style="font-size:9px;padding: 2px;text-align: left;border-right: none;" colspan="2">Department</td>
+                <td style="font-size:9px;padding: 2px;border-right: none;border-left: none;">:</td>
+                <td style="font-size:9px;padding: 2px;border-left: none;text-align: left;"><%= header.department_name %></td>
+                <td style="padding: 3px;text-align: left;" colspan="2">
+                    <% if(header.payment_type == 1){ %>
+                        <img src="<%=imagePath%>checklist.png" width="15">
+                    <% }else{ %>
+                        <img src="<%=imagePath%>blank_checklist.png" width="13">
+                    <% } %>
+                    
+                    <span style="padding-left:5px;padding-bottom:10px !important;font-size:9px;position: absolute;">Tunai</span>                
+                   
+                </td>
+                <td style="padding: 3px;text-align: left;" colspan="2">
+                    <% if(header.payment_type == 2){ %>
+                        <img src="<%=imagePath%>checklist.png" width="15">
+                                        
+                        <span style="padding-left:5px;padding-bottom:10px !important;font-size:9px;position: absolute;">Bank</span>   
+                    <% }else{ %>
+                        <img src="<%=imagePath%>blank_checklist.png" width="13">
+                    <% } %>        
+                </td>
+                <td style="padding: 3px;text-align: left;white-space:nowrap;width:20%;">
+                    
+                    <img src="<%=imagePath%>blank_checklist.png" width="15">
+                    <span style="padding-left:5px;padding-bottom:10px !important;font-size:9px;position: absolute;">Giro</span>
+                    
+                </td>
+                <td style="padding: 2px;text-align: left;font-size:9px;" colspan="4">
+                    
+                    An. ...............................................................
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td style="font-size:9px;padding: 2px;text-align: left;border-right: none;" colspan="2">Jabatan</td>
+                <td style="padding: 2px;border-right: none;border-left: none;">:</td>
+                <td style="font-size:9px;padding: 2px;border-left: none;text-align: left;">
+                    
+                </td>
+                <td style="padding: 2px;width:3%;text-align: center;font-size: 20px; font-weight: bold;" colspan="4" rowspan="4">
+                    
+                </td>
+                <td style="padding: 3px;text-align: left;white-space:nowrap;">
+                    <img src="<%=imagePath%>blank_checklist.png" width="15">
+                    <span style="padding-left:5px;padding-bottom:10px !important;font-size:9px;position: absolute;">Check</span>
+                    
+                </td>
+                <td style="font-size:9px;padding: 2px;text-align: left;" colspan="4">
+                    An. ...............................................................
+                </td>
+            </tr>
+            <tr>
+                <td style="font-size:9px;padding: 2px;text-align: left;" colspan="4">Mohon dibayarkan kepada : </td>
+                <td style="padding: 3px;text-align: left;white-space:nowrap;">
+                    <% if(header.payment_type == 2){ %>
+                        <img src="<%=imagePath%>checklist.png" width="15">
+                        <span style="padding-left:5px;padding-bottom:10px !important;font-size:9px;position: absolute;">Transfer</span>
+                    <% }else{ %>
+                        <img src="<%=imagePath%>blank_checklist.png" width="15">
+                        <span style="padding-left:5px;padding-bottom:10px !important;font-size:9px;position: absolute;">Transfer</span>
+                    <% } %>
+                </td>
+                <td style="font-size:9px;padding: 2px;text-align: left;word-wrap: none;" colspan="4">
+                    <% if(header.payment_type == 2){ %>
+                        An. <%= header.account_name%>
+                    <% }else{ %>
+                        An. ...............................................................
+                    <% } %>
+                </td>
+            </tr>
+            <tr>
+                <td style="font-size:9px;padding: 2px;text-align:center;" colspan="4" rowspan="2">
+                    <%= header.vendor_name %>
+                </td>
+                <td style="font-size:9px;padding: 2px;width:3%;text-align: left;white-space:nowrap;">
+                    Nama Bank
+                </td>
+                <td style="font-size:9px;padding: 2px;text-align: left;" colspan="4">
+                    <% if(header.payment_type == 2){ %>
+                        <%= header.bank_name%>
+                    <% }else {%>
+                        ................................
+                    <% } %>
+                </td>
+            </tr>
+            <tr>
+                <td style="font-size:9px;padding: 2px;width:3%;text-align: left;white-space:nowrap;">
+                    No. Rek
+                </td>
+                <td style="font-size:9px;padding: 2px;text-align: left;" colspan="4">
+                    <% if(header.payment_type == 2){ %>
+                        <%= header.account_number%>
+                    <% }else {%>
+                        ................................
+                    <% } %>
+                </td>
+            </tr>
+            <tr>
+                <td style="font-size:9px;padding: 2px;width:3%;text-align: left;" colspan="8">
+                    Untuk Pembayaran 
+                    <span style="margin: 0 5px">: </span>
+                    <% if( header.purchase_request != null){ %>
+                        <% if( header.purchase_request.project != null ){ %>
+                        (<%= header.purchase_request.project.odoo_project_code %>/<%= header.purchase_request.project.name %>)
+                        <% }else{ %>
+                        <span><%= header.payment_desc %></span>
+                        <% } %>
+                    <% }else{ %>
+                        <span><%= header.payment_desc %></span>
+                    <% } %>
+                </td>
+                <td style="font-size:9px;padding: 2px;width:3%;text-align: left;white-space:nowrap;">
+                    Currency
+                </td>
+                <td style="font-size:9px;padding: 2px;text-align: left;" colspan="4">
+                </td>
+            </tr>
+            <tr>
+                <td style="font-size:9px;padding: 2px;text-align: center;font-weight: bold;" colspan="2">No. Bill</td>
+                <td style="font-size:9px;padding: 2px;width:7%;text-align: center;font-weight: bold;" colspan="2">No. Faktur</td>
+                <td style="font-size:9px;padding: 2px;width:7%;text-align: center;font-weight: bold;white-space:nowrap;">Tgl. Faktur</td>
+                <td style="font-size:9px;padding: 2px;width:7%;text-align: center;font-weight: bold;white-space:nowrap;">Tgl. Terima Faktur</td>
+                <td style="font-size:9px;padding: 2px;text-align: center;font-weight: bold;" nowrap="nowrap" colspan="2">Tgl. Jth Tempo</td>
+                <td style="font-size:9px;padding: 2px;text-align: center;font-weight: bold;width:30%;" colspan="2">Nilai Faktur</td>
+                <td style="font-size:9px;padding: 2px;text-align: center;font-weight: bold;">Potongan</td>
+                <td style="font-size:9px;padding: 2px;text-align: center;font-weight: bold;" colspan="2">Nilai Hutang</td>
+            </tr>
+            <%
+                var index = 1;
+                var xMaxLinePerPage = 47;
+                header.payment_request_detail.forEach( item => {
+            %>
+                    <tr>
+                        <td style="font-size:10px;padding: 2px;text-align: center;" colspan="2"><%= item.odoo_bill_no %></td>
+                        <td style="font-size:10px;padding: 2px;text-align: center;white-space:nowrap;" colspan="2"><%= item.invoice_no %></td>
+                        <td style="font-size:10px;padding: 2px;width:7%;text-align: center;white-space:nowrap;"><%= item.invoice_date %></td>
+                        <td style="font-size:10px;padding: 2px;width:7%;text-align: center;"><%= item.receive_invoice_date %></td>
+                        <td style="font-size:10px;padding: 2px;width:7%;text-align: center;" colspan="2"><%= item.invoice_due_date %></td>
+                        <td style="font-size:10px;padding: 2px;text-align: right;" colspan="2">
+                            <%=item.total_after_tax != null ? item.total_after_tax.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%>
+                        </td>
+                        <td style="font-size:10px;padding: 2px;text-align: right;">
+                            <%=item.deduction != null ? item.deduction.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%>
+                        </td>
+                        <td style="font-size:10px;padding: 2px;text-align: right;" colspan="2">
+                            <%=item.debt_value != null ? item.debt_value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%>
+                        </td>
+                    </tr>
+            <%
+                    if( header.payment_request_detail.length > xMaxLinePerPage && index == xMaxLinePerPage ){
+            %>
+                        </table>
+            <%
+                        for( var i=0; i < 2; i++ ){
+            %>
+                            <br>
+            <%
+                        }
+            %>
+                        <table class="center" cellspacing="0" border="1">
+                            <tr>
+                                <td style="font-size:9px;padding: 2px;text-align: center;font-weight: bold;" colspan="2">No. Bill</td>
+                                <td style="font-size:9px;padding: 2px;width:7%;text-align: center;font-weight: bold;" colspan="2">No. Faktur</td>
+                                <td style="font-size:9px;padding: 2px;width:7%;text-align: center;font-weight: bold;white-space:nowrap;">Tgl. Faktur</td>
+                                <td style="font-size:9px;padding: 2px;width:7%;text-align: center;font-weight: bold;white-space:nowrap;">Tgl. Terima Faktur</td>
+                                <td style="font-size:9px;padding: 2px;text-align: center;font-weight: bold;" colspan="2">Tgl. Jth Tempo</td>
+                                <td style="font-size:9px;padding: 2px;text-align: center;font-weight: bold;width:30%;" colspan="2">Nilai Faktur</td>
+                                <td style="font-size:9px;padding: 2px;text-align: center;font-weight: bold;">Potongan</td>
+                                <td style="font-size:9px;padding: 2px;text-align: center;font-weight: bold;" colspan="2">Nilai Hutang</td>
+                            </tr>
+
+            <%
+                    }
+                    index++;
+                } ) 
+            %>
+                   
+            
+        
+            
+            <tr>
+                <td colspan="11" style="font-size:10px;padding: 3px;text-align:left;font-weight: bold;">Total</td>
+                
+                <td style="font-size:10px;padding: 3px;text-align:right;" colspan="2"><%=header.total_price != null ? header.total_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+            </tr>
+            <tr>
+                <td colspan="13" style="padding:1px;text-align: left;font-size: 10px;">Terbilang: <%= header.terbilang %>
+
+                </td>
+            </tr>
+            <tr>
+                <td rowspan="4" style="border-right: none;">&nbsp;</td>
+                <td style="font-size:9px;text-align:center;border-bottom:none;border-right:none;border-left:none;" rowspan="2">Pemohon</td>
+                <td rowspan="4" style="border-left:none;border-right:none;">&nbsp;</td>
+                <td colspan="6" style="font-size:9px;text-align:center;border-right:none;border-left:none;border-bottom:none;" rowspan="2">Ka. Department</td>
+                <td rowspan="4" style="border-left:none;border-right:none;"></td>            
+                <td colspan="7" style="font-size:9px;text-align:center;">Kolom Persetujuan</td>
+            </tr>
+            <tr>
+                <td colspan="7" style="font-size:9px;text-align:center;">Plant Manager/Direktur</td>
+            </tr>
+            <tr style="height:25px;">
+                <td style="border-top:none;border-bottom:none;border-right:none;border-left:none;">&nbsp;</td>
+                <td colspan="6" style="border:none;">&nbsp;</td>
+                <td colspan="2">&nbsp;</td>
+            </tr>
+            <tr>
+                <td style="text-align:center;border-top:none;border-right:none;border-left:none;">(............................)</td>
+                <td colspan="2" style="text-align:center;border-left:none;border-right:none;border-top:none;">(............................)</td>
+                <td colspan="2" style="text-align:center;border-left:none;border-right:none;border-top:none;">(............................)</td>
+                <td colspan="2" style="text-align:center;border-left:none;border-right:none;border-top:none;">(............................)</td>
+                <td colspan="2">&nbsp;</td>
+            </tr>
+            <tr>
+                <td colspan="13" style="font-size:9px;padding:1px;text-align: left;">Diisi oleh Bagian Finance</td>
+            </tr>
+            <tr>
+                <td colspan="4" style="font-size:9px;padding:1px;text-align: left;">Jenis Payment Request</td>
+                <td style="padding:5px;text-align: left;" colspan="4">
+                    <img src="<%=imagePath%>blank_checklist.png" width="10">
+                    <span style="padding-left:5px;padding-bottom:10px !important;font-size:9px;position: absolute;">Cash Advance</span>
+                </td>
+                <td colspan="2" style="font-size:9px;padding:1px;" rowspan="4">Sumber Dana:</td>
+                <td style="padding:5px;text-align: left;" colspan="3">
+                    <img src="<%=imagePath%>blank_checklist.png" width="10">                        
+                    <span style="padding-left:5px;padding-bottom:10px !important;font-size:9px;position: absolute;">Kas Kecil</span>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" style="padding:1px;" rowspan="2">&nbsp;</td>
+                <td style="padding:5px;text-align: left;" colspan="4">
+                    <img src="<%=imagePath%>blank_checklist.png" width="10">
+                    <span style="padding-left:5px;padding-bottom:10px !important;font-size:9px;position: absolute;">Reimbursement</span>
+                </td>
+                <td style="padding:5px;text-align: left;" colspan="3">
+                    <img src="<%=imagePath%>blank_checklist.png" width="10">                        
+                    <span style="padding-left:5px;padding-bottom:10px !important;font-size:9px;position: absolute;">.....................................</span>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding:5px;text-align: left;" colspan="4">
+                    <img src="<%=imagePath%>blank_checklist.png" width="10">
+                    <span style="padding-left:5px;padding-bottom:10px !important;font-size:9px;position: absolute;">Pelunasan Purchase Order</span>
+                </td>
+                <td style="padding:5px;text-align: left;" colspan="3">
+                    <img src="<%=imagePath%>blank_checklist.png" width="10">                        
+                    <span style="padding-left:5px;padding-bottom:10px !important;font-size:9px;position: absolute;">.....................................</span>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" style="padding:1px;">(..................................................................................)</td>
+                <td style="padding:5px;text-align: left;" colspan="4">
+                    <img src="<%=imagePath%>blank_checklist.png" width="10">                        
+                    <span style="padding-left:5px;padding-bottom:10px !important;font-size:9px;position: absolute;">............................................................</span>
+                </td>
+                <td style="padding:5px;text-align: left;" colspan="3">
+                    <img src="<%=imagePath%>blank_checklist.png" width="10">                        
+                    <span style="padding-left:5px;padding-bottom:10px !important;font-size:9px;position: absolute;">.....................................</span>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" style="font-size:9px;padding:1px;text-align: center;" rowspan="4">Serah Terima Kas</td>
+                <td colspan="5" style="font-size:9px;padding:1px;text-align: center;">Diserahkan Oleh Kasir : </td>
+                <td style="font-size:9px;padding:1px;text-align: center;" colspan="5">Diterima Oleh :</td>
+            </tr>
+            <tr>
+                <td colspan="5" style="font-size:9px;padding:1px;text-align: left;">Tgl:</td>
+                <td style="font-size:9px;padding:1px;padding:1px;text-align: left;" colspan="5">Tgl :</td>
+            </tr>        
+            <tr>
+                <td colspan="5" style="height:70px;">&nbsp;</td>
+                <td colspan="5" style="height:70px;">&nbsp;</td>
+            </tr>
+            <tr>
+                <td colspan="5" style="font-size:9px;padding:1px;text-align: left;">Nama</td>
+                <td style="font-size:9px;padding:1px;text-align: left;" colspan="5">Nama</td>
+            </tr>
+        </table>
+    </body>
+</html>
