@@ -53,7 +53,7 @@ module.exports = (app) => {
 	arrValidate = [];
 	arrValidate = [
 		check('id').not().isEmpty().withMessage('Parameter id cannot be empty'),
-		check('file', 'Parameter photo must be array and cannot be empty').not().isEmpty().isArray()
+		// check('file', 'Parameter photo must be array and cannot be empty').not().isEmpty().isArray()
 	];
 	app.post(
 		rootAPIPath + 'update_file_upload', arrValidate, purchaseRequestController.purchaseRequest_UpdateFileUpload
