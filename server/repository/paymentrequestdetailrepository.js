@@ -148,6 +148,65 @@ class PaymentRequestDetailRepository {
 				pParam.updated_by_name = pParam.user_name;
 
 				xSaved = await _modelDb.update(pParam, xWhere);
+				if (xSaved) {
+					xJoResult = {
+						status_code: '00',
+						status_msg: 'Data has been successfully saved',
+						// created_id: await _utilInstance.encrypt(toString(xSaved.id), config.cryptoKey.hashKey)
+						//// clear_id: xSaved.id,
+					};
+
+					await xTransaction.commit();
+				} else {
+					if (xTransaction) await xTransaction.rollback();
+
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Failed save to database'
+					};
+				}
+			} else if (pAct == 'add_batch') {
+				xSaved = await _modelDb.bulkCreate(pParam, { transaction: xTransaction });
+				//if (xSaved.id != null) {
+				await xTransaction.commit();
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'Data has been successfully saved'
+				};
+				//}
+			} else if (pAct == 'update_from_fpb') {
+				// var xFlag = false
+				pParam.updatedAt = await _utilInstance.getCurrDateTime();
+				var xPyrId = pParam.payment_request_id;
+				var xProduct = {
+					id: pParam.product_id,
+					name: pParam.product_name,
+					code: pParam.product_code,
+				}
+				var xUomId = pParam.uom_id
+				var xQty = pParam.qty_request
+				delete pParam.payment_request_id;
+				delete pParam.product_id;
+				delete pParam.product_name;
+				delete pParam.product_code;
+				delete pParam.uom_id;
+				delete pParam.qty_request;
+				var xWhere = {
+					where: {
+						payment_request_id: xPyrId,
+						product_id: xProduct.id,
+						product_name: xProduct.name,
+						product_code: xProduct.code,
+						uom_id: xUomId,
+						qty_request: xQty
+					},
+					transaction: xTransaction
+				};
+
+				pParam.updated_by = pParam.user_id;
+				pParam.updated_by_name = pParam.user_name;
+
+				xSaved = await _modelDb.update(pParam, xWhere);
 
 				await xTransaction.commit();
 
@@ -280,6 +339,20 @@ class PaymentRequestDetailRepository {
 				if (pParam.product_code != '') {
 					xWhereAnd.push({
 						product_code: pParam.product_code
+					});
+				}
+			}
+			if (pParam.hasOwnProperty('invoice_no')) {
+				if (pParam.invoice_no != '') {
+					xWhereAnd.push({
+						invoice_no: pParam.invoice_no
+					});
+				}
+			}
+			if (pParam.hasOwnProperty('odoo_bill_no')) {
+				if (pParam.odoo_bill_no != '') {
+					xWhereAnd.push({
+						odoo_bill_no: pParam.odoo_bill_no
 					});
 				}
 			}

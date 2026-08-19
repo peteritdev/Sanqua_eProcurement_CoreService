@@ -276,6 +276,14 @@ class PaymentRequestRepository {
 					// );
 				}
 			}
+			
+			if (pParam.hasOwnProperty('app_category')) {
+				if (pParam.app_category != '') {
+					xWhereAnd.push({
+						app_category: pParam.app_category
+					});
+				}
+			}
 
 			if (pParam.hasOwnProperty('keyword')) {
 				if (pParam.keyword != '') {
@@ -441,7 +449,8 @@ class PaymentRequestRepository {
 				// sequelize.query(
 				// 	'ALTER TABLE "tr_paymentrequestdetails" DISABLE TRIGGER "trg_update_total_item_afterinsert"'
 				// );
-
+				
+				console.log(`>>> pParam.total_price ${JSON.stringify(pParam.total_price)}`);
 				xSaved = await _modelDb.create(
 					pParam,
 					{
@@ -451,7 +460,8 @@ class PaymentRequestRepository {
 								model: _modelPaymentRequestDetail,
 								as: 'payment_request_detail'
 							}
-						]
+						],
+						logging: true
 					}
 				);
 

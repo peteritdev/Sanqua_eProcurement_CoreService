@@ -1053,7 +1053,7 @@ class PurchaseRequestRepository {
 					};
 				}
 			}
-			if (pAct == 'add_batch_in_item') {
+			if (pAct == 'add_batch_in_item' || pAct == 'add_batch_from_ca') {
 				var xFlag = false
 				var xSql = "";
 				var xSqlErrMsg = ""
@@ -1112,6 +1112,7 @@ class PurchaseRequestRepository {
 						},
 						{ transaction: xTransaction }
 					);
+					// console.log(`>>> Pr.xSaved : ${JSON.stringify(xSaved)}`);
 
 					if (xSaved.id != null) {
 						xJoResult = {
@@ -1120,6 +1121,11 @@ class PurchaseRequestRepository {
 							created_id: await _utilInstance.encrypt(xSaved.id, config.cryptoKey.hashKey),
 							clear_id: xSaved.id
 						};
+						if (pAct == 'add_batch_from_ca') {
+							Object.assign(xJoResult, {
+								purchase_request_detail: xSaved.purchase_request_detail
+							})
+						}
 
 						sequelize.query(
 							'ALTER TABLE "tr_purchaserequestdetails" ENABLE TRIGGER "trg_update_total_item_afterinsert"'

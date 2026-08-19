@@ -53,6 +53,7 @@ module.exports = (sequelize, DataTypes) => {
 		odoo_bill_no: DataTypes.STRING,
 		invoice_no: DataTypes.STRING,
 		invoice_date: DataTypes.DATE,
+		vendor_id: DataTypes.INTEGER,
 		vendor_code: DataTypes.STRING,
 		vendor_name: DataTypes.STRING,
 		total_after_tax: DataTypes.DOUBLE,
@@ -61,6 +62,7 @@ module.exports = (sequelize, DataTypes) => {
 		receive_invoice_date: DataTypes.DATE,
 		invoice_due_date: DataTypes.DATE,
 		company_id: DataTypes.INTEGER,
+		store_link: DataTypes.STRING
 	});
 
 	PaymentRequestDetail.associate = function(models) {

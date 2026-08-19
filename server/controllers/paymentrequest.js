@@ -27,11 +27,13 @@ module.exports = {
 	// paymentRequest_Done,
 	paymentRequest_Dropdown,
 	paymentRequest_FetchMatrix,
+	paymentRequest_MergeWithFPB,
 
 	paymentRequestDetail_Save,
 	paymentRequestDetail_Dropdown,
 	paymentRequestDetail_Delete,
-	paymentRequest_UpdateFileUpload
+	paymentRequest_UpdateFileUpload,
+	paymentRequestDetail_AddBatch
 };
 
 async function paymentRequest_Detail(req, res) {
@@ -657,6 +659,108 @@ async function paymentRequest_UpdateFileUpload(req, res) {
 				req.body.method = req.headers['x-method'];
 				req.body.act = 'update';
 				joResult = await _serviceInstance.save(req.body);
+				joResult = JSON.stringify(joResult);
+			}
+		} else {
+			joResult = JSON.stringify(oAuthResult);
+		}
+	} else {
+		joResult = JSON.stringify(oAuthResult);
+	}
+
+	res.setHeader('Content-Type', 'application/json');
+	res.status(200).send(joResult);
+}
+
+async function paymentRequestDetail_AddBatch(req, res) {
+	var joResult;
+	var oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
+
+	if (oAuthResult.status_code == '00') {
+		if (oAuthResult.token_data.status_code == '00') {
+			// Validate first
+			var errors = validationResult(req).array();
+
+			if (errors.length != 0 && req.body.act == 'add') {
+				joResult = JSON.stringify({
+					status_code: '-99',
+					status_msg: 'Parameter value has problem',
+					error_msg: errors
+				});
+			} else {
+				req.body.user_id = oAuthResult.token_data.result_verify.id;
+				req.body.user_name = oAuthResult.token_data.result_verify.name;
+				req.body.employee_id = oAuthResult.token_data.result_verify.employee_info.id;
+				req.body.employee_name = oAuthResult.token_data.result_verify.employee_info.name;
+				req.body.token = req.headers['x-token'];
+				req.body.method = req.headers['x-method'];
+				joResult = await _serviceDetailInstance.save(req.body);
+				joResult = JSON.stringify(joResult);
+			}
+		} else {
+			joResult = JSON.stringify(oAuthResult);
+		}
+	} else {
+		joResult = JSON.stringify(oAuthResult);
+	}
+
+	res.setHeader('Content-Type', 'application/json');
+	res.status(200).send(joResult);
+}
+
+async function paymentRequest_MergeWithFPB(req, res) {
+	var joResult;
+	var oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
+
+	if (oAuthResult.status_code == '00') {
+		if (oAuthResult.token_data.status_code == '00') {
+			// Validate first
+			var errors = validationResult(req).array();
+
+			if (errors.length != 0 && req.body.act == 'add') {
+				joResult = JSON.stringify({
+					status_code: '-99',
+					status_msg: 'Parameter value has problem',
+					error_msg: errors
+				});
+			} else {
+				req.body.user_id = oAuthResult.token_data.result_verify.id;
+				req.body.user_name = oAuthResult.token_data.result_verify.name;
+
+				// req.body.logged_company_code = oAuthResult.token_data.result_verify.company.alias;
+				// req.body.logged_company_id = oAuthResult.token_data.result_verify.company.id;
+				// req.body.logged_company_name = oAuthResult.token_data.result_verify.company.name;
+
+				req.body.employee_id = oAuthResult.token_data.result_verify.employee_info.id;
+				req.body.employee_name = oAuthResult.token_data.result_verify.employee_info.name;
+				if (oAuthResult.token_data.result_verify.employee_info.department.hasOwnProperty('unit')) {
+					if (oAuthResult.token_data.result_verify.employee_info.department.unit != null) {
+						req.body.department_id = oAuthResult.token_data.result_verify.employee_info.department.unit.id;
+						req.body.department_name =
+							oAuthResult.token_data.result_verify.employee_info.department.unit.name;
+					} else {
+						if (oAuthResult.token_data.result_verify.employee_info.department.section != null) {
+							req.body.department_id =
+								oAuthResult.token_data.result_verify.employee_info.department.section.id;
+							req.body.department_name =
+								oAuthResult.token_data.result_verify.employee_info.department.section.name;
+						}
+					}
+				} else {
+					if (oAuthResult.token_data.result_verify.employee_info.department.section != null) {
+						req.body.department_id =
+							oAuthResult.token_data.result_verify.employee_info.department.section.id;
+						req.body.department_name =
+							oAuthResult.token_data.result_verify.employee_info.department.section.name;
+					} else {
+						req.body.department_id = oAuthResult.token_data.result_verify.employee_info.department.id;
+						req.body.department_name = oAuthResult.token_data.result_verify.employee_info.department.name;
+					}
+				}
+
+				req.body.token = req.headers['x-token'];
+				req.body.method = req.headers['x-method'];
+				joResult = await _serviceInstance.mergeWithFPB(req.body);
 				joResult = JSON.stringify(joResult);
 			}
 		} else {
