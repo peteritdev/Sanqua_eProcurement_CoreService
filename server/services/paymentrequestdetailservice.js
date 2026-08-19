@@ -25,6 +25,9 @@ const _paymentRequestRepoInstance = new PaymentRequestRepository();
 const PurchaseRequestDetailRepository = require('../repository/purchaserequestdetailrepository.js');
 const _purchaseRequestDetailRepoInstance = new PurchaseRequestDetailRepository();
 
+const PjcaDetailRepository = require('../repository/pjcadetailrepository.js');
+const _pjcaDetailRepoInstance = new PjcaDetailRepository();
+
 // Service
 const ProductServiceRepository = require('./productservice.js');
 const _productServiceInstance = new ProductServiceRepository();
@@ -60,6 +63,7 @@ class PaymentRequestDetailService {
 
 		var xMethod = pParam.method;
 		var xToken = pParam.token;
+		var xUpdateResult;
 
 		if (pParam.hasOwnProperty('user_id') && pParam.hasOwnProperty('payment_request_id')) {
 			if (pParam.user_id != '') {
@@ -76,7 +80,7 @@ class PaymentRequestDetailService {
 		
 					if (xPaymentRequest != null) {
 						if (xPaymentRequest.status_code == '00') {
-							if (xPaymentRequest.data.status == 0) {
+							if (xPaymentRequest.data.status == 0 || (pParam.hasOwnProperty('item_type') && pParam.item_type == 2)) {
 								xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
 								if (xDecId.status_code == '00') {
 									pParam.user_id = xDecId.decrypted;
@@ -199,6 +203,8 @@ class PaymentRequestDetailService {
 					}
 
 					pParam.price_total = Math.round(pParam.qty_request * pParam.price_request * 1000) / 1000;
+					
+					pParam.item_type = pParam.item_type ? pParam.item_type : 1
 				}
 				// Validate if product_id is null (free keyin for project), estimate_fulfillment
 
@@ -256,6 +262,7 @@ class PaymentRequestDetailService {
 							xItems[i].payment_request_id = xRequestIdClear;
 							xItems[i].user_id = pParam.user_id;
 							xItems[i].user_name = pParam.user_name;
+							xItems[i].item_type = xItems[i].item_type ? xItems[i].item_type : 1
 
 							xAct = 'add';
 						}
@@ -290,9 +297,89 @@ class PaymentRequestDetailService {
 								Math.round(pParam.qty_request * pParam.price_request * 1000) / 1000;
 						}
 					}
-
-					// console.log(`>>> editDetail : ${JSON.stringify(pParam)}`);
-					var xUpdateResult = await _repoInstance.save(pParam, xAct);
+					// check if given param item_type = 2 then update status payreq item to -1 (revision) 
+					// and create new item with item_type = 2
+					console.log(`>>> ItemType : ${JSON.stringify(pParam)}`);
+					if (pParam.hasOwnProperty('item_type') && pParam.item_type == 2) {
+						console.log(`>>> update and create new item .>>>`);
+						// get detail old item first
+						const xGetCaItem = await _repoInstance.getByParam({id: pParam.id});
+						if (xGetCaItem.status_code == '00') {
+							// check old item already used by pjca or not, if there's one then must be deleted first
+							const xCheckCreatedPJCA = await _pjcaDetailRepoInstance.getByParam({cad_id: pParam.id});
+							if (xCheckCreatedPJCA.status_code == '00') {
+								xUpdateResult = {
+									status_code: '-99',
+									status_msg: 'Item already used in PJCA, You cannot create revision item for this item'
+								}
+								// please cancel the PJCA then delete this item from its detail first
+							} else {
+								// then check if there are already created revision item with same origin_id or not
+								// if yes then return error
+								const xCheckRevisionItem = await _repoInstance.getByParam({origin_id: pParam.id});
+								console.log(`>>> xCheckRevisionItem .>>>`, xCheckRevisionItem);
+								if (xCheckRevisionItem.status_code == '-99' && xCheckRevisionItem.status_msg == 'Data not found') {
+									const xUpdateOldItem = {
+										id: pParam.id,
+										status: -1
+									}
+									xUpdateResult = await _repoInstance.save(xUpdateOldItem, 'update');
+									if (xUpdateResult.status_code == '00') {
+										// update purchase request detail item qty_done with revised qty_request - old qty_request
+										var xPrDetailItem = await _purchaseRequestDetailRepoInstance.getByParam({id: pParam.prd_id})
+										if (xPrDetailItem.status_code == '00') {
+											let xQtyLeft = xPrDetailItem.data.qty_paid || 0
+											let xPrdUpdateParam = {
+												id: pParam.prd_id,
+												qty_paid: xQtyLeft - (xGetCaItem.data.qty_request - pParam.qty_request)
+											}
+											let xUpdatePrdItem = await _purchaseRequestDetailRepoInstance.save(xPrdUpdateParam, 'revision')
+											console.log(`>>> xUpdatePrdItem .>>>`, xUpdatePrdItem);
+											if (xUpdatePrdItem.status_code == '00') {
+												// create new revision item
+												const xAddRevisionItem = {
+													origin_id: pParam.id,
+													payment_request_id: pParam.payment_request_id,
+													prd_id: pParam.prd_id,
+													qty_request: pParam.qty_request,
+													price_request: pParam.price_request,
+													discount_amount: pParam.discount_amount,
+													discount_percent: pParam.discount_percent,
+													tax_type: pParam.tax_type,
+													description: pParam.description,
+													item_type: pParam.item_type,
+													price_total: pParam.price_total,
+													product_id: xGetCaItem.data.product_id,
+													product_code: xGetCaItem.data.product_code,
+													product_name: xGetCaItem.data.product_name,
+													uom_id: xGetCaItem.data.uom_id,
+													uom_name: xGetCaItem.data.uom_name,
+													qty_done: xGetCaItem.data.qty_done
+												}
+												
+												console.log(`>>> xAddRevisionItem .>>>`, xAddRevisionItem);
+												xUpdateResult = await _repoInstance.save(xAddRevisionItem, 'add');
+											}
+										}
+									}
+								} else {
+									xUpdateResult = {
+										status_code: '-99',
+										status_msg: 'Revision item already exists, You cannot create revision item with this item anymore'
+									}
+								}
+							}
+						} else {
+							xUpdateResult = {
+								status_code: '-99',
+								status_msg: 'Revision failed, invalid ID of original item'
+							}
+						}
+					} else {
+						console.log(`>>> update heree 222.>>>`);
+						xUpdateResult = await _repoInstance.save(pParam, xAct);
+					}
+					console.log(`>>> save payreq item : ${JSON.stringify(pParam)}`);
 					xJoResult = xUpdateResult;
 				}
 			}
@@ -387,8 +474,52 @@ class PaymentRequestDetailService {
 		}
 
 		if (xFlagProcess) {
+			console.log(`>>> delete payment request detail with id: ${pParam}`)
+			// check if item already used by pjca and its pjca status is not cancelled or not
+			const xCheckPjcaDetail = await _pjcaDetailRepoInstance.getByParam({cad_id: pParam.id});
+			console.log(`xCheckPjcaDetail: ${JSON.stringify(xCheckPjcaDetail)}`)
+			if (xCheckPjcaDetail.status_code == '00') {
+				// if (xCheckPjcaDetail.data.pjca.status != 3) { // 3 = cancelled
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Cannot delete item, already used in PJCA'
+				};
+				return xJoResult;
+				// }
+			}
+			// get detail item first
+			const xGetDetailItem = await _repoInstance.getByParam({id: pParam.id});
+			if (xGetDetailItem.status_code == '00') {
+				// check if deleted item type is 2 and has origin id or not,
+				// if yes then update origin item status to active (0)
+				if (xGetDetailItem.data.item_type == 2 && xGetDetailItem.data.origin_id) {
+					var xUpdateOriginItem = await _repoInstance.save({id: xGetDetailItem.data.origin_id, status: 0}, 'update');
+					if (xUpdateOriginItem.status_code == '00') {
+						console.log(`>>> update origin item status: ${JSON.stringify(xUpdateOriginItem)}`);
+						var xPrDetailItem = await _purchaseRequestDetailRepoInstance.getByParam({id: xGetDetailItem.data.prd_id})
+						// then update purchase request detail item qty_done with original qty_request
+						if (xPrDetailItem.status_code == '00') {
+							let xQtyLeft = xPrDetailItem.data.qty_paid || 0
+
+							let xPrdUpdateParam = {
+								id: xGetDetailItem.data.prd_id,
+								qty_paid: xQtyLeft + (Math.abs(xGetDetailItem.data.qty_request - xGetDetailItem.data.origin_detail.qty_request))
+							}
+							
+							let xUpdatePrdItem = await _purchaseRequestDetailRepoInstance.save(xPrdUpdateParam, 'update')
+						}
+					}
+				}
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Cannot delete item, already used in PJCA'
+				};
+				return xJoResult;
+			}
+			console.log(`>>> xGetDetailItem : ${JSON.stringify(xGetDetailItem)}`);
 			var xDeleteResult = await _repoInstance.delete(pParam);
-			xJoResult = xDeleteResult;
+			xJoResult = xDeleteResult
 		}
 
 		return xJoResult;

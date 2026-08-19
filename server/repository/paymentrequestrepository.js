@@ -16,7 +16,8 @@ const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
 const _modelTax = require('../models').ms_taxes;
 const _modelPJCADb = require('../models').tr_pjcas;
-// const _modelBudgetPlan = require('../models').tr_budgetplans;
+const _modelProject = require('../models').ms_projects;
+const _modelBudgetPlan = require('../models').tr_budgetplans;
 
 const Utility = require('peters-globallib-v2');
 const { param } = require('express-validator');
@@ -40,7 +41,19 @@ class PaymentRequestRepository {
 				{
 					model: _modelPurchaseRequest,
 					as: 'purchase_request',
-					attributes: [ 'id', 'request_no' ]
+					attributes: [ 'id', 'request_no' ],
+					include: [
+						{
+							model: _modelBudgetPlan,
+							as: 'budget_plan',
+							attributes: [ 'id', 'name', 'budget_no' ]
+						},
+						{
+							model: _modelProject,
+							as: 'project',
+							attributes: [ 'id', 'code', 'name', 'odoo_project_code' ]
+						},
+					]
 				},
 				{
 					model: _modelPaymentRequestDetail,
@@ -54,7 +67,12 @@ class PaymentRequestRepository {
 						{
 							model: _modelPurchaseRequestDetail,
 							as: 'purchase_request_detail',
-							attributes: ['id', 'request_id', 'product_id', 'product_code', 'product_name', 'qty', 'qty_done', 'qty_paid', ['budget_price_per_unit', 'unit_price'], 'uom_name', 'uom_id'],
+							attributes: ['id', 'request_id', 'product_id', 'product_code', 'product_name', 'qty', 'qty_done', 'qty_paid', ['budget_price_per_unit', 'unit_price'], 'uom_name', 'uom_id', 'store_link'],
+						},
+						{
+							model: _modelPaymentRequestDetail,
+							as: 'origin_detail',
+							attributes: [ 'id', 'origin_id', 'description', 'discount_amount', 'discount_percent', 'item_type', 'price_request', 'price_total', 'product_code', 'product_id', 'product_name', 'qty_done', 'qty_request', 'status', 'tax_type', 'uom_id', 'uom_name'],
 						},
 					]
 				},
@@ -149,6 +167,21 @@ class PaymentRequestRepository {
 					}
 				}
 			}
+			if (pParam.hasOwnProperty('prd_id')) {
+				if (pParam.prd_id != null && pParam.prd_id != undefined && pParam.prd_id != '') {
+					xInclude.push(
+						{
+							model: _modelPaymentRequestDetail,
+							as: 'payment_request_detail'
+						}
+					)
+					xWhereAnd.push({
+						'$payment_request_detail.prd_id$': {
+							[Op.in]: [pParam.prd_id]
+						}
+					});
+				}
+			}
 
 			if (pParam.hasOwnProperty('purchase_request_id')) {
 				if (pParam.purchase_request_id != '') {
@@ -175,6 +208,14 @@ class PaymentRequestRepository {
 				if (pParam.department_id != '') {
 					xWhereAnd.push({
 						department_id: pParam.department_id
+					});
+				}
+			}
+			
+			if (pParam.hasOwnProperty('vendor_id')) {
+				if (pParam.vendor_id != '') {
+					xWhereAnd.push({
+						vendor_id: pParam.vendor_id
 					});
 				}
 			}
@@ -238,35 +279,49 @@ class PaymentRequestRepository {
 
 			if (pParam.hasOwnProperty('keyword')) {
 				if (pParam.keyword != '') {
+					let keywordArray = [];
+
+					if (Array.isArray(pParam.keyword)) {
+						keywordArray = pParam.keyword;
+					} else {
+						keywordArray = pParam.keyword
+							.split(',')
+							.map(item => item.trim())
+							.filter(item => item !== '');
+					}
+					const keywords = keywordArray.map(
+						(item) => `%${item}%`
+					);
+
 					xWhereOr.push(
 						{
 							'$purchase_request.request_no$': {
-								[Op.iLike]: '%' + pParam.keyword + '%'
+								[Op.iLike]: {[Op.any]: keywords}
+								// [Op.iLike]: '%' + pParam.keyword + '%'
 							}
 						},
 						{
 							document_no: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
+								[Op.iLike]: {[Op.any]: keywords}
+								// [Op.iLike]: '%' + pParam.keyword + '%'
 							}
 						},
-						// {
-						// 	product_name: {
-						// 		[Op.iLike]: '%' + pParam.keyword + '%'
-						// 	}
-						// },
-						// {
-						// 	code: {
-						// 		[Op.iLike]: '%' + pParam.keyword + '%'
-						// 	}
-						// },
+						{
+							vendor_name: {
+								[Op.iLike]: {[Op.any]: keywords}
+								// [Op.iLike]: '%' + pParam.keyword + '%'
+							}
+						},
 						{
 							employee_name: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
+								[Op.iLike]: {[Op.any]: keywords}
+								// [Op.iLike]: '%' + pParam.keyword + '%'
 							}
 						},
 						{
 							description: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
+								[Op.iLike]: {[Op.any]: keywords}
+								// [Op.iLike]: '%' + pParam.keyword + '%'
 							}
 						}
 					);
@@ -345,7 +400,6 @@ class PaymentRequestRepository {
 		var xJoResult = {};
 
 		try {
-			// console.log(`>>> before xSave:end ${JSON.stringify(pParam)}`, pAct);
 			var xSaved = null;
 			xTransaction = await sequelize.transaction();
 
@@ -354,7 +408,8 @@ class PaymentRequestRepository {
 				pParam.is_delete = 0;
 				pParam.created_by = pParam.user_id;
 				pParam.created_by_name = pParam.user_name;
-
+				// console.log(`>>> xSave: ${JSON.stringify(pParam)}`);
+				
 				xSaved = await _modelDb.create(pParam, { transaction: xTransaction });
 				console.log(`>>> xSave:end ${JSON.stringify(xSaved)}`);
 
@@ -407,7 +462,6 @@ class PaymentRequestRepository {
 						created_id: await _utilInstance.encrypt(xSaved.id.toString(), config.cryptoKey.hashKey),
 						clear_id: xSaved.id
 					};
-					// console.log(`>>> after xSave:end ${JSON.stringify(xJoResult)}`);
 
 					// sequelize.query(
 					// 	'ALTER TABLE "tr_paymentrequestdetails" ENABLE TRIGGER "trg_update_total_item_afterinsert"'
@@ -454,9 +508,7 @@ class PaymentRequestRepository {
 					logging: true
 				};
 				
-				// console.log(`>>> xUpdateApproval.pParam: ${JSON.stringify(pParam)}`);
 				xSaved = await _modelDb.update(pParam, xWhere);
-				// console.log(`>>> xSaved: ${JSON.stringify(xSaved)}`);
 				if (xSaved[0] > 0) {
 					await xTransaction.commit();
 					xJoResult = {
@@ -472,7 +524,6 @@ class PaymentRequestRepository {
 				}
 			}
 		} catch (e) {
-			// console.log(`>>> after xSave:error ${JSON.stringify(e)}`);
 			if (xTransaction) await xTransaction.rollback();
 			xJoResult = {
 				status_code: '-99',

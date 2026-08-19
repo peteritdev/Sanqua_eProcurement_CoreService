@@ -9,6 +9,15 @@
       html {
         zoom: 0.70;
       }
+      @media print {
+        .page-break {
+          page-break-before: always;
+        }
+
+        .no-break {
+          page-break-inside: avoid;
+        }
+      }
       .center {
         margin-left: auto;
         margin-right: auto;
@@ -349,7 +358,7 @@
                 <td style="text-align: center" class="border-rb">
                 </td>
                 <td style="text-align: left" class="border-rb">
-                  Discount Global (<%=data.data.global_discount_percent%>%)
+                  Pph/Discount Global (<%=data.data.global_discount_percent%>%)
                 </td>
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
@@ -363,6 +372,102 @@
                   style="text-align: center; border-right: none"
                   class="border-rb"
                 >
+                </td>
+              </tr>
+              <%
+                  }
+              %>
+
+              <!-- PPN -->
+              <%
+              if(data.data.total_tax_amount != null && data.data.total_tax_amount > 0){
+              %>
+              <tr>
+                <td style="text-align: center" class="border-rb">
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  PPN
+                </td>
+                <td style="text-align: right" class="border-rb">
+                  <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td>Rp </td>
+                      <td style="text-align: right; width: 100%;"><%=data.data.total_tax_amount != null ? data.data.total_tax_amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                    </tr>
+                  </table>
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                </td>
+              </tr>
+              <%
+                  } else {
+              %>
+              <tr style="height: 25px;">
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%>. -->
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                  <!-- <%=i%> -->
+                </td>
+              </tr>
+              <%
+                  }
+              %>
+              
+              <!-- PPH -->
+              <%
+              if(data.data.total_pph_amount != null && data.data.total_pph_amount > 0){
+              %>
+              <tr>
+                <td style="text-align: center" class="border-rb">
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  PPh (<%=data.data.pph_percent%>%)
+                </td>
+                <td style="text-align: right" class="border-rb">
+                  <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td>Rp </td>
+                      <td style="text-align: right; width: 100%;"><%=data.data.total_pph_amount != null ? data.data.total_pph_amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                    </tr>
+                  </table>
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                </td>
+              </tr>
+              <%
+                  } else {
+              %>
+              <tr style="height: 25px;">
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%>. -->
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                  <!-- <%=i%> -->
                 </td>
               </tr>
               <%
@@ -385,9 +490,9 @@
                     <td class="border-rb">
                       <table style="margin-left: auto;" cellspacing="0" cellpadding="0">
                         <tr>
-                          <td style="width: 50px; text-align: right; padding-right: 5px;">Realisasi: </td>
+                          <td style="width: 50px; text-align: right; padding-right: 5px;">CA: </td>
                           <td style="width: 10px; text-align: right;">Rp </td>
-                          <td style="width: 120px; text-align: right;"><%=data.data.total_price != null ? data.data.total_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                          <td style="width: 120px; text-align: right;"><%=data.data.payment_request.total_price != null ? data.data.payment_request.total_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                         </tr>
                       </table>
                     </td>
@@ -396,9 +501,9 @@
                     <td style="text-align: right" class="border-rb">
                       <table style="margin-left: auto;" cellspacing="0" cellpadding="0">
                         <tr>
-                          <td style="width: 50px; text-align: right; padding-right: 5px;">CA: </td>
+                          <td style="width: 50px; text-align: right; padding-right: 5px;">PJCA: </td>
                           <td style="width: 10px; text-align: right;" class="border-b">Rp </td>
-                          <td style="width: 120px; text-align: right;" class="border-b"><%=data.data.payment_request.total_price != null ? data.data.payment_request.total_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                          <td style="width: 120px; text-align: right;" class="border-b"><%=data.data.total_price != null ? data.data.total_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                         </tr>
                       </table>
                     </td>

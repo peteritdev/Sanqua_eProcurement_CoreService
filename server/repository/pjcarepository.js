@@ -9,6 +9,8 @@ const Op = Sequelize.Op;
 const _modelDb = require('../models').tr_pjcas;
 const _modelPJCADetail = require('../models').tr_pjcadetails;
 const _modelPaymentRequest = require('../models').tr_paymentrequests;
+const _modelPayreqDetail = require('../models').tr_paymentrequestdetails;
+const _modelPurchaseRequestDetail = require('../models').tr_purchaserequestdetails;
 const _modelVendorCatalogueDb = require('../models').ms_vendorcatalogues;
 const _modelProduct = require('../models').ms_products;
 const _modelUnit = require('../models').ms_units;
@@ -37,7 +39,13 @@ class PJCARepository {
 				{
 					model: _modelPaymentRequest,
 					as: 'payment_request',
-					attributes: [ 'id', 'document_no', 'created_at' ]
+					attributes: [ 'id', 'document_no', 'created_at' ],
+					include: [
+						{
+							model: _modelPayreqDetail,
+							as: 'payment_request_detail',
+						}
+					]
 				},
 				{
 					model: _modelPJCADetail,
@@ -47,6 +55,23 @@ class PJCARepository {
 							model: _modelTax,
 							as: 'tax',
 							attributes: [['id', 'tax_id'], 'name', 'type', 'value'],
+						},
+						{
+							model: _modelPurchaseRequestDetail,
+							as: 'purchase_request_detail',
+							attributes: ['id', 'request_id', 'product_id', 'product_code', 'product_name', 'qty', 'qty_done', 'qty_paid', ['budget_price_per_unit', 'unit_price'], 'uom_name', 'uom_id', 'store_link'],
+						},
+						{
+							model: _modelPayreqDetail,
+							as: 'payment_request_detail',
+							attributes: [ 'id', 'discount_amount', 'discount_percent', 'item_type', 'price_request', 'price_total', 'qty_done', 'qty_request', 'status', 'tax_type'],
+							include: [
+								{
+									model: _modelPayreqDetail,
+									as: 'origin_detail',
+									attributes: [ 'id', 'discount_amount', 'discount_percent', 'item_type', 'price_request', 'price_total', 'qty_done', 'qty_request', 'status', 'tax_type']
+								}
+							]
 						}
 					]
 				},
@@ -189,35 +214,60 @@ class PJCARepository {
 
 			if (pParam.hasOwnProperty('keyword')) {
 				if (pParam.keyword != '') {
+					let keywordArray = [];
+
+					if (Array.isArray(pParam.keyword)) {
+						keywordArray = pParam.keyword;
+					} else {
+						keywordArray = pParam.keyword
+							.split(',')
+							.map(item => item.trim())
+							.filter(item => item !== '');
+					}
+					const keywords = keywordArray.map(
+						(item) => `%${item}%`
+					);
 					xWhereOr.push(
 						{
+							'$payment_request.document_no$': {
+								[Op.iLike]: {[Op.any]: keywords}
+								// [Op.iLike]: '%' + pParam.keyword + '%'
+							}
+						},
+						{
 							document_no: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
+								[Op.iLike]: {[Op.any]: keywords}
+								// [Op.iLike]: '%' + pParam.keyword + '%'
 							}
 						},
 						{
 							company_name: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
+								[Op.iLike]: {[Op.any]: keywords}
+								// [Op.iLike]: '%' + pParam.keyword + '%'
 							}
 						},
 						{
 							department_name: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
+								[Op.iLike]: {[Op.any]: keywords}
+								// [Op.iLike]: '%' + pParam.keyword + '%'
 							}
 						},
 						{
 							to_department_name: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
+								[Op.iLike]: {[Op.any]: keywords}
+								// [Op.iLike]: '%' + pParam.keyword + '%'
 							}
 						},
 						{
 							employee_name: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
+								[Op.iLike]: {[Op.any]: keywords}
+								// [Op.iLike]: '%' + pParam.keyword + '%'
 							}
 						},
 						{
 							description: {
-								[Op.iLike]: '%' + pParam.keyword + '%'
+								[Op.iLike]: {[Op.any]: keywords}
+								// [Op.iLike]: '%' + pParam.keyword + '%'
 							}
 						}
 					);
@@ -379,6 +429,7 @@ class PJCARepository {
 				};
 
 				xSaved = await _modelDb.update(pParam, xWhere, { xTransaction });
+				// console.log
 				if (xSaved[0] > 0) {
 					await xTransaction.commit();
 					xJoResult = {

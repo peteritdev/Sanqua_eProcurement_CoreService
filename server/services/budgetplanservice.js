@@ -135,14 +135,25 @@ class BudgetPlanService {
                     pParam.filter = JSON.stringify(filter)
                 }
                 
-                var xResultList = await _repoInstance.list(pParam);
+                var xResultList = null
+                if (pParam.hasOwnProperty('export_detail') && pParam.export_detail) {
+                    xResultList = await _repoInstance.exportData(pParam);
+                } else {
+                    xResultList = await _repoInstance.list(pParam);
+                }
                 if (xResultList) {
-                    // console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
+                    console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
                     if (xResultList.status_code == '00') {
-                        var xRows = xResultList.data.rows;
+                        var xRows = []
+                        if (pParam.hasOwnProperty('export_detail') && pParam.export_detail) {
+                            xRows = xResultList.data;
+                        } else {
+                            xRows = xResultList.data.rows;
+                        }
+                        // console.log(`>>> xRows: ${JSON.stringify(xRows)}`);
                         if (xRows.length > 0) {
                             for (var i in xRows) {
-                                xJoArrData.push({
+                                const xData = {
                                     id: await _utilInstance.encrypt(xRows[i].id.toString(), config.cryptoKey.hashKey),
                                     name: xRows[i].name,
                                     budget_no: xRows[i].budget_no,
@@ -197,7 +208,43 @@ class BudgetPlanService {
                                     // deleted_by_name: xRows[i].deleted_by_name
                                     // rab_type: xRows[i].rab_type,
                                     budget_category: xRows[i].budget_category
-                                });
+                                }
+                                if (pParam.hasOwnProperty('export_detail') && pParam.export_detail) {
+                                    Object.assign(xData, {
+                                        item: {
+                                            // id: xRows[i].budget_plan_detail.id,
+                                            product_id: xRows[i].product_id,
+                                            product_code: xRows[i].product_code,
+                                            product_name: xRows[i].product_name,
+                                            category_id: xRows[i].category_id,
+                                            category_name: xRows[i].category_name,
+                                            qty: xRows[i].qty,
+                                            qty_remain: xRows[i].qty_remain,
+                                            budget_price_per_unit: xRows[i].budget_price_per_unit,
+                                            budget_price_total: xRows[i].budget_price_total,
+                                            last_price: xRows[i].last_price,
+                                            uom_id: xRows[i].uom_id,
+                                            uom_name: xRows[i].uom_name,
+                                            estimate_date_use: xRows[i].estimate_date_use,
+                                            section_title: xRows[i].section_title,
+                                            description: xRows[i].description,
+                                            dimension: xRows[i].dimension,
+                                            merk: xRows[i].merk,
+                                            type: xRows[i].type,
+                                            material: xRows[i].material,
+                                            currency_id: xRows[i].currency_id,
+                                            currency_code: xRows[i].currency_code,
+                                            currency_symbol: xRows[i].currency_symbol,
+                                            vendor_id: xRows[i].vendor_id,
+                                            vendor_code: xRows[i].vendor_code,
+                                            vendor_name: xRows[i].vendor_name,
+                                            vendor_recomendation: xRows[i].vendor_recomendation,
+                                            vendor_recomendation_id: xRows[i].vendor_recomendation_id,
+                                            vendor_recomendation_name: xRows[i].vendor_recomendation_name,
+                                        }
+                                    })
+                                }
+                                xJoArrData.push(xData);
                             }
     
                             xJoResult = {
@@ -884,69 +931,70 @@ class BudgetPlanService {
 		var xClearId = '';
 
         try {
-			if (pParam.logged_is_admin !== 1) {
-				xJoResult = {
-					status_msg: "You don't have permission of this access.",
-					status_code: '-99'
-				};
-			} else {
-				if (pParam.id != '' && pParam.user_id != '') {
-					xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
-					if (xDecId.status_code == '00') {
-						xFlagProcess = true;
-						xEncId = pParam.id;
-						pParam.id = xDecId.decrypted;
-						xClearId = xDecId.decrypted;
-						xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
-						if (xDecId.status_code == '00') {
-							pParam.user_id = xDecId.decrypted;
-							xFlagProcess = true;
-						} else {
-							xJoResult = xDecId;
-						}
-					} else {
-						xJoResult = xDecId;
-					}
-				}
-
-				if (xFlagProcess) {
-					// Check if this request id valid or not
-					var xRABDetail = await _repoInstance.getById({ id: xClearId });
-					if (xRABDetail != null) {
-						if (xRABDetail.status != 2) {
-							xJoResult = {
-								status_code: '-99',
-								status_msg: 'This document can not take since the status is not Pending.'
-							};
-						} else {
-                            pParam.receivedAt = await _utilInstance.getCurrDateTime();
-                            pParam.status = 3;
-							// var xParamUpdatePR = {
-							// 	id: pParam.document_id,
-							// 	status: 3,
-							// 	user_id: pParam.user_id,
-                            //     user_name: pParam.user_name,
-                            //     rece
-							// };
-							var xUpdateResult = await _repoInstance.save(pParam, 'take');
-
-							if (xUpdateResult.status_code == '00') {
-								xJoResult = {
-									status_code: '00',
-									status_msg: 'RAB successfully received'
-								};
-							} else {
-								xJoResult = xUpdateResult;
-							}
-						}
+			
+            if (pParam.id != '' && pParam.user_id != '') {
+                xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
+                if (xDecId.status_code == '00') {
+                    xFlagProcess = true;
+                    xEncId = pParam.id;
+                    pParam.id = xDecId.decrypted;
+                    xClearId = xDecId.decrypted;
+                    xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+                    if (xDecId.status_code == '00') {
+                        pParam.user_id = xDecId.decrypted;
+                        xFlagProcess = true;
                     } else {
+                        xJoResult = xDecId;
+                    }
+                } else {
+                    xJoResult = xDecId;
+                }
+            }
+
+            if (xFlagProcess) {
+                // Check if this request id valid or not
+                var xRABDetail = await _repoInstance.getById({ id: xClearId });
+                if (xRABDetail != null) {
+                    if (xRABDetail.status != 2) {
                         xJoResult = {
                             status_code: '-99',
-                            status_msg: 'Data not found. Please supply valid identifier'
+                            status_msg: 'This document can not take since the status is not Pending.'
                         };
+                    } else {
+                        if (pParam.logged_is_admin == 1 || pParam.user_id == xRABDetail.created_by) {
+                            pParam.receivedAt = await _utilInstance.getCurrDateTime();
+                            pParam.status = 3;
+                            // var xParamUpdatePR = {
+                            // 	id: pParam.document_id,
+                            // 	status: 3,
+                            // 	user_id: pParam.user_id,
+                            //     user_name: pParam.user_name,
+                            //     rece
+                            // };
+                            var xUpdateResult = await _repoInstance.save(pParam, 'take');
+
+                            if (xUpdateResult.status_code == '00') {
+                                xJoResult = {
+                                    status_code: '00',
+                                    status_msg: 'RAB successfully received'
+                                };
+                            } else {
+                                xJoResult = xUpdateResult;
+                            }
+                        } else {
+                            xJoResult = {
+                                status_msg: "You don't have permission of this access.",
+                                status_code: '-99'
+                            };
+                        }
                     }
-				}
-			}
+                } else {
+                    xJoResult = {
+                        status_code: '-99',
+                        status_msg: 'Data not found. Please supply valid identifier'
+                    };
+                }
+            }
 		} catch (e) {
 			xJoResult = {
 				status_code: '-99',

@@ -61,9 +61,6 @@ const _notificationService = new NotificationService();
 // const VendorCatalogueService = require('../services/vendorcatalogueservice.js');
 // const _catalogueService = new VendorCatalogueService();
 
-// const PurchaseRequestService = require('../services/purchaserequestservice.js');
-// const _purchaseRequestServiceInstance = new PurchaseRequestService();
-
 const _xClassName = 'PaymentRequestService';
 
 class PaymentRequestService {
@@ -118,6 +115,8 @@ class PaymentRequestService {
 							var xTotalDiscWoTax = 0;
 							var xTaxes = 0;
 							var xDpp = 0
+							var xPphAmount = xDetail.data.pph_amount 
+							var xPphPercent = xDetail.data.pph_percent
 								
 							// // looping detail item
 							for (var i in xPayreqDetail) {
@@ -172,18 +171,25 @@ class PaymentRequestService {
 								}
 
 								// xTotalDisc = 
+								
+								// show data only with status == 0
 								xSubtotal = Math.round((xTotalPrice * xPayreqDetail[i].qty_request) * 1000) / 1000
 								xPayreqDetail[i].subtotal = xSubtotal
 
-								xTotalDiscWoTax += Math.round((xDiscWoTax * xPayreqDetail[i].qty_request) * 1000) / 1000
-								xTotalDiscItem += Math.round((xTotalDisc * xPayreqDetail[i].qty_request) * 1000) / 1000
-								xPayreqDetail[i].total_discount = Math.round((xTotalDisc * xPayreqDetail[i].qty_request) * 1000) / 1000
+								if (xPayreqDetail[i].status != -1) {
+									xTotalDiscWoTax += Math.round((xDiscWoTax * xPayreqDetail[i].qty_request) * 1000) / 1000
+									xTotalDiscItem += Math.round((xTotalDisc * xPayreqDetail[i].qty_request) * 1000) / 1000
+									xPayreqDetail[i].total_discount = Math.round((xTotalDisc * xPayreqDetail[i].qty_request) * 1000) / 1000
 
-								xTaxes += Math.round((xTax * xPayreqDetail[i].qty_request) * 1000) / 1000
+									xTaxes += Math.round((xTax * xPayreqDetail[i].qty_request) * 1000) / 1000
 
-								xTotalBasePrice += xSubtotal
+									xTotalBasePrice += xSubtotal
 
-								xPayreqDetail[i].tax_amount = xTax
+									xPayreqDetail[i].tax_amount = xTax
+								} else {
+									xPayreqDetail[i].total_discount = Math.round((xTotalDisc * xPayreqDetail[i].qty_request) * 1000) / 1000
+									xPayreqDetail[i].tax_amount = xTax
+								}
 							}
 							
 							delete xDetail.data.purchase_request_id;
@@ -213,25 +219,44 @@ class PaymentRequestService {
 							if (xGlobalAmount == 0) {
 								xDetail.data.untaxed_amount = Math.round((xDetail.data.total_base_price - xDetail.data.total_discount || 0 ) * 1000) / 1000
 								if (xPayreqDetail.every( ({ tax_type }) => tax_type == 6 || tax_type == 7)) {
-									xDpp = (Math.round((xDetail.data.untaxed_amount * (11/12)) * 1000 )  / 1000) || 0
-									xDetail.data.total_tax_amount = (Math.round((xDpp * 0.12) * 1000 )  / 1000) || 0
+									if (xPayreqDetail.every( ({ tax_type }) => tax_type == 6)) {
+										xDpp = (Math.round((xDetail.data.untaxed_amount * (11/12)) * 1000 )  / 1000) || 0
+										xDetail.data.total_tax_amount = (Math.round((xDpp * 0.12) * 1000 )  / 1000) || 0
+									} else {
+										xDpp = (Math.round((xDetail.data.untaxed_amount) * 1000 )  / 1000) || 0
+										xDetail.data.total_tax_amount = (Math.round((xDpp * 0.11) * 1000 )  / 1000) || 0
+									}
 								} else {
 									xDetail.data.total_tax_amount = Math.round(( xTaxes || 0 ) * 1000) / 1000
 								}
 							} else {
 								xDetail.data.untaxed_amount = Math.round((xDetail.data.total_base_price - xGlobalAmount || 0) * 1000) / 1000
 								if (xPayreqDetail.every( ({ tax_type }) => tax_type == 6 || tax_type == 7)) {
-									xDpp = (Math.round((xDetail.data.untaxed_amount * (11/12)) * 1000 )  / 1000) || 0
 									// before update ppn12%
 									// xDetail.data.total_tax_amount = (Math.round((xDetail.data.untaxed_amount * 0.11) * 1000 )  / 1000) || 0
-									xDetail.data.total_tax_amount = (Math.round((xDpp * 0.12) * 1000 )  / 1000) || 0
+									if (xPayreqDetail.every( ({ tax_type }) => tax_type == 6)) {
+										xDpp = (Math.round((xDetail.data.untaxed_amount * (11/12)) * 1000 )  / 1000) || 0
+										xDetail.data.total_tax_amount = (Math.round((xDpp * 0.12) * 1000 )  / 1000) || 0
+									} else {
+										xDpp = (Math.round((xDetail.data.untaxed_amount) * 1000 )  / 1000) || 0
+										xDetail.data.total_tax_amount = (Math.round((xDpp * 0.11) * 1000 )  / 1000) || 0
+									}
 								} else {
 									xDetail.data.total_tax_amount = (Math.round((xTaxes) * 1000 )  / 1000) || 0
 								}
 								// xDetail.data.total_tax_amount = (Math.round((xTaxes - (xTaxes * (xDetail.data.global_discount_percent / 100))) * 1000 )  / 1000) || 0
 							}
+							
+							if (xPphAmount == 0) {
+								xDetail.data.total_pph_amount =  (Math.round((xDpp * (xDetail.data.pph_percent / 100)) * 1000 )  / 1000) || 0
+								xDetail.data.pph_amount = xDetail.data.total_pph_amount
+							} else {
+								xDetail.data.total_pph_amount =  (Math.round((xDetail.data.pph_amount) * 1000 )  / 1000) || 0
+								xDetail.data.pph_percent = (Math.round(((xDetail.data.pph_amount/xDpp) * 100) * 1000 )  / 1000) || 0
+							}
+							
 							xDetail.data.total_dpp = xDpp
-							const xPreTotalPrice = xDetail.data.untaxed_amount + xDetail.data.total_tax_amount + xDetail.data.delivery_costs + xDetail.data.service_costs + xDetail.data.other_costs
+							const xPreTotalPrice = (xDetail.data.untaxed_amount + xDetail.data.total_tax_amount + xDetail.data.delivery_costs + xDetail.data.service_costs + xDetail.data.other_costs) - xDetail.data.total_pph_amount
 							const xTotalPriceRound = Math.round((xPreTotalPrice || 0) * 1000) / 1000
 							xDetail.data.total_price = xTotalPriceRound
 							// get Detail FPB
@@ -240,8 +265,7 @@ class PaymentRequestService {
 							// 	xDetail.data.fpb_no = xFpbDetail.request_no
 							// }
 							// Convert nominal to trebilang
-							// const xTerbilang = await _currencyService.terbilang(xTotalPriceRound)
-							const xTerbilang = _xTerbilang(xTotalPriceRound)
+							const xTerbilang = await _currencyService.terbilang(xTotalPriceRound)
 							xDetail.data.terbilang = xTerbilang
 							
 							// Get Approval Matrix
@@ -349,10 +373,10 @@ class PaymentRequestService {
 								xArrOwnedDocNo.push(xOwnedDocument.token_data.data[i].document_no);
 							}
 							pParam.owned_document_no = xArrOwnedDocNo;
-							pParam.current_approval_ids = pParam.user_id;
 						}
 					}
 				}
+				pParam.current_approval_ids = pParam.user_id;
 			}
 
 			if (xFlagProccess) {
@@ -580,7 +604,7 @@ class PaymentRequestService {
 												xFpbItemQty = xArrItem[j].purchase_request_detail.qty;
 											}
 
-											if (xArrItem[j].payment_request != null && xArrItem[j].payment_request.status != 4 && xArrItem[j].payment_request.status != 5) {
+											if (xArrItem[j].payment_request != null && xArrItem[j].payment_request.status != 4 && xArrItem[j].payment_request.status != 5 && xArrItem[j].status == 0) {
 												xTotalQtyRequest += Number(xArrItem[j].qty_request || 0);
 												
 												xArrPayreqNo.push(xArrItem[j].payment_request.document_no);
@@ -599,6 +623,7 @@ class PaymentRequestService {
 										}
 									}
 								}
+								xJoArrItems[i].item_type ? xJoArrItems[i].item_type : 1 
 							}
 						}
 						// console.log(`>>> xJoArrItems ${JSON.stringify(xJoArrItems)}`);
@@ -606,6 +631,7 @@ class PaymentRequestService {
 					}
 
 					let xResult = await _repoInstance.save(pParam, xAct);
+					console.log(`>>> Save Param..>>> : ${JSON.stringify(pParam)}`);
 					if (xResult.status_code == '00') {
 						var dt = dateTime.create();
 						var xDate = dt.format('ym');
@@ -617,6 +643,22 @@ class PaymentRequestService {
 						};
 
 						var xUpdate = await _repoInstance.save(xParamUpdate, 'update');
+						console.log(`>>> Payreq Save Success>>> : ${JSON.stringify(xUpdate)}`);
+						// update fpb item ca_type to 1 = ca digital
+						if (xUpdate.status_code == '00') {
+							const xArrIds = []
+							for (let i = 0; i < pParam.purchase_request_detail.length; i++) {
+								xArrIds.push(pParam.purchase_request_detail[i].prd_id)
+							}
+							const xPayload = {
+								id: xArrIds,
+								// request_id: pParam.purchase_request_id,
+								ca_type: 1 //1:digital,2:manual
+							}
+							console.log(`>>> xPayload>>> : ${JSON.stringify(xPayload)}`);
+							var xUpdatePrdCaType = await _purchaseRequestDetailRepoInstance.save(xPayload, 'update_ca');
+						}
+
 					}
 
 					xJoResult = xResult;
@@ -778,6 +820,8 @@ class PaymentRequestService {
 														`xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`,
 														'info'
 													);
+													
+													// check if notification_via_email is true
 													// Email Notification
 													let xParamEmailNotification,
 														xNotificationResult = {};
@@ -807,19 +851,16 @@ class PaymentRequestService {
 															pParam.token
 														);
 														console.log(`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`);
-			
 													}
 												}
 											}
-											// console.log(`>>> xApproverIds: ${JSON.stringify(xApproverIds)}`);
 											// update current approval id
 											let xPrdUpdateApprovalId = {
 												id: xDetail.data.id,
 												current_approval_ids: xApproverIds
 											}
-											// console.log(`>>> xPrdUpdateApprovalId: ${JSON.stringify(xPrdUpdateApprovalId)}`);
+											
 											const xUpdateApproval = await _repoInstance.save(xPrdUpdateApprovalId, 'update')
-											// console.log(`>>> xUpdateApproval: ${JSON.stringify(xUpdateApproval)}`);
 										}
 									}
 								} else {
@@ -904,7 +945,7 @@ class PaymentRequestService {
 									if (xResultCheckItem.status_code == '00') {
 										if (xResultCheckItem.data.count > 0) {
 											let xArrItem = xResultCheckItem.data.rows;
-											// console.log(`>>> xArrItem ${JSON.stringify(xArrItem)}`);
+											console.log(`>>> xArrItem ${JSON.stringify(xArrItem)}`);
 											let xTotalQtyRequest = 0;
 											let xFpbItemQty = 0
 											let xArrPayreqNo = []
@@ -912,7 +953,7 @@ class PaymentRequestService {
 												if (j == 0) {
 													xFpbItemQty = xArrItem[j].purchase_request_detail.qty;
 												}
-												if (xArrItem[j].payment_request != null && xArrItem[j].payment_request.status != 4 && xArrItem[j].payment_request.status != 5) {
+												if (xArrItem[j].payment_request != null && xArrItem[j].payment_request.status != 4 && xArrItem[j].payment_request.status != 5 && xArrItem[j].status == 0) {
 													xTotalQtyRequest += xArrItem[j].qty_request;
 													xArrPayreqNo.push(xArrItem[j].payment_request.document_no);
 												}
@@ -1126,7 +1167,7 @@ class PaymentRequestService {
 		var xFlagProcess = false;
 		var xEncId = '';
 		try {
-			
+
 			if (pParam.document_id != '' && pParam.user_id != '') {
 				xEncId = pParam.document_id;
 				xDecId = await _utilInstance.decrypt(pParam.document_id, config.cryptoKey.hashKey);
@@ -1315,7 +1356,7 @@ class PaymentRequestService {
 		var xFlagProcess = false;
 		var xEncId = '';
 		try {
-				
+
 			if (pParam.document_id != '' && pParam.user_id != '') {
 				xEncId = pParam.document_id;
 				xDecId = await _utilInstance.decrypt(pParam.document_id, config.cryptoKey.hashKey);
@@ -1484,7 +1525,7 @@ class PaymentRequestService {
 									for (var i in xListApprover) {
 										let xApproverUsers = _.filter(xListApprover[i].approver_user).map(
 											// update 08/08/2023 prevent user is null
-											(v) => (v.user != null ? v.user.email : v.user)
+											(v) => (v.user != null && v.user.notification_via_email ? v.user.email : v.user)
 										);
 										xArrApproverUsers.push.apply(xArrApproverUsers, xApproverUsers);
 									}
@@ -1660,7 +1701,7 @@ class PaymentRequestService {
 		var xEncId = '';
 		var xClearId = '';
 		try {
-				
+
 			if (pParam.id != '' && pParam.user_id != '') {
 				xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
 				if (xDecId.status_code == '00') {
@@ -1761,23 +1802,26 @@ class PaymentRequestService {
 		let xPaymentRequestDetail = pParam.payment_request_detail
 		console.log(`>>> xPaymentRequestDetail: ${JSON.stringify(xPaymentRequestDetail)}`);
 		for (let i = 0; i < xPaymentRequestDetail.length; i++) {
-			var xPrDetailItem = await _purchaseRequestDetailRepoInstance.getByParam({id: xPaymentRequestDetail[i].prd_id})
-			console.log(`>>> xPrDetailItem: ${JSON.stringify(xPrDetailItem)}`);
-			if (xPrDetailItem.status_code == '00') {
-				let xQtyLeft = xPrDetailItem.data.qty_paid || 0
-				let xCalculatedQty = 0
-				if (pAct == 'add') {
-					xCalculatedQty = xQtyLeft + xPaymentRequestDetail[i].qty_request
-				} else if (pAct == 'delete'){
-					xCalculatedQty = xQtyLeft - xPaymentRequestDetail[i].qty_request
+			if (xPaymentRequestDetail[i].status == 0) {
+				var xPrDetailItem = await _purchaseRequestDetailRepoInstance.getByParam({id: xPaymentRequestDetail[i].prd_id})
+				console.log(`>>> xPrDetailItem: ${JSON.stringify(xPrDetailItem)}`);
+				if (xPrDetailItem.status_code == '00') {
+					let xQtyLeft = xPrDetailItem.data.qty_paid || 0
+					let xCalculatedQty = 0
+					if (pAct == 'add') {
+						xCalculatedQty = xQtyLeft + xPaymentRequestDetail[i].qty_request
+					} else if (pAct == 'delete'){
+						xCalculatedQty = xQtyLeft - xPaymentRequestDetail[i].qty_request
+					}
+					let xPrdUpdateParam = {
+						id: xPaymentRequestDetail[i].prd_id,
+						qty_paid: xCalculatedQty
+					}
+					
+					let xUpdatePrdItem = await _purchaseRequestDetailRepoInstance.save(xPrdUpdateParam, 'update')
+					console.log(`>>> xUpdatePrdItem: ${JSON.stringify(xUpdatePrdItem)}`);
 				}
-				let xPrdUpdateParam = {
-					id: xPaymentRequestDetail[i].prd_id,
-					qty_paid: xCalculatedQty
-				}
-				
-				let xUpdatePrdItem = await _purchaseRequestDetailRepoInstance.save(xPrdUpdateParam, 'update')
-				console.log(`>>> xUpdatePrdItem: ${JSON.stringify(xUpdatePrdItem)}`);
+			
 			}
 		}
 	}

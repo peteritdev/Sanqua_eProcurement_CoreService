@@ -18,13 +18,13 @@ class Security{
     async encryptCriticalField(pParam){
 
         if( ("email" in pParam) == true ){
-            pParam.email = await utilInstance.encrypt(pParam.email);
+            pParam.email = pParam.email ? await utilInstance.encrypt(pParam.email) : null;
         }
         if( ("phone1" in pParam) == true ){
-            pParam.phone1 = await utilInstance.encrypt(pParam.phone1);
+            pParam.phone1 = pParam.phone1 ? await utilInstance.encrypt(pParam.phone1) : null;
         }
         if( ("phone2" in pParam) == true ){
-            pParam.phone2 = await utilInstance.encrypt(pParam.phone2);
+            pParam.phone2 = pParam.phone2 ? await utilInstance.encrypt(pParam.phone2) : null;
         }
 
         return pParam;

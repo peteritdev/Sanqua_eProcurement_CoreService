@@ -44,6 +44,7 @@ const PaymentRequestService = require('./paymentrequestservice.js');
 const _paymentRequestServiceInstance = new PaymentRequestService();
 const CurrencyService = require('../services/currencyservice.js');
 const _currencyService = new CurrencyService();
+
 const NotificationService = require('../services/notificationservice.js');
 const _notificationService = new NotificationService();
 
@@ -99,6 +100,8 @@ class PJCAService {
 							var xTotalDiscWoTax = 0;
 							var xTaxes = 0;
 							var xDpp = 0
+							var xPphAmount = xDetail.data.pph_amount 
+							var xPphPercent = xDetail.data.pph_percent
 								
 							// // looping detail item
 							for (var i in xPjcaDetail) {
@@ -194,25 +197,44 @@ class PJCAService {
 							if (xGlobalAmount == 0) {
 								xDetail.data.untaxed_amount = Math.round((xDetail.data.total_base_price - xDetail.data.total_discount || 0 ) * 1000) / 1000
 								if (xPjcaDetail.every( ({ tax_type }) => tax_type == 6 || tax_type == 7)) {
-									xDpp = (Math.round((xDetail.data.untaxed_amount * (11/12)) * 1000 )  / 1000) || 0
-									xDetail.data.total_tax_amount = (Math.round((xDpp * 0.12) * 1000 )  / 1000) || 0
+									if (xPjcaDetail.every( ({ tax_type }) => tax_type == 6)) {
+										xDpp = (Math.round((xDetail.data.untaxed_amount * (11/12)) * 1000 )  / 1000) || 0
+										xDetail.data.total_tax_amount = (Math.round((xDpp * 0.12) * 1000 )  / 1000) || 0
+									} else {
+										xDpp = (Math.round((xDetail.data.untaxed_amount) * 1000 )  / 1000) || 0
+										xDetail.data.total_tax_amount = (Math.round((xDpp * 0.11) * 1000 )  / 1000) || 0
+									}
 								} else {
 									xDetail.data.total_tax_amount = Math.round(( xTaxes || 0 ) * 1000) / 1000
 								}
 							} else { 
 								xDetail.data.untaxed_amount = Math.round((xDetail.data.total_base_price - xGlobalAmount || 0) * 1000) / 1000
 								if (xPjcaDetail.every( ({ tax_type }) => tax_type == 6 || tax_type == 7)) {
-									xDpp = (Math.round((xDetail.data.untaxed_amount * (11/12)) * 1000 )  / 1000) || 0
 									// before update ppn12%
 									// xDetail.data.total_tax_amount = (Math.round((xDetail.data.untaxed_amount * 0.11) * 1000 )  / 1000) || 0
-									xDetail.data.total_tax_amount = (Math.round((xDpp * 0.12) * 1000 )  / 1000) || 0
+									if (xPayreqDetail.every( ({ tax_type }) => tax_type == 6)) {
+										xDpp = (Math.round((xDetail.data.untaxed_amount * (11/12)) * 1000 )  / 1000) || 0
+										xDetail.data.total_tax_amount = (Math.round((xDpp * 0.12) * 1000 )  / 1000) || 0
+									} else {
+										xDpp = (Math.round((xDetail.data.untaxed_amount) * 1000 )  / 1000) || 0
+										xDetail.data.total_tax_amount = (Math.round((xDpp * 0.11) * 1000 )  / 1000) || 0
+									}
 								} else {
 									xDetail.data.total_tax_amount = (Math.round((xTaxes) * 1000 )  / 1000) || 0
 								}
 								// xDetail.data.total_tax_amount = (Math.round((xTaxes - (xTaxes * (xDetail.data.global_discount_percent / 100))) * 1000 )  / 1000) || 0
 							}
+							
+							if (xPphAmount == 0) {
+								xDetail.data.total_pph_amount =  (Math.round((xDpp * (xDetail.data.pph_percent / 100)) * 1000 )  / 1000) || 0
+								xDetail.data.pph_amount = xDetail.data.total_pph_amount
+							} else {
+								xDetail.data.total_pph_amount =  (Math.round((xDetail.data.pph_amount) * 1000 )  / 1000) || 0
+								xDetail.data.pph_percent = (Math.round(((xDetail.data.pph_amount/xDpp) * 100) * 1000 )  / 1000) || 0
+							}
+
 							xDetail.data.total_dpp = xDpp
-							var xPreTotalPrice = xDetail.data.untaxed_amount + xDetail.data.total_tax_amount + xDetail.data.delivery_costs + xDetail.data.service_costs + xDetail.data.other_costs
+							var xPreTotalPrice = (xDetail.data.untaxed_amount + xDetail.data.total_tax_amount + xDetail.data.delivery_costs + xDetail.data.service_costs + xDetail.data.other_costs) - xDetail.data.total_pph_amount
 							
 							const xTotalPriceRound = Math.round((xPreTotalPrice || 0) * 1000) / 1000
 							xDetail.data.total_price = xTotalPriceRound
@@ -225,7 +247,7 @@ class PJCAService {
 							});
 							if (xPayreqDetail.status_code == '00') {
 								xDetail.data.payment_request.total_price = xPayreqDetail.data.total_price || 0
-								const xDiffPrice = xDetail.data.total_price - xPayreqDetail.data.total_price
+								const xDiffPrice = xPayreqDetail.data.total_price - xDetail.data.total_price
 
 								xDetail.data.difference_type = xDiffPrice > 0 ? 'Lebih' : 'Kurang'
 								// xDetail.data.difference_price = (Math.round(
@@ -236,8 +258,7 @@ class PJCAService {
 							// console.log(`>>> xPayreqDetail: ${JSON.stringify(xPayreqDetail)}`);
 
 							// Convert nominal to trebilang
-							// const xTerbilang = await _currencyService.terbilang(xTotalPriceRound)
-							const xTerbilang = _xTerbilang(xTotalPriceRound)
+							const xTerbilang = await _currencyService.terbilang(xTotalPriceRound)
 							xDetail.data.terbilang = xTerbilang
 
 							// Get Approval Matrix
@@ -340,10 +361,10 @@ class PJCAService {
 								xArrOwnedDocNo.push(xOwnedDocument.token_data.data[i].document_no);
 							}
 							pParam.owned_document_no = xArrOwnedDocNo;
+							pParam.current_approval_ids = pParam.user_id;
 						}
 					}
 				}
-				pParam.current_approval_ids = pParam.user_id;
 			}
 
 			if (xFlagProccess) {
@@ -439,6 +460,8 @@ class PJCAService {
 													pParam.company_name = xPaymentRequest.data.company_name
 													pParam.department_id = xPaymentRequest.data.department_id
 													pParam.department_name = xPaymentRequest.data.department_name
+													pParam.employee_id = xPaymentRequest.data.employee_id
+													pParam.employee_name = xPaymentRequest.data.employee_name
 													xFlagProcess = true;
 												} else {
 													xJoResult = {
@@ -506,10 +529,19 @@ class PJCAService {
 										xJoArrItems[i].price_total =
 											xJoArrItems[i].qty_done * xJoArrItems[i].price_done;
 									}
+									if (xJoArrItems[i].hasOwnProperty('cad_id') && xJoArrItems[i].cad_id) {
+										var xCadId = await _utilInstance.decrypt(xJoArrItems[i].cad_id, config.cryptoKey.hashKey);
+										if (xCadId.status_code == '00') {
+											xJoArrItems[i].cad_id = xCadId.decrypted;
+										}
+									}
 								}
+
+								// console.log(`>>> xJoArrItems ${JSON.stringify(xJoArrItems)}`);
+								pParam.pjca_detail = xJoArrItems;
 							}
 
-							console.log(`>>> xJoArrItems ${JSON.stringify(xJoArrItems)}`);
+							// console.log(`>>> xJoArrItems ${JSON.stringify(xJoArrItems)}`);
 							pParam.pjca_detail = xJoArrItems;
 						}
 
@@ -535,6 +567,18 @@ class PJCAService {
 						pParam.updated_by = pParam.user_id;
 						pParam.updated_by_name = pParam.user_name;
 						xFlagProcess = true;
+						var xPjcaDetail = await _repoInstance.getByParameter({id: pParam.id});
+						if (xPjcaDetail != null && xPjcaDetail.status_code == '00') {
+							if (xPjcaDetail.data.status == 0) {
+								pParam.company_id = xPjcaDetail.data.company_id
+								pParam.company_code = xPjcaDetail.data.company_code
+								pParam.company_name = xPjcaDetail.data.company_name
+								pParam.department_id = xPjcaDetail.data.department_id
+								pParam.department_name = xPjcaDetail.data.department_name
+								pParam.employee_id = xPjcaDetail.data.employee_id
+								pParam.employee_name = xPjcaDetail.data.employee_name
+							}
+						}
 					} else {
 						xJoResult = xDecId;
 					}
@@ -545,7 +589,7 @@ class PJCAService {
 					}
 				}
 			}
-	
+			
 		} catch (e) {
 			_utilInstance.writeLog(`${_xClassName}.save`, `Exception error: ${e.message}`, 'error');
 
@@ -588,7 +632,9 @@ class PJCAService {
 				var xDetail = await _repoInstance.getByParameter({
 					id: pParam.id
 				});
+
 				if (xDetail != null) {
+					// console.log(`>>> xDetail: ${JSON.stringify(xDetail.status)}`, pParam.id);
 					if (xDetail.status_code == '00') {
 						// check if Payreq already paid ?
 						const xParamPayreq = {
@@ -626,16 +672,15 @@ class PJCAService {
 										ecatalogue_fpb_category_item: null,
 										logged_company_id: pParam.logged_company_id
 									};
-									console.log(`>>> xParamAddApprovalMatrix: ${JSON.stringify(xParamAddApprovalMatrix)}`);
 
 									var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
 										pParam.method,
 										pParam.token,
 										xParamAddApprovalMatrix
 									);
-									console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
 
 									xJoResult.approval_matrix_result = xApprovalMatrixResult;
+									// console.log(`>>> xParamAddApprovalMatrix: ${JSON.stringify(xParamAddApprovalMatrix)}`);
 									if (xApprovalMatrixResult.status_code == '00') {
 										if (xApprovalMatrixResult.approvers.length > 0) {
 											const xApproverIds = []
@@ -931,7 +976,7 @@ class PJCAService {
 		var xFlagProcess = false;
 		var xEncId = '';
 		try {
-				
+
 			if (pParam.document_id != '' && pParam.user_id != '') {
 				xEncId = pParam.document_id;
 				xDecId = await _utilInstance.decrypt(pParam.document_id, config.cryptoKey.hashKey);
@@ -1023,11 +1068,10 @@ class PJCAService {
 														config.cryptoKey.hashKey
 													)
 												});
-		
+
 												// Email Notification
 												let xParamEmailNotification,
 													xNotificationResult = {};
-		
 												if (xNextApprover[i].notification_via_email) {
 													xParamEmailNotification = {
 														mode: 'request_approval_pjca',
@@ -1040,7 +1084,7 @@ class PJCAService {
 															xPjcaDetail.data.createdAt != null
 																? moment(xPjcaDetail.data.createdAt).format('DD MMM YYYY')
 																: '',
-														items: xPjcaDetail.data.pjca_cetail,
+														items: xPjcaDetail.data.pjca_detail,
 														approver_user: {
 															employee_name: xNextApprover[i].user_name,
 															email: xNextApprover[i].email
@@ -1105,7 +1149,7 @@ class PJCAService {
 		var xFlagProcess = false;
 		var xEncId = '';
 		try {
-			
+
 			if (pParam.document_id != '' && pParam.user_id != '') {
 				xEncId = pParam.document_id;
 				xDecId = await _utilInstance.decrypt(pParam.document_id, config.cryptoKey.hashKey);
@@ -1303,7 +1347,7 @@ class PJCAService {
 		var xEncId = '';
 		var xClearId = '';
 		try {
-				
+
 			if (pParam.id != '' && pParam.user_id != '') {
 				xDecId = await _utilInstance.decrypt(pParam.id, config.cryptoKey.hashKey);
 				if (xDecId.status_code == '00') {
@@ -1388,7 +1432,6 @@ class PJCAService {
 					};
 				}
 			}
-			
 		} catch (e) {
 			
 			_utilInstance.writeLog(`${_xClassName}.fetchMatrix`, `Exception error: ${e.message}`, 'error');
@@ -1398,6 +1441,7 @@ class PJCAService {
 				status_msg: `${_xClassName}.fetchMatrix: Exception error: ${e.message}`
 			};
 		}
+
 		return xJoResult;
 	}
 	
@@ -1408,7 +1452,9 @@ class PJCAService {
 			var xPyrDetailItem = await _paymentRequestDetailRepoInstance.getByParam(
 				{
 					payment_request_id: pParam.payment_request_id,
-					prd_id: xPjcaDetail[i].prd_id
+					prd_id: xPjcaDetail[i].prd_id,
+					// status: 0,
+					id: xPjcaDetail[i].cad_id
 				}
 			)
 			console.log(`>>> xPyrDetailItem: ${JSON.stringify(xPyrDetailItem)}`);

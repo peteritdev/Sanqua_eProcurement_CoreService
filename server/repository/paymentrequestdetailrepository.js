@@ -243,8 +243,13 @@ class PaymentRequestDetailRepository {
 				{
 					model: _modelPaymentRequest,
 					as: 'payment_request',
-					attributes: [ 'id', 'document_no' ]
-				}
+					attributes: [ 'id', 'document_no', 'status' ]
+				},
+				{
+					model: _modelDb,
+					as: 'origin_detail',
+					attributes: [ 'id', 'origin_id', 'description', 'discount_amount', 'discount_percent', 'item_type', 'price_request', 'price_total', 'product_code', 'product_id', 'product_name', 'qty_done', 'qty_request', 'status', 'tax_type', 'uom_id', 'uom_name'],
+				},
 			];
 
 			if (pParam.hasOwnProperty('id')) {
@@ -275,6 +280,20 @@ class PaymentRequestDetailRepository {
 				if (pParam.product_code != '') {
 					xWhereAnd.push({
 						product_code: pParam.product_code
+					});
+				}
+			}
+			if (pParam.hasOwnProperty('origin_id')) {
+				if (pParam.origin_id != '') {
+					xWhereAnd.push({
+						origin_id: pParam.origin_id
+					});
+				}
+			}
+			if (pParam.hasOwnProperty('status')) {
+				if (pParam.status != '') {
+					xWhereAnd.push({
+						status: pParam.status
 					});
 				}
 			}

@@ -44,6 +44,23 @@ module.exports = (sequelize, DataTypes) => {
 		},
 		updated_by: DataTypes.INTEGER,
 		updated_by_name: DataTypes.STRING,
+		item_type: DataTypes.INTEGER, //1:original, 2:revision
+		origin_id: DataTypes.INTEGER,
+		delivery_costs: DataTypes.DOUBLE,
+		service_costs: DataTypes.DOUBLE,
+		other_costs: DataTypes.DOUBLE,
+		// line below for FAT Payreq From Bill
+		odoo_bill_no: DataTypes.STRING,
+		invoice_no: DataTypes.STRING,
+		invoice_date: DataTypes.DATE,
+		vendor_code: DataTypes.STRING,
+		vendor_name: DataTypes.STRING,
+		total_after_tax: DataTypes.DOUBLE,
+		deduction: DataTypes.DOUBLE,
+		debt_value: DataTypes.DOUBLE,
+		receive_invoice_date: DataTypes.DATE,
+		invoice_due_date: DataTypes.DATE,
+		company_id: DataTypes.INTEGER,
 	});
 
 	PaymentRequestDetail.associate = function(models) {
@@ -68,6 +85,12 @@ module.exports = (sequelize, DataTypes) => {
 		PaymentRequestDetail.belongsTo(models.ms_taxes, {
 			foreignKey: 'tax_type',
 			as: 'tax',
+			onDelete: 'CASCADE'
+		});
+		
+		PaymentRequestDetail.belongsTo(models.tr_paymentrequestdetails, {
+			foreignKey: 'origin_id',
+			as: 'origin_detail',
 			onDelete: 'CASCADE'
 		});
 		// PaymentRequestDetail.belongsTo(models.ms_vendorcatalogues, {

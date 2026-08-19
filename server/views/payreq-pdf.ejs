@@ -3,10 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <style>
+      @media print {
+        .page-break {
+          page-break-before: always;
+        }
+
+        .no-break {
+          page-break-inside: avoid;
+        }
+      }
       html {
         /* zoom: 0.8; */
         zoom: 0.6;
         color: black !important;
+      }
+      tr, td, th {
+        page-break-inside: avoid; /* hindari potongan di tengah baris */
       }
       .center {
         margin-left: auto;
@@ -16,7 +28,7 @@
         font-family: Arial, Helvetica, sans-serif;
         /* border-collapse:collapse; */
         text-align: center;
-        font-size: 8px;
+        font-size: 10px;
         border-style: solid;
         border-color: #000000;
       }
@@ -51,6 +63,12 @@
         border-right: 1px solid #000000;
         border-bottom: 1px solid #000000 !important;
       }
+      .p-relative {
+        position: relative;
+      }
+      .span-strike {
+        position:absolute; left:0; right:0; top:50%; border-top:1px solid rgba(255, 0, 0, 0.7); pointer-events:none;
+      }
 
       th.col-header-item {
         border-bottom: 1px solid #000000;
@@ -82,7 +100,13 @@
               margin-left: -60px;
               font-weight: bold;
             "
-            ><strong>CASH ADVANCE</strong></span
+            >
+              <% if( data.data.company_id == 5 ){ %>
+              <strong>PAYMENT REQUEST</strong>
+              <% }else{ %>
+              <strong>CASH ADVANCE</strong>
+              <% } %>
+            </span
           >
         </td>
         <td style="width: 20%; padding: 0; text-align: left;">
@@ -143,8 +167,8 @@
                           align-items: center;
                           justify-content: center;
                           position: relative;
-                          top: 4px;
-                          left: 15px;
+                          top: 0px;
+                          left: 5px;
                         "
                       >
                         <% if( data.data.payment_type == 1 ){ %>
@@ -159,7 +183,8 @@
                           style="
                             margin-left: 5px;
                             position: relative;
-                            top: -7px;
+                            top: 0px; 
+                            width: 210px;
                           "
                         >
                           Tarik Tunai BDC
@@ -191,7 +216,7 @@
                           style="
                             margin-left: 5px;
                             position: relative;
-                            top: -5px;
+                            top: -3px;
                           "
                         >
                           Bank
@@ -331,8 +356,16 @@
           style="text-align: left; border-top: 1px solid #000000 !important"
         >
           <span> Untuk Pembayaran </span>
-          <span margin: 0 5px">: </span>
-          <span> <%=data.data.payment_desc%> </span>
+          <span style="margin: 0 5px">: </span>
+          <% if( data.data.purchase_request != null){ %>
+            <% if( data.data.purchase_request.project != null ){ %>
+              <span>"(" + data.data.purchase_request.project.odoo_project_code + "/" + data.data.purchase_request.project.name +") "</span>
+            <% }else{ %>
+              <span> data.data.payment_desc</span>
+            <% } %>
+          <% }else{ %>
+            <span> data.data.payment_desc</span>
+          <% } %>
         </td>
       </tr>
       <tr>
@@ -363,24 +396,49 @@
               </tr>
             </thead>
             <tbody>
+              <!-- tabel body -->
               <%
                   var index = 1;
-                  data.data.payment_request_detail.forEach( item => {
+                  const filteredData = data.data.payment_request_detail.filter(item => item.status != -1);
+                  filteredData .forEach( item => {
               %>
               <tr>
-                <td style="text-align: center" class="border-rb"><%=index%>.</td>
-                <td style="text-align: left" class="border-rb"><%=item.product_name + " (" + item.qty_request + " " + item.uom_name + ") "%> </td>
-                <td style="text-align: right" class="border-rb">
+                <td style="text-align: center;" class="border-rb p-relative"><%=index%>.
+                  <%
+                  if(item.status == -1){
+                  %>
+                  <span class="span-strike"></span>
+                  <%
+                      }
+                  %>
+                </td>
+                <td style="text-align: left" class="border-rb p-relative"><%=item.product_name + " (" + item.qty_request + " " + item.uom_name + ") "%>
+                  <%
+                  if(item.status == -1){
+                  %>
+                  <span class="span-strike"></span>
+                  <%
+                      }
+                  %>
+                </td>
+                <td style="text-align: right" class="border-rb p-relative">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td>Rp </td>
+                      <td><!--Rp  -->  </td>
                       <td style="text-align: right; width: 100%;"><%=item.subtotal != null ? item.subtotal.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
+                  <%
+                  if(item.status == -1){
+                  %>
+                  <span class="span-strike"></span>
+                  <%
+                      }
+                  %>
                 </td>
                 <td
                   style="text-align: center; border-right: none"
-                  class="border-rb"
+                  class="border-rb p-relative"
                 >
                   <%=item.description%>
                   <%
@@ -396,7 +454,15 @@
                   if(item.discount_amount != null && item.discount_amount > 0){
                   %>
                     <br/>
-                    <%='Disc: Rp' + item.discount_amount%>
+                    <!-- <%='Pph/Disc: Rp' + item.discount_amount%> -->
+                    <%='Pph/Disc: ' + item.discount_amount%>
+                  <%
+                      }
+                  %>
+                  <%
+                  if(item.status == -1){
+                  %>
+                  <span class="span-strike"></span>
                   <%
                       }
                   %>
@@ -420,7 +486,7 @@
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td>Rp </td>
+                      <td><!--Rp  --> </td>
                       <td style="text-align: right; width: 100%;"><%=data.data.delivery_costs != null ? data.data.delivery_costs.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -468,7 +534,7 @@
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td>Rp </td>
+                      <td><!--Rp  --> </td>
                       <td style="text-align: right; width: 100%;"><%=data.data.service_costs != null ? data.data.service_costs.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -516,7 +582,7 @@
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td>Rp </td>
+                      <td><!--Rp  --> </td>
                       <td style="text-align: right; width: 100%;"><%=data.data.other_costs != null ? data.data.other_costs.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -559,13 +625,110 @@
                 <td style="text-align: center" class="border-rb">
                 </td>
                 <td style="text-align: left" class="border-rb">
-                  Discount Global (<%=data.data.global_discount_percent%>%)
+                  Pph/Discount Global (<%=data.data.global_discount_percent%>%)
                 </td>
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td>Rp </td>
+                      <td><!--Rp  --> </td>
                       <td style="text-align: right; width: 100%;"><%=data.data.global_discount != null ? data.data.global_discount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                    </tr>
+                  </table>
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                </td>
+              </tr>
+              <%
+                  } else {
+              %>
+              <tr style="height: 20px;">
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%>. -->
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                  <!-- <%=i%> -->
+                </td>
+              </tr>
+              <%
+                  }
+              %>
+
+              <!-- PPN -->
+              <%
+              if(data.data.total_tax_amount != null && data.data.total_tax_amount > 0){
+              %>
+              <tr>
+                <td style="text-align: center" class="border-rb">
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  PPN
+                </td>
+                <td style="text-align: right" class="border-rb">
+                  <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td><!--Rp  --> </td>
+                      <td style="text-align: right; width: 100%;"><%=data.data.total_tax_amount != null ? data.data.total_tax_amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
+                    </tr>
+                  </table>
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                </td>
+              </tr>
+              <%
+                  } else {
+              %>
+              <tr style="height: 20px;">
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%>. -->
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td style="text-align: center" class="border-rb">
+                  <!-- <%=i%> -->
+                </td>
+                <td
+                  style="text-align: center; border-right: none"
+                  class="border-rb"
+                >
+                  <!-- <%=i%> -->
+                </td>
+              </tr>
+              <%
+                  }
+              %>
+
+              <!-- Pph -->
+              <%
+              if(data.data.total_pph_amount != null && data.data.total_pph_amount > 0){
+              %>
+              <tr>
+                <td style="text-align: center" class="border-rb">
+                </td>
+                <td style="text-align: left" class="border-rb">
+                  <!-- PPh (<%=data.data.pph_percent%>%) -->
+                   PPh
+                </td>
+                <td style="text-align: right" class="border-rb">
+                  <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
+                    <tr>
+                       <td><!--Rp  --></td>
+                      <td style="text-align: right; width: 100%;"><%=data.data.total_pph_amount != null ? data.data.total_pph_amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
                 </td>
@@ -623,7 +786,7 @@
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td>Rp </td>
+                      <td><!--Rp  -->  </td>
                       <td style="text-align: right; width: 100%;"><%=data.data.total_price != null ? data.data.total_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -958,7 +1121,7 @@
                       <table style="margin-left: 5px">
                         <tr>
                           <td>
-                            <% if( data.data.payreq_type == 3 ){ %>
+                            <% if( data.data.payreq_type == 4 ){ %>
                             <img src="<%=imagePath%>box_checklist.png" width="15" />
                             <% }else{ %>
                             <img src="<%=imagePath%>blank_checklist.png" width="15" />
@@ -974,7 +1137,7 @@
                       <table style="margin-left: 5px">
                         <tr>
                           <td>
-                            <% if( data.data.payreq_type == 4){ %>
+                            <% if( data.data.payreq_type == 3){ %>
                             <img src="<%=imagePath%>box_checklist.png" width="15" />
                             <% }else{ %>
                             <img src="<%=imagePath%>blank_checklist.png" width="15" />

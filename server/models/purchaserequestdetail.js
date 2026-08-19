@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 module.exports = (sequelize, DataTypes) => {
 	const PurchaseRequestDetail = sequelize.define('tr_purchaserequestdetails', {
@@ -95,6 +95,10 @@ module.exports = (sequelize, DataTypes) => {
 		vendor_rec_name: DataTypes.STRING,
 		vendor_rec_code: DataTypes.STRING,
 		store_link: DataTypes.STRING,
+		purchase_type: DataTypes.STRING, //po, ca
+		ca_manual_no: DataTypes.STRING,
+		ca_manual_date: DataTypes.DATE,
+		ca_type: DataTypes.INTEGER //1:Digital 2: Manual
 	});
 
 	PurchaseRequestDetail.associate = function(models) {
@@ -139,6 +143,11 @@ module.exports = (sequelize, DataTypes) => {
 		// 	as: 'log_subtitute',
 		// 	onDelete: 'CASCADE'
 		// });
+		PurchaseRequestDetail.hasMany(models.tr_paymentrequestdetails, {
+			foreignKey: "prd_id",
+			as: "payment_request_detail",
+			onDelete: "CASCADE",
+		});
 	};
 
 	return PurchaseRequestDetail;

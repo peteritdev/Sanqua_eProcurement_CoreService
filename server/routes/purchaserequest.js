@@ -53,7 +53,7 @@ module.exports = (app) => {
 	arrValidate = [];
 	arrValidate = [
 		check('id').not().isEmpty().withMessage('Parameter id cannot be empty'),
-		check('file', 'Parameter photo must be array and cannot be empty').not().isEmpty().isArray()
+		// check('file', 'Parameter photo must be array and cannot be empty').not().isEmpty().isArray()
 	];
 	app.post(
 		rootAPIPath + 'update_file_upload', arrValidate, purchaseRequestController.purchaseRequest_UpdateFileUpload
@@ -245,6 +245,13 @@ module.exports = (app) => {
 	];
 	app.get(rootAPIPath + 'gr-outstanding/list', arrValidate, purchaseRequestController.purchaseRequestDetail_OutstandingItemList);
 	
+	// Edit Linked Item
+	arrValidate = [
+		check('act').not().isEmpty().withMessage('Parameter act cannot be empty'),
+		check('store_link').not().isEmpty().withMessage('Parameter link cannot be empty'),
+		check('id', 'Parameter id must be array and cannot be empty').not().isEmpty().isArray()
+	];
+	app.post(rootAPIPath + 'save_detail_link', arrValidate, purchaseRequestController.purchaseRequestDetail_SaveLink);
 	// arrValidate = [];
 	// arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
 	// app.post(
@@ -267,4 +274,14 @@ module.exports = (app) => {
 	// 	check('request_id').not().isEmpty().withMessage('Parameter request_id cannot be empty')
 	// ];
 	// app.post(rootAPIPath + 'item/subtitute', arrValidate, purchaseRequestController.purchaseRequestDetail_Subtitute);
+	// Save Detail
+	arrValidate = [];
+	arrValidate = [
+		check('act').not().isEmpty().withMessage('Parameter act cannot be empty'),
+		check('request_id').not().isEmpty().withMessage('Parameter request_id cannot be empty'),
+		check('ca_manual_date').not().isEmpty().withMessage('Parameter ca_manual_date cannot be empty'),
+		check('ca_manual_no').not().isEmpty().withMessage('Parameter ca_manual_no cannot be empty'),
+		check('prd_ids', 'Parameter id must be array and cannot be empty').not().isEmpty().isArray()
+	];
+	app.post(rootAPIPath + 'save_detail/ca_manual', arrValidate, purchaseRequestController.purchaseRequestDetail_UpdateCAManual);
 };
