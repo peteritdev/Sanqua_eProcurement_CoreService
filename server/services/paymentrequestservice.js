@@ -257,6 +257,8 @@ class PaymentRequestService {
 									} else {
 										if (xDetail.data.pph_percent != 0) {
 											xDetail.data.total_pph_amount = ((Math.round((xDetail.data.untaxed_amount * xDetail.data.pph_percent) / 100) * 1000 ) / 1000) || 0
+										} else {
+											xDetail.data.total_pph_amount = xPphAmount
 										}
 									}
 									xDetail.data.pph_amount = xDetail.data.total_pph_amount
@@ -267,6 +269,10 @@ class PaymentRequestService {
 								const xPreTotalPrice = (xDetail.data.untaxed_amount + xDetail.data.total_tax_amount + xDetail.data.delivery_costs + xDetail.data.service_costs + xDetail.data.other_costs) - xDetail.data.total_pph_amount
 								const xTotalPriceRound = Math.round((xPreTotalPrice || 0) * 1000) / 1000
 								xDetail.data.total_price = xTotalPriceRound
+								
+								console.log(`>>> xDetailData: ${JSON.stringify(xDetail)}`);
+								console.log(`>>> xPreTotalPrice: ${JSON.stringify(xPreTotalPrice)}`);
+								console.log(`>>> xTotalPriceRound: ${JSON.stringify(xTotalPriceRound)}`);
 							} else {
 							// code line below for payreq from billing
 
