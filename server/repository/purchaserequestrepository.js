@@ -1090,7 +1090,11 @@ class PurchaseRequestRepository {
 				}
 
 				if (xFlag) {
-					pParam.status = 0;
+					if (pAct == 'add_batch_from_ca') {
+						pParam.status = 2;
+					} else {
+						pParam.status = 0;
+					}
 					pParam.is_delete = 0;
 					pParam.created_by = pParam.user_id;
 					pParam.created_by_name = pParam.user_name;
