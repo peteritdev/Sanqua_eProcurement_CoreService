@@ -33,7 +33,9 @@ module.exports = {
 	paymentRequestDetail_Dropdown,
 	paymentRequestDetail_Delete,
 	paymentRequest_UpdateFileUpload,
-	paymentRequestDetail_AddBatch
+	paymentRequestDetail_AddBatch,
+	paymentRequestDetail_List,
+	paymentRequestDetail_BillList
 };
 
 async function paymentRequest_Detail(req, res) {
@@ -761,6 +763,86 @@ async function paymentRequest_MergeWithFPB(req, res) {
 				req.body.token = req.headers['x-token'];
 				req.body.method = req.headers['x-method'];
 				joResult = await _serviceInstance.mergeWithFPB(req.body);
+				joResult = JSON.stringify(joResult);
+			}
+		} else {
+			joResult = JSON.stringify(oAuthResult);
+		}
+	} else {
+		joResult = JSON.stringify(oAuthResult);
+	}
+
+	res.setHeader('Content-Type', 'application/json');
+	res.status(200).send(joResult);
+}
+
+async function paymentRequestDetail_List(req, res) {
+	var joResult;
+	var oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
+	if (oAuthResult.status_code == '00') {
+		if (oAuthResult.token_data.status_code == '00') {
+			// Validate first
+			var errors = validationResult(req).array();
+
+			if (errors.length != 0) {
+				joResult = JSON.stringify({
+					status_code: '-99',
+					status_msg: 'Parameter value has problem',
+					error_msg: errors
+				});
+			} else {
+				let xLevel = oAuthResult.token_data.result_verify.user_level.find(
+					(el) => el.application.id === config.applicationId || el.application.id === 1
+				);
+
+				req.query.logged_is_admin = xLevel.is_admin;
+				req.query.user_id = oAuthResult.token_data.result_verify.id;
+
+				req.query.logged_company_id = oAuthResult.token_data.result_verify.employee_info.company != null ? oAuthResult.token_data.result_verify.employee_info.company.plant_id : oAuthResult.token_data.result_verify.company.plant_id;
+				req.query.logged_company_name = oAuthResult.token_data.result_verify.employee_info.company != null ? oAuthResult.token_data.result_verify.employee_info.company.name : oAuthResult.token_data.result_verify.company.name;
+				req.query.method = req.headers['x-method'];
+				req.query.token = req.headers['x-token'];
+				joResult = await _serviceDetailInstance.list(req.query);
+				joResult = JSON.stringify(joResult);
+			}
+		} else {
+			joResult = JSON.stringify(oAuthResult);
+		}
+	} else {
+		joResult = JSON.stringify(oAuthResult);
+	}
+
+	res.setHeader('Content-Type', 'application/json');
+	res.status(200).send(joResult);
+}
+
+async function paymentRequestDetail_BillList(req, res) {
+	var joResult;
+	var oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
+	if (oAuthResult.status_code == '00') {
+		if (oAuthResult.token_data.status_code == '00') {
+			// Validate first
+			var errors = validationResult(req).array();
+
+			if (errors.length != 0) {
+				joResult = JSON.stringify({
+					status_code: '-99',
+					status_msg: 'Parameter value has problem',
+					error_msg: errors
+				});
+			} else {
+				let xLevel = oAuthResult.token_data.result_verify.user_level.find(
+					(el) => el.application.id === config.applicationId || el.application.id === 1
+				);
+
+				req.query.logged_is_admin = xLevel.is_admin;
+				req.query.user_id = oAuthResult.token_data.result_verify.id;
+
+				req.query.logged_company_id = oAuthResult.token_data.result_verify.employee_info.company != null ? oAuthResult.token_data.result_verify.employee_info.company.plant_id : oAuthResult.token_data.result_verify.company.plant_id;
+				req.query.logged_company_name = oAuthResult.token_data.result_verify.employee_info.company != null ? oAuthResult.token_data.result_verify.employee_info.company.name : oAuthResult.token_data.result_verify.company.name;
+				req.query.method = req.headers['x-method'];
+				req.query.token = req.headers['x-token'];
+				joResult = await _serviceDetailInstance.billList(req.query);
 				joResult = JSON.stringify(joResult);
 			}
 		} else {
