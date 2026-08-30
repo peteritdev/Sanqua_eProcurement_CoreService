@@ -52,6 +52,20 @@ module.exports = (app) => {
 	app.get(rootAPIPath + 'list', arrValidate, paymentRequestController.paymentRequest_List);
 
 	arrValidate = [];
+	arrValidate = [
+		check('offset', 'Parameter offset must be integer and cannot be empty').not().isEmpty().isInt(),
+		check('limit').not().isEmpty().withMessage('Parameter limit cannot be empty')
+	];
+	app.get(rootAPIPath + 'detail/list', arrValidate, paymentRequestController.paymentRequestDetail_List);
+	
+	arrValidate = [];
+	arrValidate = [
+		check('offset', 'Parameter offset must be integer and cannot be empty').not().isEmpty().isInt(),
+		check('limit').not().isEmpty().withMessage('Parameter limit cannot be empty')
+	];
+	app.get(rootAPIPath + 'bill/list', arrValidate, paymentRequestController.paymentRequestDetail_BillList);
+
+	arrValidate = [];
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
 	app.get(rootAPIPath + 'detail/:id', arrValidate, paymentRequestController.paymentRequest_Detail);
 
