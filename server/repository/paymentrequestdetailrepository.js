@@ -418,6 +418,11 @@ class PaymentRequestDetailRepository {
 				{
 					model: _modelPaymentRequest,
 					as: 'payment_request'
+				},
+				{
+					model: _modelPurchaseRequestDetail,
+					as: 'purchase_request_detail',
+					attributes: [ 'id', 'request_id', 'product_id', 'product_code', 'product_name', 'qty', 'qty_paid', 'qty_done' ]
 				}
 			];
 
@@ -437,6 +442,14 @@ class PaymentRequestDetailRepository {
 				}
 			}
 
+			if (pParam.hasOwnProperty('prd_id')) {
+				if (pParam.prd_id != '') {
+					xWhereAnd.push({
+						prd_id: pParam.prd_id
+					});
+				}
+			}
+			
 			if (pParam.hasOwnProperty('product_code')) {
 				if (pParam.product_code != '') {
 					xWhereAnd.push({
