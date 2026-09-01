@@ -364,10 +364,10 @@ class PJCAService {
 								xArrOwnedDocNo.push(xOwnedDocument.token_data.data[i].document_no);
 							}
 							pParam.owned_document_no = xArrOwnedDocNo;
-							pParam.current_approval_ids = pParam.user_id;
 						}
 					}
 				}
+				pParam.current_approval_ids = pParam.user_id;
 			}
 
 			if (xFlagProccess) {
