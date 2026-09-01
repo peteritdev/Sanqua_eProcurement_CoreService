@@ -1521,7 +1521,19 @@ class PaymentRequestService {
 									if (xPayreqDetail.data.app_category != 2 && xPayreqDetail.data.payreq_type == 2 && xPayreqDetail.data.purchase_request != null) {
 										this.updatePrdItemQtyLeft(xPayreqDetail.data, 'delete')
 									}
-
+									// update notification status
+									let xInAppNotificationResult = await _notificationService.inAppNotification({
+										document_code: xPayreqDetail.data.document_no,
+										document_id: xEncId,
+										document_status: 5,
+										mode: 'feedback_from_approval_ca',
+										method: pParam.method,
+										token: pParam.token,
+										employee_id: await _utilInstance.encrypt(
+											pParam.user_id.toString(),
+											config.cryptoKey.hashKey
+										)
+									});
 									xJoResult = {
 										status_code: '00',
 										status_msg: 'Payreq successfully rejected'
@@ -1645,12 +1657,12 @@ class PaymentRequestService {
 								let xInAppNotificationResult = await _notificationService.inAppNotification({
 									document_code: xPayreqDetail.data.document_no,
 									document_id: xEncId,
-									document_status: xPayreqDetail.data.status,
+									document_status: 3,
 									mode: 'ca_paid_notification',
 									method: pParam.method,
 									token: pParam.token,
 									employee_id: await _utilInstance.encrypt(
-										xPayreqDetail.data.employee_id.toString(),
+										pParam.user_id.toString(),
 										config.cryptoKey.hashKey
 									)
 								});
