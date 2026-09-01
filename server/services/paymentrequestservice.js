@@ -1327,6 +1327,19 @@ class PaymentRequestService {
 													}
 												}
 											}
+											// update notification status
+											let xInAppNotificationResult = await _notificationService.inAppNotification({
+												document_code: xPayreqDetail.data.document_no,
+												document_id: xEncId,
+												document_status: xPayreqDetail.data.status,
+												mode: 'feedback_from_approval_ca',
+												method: pParam.method,
+												token: pParam.token,
+												employee_id: await _utilInstance.encrypt(
+													xNextApprover[i].employee_id.toString(),
+													config.cryptoKey.hashKey
+												)
+											});
 											xJoResult = {
 												status_code: '00',
 												status_msg: 'Payreq successfully confirmed'
