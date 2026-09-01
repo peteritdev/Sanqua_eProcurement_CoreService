@@ -1336,7 +1336,7 @@ class PaymentRequestService {
 												method: pParam.method,
 												token: pParam.token,
 												employee_id: await _utilInstance.encrypt(
-													pParam.user_id.toString(),
+													xPayreqDetail.data.toString(),
 													config.cryptoKey.hashKey
 												)
 											});
@@ -1530,7 +1530,7 @@ class PaymentRequestService {
 										method: pParam.method,
 										token: pParam.token,
 										employee_id: await _utilInstance.encrypt(
-											pParam.user_id.toString(),
+											xPayreqDetail.data.toString(),
 											config.cryptoKey.hashKey
 										)
 									});
@@ -1662,7 +1662,7 @@ class PaymentRequestService {
 									method: pParam.method,
 									token: pParam.token,
 									employee_id: await _utilInstance.encrypt(
-										pParam.user_id.toString(),
+										xPayreqDetail.data.toString(),
 										config.cryptoKey.hashKey
 									)
 								});

@@ -1048,7 +1048,7 @@ class PJCAService {
 												method: pParam.method,
 												token: pParam.token,
 												employee_id: await _utilInstance.encrypt(
-													pParam.user_id.toString(),
+													xPjcaDetail.data.employee_id.toString(),
 													config.cryptoKey.hashKey
 												)
 											});
@@ -1239,7 +1239,7 @@ class PJCAService {
 										method: pParam.method,
 										token: pParam.token,
 										employee_id: await _utilInstance.encrypt(
-											pParam.user_id.toString(),
+											xPjcaDetail.data.employee_id.toString(),
 											config.cryptoKey.hashKey
 										)
 									});
