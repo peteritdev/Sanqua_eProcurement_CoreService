@@ -180,6 +180,34 @@ class NotificationService {
 					status_msg: 'OK',
 					notification_result: xAddNotifResult
 				};
+			} else if (pParam.mode == 'feedback_from_approval_fpb') {
+				xParam = {
+					act: 'add',
+					subject: `Pengajuan FPB Telah Ditanggapi`,
+					body: `Pengajuan FPB degan nomor ${pParam.document_code}`,
+					module: 'eCatalogue',
+					document_id: pParam.document_id,
+					document_status: pParam.document_status,
+					document_code: pParam.document_code,
+					status: 0,
+					application_id: config.applicationId,
+					application_code: config.applicationCode,
+					channel: 1,
+					employee_id: pParam.employee_id
+				};
+
+				let xAddNotifResult = await _oAuthService.eSanQuaNotification(
+					pParam.method,
+					pParam.token,
+					xParam,
+					'/notification/save'
+				);
+
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					notification_result: xAddNotifResult
+				};
 			} else if (pParam.mode == 'request_approval_ca') {
 				xParam = {
 					act: 'add',
@@ -239,7 +267,7 @@ class NotificationService {
 			} else if (pParam.mode == 'feedback_from_approval_ca') {
 				xParam = {
 					act: 'add',
-					subject: `Pengajuan CA Telah Diapprove`,
+					subject: `Pengajuan CA Telah Ditanggapi`,
 					body: `Pengajuan CA degan nomor ${pParam.document_code}`,
 					module: 'Cash Advance',
 					document_id: pParam.document_id,
@@ -269,6 +297,34 @@ class NotificationService {
 					act: 'add',
 					subject: `Permohonan Approval PJCA`,
 					body: `Permohonan Approval PJCA ${pParam.document_code}`,
+					module: 'pjca',
+					document_id: pParam.document_id,
+					document_status: pParam.document_status,
+					document_code: pParam.document_code,
+					status: 0,
+					application_id: config.applicationId,
+					application_code: config.applicationCode,
+					channel: 1,
+					employee_id: pParam.employee_id
+				};
+
+				let xAddNotifResult = await _oAuthService.eSanQuaNotification(
+					pParam.method,
+					pParam.token,
+					xParam,
+					'/notification/save'
+				);
+
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					notification_result: xAddNotifResult
+				};
+			} else if (pParam.mode == 'feedback_from_approval_pjca') {
+				xParam = {
+					act: 'add',
+					subject: `Pengajuan PJCA Telah Ditanggapi`,
+					body: `Pengajuan PJCA degan nomor ${pParam.document_code}`,
 					module: 'pjca',
 					document_id: pParam.document_id,
 					document_status: pParam.document_status,

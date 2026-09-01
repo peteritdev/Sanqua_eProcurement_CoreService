@@ -1039,6 +1039,20 @@ class PJCAService {
 			
 										if (xUpdateResult.status_code == '00') {
 											
+											// update notification status
+											let xInAppNotificationResult = await _notificationService.inAppNotification({
+												document_code: xPjcaDetail.data.document_no,
+												document_id: xEncId,
+												document_status: 2,
+												mode: 'feedback_from_approval_pjca',
+												method: pParam.method,
+												token: pParam.token,
+												employee_id: await _utilInstance.encrypt(
+													pParam.user_id.toString(),
+													config.cryptoKey.hashKey
+												)
+											});
+
 											this.updatePyrdItemQtyRelease(xPjcaDetail.data, 'add')
 											xJoResult = {
 												status_code: '00',
@@ -1216,6 +1230,19 @@ class PJCAService {
 								var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'update');
 
 								if (xUpdateResult.status_code == '00') {
+									// update notification status
+									let xInAppNotificationResult = await _notificationService.inAppNotification({
+										document_code: xPjcaDetail.data.document_no,
+										document_id: xEncId,
+										document_status: 4,
+										mode: 'feedback_from_approval_pjca',
+										method: pParam.method,
+										token: pParam.token,
+										employee_id: await _utilInstance.encrypt(
+											pParam.user_id.toString(),
+											config.cryptoKey.hashKey
+										)
+									});
 									xJoResult = {
 										status_code: '00',
 										status_msg: 'PJCA successfully rejected'
