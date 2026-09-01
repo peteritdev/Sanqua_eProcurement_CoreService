@@ -1600,7 +1600,7 @@ class PurchaseRequestService {
 										method: pParam.method,
 										token: pParam.token,
 										employee_id: await _utilInstance.encrypt(
-											pParam.user_id.toString(),
+											xPRDetail.employee_id.toString(),
 											config.cryptoKey.hashKey
 										)
 									});
@@ -1772,7 +1772,7 @@ class PurchaseRequestService {
 									method: pParam.method,
 									token: pParam.token,
 									employee_id: await _utilInstance.encrypt(
-										pParam.user_id.toString(),
+										xPRDetail.employee_id.toString(),
 										config.cryptoKey.hashKey
 									)
 								});
@@ -2210,7 +2210,7 @@ class PurchaseRequestService {
 									method: pParam.method,
 									token: pParam.token,
 									employee_id: await _utilInstance.encrypt(
-										pParam.user_id.toString(),
+										xPRDetail.employee_id.toString(),
 										config.cryptoKey.hashKey
 									)
 								});
