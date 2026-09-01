@@ -1336,7 +1336,7 @@ class PaymentRequestService {
 												method: pParam.method,
 												token: pParam.token,
 												employee_id: await _utilInstance.encrypt(
-													xNextApprover[i].employee_id.toString(),
+													pParam.user_id.toString(),
 													config.cryptoKey.hashKey
 												)
 											});
