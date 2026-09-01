@@ -1331,7 +1331,7 @@ class PaymentRequestService {
 											let xInAppNotificationResult = await _notificationService.inAppNotification({
 												document_code: xPayreqDetail.data.document_no,
 												document_id: xEncId,
-												document_status: xPayreqDetail.data.status,
+												document_status: 2,
 												mode: 'feedback_from_approval_ca',
 												method: pParam.method,
 												token: pParam.token,
