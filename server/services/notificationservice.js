@@ -208,6 +208,34 @@ class NotificationService {
 					status_msg: 'OK',
 					notification_result: xAddNotifResult
 				};
+			} else if (pParam.mode == 'notify_fpb_take') {
+				xParam = {
+					act: 'add',
+					subject: `Pengajuan FPB Telah Diproses`,
+					body: `Pengajuan FPB degan nomor ${pParam.document_code}`,
+					module: 'eCatalogue',
+					document_id: pParam.document_id,
+					document_status: pParam.document_status,
+					document_code: pParam.document_code,
+					status: 0,
+					application_id: config.applicationId,
+					application_code: config.applicationCode,
+					channel: 1,
+					employee_id: pParam.employee_id
+				};
+
+				let xAddNotifResult = await _oAuthService.eSanQuaNotification(
+					pParam.method,
+					pParam.token,
+					xParam,
+					'/notification/save'
+				);
+
+				xJoResult = {
+					status_code: '00',
+					status_msg: 'OK',
+					notification_result: xAddNotifResult
+				};
 			} else if (pParam.mode == 'request_approval_ca') {
 				xParam = {
 					act: 'add',
