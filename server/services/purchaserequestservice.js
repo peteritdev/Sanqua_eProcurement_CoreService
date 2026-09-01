@@ -2201,6 +2201,19 @@ class PurchaseRequestService {
 							var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'take_fpb');
 
 							if (xUpdateResult.status_code == '00') {
+								// update notification status
+								let xInAppNotificationResult = await _notificationService.inAppNotification({
+									document_code: xPRDetail.request_no,
+									document_id: xEncId,
+									document_status: 2,
+									mode: 'notify_fpb_take',
+									method: pParam.method,
+									token: pParam.token,
+									employee_id: await _utilInstance.encrypt(
+										pParam.user_id.toString(),
+										config.cryptoKey.hashKey
+									)
+								});
 								xJoResult = {
 									status_code: '00',
 									status_msg: 'FPB successfully rejected'
