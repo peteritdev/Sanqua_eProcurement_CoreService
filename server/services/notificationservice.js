@@ -240,7 +240,7 @@ class NotificationService {
 				xParam = {
 					act: 'add',
 					subject: `Permohonan Approval CA`,
-					body: `Permohonan Approval CA ${pParam.document_code}`,
+					body: `Permohonan Approval CA ${pParam.document_code}${pParam.subject ? pParam.subject : ''}`,
 					module: 'Cash Advance',
 					document_id: pParam.document_id,
 					document_status: pParam.document_status,
@@ -324,7 +324,7 @@ class NotificationService {
 				xParam = {
 					act: 'add',
 					subject: `Permohonan Approval PJCA`,
-					body: `Permohonan Approval PJCA ${pParam.document_code}`,
+					body: `Permohonan Approval PJCA ${pParam.document_code}${pParam.subject ? pParam.subject : ''}`,
 					module: 'pjca',
 					document_id: pParam.document_id,
 					document_status: pParam.document_status,
