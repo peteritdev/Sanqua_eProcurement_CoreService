@@ -1897,7 +1897,7 @@ class PaymentRequestService {
 						await _notificationService.inAppNotification({
 							employee_id: xApproverEmpIds[0],
 							employee_name: xPayreqDetail.data.employee_name,
-							subject: `${xPayreqDetail.data.employee.name} (fetch)`,
+							subject: ` (fetch)`,
 							mode: 'request_approval_ca',
 							logged_employee_name: pParam.logged_employee_name,
 							document_id: xEncId,

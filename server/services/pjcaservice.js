@@ -1463,7 +1463,7 @@ class PJCAService {
 						await _notificationService.inAppNotification({
 							employee_id: xApproverEmpIds[0],
 							employee_name: xPjcaDetail.data.employee_name,
-							subject: `${xPjcaDetail.data.employee.name} (fetch)`,
+							subject: ` (fetch)`,
 							mode: 'request_approval_pjca',
 							logged_employee_name: pParam.logged_employee_name,
 							document_id: xEncId,
