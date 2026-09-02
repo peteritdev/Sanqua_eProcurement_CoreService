@@ -156,7 +156,7 @@ class NotificationService {
 				xParam = {
 					act: 'add',
 					subject: `Permohonan Approval FPB`,
-					body: `Permohonan approval FPB ${pParam.document_code}`,
+					body: `Permohonan approval FPB ${pParam.document_code}${pParam.subject ? pParam.subject : ''}`,
 					module: 'eCatalogue',
 					document_id: pParam.document_id,
 					document_status: pParam.document_status,

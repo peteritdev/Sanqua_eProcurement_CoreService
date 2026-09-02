@@ -2457,18 +2457,21 @@ class PurchaseRequestService {
 								let xApproverSeq1 = xApprovalMatrixResult.approvers.find((el) => el.sequence === 1);
 								if (xApproverSeq1 != null) {
 									for (var i in xApproverSeq1.approver_user) {
-										// In App notification
-										let xInAppNotificationResult = await _notificationService.inAppNotification({
-											document_code: xPRDetail.request_no,
-											document_id: xEncId,
-											document_status: xPRDetail.status,
-											mode: 'request_approval_fpb',
-											method: pParam.method,
-											token: pParam.token,
+										// In App Notification
+										await _notificationService.inAppNotification({
 											employee_id: await _utilInstance.encrypt(
 												xApproverSeq1.approver_user[i].employee_id.toString(),
 												config.cryptoKey.hashKey
-											)
+											),
+											employee_name: xPRDetail.employee_name,
+											subject: ` (fetch)`,
+											mode: 'request_approval_fpb',
+											logged_employee_name: pParam.logged_employee_name,
+											document_id: xEncId,
+											document_status: 1,
+											document_code: xPRDetail.request_no,
+											method: pParam.method,
+											token: pParam.token
 										});
 
 										_utilInstance.writeLog(
