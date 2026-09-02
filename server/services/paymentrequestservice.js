@@ -593,7 +593,7 @@ class PaymentRequestService {
 						if (xJoArrItems.length > 0) {
 							
 							if (pParam.app_category == 2 && !pParam.hasOwnProperty('purchase_request_id')) {
-								var xTotalFaktur = 0
+								var xTotalDebt = 0
 								// when payreq category is 2 = billing then insert invoice here
 								for (var i in xJoArrItems) {
 									// Check first whether invoice already exists in other payreq or not
@@ -609,11 +609,11 @@ class PaymentRequestService {
 										break
 									}
 
-									if (xJoArrItems[i].total_after_tax) {
-										xTotalFaktur +=  parseFloat(xJoArrItems[i].total_after_tax)
+									if (xJoArrItems[i].debt_value) {
+										xTotalDebt +=  parseFloat(xJoArrItems[i].debt_value)
 									}
 								}
-								pParam.total_price = xTotalFaktur
+								pParam.total_price = xTotalDebt
 							} else {
 								// line below to sparate payreq from FPB or w/o FPB (21/06/2026)
 								if (pParam.hasOwnProperty('purchase_request_id')) {
@@ -1333,6 +1333,19 @@ class PaymentRequestService {
 													}
 												}
 											}
+											// update notification status
+											let xInAppNotificationResult = await _notificationService.inAppNotification({
+												document_code: xPayreqDetail.data.document_no,
+												document_id: xEncId,
+												document_status: 2,
+												mode: 'feedback_from_approval_ca',
+												method: pParam.method,
+												token: pParam.token,
+												employee_id: await _utilInstance.encrypt(
+													xPayreqDetail.data.employee_id.toString(),
+													config.cryptoKey.hashKey
+												)
+											});
 											xJoResult = {
 												status_code: '00',
 												status_msg: 'Payreq successfully confirmed'
@@ -1514,7 +1527,19 @@ class PaymentRequestService {
 									if (xPayreqDetail.data.app_category != 2 && xPayreqDetail.data.payreq_type == 2 && xPayreqDetail.data.purchase_request != null) {
 										this.updatePrdItemQtyLeft(xPayreqDetail.data, 'delete')
 									}
-
+									// update notification status
+									let xInAppNotificationResult = await _notificationService.inAppNotification({
+										document_code: xPayreqDetail.data.document_no,
+										document_id: xEncId,
+										document_status: 5,
+										mode: 'feedback_from_approval_ca',
+										method: pParam.method,
+										token: pParam.token,
+										employee_id: await _utilInstance.encrypt(
+											xPayreqDetail.data.employee_id.toString(),
+											config.cryptoKey.hashKey
+										)
+									});
 									xJoResult = {
 										status_code: '00',
 										status_msg: 'Payreq successfully rejected'
@@ -1638,7 +1663,7 @@ class PaymentRequestService {
 								let xInAppNotificationResult = await _notificationService.inAppNotification({
 									document_code: xPayreqDetail.data.document_no,
 									document_id: xEncId,
-									document_status: xPayreqDetail.data.status,
+									document_status: 3,
 									mode: 'ca_paid_notification',
 									method: pParam.method,
 									token: pParam.token,
