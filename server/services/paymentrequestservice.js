@@ -148,13 +148,17 @@ class PaymentRequestService {
 
 									xPriceWithDisc = Math.round((xPricePerItem - xDiscWoTax) * 1000) / 1000
 									
+									console.log(`>>> xPriceWithDisc: ${JSON.stringify(xPriceWithDisc)}`);
 									// calc price after tax
 									if (xPayreqDetail[i].tax != null) {
 										var taxValue = xPayreqDetail[i].tax.value / 100
+										console.log(`>>> taxValue: ${JSON.stringify(taxValue)}`);
 										if (xPayreqDetail[i].tax.type == 1) {
 											taxValue = 1 + (xPayreqDetail[i].tax.value / 100)
 											xPriceBeforeTax = Math.round((xPriceWithDisc / taxValue) * 1000) / 1000
+											console.log(`>>> xPriceBeforeTax: ${JSON.stringify(xPriceBeforeTax)}`);
 											xTax = Math.round((xPriceWithDisc - xPriceBeforeTax) * 1000) / 1000
+											console.log(`>>> xTax: ${JSON.stringify(xTax)}`);
 											// xTotalPriceWithTax = Math.round((xTotalPrice - xTax) * 1000) / 1000
 											if (xDiscPercent != 0) {
 												xTotalDisc = Math.round((xDiscWoTax / taxValue) * 1000) / 1000
@@ -166,6 +170,7 @@ class PaymentRequestService {
 											xTotalDisc = xDiscWoTax
 											xTotalPrice = xPriceWithDisc
 										}
+										console.log(`>>> taxValue2: ${JSON.stringify(taxValue)}`);
 									} else {
 										xTotalDisc = xDiscWoTax
 										xTotalPrice = xPriceWithDisc
@@ -174,8 +179,10 @@ class PaymentRequestService {
 									// xTotalDisc = 
 									
 									// show data only with status == 0
+									console.log(`>>> xTotalPrice: ${JSON.stringify(xTotalPrice)}`);
 									xSubtotal = Math.round((xTotalPrice * xPayreqDetail[i].qty_request) * 1000) / 1000
 									xPayreqDetail[i].subtotal = xSubtotal
+									console.log(`>>> xSubtotal: ${JSON.stringify(xSubtotal)}`);
 
 									if (xPayreqDetail[i].status != -1) {
 										xTotalDiscWoTax += Math.round((xDiscWoTax * xPayreqDetail[i].qty_request) * 1000) / 1000
@@ -253,7 +260,7 @@ class PaymentRequestService {
 								xDetail.data.total_dpp = xDpp
 								if (xPphAmount == 0) {
 									if (xDpp != 0) {
-										xDetail.data.total_pph_amount =  (Math.round((xDpp * (xDetail.data.pph_percent / 100)) * 1000 )  / 1000) || 0
+										xDetail.data.total_pph_amount =  (Math.round((xDetail.data.untaxed_amount * (xDetail.data.pph_percent / 100)) * 1000 )  / 1000) || 0
 									} else {
 										if (xDetail.data.pph_percent != 0) {
 											xDetail.data.total_pph_amount = ((Math.round((xDetail.data.untaxed_amount * xDetail.data.pph_percent) / 100) * 1000 ) / 1000) || 0
@@ -262,7 +269,7 @@ class PaymentRequestService {
 									xDetail.data.pph_amount = xDetail.data.total_pph_amount
 								} else {
 									xDetail.data.total_pph_amount =  (Math.round((xDetail.data.pph_amount) * 1000 )  / 1000) || 0
-									xDetail.data.pph_percent = (Math.round(((xDetail.data.pph_amount/xDpp) * 100) * 1000 )  / 1000) || 0
+									xDetail.data.pph_percent = (Math.round(((xDetail.data.pph_amount/xDetail.data.untaxed_amount) * 100) * 1000 )  / 1000) || 0
 								}
 								const xPreTotalPrice = (xDetail.data.untaxed_amount + xDetail.data.total_tax_amount + xDetail.data.delivery_costs + xDetail.data.service_costs + xDetail.data.other_costs) - xDetail.data.total_pph_amount
 								const xTotalPriceRound = Math.round((xPreTotalPrice || 0) * 1000) / 1000
