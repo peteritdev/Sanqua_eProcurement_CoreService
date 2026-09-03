@@ -1435,6 +1435,7 @@ class PJCAService {
 						);
 						console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
 						const xApproverIds = []
+						const xApproverEmpIds = []
 						if (xApprovalMatrixResult.status_code == '00') {
 							if (xApprovalMatrixResult.approvers.length > 0) {
 								
@@ -1442,6 +1443,7 @@ class PJCAService {
 								if (xApproverSeq1 != null) {
 									for (var i in xApproverSeq1.approver_user) {
 										xApproverIds.push(xApproverSeq1.approver_user[i].user_id)
+										xApproverEmpIds.push(xApproverSeq1.approver_user[i].employee_id)
 									}
 								}
 							}
@@ -1456,6 +1458,20 @@ class PJCAService {
 						}
 						var xUpdateResult = await _repoInstance.save(xUpdateParam, 'update');
 						console.log(`>>> xUpdateResult: ${JSON.stringify(xUpdateResult)}`);
+						
+						// In App Notification
+						await _notificationService.inAppNotification({
+							employee_id: xApproverEmpIds[0],
+							employee_name: xPjcaDetail.data.employee_name,
+							subject: ` (fetch)`,
+							mode: 'request_approval_pjca',
+							logged_employee_name: pParam.logged_employee_name,
+							document_id: xEncId,
+							document_status: 1,
+							document_code: xPjcaDetail.data.document_no,
+							method: pParam.method,
+							token: pParam.token
+						});
 						xJoResult = xUpdateResult;
 						xJoResult.approval_matrix_result = xApprovalMatrixResult;
 					}
