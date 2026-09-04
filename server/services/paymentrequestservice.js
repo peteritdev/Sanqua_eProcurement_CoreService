@@ -264,6 +264,8 @@ class PaymentRequestService {
 									} else {
 										if (xDetail.data.pph_percent != 0) {
 											xDetail.data.total_pph_amount = ((Math.round((xDetail.data.untaxed_amount * xDetail.data.pph_percent) / 100) * 1000 ) / 1000) || 0
+										} else {
+											xDetail.data.total_pph_amount = xPphAmount
 										}
 									}
 									xDetail.data.pph_amount = xDetail.data.total_pph_amount
