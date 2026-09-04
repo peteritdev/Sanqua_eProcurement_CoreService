@@ -62,7 +62,9 @@ module.exports = (sequelize, DataTypes) => {
 		receive_invoice_date: DataTypes.DATE,
 		invoice_due_date: DataTypes.DATE,
 		company_id: DataTypes.INTEGER,
-		store_link: DataTypes.STRING
+		store_link: DataTypes.STRING,
+		is_received: DataTypes.BOOLEAN,
+		received_note: DataTypes.STRING
 	});
 
 	PaymentRequestDetail.associate = function(models) {

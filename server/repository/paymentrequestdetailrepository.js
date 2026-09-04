@@ -253,6 +253,34 @@ class PaymentRequestDetailRepository {
 
 		return xData;
 	}
+	async getByProductIdPriceAndUom(pParam) {
+		var xData = {};
+		var xInclude = [];
+		var xWhere = {};
+		var xWhereAnd = [],
+			xWhereOr = [];
+
+		xWhereAnd.push({
+			product_id: pParam.product_id,
+			price_request: pParam.price_request,
+			uom_id: pParam.uom_id
+		});
+
+		if (pParam.hasOwnProperty('payment_request_id')) {
+			if (pParam.payment_request_id != '') {
+				xWhereAnd.push({
+					payment_request_id: pParam.payment_request_id
+				});
+			}
+		}
+
+		var xData = await _modelDb.findOne({
+			where: xWhereAnd,
+			include: xInclude
+		});
+
+		return xData;
+	}
 
 	async delete(pParam) {
 		let xTransaction;
