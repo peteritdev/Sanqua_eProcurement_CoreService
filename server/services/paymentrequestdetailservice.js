@@ -162,8 +162,10 @@ class PaymentRequestDetailService {
 					if (pParam.hasOwnProperty('product_id')) {
 						if (pParam.product_id != null) {
 							// Check first whether product_id and vendor_id already exists in detail or not
-							xPaymentRequestDetail = await _repoInstance.getByProductId({
+							xPaymentRequestDetail = await _repoInstance.getByProductIdPriceAndUom({
 								product_id: pParam.product_id,	
+								price_request: pParam.price_request,	
+								uom_id: pParam.uom_id,	
 								payment_request_id: pParam.payment_request_id
 							});
 						}
