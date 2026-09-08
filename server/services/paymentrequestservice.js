@@ -836,14 +836,14 @@ class PaymentRequestService {
 									pParam.status = 2;
 								}
 
-								if (xFlagProcess) {
+								if (xFlagProcess) {	
 									var xUpdate = await _repoInstance.save(pParam, 'submit');
 									xJoResult = xUpdate;
 									
 									// Next Phase : Approval Matrix & Notification to admin
 									if (xUpdate.status_code == '00') {
 										// payreq bill skip approval
-										if (xDetail.data.app_category != 2 && xDetail.data.payreq_type == 2 && xDetail.data.purchase_request != null) {
+										if (xDetail.data.app_category != 2) {
 											if (xDetail.data.payreq_type == 2 && xDetail.data.purchase_request != null) {
 												// if payreq is reimburst then divide qty_paid on fpb
 												this.updatePrdItemQtyLeft(xDetail.data, 'add')
@@ -862,6 +862,7 @@ class PaymentRequestService {
 												logged_company_id: pParam.logged_company_id
 											};
 
+											console.log(`>>> xParamAddApprovalMatrix: ${JSON.stringify(xParamAddApprovalMatrix)}`);
 											var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
 												pParam.method,
 												pParam.token,
