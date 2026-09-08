@@ -264,6 +264,8 @@ class PaymentRequestService {
 									} else {
 										if (xDetail.data.pph_percent != 0) {
 											xDetail.data.total_pph_amount = ((Math.round((xDetail.data.untaxed_amount * xDetail.data.pph_percent) / 100) * 1000 ) / 1000) || 0
+										} else {
+											xDetail.data.total_pph_amount = xPphAmount
 										}
 									}
 									xDetail.data.pph_amount = xDetail.data.total_pph_amount
@@ -624,7 +626,6 @@ class PaymentRequestService {
 											xJoArrItems[i].prd_id = xPrdId.decrypted;
 											// delete xJoArrItems[i].prd_id
 										}
-										console.log(`>>> xPrdId ${JSON.stringify(xPrdId)}`);
 										if (
 											xJoArrItems[i].hasOwnProperty('qty_request') &&
 											xJoArrItems[i].hasOwnProperty('price_request')
@@ -687,11 +688,8 @@ class PaymentRequestService {
 						}
 						// console.log(`>>> xJoArrItems ${JSON.stringify(xJoArrItems)}`);
 					}
-					console.log(`>>> pParam ${JSON.stringify(pParam)}`, xAct);
-					console.log(`>>> pParam.total_price ${JSON.stringify(pParam.total_price)}`, xAct);
 
 					let xResult = await _repoInstance.save(pParam, xAct);
-					console.log(`>>> Save Param..>>> : ${JSON.stringify(xResult)}`);
 					if (xResult.status_code == '00') {
 						var dt = dateTime.create();
 						var xDate = dt.format('ym');
@@ -707,7 +705,6 @@ class PaymentRequestService {
 						};
 
 						var xUpdate = await _repoInstance.save(xParamUpdate, 'update');
-						console.log(`>>> Payreq Save Success>>> : ${JSON.stringify(xUpdate)}`);
 						//21/06/2026
 						if (pParam.hasOwnProperty('purchase_request_id')) {
 							// update fpb item ca_type to 1 = ca digital
@@ -722,7 +719,6 @@ class PaymentRequestService {
 										// request_id: pParam.purchase_request_id,
 										ca_type: 1 //1:digital,2:manual
 									}
-									console.log(`>>> xPayload>>> : ${JSON.stringify(xPayload)}`);
 									var xUpdatePrdCaType = await _purchaseRequestDetailRepoInstance.save(xPayload, 'update_ca');
 								}
 							}
@@ -835,6 +831,10 @@ class PaymentRequestService {
 										}
 									}
 								}
+								// payreq bill already inprogress after submit
+								if (xDetail.data.app_category == 2) {
+									pParam.status = 2;
+								}
 
 								if (xFlagProcess) {
 									var xUpdate = await _repoInstance.save(pParam, 'submit');
@@ -842,99 +842,101 @@ class PaymentRequestService {
 									
 									// Next Phase : Approval Matrix & Notification to admin
 									if (xUpdate.status_code == '00') {
-
+										// payreq bill skip approval
 										if (xDetail.data.app_category != 2 && xDetail.data.payreq_type == 2 && xDetail.data.purchase_request != null) {
-											// if payreq is reimburst then divide qty_paid on fpb
-											this.updatePrdItemQtyLeft(xDetail.data, 'add')
-										}
-										// this.updatePrdItemQtyLeft(xDetail.data, 'submit')
+											if (xDetail.data.payreq_type == 2 && xDetail.data.purchase_request != null) {
+												// if payreq is reimburst then divide qty_paid on fpb
+												this.updatePrdItemQtyLeft(xDetail.data, 'add')
+											}
+											// this.updatePrdItemQtyLeft(xDetail.data, 'submit')
 										
-										var xParamAddApprovalMatrix = {
-											act: 'add',
-											document_id: xEncId,
-											document_no: xDetail.data.document_no,
-											application_id: 8,
-											table_name: config.dbTables.payreq,
-											company_id: xDetail.data.company_id,
-											department_id: xDetail.data.department_id,
-											ecatalogue_fpb_category_item: null,
-											logged_company_id: pParam.logged_company_id
-										};
+											var xParamAddApprovalMatrix = {
+												act: 'add',
+												document_id: xEncId,
+												document_no: xDetail.data.document_no,
+												application_id: 8,
+												table_name: config.dbTables.payreq,
+												company_id: xDetail.data.company_id,
+												department_id: xDetail.data.department_id,
+												ecatalogue_fpb_category_item: null,
+												logged_company_id: pParam.logged_company_id
+											};
 
-										var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
-											pParam.method,
-											pParam.token,
-											xParamAddApprovalMatrix
-										);
-										console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
-										xJoResult.approval_matrix_result = xApprovalMatrixResult;
-										if (xApprovalMatrixResult.status_code == '00') {
-											if (xApprovalMatrixResult.approvers.length > 0) {
-												const xApproverIds = []
-												let xApproverSeq1 = xApprovalMatrixResult.approvers.find((el) => el.sequence === 1);
-												if (xApproverSeq1 != null) {
-													for (var i in xApproverSeq1.approver_user) {
-														xApproverIds.push(xApproverSeq1.approver_user[i].user_id)
-														// In App notification
-														let xInAppNotificationResult = await _notificationService.inAppNotification({
-															document_code: xDetail.data.document_no,
-															document_id: xEncId,
-															document_status: 1,
-															mode: 'request_approval_ca',
-															method: pParam.method,
-															token: pParam.token,
-															employee_id: await _utilInstance.encrypt(
-																xApproverSeq1.approver_user[i].employee_id.toString(),
-																config.cryptoKey.hashKey
-															)
-														});
-														console.log(`>>> xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`);
-				
-														_utilInstance.writeLog(
-															`${_xClassName}.submitPayreq`,
-															`xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`,
-															'info'
-														);
-														// Email Notification
-														let xParamEmailNotification,
-															xNotificationResult = {};
-				
-														if (xApproverSeq1.approver_user[i].notification_via_email) {
-															xParamEmailNotification = {
+											var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
+												pParam.method,
+												pParam.token,
+												xParamAddApprovalMatrix
+											);
+											console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
+											xJoResult.approval_matrix_result = xApprovalMatrixResult;
+											if (xApprovalMatrixResult.status_code == '00') {
+												if (xApprovalMatrixResult.approvers.length > 0) {
+													const xApproverIds = []
+													let xApproverSeq1 = xApprovalMatrixResult.approvers.find((el) => el.sequence === 1);
+													if (xApproverSeq1 != null) {
+														for (var i in xApproverSeq1.approver_user) {
+															xApproverIds.push(xApproverSeq1.approver_user[i].user_id)
+															// In App notification
+															let xInAppNotificationResult = await _notificationService.inAppNotification({
+																document_code: xDetail.data.document_no,
+																document_id: xEncId,
+																document_status: 1,
 																mode: 'request_approval_ca',
-																id: xEncId,
-																request_no: xDetail.data.document_no,
-																company_name: xDetail.data.company_name,
-																department_name: xDetail.data.department_name,
-																created_by: xDetail.data.employee_name,
-																created_at:
-																	xDetail.data.createdAt != null
-																		? moment(xDetail.data.createdAt).format('DD MMM YYYY')
-																		: '',
-																items: xPyrDetail,
-																// body: xDetail.data,
-																approver_user: {
-																	employee_name: xApproverSeq1.approver_user[i].user_name,
-																	email: xApproverSeq1.approver_user[i].email
-																}
-															};
-															xNotificationResult = await _notificationService.sendNotificationEmail_CANeedApproval(
-																xParamEmailNotification,
-																pParam.method,
-																pParam.token
+																method: pParam.method,
+																token: pParam.token,
+																employee_id: await _utilInstance.encrypt(
+																	xApproverSeq1.approver_user[i].employee_id.toString(),
+																	config.cryptoKey.hashKey
+																)
+															});
+															console.log(`>>> xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`);
+					
+															_utilInstance.writeLog(
+																`${_xClassName}.submitPayreq`,
+																`xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`,
+																'info'
 															);
-															console.log(`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`);
-				
+															// Email Notification
+															let xParamEmailNotification,
+																xNotificationResult = {};
+					
+															if (xApproverSeq1.approver_user[i].notification_via_email) {
+																xParamEmailNotification = {
+																	mode: 'request_approval_ca',
+																	id: xEncId,
+																	request_no: xDetail.data.document_no,
+																	company_name: xDetail.data.company_name,
+																	department_name: xDetail.data.department_name,
+																	created_by: xDetail.data.employee_name,
+																	created_at:
+																		xDetail.data.createdAt != null
+																			? moment(xDetail.data.createdAt).format('DD MMM YYYY')
+																			: '',
+																	items: xPyrDetail,
+																	// body: xDetail.data,
+																	approver_user: {
+																		employee_name: xApproverSeq1.approver_user[i].user_name,
+																		email: xApproverSeq1.approver_user[i].email
+																	}
+																};
+																xNotificationResult = await _notificationService.sendNotificationEmail_CANeedApproval(
+																	xParamEmailNotification,
+																	pParam.method,
+																	pParam.token
+																);
+																console.log(`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`);
+					
+															}
 														}
 													}
+													// update current approval id
+													let xPrdUpdateApprovalId = {
+														id: xDetail.data.id,
+														current_approval_ids: xApproverIds
+													}
+													
+													const xUpdateApproval = await _repoInstance.save(xPrdUpdateApprovalId, 'update')
 												}
-												// update current approval id
-												let xPrdUpdateApprovalId = {
-													id: xDetail.data.id,
-													current_approval_ids: xApproverIds
-												}
-												
-												const xUpdateApproval = await _repoInstance.save(xPrdUpdateApprovalId, 'update')
 											}
 										}
 									} else {
@@ -2058,31 +2060,29 @@ class PaymentRequestService {
 
 			const xNormalizeName = (pName) => (pName || '').toString().trim().toLowerCase();
 
-			// map fpb item by product_name utk lookup cepat
-			var xFpbItemByName = {};
+			// group FPB items per product_name -> karena bisa ada beberapa baris FPB dengan nama sama
+			// tapi price/qty beda (price diabaikan, cuma qty yang dipakai buat validasi)
+			var xFpbGroupByName = {};
 			for (let i = 0; i < xFpbItems.length; i++) {
-				xFpbItemByName[xNormalizeName(xFpbItems[i].product_name)] = xFpbItems[i];
+				let xKey = xNormalizeName(xFpbItems[i].product_name);
+				if (!xFpbGroupByName[xKey]) xFpbGroupByName[xKey] = [];
+				xFpbGroupByName[xKey].push(xFpbItems[i]);
 			}
 
-			// total qty payreq per product_name (support multi baris produk yang sama dlm 1 payreq)
-			var xPayreqQtyByName = {};
-			var xMatchedPairs = [];
+			// group payreq items per product_name juga (bisa beberapa baris nama sama, price beda)
+			var xPayreqGroupByName = {};
 			var xArrErrorNotFound = [];
-
 			for (let i = 0; i < xPayreqItems.length; i++) {
 				let xKey = xNormalizeName(xPayreqItems[i].product_name);
-				let xFpbItem = xFpbItemByName[xKey];
-
-				if (!xFpbItem) {
+				if (!xFpbGroupByName[xKey]) {
 					xArrErrorNotFound.push(xPayreqItems[i].product_name);
 					continue;
 				}
-
-				xPayreqQtyByName[xKey] = (xPayreqQtyByName[xKey] || 0) + Number(xPayreqItems[i].qty_request || 0);
-				xMatchedPairs.push({ payreq_item: xPayreqItems[i], fpb_item: xFpbItem });
+				if (!xPayreqGroupByName[xKey]) xPayreqGroupByName[xKey] = [];
+				xPayreqGroupByName[xKey].push(xPayreqItems[i]);
 			}
 
-			// requirement: kalau ada item payreq yang product_name-nya tidak ada di FPB, tolak semua
+			// requirement: kalau ada item payreq yang product_name-nya tidak ada di FPB sama sekali, tolak semua
 			if (xArrErrorNotFound.length > 0) {
 				return xJoResult = {
 					status_code: '-99',
@@ -2090,36 +2090,79 @@ class PaymentRequestService {
 				};
 			}
 
-			// requirement: total qty per product di payreq (termasuk payreq lain yg sudah nempel ke item fpb yg sama)
-			// tidak boleh melebihi qty item FPB
+			// hitung sisa kapasitas tiap baris FPB (qty baris - qty yg sudah nempel dari payreq lain yg masih aktif)
 			var xArrErrorExceed = [];
-			for (let xKey in xPayreqQtyByName) {
-				let xFpbItem = xFpbItemByName[xKey];
-				let xTotalPayreqQty = xPayreqQtyByName[xKey];
+			var xArrErrorAllocation = [];
+			var xMatchedPairs = []; // { payreq_item, fpb_item, qty }
+			var xQtyDoneAddByFpbId = {}; // fpb_item.id -> total qty yg ditambahkan ke qty_done
 
-				let xExistingQty = 0;
-				const xResultCheckItem = await _paymentRequestDetailRepoInstance.list({ prd_id: xFpbItem.id });
-				if (xResultCheckItem.status_code == '00' && xResultCheckItem.data.count > 0) {
-					let xArrItem = xResultCheckItem.data.rows;
-					for (let j = 0; j < xArrItem.length; j++) {
-						// jangan hitung dobel item milik payreq yg sedang di-merge ini sendiri
-						if (
-							xArrItem[j].payment_request_id != pParam.payment_request_id &&
-							xArrItem[j].status != -1 &&
-							xArrItem[j].payment_request != null &&
-							xArrItem[j].payment_request.status != 4 &&
-							xArrItem[j].payment_request.status != 5
-						) {
-							xExistingQty += Number(xArrItem[j].qty_request || 0);
+			for (let xKey in xPayreqGroupByName) {
+				let xFpbLines = xFpbGroupByName[xKey]; // array of fpb item
+				let xPayreqLines = xPayreqGroupByName[xKey]; // array of payreq item
+
+				// hitung remaining tiap baris fpb = qty - qty yg sudah nempel dari payreq LAIN yg aktif
+				let xRemainingByFpb = []; // { fpb_item, remaining }
+				for (let i = 0; i < xFpbLines.length; i++) {
+					let xFpbItem = xFpbLines[i];
+					let xExistingQty = 0;
+
+					const xResultCheckItem = await _paymentRequestDetailRepoInstance.list({ prd_id: xFpbItem.id });
+					if (xResultCheckItem.status_code == '00' && xResultCheckItem.data.count > 0) {
+						let xArrItem = xResultCheckItem.data.rows;
+						for (let j = 0; j < xArrItem.length; j++) {
+							// jangan hitung item milik payreq yg sedang di-merge ini sendiri (kalau ini re-merge)
+							if (
+								xArrItem[j].payment_request_id != pParam.payment_request_id &&
+								xArrItem[j].status != -1 &&
+								xArrItem[j].payment_request != null &&
+								xArrItem[j].payment_request.status != 4 &&
+								xArrItem[j].payment_request.status != 5
+							) {
+								xExistingQty += Number(xArrItem[j].qty_request || 0);
+							}
 						}
 					}
+
+					xRemainingByFpb.push({
+						fpb_item: xFpbItem,
+						remaining: Number(xFpbItem.qty || 0) - xExistingQty
+					});
 				}
 
-				let xTotalQty = xExistingQty + xTotalPayreqQty;
-				if (xTotalQty > Number(xFpbItem.qty || 0)) {
+				let xTotalPayreqQty = xPayreqLines.reduce((pSum, pItem) => pSum + Number(pItem.qty_request || 0), 0);
+				let xTotalFpbRemaining = xRemainingByFpb.reduce((pSum, pRow) => pSum + pRow.remaining, 0);
+
+				// cek dulu total agregat, biar pesan errornya jelas kalau memang secara total udah kelebihan
+				if (xTotalPayreqQty > xTotalFpbRemaining) {
 					xArrErrorExceed.push(
-						`${xFpbItem.product_name} (qty payreq ini: ${xTotalPayreqQty}${xExistingQty > 0 ? `, qty payreq lain yg sudah nempel: ${xExistingQty}` : ''}, qty tersedia di FPB: ${xFpbItem.qty})`
+						`${xPayreqLines[0].product_name} (total qty payreq: ${xTotalPayreqQty}, total sisa qty tersedia di FPB: ${xTotalFpbRemaining})`
 					);
+					continue;
+				}
+
+				// allocation: best-fit decreasing -> urutkan payreq DESC qty, tiap item dicariin
+				// baris fpb dengan sisa kapasitas TERKECIL yang masih cukup (biar baris besar disisain buat item besar lain)
+				let xSortedPayreqLines = [...xPayreqLines].sort((a, b) => Number(b.qty_request || 0) - Number(a.qty_request || 0));
+
+				for (let i = 0; i < xSortedPayreqLines.length; i++) {
+					let xPayreqItem = xSortedPayreqLines[i];
+					let xNeedQty = Number(xPayreqItem.qty_request || 0);
+
+					let xCandidates = xRemainingByFpb.filter((pRow) => pRow.remaining >= xNeedQty);
+					if (xCandidates.length == 0) {
+						xArrErrorAllocation.push(
+							`${xPayreqItem.product_name} (qty ${xNeedQty}) tidak bisa dialokasikan ke satupun baris FPB tanpa split, meskipun total qty produk ini masih cukup`
+						);
+						continue;
+					}
+
+					// best fit: pilih baris dengan sisa PALING KECIL yang masih cukup
+					xCandidates.sort((a, b) => a.remaining - b.remaining);
+					let xChosen = xCandidates[0];
+
+					xChosen.remaining -= xNeedQty;
+					xMatchedPairs.push({ payreq_item: xPayreqItem, fpb_item: xChosen.fpb_item, qty: xNeedQty });
+					xQtyDoneAddByFpbId[xChosen.fpb_item.id] = (xQtyDoneAddByFpbId[xChosen.fpb_item.id] || 0) + xNeedQty;
 				}
 			}
 
@@ -2127,6 +2170,13 @@ class PaymentRequestService {
 				return xJoResult = {
 					status_code: '-99',
 					status_msg: `Total qty payment request melebihi qty pada FPB untuk item: ${xArrErrorExceed.join('; ')}`
+				};
+			}
+
+			if (xArrErrorAllocation.length > 0) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: `Gagal alokasi (satu baris payreq hanya bisa nempel ke satu baris FPB): ${xArrErrorAllocation.join('; ')}. Coba sesuaikan pembagian qty per baris.`
 				};
 			}
 
@@ -2177,11 +2227,14 @@ class PaymentRequestService {
 				);
 			}
 
-			// 3. update qty_paid tiap item FPB, akumulasi (bukan overwrite) supaya aman kalau nanti ada
-			// payreq lain yang di-merge lagi ke item FPB yang sama
-			for (let xKey in xPayreqQtyByName) {
-				let xFpbItem = xFpbItemByName[xKey];
-				let xAddQty = xPayreqQtyByName[xKey];
+			// 3. update qty_paid tiap baris FPB yang kena alokasi, akumulasi (bukan overwrite) supaya aman kalau nanti ada
+			// payreq lain yang di-merge lagi ke baris FPB yang sama
+			var xFpbItemById = {};
+			for (let i = 0; i < xFpbItems.length; i++) xFpbItemById[xFpbItems[i].id] = xFpbItems[i];
+
+			for (let xFpbId in xQtyDoneAddByFpbId) {
+				let xFpbItem = xFpbItemById[xFpbId];
+				let xAddQty = xQtyDoneAddByFpbId[xFpbId];
 				let xNewQtyPaid = Number(xFpbItem.qty_paid || 0) + Number(xAddQty || 0);
 
 				let xUpdatePrdItem = await _purchaseRequestDetailRepoInstance.save(
@@ -2191,7 +2244,6 @@ class PaymentRequestService {
 						purchase_type: 'ca',
 						ca_type: 1,
 						status: 3
-						// store_link: ""
 					},
 					'update'
 				);

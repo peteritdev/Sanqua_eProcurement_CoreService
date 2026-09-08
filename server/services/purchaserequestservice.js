@@ -2458,7 +2458,7 @@ class PurchaseRequestService {
 								if (xApproverSeq1 != null) {
 									for (var i in xApproverSeq1.approver_user) {
 										// In App Notification
-										await _notificationService.inAppNotification({
+										let xInAppNotificationResult = await _notificationService.inAppNotification({
 											employee_id: await _utilInstance.encrypt(
 												xApproverSeq1.approver_user[i].employee_id.toString(),
 												config.cryptoKey.hashKey
