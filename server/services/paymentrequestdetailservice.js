@@ -830,6 +830,101 @@ class PaymentRequestDetailService {
 
 		return xJoResult;
 	}
+	
+	async received(pParam) {
+		var xJoResult;
+		var xAct = pParam.act;
+		var xFlagProcess = false;
+		var xDecId = null;
+		var xArrIds = [];
+		var xPrDetailItem = null
+		var xPaymentRequest = null
+
+		// console.log(`>>> pParam [PaymentRequestDetailService] : ${JSON.stringify(pParam)}`);
+
+		delete pParam.act;
+
+		var xMethod = pParam.method;
+		var xToken = pParam.token;
+		var xUpdateResult;
+		try {
+			
+		if (pParam.user_id && pParam.payment_request_id && pParam.ids) {
+			xDecId = await _utilInstance.decrypt(pParam.payment_request_id.toString(), config.cryptoKey.hashKey);
+			if (xDecId.status_code == '00') {
+				pParam.payment_request_id = xDecId.decrypted;
+				xPaymentRequest = await _paymentRequestRepoInstance.getByParameter({id: pParam.payment_request_id});
+				if (xPaymentRequest != null) {
+					if (xPaymentRequest.status_code == '00') {
+						if (xPaymentRequest.data.status == 3) {
+							xDecId = await _utilInstance.decrypt(pParam.user_id.toString(), config.cryptoKey.hashKey);
+							if (xDecId.status_code == '00') {
+								pParam.user_id = xDecId.decrypted;
+								for (let i = 0; i < pParam.ids.length; i++) {
+									let xDecIds = await _utilInstance.decrypt(pParam.ids[i].toString(), config.cryptoKey.hashKey);
+									if (xDecId.status_code == '00') {
+										xArrIds.push(xDecIds.decrypted)
+									} else {
+										xJoResult = xDecIds;
+										break;
+									}
+								}
+								
+								xFlagProcess = true;
+							} else {
+								xJoResult = xDecId;
+							}
+
+						} else {
+							xJoResult = {
+								status_code: '-99',
+								status_msg: 'Payreq must be paid before received'
+							};
+						}
+					} else {
+						xJoResult = xPaymentRequest;
+					}
+				} else {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Payment request not found'
+					};
+				}
+			} else {
+				xJoResult = xDecId;
+			}
+		} else {
+			xJoResult = {
+				status_code: '-99',
+				status_msg: 'You need to supply correct parameter'
+			};
+		}
+			console.log(`>>> pParam : ${JSON.stringify(pParam)}`);
+			// xFlagProcess = false;
+			if (xFlagProcess) {
+				let xPayload = {
+					ids: xArrIds,
+					payment_request_id: pParam.payment_request_id,
+					is_received: true,
+					received_note: pParam.received_note
+				}
+				console.log(`>>> xPayload : ${JSON.stringify(xPayload)}`);
+				// let xUpdateResult = await _repoInstance.save(xPayload, 'update_batch')
+				// xJoResult = xUpdateResult;
+			}
+		
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.detailReceived`, `Exception error: ${e.message}`, 'error');
+
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.detailReceived: Exception error: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
+	
 }
 
 module.exports = PaymentRequestDetailService;
