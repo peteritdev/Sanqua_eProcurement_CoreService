@@ -2243,7 +2243,7 @@ class PaymentRequestService {
 						id: xFpbItem.id,
 						qty_paid: xNewQtyPaid,
 						purchase_type: 'ca',
-						ca_type: 1,
+						ca_type: 2,
 						status: 3
 					},
 					'update'

@@ -1419,7 +1419,7 @@ class PurchaseRequestService {
 			pParam.set_to_draft_at = await _utilInstance.getCurrDateTime();
 			pParam.status = _PrConfStat.indexOf('Draft');
 			if (xData != null) {
-				if (xData.status == _PrConfStat.indexOf('Cancel') || xData.status == -1) {
+				if (xData.status == _PrConfStat.indexOf('Cancel') || xData.status == _PrConfStat.indexOf('Pending') || xData.status == -1) {
 					// check fpb has RAB
 					if (xData.budget_plan != null) {
 						let xCheckRAB = await _rabRepoInstance.getById({id: xData.budget_plan.id});
