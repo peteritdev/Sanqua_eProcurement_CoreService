@@ -214,6 +214,42 @@ class PaymentRequestDetailRepository {
 					status_code: '00',
 					status_msg: 'Data has been successfully updated'
 				};
+			} else if (pAct == 'update_batch') {
+				// var xFlag = false
+				pParam.updatedAt = await _utilInstance.getCurrDateTime();
+				var xPayreqId = pParam.payment_request_id;
+				var xDetailIds = pParam.ids;
+				delete pParam.payment_request_id;
+				delete pParam.ids;
+				var xWhere = {
+					where: {
+						payment_request_id: xPayreqId,
+						id: {
+							[Op.in]: xDetailIds
+						}
+					},
+					transaction: xTransaction
+				};
+
+				pParam.updated_by = pParam.user_id;
+				pParam.updated_by_name = pParam.user_name;
+
+				xSaved = await _modelDb.update(pParam, xWhere);
+				if (xSaved) {
+					xJoResult = {
+						status_code: '00',
+						status_msg: 'Data has been successfully saved'
+					};
+
+					await xTransaction.commit();
+				} else {
+					if (xTransaction) await xTransaction.rollback();
+
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Failed save to database'
+					};
+				}
 			}
 		} catch (e) {
 			if (xTransaction) await xTransaction.rollback();

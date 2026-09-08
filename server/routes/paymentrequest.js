@@ -94,6 +94,14 @@ module.exports = (app) => {
 	
 	arrValidate = [];
 	arrValidate = [
+		check('payment_request_id').not().isEmpty().withMessage('Parameter payment_request_id cannot be empty'),
+		check('received_note').not().isEmpty().withMessage('Parameter received_note cannot be empty'),
+		check('ids', 'Parameter ids must be array and cannot be empty').not().isEmpty().isArray()
+	];
+	app.post(rootAPIPath + 'detail/received', arrValidate, paymentRequestController.paymentRequestDetail_Received);
+
+	arrValidate = [];
+	arrValidate = [
 		check('act').not().isEmpty().withMessage('Parameter act cannot be empty'),
 		check('payment_request_id').not().isEmpty().withMessage('Parameter request_id cannot be empty'),
 		check('items', 'Parameter items must be array and cannot be empty').not().isEmpty().isArray()
