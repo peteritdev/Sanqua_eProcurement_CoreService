@@ -876,61 +876,64 @@ class PaymentRequestService {
 											xJoResult.approval_matrix_result = xApprovalMatrixResult;
 											if (xApprovalMatrixResult.status_code == '00') {
 												if (xApprovalMatrixResult.approvers.length > 0) {
-													const xApproverIds = []
-													let xApproverSeq1 = xApprovalMatrixResult.approvers.find((el) => el.sequence === 1);
-													if (xApproverSeq1 != null) {
-														for (var i in xApproverSeq1.approver_user) {
-															xApproverIds.push(xApproverSeq1.approver_user[i].user_id)
-															// In App notification
-															let xInAppNotificationResult = await _notificationService.inAppNotification({
-																document_code: xDetail.data.document_no,
-																document_id: xEncId,
-																document_status: 1,
-																mode: 'request_approval_ca',
-																method: pParam.method,
-																token: pParam.token,
-																employee_id: await _utilInstance.encrypt(
-																	xApproverSeq1.approver_user[i].employee_id.toString(),
-																	config.cryptoKey.hashKey
-																)
-															});
-															console.log(`>>> xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`);
-					
-															_utilInstance.writeLog(
-																`${_xClassName}.submitPayreq`,
-																`xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`,
-																'info'
-															);
-															// Email Notification
-															let xParamEmailNotification,
-																xNotificationResult = {};
-					
-															if (xApproverSeq1.approver_user[i].notification_via_email) {
-																xParamEmailNotification = {
+													// except reimburs then push notification to user
+													if (xDetail.data.payreq_type != 2) {
+														const xApproverIds = []
+														let xApproverSeq1 = xApprovalMatrixResult.approvers.find((el) => el.sequence === 1);
+														if (xApproverSeq1 != null) {
+															for (var i in xApproverSeq1.approver_user) {
+																xApproverIds.push(xApproverSeq1.approver_user[i].user_id)
+																// In App notification
+																let xInAppNotificationResult = await _notificationService.inAppNotification({
+																	document_code: xDetail.data.document_no,
+																	document_id: xEncId,
+																	document_status: 1,
 																	mode: 'request_approval_ca',
-																	id: xEncId,
-																	request_no: xDetail.data.document_no,
-																	company_name: xDetail.data.company_name,
-																	department_name: xDetail.data.department_name,
-																	created_by: xDetail.data.employee_name,
-																	created_at:
-																		xDetail.data.createdAt != null
-																			? moment(xDetail.data.createdAt).format('DD MMM YYYY')
-																			: '',
-																	items: xPyrDetail,
-																	// body: xDetail.data,
-																	approver_user: {
-																		employee_name: xApproverSeq1.approver_user[i].user_name,
-																		email: xApproverSeq1.approver_user[i].email
-																	}
-																};
-																xNotificationResult = await _notificationService.sendNotificationEmail_CANeedApproval(
-																	xParamEmailNotification,
-																	pParam.method,
-																	pParam.token
+																	method: pParam.method,
+																	token: pParam.token,
+																	employee_id: await _utilInstance.encrypt(
+																		xApproverSeq1.approver_user[i].employee_id.toString(),
+																		config.cryptoKey.hashKey
+																	)
+																});
+																console.log(`>>> xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`);
+						
+																_utilInstance.writeLog(
+																	`${_xClassName}.submitPayreq`,
+																	`xInAppNotificationResult: ${JSON.stringify(xInAppNotificationResult)}`,
+																	'info'
 																);
-																console.log(`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`);
-					
+																// Email Notification
+																let xParamEmailNotification,
+																	xNotificationResult = {};
+						
+																if (xApproverSeq1.approver_user[i].notification_via_email) {
+																	xParamEmailNotification = {
+																		mode: 'request_approval_ca',
+																		id: xEncId,
+																		request_no: xDetail.data.document_no,
+																		company_name: xDetail.data.company_name,
+																		department_name: xDetail.data.department_name,
+																		created_by: xDetail.data.employee_name,
+																		created_at:
+																			xDetail.data.createdAt != null
+																				? moment(xDetail.data.createdAt).format('DD MMM YYYY')
+																				: '',
+																		items: xPyrDetail,
+																		// body: xDetail.data,
+																		approver_user: {
+																			employee_name: xApproverSeq1.approver_user[i].user_name,
+																			email: xApproverSeq1.approver_user[i].email
+																		}
+																	};
+																	xNotificationResult = await _notificationService.sendNotificationEmail_CANeedApproval(
+																		xParamEmailNotification,
+																		pParam.method,
+																		pParam.token
+																	);
+																	console.log(`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`);
+						
+																}
 															}
 														}
 													}
