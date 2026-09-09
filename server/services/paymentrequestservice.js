@@ -876,13 +876,14 @@ class PaymentRequestService {
 											xJoResult.approval_matrix_result = xApprovalMatrixResult;
 											if (xApprovalMatrixResult.status_code == '00') {
 												if (xApprovalMatrixResult.approvers.length > 0) {
-													// except reimburs then push notification to user
-													if (xDetail.data.payreq_type != 2) {
-														const xApproverIds = []
-														let xApproverSeq1 = xApprovalMatrixResult.approvers.find((el) => el.sequence === 1);
-														if (xApproverSeq1 != null) {
-															for (var i in xApproverSeq1.approver_user) {
-																xApproverIds.push(xApproverSeq1.approver_user[i].user_id)
+													
+													const xApproverIds = []
+													let xApproverSeq1 = xApprovalMatrixResult.approvers.find((el) => el.sequence === 1);
+													if (xApproverSeq1 != null) {
+														for (var i in xApproverSeq1.approver_user) {
+															xApproverIds.push(xApproverSeq1.approver_user[i].user_id)
+															// except reimburs then push notification to user
+															if (xDetail.data.payreq_type != 2) {
 																// In App notification
 																let xInAppNotificationResult = await _notificationService.inAppNotification({
 																	document_code: xDetail.data.document_no,
@@ -937,6 +938,7 @@ class PaymentRequestService {
 															}
 														}
 													}
+												
 													// update current approval id
 													let xPrdUpdateApprovalId = {
 														id: xDetail.data.id,
