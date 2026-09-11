@@ -1091,7 +1091,7 @@ class PurchaseRequestRepository {
 
 				if (xFlag) {
 					if (pAct == 'add_batch_from_ca') {
-						pParam.status = 2;
+						pParam.status = 1;
 					} else {
 						pParam.status = 0;
 					}
