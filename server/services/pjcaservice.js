@@ -371,7 +371,7 @@ class PJCAService {
 			}
 
 			if (xFlagProccess) {
-				var xResultList = await _repoInstance.list(pParam);
+				var xResultList = await _repoInstance.list_v2(pParam);
 				if (xResultList) {
 					console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
 					if (xResultList.status_code == '00') {
