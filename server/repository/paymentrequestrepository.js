@@ -631,6 +631,223 @@ class PaymentRequestRepository {
 			return xJoResult;
 		}
 	}
+
+	async list_v2(pParam) {
+		var xJoResult = {};
+
+		// Whitelist kolom untuk ORDER BY — cegah SQL injection via order_by
+		var xOrderWhitelist = {
+			'id': { sql: 'tr.id', jsField: 'id' },
+			'created_at': { sql: 'tr.created_at', jsField: 'createdAt' },
+			'document_no': { sql: 'tr.document_no', jsField: 'document_no' },
+			'vendor_name': { sql: 'tr.vendor_name', jsField: 'vendor_name' },
+			'employee_name': { sql: 'tr.employee_name', jsField: 'employee_name' },
+			'status': { sql: 'tr.status', jsField: 'status' },
+			'request_no': { sql: 'pr.request_no', jsField: 'request_no' } // dari relasi purchase_request
+		};
+
+		try {
+			var xAndConditions = [];
+			var xOrConditions = [];
+			var xReplacements = {};
+			var xNeedPrdJoin = false;
+
+			if (pParam.hasOwnProperty('product_id') && pParam.product_id != null && pParam.product_id != undefined && pParam.product_id != '') {
+				var xProduct = JSON.parse(pParam.product_id);
+				if (xProduct.length > 0) {
+					xNeedPrdJoin = true;
+					xAndConditions.push(`prd.product_id IN (:productIds)`);
+					xReplacements.productIds = xProduct;
+				}
+			}
+
+			if (pParam.hasOwnProperty('prd_id') && pParam.prd_id != null && pParam.prd_id != undefined && pParam.prd_id != '') {
+				xNeedPrdJoin = true;
+				xAndConditions.push(`prd.prd_id = :prdId`);
+				xReplacements.prdId = pParam.prd_id;
+			}
+
+			if (pParam.hasOwnProperty('purchase_request_id') && pParam.purchase_request_id != '') {
+				xAndConditions.push(`tr.purchase_request_id = :purchaseRequestId`);
+				xReplacements.purchaseRequestId = pParam.purchase_request_id;
+			}
+
+			if (pParam.hasOwnProperty('company_id')) {
+				xAndConditions.push(`tr.company_id = :companyId`);
+				xReplacements.companyId = pParam.company_id != '' ? pParam.company_id : pParam.logged_company_id;
+			}
+
+			if (pParam.hasOwnProperty('department_id') && pParam.department_id != '') {
+				xAndConditions.push(`tr.department_id = :departmentId`);
+				xReplacements.departmentId = pParam.department_id;
+			}
+
+			if (pParam.hasOwnProperty('vendor_id') && pParam.vendor_id != '') {
+				xAndConditions.push(`tr.vendor_id = :vendorId`);
+				xReplacements.vendorId = pParam.vendor_id;
+			}
+
+			if (pParam.hasOwnProperty('status') && pParam.status != null && pParam.status != undefined && pParam.status != '') {
+				var xStatus = JSON.parse(pParam.status);
+				if (Array.isArray(xStatus) && xStatus.length > 0) {
+					xAndConditions.push(`tr.status IN (:statusList)`);
+					xReplacements.statusList = xStatus;
+				} else {
+					xAndConditions.push(`tr.status = :statusSingle`);
+					xReplacements.statusSingle = pParam.status;
+				}
+			}
+
+			if (pParam.hasOwnProperty('current_approval_ids') && pParam.current_approval_ids != '') {
+				xAndConditions.push(`tr.current_approval_ids::jsonb @> :currentApprovalId::jsonb`);
+				xReplacements.currentApprovalId = JSON.stringify([pParam.current_approval_ids]);
+			}
+
+			if (pParam.hasOwnProperty('start_date') && pParam.hasOwnProperty('end_date')) {
+				if (pParam.start_date != '' && pParam.end_date != '') {
+					xAndConditions.push(`tr.created_at BETWEEN :startDate AND :endDate`);
+					xReplacements.startDate = pParam.start_date + ' 00:00:00';
+					xReplacements.endDate = pParam.end_date + ' 23:59:59';
+				}
+			}
+
+			if (pParam.hasOwnProperty('app_category') && pParam.app_category != '') {
+				xAndConditions.push(`tr.app_category = :appCategory`);
+				xReplacements.appCategory = pParam.app_category;
+			}
+
+			var xNeedPrJoin = true; // pr selalu di-LEFT JOIN karena dipakai untuk keyword & order_by request_no
+
+			if (pParam.hasOwnProperty('keyword') && pParam.keyword != '') {
+				let keywordArray = Array.isArray(pParam.keyword)
+					? pParam.keyword
+					: pParam.keyword.split(',').map(item => item.trim()).filter(item => item !== '');
+				var xKeywords = keywordArray.map(item => `%${item}%`);
+
+				xNeedPrdJoin = true;
+
+				xOrConditions.push(`pr.request_no ILIKE ANY (ARRAY[:keywords])`);
+				xOrConditions.push(`tr.document_no ILIKE ANY (ARRAY[:keywords])`);
+				xOrConditions.push(`tr.vendor_name ILIKE ANY (ARRAY[:keywords])`);
+				xOrConditions.push(`tr.employee_name ILIKE ANY (ARRAY[:keywords])`);
+				xOrConditions.push(`tr.description ILIKE ANY (ARRAY[:keywords])`);
+				xOrConditions.push(`prd.product_code ILIKE ANY (ARRAY[:keywords])`);
+				xOrConditions.push(`prd.product_name ILIKE ANY (ARRAY[:keywords])`);
+				xReplacements.keywords = xKeywords;
+			}
+
+			if (pParam.hasOwnProperty('owned_document_no') && pParam.owned_document_no != '') {
+				xOrConditions.push(`tr.document_no IN (:ownedDocumentNo)`);
+				xReplacements.ownedDocumentNo = pParam.owned_document_no;
+			}
+
+			// --- ORDER BY dari whitelist ---
+			var xOrderKey = 'created_at';
+			var xOrderDir = 'ASC';
+			if (pParam.hasOwnProperty('order_by') && pParam.order_by != '' && xOrderWhitelist.hasOwnProperty(pParam.order_by)) {
+				xOrderKey = pParam.order_by;
+				xOrderDir = pParam.order_type == 'desc' ? 'DESC' : 'ASC';
+			}
+			var xOrderCol = xOrderWhitelist[xOrderKey].sql;
+			var xOrderJsField = xOrderWhitelist[xOrderKey].jsField;
+
+			// --- Susun WHERE ---
+			var xWhereParts = [];
+			if (xAndConditions.length > 0) xWhereParts.push(`(${xAndConditions.join(' AND ')})`);
+			if (xOrConditions.length > 0) xWhereParts.push(`(${xOrConditions.join(' OR ')})`);
+			var xWhereSql = xWhereParts.length > 0 ? `WHERE ${xWhereParts.join(' AND ')}` : '';
+
+			// --- Susun JOIN (nama tabel fisik sesuai model) ---
+			var xJoinSql = `LEFT JOIN tr_purchaserequests pr ON pr.id = tr.purchase_request_id`;
+			if (xNeedPrdJoin) {
+				xJoinSql += ` LEFT JOIN tr_paymentrequestdetails prd ON prd.payment_request_id = tr.id`;
+			}
+
+			// --- Query 1: total distinct payreq ---
+			var xCountSql = `
+				SELECT COUNT(DISTINCT tr.id) AS total
+				FROM tr_paymentrequests tr
+				${xJoinSql}
+				${xWhereSql}
+			`;
+			console.log(`>>> xCountSql: ${JSON.stringify(xCountSql)}`);
+			var xCountResult = await _modelDb.sequelize.query(xCountSql, {
+				replacements: xReplacements,
+				type: Sequelize.QueryTypes.SELECT
+			});
+			console.log(`>>> xCountResult: ${JSON.stringify(xCountResult)}`);
+			var xCountDataWithoutLimit = parseInt(xCountResult[0].total, 10);
+			console.log(`>>> xCountDataWithoutLimit: ${JSON.stringify(xCountDataWithoutLimit)}`);
+
+			// --- Query 2: ID unik + pagination ---
+			var xLimitOffsetSql = '';
+			if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit') &&
+				pParam.offset != '' && pParam.limit != '' && pParam.limit != 'all') {
+				xReplacements.limitVal = parseInt(pParam.limit, 10);
+				xReplacements.offsetVal = parseInt(pParam.offset, 10);
+				xLimitOffsetSql = `LIMIT :limitVal OFFSET :offsetVal`;
+			}
+
+			var xIdSql = `
+				SELECT tr.id
+				FROM tr_paymentrequests tr
+				${xJoinSql}
+				${xWhereSql}
+				GROUP BY tr.id, pr.id
+				ORDER BY ${xOrderCol} ${xOrderDir}
+				${xLimitOffsetSql}
+			`;
+			var xIdRows = await _modelDb.sequelize.query(xIdSql, {
+				replacements: xReplacements,
+				type: Sequelize.QueryTypes.SELECT
+			});
+			var xIds = xIdRows.map(r => r.id);
+
+			// --- Query 3: fetch data lengkap + semua include, id sudah unik & terpaginasi ---
+			var xOrderClause = xOrderKey === 'request_no'
+				? [ [ { model: _modelPurchaseRequest, as: 'purchase_request' }, 'request_no', xOrderDir ] ]
+				: [ [ xOrderJsField, xOrderDir ] ];
+			// lalu pakai: order: xOrderClause
+			var xData = xIds.length > 0 ? await _modelDb.findAll({
+				where: { id: { [Op.in]: xIds } },
+				// order: [ [xOrderJsField.includes('.') ? xOrderJsField.split('.') : xOrderJsField, xOrderDir] ],
+				order: xOrderClause,
+				include: [
+					{
+						model: _modelPurchaseRequest,
+						as: 'purchase_request',
+						attributes: [ 'id', 'request_no' ]
+					},
+					{
+						model: _modelPJCADb,
+						as: 'pjca',
+						attributes: ['id', 'document_no', 'status']
+					},
+					{
+						model: _modelPaymentRequestDetail,
+						as: 'payment_request_detail'
+					}
+				]
+			}) : [];
+
+			var xDataMap = new Map(xData.map(d => [d.id, d]));
+			xData = xIds.map(id => xDataMap.get(id)).filter(Boolean);
+
+			xJoResult = {
+				status_code: '00',
+				status_msg: 'OK',
+				data: { rows: xData, count: xData.length },
+				total_record: xCountDataWithoutLimit
+			};
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.list`, `Exception error: ${e.message}`, 'error');
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.list: Exception error: ${e.message}`
+			};
+		}
+		return xJoResult;
+	}
 }
 
 module.exports = PaymentRequestRepository;
