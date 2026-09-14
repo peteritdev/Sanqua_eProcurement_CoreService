@@ -682,7 +682,7 @@ class PaymentRequestRepository {
 				xAndConditions.push(`tr.company_id = :companyId`);
 				xReplacements.companyId = pParam.company_id != '' ? pParam.company_id : pParam.logged_company_id;
 				if (pParam.logged_company_id != 6) {
-					xAndConditions.push(`pr.created_by_plant_id <> 6 OR pr.created_by_plant_id IS NULL`);
+					xAndConditions.push(`(pr.created_by_plant_id <> 6 OR pr.created_by_plant_id IS NULL)`);
 				}
 			}
 
