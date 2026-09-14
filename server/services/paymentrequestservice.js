@@ -433,7 +433,8 @@ class PaymentRequestService {
 									updated_by_name: xRows[i].updated_by_name,
 									purchase_request: xRows[i].purchase_request,
 									pjca: xRows[i].pjca,
-									app_category: xRows[i].app_category
+									app_category: xRows[i].app_category,
+									created_by_plant_id: xRows[i].created_by_plant_id
 								});
 							}
 

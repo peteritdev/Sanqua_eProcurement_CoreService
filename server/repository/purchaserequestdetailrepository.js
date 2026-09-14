@@ -917,10 +917,21 @@ class PurchaseRequestDetailRepository {
 
 			xSqlWhere += ' AND prd.status = 3 AND prd.qty_done < prd.qty_paid ';
 
-			if (pParam.hasOwnProperty('company_id')) {
-				if (pParam.company_id != '') {
+			if (pParam.hasOwnProperty('company_id') && pParam.company_id != '') {
+				// if (pParam.company_id != '') {
+				// 	xSqlWhere += ' AND pr.company_id = :companyId ';
+				// 	xObjJsonWhere.companyId = pParam.company_id;
+				// }
+				// check if logged user is from company id 6 (PT. SANQUA) then show all data from all user otherwise show data from user company only
+				if (pParam.logged_company_id == 6) {
 					xSqlWhere += ' AND pr.company_id = :companyId ';
 					xObjJsonWhere.companyId = pParam.company_id;
+				} else {
+					xSqlWhere += ' AND pr.company_id = :companyId ';
+					xObjJsonWhere.companyId = pParam.company_id;
+					
+					xSqlWhere += ' AND (pr.created_by_plant_id <> 6 OR pr.created_by_plant_id is null)';
+					// xObjJsonWhere.plantId = pParam.pParam.logged_company_id;
 				}
 			}
 

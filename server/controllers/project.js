@@ -117,6 +117,7 @@ async function save(req, res) {
 
 				req.body.logged_employee_id = oAuthResult.token_data.result_verify.employee_info.id;
 				req.body.logged_employee_name = oAuthResult.token_data.result_verify.employee_info.name;
+				req.body.logged_plant_id = oAuthResult.token_data.result_verify.company.plant_id;
 				if (oAuthResult.token_data.result_verify.employee_info.department.hasOwnProperty('unit')) {
 					if (oAuthResult.token_data.result_verify.employee_info.department.unit != null) {
 						req.body.department_id = oAuthResult.token_data.result_verify.employee_info.department.unit.id;

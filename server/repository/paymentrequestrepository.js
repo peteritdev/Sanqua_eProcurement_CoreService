@@ -416,7 +416,7 @@ class PaymentRequestRepository {
 				pParam.is_delete = 0;
 				pParam.created_by = pParam.user_id;
 				pParam.created_by_name = pParam.user_name;
-				// console.log(`>>> xSave: ${JSON.stringify(pParam)}`);
+				pParam.created_by_plant_id = pParam.logged_plant_id;
 				
 				xSaved = await _modelDb.create(pParam, { transaction: xTransaction });
 				console.log(`>>> xSave:end ${JSON.stringify(xSaved)}`);
@@ -444,7 +444,7 @@ class PaymentRequestRepository {
 				pParam.is_delete = 0;
 				pParam.created_by = pParam.user_id;
 				pParam.created_by_name = pParam.user_name;
-
+				pParam.created_by_plant_id = pParam.logged_plant_id;
 				//// Need disable trigger first because it affect when add batch item.
 				// sequelize.query(
 				// 	'ALTER TABLE "tr_paymentrequestdetails" DISABLE TRIGGER "trg_update_total_item_afterinsert"'
@@ -672,9 +672,18 @@ class PaymentRequestRepository {
 				xReplacements.purchaseRequestId = pParam.purchase_request_id;
 			}
 
-			if (pParam.hasOwnProperty('company_id')) {
+			// if (pParam.hasOwnProperty('company_id')) {
+			// 	xAndConditions.push(`tr.company_id = :companyId`);
+			// 	xReplacements.companyId = pParam.company_id != '' ? pParam.company_id : pParam.logged_company_id;
+			// }
+			
+			if (pParam.hasOwnProperty('company_id') && pParam.company_id != '') {
+				// check if logged user is from company id 6 (PT. SANQUA) then show all data from all user otherwise show data from user company only
 				xAndConditions.push(`tr.company_id = :companyId`);
 				xReplacements.companyId = pParam.company_id != '' ? pParam.company_id : pParam.logged_company_id;
+				if (pParam.logged_company_id != 6) {
+					xAndConditions.push(`pr.created_by_plant_id <> 6 OR pr.created_by_plant_id IS NULL`);
+				}
 			}
 
 			if (pParam.hasOwnProperty('department_id') && pParam.department_id != '') {
