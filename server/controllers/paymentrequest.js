@@ -131,11 +131,12 @@ async function paymentRequest_Save(req, res) {
 				req.body.user_name = oAuthResult.token_data.result_verify.name;
 
 				// req.body.logged_company_code = oAuthResult.token_data.result_verify.company.alias;
-				// req.body.logged_company_id = oAuthResult.token_data.result_verify.company.id;
+				// req.body.logged_company_id = oAuthResult.token_data.result_verify.company.plant_id;
 				// req.body.logged_company_name = oAuthResult.token_data.result_verify.company.name;
 
 				req.body.employee_id = oAuthResult.token_data.result_verify.employee_info.id;
 				req.body.employee_name = oAuthResult.token_data.result_verify.employee_info.name;
+				req.body.logged_plant_id = oAuthResult.token_data.result_verify.company.plant_id;
 				if (oAuthResult.token_data.result_verify.employee_info.department.hasOwnProperty('unit')) {
 					if (oAuthResult.token_data.result_verify.employee_info.department.unit != null) {
 						req.body.department_id = oAuthResult.token_data.result_verify.employee_info.department.unit.id;
