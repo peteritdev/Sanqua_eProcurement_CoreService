@@ -397,6 +397,7 @@ class PJCAService {
 									updated_at: moment(xRows[i].updatedAt).format('DD MMM YYYY HH:mm:ss'),
 									updated_by_name: xRows[i].updated_by_name,
 									payment_request: xRows[i].payment_request,
+									created_by_plant_id: xRows[i].created_by_plant_id
 								});
 							}
 

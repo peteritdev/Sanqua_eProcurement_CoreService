@@ -355,7 +355,7 @@ class PJCARepository {
 				pParam.is_delete = 0;
 				pParam.created_by = pParam.user_id;
 				pParam.created_by_name = pParam.user_name;
-				// console.log(`>>> xSave: ${JSON.stringify(pParam)}`);
+				pParam.created_by_plant_id = pParam.logged_plant_id;
 				
 				xSaved = await _modelDb.create(pParam, { transaction: xTransaction });
 				console.log(`>>> xSave:end ${JSON.stringify(xSaved)}`);
@@ -383,6 +383,7 @@ class PJCARepository {
 				pParam.is_delete = 0;
 				pParam.created_by = pParam.user_id;
 				pParam.created_by_name = pParam.user_name;
+				pParam.created_by_plant_id = pParam.logged_plant_id;
 
 				console.log(`>>> before xSave:end ${JSON.stringify(pParam)}`, pAct);
 				xSaved = await _modelDb.create(
@@ -577,10 +578,18 @@ class PJCARepository {
 				xReplacements.paymentRequestId = pParam.payment_request_id;
 			}
 
-			if (pParam.hasOwnProperty('company_id')) {
+			if (pParam.hasOwnProperty('company_id') && pParam.company_id != '') {
+				// check if logged user is from company id 6 (PT. SANQUA) then show all data from all user otherwise show data from user company only
 				xAndConditions.push(`tr.company_id = :companyId`);
 				xReplacements.companyId = pParam.company_id != '' ? pParam.company_id : pParam.logged_company_id;
+				if (pParam.logged_company_id != 6) {
+					xAndConditions.push(`tr.created_by_plant_id <> 6 OR tr.created_by_plant_id IS NULL`);
+				}
 			}
+			// if (pParam.hasOwnProperty('company_id')) {
+			// 	xAndConditions.push(`tr.company_id = :companyId`);
+			// 	xReplacements.companyId = pParam.company_id != '' ? pParam.company_id : pParam.logged_company_id;
+			// }
 
 			if (pParam.hasOwnProperty('department_id') && pParam.department_id != '') {
 				xAndConditions.push(`tr.department_id = :departmentId`);
