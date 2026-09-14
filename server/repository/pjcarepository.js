@@ -583,7 +583,7 @@ class PJCARepository {
 				xAndConditions.push(`tr.company_id = :companyId`);
 				xReplacements.companyId = pParam.company_id != '' ? pParam.company_id : pParam.logged_company_id;
 				if (pParam.logged_company_id != 6) {
-					xAndConditions.push(`tr.created_by_plant_id <> 6 OR tr.created_by_plant_id IS NULL`);
+					xAndConditions.push(`(tr.created_by_plant_id <> 6 OR tr.created_by_plant_id IS NULL)`);
 				}
 			}
 			// if (pParam.hasOwnProperty('company_id')) {
