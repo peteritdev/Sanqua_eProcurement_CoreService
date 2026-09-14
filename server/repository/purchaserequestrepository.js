@@ -438,8 +438,17 @@ class PurchaseRequestRepository {
 
 		if (pParam.hasOwnProperty('company_id')) {
 			if (pParam.company_id != '') {
-				xSqlWhere += ' AND pr.company_id = :companyId ';
-				xObjJsonWhere.companyId = pParam.company_id;
+				// check if logged user is from company id 6 (PT. SANQUA) then show all data from all user otherwise show data from user company only
+				if (pParam.logged_company_id == 6) {
+					xSqlWhere += ' AND pr.company_id = :companyId ';
+					xObjJsonWhere.companyId = pParam.company_id;
+				} else {
+					xSqlWhere += ' AND pr.company_id = :companyId ';
+					xObjJsonWhere.companyId = pParam.company_id;
+					
+					xSqlWhere += ' AND (pr.created_by_plant_id <> 6 OR pr.created_by_plant_id is null)';
+					// xObjJsonWhere.plantId = pParam.pParam.logged_company_id;
+				}
 			}
 		}
 
@@ -621,7 +630,7 @@ class PurchaseRequestRepository {
 		if (!pParam.hasOwnProperty('is_export')) {
 			xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
 			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item, pr.fpb_type,
-			pr.budget_plan_no,
+			pr.budget_plan_no, pr.created_by_plant_id,
 			p.id AS "project_id", p.code AS "project_code", p.name AS "project_name", p.odoo_project_code, pr.approved_at`;
 
 			xSqlGroupBy = ` GROUP BY pr.id, 
@@ -635,6 +644,7 @@ class PurchaseRequestRepository {
 						pr.company_id, 
 						pr.company_code, 
 						pr.company_name,
+						pr.created_by_plant_id,
 						p.id,p.code,p.name,p.odoo_project_code`;
 
 			if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
@@ -646,7 +656,7 @@ class PurchaseRequestRepository {
 			if (pParam.is_export) {
 				xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name, pr.fpb_type,
 								pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item, pr.approved_at, 
-								pr.budget_plan_no,
+								pr.budget_plan_no, pr.created_by_plant_id,
 								prd.product_code,
 								prd.product_name,
 								prd.qty,
@@ -677,7 +687,7 @@ class PurchaseRequestRepository {
 			} else {
 				xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name, pr.fpb_type,
 			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item,
-			pr.budget_plan_no,
+			pr.budget_plan_no, pr.created_by_plant_id,
 			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code, pr.approved_at`;
 
 				xSqlGroupBy = ` GROUP BY pr.id, 
@@ -691,6 +701,7 @@ class PurchaseRequestRepository {
 						pr.company_id, 
 						pr.company_code, 
 						pr.company_name,
+						pr.created_by_plant_id,
 						p.id,p.code,p.name,p.odoo_project_code`;
 
 				if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
