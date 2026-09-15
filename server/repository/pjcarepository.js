@@ -596,6 +596,12 @@ class PJCARepository {
 				xReplacements.departmentId = pParam.department_id;
 			}
 
+			console.log(`>>> pParam.logged_is_admin: ${JSON.stringify(pParam.logged_is_admin)}`);
+			if (pParam.hasOwnProperty('user_id') && pParam.user_id != '' && pParam.logged_is_admin == 0) {
+				xAndConditions.push(`tr.created_by = :createdBy`);
+				xReplacements.createdBy = pParam.user_id;
+			}
+			
 			if (pParam.hasOwnProperty('status') && pParam.status != '') {
 				if (Array.isArray(pParam.status)) {
 					xAndConditions.push(`tr.status IN (:statusList)`);
