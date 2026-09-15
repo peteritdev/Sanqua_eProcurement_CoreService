@@ -595,12 +595,6 @@ class PJCARepository {
 				xAndConditions.push(`tr.department_id = :departmentId`);
 				xReplacements.departmentId = pParam.department_id;
 			}
-
-			console.log(`>>> pParam.logged_is_admin: ${JSON.stringify(pParam.logged_is_admin)}`);
-			if (pParam.hasOwnProperty('user_id') && pParam.user_id != '' && pParam.logged_is_admin == 0) {
-				xAndConditions.push(`tr.created_by = :createdBy`);
-				xReplacements.createdBy = pParam.user_id;
-			}
 			
 			if (pParam.hasOwnProperty('status') && pParam.status != '') {
 				if (Array.isArray(pParam.status)) {
@@ -681,9 +675,70 @@ class PJCARepository {
 				}
 			}
 
+			console.log(`>>> pParam.logged_is_admin: ${JSON.stringify(pParam.logged_is_admin)}`);
+			console.log(`>>> pParam.owned_document_no: ${JSON.stringify(pParam.hasOwnProperty('owned_document_no'))}`);
+
 			if (pParam.hasOwnProperty('owned_document_no') && pParam.owned_document_no != '') {
-				xOrConditions.push(`tr.document_no IN (:ownedDocumentNo)`);
+				let xSqlMerge = '';
+				if (pParam.hasOwnProperty('keyword') && pParam.keyword != '') {
+					let keywordArray = Array.isArray(pParam.keyword)
+						? pParam.keyword
+						: pParam.keyword.split(',').map(item => item.trim()).filter(item => item !== '');
+					var xKeywords = keywordArray.map(item => `%${item}%`);
+
+					xNeedPrdJoin = true;
+					xSqlMerge = `(pmt.document_no ILIKE ANY (ARRAY[:keywords]) OR
+						tr.document_no ILIKE ANY (ARRAY[:keywords]) OR
+						tr.company_name ILIKE ANY (ARRAY[:keywords]) OR
+						tr.department_name ILIKE ANY (ARRAY[:keywords]) OR
+						tr.to_department_name ILIKE ANY (ARRAY[:keywords]) OR
+						tr.employee_name ILIKE ANY (ARRAY[:keywords]) OR
+						tr.description ILIKE ANY (ARRAY[:keywords]) OR
+						pd.product_code ILIKE ANY (ARRAY[:keywords]) OR
+						pd.product_name ILIKE ANY (ARRAY[:keywords]) AND tr.document_no IN (:ownedDocumentNo))`
+						
+					if (pParam.hasOwnProperty('user_id') && pParam.user_id != '' && pParam.logged_is_admin == 0) {
+						xSqlMerge = xSqlMerge + ` OR tr.created_by = :createdBy`;
+						xReplacements.createdBy = pParam.user_id;
+					}
+
+					xAndConditions.push(xSqlMerge);
+					xReplacements.keywords = xKeywords;
+				} else {
+					xOrConditions.push(`tr.document_no IN (:ownedDocumentNo)`);
+					
+					if (pParam.hasOwnProperty('user_id') && pParam.user_id != '' && pParam.logged_is_admin == 0) {
+						xOrConditions.push(`tr.created_by = :createdBy`);
+						xReplacements.createdBy = pParam.user_id;
+					}
+				}
 				xReplacements.ownedDocumentNo = pParam.owned_document_no;
+				
+			} else {
+				if (pParam.hasOwnProperty('user_id') && pParam.user_id != '' && pParam.logged_is_admin == 0) {
+					xAndConditions.push(`tr.created_by = :createdBy`);
+					xReplacements.createdBy = pParam.user_id;
+				}
+
+				if (pParam.hasOwnProperty('keyword') && pParam.keyword != '') {
+					let keywordArray = Array.isArray(pParam.keyword)
+						? pParam.keyword
+						: pParam.keyword.split(',').map(item => item.trim()).filter(item => item !== '');
+					var xKeywords = keywordArray.map(item => `%${item}%`);
+
+					xNeedPrdJoin = true;
+
+					xOrConditions.push(`pmt.document_no ILIKE ANY(ARRAY[:keywords])`);
+					xOrConditions.push(`tr.document_no ILIKE ANY(ARRAY[:keywords])`);
+					xOrConditions.push(`tr.company_name ILIKE ANY(ARRAY[:keywords])`);
+					xOrConditions.push(`tr.department_name ILIKE ANY(ARRAY[:keywords])`);
+					xOrConditions.push(`tr.to_department_name ILIKE ANY(ARRAY[:keywords])`);
+					xOrConditions.push(`tr.employee_name ILIKE ANY(ARRAY[:keywords])`);
+					xOrConditions.push(`tr.description ILIKE ANY(ARRAY[:keywords])`);
+					xOrConditions.push(`pd.product_code ILIKE ANY(ARRAY[:keywords])`);
+					xOrConditions.push(`pd.product_name ILIKE ANY(ARRAY[:keywords])`);
+					xReplacements.keywords = xKeywords;
+				}
 			}
 			// --- ORDER BY dari whitelist ---
 			var xOrderKey = 'id';

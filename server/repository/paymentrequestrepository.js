@@ -690,12 +690,6 @@ class PaymentRequestRepository {
 				xAndConditions.push(`tr.department_id = :departmentId`);
 				xReplacements.departmentId = pParam.department_id;
 			}
-			
-			console.log(`>>> pParam.logged_is_admin: ${JSON.stringify(pParam.logged_is_admin)}`);
-			if (pParam.hasOwnProperty('user_id') && pParam.user_id != '' && pParam.logged_is_admin == 0) {
-				xAndConditions.push(`tr.created_by = :createdBy`);
-				xReplacements.createdBy = pParam.user_id;
-			}
 
 			if (pParam.hasOwnProperty('vendor_id') && pParam.vendor_id != '') {
 				xAndConditions.push(`tr.vendor_id = :vendorId`);
@@ -732,30 +726,68 @@ class PaymentRequestRepository {
 			}
 
 			var xNeedPrJoin = true; // pr selalu di-LEFT JOIN karena dipakai untuk keyword & order_by request_no
-
-			if (pParam.hasOwnProperty('keyword') && pParam.keyword != '') {
-				let keywordArray = Array.isArray(pParam.keyword)
-					? pParam.keyword
-					: pParam.keyword.split(',').map(item => item.trim()).filter(item => item !== '');
-				var xKeywords = keywordArray.map(item => `%${item}%`);
-
-				xNeedPrdJoin = true;
-
-				xOrConditions.push(`pr.request_no ILIKE ANY (ARRAY[:keywords])`);
-				xOrConditions.push(`tr.document_no ILIKE ANY (ARRAY[:keywords])`);
-				xOrConditions.push(`tr.vendor_name ILIKE ANY (ARRAY[:keywords])`);
-				xOrConditions.push(`tr.employee_name ILIKE ANY (ARRAY[:keywords])`);
-				xOrConditions.push(`tr.description ILIKE ANY (ARRAY[:keywords])`);
-				xOrConditions.push(`prd.product_code ILIKE ANY (ARRAY[:keywords])`);
-				xOrConditions.push(`prd.product_name ILIKE ANY (ARRAY[:keywords])`);
-				xReplacements.keywords = xKeywords;
-			}
+			console.log(`>>> pParam.logged_is_admin: ${JSON.stringify(pParam.logged_is_admin)}`);
+			console.log(`>>> pParam.owned_document_no: ${JSON.stringify(pParam.hasOwnProperty('owned_document_no'))}`);
 
 			if (pParam.hasOwnProperty('owned_document_no') && pParam.owned_document_no != '') {
-				xOrConditions.push(`tr.document_no IN (:ownedDocumentNo)`);
-				xReplacements.ownedDocumentNo = pParam.owned_document_no;
-			}
+				let xSqlMerge = '';
+				if (pParam.hasOwnProperty('keyword') && pParam.keyword != '') {
+					let keywordArray = Array.isArray(pParam.keyword)
+						? pParam.keyword
+						: pParam.keyword.split(',').map(item => item.trim()).filter(item => item !== '');
+					var xKeywords = keywordArray.map(item => `%${item}%`);
 
+					xNeedPrdJoin = true;
+					xSqlMerge = `(pr.request_no ILIKE ANY (ARRAY[:keywords]) OR
+						tr.document_no ILIKE ANY (ARRAY[:keywords]) OR
+						tr.vendor_name ILIKE ANY (ARRAY[:keywords]) OR
+						tr.employee_name ILIKE ANY (ARRAY[:keywords]) OR
+						tr.description ILIKE ANY (ARRAY[:keywords]) OR
+						prd.product_code ILIKE ANY (ARRAY[:keywords]) OR
+						prd.product_name ILIKE ANY (ARRAY[:keywords]) AND tr.document_no IN (:ownedDocumentNo))`
+						
+					if (pParam.hasOwnProperty('user_id') && pParam.user_id != '' && pParam.logged_is_admin == 0) {
+						xSqlMerge = xSqlMerge + ` OR tr.created_by = :createdBy`;
+						xReplacements.createdBy = pParam.user_id;
+					}
+
+					xAndConditions.push(xSqlMerge);
+					xReplacements.keywords = xKeywords;
+				} else {
+					xOrConditions.push(`tr.document_no IN (:ownedDocumentNo)`);
+					
+					if (pParam.hasOwnProperty('user_id') && pParam.user_id != '' && pParam.logged_is_admin == 0) {
+						xOrConditions.push(`tr.created_by = :createdBy`);
+						xReplacements.createdBy = pParam.user_id;
+					}
+				}
+				xReplacements.ownedDocumentNo = pParam.owned_document_no;
+				
+			} else {
+				if (pParam.hasOwnProperty('user_id') && pParam.user_id != '' && pParam.logged_is_admin == 0) {
+					xAndConditions.push(`tr.created_by = :createdBy`);
+					xReplacements.createdBy = pParam.user_id;
+				}
+
+				if (pParam.hasOwnProperty('keyword') && pParam.keyword != '') {
+					let keywordArray = Array.isArray(pParam.keyword)
+						? pParam.keyword
+						: pParam.keyword.split(',').map(item => item.trim()).filter(item => item !== '');
+					var xKeywords = keywordArray.map(item => `%${item}%`);
+
+					xNeedPrdJoin = true;
+
+					xOrConditions.push(`pr.request_no ILIKE ANY (ARRAY[:keywords])`);
+					xOrConditions.push(`tr.document_no ILIKE ANY (ARRAY[:keywords])`);
+					xOrConditions.push(`tr.vendor_name ILIKE ANY (ARRAY[:keywords])`);
+					xOrConditions.push(`tr.employee_name ILIKE ANY (ARRAY[:keywords])`);
+					xOrConditions.push(`tr.description ILIKE ANY (ARRAY[:keywords])`);
+					xOrConditions.push(`prd.product_code ILIKE ANY (ARRAY[:keywords])`);
+					xOrConditions.push(`prd.product_name ILIKE ANY (ARRAY[:keywords])`);
+					xReplacements.keywords = xKeywords;
+				}
+			}
+			
 			// --- ORDER BY dari whitelist ---
 			var xOrderKey = 'created_at';
 			var xOrderDir = 'ASC';
