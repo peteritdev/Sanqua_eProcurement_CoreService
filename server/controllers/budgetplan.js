@@ -58,7 +58,7 @@ async function budgetPlan_List(req, res) {
 					(el) => el.application.id === config.applicationId || el.application.id === 1
 				);
 
-				req.query.logged_is_admin = xLevel.is_admin;
+				req.query.logged_is_admin = xLevel.is_admin || false;
 				req.query.user_id = oAuthResult.token_data.result_verify.id;
 				if (oAuthResult.token_data.result_verify.employee_info.department.hasOwnProperty('unit')) {
 					if (oAuthResult.token_data.result_verify.employee_info.department.unit != null) {

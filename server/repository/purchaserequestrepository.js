@@ -427,7 +427,6 @@ class PurchaseRequestRepository {
 				xObjJsonWhere.status = pParam.status;
 			}
 		}
-
 		if (pParam.hasOwnProperty('user_id') && (pParam.is_admin == 0 || pParam.logged_is_admin == 0)) {
 			if (pParam.user_id != '') {
 				// xSqlWhereOr.push(' pr.created_by = :createdBy ');
