@@ -646,26 +646,6 @@ class PJCARepository {
 				}
 			}
 
-			if (pParam.hasOwnProperty('keyword') && pParam.keyword != '') {
-				let keywordArray = Array.isArray(pParam.keyword)
-					? pParam.keyword
-					: pParam.keyword.split(',').map(item => item.trim()).filter(item => item !== '');
-				var xKeywords = keywordArray.map(item => `%${item}%`);
-
-				xNeedDetailJoin = true;
-
-				xOrConditions.push(`pmt.document_no ILIKE ANY(ARRAY[:keywords])`);
-				xOrConditions.push(`tr.document_no ILIKE ANY(ARRAY[:keywords])`);
-				xOrConditions.push(`tr.company_name ILIKE ANY(ARRAY[:keywords])`);
-				xOrConditions.push(`tr.department_name ILIKE ANY(ARRAY[:keywords])`);
-				xOrConditions.push(`tr.to_department_name ILIKE ANY(ARRAY[:keywords])`);
-				xOrConditions.push(`tr.employee_name ILIKE ANY(ARRAY[:keywords])`);
-				xOrConditions.push(`tr.description ILIKE ANY(ARRAY[:keywords])`);
-				xOrConditions.push(`pd.product_code ILIKE ANY(ARRAY[:keywords])`);
-				xOrConditions.push(`pd.product_name ILIKE ANY(ARRAY[:keywords])`);
-				xReplacements.keywords = xKeywords;
-			}
-
 			if (pParam.hasOwnProperty('product_id') && pParam.product_id != null && pParam.product_id != '') {
 				var xProductIds = JSON.parse(pParam.product_id);
 				if (xProductIds.length > 0) {
@@ -686,7 +666,7 @@ class PJCARepository {
 						: pParam.keyword.split(',').map(item => item.trim()).filter(item => item !== '');
 					var xKeywords = keywordArray.map(item => `%${item}%`);
 
-					xNeedPrdJoin = true;
+					xNeedDetailJoin = true;
 					xSqlMerge = `(pmt.document_no ILIKE ANY (ARRAY[:keywords]) OR
 						tr.document_no ILIKE ANY (ARRAY[:keywords]) OR
 						tr.company_name ILIKE ANY (ARRAY[:keywords]) OR
@@ -726,7 +706,7 @@ class PJCARepository {
 						: pParam.keyword.split(',').map(item => item.trim()).filter(item => item !== '');
 					var xKeywords = keywordArray.map(item => `%${item}%`);
 
-					xNeedPrdJoin = true;
+					xNeedDetailJoin = true;
 
 					xOrConditions.push(`pmt.document_no ILIKE ANY(ARRAY[:keywords])`);
 					xOrConditions.push(`tr.document_no ILIKE ANY(ARRAY[:keywords])`);
@@ -809,7 +789,8 @@ class PJCARepository {
 						as: 'payment_request',
 						attributes: [ 'id', 'document_no' ]
 					}
-				]
+				],
+				logging: true
 			}) : [];
 
         	// Re-sort sesuai urutan xIds dari step 2

@@ -373,7 +373,7 @@ class PJCAService {
 			if (xFlagProccess) {
 				var xResultList = await _repoInstance.list_v2(pParam);
 				if (xResultList) {
-					console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
+					// console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
 					if (xResultList.status_code == '00') {
 						var xRows = xResultList.data.rows;
 						if (xRows.length > 0) {
