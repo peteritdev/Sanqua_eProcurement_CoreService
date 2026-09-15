@@ -690,6 +690,12 @@ class PaymentRequestRepository {
 				xAndConditions.push(`tr.department_id = :departmentId`);
 				xReplacements.departmentId = pParam.department_id;
 			}
+			
+			console.log(`>>> pParam.logged_is_admin: ${JSON.stringify(pParam.logged_is_admin)}`);
+			if (pParam.hasOwnProperty('user_id') && pParam.user_id != '' && pParam.logged_is_admin == 0) {
+				xAndConditions.push(`tr.created_by = :createdBy`);
+				xReplacements.createdBy = pParam.user_id;
+			}
 
 			if (pParam.hasOwnProperty('vendor_id') && pParam.vendor_id != '') {
 				xAndConditions.push(`tr.vendor_id = :vendorId`);
