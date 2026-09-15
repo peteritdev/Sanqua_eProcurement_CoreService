@@ -86,11 +86,12 @@ async function paymentRequest_List(req, res) {
 					error_msg: errors
 				});
 			} else {
+				console.log(`>>> xLevel 2`);
 				let xLevel = oAuthResult.token_data.result_verify.user_level.find(
 					(el) => el.application.id === config.applicationId || el.application.id === 1
 				);
-
-				req.query.logged_is_admin = xLevel.is_admin;
+				console.log(`>>> xLevel : ${JSON.stringify(xLevel)}`);
+				req.query.logged_is_admin = xLevel.is_admin || false;
 				req.query.user_id = oAuthResult.token_data.result_verify.id;
 
 				req.query.logged_company_id = oAuthResult.token_data.result_verify.employee_info.company != null ? oAuthResult.token_data.result_verify.employee_info.company.plant_id : oAuthResult.token_data.result_verify.company.plant_id;

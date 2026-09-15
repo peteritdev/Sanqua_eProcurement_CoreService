@@ -344,30 +344,30 @@ class PJCAService {
 				};
 			}
 			
+			const xOwnedDocumentPayload = {
+				application_id: 8,
+				table_name: config.dbTables.pjca,
+				document_id: '',
+				user_id: pParam.user_id
+			}
 			if (pParam.hasOwnProperty('inappnotif') && pParam.inappnotif) {
-				const xOwnedDocumentPayload = {
-					application_id: 8,
-					table_name: config.dbTables.pjca,
-					document_id: '',
-					user_id: pParam.user_id
-				}
-			
 				xOwnedDocumentPayload.status = 0
 				
-				let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, xOwnedDocumentPayload);
-				console.log(`>>> xOwnedDocument : ${JSON.stringify(xOwnedDocument)}`);
+				pParam.current_approval_ids = pParam.user_id;
+			}
+			
+			let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, xOwnedDocumentPayload);
+			console.log(`>>> xOwnedDocument : ${JSON.stringify(xOwnedDocument)}`);
 
-				if (xOwnedDocument.status_code == '00') {
-					if (xOwnedDocument.hasOwnProperty('token_data')) {
-						if (xOwnedDocument.token_data.status_code == '00') {
-							for (var i in xOwnedDocument.token_data.data) {
-								xArrOwnedDocNo.push(xOwnedDocument.token_data.data[i].document_no);
-							}
-							pParam.owned_document_no = xArrOwnedDocNo;
+			if (xOwnedDocument.status_code == '00') {
+				if (xOwnedDocument.hasOwnProperty('token_data')) {
+					if (xOwnedDocument.token_data.status_code == '00') {
+						for (var i in xOwnedDocument.token_data.data) {
+							xArrOwnedDocNo.push(xOwnedDocument.token_data.data[i].document_no);
 						}
+						pParam.owned_document_no = xArrOwnedDocNo;
 					}
 				}
-				pParam.current_approval_ids = pParam.user_id;
 			}
 
 			if (xFlagProccess) {
