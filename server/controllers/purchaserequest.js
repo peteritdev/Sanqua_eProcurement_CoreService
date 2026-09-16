@@ -141,6 +141,43 @@ async function purchaseRequest_DropDown(req, res) {
 					error_msg: errors
 				});
 			} else {
+				let xLevel = oAuthResult.token_data.result_verify.user_level.find(
+					(el) => el.application.id === config.applicationId || el.application.id === 1
+				);
+
+				req.query.logged_is_admin = xLevel != undefined ? xLevel.is_admin : 0;
+				req.query.user_id = oAuthResult.token_data.result_verify.id;
+				if (oAuthResult.token_data.result_verify.employee_info.department.hasOwnProperty('unit')) {
+					if (oAuthResult.token_data.result_verify.employee_info.department.unit != null) {
+						req.query.logged_department_id =
+							oAuthResult.token_data.result_verify.employee_info.department.unit.id;
+						req.query.logged_department_name =
+							oAuthResult.token_data.result_verify.employee_info.department.unit.name;
+					} else {
+						if (oAuthResult.token_data.result_verify.employee_info.department.section != null) {
+							req.query.logged_department_id =
+								oAuthResult.token_data.result_verify.employee_info.department.section.id;
+							req.query.logged_department_name =
+								oAuthResult.token_data.result_verify.employee_info.department.section.name;
+						}
+					}
+				} else {
+					if (oAuthResult.token_data.result_verify.employee_info.department.section != null) {
+						req.query.logged_department_id =
+							oAuthResult.token_data.result_verify.employee_info.department.section.id;
+						req.query.logged_department_name =
+							oAuthResult.token_data.result_verify.employee_info.department.section.name;
+					} else {
+						req.query.logged_department_id =
+							oAuthResult.token_data.result_verify.employee_info.department.id;
+						req.query.logged_department_name =
+							oAuthResult.token_data.result_verify.employee_info.department.name;
+					}
+				}
+
+				req.query.logged_company_id = oAuthResult.token_data.result_verify.employee_info.company != null ? oAuthResult.token_data.result_verify.employee_info.company.id : oAuthResult.token_data.result_verify.company.id;
+				req.query.logged_company_name = oAuthResult.token_data.result_verify.employee_info.company != null ? oAuthResult.token_data.result_verify.employee_info.company.name : oAuthResult.token_data.result_verify.company.name;
+				
 				req.query.method = req.headers['x-method'];
 				req.query.token = req.headers['x-token'];
 				joResult = await _serviceInstance.dropDown(req.query);
