@@ -577,15 +577,6 @@ class PJCARepository {
 				xAndConditions.push(`tr.payment_request_id = :paymentRequestId`);
 				xReplacements.paymentRequestId = pParam.payment_request_id;
 			}
-
-			if (pParam.hasOwnProperty('company_id') && pParam.company_id != '') {
-				// check if logged user is from company id 6 (PT. SANQUA) then show all data from all user otherwise show data from user company only
-				xAndConditions.push(`tr.company_id = :companyId`);
-				xReplacements.companyId = pParam.company_id != '' ? pParam.company_id : pParam.logged_company_id;
-				if (pParam.logged_company_id != 6) {
-					xAndConditions.push(`(tr.created_by_plant_id <> 6 OR tr.created_by_plant_id IS NULL)`);
-				}
-			}
 			// if (pParam.hasOwnProperty('company_id')) {
 			// 	xAndConditions.push(`tr.company_id = :companyId`);
 			// 	xReplacements.companyId = pParam.company_id != '' ? pParam.company_id : pParam.logged_company_id;
@@ -655,6 +646,14 @@ class PJCARepository {
 				}
 			}
 
+			if (pParam.hasOwnProperty('company_id') && pParam.company_id != '') {
+				// check if logged user is from company id 6 (PT. SANQUA) then show all data from all user otherwise show data from user company only
+				xAndConditions.push(`tr.company_id = :companyId`);
+				xReplacements.companyId = pParam.company_id != '' ? pParam.company_id : pParam.logged_company_id;
+				if (pParam.logged_company_id != 6) {
+					xAndConditions.push(`(tr.created_by_plant_id <> 6 OR tr.created_by_plant_id IS NULL)`);
+				}
+			}
 			console.log(`>>> pParam.logged_is_admin: ${JSON.stringify(pParam.logged_is_admin)}`);
 			console.log(`>>> pParam.owned_document_no: ${JSON.stringify(pParam.hasOwnProperty('owned_document_no'))}`);
 
@@ -734,6 +733,269 @@ class PJCARepository {
 			if (xAndConditions.length > 0) xWhereParts.push(`(${xAndConditions.join(' AND ')})`);
 			if (xOrConditions.length > 0) xWhereParts.push(`(${xOrConditions.join(' OR ')})`);
 			var xWhereSql = xWhereParts.length > 0 ? `WHERE ${xWhereParts.join(' AND ')}` : '';
+
+			var xJoinSql = `LEFT JOIN tr_paymentrequests pmt ON pmt.id = tr.payment_request_id`;
+			if (xNeedDetailJoin) {
+				xJoinSql += ` LEFT JOIN tr_pjcadetails pd ON pd.pjca_id = tr.id`;
+			}
+
+			// --- Query 1: total distinct payreq ---
+			var xCountSql = `
+				SELECT COUNT(DISTINCT tr.id) AS total
+				FROM tr_pjcas tr
+				${xJoinSql}
+				${xWhereSql}
+			`;
+			console.log(`>>> xCountSql: ${JSON.stringify(xCountSql)}`);
+			var xCountResult = await _modelDb.sequelize.query(xCountSql, {
+				replacements: xReplacements,
+				type: Sequelize.QueryTypes.SELECT
+			});
+			console.log(`>>> xCountResult: ${JSON.stringify(xCountResult)}`);
+			var xCountDataWithoutLimit = parseInt(xCountResult[0].total, 10);
+			console.log(`>>> xCountDataWithoutLimit: ${JSON.stringify(xCountDataWithoutLimit)}`);
+
+			// --- Query 2: ID unik + pagination ---
+			var xLimitOffsetSql = '';
+			if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit') &&
+				pParam.offset != '' && pParam.limit != '' && pParam.limit != 'all') {
+				xReplacements.limitVal = parseInt(pParam.limit, 10);
+				xReplacements.offsetVal = parseInt(pParam.offset, 10);
+				xLimitOffsetSql = `LIMIT :limitVal OFFSET :offsetVal`;
+			}
+
+			var xIdSql = `
+				SELECT tr.id
+				FROM tr_pjcas tr
+				${xJoinSql}
+				${xWhereSql}
+				GROUP BY tr.id
+				ORDER BY ${xOrderCol} ${xOrderDir}
+				${xLimitOffsetSql}
+			`;
+			var xIdRows = await _modelDb.sequelize.query(xIdSql, {
+				replacements: xReplacements,
+				type: Sequelize.QueryTypes.SELECT
+			});
+			var xIds = xIdRows.map(r => r.id);
+
+			// --- Query 3: fetch data lengkap + semua include, id sudah unik & terpaginasi ---
+			var xData = xIds.length > 0 ? await _modelDb.findAll({
+				where: { id: { [Op.in]: xIds } },
+				include: [
+					{
+						model: _modelPaymentRequest,
+						as: 'payment_request',
+						attributes: [ 'id', 'document_no' ]
+					}
+				],
+				logging: true
+			}) : [];
+
+        	// Re-sort sesuai urutan xIds dari step 2
+			var xDataMap = new Map(xData.map(d => [d.id, d]));
+			xData = xIds.map(id => xDataMap.get(id)).filter(Boolean);
+
+			xJoResult = {
+				status_code: '00',
+				status_msg: 'OK',
+				data: { rows: xData, count: xData.length },
+				total_record: xCountDataWithoutLimit
+			};
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.list`, `Exception error: ${e.message}`, 'error');
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.list: Exception error: ${e.message}`
+			};
+		}
+		return xJoResult;
+	}
+	
+	async list_v3(pParam) {
+		var xJoResult = {};
+
+		// Whitelist kolom untuk ORDER BY — cegah SQL injection via order_by
+		var xOrderWhitelist = {
+			'id': { sql: 'tr.id' },
+			'created_at': { sql: 'tr.created_at' },
+			'document_no': { sql: 'tr.document_no' },
+			'company_name': { sql: 'tr.company_name' },
+			'department_name': { sql: 'tr.department_name' },
+			'status': { sql: 'tr.status' }
+		};
+		// Whitelist kolom yang boleh difilter lewat parameter `filter`
+		var xFilterColumnWhitelist = {
+			'company_id': 'tr.company_id',
+			'department_id': 'tr.department_id',
+			'status': 'tr.status',
+			'payment_request_id': 'tr.payment_request_id',
+			'employee_id': 'tr.employee_id',
+			'is_delete': 'tr.is_delete'
+			// tambahkan key lain di sini kalau frontend butuh filter kolom lain
+		};
+
+		try {
+			var xAndConditions = [];
+			// var xOrConditions = [];
+			var xReplacements = {};
+        	var xNeedDetailJoin = false;
+
+			if (pParam.hasOwnProperty('payment_request_id') && pParam.payment_request_id != '') {
+				xAndConditions.push(`tr.payment_request_id = :paymentRequestId`);
+				xReplacements.paymentRequestId = pParam.payment_request_id;
+			}
+
+			if (pParam.hasOwnProperty('department_id') && pParam.department_id != '') {
+				xAndConditions.push(`tr.department_id = :departmentId`);
+				xReplacements.departmentId = pParam.department_id;
+			}
+			
+			if (pParam.hasOwnProperty('status') && pParam.status != '') {
+				if (Array.isArray(pParam.status)) {
+					xAndConditions.push(`tr.status IN (:statusList)`);
+					xReplacements.statusList = pParam.status;
+				} else {
+					xAndConditions.push(`tr.status = :statusSingle`);
+					xReplacements.statusSingle = pParam.status;
+				}
+			}
+
+			if (pParam.hasOwnProperty('start_date') && pParam.hasOwnProperty('end_date')) {
+				if (pParam.start_date != '' && pParam.end_date != '') {
+					xAndConditions.push(`tr.created_at BETWEEN :startDate AND :endDate`);
+					xReplacements.startDate = pParam.start_date + ' 00:00:00';
+					xReplacements.endDate = pParam.end_date + ' 23:59:59';
+				}
+			}
+
+			if (pParam.hasOwnProperty('current_approval_ids') && pParam.current_approval_ids != '') {
+				xAndConditions.push(`tr.current_approval_ids::jsonb @> :currentApprovalId::jsonb`);
+				xReplacements.currentApprovalId = JSON.stringify([pParam.current_approval_ids]);
+			}
+
+			if (pParam.hasOwnProperty('filter') && pParam.filter != null && pParam.filter != undefined && pParam.filter != '') {
+				var xFilter = JSON.parse(pParam.filter);
+				if (Array.isArray(xFilter) && xFilter.length > 0) {
+					xFilter.forEach((xFilterItem, xFilterIdx) => {
+						Object.keys(xFilterItem).forEach((xKey, xKeyIdx) => {
+							if (xFilterColumnWhitelist.hasOwnProperty(xKey)) {
+								var xValue = xFilterItem[xKey];
+								var xParamName = `filterParam_${xFilterIdx}_${xKeyIdx}`;
+
+								if (Array.isArray(xValue)) {
+									xAndConditions.push(`${xFilterColumnWhitelist[xKey]} IN (:${xParamName})`);
+								} else {
+									xAndConditions.push(`${xFilterColumnWhitelist[xKey]} = :${xParamName}`);
+								}
+								xReplacements[xParamName] = xValue;
+							} else {
+								_utilInstance.writeLog(
+									`${_xClassName}.list`,
+									`Ignored unknown filter key: ${xKey}`,
+									'warning'
+								);
+							}
+						});
+					});
+				}
+			}
+
+			if (pParam.hasOwnProperty('product_id') && pParam.product_id != null && pParam.product_id != '') {
+				var xProductIds = JSON.parse(pParam.product_id);
+				if (xProductIds.length > 0) {
+					xNeedDetailJoin = true;
+					xAndConditions.push(`pd.product_id IN (:productIds)`);
+					xReplacements.productIds = xProductIds;
+				}
+			}
+
+			if (pParam.hasOwnProperty('company_id') && pParam.company_id != '') {
+				// check if logged user is from company id 6 (PT. SANQUA) then show all data from all user otherwise show data from user company only
+				xAndConditions.push(`tr.company_id = :companyId`);
+				xReplacements.companyId = pParam.company_id != '' ? pParam.company_id : pParam.logged_company_id;
+				if (pParam.logged_company_id != 6) {
+					xAndConditions.push(`(tr.created_by_plant_id <> 6 OR tr.created_by_plant_id IS NULL)`);
+				}
+
+				// Restriction akses tambahan HANYA untuk non-admin.
+				// Admin tidak dibatasi apa pun selain company_id -> lihat semua dokumen di company tsb.
+				if (pParam.logged_is_admin == 0 && pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
+					var xAccessOrConds = [`tr.created_by = :createdBy`];
+					xReplacements.createdBy = pParam.user_id;
+
+					if (pParam.hasOwnProperty('owned_document_no') && pParam.owned_document_no != '') {
+						xAccessOrConds.push(`tr.document_no IN (:ownedDocumentNo)`);
+						xReplacements.ownedDocumentNo = pParam.owned_document_no;
+					}
+
+					xAndConditions.push(
+						xAccessOrConds.length > 1
+							? `(${xAccessOrConds.join(' OR ')})`
+							: xAccessOrConds[0]
+					);
+				}
+			} else {
+				// Fallback: company_id tidak di-select sama sekali
+				if (pParam.logged_is_admin == 0 && pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
+					var xAccessOrCondsNoCompany = [`tr.created_by = :createdBy`];
+					xReplacements.createdBy = pParam.user_id;
+
+					if (pParam.hasOwnProperty('owned_document_no') && pParam.owned_document_no != '') {
+						xAccessOrCondsNoCompany.push(`tr.document_no IN (:ownedDocumentNo)`);
+						xReplacements.ownedDocumentNo = pParam.owned_document_no;
+					}
+
+					xAndConditions.push(
+						xAccessOrCondsNoCompany.length > 1
+							? `(${xAccessOrCondsNoCompany.join(' OR ')})`
+							: xAccessOrCondsNoCompany[0]
+					);
+				} else if (pParam.hasOwnProperty('owned_document_no') && pParam.owned_document_no != '') {
+					// Admin tanpa company_id -> tetap batasi ke owned_document_no lintas company
+					xAndConditions.push(`tr.document_no IN (:ownedDocumentNo)`);
+					xReplacements.ownedDocumentNo = pParam.owned_document_no;
+				}
+			}
+			console.log(`>>> pParam.logged_is_admin: ${JSON.stringify(pParam.logged_is_admin)}`);
+			console.log(`>>> pParam.owned_document_no: ${JSON.stringify(pParam.hasOwnProperty('owned_document_no'))}`);
+
+			
+        // --- keyword: grup OR terpisah, di-AND-kan dengan kondisi lain (termasuk company_id di atas) ---
+			if (pParam.hasOwnProperty('keyword') && pParam.keyword != '') {
+				let keywordArray = Array.isArray(pParam.keyword)
+					? pParam.keyword
+					: pParam.keyword.split(',').map(item => item.trim()).filter(item => item !== '');
+				var xKeywords = keywordArray.map(item => `%${item}%`);
+
+				xNeedDetailJoin = true;
+
+				var xKeywordSql = `(
+					pmt.document_no ILIKE ANY(ARRAY[:keywords]) OR
+					tr.document_no ILIKE ANY(ARRAY[:keywords]) OR
+					tr.company_name ILIKE ANY(ARRAY[:keywords]) OR
+					tr.department_name ILIKE ANY(ARRAY[:keywords]) OR
+					tr.to_department_name ILIKE ANY(ARRAY[:keywords]) OR
+					tr.employee_name ILIKE ANY(ARRAY[:keywords]) OR
+					tr.description ILIKE ANY(ARRAY[:keywords]) OR
+					pd.product_code ILIKE ANY(ARRAY[:keywords]) OR
+					pd.product_name ILIKE ANY(ARRAY[:keywords])
+				)`;
+				xAndConditions.push(xKeywordSql);
+				xReplacements.keywords = xKeywords;
+			}
+			// --- ORDER BY dari whitelist ---
+			var xOrderKey = 'id';
+			var xOrderDir = 'ASC';
+			if (pParam.hasOwnProperty('order_by') && pParam.order_by != '' && xOrderWhitelist.hasOwnProperty(pParam.order_by)) {
+				xOrderKey = pParam.order_by;
+				xOrderDir = pParam.order_type == 'desc' ? 'DESC' : 'ASC';
+			}
+			var xOrderCol = xOrderWhitelist[xOrderKey].sql;
+
+			// --- Susun WHERE ---
+        // --- Susun WHERE ---
+			var xWhereSql = xAndConditions.length > 0 ? `WHERE ${xAndConditions.join(' AND ')}` : '';
 
 			var xJoinSql = `LEFT JOIN tr_paymentrequests pmt ON pmt.id = tr.payment_request_id`;
 			if (xNeedDetailJoin) {
