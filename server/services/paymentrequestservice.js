@@ -105,7 +105,7 @@ class PaymentRequestService {
 								});
 							}
 							xDetail.data.file = xFileArr
-							xDetail.data.createdAt = xDetail.data.createdAt != null ? moment(xDetail.data.createdAt).format('DD MMM YYYY') : ''
+							xDetail.data.createdAt = xDetail.data.createdAt != null ? moment(xDetail.data.createdAt).format('DD MMM YYYY hh:mm:ss') : ''
 
 							var xPayreqDetail = xDetail.data.payment_request_detail;
 							if (xDetail.data.app_category != 2) {
