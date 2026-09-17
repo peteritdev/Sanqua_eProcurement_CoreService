@@ -765,7 +765,8 @@ async function paymentRequest_MergeWithFPB(req, res) {
 
 				req.body.token = req.headers['x-token'];
 				req.body.method = req.headers['x-method'];
-				joResult = await _serviceInstance.mergeWithFPB(req.body);
+				// joResult = await _serviceInstance.mergeWithFPB(req.body);
+				joResult = await _serviceInstance.paymentRequest_MergeWithFPB_V2(req.body);
 				joResult = JSON.stringify(joResult);
 			}
 		} else {
