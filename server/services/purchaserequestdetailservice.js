@@ -69,7 +69,8 @@ class PurchaseRequestDetailService {
 				for (var index in xRows) {
 					xJoArrData.push({
 						id: xRows[index].id,
-						product_name: xRows[index].product_name
+						product_name: xRows[index].product_name,
+						product_code: xRows[index].product_code
 					});
 				}
 

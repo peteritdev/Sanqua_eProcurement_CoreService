@@ -2294,6 +2294,341 @@ class PaymentRequestService {
 
 		return xJoResult;
 	}
+	
+
+	/**
+	 * V2: merge payreq dengan FPB, tapi mapping item dilakukan MANUAL oleh user
+	 * (tidak lagi cocokin product_name/product_code otomatis), karena bisa jadi produk yang
+	 * sama cuma beda penyebutan/tidak ada kode. User yang memvalidasi sendiri kecocokan namanya
+	 * lewat mapping yang dikirim.
+	 *
+	 * pParam = {
+	 *   user_id, user_name,
+	 *   purchase_request_id,
+	 *   payment_request_id,
+	 *   mapping: [
+	 *     { payment_request_detail_id: <id item payreq>, purchase_request_detail_id: <id item fpb> },
+	 *     ...
+	 *   ]
+	 * }
+	 *
+	 * Aturan:
+	 * - FPB harus berstatus inprogress (status == 2), selain itu ditolak.
+	 * - Tiap item payreq aktif WAJIB ada di mapping (tidak boleh ada yang kelewat).
+	 * - Satu item payreq cuma boleh dipetakan ke SATU item fpb (sesuai kolom prd_id yang single FK).
+	 * - Beberapa item payreq BOLEH dipetakan ke item fpb yang sama (multi join tetap didukung).
+	 * - Total qty_request yang dipetakan ke satu item fpb (termasuk yang sudah nempel dari payreq
+	 *   lain yang masih aktif) tidak boleh melebihi qty item fpb tsb.
+	 */
+	async paymentRequest_MergeWithFPB_V2(pParam) {
+		var xJoResult;
+		var xDecId = null;
+		var xDetailPayreq = null;
+		var xDetailFPB = null;
+
+		try {
+			delete pParam.act;
+
+			if (pParam.user_id && pParam.user_id.length == 65) {
+				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.user_id = xDecId.decrypted;
+				}
+			}
+			if (pParam.purchase_request_id && pParam.purchase_request_id.length == 65) {
+				xDecId = await _utilInstance.decrypt(pParam.purchase_request_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.purchase_request_id = xDecId.decrypted;
+				}
+			}
+			if (pParam.payment_request_id && pParam.payment_request_id.length == 65) {
+				xDecId = await _utilInstance.decrypt(pParam.payment_request_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.payment_request_id = xDecId.decrypted;
+				}
+			}
+			if (!pParam.user_id || !pParam.purchase_request_id || !pParam.payment_request_id) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: 'Invalid or Failed to decrypt param Ids'
+				};
+			}
+			if (!Array.isArray(pParam.mapping) || pParam.mapping.length == 0) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: 'Mapping item payreq ke item FPB wajib diisi'
+				};
+			}
+
+			// decrypt tiap id di dalam mapping (kalau memang dikirim dalam bentuk terenkripsi dari FE)
+			for (let i = 0; i < pParam.mapping.length; i++) {
+				let xMap = pParam.mapping[i];
+				if (xMap.cad_id && String(xMap.cad_id).length == 65) {
+					xDecId = await _utilInstance.decrypt(xMap.cad_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') xMap.cad_id = xDecId.decrypted;
+				}
+				if (xMap.prd_id && String(xMap.prd_id).length == 65) {
+					xDecId = await _utilInstance.decrypt(xMap.prd_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') xMap.prd_id = xDecId.decrypted;
+				}
+				if (!xMap.cad_id || !xMap.prd_id) {
+					return xJoResult = {
+						status_code: '-99',
+						status_msg: `Mapping index ${i} tidak lengkap, payment_request_detail_id dan purchase_request_detail_id wajib diisi`
+					};
+				}
+			}
+
+			// get detail fpb & its item
+			xDetailFPB = await _purchaseRequestRepoInstance.getById({id: pParam.purchase_request_id});
+			// get detail payreq & its item
+			xDetailPayreq = await _repoInstance.getByParameter({id: pParam.payment_request_id});
+			
+			if (!xDetailFPB || !xDetailPayreq) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: 'Invalid FPB or Payment Request not found'
+				};
+			}
+
+			// getById kadang return object langsung, kadang wrapped {status_code, data} tergantung repo,
+			// jadi di-handle dua-duanya biar aman
+			var xFpbData = xDetailFPB.data ? xDetailFPB.data : xDetailFPB;
+
+			if (xDetailPayreq.status_code != '00' || !xDetailPayreq.data) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: 'Invalid Payment Request or Payment Request not found'
+				};
+			}
+			var xPayreqData = xDetailPayreq.data;
+
+			if (!xFpbData || !xFpbData.id) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: 'Invalid FPB or FPB not found'
+				};
+			}
+
+			// requirement baru: FPB cuma boleh di-merge kalau statusnya udah inprogress (2)
+			if (xFpbData.status != config.statusDescription.paymentRequest.indexOf('In Progress')) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: `FPB belum berstatus inprogress, merge tidak bisa dilakukan (status FPB saat ini: ${config.statusDescription.purchaseRequest[xFpbData.status]})`
+				};
+			}
+
+			// payreq yang sudah terhubung ke FPB lain tidak boleh di-merge ulang ke FPB berbeda
+			if (xPayreqData.purchase_request_id != null && xPayreqData.purchase_request_id != pParam.purchase_request_id) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: 'Payment request sudah terhubung dengan FPB lain'
+				};
+			}
+
+			var xFpbItems = (xFpbData.purchase_request_detail || []).filter((el) => el.is_delete != 1 && el.status != -1);
+			var xPayreqItems = (xPayreqData.payment_request_detail || []).filter((el) => el.is_delete != 1 && el.status != -1);
+
+			if (xPayreqItems.length == 0) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: 'Tidak ada item pada payment request untuk digabungkan'
+				};
+			}
+			if (xFpbItems.length == 0) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: 'Tidak ada item pada FPB'
+				};
+			}
+
+			var xFpbItemById = {};
+			for (let i = 0; i < xFpbItems.length; i++) xFpbItemById[xFpbItems[i].id] = xFpbItems[i];
+
+			var xPayreqItemById = {};
+			for (let i = 0; i < xPayreqItems.length; i++) xPayreqItemById[xPayreqItems[i].id] = xPayreqItems[i];
+
+			// validasi tiap baris mapping: id-nya harus valid & milik payreq/fpb yg bersangkutan,
+			// dan satu item payreq cuma boleh muncul sekali di mapping (1 prd_id per baris payreq)
+			var xArrErrorInvalidMap = [];
+			var xSeenPayreqId = {};
+			var xMatchedPairs = []; // { payreq_item, fpb_item }
+			var xQtyByFpbId = {}; // fpb id -> total qty payreq yg dipetakan ke situ (dari merge ini)
+
+			for (let i = 0; i < pParam.mapping.length; i++) {
+				let xMap = pParam.mapping[i];
+				let xPayreqItem = xPayreqItemById[xMap.cad_id];
+				let xFpbItem = xFpbItemById[xMap.prd_id];
+
+				if (!xPayreqItem) {
+					xArrErrorInvalidMap.push(`payment_request_detail_id ${xMap.cad_id} tidak ditemukan/tidak aktif pada payment request ini`);
+					continue;
+				}
+				if (!xFpbItem) {
+					xArrErrorInvalidMap.push(`purchase_request_detail_id ${xMap.prd_id} tidak ditemukan/tidak aktif pada FPB ini`);
+					continue;
+				}
+				if (xSeenPayreqId[xPayreqItem.id]) {
+					xArrErrorInvalidMap.push(`Item payreq "${xPayreqItem.product_name}" (id ${xPayreqItem.id}) dipetakan lebih dari satu kali, satu item payreq hanya boleh nempel ke satu item FPB`);
+					continue;
+				}
+				xSeenPayreqId[xPayreqItem.id] = true;
+
+				xMatchedPairs.push({ payreq_item: xPayreqItem, fpb_item: xFpbItem });
+				xQtyByFpbId[xFpbItem.id] = (xQtyByFpbId[xFpbItem.id] || 0) + Number(xPayreqItem.qty_request || 0);
+			}
+
+			if (xArrErrorInvalidMap.length > 0) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: `Mapping tidak valid: ${xArrErrorInvalidMap.join('; ')}`
+				};
+			}
+
+			// requirement: semua item payreq yang aktif wajib ke-cover di mapping, gak boleh ada yg kelewat
+			var xArrItemNotMapped = xPayreqItems.filter((el) => !xSeenPayreqId[el.id]);
+			if (xArrItemNotMapped.length > 0) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: `Item payreq berikut belum dipetakan ke item FPB manapun: ${xArrItemNotMapped.map((el) => `${el.product_name} (id ${el.id})`).join(', ')}`
+				};
+			}
+
+			// requirement: total qty yg dipetakan ke tiap item fpb (termasuk qty dari payreq lain yg
+			// masih aktif & sudah nempel ke item fpb yg sama) tidak boleh melebihi qty item fpb tsb
+			var xArrErrorExceed = [];
+			for (let xFpbId in xQtyByFpbId) {
+				let xFpbItem = xFpbItemById[xFpbId];
+				let xTotalMappedQty = xQtyByFpbId[xFpbId];
+
+				let xExistingQty = 0;
+				const xResultCheckItem = await _paymentRequestDetailRepoInstance.list({ prd_id: xFpbItem.id });
+				if (xResultCheckItem.status_code == '00' && xResultCheckItem.data.count > 0) {
+					let xArrItem = xResultCheckItem.data.rows;
+					for (let j = 0; j < xArrItem.length; j++) {
+						// jangan hitung dobel item milik payreq yg sedang di-merge ini sendiri
+						if (
+							xArrItem[j].payment_request_id != pParam.payment_request_id &&
+							xArrItem[j].status != -1 &&
+							xArrItem[j].payment_request != null &&
+							xArrItem[j].payment_request.status != 4 &&
+							xArrItem[j].payment_request.status != 5
+						) {
+							xExistingQty += Number(xArrItem[j].qty_request || 0);
+						}
+					}
+				}
+
+				let xTotalQty = xExistingQty + xTotalMappedQty;
+				if (xTotalQty > Number(xFpbItem.qty || 0)) {
+					xArrErrorExceed.push(
+						`${xFpbItem.product_name} (qty payreq ini: ${xTotalMappedQty}${xExistingQty > 0 ? `, qty payreq lain yg sudah nempel: ${xExistingQty}` : ''}, qty tersedia di FPB: ${xFpbItem.qty})`
+					);
+				}
+			}
+
+			if (xArrErrorExceed.length > 0) {
+				return xJoResult = {
+					status_code: '-99',
+					status_msg: `Total qty payment request melebihi qty pada FPB untuk item: ${xArrErrorExceed.join('; ')}`
+				};
+			}
+
+			// ==== semua validasi lolos, lanjut proses merge ====
+			var xArrFailedUpdate = [];
+
+			// 1. update tiap item payreq -> prd_id sesuai mapping manual dari user
+			for (let i = 0; i < xMatchedPairs.length; i++) {
+				let xPayreqItem = xMatchedPairs[i].payreq_item;
+				let xFpbItem = xMatchedPairs[i].fpb_item;
+				
+				let xUpdatePyrdItem = await _paymentRequestDetailRepoInstance.save(
+					{
+						id: xPayreqItem.id,
+						prd_id: xFpbItem.id
+					},
+					'update'
+				);
+
+				if (!xUpdatePyrdItem || xUpdatePyrdItem.status_code != '00') {
+					xArrFailedUpdate.push(`payment_request_detail#${xPayreqItem.id}`);
+					_utilInstance.writeLog(
+						`${_xClassName}.paymentRequest_MergeWithFPB_V2`,
+						`Failed updating payment_request_detail id ${xPayreqItem.id}: ${JSON.stringify(xUpdatePyrdItem)}`,
+						'error'
+					);
+				}
+			}
+
+			// 2. update header payreq -> purchase_request_id nempel ke FPB
+			const xPayloadUpdatePayreq = {
+				id: pParam.payment_request_id,
+				purchase_request_id: pParam.purchase_request_id,
+				updated_by: pParam.user_id,
+				updated_by_name: pParam.user_name,
+				updatedAt: await _utilInstance.getCurrDateTime()
+			}
+			var xUpdatePayreq = await _repoInstance.save(
+				xPayloadUpdatePayreq,
+				'update'
+			);
+
+			if (!xUpdatePayreq || xUpdatePayreq.status_code != '00') {
+				xArrFailedUpdate.push(`payment_request#${pParam.payment_request_id}`);
+				_utilInstance.writeLog(
+					`${_xClassName}.paymentRequest_MergeWithFPB_V2`,
+					`Failed updating payment request header: ${JSON.stringify(xUpdatePayreq)}`,
+					'error'
+				);
+			}
+
+			// 3. update qty_done tiap item FPB yg kena mapping, akumulasi (bukan overwrite) supaya aman
+			// kalau nanti ada payreq lain yang di-merge lagi ke item FPB yang sama
+			for (let xFpbId in xQtyByFpbId) {
+				let xFpbItem = xFpbItemById[xFpbId];
+				let xAddQty = xQtyByFpbId[xFpbId];
+				let xNewQtyDone = Number(xFpbItem.qty_done || 0) + Number(xAddQty || 0);
+
+				let xUpdatePrdItem = await _purchaseRequestDetailRepoInstance.save(
+					{
+						id: xFpbItem.id,
+						qty_done: xNewQtyDone
+					},
+					'update'
+				);
+
+				if (!xUpdatePrdItem || xUpdatePrdItem.status_code != '00') {
+					xArrFailedUpdate.push(`purchase_request_detail#${xFpbItem.id}`);
+					_utilInstance.writeLog(
+						`${_xClassName}.paymentRequest_MergeWithFPB_V2`,
+						`Failed updating purchase_request_detail id ${xFpbItem.id}: ${JSON.stringify(xUpdatePrdItem)}`,
+						'error'
+					);
+				}
+			}
+
+			xJoResult = {
+				status_code: '00',
+				status_msg: xArrFailedUpdate.length == 0
+					? 'Success merge payment request with FPB'
+					: `Merge selesai dengan sebagian gagal update: ${xArrFailedUpdate.join(', ')}`,
+				data: {
+					payment_request_id: pParam.payment_request_id,
+					purchase_request_id: pParam.purchase_request_id,
+					merged_items: xMatchedPairs.length
+				}
+			};
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.paymentRequest_MergeWithFPB_V2`, `Exception error: ${e.message}`, 'error');
+
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.paymentRequest_MergeWithFPB_V2: Exception error: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
 }
 
 module.exports = PaymentRequestService;

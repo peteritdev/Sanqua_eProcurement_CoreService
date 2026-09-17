@@ -47,9 +47,14 @@ class PurchaseRequestDetailRepository {
 
 			if (pParam.hasOwnProperty('filter')) {
 				if (pParam.filter != null && pParam.filter != undefined && pParam.filter != '') {
-					// var xFilter = JSON.parse(pParam.filter);
+
 					var xFilter = pParam.filter;
-					if (xFilter.length > 0) {
+
+					if (typeof xFilter === 'string') {
+						xFilter = JSON.parse(xFilter);
+					}
+
+					if (Array.isArray(xFilter) && xFilter.length > 0) {
 						for (var index in xFilter) {
 							xWhereAnd.push(xFilter[index]);
 						}
