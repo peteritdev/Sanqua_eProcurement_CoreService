@@ -276,6 +276,10 @@ class PaymentRequestService {
 								const xPreTotalPrice = (xDetail.data.untaxed_amount + xDetail.data.total_tax_amount + xDetail.data.delivery_costs + xDetail.data.service_costs + xDetail.data.other_costs) - xDetail.data.total_pph_amount
 								const xTotalPriceRound = Math.round((xPreTotalPrice || 0) * 1000) / 1000
 								xDetail.data.total_price = xTotalPriceRound
+								
+								console.log(`>>> xDetailData: ${JSON.stringify(xDetail)}`);
+								console.log(`>>> xPreTotalPrice: ${JSON.stringify(xPreTotalPrice)}`);
+								console.log(`>>> xTotalPriceRound: ${JSON.stringify(xTotalPriceRound)}`);
 							} else {
 							// code line below for payreq from billing
 
@@ -2290,7 +2294,6 @@ class PaymentRequestService {
 
 		return xJoResult;
 	}
-	
 
 	/**
 	 * V2: merge payreq dengan FPB, tapi mapping item dilakukan MANUAL oleh user
