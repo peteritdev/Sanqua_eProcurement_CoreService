@@ -2294,7 +2294,6 @@ class PaymentRequestService {
 
 		return xJoResult;
 	}
-	
 
 	/**
 	 * V2: merge payreq dengan FPB, tapi mapping item dilakukan MANUAL oleh user

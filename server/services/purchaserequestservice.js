@@ -1142,7 +1142,12 @@ class PurchaseRequestService {
 						approved_at: xResult.approved_at,
 						last_click_equalization_at: xResult.last_click_equalization_at,
 						last_click_equalization_by_name: xResult.last_click_equalization_by_name,
-						budget_plan_no: xResult.budget_plan_no
+						budget_plan_no: xResult.budget_plan_no,
+						
+						fetch_at:
+							xResult.fetch_at != null ? moment(xResult.fetch_at).format('DD MMM YYYY HH:mm:ss') : '',
+						fetch_by_name: xResult.fetch_by_name,
+						fetch_by: xResult.fetch_by
 					};
 
 					xJoResult = {
@@ -1237,6 +1242,8 @@ class PurchaseRequestService {
 							pParam.token,
 							xParamAddApprovalMatrix
 						);
+						
+						console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
 						xJoResult.approval_matrix_result = xApprovalMatrixResult;
 
 						if (xApprovalMatrixResult.status_code == '00') {
@@ -1285,6 +1292,7 @@ class PurchaseRequestService {
 													email: xApproverSeq1.approver_user[i].email
 												}
 											};
+											console.log(`>>> xParamEmailNotification: ${JSON.stringify(xParamEmailNotification)}`);
 											xNotificationResult = await _notificationService.sendNotificationEmail_FPBNeedApproval(
 												xParamEmailNotification,
 												pParam.method,
@@ -2424,7 +2432,10 @@ class PurchaseRequestService {
 						id: xClearId,
 						approved_at: null,
 						user_id: pParam.user_id,
-						user_name: pParam.user_name
+						user_name: pParam.user_name,
+						fetch_by: pParam.user_id,
+						fetch_by_name: pParam.user_name,
+						fetch_at: await _utilInstance.getCurrDateTime()
 					}
 					var xUpdateResult = await _repoInstance.save(xUpdateParam, 'update');
 					xJoResult = xUpdateResult;
@@ -2455,6 +2466,7 @@ class PurchaseRequestService {
 							pParam.token,
 							xParamAddApprovalMatrix
 						);
+						console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
 						xJoResult.approval_matrix_result = xApprovalMatrixResult;
 
 						if (xApprovalMatrixResult.status_code == '00') {
@@ -2507,6 +2519,7 @@ class PurchaseRequestService {
 													email: xApproverSeq1.approver_user[i].email
 												}
 											};
+											console.log(`>>> xParamEmailNotification: ${JSON.stringify(xParamEmailNotification)}`);
 											xNotificationResult = await _notificationService.sendNotificationEmail_FPBNeedApproval(
 												xParamEmailNotification,
 												pParam.method,

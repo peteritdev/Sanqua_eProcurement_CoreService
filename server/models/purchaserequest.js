@@ -79,6 +79,10 @@ module.exports = (sequelize, DataTypes) => {
 
 		budget_plan_no: DataTypes.STRING,
 		created_by_plant_id: DataTypes.INTEGER,
+		
+		fetch_at: DataTypes.DATE,
+		fetch_by: DataTypes.INTEGER,
+		fetch_by_name: DataTypes.STRING
 	});
 
 	PurchaseRequest.associate = function(models) {
