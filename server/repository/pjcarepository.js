@@ -572,11 +572,6 @@ class PJCARepository {
 			var xOrConditions = [];
 			var xReplacements = {};
         	var xNeedDetailJoin = false;
-
-			if (pParam.hasOwnProperty('payment_request_id') && pParam.payment_request_id != '') {
-				xAndConditions.push(`tr.payment_request_id = :paymentRequestId`);
-				xReplacements.paymentRequestId = pParam.payment_request_id;
-			}
 			// if (pParam.hasOwnProperty('company_id')) {
 			// 	xAndConditions.push(`tr.company_id = :companyId`);
 			// 	xReplacements.companyId = pParam.company_id != '' ? pParam.company_id : pParam.logged_company_id;
@@ -719,6 +714,14 @@ class PJCARepository {
 					xReplacements.keywords = xKeywords;
 				}
 			}
+			
+			if (pParam.hasOwnProperty('payment_request_id') && pParam.payment_request_id != '') {
+				xAndConditions = [];
+				xOrConditions = [];
+				xReplacements = {};
+				xAndConditions.push(`tr.payment_request_id = :paymentRequestId`);
+				xReplacements.paymentRequestId = pParam.payment_request_id;
+			}
 			// --- ORDER BY dari whitelist ---
 			var xOrderKey = 'id';
 			var xOrderDir = 'ASC';
@@ -815,7 +818,6 @@ class PJCARepository {
 	async list_v3(pParam) {
 		var xJoResult = {};
 
-		// Whitelist kolom untuk ORDER BY — cegah SQL injection via order_by
 		var xOrderWhitelist = {
 			'id': { sql: 'tr.id' },
 			'created_at': { sql: 'tr.created_at' },
@@ -824,7 +826,6 @@ class PJCARepository {
 			'department_name': { sql: 'tr.department_name' },
 			'status': { sql: 'tr.status' }
 		};
-		// Whitelist kolom yang boleh difilter lewat parameter `filter`
 		var xFilterColumnWhitelist = {
 			'company_id': 'tr.company_id',
 			'department_id': 'tr.department_id',
@@ -832,25 +833,19 @@ class PJCARepository {
 			'payment_request_id': 'tr.payment_request_id',
 			'employee_id': 'tr.employee_id',
 			'is_delete': 'tr.is_delete'
-			// tambahkan key lain di sini kalau frontend butuh filter kolom lain
 		};
-
+		console.log('hereee');
+		
 		try {
 			var xAndConditions = [];
-			// var xOrConditions = [];
 			var xReplacements = {};
-        	var xNeedDetailJoin = false;
-
-			if (pParam.hasOwnProperty('payment_request_id') && pParam.payment_request_id != '') {
-				xAndConditions.push(`tr.payment_request_id = :paymentRequestId`);
-				xReplacements.paymentRequestId = pParam.payment_request_id;
-			}
+			var xNeedDetailJoin = false;
 
 			if (pParam.hasOwnProperty('department_id') && pParam.department_id != '') {
 				xAndConditions.push(`tr.department_id = :departmentId`);
 				xReplacements.departmentId = pParam.department_id;
 			}
-			
+
 			if (pParam.hasOwnProperty('status') && pParam.status != '') {
 				if (Array.isArray(pParam.status)) {
 					xAndConditions.push(`tr.status IN (:statusList)`);
@@ -882,7 +877,6 @@ class PJCARepository {
 							if (xFilterColumnWhitelist.hasOwnProperty(xKey)) {
 								var xValue = xFilterItem[xKey];
 								var xParamName = `filterParam_${xFilterIdx}_${xKeyIdx}`;
-
 								if (Array.isArray(xValue)) {
 									xAndConditions.push(`${xFilterColumnWhitelist[xKey]} IN (:${xParamName})`);
 								} else {
@@ -890,11 +884,7 @@ class PJCARepository {
 								}
 								xReplacements[xParamName] = xValue;
 							} else {
-								_utilInstance.writeLog(
-									`${_xClassName}.list`,
-									`Ignored unknown filter key: ${xKey}`,
-									'warning'
-								);
+								_utilInstance.writeLog(`${_xClassName}.list`, `Ignored unknown filter key: ${xKey}`, 'warning');
 							}
 						});
 					});
@@ -910,58 +900,75 @@ class PJCARepository {
 				}
 			}
 
+			// --- Scope akses berdasarkan role, lokasi, dan apakah company yang di-select = company sendiri ---
 			if (pParam.hasOwnProperty('company_id') && pParam.company_id != '') {
-				// check if logged user is from company id 6 (PT. SANQUA) then show all data from all user otherwise show data from user company only
+
+				var xIsHO = (pParam.logged_company_id == 6);
+				var xIsOwnCompany = (pParam.company_id == pParam.logged_company_id);
+
 				xAndConditions.push(`tr.company_id = :companyId`);
-				xReplacements.companyId = pParam.company_id != '' ? pParam.company_id : pParam.logged_company_id;
+				xReplacements.companyId = pParam.company_id;
+
 				if (pParam.logged_company_id != 6) {
 					xAndConditions.push(`(tr.created_by_plant_id <> 6 OR tr.created_by_plant_id IS NULL)`);
 				}
 
-				// Restriction akses tambahan HANYA untuk non-admin.
-				// Admin tidak dibatasi apa pun selain company_id -> lihat semua dokumen di company tsb.
-				if (pParam.logged_is_admin == 0 && pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
-					var xAccessOrConds = [`tr.created_by = :createdBy`];
-					xReplacements.createdBy = pParam.user_id;
+				if (xIsHO) {
+					if (pParam.logged_is_admin == 1) {
+						// Role 1: Admin HO -> tidak ada restriction tambahan
+					} else if (pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
+						// Role 2: PIC HO -> created_by OR approval
+						var xAccessOrConds = [`tr.created_by = :createdBy`];
+						xReplacements.createdBy = pParam.user_id;
 
-					if (pParam.hasOwnProperty('owned_document_no') && pParam.owned_document_no != '') {
-						xAccessOrConds.push(`tr.document_no IN (:ownedDocumentNo)`);
-						xReplacements.ownedDocumentNo = pParam.owned_document_no;
+						if (pParam.hasOwnProperty('owned_document_no') && pParam.owned_document_no != '') {
+							xAccessOrConds.push(`tr.document_no IN (:ownedDocumentNo)`);
+							xReplacements.ownedDocumentNo = pParam.owned_document_no;
+						}
+						xAndConditions.push(
+							xAccessOrConds.length > 1 ? `(${xAccessOrConds.join(' OR ')})` : xAccessOrConds[0]
+						);
 					}
+				} else {
+					// non-HO
+					if (pParam.logged_is_admin == 1) {
+						// Role 3: Admin purchasing non-HO
+						if (xIsOwnCompany) {
+							// Company sendiri: semua data yang dibuat user dari company sendiri
+							// (created_by_plant_id = company dia), ditambah data yang dia buat sendiri.
+							// Data yang dibuat user dari company lain TIDAK ikut, walau company_id sama.
+							if (pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
+								xAndConditions.push(`(tr.created_by_plant_id = :loggedCompanyId OR tr.created_by = :createdBy)`);
+								xReplacements.loggedCompanyId = pParam.logged_company_id;
+								xReplacements.createdBy = pParam.user_id;
+							} else {
+								xAndConditions.push(`tr.created_by_plant_id = :loggedCompanyId`);
+								xReplacements.loggedCompanyId = pParam.logged_company_id;
+							}
+						} else {
+							// Company assigned (bukan miliknya) -> HANYA data yang dia buat sendiri
+							if (pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
+								xAndConditions.push(`tr.created_by = :createdBy`);
+								xReplacements.createdBy = pParam.user_id;
+							}
+						}
+					} else if (pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
+						// Role 4: PIC dept non-HO -> selalu created_by OR approval
+						var xAccessOrCondsPic = [`tr.created_by = :createdBy`];
+						xReplacements.createdBy = pParam.user_id;
 
-					xAndConditions.push(
-						xAccessOrConds.length > 1
-							? `(${xAccessOrConds.join(' OR ')})`
-							: xAccessOrConds[0]
-					);
-				}
-			} else {
-				// Fallback: company_id tidak di-select sama sekali
-				if (pParam.logged_is_admin == 0 && pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
-					var xAccessOrCondsNoCompany = [`tr.created_by = :createdBy`];
-					xReplacements.createdBy = pParam.user_id;
-
-					if (pParam.hasOwnProperty('owned_document_no') && pParam.owned_document_no != '') {
-						xAccessOrCondsNoCompany.push(`tr.document_no IN (:ownedDocumentNo)`);
-						xReplacements.ownedDocumentNo = pParam.owned_document_no;
+						if (pParam.hasOwnProperty('owned_document_no') && pParam.owned_document_no != '') {
+							xAccessOrCondsPic.push(`tr.document_no IN (:ownedDocumentNo)`);
+							xReplacements.ownedDocumentNo = pParam.owned_document_no;
+						}
+						xAndConditions.push(
+							xAccessOrCondsPic.length > 1 ? `(${xAccessOrCondsPic.join(' OR ')})` : xAccessOrCondsPic[0]
+						);
 					}
-
-					xAndConditions.push(
-						xAccessOrCondsNoCompany.length > 1
-							? `(${xAccessOrCondsNoCompany.join(' OR ')})`
-							: xAccessOrCondsNoCompany[0]
-					);
-				} else if (pParam.hasOwnProperty('owned_document_no') && pParam.owned_document_no != '') {
-					// Admin tanpa company_id -> tetap batasi ke owned_document_no lintas company
-					xAndConditions.push(`tr.document_no IN (:ownedDocumentNo)`);
-					xReplacements.ownedDocumentNo = pParam.owned_document_no;
 				}
 			}
-			console.log(`>>> pParam.logged_is_admin: ${JSON.stringify(pParam.logged_is_admin)}`);
-			console.log(`>>> pParam.owned_document_no: ${JSON.stringify(pParam.hasOwnProperty('owned_document_no'))}`);
 
-			
-        // --- keyword: grup OR terpisah, di-AND-kan dengan kondisi lain (termasuk company_id di atas) ---
+			// --- keyword ---
 			if (pParam.hasOwnProperty('keyword') && pParam.keyword != '') {
 				let keywordArray = Array.isArray(pParam.keyword)
 					? pParam.keyword
@@ -984,7 +991,13 @@ class PJCARepository {
 				xAndConditions.push(xKeywordSql);
 				xReplacements.keywords = xKeywords;
 			}
-			// --- ORDER BY dari whitelist ---
+			
+			if (pParam.hasOwnProperty('payment_request_id') && pParam.payment_request_id != '') {
+				xAndConditions = [];
+				xReplacements = {};
+				xAndConditions.push(`tr.payment_request_id = :paymentRequestId`);
+				xReplacements.paymentRequestId = pParam.payment_request_id;
+			}
 			var xOrderKey = 'id';
 			var xOrderDir = 'ASC';
 			if (pParam.hasOwnProperty('order_by') && pParam.order_by != '' && xOrderWhitelist.hasOwnProperty(pParam.order_by)) {
@@ -993,8 +1006,6 @@ class PJCARepository {
 			}
 			var xOrderCol = xOrderWhitelist[xOrderKey].sql;
 
-			// --- Susun WHERE ---
-        // --- Susun WHERE ---
 			var xWhereSql = xAndConditions.length > 0 ? `WHERE ${xAndConditions.join(' AND ')}` : '';
 
 			var xJoinSql = `LEFT JOIN tr_paymentrequests pmt ON pmt.id = tr.payment_request_id`;
@@ -1002,23 +1013,18 @@ class PJCARepository {
 				xJoinSql += ` LEFT JOIN tr_pjcadetails pd ON pd.pjca_id = tr.id`;
 			}
 
-			// --- Query 1: total distinct payreq ---
 			var xCountSql = `
 				SELECT COUNT(DISTINCT tr.id) AS total
 				FROM tr_pjcas tr
 				${xJoinSql}
 				${xWhereSql}
 			`;
-			console.log(`>>> xCountSql: ${JSON.stringify(xCountSql)}`);
 			var xCountResult = await _modelDb.sequelize.query(xCountSql, {
 				replacements: xReplacements,
 				type: Sequelize.QueryTypes.SELECT
 			});
-			console.log(`>>> xCountResult: ${JSON.stringify(xCountResult)}`);
 			var xCountDataWithoutLimit = parseInt(xCountResult[0].total, 10);
-			console.log(`>>> xCountDataWithoutLimit: ${JSON.stringify(xCountDataWithoutLimit)}`);
 
-			// --- Query 2: ID unik + pagination ---
 			var xLimitOffsetSql = '';
 			if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit') &&
 				pParam.offset != '' && pParam.limit != '' && pParam.limit != 'all') {
@@ -1042,7 +1048,6 @@ class PJCARepository {
 			});
 			var xIds = xIdRows.map(r => r.id);
 
-			// --- Query 3: fetch data lengkap + semua include, id sudah unik & terpaginasi ---
 			var xData = xIds.length > 0 ? await _modelDb.findAll({
 				where: { id: { [Op.in]: xIds } },
 				include: [
@@ -1051,11 +1056,9 @@ class PJCARepository {
 						as: 'payment_request',
 						attributes: [ 'id', 'document_no' ]
 					}
-				],
-				logging: true
+				]
 			}) : [];
 
-        	// Re-sort sesuai urutan xIds dari step 2
 			var xDataMap = new Map(xData.map(d => [d.id, d]));
 			xData = xIds.map(id => xDataMap.get(id)).filter(Boolean);
 

@@ -666,16 +666,6 @@ class PaymentRequestRepository {
 				xAndConditions.push(`prd.prd_id = :prdId`);
 				xReplacements.prdId = pParam.prd_id;
 			}
-
-			if (pParam.hasOwnProperty('purchase_request_id') && pParam.purchase_request_id != '') {
-				xAndConditions.push(`tr.purchase_request_id = :purchaseRequestId`);
-				xReplacements.purchaseRequestId = pParam.purchase_request_id;
-			}
-
-			// if (pParam.hasOwnProperty('company_id')) {
-			// 	xAndConditions.push(`tr.company_id = :companyId`);
-			// 	xReplacements.companyId = pParam.company_id != '' ? pParam.company_id : pParam.logged_company_id;
-			// }
 			
 			if (pParam.hasOwnProperty('company_id') && pParam.company_id != '') {
 				// check if logged user is from company id 6 (PT. SANQUA) then show all data from all user otherwise show data from user company only
@@ -726,8 +716,6 @@ class PaymentRequestRepository {
 			}
 
 			var xNeedPrJoin = true; // pr selalu di-LEFT JOIN karena dipakai untuk keyword & order_by request_no
-			console.log(`>>> pParam.logged_is_admin: ${JSON.stringify(pParam.logged_is_admin)}`);
-			console.log(`>>> pParam.owned_document_no: ${JSON.stringify(pParam.hasOwnProperty('owned_document_no'))}`);
 
 			if (pParam.hasOwnProperty('owned_document_no') && pParam.owned_document_no != '') {
 				let xSqlMerge = '';
@@ -786,6 +774,15 @@ class PaymentRequestRepository {
 					xOrConditions.push(`prd.product_name ILIKE ANY (ARRAY[:keywords])`);
 					xReplacements.keywords = xKeywords;
 				}
+			}
+			
+			if (pParam.hasOwnProperty('purchase_request_id') && pParam.purchase_request_id != '') {
+				xAndConditions = []
+				xOrConditions = []
+				xReplacements = {}
+				
+				xAndConditions.push(`tr.purchase_request_id = :purchaseRequestId`);
+				xReplacements.purchaseRequestId = pParam.purchase_request_id;
 			}
 			
 			// --- ORDER BY dari whitelist ---
