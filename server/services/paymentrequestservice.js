@@ -283,12 +283,57 @@ class PaymentRequestService {
 							} else {
 							// code line below for payreq from billing
 
+								// code line below for payreq from billing
+								// NOTE: PPN & diskon per-item detail diabaikan dulu (belum diakomodir di level item untuk payreq bill)
+								var xGlobalAmount = xDetail.data.global_discount
+								var xGlobalPercent = xDetail.data.global_discount_percent
+								var xTotalBasePrice = 0;
+								var xPphAmount = xDetail.data.pph_amount
+								var xPphPercent = xDetail.data.pph_percent
+
+								// looping detail item, hanya menjumlahkan nilai tagihan (debt_value), tanpa hitung ppn/diskon per item dulu
+								for (var i in xPayreqDetail) {
+									if (xPayreqDetail[i].status != -1) {
+										var xItemBaseValue = xPayreqDetail[i].debt_value != null ? xPayreqDetail[i].debt_value : (xPayreqDetail[i].total_after_tax || 0)
+										xTotalBasePrice += Math.round((xItemBaseValue || 0) * 1000) / 1000
+									}
+								}
+
+								delete xDetail.data.purchase_request_id;
+								xDetail.data.total_base_price = Math.round((xTotalBasePrice || 0) * 1000) / 1000
+
+								// calc global discount (saling menurunkan amount <-> percent, sama seperti payreq non-bill)
+								if (xDetail.data.global_discount != null && xDetail.data.global_discount != 0) {
+									xGlobalPercent = xTotalBasePrice != 0 ? (xDetail.data.global_discount / xTotalBasePrice) * 100 : 0
+								}
+								if (xDetail.data.global_discount_percent != null && xDetail.data.global_discount_percent != 0) {
+									xGlobalAmount = (xDetail.data.global_discount_percent * xTotalBasePrice) / 100
+								}
+								xDetail.data.global_discount_percent = Math.round((xGlobalPercent || 0) * 1000) / 1000
+								xDetail.data.global_discount = Math.round((xGlobalAmount || 0) * 1000) / 1000
+
+								// ppn diabaikan dulu untuk payreq bill
+								xDetail.data.untaxed_amount = Math.round(((xTotalBasePrice - xGlobalAmount) || 0) * 1000) / 1000
+								xDetail.data.total_dpp = 0
+								xDetail.data.total_tax_amount = 0
+
+								// calc pph, sama seperti payreq non-bill: kalau pph_amount kosong maka dihitung dari persen, kalau ada amount maka persen diturunkan dari amount
+								if (xPphAmount == 0) {
+									if (xDetail.data.pph_percent) {
+										xDetail.data.total_pph_amount = Math.round((xDetail.data.untaxed_amount * (xDetail.data.pph_percent / 100)) * 1000) / 1000 || 0
+									} else {
+										xDetail.data.total_pph_amount = 0
+									}
+									xDetail.data.pph_amount = xDetail.data.total_pph_amount
+								} else {
+									xDetail.data.total_pph_amount = Math.round((xDetail.data.pph_amount) * 1000) / 1000 || 0
+									xDetail.data.pph_percent = xDetail.data.untaxed_amount != 0 ? Math.round(((xDetail.data.pph_amount / xDetail.data.untaxed_amount) * 100) * 1000) / 1000 : 0
+								}
+
+								const xPreTotalPriceBill = (xDetail.data.untaxed_amount + xDetail.data.total_tax_amount + (xDetail.data.delivery_costs || 0) + (xDetail.data.service_costs || 0) + (xDetail.data.other_costs || 0)) - xDetail.data.total_pph_amount
+								xDetail.data.total_price = Math.round((xPreTotalPriceBill || 0) * 1000) / 1000
+
 							}
-							// get Detail FPB
-							// let xFpbDetail = await _purchaseRequestRepoInstance.getById({ id: xDetail.data.purchase_request_id })
-							// if (xFpbDetail != null) {
-							// 	xDetail.data.fpb_no = xFpbDetail.request_no
-							// }
 							// Convert nominal to trebilang
 							const xTerbilang = await _currencyService.terbilang(xDetail.data.total_price)
 							xDetail.data.terbilang = xTerbilang
@@ -436,7 +481,8 @@ class PaymentRequestService {
 									purchase_request: xRows[i].purchase_request,
 									pjca: xRows[i].pjca,
 									app_category: xRows[i].app_category,
-									created_by_plant_id: xRows[i].created_by_plant_id
+									created_by_plant_id: xRows[i].created_by_plant_id,
+									currency: xRows[i].currency
 								});
 							}
 
@@ -1910,7 +1956,10 @@ class PaymentRequestService {
 							approved_at: null,
 							user_id: pParam.user_id,
 							user_name: pParam.user_name,
-							current_approval_ids: xApproverIds
+							current_approval_ids: xApproverIds,
+							fetch_by: pParam.user_id,
+							fetch_by_name: pParam.user_name,
+							fetch_at: await _utilInstance.getCurrDateTime()
 						}
 						var xUpdateResult = await _repoInstance.save(xUpdateParam, 'update');
 						console.log(`>>> xUpdateResult: ${JSON.stringify(xUpdateResult)}`);

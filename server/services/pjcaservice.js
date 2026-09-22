@@ -397,7 +397,8 @@ class PJCAService {
 									updated_at: moment(xRows[i].updatedAt).format('DD MMM YYYY HH:mm:ss'),
 									updated_by_name: xRows[i].updated_by_name,
 									payment_request: xRows[i].payment_request,
-									created_by_plant_id: xRows[i].created_by_plant_id
+									created_by_plant_id: xRows[i].created_by_plant_id,
+									currency: xRows[i].currency
 								});
 							}
 
@@ -1455,7 +1456,10 @@ class PJCAService {
 							approved_at: null,
 							user_id: pParam.user_id,
 							user_name: pParam.user_name,
-							current_approval_ids: xApproverIds
+							current_approval_ids: xApproverIds,
+							fetch_by: pParam.user_id,
+							fetch_by_name: pParam.user_name,
+							fetch_at: await _utilInstance.getCurrDateTime()
 						}
 						var xUpdateResult = await _repoInstance.save(xUpdateParam, 'update');
 						console.log(`>>> xUpdateResult: ${JSON.stringify(xUpdateResult)}`);
