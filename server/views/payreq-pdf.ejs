@@ -101,11 +101,7 @@
               font-weight: bold;
             "
             >
-              <% if( data.data.company_id == 5 ){ %>
               <strong>PAYMENT REQUEST</strong>
-              <% }else{ %>
-              <strong>CASH ADVANCE</strong>
-              <% } %>
             </span
           >
         </td>
@@ -427,7 +423,7 @@
                 <td style="text-align: right" class="border-rb p-relative">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td><!--Rp  -->  </td>
+                      <td><%=data.data.currency ? data.data.currency : 'Rp'%></td>
                       <td style="text-align: right; width: 100%;"><%=item.subtotal != null ? item.subtotal.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -457,8 +453,8 @@
                   if(item.discount_amount != null && item.discount_amount > 0){
                   %>
                     <br/>
-                    <!-- <%='Pph/Disc: Rp' + item.discount_amount%> -->
-                    <%='Pph/Disc: ' + item.discount_amount%>
+                    <%='Disc: ' + (data.data.currency ? data.data.currency : 'Rp') + item.discount_amount%>
+                    <!-- <%='Pph/Disc: ' + item.discount_amount%> -->
                   <%
                       }
                   %>
@@ -489,7 +485,7 @@
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td><!--Rp  --> </td>
+                      <td><%=data.data.currency ? data.data.currency : 'Rp'%></td>
                       <td style="text-align: right; width: 100%;"><%=data.data.delivery_costs != null ? data.data.delivery_costs.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -537,7 +533,7 @@
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td><!--Rp  --> </td>
+                      <td><%=data.data.currency ? data.data.currency : 'Rp'%></td>
                       <td style="text-align: right; width: 100%;"><%=data.data.service_costs != null ? data.data.service_costs.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -585,7 +581,7 @@
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td><!--Rp  --> </td>
+                      <td><%=data.data.currency ? data.data.currency : 'Rp'%></td>
                       <td style="text-align: right; width: 100%;"><%=data.data.other_costs != null ? data.data.other_costs.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -628,12 +624,12 @@
                 <td style="text-align: center" class="border-rb">
                 </td>
                 <td style="text-align: left" class="border-rb">
-                  Pph/Discount Global (<%=data.data.global_discount_percent%>%)
+                  Discount Global (<%=data.data.global_discount_percent%>%)
                 </td>
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td><!--Rp  --> </td>
+                      <td><%=data.data.currency ? data.data.currency : 'Rp'%></td>
                       <td style="text-align: right; width: 100%;"><%=data.data.global_discount != null ? data.data.global_discount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -681,7 +677,7 @@
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td><!--Rp  --> </td>
+                      <td><%=data.data.currency ? data.data.currency : 'Rp'%></td>
                       <td style="text-align: right; width: 100%;"><%=data.data.total_tax_amount != null ? data.data.total_tax_amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -730,7 +726,7 @@
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                       <td><!--Rp  --></td>
+                      <td><%=data.data.currency ? data.data.currency : 'Rp'%></td>
                       <td style="text-align: right; width: 100%;">- <%=data.data.total_pph_amount != null ? data.data.total_pph_amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -789,7 +785,7 @@
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td><!--Rp  -->  </td>
+                      <td><%=data.data.currency ? data.data.currency : 'Rp'%></td>
                       <td style="text-align: right; width: 100%;"><%=data.data.total_price != null ? data.data.total_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>

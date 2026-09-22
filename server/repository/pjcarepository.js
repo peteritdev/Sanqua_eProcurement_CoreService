@@ -901,70 +901,68 @@ class PJCARepository {
 			}
 
 			// --- Scope akses berdasarkan role, lokasi, dan apakah company yang di-select = company sendiri ---
-			if (pParam.hasOwnProperty('company_id') && pParam.company_id != '') {
+			// company_id WAJIB ada nilai — kalau tidak dikirim/kosong, override paksa ke logged_company_id
+			// supaya tidak ada request yang lolos tanpa scope company sama sekali.
+			var xSelectedCompanyId = (pParam.hasOwnProperty('company_id') && pParam.company_id != null && pParam.company_id != '')
+				? pParam.company_id
+				: pParam.logged_company_id;
+			var xIsHO = (pParam.logged_company_id == 6);
+			var xIsOwnCompany = (xSelectedCompanyId == pParam.logged_company_id);
 
-				var xIsHO = (pParam.logged_company_id == 6);
-				var xIsOwnCompany = (pParam.company_id == pParam.logged_company_id);
+			xAndConditions.push(`tr.company_id = :companyId`);
+			xReplacements.companyId = xSelectedCompanyId;
+			
+			if (xIsHO) {
+				if (pParam.logged_is_admin == 1) {
+					// Role 1: Admin HO -> tidak ada restriction tambahan
+				} else if (pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
+					// Role 2: PIC HO -> created_by OR approval
+					var xAccessOrConds = [`tr.created_by = :createdBy`];
+					xReplacements.createdBy = pParam.user_id;
 
-				xAndConditions.push(`tr.company_id = :companyId`);
-				xReplacements.companyId = pParam.company_id;
-
-				if (pParam.logged_company_id != 6) {
-					xAndConditions.push(`(tr.created_by_plant_id <> 6 OR tr.created_by_plant_id IS NULL)`);
+					if (pParam.hasOwnProperty('owned_document_no') && pParam.owned_document_no != '') {
+						xAccessOrConds.push(`tr.document_no IN (:ownedDocumentNo)`);
+						xReplacements.ownedDocumentNo = pParam.owned_document_no;
+					}
+					xAndConditions.push(
+						xAccessOrConds.length > 1 ? `(${xAccessOrConds.join(' OR ')})` : xAccessOrConds[0]
+					);
 				}
-
-				if (xIsHO) {
-					if (pParam.logged_is_admin == 1) {
-						// Role 1: Admin HO -> tidak ada restriction tambahan
-					} else if (pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
-						// Role 2: PIC HO -> created_by OR approval
-						var xAccessOrConds = [`tr.created_by = :createdBy`];
-						xReplacements.createdBy = pParam.user_id;
-
-						if (pParam.hasOwnProperty('owned_document_no') && pParam.owned_document_no != '') {
-							xAccessOrConds.push(`tr.document_no IN (:ownedDocumentNo)`);
-							xReplacements.ownedDocumentNo = pParam.owned_document_no;
-						}
-						xAndConditions.push(
-							xAccessOrConds.length > 1 ? `(${xAccessOrConds.join(' OR ')})` : xAccessOrConds[0]
-						);
-					}
-				} else {
-					// non-HO
-					if (pParam.logged_is_admin == 1) {
-						// Role 3: Admin purchasing non-HO
-						if (xIsOwnCompany) {
-							// Company sendiri: semua data yang dibuat user dari company sendiri
-							// (created_by_plant_id = company dia), ditambah data yang dia buat sendiri.
-							// Data yang dibuat user dari company lain TIDAK ikut, walau company_id sama.
-							if (pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
-								xAndConditions.push(`(tr.created_by_plant_id = :loggedCompanyId OR tr.created_by = :createdBy)`);
-								xReplacements.loggedCompanyId = pParam.logged_company_id;
-								xReplacements.createdBy = pParam.user_id;
-							} else {
-								xAndConditions.push(`tr.created_by_plant_id = :loggedCompanyId`);
-								xReplacements.loggedCompanyId = pParam.logged_company_id;
-							}
+			} else {
+				// non-HO
+				if (pParam.logged_is_admin == 1) {
+					// Role 3: Admin purchasing non-HO
+					if (xIsOwnCompany) {
+						// Company sendiri: semua data yang dibuat user dari company sendiri
+						// (created_by_plant_id = company dia), ditambah data yang dia buat sendiri.
+						// Data yang dibuat user dari company lain TIDAK ikut, walau company_id sama.
+						if (pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
+							xAndConditions.push(`((tr.created_by_plant_id = :loggedCompanyId OR tr.created_by_plant_id IS NULL) OR tr.created_by = :createdBy)`);
+							xReplacements.loggedCompanyId = pParam.logged_company_id;
+							xReplacements.createdBy = pParam.user_id;
 						} else {
-							// Company assigned (bukan miliknya) -> HANYA data yang dia buat sendiri
-							if (pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
-								xAndConditions.push(`tr.created_by = :createdBy`);
-								xReplacements.createdBy = pParam.user_id;
-							}
+							xAndConditions.push(`(tr.created_by_plant_id = :loggedCompanyId OR tr.created_by_plant_id IS NULL)`);
+							xReplacements.loggedCompanyId = pParam.logged_company_id;
 						}
-					} else if (pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
-						// Role 4: PIC dept non-HO -> selalu created_by OR approval
-						var xAccessOrCondsPic = [`tr.created_by = :createdBy`];
-						xReplacements.createdBy = pParam.user_id;
-
-						if (pParam.hasOwnProperty('owned_document_no') && pParam.owned_document_no != '') {
-							xAccessOrCondsPic.push(`tr.document_no IN (:ownedDocumentNo)`);
-							xReplacements.ownedDocumentNo = pParam.owned_document_no;
+					} else {
+						// Company assigned (bukan miliknya) -> HANYA data yang dia buat sendiri
+						if (pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
+							xAndConditions.push(`tr.created_by = :createdBy`);
+							xReplacements.createdBy = pParam.user_id;
 						}
-						xAndConditions.push(
-							xAccessOrCondsPic.length > 1 ? `(${xAccessOrCondsPic.join(' OR ')})` : xAccessOrCondsPic[0]
-						);
 					}
+				} else if (pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
+					// Role 4: PIC dept non-HO -> selalu created_by OR approval
+					var xAccessOrCondsPic = [`tr.created_by = :createdBy`];
+					xReplacements.createdBy = pParam.user_id;
+
+					if (pParam.hasOwnProperty('owned_document_no') && pParam.owned_document_no != '') {
+						xAccessOrCondsPic.push(`tr.document_no IN (:ownedDocumentNo)`);
+						xReplacements.ownedDocumentNo = pParam.owned_document_no;
+					}
+					xAndConditions.push(
+						xAccessOrCondsPic.length > 1 ? `(${xAccessOrCondsPic.join(' OR ')})` : xAccessOrCondsPic[0]
+					);
 				}
 			}
 

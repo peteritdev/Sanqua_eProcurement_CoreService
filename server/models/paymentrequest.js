@@ -69,6 +69,7 @@ module.exports = (sequelize, DataTypes) => {
 		
 		generate_pdf_history: DataTypes.JSON,
 		created_by_plant_id: DataTypes.INTEGER,
+		currency: DataTypes.STRING
 	});
 
 	PaymentRequest.associate = function(models) {
