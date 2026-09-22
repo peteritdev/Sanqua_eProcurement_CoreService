@@ -912,7 +912,8 @@ class PaymentRequestService {
 												company_id: xDetail.data.company_id,
 												department_id: xDetail.data.department_id,
 												ecatalogue_fpb_category_item: null,
-												logged_company_id: pParam.logged_company_id
+												logged_company_id: pParam.logged_company_id,
+												approval_matrix_id: pParam.approval_matrix_id
 											};
 
 											console.log(`>>> xParamAddApprovalMatrix: ${JSON.stringify(xParamAddApprovalMatrix)}`);
@@ -957,6 +958,7 @@ class PaymentRequestService {
 																let xParamEmailNotification,
 																	xNotificationResult = {};
 						
+																console.log(`>>> xApproverSeq1.approver_user[i].notification_via_email: ${JSON.stringify(xApproverSeq1.approver_user[i].notification_via_email)}`);
 																if (xApproverSeq1.approver_user[i].notification_via_email) {
 																	xParamEmailNotification = {
 																		mode: 'request_approval_ca',
@@ -976,6 +978,7 @@ class PaymentRequestService {
 																			email: xApproverSeq1.approver_user[i].email
 																		}
 																	};
+																	console.log(`>>> xParamEmailNotification: ${JSON.stringify(xParamEmailNotification)}`);
 																	xNotificationResult = await _notificationService.sendNotificationEmail_CANeedApproval(
 																		xParamEmailNotification,
 																		pParam.method,
@@ -1938,14 +1941,22 @@ class PaymentRequestService {
 						console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
 						const xApproverIds = []
 						const xApproverEmpIds = []
+						const xApproverEmpEmail = []
+						const xApproverEmpName = []
 						if (xApprovalMatrixResult.status_code == '00') {
 							if (xApprovalMatrixResult.approvers.length > 0) {
+								console.log(`>>> xApprovalMatrixResult.approvers: ${JSON.stringify(xApprovalMatrixResult.approvers)}`);
 								
 								let xApproverSeq1 = xApprovalMatrixResult.approvers.find((el) => el.sequence === 1);
+								console.log(`>>> xApproverSeq1: ${JSON.stringify(xApproverSeq1)}`);
 								if (xApproverSeq1 != null) {
 									for (var i in xApproverSeq1.approver_user) {
 										xApproverIds.push(xApproverSeq1.approver_user[i].user_id)
 										xApproverEmpIds.push(xApproverSeq1.approver_user[i].employee_id)
+										if (xApproverSeq1.approver_user[i].notification_via_email) {
+											xApproverEmpEmail.push(xApproverSeq1.approver_user[i].email)
+											xApproverEmpName.push(xApproverSeq1.approver_user[i].user_name)
+										}
 									}
 								}
 							}
@@ -1965,7 +1976,7 @@ class PaymentRequestService {
 						console.log(`>>> xUpdateResult: ${JSON.stringify(xUpdateResult)}`);
 						
 						// In App Notification
-						await _notificationService.inAppNotification({
+						const xInAppNofitication = await _notificationService.inAppNotification({
 							employee_id: xApproverEmpIds[0],
 							employee_name: xPayreqDetail.data.employee_name,
 							subject: ` (fetch)`,
@@ -1977,6 +1988,40 @@ class PaymentRequestService {
 							method: pParam.method,
 							token: pParam.token
 						});
+						console.log(`>>> xInAppNofitication: ${JSON.stringify(xInAppNofitication)}`);
+						console.log(`>>> xApproverEmpEmail: ${JSON.stringify(xApproverEmpEmail)}`);
+						console.log(`>>> xApproverEmpName: ${JSON.stringify(xApproverEmpName)}`);
+						console.log(`>>> EmailNotif: ${JSON.stringify(xApproverEmpEmail.length > 0 && xApproverEmpName.length > 0)}`);
+						if (xApproverEmpEmail.length > 0 && xApproverEmpName.length > 0) {
+							for (let i = 0; i < xApproverEmpEmail.length; i++) {
+								let xParamEmailNotification = {
+									mode: 'request_approval_ca',
+									id: xEncId,
+									request_no: xPayreqDetail.data.document_no,
+									company_name: xPayreqDetail.data.company_name,
+									department_name: xPayreqDetail.data.department_name,
+									created_by: xPayreqDetail.data.employee_name,
+									created_at:
+										xPayreqDetail.data.createdAt != null
+											? moment(xPayreqDetail.data.createdAt).format('DD MMM YYYY')
+											: '',
+									items: xPayreqDetail.data.payment_request_detail,
+									// body: xDetail.data,
+									approver_user: {
+										employee_name: xApproverEmpName[i],
+										email: xApproverEmpEmail[i]
+									}
+								};
+								console.log(`>>> xParamEmailNotification: ${JSON.stringify(xParamEmailNotification)}`);
+								const xNotificationResult = await _notificationService.sendNotificationEmail_CANeedApproval(
+									xParamEmailNotification,
+									pParam.method,
+									pParam.token
+								);
+								console.log(`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`);
+							}
+						}
+
 						xJoResult = xUpdateResult;
 						xJoResult.approval_matrix_result = xApprovalMatrixResult;
 					}

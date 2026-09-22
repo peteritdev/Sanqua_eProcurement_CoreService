@@ -679,7 +679,8 @@ class PJCAService {
 										company_id: xDetail.data.company_id,
 										department_id: xDetail.data.department_id,
 										ecatalogue_fpb_category_item: null,
-										logged_company_id: pParam.logged_company_id
+										logged_company_id: pParam.logged_company_id,
+										approval_matrix_id: pParam.approval_matrix_id
 									};
 
 									var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
@@ -1438,6 +1439,8 @@ class PJCAService {
 						console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
 						const xApproverIds = []
 						const xApproverEmpIds = []
+						const xApproverEmpEmail = []
+						const xApproverEmpName = []
 						if (xApprovalMatrixResult.status_code == '00') {
 							if (xApprovalMatrixResult.approvers.length > 0) {
 								
@@ -1446,6 +1449,10 @@ class PJCAService {
 									for (var i in xApproverSeq1.approver_user) {
 										xApproverIds.push(xApproverSeq1.approver_user[i].user_id)
 										xApproverEmpIds.push(xApproverSeq1.approver_user[i].employee_id)
+										if (xApproverSeq1.approver_user[i].notification_via_email) {
+											xApproverEmpEmail.push(xApproverSeq1.approver_user[i].email)
+											xApproverEmpName.push(xApproverSeq1.approver_user[i].user_name)
+										}
 									}
 								}
 							}
@@ -1465,7 +1472,7 @@ class PJCAService {
 						console.log(`>>> xUpdateResult: ${JSON.stringify(xUpdateResult)}`);
 						
 						// In App Notification
-						await _notificationService.inAppNotification({
+						var xInAppNofitication = await _notificationService.inAppNotification({
 							employee_id: xApproverEmpIds[0],
 							employee_name: xPjcaDetail.data.employee_name,
 							subject: ` (fetch)`,
@@ -1477,6 +1484,40 @@ class PJCAService {
 							method: pParam.method,
 							token: pParam.token
 						});
+
+						console.log(`>>> xInAppNofitication: ${JSON.stringify(xInAppNofitication)}`);
+						console.log(`>>> xApproverEmpEmail: ${JSON.stringify(xApproverEmpEmail)}`);
+						console.log(`>>> xApproverEmpName: ${JSON.stringify(xApproverEmpName)}`);
+						console.log(`>>> EmailNotif: ${JSON.stringify(xApproverEmpEmail.length > 0 && xApproverEmpName.length > 0)}`);
+						if (xApproverEmpEmail.length > 0 && xApproverEmpName.length > 0) {
+							for (let i = 0; i < xApproverEmpEmail.length; i++) {
+								let xParamEmailNotification = {
+									mode: 'request_approval_pjca',
+									id: xEncId,
+									request_no: xPjcaDetail.data.document_no,
+									company_name: xPjcaDetail.data.company_name,
+									department_name: xPjcaDetail.data.department_name,
+									created_by: xPjcaDetail.data.employee_name,
+									created_at:
+										xPjcaDetail.data.createdAt != null
+											? moment(xPjcaDetail.data.createdAt).format('DD MMM YYYY')
+											: '',
+									items: xPjcaDetail.data.payment_request_detail,
+									// body: xDetail.data,
+									approver_user: {
+										employee_name: xApproverEmpName[i],
+										email: xApproverEmpEmail[i]
+									}
+								};
+								console.log(`>>> xParamEmailNotification: ${JSON.stringify(xParamEmailNotification)}`);
+								const xNotificationResult = await _notificationService.sendNotificationEmail_PJCANeedApproval(
+									xParamEmailNotification,
+									pParam.method,
+									pParam.token
+								);
+								console.log(`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`);
+							}
+						}
 						xJoResult = xUpdateResult;
 						xJoResult.approval_matrix_result = xApprovalMatrixResult;
 					}
