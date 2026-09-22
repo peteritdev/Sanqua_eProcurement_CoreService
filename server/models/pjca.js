@@ -60,6 +60,7 @@ module.exports = (sequelize, DataTypes) => {
 		// vendor_name: DataTypes.STRING,
 		// vendor_code: DataTypes.STRING
 		created_by_plant_id: DataTypes.INTEGER,
+		currency: DataTypes.STRING
 	});
 
 	PJCA.associate = function(models) {
