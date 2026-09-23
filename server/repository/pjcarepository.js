@@ -868,7 +868,8 @@ class PJCARepository {
 				xAndConditions.push(`tr.current_approval_ids::jsonb @> :currentApprovalId::jsonb`);
 				xReplacements.currentApprovalId = JSON.stringify([pParam.current_approval_ids]);
 			}
-
+			var xHasApprovalFilter = pParam.hasOwnProperty('current_approval_ids') && pParam.current_approval_ids != '';
+			
 			if (pParam.hasOwnProperty('filter') && pParam.filter != null && pParam.filter != undefined && pParam.filter != '') {
 				var xFilter = JSON.parse(pParam.filter);
 				if (Array.isArray(xFilter) && xFilter.length > 0) {
@@ -909,8 +910,11 @@ class PJCARepository {
 			var xIsHO = (pParam.logged_company_id == 6);
 			var xIsOwnCompany = (xSelectedCompanyId == pParam.logged_company_id);
 
-			xAndConditions.push(`tr.company_id = :companyId`);
-			xReplacements.companyId = xSelectedCompanyId;
+			if (!xHasApprovalFilter) {
+				// company_id HANYA di-filter kalau tidak sedang search by current_approval_ids
+				xAndConditions.push(`tr.company_id = :companyId`);
+				xReplacements.companyId = xSelectedCompanyId;
+			}
 			
 			if (xIsHO) {
 				if (pParam.logged_is_admin == 1) {
