@@ -2132,7 +2132,7 @@ class PurchaseRequestService {
 		try {
 			if (pParam.hasOwnProperty('user_id')) {
 				if (pParam.user_id != '') {
-					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+					const xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
 					if (xDecId.status_code == '00') {
 						pParam.user_id = xDecId.decrypted;
 					}
