@@ -2156,6 +2156,8 @@ class PurchaseRequestService {
 					total_record: xResultList.total_record,
 					data: xJoArrData
 				};
+			} else {
+				xJoResult = xResultList
 			}
 		} catch (e) {
 			xJoResult = {

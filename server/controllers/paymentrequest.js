@@ -91,7 +91,7 @@ async function paymentRequest_List(req, res) {
 					(el) => el.application.id === config.applicationId || el.application.id === 1
 				);
 				console.log(`>>> xLevel : ${JSON.stringify(xLevel)}`);
-				req.query.logged_is_admin = xLevel.is_admin || false;
+				req.query.logged_is_admin = xLevel ? xLevel.is_admin : 0;
 				req.query.user_id = oAuthResult.token_data.result_verify.id;
 
 				req.query.logged_company_id = oAuthResult.token_data.result_verify.employee_info.company != null ? oAuthResult.token_data.result_verify.employee_info.company.plant_id : oAuthResult.token_data.result_verify.company.plant_id;
@@ -463,7 +463,7 @@ async function paymentRequest_Dropdown(req, res) {
 					(el) => el.application.id === config.applicationId || el.application.id === 1
 				);
 
-				req.query.logged_is_admin = xLevel.is_admin;
+				req.query.logged_is_admin = xLevel ? xLevel.is_admin : 0;
 				req.query.user_id = oAuthResult.token_data.result_verify.id;
 
 				req.query.logged_company_id = oAuthResult.token_data.result_verify.employee_info.company.id;
@@ -504,7 +504,7 @@ async function paymentRequestDetail_Dropdown(req, res) {
 					(el) => el.application.id === config.applicationId || el.application.id === 1
 				);
 
-				req.query.logged_is_admin = xLevel.is_admin;
+				req.query.logged_is_admin = xLevel ? xLevel.is_admin : 0;
 				req.query.user_id = oAuthResult.token_data.result_verify.id;
 
 				req.query.logged_company_id = oAuthResult.token_data.result_verify.employee_info.company.id;
@@ -799,7 +799,7 @@ async function paymentRequestDetail_List(req, res) {
 					(el) => el.application.id === config.applicationId || el.application.id === 1
 				);
 
-				req.query.logged_is_admin = xLevel.is_admin;
+				req.query.logged_is_admin = xLevel ? xLevel.is_admin : 0;
 				req.query.user_id = oAuthResult.token_data.result_verify.id;
 
 				req.query.logged_company_id = oAuthResult.token_data.result_verify.employee_info.company != null ? oAuthResult.token_data.result_verify.employee_info.company.plant_id : oAuthResult.token_data.result_verify.company.plant_id;
@@ -839,7 +839,7 @@ async function paymentRequestDetail_BillList(req, res) {
 					(el) => el.application.id === config.applicationId || el.application.id === 1
 				);
 
-				req.query.logged_is_admin = xLevel.is_admin;
+				req.query.logged_is_admin = xLevel ? xLevel.is_admin : 0;
 				req.query.user_id = oAuthResult.token_data.result_verify.id;
 
 				req.query.logged_company_id = oAuthResult.token_data.result_verify.employee_info.company != null ? oAuthResult.token_data.result_verify.employee_info.company.plant_id : oAuthResult.token_data.result_verify.company.plant_id;
