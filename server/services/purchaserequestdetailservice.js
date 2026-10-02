@@ -1444,21 +1444,24 @@ class PurchaseRequestDetailService {
 
 			if (xItems.status_code == '00') {
 				if (xItems.hasOwnProperty('data')) {
+					// resync item untuk fpb yang ber project blm diakomodir, akan error karena itemnya mix dengan produk yang tidak berkode
 					for (var i in xItems.data.purchase_request_detail) {
 						if (xItems.data.purchase_request_detail[i].is_item_match_with_odoo == null || xItems.data.purchase_request_detail[i].is_item_match_with_odoo == 0) {
-							if (
-								xItems.data.purchase_request_detail[i].master_product.code != null &&
-								xItems.data.purchase_request_detail[i].master_product.code != ''
-							) {
-								xJaArrCheckItem.push({
-									code: xItems.data.purchase_request_detail[i].master_product.code,
-									name: xItems.data.purchase_request_detail[i].master_product.name,
-									uom:
-										xItems.data.purchase_request_detail[i].master_product.uom != null
-											? xItems.data.purchase_request_detail[i].master_product.uom.name
-											: null,
-									index: 0
-								});
+							if (xItems.data.purchase_request_detail[i].master_product) {
+								if (
+									xItems.data.purchase_request_detail[i].master_product.code != null &&
+									xItems.data.purchase_request_detail[i].master_product.code != ''
+								) {
+									xJaArrCheckItem.push({
+										code: xItems.data.purchase_request_detail[i].master_product.code,
+										name: xItems.data.purchase_request_detail[i].master_product.name,
+										uom:
+											xItems.data.purchase_request_detail[i].master_product.uom != null
+												? xItems.data.purchase_request_detail[i].master_product.uom.name
+												: null,
+										index: 0
+									});
+								}
 							}
 						}
 					}
