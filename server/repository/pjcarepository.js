@@ -937,17 +937,34 @@ class PJCARepository {
 				if (pParam.logged_is_admin == 1) {
 					// Role 3: Admin purchasing non-HO
 					if (xIsOwnCompany) {
-						// Company sendiri: semua data yang dibuat user dari company sendiri
-						// (created_by_plant_id = company dia), ditambah data yang dia buat sendiri.
-						// Data yang dibuat user dari company lain TIDAK ikut, walau company_id sama.
+						// // Company sendiri: semua data yang dibuat user dari company sendiri
+						// // (created_by_plant_id = company dia), ditambah data yang dia buat sendiri.
+						// // Data yang dibuat user dari company lain TIDAK ikut, walau company_id sama.
+						// if (pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
+						// 	xAndConditions.push(`((tr.created_by_plant_id = :loggedCompanyId OR tr.created_by_plant_id IS NULL) OR tr.created_by = :createdBy)`);
+						// 	xReplacements.loggedCompanyId = pParam.logged_company_id;
+						// 	xReplacements.createdBy = pParam.user_id;
+						// } else {
+						// 	xAndConditions.push(`(tr.created_by_plant_id = :loggedCompanyId OR tr.created_by_plant_id IS NULL)`);
+						// 	xReplacements.loggedCompanyId = pParam.logged_company_id;
+						// }
+						
+						// 26/09/2026: untuk role 3 admin non-ho bisa melihat semua data dari company sendiri, ditambah data yang dia buat sendiri (walau company lain)
+						// dan data yang dibuat oleh user company lain tapi perlu approval dari dia
+						var xOwnCompanyOrConds = [`tr.created_by_plant_id = :loggedCompanyId`, `tr.created_by_plant_id IS NULL`];
+						xReplacements.loggedCompanyId = pParam.logged_company_id;
+
 						if (pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
-							xAndConditions.push(`((tr.created_by_plant_id = :loggedCompanyId OR tr.created_by_plant_id IS NULL) OR tr.created_by = :createdBy)`);
-							xReplacements.loggedCompanyId = pParam.logged_company_id;
+							xOwnCompanyOrConds.push(`tr.created_by = :createdBy`);
 							xReplacements.createdBy = pParam.user_id;
-						} else {
-							xAndConditions.push(`(tr.created_by_plant_id = :loggedCompanyId OR tr.created_by_plant_id IS NULL)`);
-							xReplacements.loggedCompanyId = pParam.logged_company_id;
 						}
+
+						if (pParam.hasOwnProperty('owned_document_no') && pParam.owned_document_no != '') {
+							xOwnCompanyOrConds.push(`tr.document_no IN (:ownedDocumentNo)`);
+							xReplacements.ownedDocumentNo = pParam.owned_document_no;
+						}
+
+						xAndConditions.push(`(${xOwnCompanyOrConds.join(' OR ')})`);
 					} else {
 						// Company assigned (bukan miliknya) -> HANYA data yang dia buat sendiri
 						if (pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
