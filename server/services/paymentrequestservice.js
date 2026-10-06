@@ -290,12 +290,15 @@ class PaymentRequestService {
 								var xTotalBasePrice = 0;
 								var xPphAmount = xDetail.data.pph_amount
 								var xPphPercent = xDetail.data.pph_percent
+								var xTotalFaktur = 0;
 
 								// looping detail item, hanya menjumlahkan nilai tagihan (debt_value), tanpa hitung ppn/diskon per item dulu
 								for (var i in xPayreqDetail) {
 									if (xPayreqDetail[i].status != -1) {
-										var xItemBaseValue = xPayreqDetail[i].debt_value != null ? xPayreqDetail[i].debt_value : (xPayreqDetail[i].total_after_tax || 0)
+										var xItemBaseValue = xPayreqDetail[i].debt_value != null ? xPayreqDetail[i].debt_value : 0
+										var xItemFakturValue = xPayreqDetail[i].total_after_tax ? xPayreqDetail[i].total_after_tax : 0
 										xTotalBasePrice += Math.round((xItemBaseValue || 0) * 1000) / 1000
+										xTotalFaktur += Math.round((xItemFakturValue || 0) * 1000) / 1000
 									}
 								}
 
@@ -304,10 +307,10 @@ class PaymentRequestService {
 
 								// calc global discount (saling menurunkan amount <-> percent, sama seperti payreq non-bill)
 								if (xDetail.data.global_discount != null && xDetail.data.global_discount != 0) {
-									xGlobalPercent = xTotalBasePrice != 0 ? (xDetail.data.global_discount / xTotalBasePrice) * 100 : 0
+									xGlobalPercent = xTotalFaktur != 0 ? (xDetail.data.global_discount / xTotalFaktur) * 100 : 0
 								}
 								if (xDetail.data.global_discount_percent != null && xDetail.data.global_discount_percent != 0) {
-									xGlobalAmount = (xDetail.data.global_discount_percent * xTotalBasePrice) / 100
+									xGlobalAmount = (xDetail.data.global_discount_percent * xTotalFaktur) / 100
 								}
 								xDetail.data.global_discount_percent = Math.round((xGlobalPercent || 0) * 1000) / 1000
 								xDetail.data.global_discount = Math.round((xGlobalAmount || 0) * 1000) / 1000
