@@ -82,7 +82,12 @@ module.exports = (sequelize, DataTypes) => {
 		
 		fetch_at: DataTypes.DATE,
 		fetch_by: DataTypes.INTEGER,
-		fetch_by_name: DataTypes.STRING
+		fetch_by_name: DataTypes.STRING,
+
+		subject: DataTypes.STRING,
+		event_date_start: DataTypes.DATE,
+		event_date_end: DataTypes.DATE,
+		event_location: DataTypes.STRING
 	});
 
 	PurchaseRequest.associate = function(models) {

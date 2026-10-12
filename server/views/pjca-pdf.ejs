@@ -96,12 +96,30 @@
         <th
           style="
             width: 25%;
-            padding: 3px;
-            text-align: right;
-            vertical-align: bottom;
           "
         >
-          <span style="width: 240px; margin-left: -20px; font-size: 10px;">Doc No. FRM ACC.03.02 rev.01</span>
+          <table
+            cellspacing="0"
+            cellpadding="5"
+            style="width: 100%; text-align: right"
+          >
+            <tr>
+              <td style="width: 100%">
+                <%
+                if(data.data.company_id == 5 || data.data.company_id == 14){
+                %>
+                <span style="font-size: 14px; font-weight: normal;"><%= data.data.document_no %></span>
+                <%
+                    }
+                %>
+              </td>
+            </tr>
+            <tr style="vertical-align: bottom;">
+              <td style="width: 100%">
+                <span style="font-size: 10px;">Doc No. FRM ACC.03.02 rev.01</span>
+              </td>
+            </tr>
+          </table>
         </th>
       </tr>
       <tr>
