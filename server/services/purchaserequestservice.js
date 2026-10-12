@@ -111,6 +111,23 @@ class PurchaseRequestService {
 
 			if (xFlagProcess) {
 				xFlagProcess = false;
+				// Validate event date range
+				if (
+					pParam.hasOwnProperty('event_date_start') &&
+					pParam.hasOwnProperty('event_date_end') &&
+					pParam.event_date_start != null &&
+					pParam.event_date_start != '' &&
+					pParam.event_date_end != null &&
+					pParam.event_date_end != ''
+				) {
+					if (pParam.event_date_start > pParam.event_date_end) {
+						return (xJoResult = {
+							status_code: '-99',
+							status_msg: 'Tanggal awal event tidak boleh lebih besar dari tanggal akhir event'
+						});
+					}
+				}
+
 				/*
 					At: 10/11/2023
 					Description: Checking when the parameter project is set, category_time must be 7 and category_pr must be 'asset'
@@ -656,6 +673,10 @@ class PurchaseRequestService {
 									},
 									approved_at: xRows[index].approved_at,
 									budget_plan_no: xRows[index].budget_plan_no,
+									subject: xRows[index].subject,
+									event_date_start: xRows[index].event_date_start,
+									event_date_end: xRows[index].event_date_end,
+									event_location: xRows[index].event_location
 								});
 							}
 						} else {
@@ -715,7 +736,11 @@ class PurchaseRequestService {
 										name: config.categoryItem[xRows[index].category_item]
 									},
 									approved_at: xRows[index].approved_at,
-									budget_plan_no: xRows[index].budget_plan_no
+									budget_plan_no: xRows[index].budget_plan_no,
+									subject: xRows[index].subject,
+									event_date_start: xRows[index].event_date_start,
+									event_date_end: xRows[index].event_date_end,
+									event_location: xRows[index].event_location
 								});
 							}
 						}
@@ -777,7 +802,11 @@ class PurchaseRequestService {
 								approved_at: xRows[index].approved_at,
 								fpb_type_id: xRows[index].fpb_type,
 								fpb_type_name: fpbType[xRows[index].fpb_type-1],
-								budget_plan_no: xRows[index].budget_plan_no
+								budget_plan_no: xRows[index].budget_plan_no,
+								subject: xRows[index].subject,
+								event_date_start: xRows[index].event_date_start,
+								event_date_end: xRows[index].event_date_end,
+								event_location: xRows[index].event_location
 							});
 						}
 					}
@@ -1148,7 +1177,11 @@ class PurchaseRequestService {
 						fetch_at:
 							xResult.fetch_at != null ? moment(xResult.fetch_at).format('DD MMM YYYY HH:mm:ss') : '',
 						fetch_by_name: xResult.fetch_by_name,
-						fetch_by: xResult.fetch_by
+						fetch_by: xResult.fetch_by,
+						subject: xResult.subject,
+						event_date_start: xResult.event_date_start,
+						event_date_end: xResult.event_date_end,
+						event_location: xResult.event_location
 					};
 
 					xJoResult = {
