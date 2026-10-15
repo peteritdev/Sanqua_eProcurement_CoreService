@@ -128,6 +128,21 @@ class PurchaseRequestService {
 					}
 				}
 
+				// Remove null/empty event fields so they are not included in the save/update query
+				const xEventFields = ['event_date_start', 'event_date_end', 'event_location'];
+				for (var i = 0; i < xEventFields.length; i++) {
+					const xField = xEventFields[i];
+					if (pParam.hasOwnProperty(xField)) {
+						if (
+							pParam[xField] == null ||
+							pParam[xField] === '' ||
+							pParam[xField] === undefined
+						) {
+							delete pParam[xField];
+						}
+					}
+				}
+
 				/*
 					At: 10/11/2023
 					Description: Checking when the parameter project is set, category_time must be 7 and category_pr must be 'asset'
