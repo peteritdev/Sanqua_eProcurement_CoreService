@@ -518,9 +518,125 @@ class PaymentRequestService {
 			};
 		}
 
+	return xJoResult;
+}
+
+	// Export "beserta detail": same auth prelude as list, but returns flat header+item rows
+	async exportWithDetail(pParam) {
+		var xJoResult = {};
+		var xJoArrData = [];
+		var xDecId = null;
+		var xFlagProccess = false;
+		var xArrOwnedDocNo = [];
+
+		try {
+			if (pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.user_id = xDecId.decrypted;
+					xFlagProccess = true;
+				} else {
+					xJoResult = xDecId;
+				}
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Invalid Logged User Id'
+				};
+			}
+
+			const xOwnedDocumentPayload = {
+				application_id: 8,
+				table_name: config.dbTables.payreq,
+				document_id: '',
+				user_id: pParam.user_id
+			}
+
+			let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, xOwnedDocumentPayload);
+
+			if (xOwnedDocument.status_code == '00') {
+				if (xOwnedDocument.hasOwnProperty('token_data')) {
+					if (xOwnedDocument.token_data.status_code == '00') {
+						for (var i in xOwnedDocument.token_data.data) {
+							xArrOwnedDocNo.push(xOwnedDocument.token_data.data[i].document_no);
+						}
+						pParam.owned_document_no = xArrOwnedDocNo;
+					}
+				}
+			}
+
+			if (xFlagProccess) {
+				var xResultList = await _repoInstance.listWithDetail(pParam);
+				if (xResultList) {
+					if (xResultList.status_code == '00') {
+						var xRows = xResultList.data;
+						for (var i in xRows) {
+							var xRow = xRows[i];
+							xJoArrData.push({
+								id: await _utilInstance.encrypt(xRow.id.toString(), config.cryptoKey.hashKey),
+								document_no: xRow.document_no,
+								company_name: xRow.company_name,
+								employee_name: xRow.employee_name,
+								department_name: xRow.department_name,
+								status: xRow.status,
+								vendor_code: xRow.vendor_code,
+								vendor_name: xRow.vendor_name,
+								payreq_type: xRow.payreq_type,
+								payment_type: xRow.payment_type,
+								app_category: xRow.app_category,
+								created_by_name: xRow.created_by_name,
+								created_at: xRow.created_at != null ? moment(xRow.created_at).format('DD MMM YYYY HH:mm:ss') : null,
+								currency: xRow.currency,
+								purchase_request: {
+									id: xRow.pr_id,
+									request_no: xRow.request_no
+								},
+								item: xRow.prd_id != null ? {
+									id: xRow.prd_id,
+									product_code: xRow.product_code,
+									product_name: xRow.product_name,
+									uom_name: xRow.uom_name,
+									qty_request: xRow.qty_request,
+									price_request: xRow.price_request,
+									price_total: xRow.price_total,
+									qty_done: xRow.qty_done,
+									discount_amount: xRow.discount_amount,
+									discount_percent: xRow.discount_percent,
+									description: xRow.description,
+									status: xRow.prd_status,
+									odoo_bill_no: xRow.odoo_bill_no,
+									invoice_no: xRow.invoice_no,
+									invoice_date: xRow.invoice_date != null ? moment(xRow.invoice_date).format('DD MMM YYYY') : null,
+									total_after_tax: xRow.total_after_tax,
+									deduction: xRow.deduction,
+									debt_value: xRow.debt_value
+								} : null
+							});
+						}
+
+						xJoResult = {
+							status_code: '00',
+							status_msg: 'OK',
+							data: xJoArrData
+						};
+					} else {
+						xJoResult = xResultList;
+					}
+				} else {
+					xJoResult = xResultList;
+				}
+			}
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.exportWithDetail`, `Exception error: ${e.message}`, 'error');
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.exportWithDetail: Exception error: ${e.message}`
+			};
+		}
+
 		return xJoResult;
 	}
-	
+
 	async dropdown(pParam) {
 		var xJoResult = {};
 		var xJoArrData = [];

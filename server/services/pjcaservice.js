@@ -432,7 +432,116 @@ class PJCAService {
 
 		return xJoResult;
 	}
-	
+
+	// Export "beserta detail": same auth prelude as list, but returns flat header+item rows
+	async exportWithDetail(pParam) {
+		var xJoResult = {};
+		var xJoArrData = [];
+		var xDecId = null;
+		var xFlagProccess = false;
+		var xArrOwnedDocNo = [];
+
+		try {
+			if (pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.user_id = xDecId.decrypted;
+					xFlagProccess = true;
+				} else {
+					xJoResult = xDecId;
+				}
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Invalid Logged User Id'
+				};
+			}
+
+			const xOwnedDocumentPayload = {
+				application_id: 8,
+				table_name: config.dbTables.pjca,
+				document_id: '',
+				user_id: pParam.user_id
+			}
+
+			let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, xOwnedDocumentPayload);
+
+			if (xOwnedDocument.status_code == '00') {
+				if (xOwnedDocument.hasOwnProperty('token_data')) {
+					if (xOwnedDocument.token_data.status_code == '00') {
+						for (var i in xOwnedDocument.token_data.data) {
+							xArrOwnedDocNo.push(xOwnedDocument.token_data.data[i].document_no);
+						}
+						pParam.owned_document_no = xArrOwnedDocNo;
+					}
+				}
+			}
+
+			if (xFlagProccess) {
+				var xResultList = await _repoInstance.listWithDetail(pParam);
+				if (xResultList) {
+					if (xResultList.status_code == '00') {
+						var xRows = xResultList.data;
+						for (var i in xRows) {
+							var xRow = xRows[i];
+							xJoArrData.push({
+								id: await _utilInstance.encrypt(xRow.id.toString(), config.cryptoKey.hashKey),
+								document_no: xRow.document_no,
+								company_name: xRow.company_name,
+								employee_name: xRow.employee_name,
+								department_name: xRow.department_name,
+								to_department_name: xRow.to_department_name,
+								total_qty_released: xRow.total_qty_released,
+								total_price_released: xRow.total_price_released,
+								status: xRow.status,
+								created_by_name: xRow.created_by_name,
+								created_at: xRow.created_at != null ? moment(xRow.created_at).format('DD MMM YYYY HH:mm:ss') : null,
+								currency: xRow.currency,
+								payment_request: {
+									id: xRow.pmt_id,
+									document_no: xRow.pmt_document_no
+								},
+								item: xRow.pd_id != null ? {
+									id: xRow.pd_id,
+									product_code: xRow.product_code,
+									product_name: xRow.product_name,
+									uom_name: xRow.uom_name,
+									qty_request: xRow.qty_request,
+									qty_done: xRow.qty_done,
+									price_request: xRow.price_request,
+									price_done: xRow.price_done,
+									discount_amount: xRow.discount_amount,
+									discount_percent: xRow.discount_percent,
+									price_total: xRow.price_total,
+									description: xRow.description,
+									status: xRow.pd_status
+								} : null
+							});
+						}
+
+						xJoResult = {
+							status_code: '00',
+							status_msg: 'OK',
+							data: xJoArrData
+						};
+					} else {
+						xJoResult = xResultList;
+					}
+				} else {
+					xJoResult = xResultList;
+				}
+			}
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.exportWithDetail`, `Exception error: ${e.message}`, 'error');
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.exportWithDetail: Exception error: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
+
 	async save(pParam) {
 		var xJoResult;
 		var xAct = pParam.act;
