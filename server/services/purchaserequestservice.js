@@ -594,172 +594,8 @@ class PurchaseRequestService {
 
 				if (xResultList.total_record > 0) {
 					var fpbType = ["CA", "PO", "MIX"]
-					var xRows = xResultList.data;
+				var xRows = xResultList.data;
 
-					if (pParam.hasOwnProperty('is_export')) {
-						if (pParam.is_export) {
-							for (var index in xRows) {
-								xJoArrData.push({
-									id: await _utilInstance.encrypt(
-										xRows[index].id.toString(),
-										config.cryptoKey.hashKey
-									),
-									project: {
-										id: xRows[index].project_id,
-										code: xRows[index].project_code,
-										name: xRows[index].project_name,
-										odoo_project_code: xRows[index].odoo_project_code
-									},
-									budget_plan: {
-										id: xRows[index].budget_plan_id,
-										name: xRows[index].budget_plan_name
-									},
-									request_no: xRows[index].request_no,
-									requested_at:
-										xRows[index].requested_at == null
-											? ''
-											: moment(xRows[index].requested_at).tz(config.timezone).format('DD MMM'),
-									employee: {
-										id: await _utilInstance.encrypt(
-											xRows[index].employee_id.toString(),
-											config.cryptoKey.hashKey
-										),
-										name: xRows[index].employee_name
-									},
-									department: {
-										id: xRows[index].department_id,
-										name: xRows[index].department_name
-									},
-									status: {
-										id: xRows[index].status,
-										name:
-											xRows[index].status == -1
-												? 'Rejected'
-												: config.statusDescription.purchaseRequest[xRows[index].status]
-									},
-
-									company: {
-										id: xRows[index].company_id,
-										code: xRows[index].company_code,
-										name: xRows[index].company_name
-									},
-									fpb_type_id: xRows[index].fpb_type,
-									fpb_type_name: fpbType[xRows[index].fpb_type-1],
-									created_at:
-										xRows[index].created_at != null
-											? moment(xRows[index].created_at).format('DD-MM-YYYY HH:mm:ss')
-											: null,
-
-									total_price: xRows[index].total_price,
-									total_quotation_price: xRows[index].total_quotation_price,
-									category_item: {
-										id: xRows[index].category_item,
-										name: config.categoryItem[xRows[index].category_item]
-									},
-									fpb_type_id: xRows[index].fpb_type,
-									fpb_type_name: fpbType[xRows[index].fpb_type-1],
-									item: {
-										product_code: xRows[index].product_code,
-										product_name: xRows[index].product_name,
-										qty: xRows[index].qty,
-										budget_price_per_unit: xRows[index].budget_price_per_unit,
-										budget_price_total: xRows[index].budget_price_total,
-										quotation_price_per_unit: xRows[index].quotation_price_per_unit,
-										quotation_price_total: xRows[index].quotation_price_total,
-										estimate_date_use: xRows[index].estimate_date_use,
-										pr_no: xRows[index].pr_no,
-										last_price: xRows[index].last_price,
-										uom_name: xRows[index].uom_name,
-										// add new 16/11/2023
-										estimate_fulfillment: xRows[index].estimate_fulfillment,
-										status: xRows[index].item_detail_status,
-										description: xRows[index].description,
-
-										currency_id: xRows[index].currency_id,
-										currency_code: xRows[index].currency_code,
-										currency_symbol: xRows[index].currency_symbol,
-										paid_at: xRows[index].paid_at,
-										paid_by_name: xRows[index].paid_by_name,
-										store_link: xRows[index].store_link,
-										purchase_type: xRows[index].purchase_type,
-										ca_manual_no: xRows[index].ca_manual_no,
-										ca_manual_date: xRows[index].ca_manual_date,
-										ca_type: xRows[index].ca_type
-									},
-									approved_at: xRows[index].approved_at,
-									budget_plan_no: xRows[index].budget_plan_no,
-									subject: xRows[index].subject,
-									event_date_start: xRows[index].event_date_start,
-									event_date_end: xRows[index].event_date_end,
-									event_location: xRows[index].event_location
-								});
-							}
-						} else {
-							for (var index in xRows) {
-								xJoArrData.push({
-									id: await _utilInstance.encrypt(
-										xRows[index].id.toString(),
-										config.cryptoKey.hashKey
-									),
-									project: {
-										id: xRows[index].project_id,
-										code: xRows[index].project_code,
-										name: xRows[index].project_name,
-										odoo_project_code: xRows[index].odoo_project_code
-									},
-									request_no: xRows[index].request_no,
-									requested_at:
-										xRows[index].requested_at == null
-											? ''
-											: moment(xRows[index].requested_at).tz(config.timezone).format('DD MMM'),
-									employee: {
-										id: await _utilInstance.encrypt(
-											xRows[index].employee_id.toString(),
-											config.cryptoKey.hashKey
-										),
-										name: xRows[index].employee_name
-									},
-									department: {
-										id: xRows[index].department_id,
-										name: xRows[index].department_name
-									},
-									status: {
-										id: xRows[index].status,
-										name:
-											xRows[index].status == -1
-												? 'Rejected'
-												: config.statusDescription.purchaseRequest[xRows[index].status]
-									},
-
-									company: {
-										id: xRows[index].company_id,
-										code: xRows[index].company_code,
-										name: xRows[index].company_name
-									},
-									fpb_type_id: xRows[index].fpb_type,
-									fpb_type_name: fpbType[xRows[index].fpb_type-1],
-
-									created_at:
-										xRows[index].created_at != null
-											? moment(xRows[index].created_at).format('DD-MM-YYYY HH:mm:ss')
-											: null,
-
-									total_price: xRows[index].total_price,
-									total_quotation_price: xRows[index].total_quotation_price,
-									category_item: {
-										id: xRows[index].category_item,
-										name: config.categoryItem[xRows[index].category_item]
-									},
-									approved_at: xRows[index].approved_at,
-									budget_plan_no: xRows[index].budget_plan_no,
-									subject: xRows[index].subject,
-									event_date_start: xRows[index].event_date_start,
-									event_date_end: xRows[index].event_date_end,
-									event_location: xRows[index].event_location
-								});
-							}
-						}
-					} else {
 						for (var index in xRows) {
 							xJoArrData.push({
 								id: await _utilInstance.encrypt(xRows[index].id.toString(), config.cryptoKey.hashKey),
@@ -824,7 +660,6 @@ class PurchaseRequestService {
 								event_location: xRows[index].event_location
 							});
 						}
-					}
 
 					xJoResult = {
 						status_code: '00',
@@ -841,6 +676,193 @@ class PurchaseRequestService {
 			}
 		}
 		// 24/10/2023
+		return xJoResult;
+	}
+
+	async exportWithDetail(pParam) {
+		var xJoResult = {};
+		var xJoArrData = [];
+		var xFlagProcess = false;
+		var xDecId = {};
+		var xFlagAPIResult = false;
+		var xArrOwnedDocNo = [];
+
+		if (pParam.hasOwnProperty('user_id')) {
+			if (pParam.user_id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.user_id = xDecId.decrypted;
+					xFlagProcess = true;
+				} else {
+					xJoResult = xDecId;
+				}
+			}
+		}
+
+		if (xFlagProcess) {
+			const xOwnedDocumentPayload = {
+				application_id: config.applicationId,
+				table_name: config.dbTables.fpb,
+				document_id: '',
+				user_id: pParam.user_id
+			}
+
+			if (pParam.hasOwnProperty('inappnotif') && pParam.inappnotif) {
+				xOwnedDocumentPayload.status = 0
+			}
+			let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, xOwnedDocumentPayload);
+
+			if (xOwnedDocument.status_code == '00') {
+				if (xOwnedDocument.hasOwnProperty('token_data')) {
+					if (xOwnedDocument.token_data.status_code == '00') {
+						xFlagAPIResult = true;
+						for (var i in xOwnedDocument.token_data.data) {
+							xArrOwnedDocNo.push(xOwnedDocument.token_data.data[i].document_no);
+						}
+					} else {
+						xFlagAPIResult = true;
+					}
+				}
+			} else {
+				xFlagAPIResult = true;
+			}
+
+			if (xFlagAPIResult) {
+				pParam.owned_document_no = xArrOwnedDocNo;
+
+				if (!pParam.hasOwnProperty('company_id')) {
+					if (!pParam.hasOwnProperty('inappnotif')) {
+						pParam.company_id = pParam.logged_company_id;
+					}
+				}
+
+				if (!pParam.hasOwnProperty('department_id')) {
+					if (!pParam.hasOwnProperty('inappnotif')) {
+						pParam.department_id = pParam.logged_department_id;
+					}
+				}
+
+				if (pParam.hasOwnProperty('pending_notif')) {
+					if (pParam.pending_notif != null & pParam.pending_notif != '' && pParam.pending_notif != 0) {
+						if (pParam.logged_department_name.includes('PURCHASING') || pParam.logged_department_name.includes('PROCUREMENT') || pParam.logged_department_name.includes('PRO/MIS/IC')) {
+							delete pParam.department_id
+						}
+						delete pParam.owned_document_no
+					}
+				}
+				if (pParam.hasOwnProperty('budget_plan_id')) {
+					const bDect = await _utilInstance.decrypt(pParam.budget_plan_id, config.cryptoKey.hashKey);
+					if (bDect.status_code == '00') {
+						pParam.budget_plan_id = bDect.decrypted
+						delete pParam.department_id
+					}
+				}
+
+				var xResultList = await _repoInstance.listWithDetail(pParam);
+
+				if (xResultList.data.length > 0) {
+					var fpbType = ["CA", "PO", "MIX"]
+					var xRows = xResultList.data;
+
+					for (var index in xRows) {
+						xJoArrData.push({
+							id: await _utilInstance.encrypt(xRows[index].id.toString(), config.cryptoKey.hashKey),
+							request_no: xRows[index].request_no,
+							requested_at:
+								xRows[index].requested_at == null
+									? ''
+									: moment(xRows[index].requested_at).tz(config.timezone).format('DD MMM'),
+							employee: {
+								id: await _utilInstance.encrypt(
+									xRows[index].employee_id.toString(),
+									config.cryptoKey.hashKey
+								),
+								name: xRows[index].employee_name
+							},
+							department: {
+								id: xRows[index].department_id,
+								name: xRows[index].department_name
+							},
+							project: {
+								id: xRows[index].project_id,
+								code: xRows[index].project_code,
+								name: xRows[index].project_name,
+								odoo_project_code: xRows[index].odoo_project_code
+							},
+							status: {
+								id: xRows[index].status,
+								name:
+									xRows[index].status == -1
+										? 'Rejected'
+										: config.statusDescription.purchaseRequest[xRows[index].status]
+							},
+
+							company: {
+								id: xRows[index].company_id,
+								code: xRows[index].company_code,
+								name: xRows[index].company_name
+							},
+							fpb_type_id: xRows[index].fpb_type,
+							fpb_type_name: fpbType[xRows[index].fpb_type-1],
+							created_at:
+								xRows[index].created_at != null
+									? moment(xRows[index].created_at).format('DD-MM-YYYY HH:mm:ss')
+									: null,
+
+							total_price: xRows[index].total_price,
+							total_quotation_price: xRows[index].total_quotation_price,
+							category_item: {
+								id: xRows[index].category_item,
+								name: config.categoryItem[xRows[index].category_item]
+							},
+							approved_at: xRows[index].approved_at,
+							budget_plan_no: xRows[index].budget_plan_no,
+							subject: xRows[index].subject,
+							event_date_start: xRows[index].event_date_start,
+							event_date_end: xRows[index].event_date_end,
+							event_location: xRows[index].event_location,
+							item: {
+								product_code: xRows[index].product_code,
+								product_name: xRows[index].product_name,
+								qty: xRows[index].qty,
+								budget_price_per_unit: xRows[index].budget_price_per_unit,
+								budget_price_total: xRows[index].budget_price_total,
+								quotation_price_per_unit: xRows[index].quotation_price_per_unit,
+								quotation_price_total: xRows[index].quotation_price_total,
+								estimate_date_use: xRows[index].estimate_date_use,
+								pr_no: xRows[index].pr_no,
+								last_price: xRows[index].last_price,
+								uom_name: xRows[index].uom_name,
+								estimate_fulfillment: xRows[index].estimate_fulfillment,
+								status: xRows[index].item_detail_status,
+								description: xRows[index].description,
+								currency_id: xRows[index].currency_id,
+								currency_code: xRows[index].currency_code,
+								currency_symbol: xRows[index].currency_symbol,
+								paid_at: xRows[index].paid_at,
+								paid_by_name: xRows[index].paid_by_name,
+								store_link: xRows[index].store_link,
+								purchase_type: xRows[index].purchase_type,
+								ca_manual_no: xRows[index].ca_manual_no,
+								ca_manual_date: xRows[index].ca_manual_date,
+								ca_type: xRows[index].ca_type
+							}
+						});
+					}
+
+					xJoResult = {
+						status_code: '00',
+						status_msg: 'OK',
+						data: xJoArrData
+					};
+				} else {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Data not found'
+					};
+				}
+			}
+		}
 		return xJoResult;
 	}
 

@@ -51,6 +51,10 @@ module.exports = (app) => {
 	];
 	app.get(rootAPIPath + 'list', arrValidate, paymentRequestController.paymentRequest_List);
 
+	// Export "beserta detail" — flat header+item rows, no pagination
+	arrValidate = [];
+	app.get(rootAPIPath + 'export_with_detail', arrValidate, paymentRequestController.paymentRequest_ExportWithDetail);
+
 	arrValidate = [];
 	arrValidate = [
 		check('offset', 'Parameter offset must be integer and cannot be empty').not().isEmpty().isInt(),

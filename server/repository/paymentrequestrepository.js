@@ -632,6 +632,152 @@ class PaymentRequestRepository {
 		}
 	}
 
+	// Shared WHERE-builder for list_v2 & listWithDetail — filter logic lives in ONE place
+	_buildListFilterWhere(pParam) {
+		var xAndConditions = [];
+		var xOrConditions = [];
+		var xReplacements = {};
+		var xNeedPrdJoin = false;
+
+		if (pParam.hasOwnProperty('product_id') && pParam.product_id != null && pParam.product_id != undefined && pParam.product_id != '') {
+			var xProduct = JSON.parse(pParam.product_id);
+			if (xProduct.length > 0) {
+				xNeedPrdJoin = true;
+				xAndConditions.push(`prd.product_id IN (:productIds)`);
+				xReplacements.productIds = xProduct;
+			}
+		}
+
+		if (pParam.hasOwnProperty('prd_id') && pParam.prd_id != null && pParam.prd_id != undefined && pParam.prd_id != '') {
+			xNeedPrdJoin = true;
+			xAndConditions.push(`prd.prd_id = :prdId`);
+			xReplacements.prdId = pParam.prd_id;
+		}
+
+		if (pParam.hasOwnProperty('company_id') && pParam.company_id != '') {
+			// check if logged user is from company id 6 (PT. SANQUA) then show all data from all user otherwise show data from user company only
+			xAndConditions.push(`tr.company_id = :companyId`);
+			xReplacements.companyId = pParam.company_id != '' ? pParam.company_id : pParam.logged_company_id;
+			if (pParam.logged_company_id != 6) {
+				xAndConditions.push(`(pr.created_by_plant_id <> 6 OR pr.created_by_plant_id IS NULL)`);
+			}
+		}
+
+		if (pParam.hasOwnProperty('department_id') && pParam.department_id != '') {
+			xAndConditions.push(`tr.department_id = :departmentId`);
+			xReplacements.departmentId = pParam.department_id;
+		}
+
+		if (pParam.hasOwnProperty('vendor_id') && pParam.vendor_id != '') {
+			xAndConditions.push(`tr.vendor_id = :vendorId`);
+			xReplacements.vendorId = pParam.vendor_id;
+		}
+
+		if (pParam.hasOwnProperty('status') && pParam.status != null && pParam.status != undefined && pParam.status != '') {
+			var xStatus = JSON.parse(pParam.status);
+			if (Array.isArray(xStatus) && xStatus.length > 0) {
+				xAndConditions.push(`tr.status IN (:statusList)`);
+				xReplacements.statusList = xStatus;
+			} else {
+				xAndConditions.push(`tr.status = :statusSingle`);
+				xReplacements.statusSingle = pParam.status;
+			}
+		}
+
+		if (pParam.hasOwnProperty('current_approval_ids') && pParam.current_approval_ids != '') {
+			xAndConditions.push(`tr.current_approval_ids::jsonb @> :currentApprovalId::jsonb`);
+			xReplacements.currentApprovalId = JSON.stringify([pParam.current_approval_ids]);
+		}
+
+		if (pParam.hasOwnProperty('start_date') && pParam.hasOwnProperty('end_date')) {
+			if (pParam.start_date != '' && pParam.end_date != '') {
+				xAndConditions.push(`tr.created_at BETWEEN :startDate AND :endDate`);
+				xReplacements.startDate = pParam.start_date + ' 00:00:00';
+				xReplacements.endDate = pParam.end_date + ' 23:59:59';
+			}
+		}
+
+		if (pParam.hasOwnProperty('app_category') && pParam.app_category != '') {
+			xAndConditions.push(`tr.app_category = :appCategory`);
+			xReplacements.appCategory = pParam.app_category;
+		}
+
+		if (pParam.hasOwnProperty('owned_document_no') && pParam.owned_document_no != '') {
+			let xSqlMerge = '';
+			if (pParam.hasOwnProperty('keyword') && pParam.keyword != '') {
+				let keywordArray = Array.isArray(pParam.keyword)
+					? pParam.keyword
+					: pParam.keyword.split(',').map(item => item.trim()).filter(item => item !== '');
+				var xKeywords = keywordArray.map(item => `%${item}%`);
+
+				xNeedPrdJoin = true;
+				xSqlMerge = `(pr.request_no ILIKE ANY (ARRAY[:keywords]) OR
+					tr.document_no ILIKE ANY (ARRAY[:keywords]) OR
+					tr.vendor_name ILIKE ANY (ARRAY[:keywords]) OR
+					tr.employee_name ILIKE ANY (ARRAY[:keywords]) OR
+					tr.description ILIKE ANY (ARRAY[:keywords]) OR
+					prd.product_code ILIKE ANY (ARRAY[:keywords]) OR
+					prd.product_name ILIKE ANY (ARRAY[:keywords]) AND tr.document_no IN (:ownedDocumentNo))`
+
+				if (pParam.hasOwnProperty('user_id') && pParam.user_id != '' && pParam.logged_is_admin == 0) {
+					xSqlMerge = xSqlMerge + ` OR tr.created_by = :createdBy`;
+					xReplacements.createdBy = pParam.user_id;
+				}
+
+				xAndConditions.push(xSqlMerge);
+				xReplacements.keywords = xKeywords;
+			} else {
+				xOrConditions.push(`tr.document_no IN (:ownedDocumentNo)`);
+
+				if (pParam.hasOwnProperty('user_id') && pParam.user_id != '' && pParam.logged_is_admin == 0) {
+					xOrConditions.push(`tr.created_by = :createdBy`);
+					xReplacements.createdBy = pParam.user_id;
+				}
+			}
+			xReplacements.ownedDocumentNo = pParam.owned_document_no;
+
+		} else {
+			if (pParam.hasOwnProperty('user_id') && pParam.user_id != '' && pParam.logged_is_admin == 0) {
+				xAndConditions.push(`tr.created_by = :createdBy`);
+				xReplacements.createdBy = pParam.user_id;
+			}
+
+			if (pParam.hasOwnProperty('keyword') && pParam.keyword != '') {
+				let keywordArray = Array.isArray(pParam.keyword)
+					? pParam.keyword
+					: pParam.keyword.split(',').map(item => item.trim()).filter(item => item !== '');
+				var xKeywords = keywordArray.map(item => `%${item}%`);
+
+				xNeedPrdJoin = true;
+
+				xOrConditions.push(`pr.request_no ILIKE ANY (ARRAY[:keywords])`);
+				xOrConditions.push(`tr.document_no ILIKE ANY (ARRAY[:keywords])`);
+				xOrConditions.push(`tr.vendor_name ILIKE ANY (ARRAY[:keywords])`);
+				xOrConditions.push(`tr.employee_name ILIKE ANY (ARRAY[:keywords])`);
+				xOrConditions.push(`tr.description ILIKE ANY (ARRAY[:keywords])`);
+				xOrConditions.push(`prd.product_code ILIKE ANY (ARRAY[:keywords])`);
+				xOrConditions.push(`prd.product_name ILIKE ANY (ARRAY[:keywords])`);
+				xReplacements.keywords = xKeywords;
+			}
+		}
+
+		if (pParam.hasOwnProperty('purchase_request_id') && pParam.purchase_request_id != '') {
+			xAndConditions = []
+			xOrConditions = []
+			xReplacements = {}
+
+			xAndConditions.push(`tr.purchase_request_id = :purchaseRequestId`);
+			xReplacements.purchaseRequestId = pParam.purchase_request_id;
+		}
+
+		return {
+			andConditions: xAndConditions,
+			orConditions: xOrConditions,
+			replacements: xReplacements,
+			needPrdJoin: xNeedPrdJoin
+		};
+	}
+
 	async list_v2(pParam) {
 		var xJoResult = {};
 
@@ -647,144 +793,12 @@ class PaymentRequestRepository {
 		};
 
 		try {
-			var xAndConditions = [];
-			var xOrConditions = [];
-			var xReplacements = {};
-			var xNeedPrdJoin = false;
+			var xFilter = this._buildListFilterWhere(pParam);
+			var xAndConditions = xFilter.andConditions;
+			var xOrConditions = xFilter.orConditions;
+			var xReplacements = xFilter.replacements;
+			var xNeedPrdJoin = xFilter.needPrdJoin;
 
-			if (pParam.hasOwnProperty('product_id') && pParam.product_id != null && pParam.product_id != undefined && pParam.product_id != '') {
-				var xProduct = JSON.parse(pParam.product_id);
-				if (xProduct.length > 0) {
-					xNeedPrdJoin = true;
-					xAndConditions.push(`prd.product_id IN (:productIds)`);
-					xReplacements.productIds = xProduct;
-				}
-			}
-
-			if (pParam.hasOwnProperty('prd_id') && pParam.prd_id != null && pParam.prd_id != undefined && pParam.prd_id != '') {
-				xNeedPrdJoin = true;
-				xAndConditions.push(`prd.prd_id = :prdId`);
-				xReplacements.prdId = pParam.prd_id;
-			}
-			
-			if (pParam.hasOwnProperty('company_id') && pParam.company_id != '') {
-				// check if logged user is from company id 6 (PT. SANQUA) then show all data from all user otherwise show data from user company only
-				xAndConditions.push(`tr.company_id = :companyId`);
-				xReplacements.companyId = pParam.company_id != '' ? pParam.company_id : pParam.logged_company_id;
-				if (pParam.logged_company_id != 6) {
-					xAndConditions.push(`(pr.created_by_plant_id <> 6 OR pr.created_by_plant_id IS NULL)`);
-				}
-			}
-
-			if (pParam.hasOwnProperty('department_id') && pParam.department_id != '') {
-				xAndConditions.push(`tr.department_id = :departmentId`);
-				xReplacements.departmentId = pParam.department_id;
-			}
-
-			if (pParam.hasOwnProperty('vendor_id') && pParam.vendor_id != '') {
-				xAndConditions.push(`tr.vendor_id = :vendorId`);
-				xReplacements.vendorId = pParam.vendor_id;
-			}
-
-			if (pParam.hasOwnProperty('status') && pParam.status != null && pParam.status != undefined && pParam.status != '') {
-				var xStatus = JSON.parse(pParam.status);
-				if (Array.isArray(xStatus) && xStatus.length > 0) {
-					xAndConditions.push(`tr.status IN (:statusList)`);
-					xReplacements.statusList = xStatus;
-				} else {
-					xAndConditions.push(`tr.status = :statusSingle`);
-					xReplacements.statusSingle = pParam.status;
-				}
-			}
-
-			if (pParam.hasOwnProperty('current_approval_ids') && pParam.current_approval_ids != '') {
-				xAndConditions.push(`tr.current_approval_ids::jsonb @> :currentApprovalId::jsonb`);
-				xReplacements.currentApprovalId = JSON.stringify([pParam.current_approval_ids]);
-			}
-
-			if (pParam.hasOwnProperty('start_date') && pParam.hasOwnProperty('end_date')) {
-				if (pParam.start_date != '' && pParam.end_date != '') {
-					xAndConditions.push(`tr.created_at BETWEEN :startDate AND :endDate`);
-					xReplacements.startDate = pParam.start_date + ' 00:00:00';
-					xReplacements.endDate = pParam.end_date + ' 23:59:59';
-				}
-			}
-
-			if (pParam.hasOwnProperty('app_category') && pParam.app_category != '') {
-				xAndConditions.push(`tr.app_category = :appCategory`);
-				xReplacements.appCategory = pParam.app_category;
-			}
-
-			var xNeedPrJoin = true; // pr selalu di-LEFT JOIN karena dipakai untuk keyword & order_by request_no
-
-			if (pParam.hasOwnProperty('owned_document_no') && pParam.owned_document_no != '') {
-				let xSqlMerge = '';
-				if (pParam.hasOwnProperty('keyword') && pParam.keyword != '') {
-					let keywordArray = Array.isArray(pParam.keyword)
-						? pParam.keyword
-						: pParam.keyword.split(',').map(item => item.trim()).filter(item => item !== '');
-					var xKeywords = keywordArray.map(item => `%${item}%`);
-
-					xNeedPrdJoin = true;
-					xSqlMerge = `(pr.request_no ILIKE ANY (ARRAY[:keywords]) OR
-						tr.document_no ILIKE ANY (ARRAY[:keywords]) OR
-						tr.vendor_name ILIKE ANY (ARRAY[:keywords]) OR
-						tr.employee_name ILIKE ANY (ARRAY[:keywords]) OR
-						tr.description ILIKE ANY (ARRAY[:keywords]) OR
-						prd.product_code ILIKE ANY (ARRAY[:keywords]) OR
-						prd.product_name ILIKE ANY (ARRAY[:keywords]) AND tr.document_no IN (:ownedDocumentNo))`
-						
-					if (pParam.hasOwnProperty('user_id') && pParam.user_id != '' && pParam.logged_is_admin == 0) {
-						xSqlMerge = xSqlMerge + ` OR tr.created_by = :createdBy`;
-						xReplacements.createdBy = pParam.user_id;
-					}
-
-					xAndConditions.push(xSqlMerge);
-					xReplacements.keywords = xKeywords;
-				} else {
-					xOrConditions.push(`tr.document_no IN (:ownedDocumentNo)`);
-					
-					if (pParam.hasOwnProperty('user_id') && pParam.user_id != '' && pParam.logged_is_admin == 0) {
-						xOrConditions.push(`tr.created_by = :createdBy`);
-						xReplacements.createdBy = pParam.user_id;
-					}
-				}
-				xReplacements.ownedDocumentNo = pParam.owned_document_no;
-				
-			} else {
-				if (pParam.hasOwnProperty('user_id') && pParam.user_id != '' && pParam.logged_is_admin == 0) {
-					xAndConditions.push(`tr.created_by = :createdBy`);
-					xReplacements.createdBy = pParam.user_id;
-				}
-
-				if (pParam.hasOwnProperty('keyword') && pParam.keyword != '') {
-					let keywordArray = Array.isArray(pParam.keyword)
-						? pParam.keyword
-						: pParam.keyword.split(',').map(item => item.trim()).filter(item => item !== '');
-					var xKeywords = keywordArray.map(item => `%${item}%`);
-
-					xNeedPrdJoin = true;
-
-					xOrConditions.push(`pr.request_no ILIKE ANY (ARRAY[:keywords])`);
-					xOrConditions.push(`tr.document_no ILIKE ANY (ARRAY[:keywords])`);
-					xOrConditions.push(`tr.vendor_name ILIKE ANY (ARRAY[:keywords])`);
-					xOrConditions.push(`tr.employee_name ILIKE ANY (ARRAY[:keywords])`);
-					xOrConditions.push(`tr.description ILIKE ANY (ARRAY[:keywords])`);
-					xOrConditions.push(`prd.product_code ILIKE ANY (ARRAY[:keywords])`);
-					xOrConditions.push(`prd.product_name ILIKE ANY (ARRAY[:keywords])`);
-					xReplacements.keywords = xKeywords;
-				}
-			}
-			
-			if (pParam.hasOwnProperty('purchase_request_id') && pParam.purchase_request_id != '') {
-				xAndConditions = []
-				xOrConditions = []
-				xReplacements = {}
-				
-				xAndConditions.push(`tr.purchase_request_id = :purchaseRequestId`);
-				xReplacements.purchaseRequestId = pParam.purchase_request_id;
-			}
-			
 			// --- ORDER BY dari whitelist ---
 			var xOrderKey = 'created_at';
 			var xOrderDir = 'ASC';
@@ -888,6 +902,64 @@ class PaymentRequestRepository {
 			xJoResult = {
 				status_code: '-99',
 				status_msg: `${_xClassName}.list: Exception error: ${e.message}`
+			};
+		}
+		return xJoResult;
+	}
+
+	// Flat export query: header JOIN detail, one row per item, no pagination, no GROUP BY
+	async listWithDetail(pParam) {
+		var xJoResult = {};
+
+		try {
+			var xFilter = this._buildListFilterWhere(pParam);
+			var xAndConditions = xFilter.andConditions;
+			var xOrConditions = xFilter.orConditions;
+			var xReplacements = xFilter.replacements;
+
+			var xWhereParts = [];
+			if (xAndConditions.length > 0) xWhereParts.push(`(${xAndConditions.join(' AND ')})`);
+			if (xOrConditions.length > 0) xWhereParts.push(`(${xOrConditions.join(' OR ')})`);
+			var xWhereSql = xWhereParts.length > 0 ? `WHERE ${xWhereParts.join(' AND ')}` : '';
+
+			var xJoinSql = `LEFT JOIN tr_purchaserequests pr ON pr.id = tr.purchase_request_id
+				LEFT JOIN tr_paymentrequestdetails prd ON prd.payment_request_id = tr.id AND prd.is_delete = 0`;
+
+			var xFields = `
+				tr.id, tr.document_no, tr.company_id, tr.company_name, tr.employee_id, tr.employee_name,
+				tr.department_id, tr.department_name, tr.status, tr.vendor_id, tr.vendor_name, tr.vendor_code,
+				tr.payreq_type, tr.payment_type, tr.app_category, tr.created_by_name, tr.currency,
+				tr.created_at, tr.updated_at, tr.updated_by_name, tr.created_by_plant_id,
+				pr.id AS pr_id, pr.request_no,
+				prd.id AS prd_id, prd.product_code, prd.product_name, prd.uom_name,
+				prd.qty_request, prd.price_request, prd.price_total, prd.qty_done,
+				prd.discount_amount, prd.discount_percent, prd.description, prd.status AS prd_status,
+				prd.odoo_bill_no, prd.invoice_no, prd.invoice_date, prd.total_after_tax, prd.deduction, prd.debt_value
+			`;
+
+			var xSql = `
+				SELECT ${xFields}
+				FROM tr_paymentrequests tr
+				${xJoinSql}
+				${xWhereSql}
+				ORDER BY tr.created_at ASC
+			`;
+
+			var xRows = await _modelDb.sequelize.query(xSql, {
+				replacements: xReplacements,
+				type: Sequelize.QueryTypes.SELECT
+			});
+
+			xJoResult = {
+				status_code: '00',
+				status_msg: 'OK',
+				data: xRows
+			};
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.listWithDetail`, `Exception error: ${e.message}`, 'error');
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.listWithDetail: Exception error: ${e.message}`
 			};
 		}
 		return xJoResult;
