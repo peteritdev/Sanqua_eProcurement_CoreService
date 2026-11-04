@@ -257,7 +257,7 @@
                       <img src="<%=imagePath%>blank_checklist.png" width="15" />
                       <% } %>
                     </td>
-                    <td style="width: 45px">Check</td>
+                    <td style="width: 45px">Cek</td>
                     <td>
                       <% if( data.data.payment_type == 4 ){ %>
                         <span>An. <%=data.data.account_name%></span>
@@ -306,7 +306,7 @@
         >
           <table>
             <tr>
-              <th style="text-align: left; width: 70px">Department</th>
+              <th style="text-align: left; width: 70px">Departemen</th>
               <th style="text-align: left; width: 5px">:</th>
               <td style="text-align: left"><%=data.data.department_name%></td>
             </tr>
@@ -452,7 +452,7 @@
                   if(item.discount_amount != null && item.discount_amount > 0){
                   %>
                     <br/>
-                    <%='Disc: ' + (data.data.currency ? data.data.currency : 'Rp') + item.discount_amount%>
+                    <%='Diskon: ' + (data.data.currency ? data.data.currency : 'Rp') + item.discount_amount%>
                     <!-- <%='Pph/Disc: ' + item.discount_amount%> -->
                   <%
                       }
@@ -623,7 +623,7 @@
                 <td style="text-align: center" class="border-rb">
                 </td>
                 <td style="text-align: left" class="border-rb">
-                  Discount Global (<%=data.data.global_discount_percent%>%)
+                  Diskon Global (<%=data.data.global_discount_percent%>%)
                 </td>
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
@@ -779,7 +779,7 @@
 
               <tr>
                 <th colspan="2" style="text-align: left" class="border-rb">
-                  TOTAL
+                  Total
                 </th>
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
@@ -835,7 +835,7 @@
             </tr>
             <tr>
               <th style="width: 25%;">Pemohon</th>
-              <th class="border-r" style="width: 25%;">Ka. Department</th>
+              <th class="border-r" style="width: 25%;">Ka. Departemen</th>
               <th class="border-rb" style="width: 25%;">Finance</th>
               <th class="border-b" style="width: 25%;">Head / Plant Manager / Direktur</th>
             </tr>
