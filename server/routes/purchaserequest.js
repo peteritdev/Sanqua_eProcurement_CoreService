@@ -100,6 +100,10 @@ module.exports = (app) => {
 	];
 	app.get(rootAPIPath + 'list', arrValidate, purchaseRequestController.purchaseRequest_List);
 
+	// Export FPB with detail
+	arrValidate = [];
+	app.get(rootAPIPath + 'export_with_detail', arrValidate, purchaseRequestController.purchaseRequest_ExportWithDetail);
+
 	// Dropdown FPB
 	arrValidate = [];
 	arrValidate = [
