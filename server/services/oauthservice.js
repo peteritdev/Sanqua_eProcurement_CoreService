@@ -164,6 +164,21 @@ class OAuthService {
 
 		return xResult;
 	}
+	
+	async getDepartmentDetail(pToken, pMethod, pId) {
+		var xAPIUrl = config.api.hr.url + '/employee_department/get_department_of_employee/';
+		var xQueryParam = `?id=${pId}`;
+		var xHeader = {
+			headers: {
+				'x-method': pMethod,
+				'x-token': pToken
+			}
+		};
+		console.log('>>> API URL : ' + (xAPIUrl + xQueryParam));
+		var xResult = await _utilInstance.axiosRequest(xAPIUrl + xQueryParam, xHeader);
+
+		return xResult;
+	}
 }
 
 module.exports = OAuthService;
