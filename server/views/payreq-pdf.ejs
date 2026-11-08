@@ -308,7 +308,7 @@
             <tr>
               <th style="text-align: left; width: 70px">Departemen</th>
               <th style="text-align: left; width: 5px">:</th>
-              <td style="text-align: left"><%=data.data.department_name%></td>
+              <td style="text-align: left"><%= departmentData ? departmentData.name : data.data.department_name %></td>
             </tr>
           </table>
         </td>

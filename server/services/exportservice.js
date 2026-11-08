@@ -455,6 +455,31 @@ class ExportService {
 					}
 				}
 
+				// Get Department parent & section
+				const xPayreqDepartmentId = xJoResultPayreq.data.department_id != null ? xJoResultPayreq.data.department_id : null;
+				var xDepartmentParent = null;
+				var xDepartmentSection = null;
+				if (xPayreqDepartmentId != null) {
+					var xDeptDetail = await _oAuthService.getDepartmentDetail(pToken, pMethod, xPayreqDepartmentId.toString());
+					console.log(`>>> xDeptDetail : ${JSON.stringify(xDeptDetail)}`);
+					if (xDeptDetail != null) {
+						if (xDeptDetail.status_code == '00' && xDeptDetail.token_data.status_code == '00' && xDeptDetail.token_data.data) {
+							xDepartmentParent = {
+								id: xDeptDetail.token_data.data.id,
+								name: xDeptDetail.token_data.data.name
+							};
+							if (xDeptDetail.token_data.data.section && xDeptDetail.token_data.data.section.id && xDeptDetail.token_data.data.section.name) {
+								xDepartmentSection = {
+									id: xDeptDetail.token_data.data.section.id,
+									name: xDeptDetail.token_data.data.section.name
+								};
+							}
+						}
+					}
+				}
+				console.log(`>>> xDepartmentParent : ${JSON.stringify(xDepartmentParent)}`);
+				console.log(`>>> xDepartmentSection : ${JSON.stringify(xDepartmentSection)}`);
+
 				let xCreator = null;
 				let xApprover1 = null;
 				let xApprover2 = null;
@@ -553,6 +578,7 @@ class ExportService {
 					{
 						data: xJoResultPayreq,
 						companyData: xCompanyData,
+						departmentData: xDepartmentSection ? xDepartmentSection : xDepartmentParent,
 						imagePath: config.imagePath,
 						approver1: xApprovedUser1,
 						approver2: xApprovedUser2,
@@ -834,6 +860,31 @@ class ExportService {
 					}
 				}
 
+				// Get Department parent & section
+				const xPJCADepartmentId = xJoResultPJCA.data.department_id != null ? xJoResultPJCA.data.department_id : null;
+				var xDepartmentParent = null;
+				var xDepartmentSection = null;
+				if (xPJCADepartmentId != null) {
+					var xDeptDetail = await _oAuthService.getDepartmentDetail(pToken, pMethod, xPJCADepartmentId.toString());
+					console.log(`>>> xDeptDetail : ${JSON.stringify(xDeptDetail)}`);
+					if (xDeptDetail != null) {
+						if (xDeptDetail.status_code == '00' && xDeptDetail.token_data.status_code == '00' && xDeptDetail.token_data.data) {
+							xDepartmentParent = {
+								id: xDeptDetail.token_data.data.id,
+								name: xDeptDetail.token_data.data.name
+							};
+							if (xDeptDetail.token_data.data.section && xDeptDetail.token_data.data.section.id && xDeptDetail.token_data.data.section.name) {
+								xDepartmentSection = {
+									id: xDeptDetail.token_data.data.section.id,
+									name: xDeptDetail.token_data.data.section.name
+								};
+							}
+						}
+					}
+				}
+				console.log(`>>> xDepartmentParent : ${JSON.stringify(xDepartmentParent)}`);
+				console.log(`>>> xDepartmentSection : ${JSON.stringify(xDepartmentSection)}`);
+
 				let xCreator = null;
 				let xApprover1 = null;
 				let xApprover2 = null;
@@ -933,6 +984,7 @@ class ExportService {
 					{
 						data: xJoResultPJCA,
 						companyData: xCompanyData,
+						departmentData: xDepartmentSection ? xDepartmentSection : xDepartmentParent,
 						imagePath: config.imagePath,
 						// xApprover1 != null
 						// 	? xApprover1.approver_user.find((el) => el.status === 1) == null
@@ -1791,6 +1843,31 @@ class ExportService {
 					}
 				}
 
+				// Get Department parent & section
+				const xPayreqDepartmentId = xJoResultPayreq.data.department_id != null ? xJoResultPayreq.data.department_id : null;
+				var xDepartmentParent = null;
+				var xDepartmentSection = null;
+				if (xPayreqDepartmentId != null) {
+					var xDeptDetail = await _oAuthService.getDepartmentDetail(pToken, pMethod, xPayreqDepartmentId.toString());
+					console.log(`>>> xDeptDetail : ${JSON.stringify(xDeptDetail)}`);
+					if (xDeptDetail != null) {
+						if (xDeptDetail.status_code == '00' && xDeptDetail.token_data.status_code == '00' && xDeptDetail.token_data.data) {
+							xDepartmentParent = {
+								id: xDeptDetail.token_data.data.id,
+								name: xDeptDetail.token_data.data.name
+							};
+							if (xDeptDetail.token_data.data.section && xDeptDetail.token_data.data.section.id && xDeptDetail.token_data.data.section.name) {
+								xDepartmentSection = {
+									id: xDeptDetail.token_data.data.section.id,
+									name: xDeptDetail.token_data.data.section.name
+								};
+							}
+						}
+					}
+				}
+				console.log(`>>> xDepartmentParent : ${JSON.stringify(xDepartmentParent)}`);
+				console.log(`>>> xDepartmentSection : ${JSON.stringify(xDepartmentSection)}`);
+
 				let xCreator = null;
 				let xApprover1 = null;
 				let xApprover2 = null;
@@ -1889,6 +1966,7 @@ class ExportService {
 					let html = null;
 					let xPayload = {
 						companyData: xCompanyData,
+						departmentData: xDepartmentSection ? xDepartmentSection : xDepartmentParent,
 						imagePath: config.imagePath,
 						approver1: xApprovedUser1,
 						approver2: xApprovedUser2,
@@ -2106,6 +2184,31 @@ class ExportService {
 					}
 				}
 
+				// Get Department parent & section
+				const xPJCADepartmentId = xJoResultPJCA.data.department_id != null ? xJoResultPJCA.data.department_id : null;
+				var xDepartmentParent = null;
+				var xDepartmentSection = null;
+				if (xPJCADepartmentId != null) {
+					var xDeptDetail = await _oAuthService.getDepartmentDetail(pToken, pMethod, xPJCADepartmentId.toString());
+					console.log(`>>> xDeptDetail : ${JSON.stringify(xDeptDetail)}`);
+					if (xDeptDetail != null) {
+						if (xDeptDetail.status_code == '00' && xDeptDetail.token_data.status_code == '00' && xDeptDetail.token_data.data) {
+							xDepartmentParent = {
+								id: xDeptDetail.token_data.data.id,
+								name: xDeptDetail.token_data.data.name
+							};
+							if (xDeptDetail.token_data.data.section && xDeptDetail.token_data.data.section.id && xDeptDetail.token_data.data.section.name) {
+								xDepartmentSection = {
+									id: xDeptDetail.token_data.data.section.id,
+									name: xDeptDetail.token_data.data.section.name
+								};
+							}
+						}
+					}
+				}
+				console.log(`>>> xDepartmentParent : ${JSON.stringify(xDepartmentParent)}`);
+				console.log(`>>> xDepartmentSection : ${JSON.stringify(xDepartmentSection)}`);
+
 				let xCreator = null;
 				let xApprover1 = null;
 				let xApprover2 = null;
@@ -2207,6 +2310,7 @@ class ExportService {
 							{
 								data: xJoResultPJCA,
 								companyData: xCompanyData,
+								departmentData: xDepartmentSection ? xDepartmentSection : xDepartmentParent,
 								imagePath: config.imagePath,
 								// xApprover1 != null
 								// 	? xApprover1.approver_user.find((el) => el.status === 1) == null
