@@ -111,6 +111,38 @@ class PurchaseRequestService {
 
 			if (xFlagProcess) {
 				xFlagProcess = false;
+				// Validate event date range
+				if (
+					pParam.hasOwnProperty('event_date_start') &&
+					pParam.hasOwnProperty('event_date_end') &&
+					pParam.event_date_start != null &&
+					pParam.event_date_start != '' &&
+					pParam.event_date_end != null &&
+					pParam.event_date_end != ''
+				) {
+					if (pParam.event_date_start > pParam.event_date_end) {
+						return (xJoResult = {
+							status_code: '-99',
+							status_msg: 'Tanggal awal event tidak boleh lebih besar dari tanggal akhir event'
+						});
+					}
+				}
+
+				// Remove null/empty event fields so they are not included in the save/update query
+				const xEventFields = ['event_date_start', 'event_date_end', 'event_location'];
+				for (var i = 0; i < xEventFields.length; i++) {
+					const xField = xEventFields[i];
+					if (pParam.hasOwnProperty(xField)) {
+						if (
+							pParam[xField] == null ||
+							pParam[xField] === '' ||
+							pParam[xField] === undefined
+						) {
+							delete pParam[xField];
+						}
+					}
+				}
+
 				/*
 					At: 10/11/2023
 					Description: Checking when the parameter project is set, category_time must be 7 and category_pr must be 'asset'
@@ -562,164 +594,8 @@ class PurchaseRequestService {
 
 				if (xResultList.total_record > 0) {
 					var fpbType = ["CA", "PO", "MIX"]
-					var xRows = xResultList.data;
+				var xRows = xResultList.data;
 
-					if (pParam.hasOwnProperty('is_export')) {
-						if (pParam.is_export) {
-							for (var index in xRows) {
-								xJoArrData.push({
-									id: await _utilInstance.encrypt(
-										xRows[index].id.toString(),
-										config.cryptoKey.hashKey
-									),
-									project: {
-										id: xRows[index].project_id,
-										code: xRows[index].project_code,
-										name: xRows[index].project_name,
-										odoo_project_code: xRows[index].odoo_project_code
-									},
-									budget_plan: {
-										id: xRows[index].budget_plan_id,
-										name: xRows[index].budget_plan_name
-									},
-									request_no: xRows[index].request_no,
-									requested_at:
-										xRows[index].requested_at == null
-											? ''
-											: moment(xRows[index].requested_at).tz(config.timezone).format('DD MMM'),
-									employee: {
-										id: await _utilInstance.encrypt(
-											xRows[index].employee_id.toString(),
-											config.cryptoKey.hashKey
-										),
-										name: xRows[index].employee_name
-									},
-									department: {
-										id: xRows[index].department_id,
-										name: xRows[index].department_name
-									},
-									status: {
-										id: xRows[index].status,
-										name:
-											xRows[index].status == -1
-												? 'Rejected'
-												: config.statusDescription.purchaseRequest[xRows[index].status]
-									},
-
-									company: {
-										id: xRows[index].company_id,
-										code: xRows[index].company_code,
-										name: xRows[index].company_name
-									},
-									fpb_type_id: xRows[index].fpb_type,
-									fpb_type_name: fpbType[xRows[index].fpb_type-1],
-									created_at:
-										xRows[index].created_at != null
-											? moment(xRows[index].created_at).format('DD-MM-YYYY HH:mm:ss')
-											: null,
-
-									total_price: xRows[index].total_price,
-									total_quotation_price: xRows[index].total_quotation_price,
-									category_item: {
-										id: xRows[index].category_item,
-										name: config.categoryItem[xRows[index].category_item]
-									},
-									fpb_type_id: xRows[index].fpb_type,
-									fpb_type_name: fpbType[xRows[index].fpb_type-1],
-									item: {
-										product_code: xRows[index].product_code,
-										product_name: xRows[index].product_name,
-										qty: xRows[index].qty,
-										budget_price_per_unit: xRows[index].budget_price_per_unit,
-										budget_price_total: xRows[index].budget_price_total,
-										quotation_price_per_unit: xRows[index].quotation_price_per_unit,
-										quotation_price_total: xRows[index].quotation_price_total,
-										estimate_date_use: xRows[index].estimate_date_use,
-										pr_no: xRows[index].pr_no,
-										last_price: xRows[index].last_price,
-										uom_name: xRows[index].uom_name,
-										// add new 16/11/2023
-										estimate_fulfillment: xRows[index].estimate_fulfillment,
-										status: xRows[index].item_detail_status,
-										description: xRows[index].description,
-
-										currency_id: xRows[index].currency_id,
-										currency_code: xRows[index].currency_code,
-										currency_symbol: xRows[index].currency_symbol,
-										paid_at: xRows[index].paid_at,
-										paid_by_name: xRows[index].paid_by_name,
-										store_link: xRows[index].store_link,
-										purchase_type: xRows[index].purchase_type,
-										ca_manual_no: xRows[index].ca_manual_no,
-										ca_manual_date: xRows[index].ca_manual_date,
-										ca_type: xRows[index].ca_type
-									},
-									approved_at: xRows[index].approved_at,
-									budget_plan_no: xRows[index].budget_plan_no,
-								});
-							}
-						} else {
-							for (var index in xRows) {
-								xJoArrData.push({
-									id: await _utilInstance.encrypt(
-										xRows[index].id.toString(),
-										config.cryptoKey.hashKey
-									),
-									project: {
-										id: xRows[index].project_id,
-										code: xRows[index].project_code,
-										name: xRows[index].project_name,
-										odoo_project_code: xRows[index].odoo_project_code
-									},
-									request_no: xRows[index].request_no,
-									requested_at:
-										xRows[index].requested_at == null
-											? ''
-											: moment(xRows[index].requested_at).tz(config.timezone).format('DD MMM'),
-									employee: {
-										id: await _utilInstance.encrypt(
-											xRows[index].employee_id.toString(),
-											config.cryptoKey.hashKey
-										),
-										name: xRows[index].employee_name
-									},
-									department: {
-										id: xRows[index].department_id,
-										name: xRows[index].department_name
-									},
-									status: {
-										id: xRows[index].status,
-										name:
-											xRows[index].status == -1
-												? 'Rejected'
-												: config.statusDescription.purchaseRequest[xRows[index].status]
-									},
-
-									company: {
-										id: xRows[index].company_id,
-										code: xRows[index].company_code,
-										name: xRows[index].company_name
-									},
-									fpb_type_id: xRows[index].fpb_type,
-									fpb_type_name: fpbType[xRows[index].fpb_type-1],
-
-									created_at:
-										xRows[index].created_at != null
-											? moment(xRows[index].created_at).format('DD-MM-YYYY HH:mm:ss')
-											: null,
-
-									total_price: xRows[index].total_price,
-									total_quotation_price: xRows[index].total_quotation_price,
-									category_item: {
-										id: xRows[index].category_item,
-										name: config.categoryItem[xRows[index].category_item]
-									},
-									approved_at: xRows[index].approved_at,
-									budget_plan_no: xRows[index].budget_plan_no
-								});
-							}
-						}
-					} else {
 						for (var index in xRows) {
 							xJoArrData.push({
 								id: await _utilInstance.encrypt(xRows[index].id.toString(), config.cryptoKey.hashKey),
@@ -777,10 +653,13 @@ class PurchaseRequestService {
 								approved_at: xRows[index].approved_at,
 								fpb_type_id: xRows[index].fpb_type,
 								fpb_type_name: fpbType[xRows[index].fpb_type-1],
-								budget_plan_no: xRows[index].budget_plan_no
+								budget_plan_no: xRows[index].budget_plan_no,
+								subject: xRows[index].subject,
+								event_date_start: xRows[index].event_date_start,
+								event_date_end: xRows[index].event_date_end,
+								event_location: xRows[index].event_location
 							});
 						}
-					}
 
 					xJoResult = {
 						status_code: '00',
@@ -797,6 +676,193 @@ class PurchaseRequestService {
 			}
 		}
 		// 24/10/2023
+		return xJoResult;
+	}
+
+	async exportWithDetail(pParam) {
+		var xJoResult = {};
+		var xJoArrData = [];
+		var xFlagProcess = false;
+		var xDecId = {};
+		var xFlagAPIResult = false;
+		var xArrOwnedDocNo = [];
+
+		if (pParam.hasOwnProperty('user_id')) {
+			if (pParam.user_id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.user_id = xDecId.decrypted;
+					xFlagProcess = true;
+				} else {
+					xJoResult = xDecId;
+				}
+			}
+		}
+
+		if (xFlagProcess) {
+			const xOwnedDocumentPayload = {
+				application_id: config.applicationId,
+				table_name: config.dbTables.fpb,
+				document_id: '',
+				user_id: pParam.user_id
+			}
+
+			if (pParam.hasOwnProperty('inappnotif') && pParam.inappnotif) {
+				xOwnedDocumentPayload.status = 0
+			}
+			let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, xOwnedDocumentPayload);
+
+			if (xOwnedDocument.status_code == '00') {
+				if (xOwnedDocument.hasOwnProperty('token_data')) {
+					if (xOwnedDocument.token_data.status_code == '00') {
+						xFlagAPIResult = true;
+						for (var i in xOwnedDocument.token_data.data) {
+							xArrOwnedDocNo.push(xOwnedDocument.token_data.data[i].document_no);
+						}
+					} else {
+						xFlagAPIResult = true;
+					}
+				}
+			} else {
+				xFlagAPIResult = true;
+			}
+
+			if (xFlagAPIResult) {
+				pParam.owned_document_no = xArrOwnedDocNo;
+
+				if (!pParam.hasOwnProperty('company_id')) {
+					if (!pParam.hasOwnProperty('inappnotif')) {
+						pParam.company_id = pParam.logged_company_id;
+					}
+				}
+
+				if (!pParam.hasOwnProperty('department_id')) {
+					if (!pParam.hasOwnProperty('inappnotif')) {
+						pParam.department_id = pParam.logged_department_id;
+					}
+				}
+
+				if (pParam.hasOwnProperty('pending_notif')) {
+					if (pParam.pending_notif != null & pParam.pending_notif != '' && pParam.pending_notif != 0) {
+						if (pParam.logged_department_name.includes('PURCHASING') || pParam.logged_department_name.includes('PROCUREMENT') || pParam.logged_department_name.includes('PRO/MIS/IC')) {
+							delete pParam.department_id
+						}
+						delete pParam.owned_document_no
+					}
+				}
+				if (pParam.hasOwnProperty('budget_plan_id')) {
+					const bDect = await _utilInstance.decrypt(pParam.budget_plan_id, config.cryptoKey.hashKey);
+					if (bDect.status_code == '00') {
+						pParam.budget_plan_id = bDect.decrypted
+						delete pParam.department_id
+					}
+				}
+
+				var xResultList = await _repoInstance.listWithDetail(pParam);
+
+				if (xResultList.data.length > 0) {
+					var fpbType = ["CA", "PO", "MIX"]
+					var xRows = xResultList.data;
+
+					for (var index in xRows) {
+						xJoArrData.push({
+							id: await _utilInstance.encrypt(xRows[index].id.toString(), config.cryptoKey.hashKey),
+							request_no: xRows[index].request_no,
+							requested_at:
+								xRows[index].requested_at == null
+									? ''
+									: moment(xRows[index].requested_at).tz(config.timezone).format('DD MMM'),
+							employee: {
+								id: await _utilInstance.encrypt(
+									xRows[index].employee_id.toString(),
+									config.cryptoKey.hashKey
+								),
+								name: xRows[index].employee_name
+							},
+							department: {
+								id: xRows[index].department_id,
+								name: xRows[index].department_name
+							},
+							project: {
+								id: xRows[index].project_id,
+								code: xRows[index].project_code,
+								name: xRows[index].project_name,
+								odoo_project_code: xRows[index].odoo_project_code
+							},
+							status: {
+								id: xRows[index].status,
+								name:
+									xRows[index].status == -1
+										? 'Rejected'
+										: config.statusDescription.purchaseRequest[xRows[index].status]
+							},
+
+							company: {
+								id: xRows[index].company_id,
+								code: xRows[index].company_code,
+								name: xRows[index].company_name
+							},
+							fpb_type_id: xRows[index].fpb_type,
+							fpb_type_name: fpbType[xRows[index].fpb_type-1],
+							created_at:
+								xRows[index].created_at != null
+									? moment(xRows[index].created_at).format('DD-MM-YYYY HH:mm:ss')
+									: null,
+
+							total_price: xRows[index].total_price,
+							total_quotation_price: xRows[index].total_quotation_price,
+							category_item: {
+								id: xRows[index].category_item,
+								name: config.categoryItem[xRows[index].category_item]
+							},
+							approved_at: xRows[index].approved_at,
+							budget_plan_no: xRows[index].budget_plan_no,
+							subject: xRows[index].subject,
+							event_date_start: xRows[index].event_date_start,
+							event_date_end: xRows[index].event_date_end,
+							event_location: xRows[index].event_location,
+							item: {
+								product_code: xRows[index].product_code,
+								product_name: xRows[index].product_name,
+								qty: xRows[index].qty,
+								budget_price_per_unit: xRows[index].budget_price_per_unit,
+								budget_price_total: xRows[index].budget_price_total,
+								quotation_price_per_unit: xRows[index].quotation_price_per_unit,
+								quotation_price_total: xRows[index].quotation_price_total,
+								estimate_date_use: xRows[index].estimate_date_use,
+								pr_no: xRows[index].pr_no,
+								last_price: xRows[index].last_price,
+								uom_name: xRows[index].uom_name,
+								estimate_fulfillment: xRows[index].estimate_fulfillment,
+								status: xRows[index].item_detail_status,
+								description: xRows[index].description,
+								currency_id: xRows[index].currency_id,
+								currency_code: xRows[index].currency_code,
+								currency_symbol: xRows[index].currency_symbol,
+								paid_at: xRows[index].paid_at,
+								paid_by_name: xRows[index].paid_by_name,
+								store_link: xRows[index].store_link,
+								purchase_type: xRows[index].purchase_type,
+								ca_manual_no: xRows[index].ca_manual_no,
+								ca_manual_date: xRows[index].ca_manual_date,
+								ca_type: xRows[index].ca_type
+							}
+						});
+					}
+
+					xJoResult = {
+						status_code: '00',
+						status_msg: 'OK',
+						data: xJoArrData
+					};
+				} else {
+					xJoResult = {
+						status_code: '-99',
+						status_msg: 'Data not found'
+					};
+				}
+			}
+		}
 		return xJoResult;
 	}
 
@@ -1130,6 +1196,7 @@ class PurchaseRequestService {
 
 						took_at:
 							xResult.took_at != null ? moment(xResult.took_at).format('DD MMM YYYY HH:mm:ss') : null,
+						took_by: xResult.took_by,
 						took_by_name: xResult.took_by_name,
 						fpb_type: xResult.fpb_type,
 						budget_plan: xResult.budget_plan != null ? {
@@ -1142,7 +1209,16 @@ class PurchaseRequestService {
 						approved_at: xResult.approved_at,
 						last_click_equalization_at: xResult.last_click_equalization_at,
 						last_click_equalization_by_name: xResult.last_click_equalization_by_name,
-						budget_plan_no: xResult.budget_plan_no
+						budget_plan_no: xResult.budget_plan_no,
+						
+						fetch_at:
+							xResult.fetch_at != null ? moment(xResult.fetch_at).format('DD MMM YYYY HH:mm:ss') : '',
+						fetch_by_name: xResult.fetch_by_name,
+						fetch_by: xResult.fetch_by,
+						subject: xResult.subject,
+						event_date_start: xResult.event_date_start,
+						event_date_end: xResult.event_date_end,
+						event_location: xResult.event_location
 					};
 
 					xJoResult = {
@@ -1237,6 +1313,8 @@ class PurchaseRequestService {
 							pParam.token,
 							xParamAddApprovalMatrix
 						);
+						
+						console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
 						xJoResult.approval_matrix_result = xApprovalMatrixResult;
 
 						if (xApprovalMatrixResult.status_code == '00') {
@@ -1285,6 +1363,7 @@ class PurchaseRequestService {
 													email: xApproverSeq1.approver_user[i].email
 												}
 											};
+											console.log(`>>> xParamEmailNotification: ${JSON.stringify(xParamEmailNotification)}`);
 											xNotificationResult = await _notificationService.sendNotificationEmail_FPBNeedApproval(
 												xParamEmailNotification,
 												pParam.method,
@@ -2121,6 +2200,15 @@ class PurchaseRequestService {
 		var xJoArrData = [];
 
 		try {
+			if (pParam.hasOwnProperty('user_id')) {
+				if (pParam.user_id != '') {
+					const xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+					if (xDecId.status_code == '00') {
+						pParam.user_id = xDecId.decrypted;
+					}
+				}
+			}
+
 			var xResultList = await _repoInstance.list(pParam);
 
 			if (xResultList.total_record > 0) {
@@ -2138,6 +2226,8 @@ class PurchaseRequestService {
 					total_record: xResultList.total_record,
 					data: xJoArrData
 				};
+			} else {
+				xJoResult = xResultList
 			}
 		} catch (e) {
 			xJoResult = {
@@ -2157,74 +2247,79 @@ class PurchaseRequestService {
 		var xClearId = '';
 
 		try {
-			if (!pParam.logged_is_admin) {
-				xJoResult = {
-					status_msg: "You don't have permission of this access.",
-					status_code: '-99'
-				};
-			} else {
-				if (pParam.document_id != '' && pParam.user_id != '') {
-					xDecId = await _utilInstance.decrypt(pParam.document_id, config.cryptoKey.hashKey);
+			// if (!pParam.logged_is_admin) {
+			// 	xJoResult = {
+			// 		status_msg: "You don't have permission of this access.",
+			// 		status_code: '-99'
+			// 	};
+			// } else {
+			if (pParam.document_id != '' && pParam.user_id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.document_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					xFlagProcess = true;
+					xEncId = pParam.document_id;
+					pParam.document_id = xDecId.decrypted;
+					xClearId = xDecId.decrypted;
+					xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
 					if (xDecId.status_code == '00') {
+						pParam.user_id = xDecId.decrypted;
 						xFlagProcess = true;
-						xEncId = pParam.document_id;
-						pParam.document_id = xDecId.decrypted;
-						xClearId = xDecId.decrypted;
-						xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
-						if (xDecId.status_code == '00') {
-							pParam.user_id = xDecId.decrypted;
-							xFlagProcess = true;
-						} else {
-							xJoResult = xDecId;
-						}
 					} else {
 						xJoResult = xDecId;
 					}
+				} else {
+					xJoResult = xDecId;
 				}
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Invalid document id or user id'
+				}
+			}
 
-				if (xFlagProcess) {
-					// Check if this request id valid or not
-					var xPRDetail = await _repoInstance.getById({ id: pParam.document_id });
-					if (xPRDetail != null) {
-						if (xPRDetail.status != 5) {
+			if (xFlagProcess) {
+				// Check if this request id valid or not
+				var xPRDetail = await _repoInstance.getById({ id: pParam.document_id });
+				if (xPRDetail != null) {
+					if (xPRDetail.status != 5) {
+						xJoResult = {
+							status_code: '-99',
+							status_msg: 'This document can not take since the status is not Pending.'
+						};
+					} else {
+						var xParamUpdatePR = {
+							id: pParam.document_id,
+							status: 2,
+							user_id: pParam.user_id,
+							user_name: pParam.user_name
+						};
+						var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'take_fpb');
+
+						if (xUpdateResult.status_code == '00') {
+							// update notification status
+							let xInAppNotificationResult = await _notificationService.inAppNotification({
+								document_code: xPRDetail.request_no,
+								document_id: xEncId,
+								document_status: 2,
+								mode: 'notify_fpb_take',
+								method: pParam.method,
+								token: pParam.token,
+								employee_id: await _utilInstance.encrypt(
+									xPRDetail.employee_id.toString(),
+									config.cryptoKey.hashKey
+								)
+							});
 							xJoResult = {
-								status_code: '-99',
-								status_msg: 'This document can not take since the status is not Pending.'
+								status_code: '00',
+								status_msg: 'FPB successfully rejected'
 							};
 						} else {
-							var xParamUpdatePR = {
-								id: pParam.document_id,
-								status: 2,
-								user_id: pParam.user_id,
-								user_name: pParam.user_name
-							};
-							var xUpdateResult = await _repoInstance.save(xParamUpdatePR, 'take_fpb');
-
-							if (xUpdateResult.status_code == '00') {
-								// update notification status
-								let xInAppNotificationResult = await _notificationService.inAppNotification({
-									document_code: xPRDetail.request_no,
-									document_id: xEncId,
-									document_status: 2,
-									mode: 'notify_fpb_take',
-									method: pParam.method,
-									token: pParam.token,
-									employee_id: await _utilInstance.encrypt(
-										xPRDetail.employee_id.toString(),
-										config.cryptoKey.hashKey
-									)
-								});
-								xJoResult = {
-									status_code: '00',
-									status_msg: 'FPB successfully rejected'
-								};
-							} else {
-								xJoResult = xUpdateResult;
-							}
+							xJoResult = xUpdateResult;
 						}
 					}
 				}
 			}
+			// }
 		} catch (e) {
 			xJoResult = {
 				status_code: '-99',
@@ -2419,7 +2514,10 @@ class PurchaseRequestService {
 						id: xClearId,
 						approved_at: null,
 						user_id: pParam.user_id,
-						user_name: pParam.user_name
+						user_name: pParam.user_name,
+						fetch_by: pParam.user_id,
+						fetch_by_name: pParam.user_name,
+						fetch_at: await _utilInstance.getCurrDateTime()
 					}
 					var xUpdateResult = await _repoInstance.save(xUpdateParam, 'update');
 					xJoResult = xUpdateResult;
@@ -2450,6 +2548,7 @@ class PurchaseRequestService {
 							pParam.token,
 							xParamAddApprovalMatrix
 						);
+						console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
 						xJoResult.approval_matrix_result = xApprovalMatrixResult;
 
 						if (xApprovalMatrixResult.status_code == '00') {
@@ -2502,6 +2601,7 @@ class PurchaseRequestService {
 													email: xApproverSeq1.approver_user[i].email
 												}
 											};
+											console.log(`>>> xParamEmailNotification: ${JSON.stringify(xParamEmailNotification)}`);
 											xNotificationResult = await _notificationService.sendNotificationEmail_FPBNeedApproval(
 												xParamEmailNotification,
 												pParam.method,

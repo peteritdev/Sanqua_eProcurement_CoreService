@@ -344,36 +344,36 @@ class PJCAService {
 				};
 			}
 			
+			const xOwnedDocumentPayload = {
+				application_id: 8,
+				table_name: config.dbTables.pjca,
+				document_id: '',
+				user_id: pParam.user_id
+			}
 			if (pParam.hasOwnProperty('inappnotif') && pParam.inappnotif) {
-				const xOwnedDocumentPayload = {
-					application_id: 8,
-					table_name: config.dbTables.pjca,
-					document_id: '',
-					user_id: pParam.user_id
-				}
-			
 				xOwnedDocumentPayload.status = 0
 				
-				let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, xOwnedDocumentPayload);
-				console.log(`>>> xOwnedDocument : ${JSON.stringify(xOwnedDocument)}`);
+				pParam.current_approval_ids = pParam.user_id;
+			}
+			
+			let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, xOwnedDocumentPayload);
+			console.log(`>>> xOwnedDocument : ${JSON.stringify(xOwnedDocument)}`);
 
-				if (xOwnedDocument.status_code == '00') {
-					if (xOwnedDocument.hasOwnProperty('token_data')) {
-						if (xOwnedDocument.token_data.status_code == '00') {
-							for (var i in xOwnedDocument.token_data.data) {
-								xArrOwnedDocNo.push(xOwnedDocument.token_data.data[i].document_no);
-							}
-							pParam.owned_document_no = xArrOwnedDocNo;
+			if (xOwnedDocument.status_code == '00') {
+				if (xOwnedDocument.hasOwnProperty('token_data')) {
+					if (xOwnedDocument.token_data.status_code == '00') {
+						for (var i in xOwnedDocument.token_data.data) {
+							xArrOwnedDocNo.push(xOwnedDocument.token_data.data[i].document_no);
 						}
+						pParam.owned_document_no = xArrOwnedDocNo;
 					}
 				}
-				pParam.current_approval_ids = pParam.user_id;
 			}
 
 			if (xFlagProccess) {
-				var xResultList = await _repoInstance.list(pParam);
+				var xResultList = await _repoInstance.list_v3(pParam);
 				if (xResultList) {
-					console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
+					// console.log(`>>> xResultList: ${JSON.stringify(xResultList)}`);
 					if (xResultList.status_code == '00') {
 						var xRows = xResultList.data.rows;
 						if (xRows.length > 0) {
@@ -397,6 +397,8 @@ class PJCAService {
 									updated_at: moment(xRows[i].updatedAt).format('DD MMM YYYY HH:mm:ss'),
 									updated_by_name: xRows[i].updated_by_name,
 									payment_request: xRows[i].payment_request,
+									created_by_plant_id: xRows[i].created_by_plant_id,
+									currency: xRows[i].currency
 								});
 							}
 
@@ -430,7 +432,116 @@ class PJCAService {
 
 		return xJoResult;
 	}
-	
+
+	// Export "beserta detail": same auth prelude as list, but returns flat header+item rows
+	async exportWithDetail(pParam) {
+		var xJoResult = {};
+		var xJoArrData = [];
+		var xDecId = null;
+		var xFlagProccess = false;
+		var xArrOwnedDocNo = [];
+
+		try {
+			if (pParam.hasOwnProperty('user_id') && pParam.user_id != '') {
+				xDecId = await _utilInstance.decrypt(pParam.user_id, config.cryptoKey.hashKey);
+				if (xDecId.status_code == '00') {
+					pParam.user_id = xDecId.decrypted;
+					xFlagProccess = true;
+				} else {
+					xJoResult = xDecId;
+				}
+			} else {
+				xJoResult = {
+					status_code: '-99',
+					status_msg: 'Invalid Logged User Id'
+				};
+			}
+
+			const xOwnedDocumentPayload = {
+				application_id: 8,
+				table_name: config.dbTables.pjca,
+				document_id: '',
+				user_id: pParam.user_id
+			}
+
+			let xOwnedDocument = await _oAuthService.getApprovalMatrix(pParam.method, pParam.token, xOwnedDocumentPayload);
+
+			if (xOwnedDocument.status_code == '00') {
+				if (xOwnedDocument.hasOwnProperty('token_data')) {
+					if (xOwnedDocument.token_data.status_code == '00') {
+						for (var i in xOwnedDocument.token_data.data) {
+							xArrOwnedDocNo.push(xOwnedDocument.token_data.data[i].document_no);
+						}
+						pParam.owned_document_no = xArrOwnedDocNo;
+					}
+				}
+			}
+
+			if (xFlagProccess) {
+				var xResultList = await _repoInstance.listWithDetail(pParam);
+				if (xResultList) {
+					if (xResultList.status_code == '00') {
+						var xRows = xResultList.data;
+						for (var i in xRows) {
+							var xRow = xRows[i];
+							xJoArrData.push({
+								id: await _utilInstance.encrypt(xRow.id.toString(), config.cryptoKey.hashKey),
+								document_no: xRow.document_no,
+								company_name: xRow.company_name,
+								employee_name: xRow.employee_name,
+								department_name: xRow.department_name,
+								to_department_name: xRow.to_department_name,
+								total_qty_released: xRow.total_qty_released,
+								total_price_released: xRow.total_price_released,
+								status: xRow.status,
+								created_by_name: xRow.created_by_name,
+								created_at: xRow.created_at != null ? moment(xRow.created_at).format('DD MMM YYYY HH:mm:ss') : null,
+								currency: xRow.currency,
+								payment_request: {
+									id: xRow.pmt_id,
+									document_no: xRow.pmt_document_no
+								},
+								item: xRow.pd_id != null ? {
+									id: xRow.pd_id,
+									product_code: xRow.product_code,
+									product_name: xRow.product_name,
+									uom_name: xRow.uom_name,
+									qty_request: xRow.qty_request,
+									qty_done: xRow.qty_done,
+									price_request: xRow.price_request,
+									price_done: xRow.price_done,
+									discount_amount: xRow.discount_amount,
+									discount_percent: xRow.discount_percent,
+									price_total: xRow.price_total,
+									description: xRow.description,
+									status: xRow.pd_status
+								} : null
+							});
+						}
+
+						xJoResult = {
+							status_code: '00',
+							status_msg: 'OK',
+							data: xJoArrData
+						};
+					} else {
+						xJoResult = xResultList;
+					}
+				} else {
+					xJoResult = xResultList;
+				}
+			}
+		} catch (e) {
+			_utilInstance.writeLog(`${_xClassName}.exportWithDetail`, `Exception error: ${e.message}`, 'error');
+			xJoResult = {
+				status_code: '-99',
+				status_msg: `${_xClassName}.exportWithDetail: Exception error: ${e.message}`
+			};
+		}
+
+		return xJoResult;
+	}
+
 	async save(pParam) {
 		var xJoResult;
 		var xAct = pParam.act;
@@ -677,7 +788,8 @@ class PJCAService {
 										company_id: xDetail.data.company_id,
 										department_id: xDetail.data.department_id,
 										ecatalogue_fpb_category_item: null,
-										logged_company_id: pParam.logged_company_id
+										logged_company_id: pParam.logged_company_id,
+										approval_matrix_id: pParam.approval_matrix_id
 									};
 
 									var xApprovalMatrixResult = await _oAuthService.addApprovalMatrix(
@@ -1436,6 +1548,8 @@ class PJCAService {
 						console.log(`>>> xApprovalMatrixResult: ${JSON.stringify(xApprovalMatrixResult)}`);
 						const xApproverIds = []
 						const xApproverEmpIds = []
+						const xApproverEmpEmail = []
+						const xApproverEmpName = []
 						if (xApprovalMatrixResult.status_code == '00') {
 							if (xApprovalMatrixResult.approvers.length > 0) {
 								
@@ -1444,6 +1558,10 @@ class PJCAService {
 									for (var i in xApproverSeq1.approver_user) {
 										xApproverIds.push(xApproverSeq1.approver_user[i].user_id)
 										xApproverEmpIds.push(xApproverSeq1.approver_user[i].employee_id)
+										if (xApproverSeq1.approver_user[i].notification_via_email) {
+											xApproverEmpEmail.push(xApproverSeq1.approver_user[i].email)
+											xApproverEmpName.push(xApproverSeq1.approver_user[i].user_name)
+										}
 									}
 								}
 							}
@@ -1454,13 +1572,16 @@ class PJCAService {
 							approved_at: null,
 							user_id: pParam.user_id,
 							user_name: pParam.user_name,
-							current_approval_ids: xApproverIds
+							current_approval_ids: xApproverIds,
+							fetch_by: pParam.user_id,
+							fetch_by_name: pParam.user_name,
+							fetch_at: await _utilInstance.getCurrDateTime()
 						}
 						var xUpdateResult = await _repoInstance.save(xUpdateParam, 'update');
 						console.log(`>>> xUpdateResult: ${JSON.stringify(xUpdateResult)}`);
 						
 						// In App Notification
-						await _notificationService.inAppNotification({
+						var xInAppNofitication = await _notificationService.inAppNotification({
 							employee_id: xApproverEmpIds[0],
 							employee_name: xPjcaDetail.data.employee_name,
 							subject: ` (fetch)`,
@@ -1472,6 +1593,40 @@ class PJCAService {
 							method: pParam.method,
 							token: pParam.token
 						});
+
+						console.log(`>>> xInAppNofitication: ${JSON.stringify(xInAppNofitication)}`);
+						console.log(`>>> xApproverEmpEmail: ${JSON.stringify(xApproverEmpEmail)}`);
+						console.log(`>>> xApproverEmpName: ${JSON.stringify(xApproverEmpName)}`);
+						console.log(`>>> EmailNotif: ${JSON.stringify(xApproverEmpEmail.length > 0 && xApproverEmpName.length > 0)}`);
+						if (xApproverEmpEmail.length > 0 && xApproverEmpName.length > 0) {
+							for (let i = 0; i < xApproverEmpEmail.length; i++) {
+								let xParamEmailNotification = {
+									mode: 'request_approval_pjca',
+									id: xEncId,
+									request_no: xPjcaDetail.data.document_no,
+									company_name: xPjcaDetail.data.company_name,
+									department_name: xPjcaDetail.data.department_name,
+									created_by: xPjcaDetail.data.employee_name,
+									created_at:
+										xPjcaDetail.data.createdAt != null
+											? moment(xPjcaDetail.data.createdAt).format('DD MMM YYYY')
+											: '',
+									items: xPjcaDetail.data.payment_request_detail,
+									// body: xDetail.data,
+									approver_user: {
+										employee_name: xApproverEmpName[i],
+										email: xApproverEmpEmail[i]
+									}
+								};
+								console.log(`>>> xParamEmailNotification: ${JSON.stringify(xParamEmailNotification)}`);
+								const xNotificationResult = await _notificationService.sendNotificationEmail_PJCANeedApproval(
+									xParamEmailNotification,
+									pParam.method,
+									pParam.token
+								);
+								console.log(`>>> xNotificationResult: ${JSON.stringify(xNotificationResult)}`);
+							}
+						}
 						xJoResult = xUpdateResult;
 						xJoResult.approval_matrix_result = xApprovalMatrixResult;
 					}

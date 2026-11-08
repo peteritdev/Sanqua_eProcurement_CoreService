@@ -149,7 +149,6 @@ class PaymentRequestDetailService {
 			}
 		}
 
-		// console.log(`>>> xPrDetailItem : ${JSON.stringify(xPrDetailItem)}`);
 		// xFlagProcess = false;
 		if (xFlagProcess) {
 			if (xAct == 'add') {
@@ -348,9 +347,9 @@ class PaymentRequestDetailService {
 					}
 					// check if given param item_type = 2 then update status payreq item to -1 (revision) 
 					// and create new item with item_type = 2
-					console.log(`>>> ItemType : ${JSON.stringify(pParam)}`);
+					// console.log(`>>> ItemType : ${JSON.stringify(pParam)}`);
 					if (pParam.hasOwnProperty('item_type') && pParam.item_type == 2) {
-						console.log(`>>> update and create new item .>>>`);
+						// console.log(`>>> update and create new item .>>>`);
 						// get detail old item first
 						const xGetCaItem = await _repoInstance.getByParam({id: pParam.id});
 						if (xGetCaItem.status_code == '00') {
@@ -366,49 +365,57 @@ class PaymentRequestDetailService {
 								// then check if there are already created revision item with same origin_id or not
 								// if yes then return error
 								const xCheckRevisionItem = await _repoInstance.getByParam({origin_id: pParam.id});
-								console.log(`>>> xCheckRevisionItem .>>>`, xCheckRevisionItem);
+								// console.log(`>>> xCheckRevisionItem .>>>`, xCheckRevisionItem);
 								if (xCheckRevisionItem.status_code == '-99' && xCheckRevisionItem.status_msg == 'Data not found') {
 									const xUpdateOldItem = {
 										id: pParam.id,
 										status: -1
 									}
+									// console.log(`>>> xGetCaItem : ${JSON.stringify(xGetCaItem)}`, xAct);
 									xUpdateResult = await _repoInstance.save(xUpdateOldItem, 'update');
 									if (xUpdateResult.status_code == '00') {
-										// update purchase request detail item qty_done with revised qty_request - old qty_request
-										var xPrDetailItem = await _purchaseRequestDetailRepoInstance.getByParam({id: pParam.prd_id})
-										if (xPrDetailItem.status_code == '00') {
-											let xQtyLeft = xPrDetailItem.data.qty_paid || 0
-											let xPrdUpdateParam = {
-												id: pParam.prd_id,
-												qty_paid: xQtyLeft - (xGetCaItem.data.qty_request - pParam.qty_request)
-											}
-											let xUpdatePrdItem = await _purchaseRequestDetailRepoInstance.save(xPrdUpdateParam, 'revision')
-											console.log(`>>> xUpdatePrdItem .>>>`, xUpdatePrdItem);
-											if (xUpdatePrdItem.status_code == '00') {
-												// create new revision item
-												const xAddRevisionItem = {
-													origin_id: pParam.id,
-													payment_request_id: pParam.payment_request_id,
-													prd_id: pParam.prd_id,
-													qty_request: pParam.qty_request,
-													price_request: pParam.price_request,
-													discount_amount: pParam.discount_amount,
-													discount_percent: pParam.discount_percent,
-													tax_type: pParam.tax_type,
-													description: pParam.description,
-													item_type: pParam.item_type,
-													price_total: pParam.price_total,
-													product_id: xGetCaItem.data.product_id,
-													product_code: xGetCaItem.data.product_code,
-													product_name: xGetCaItem.data.product_name,
-													uom_id: xGetCaItem.data.uom_id,
-													uom_name: xGetCaItem.data.uom_name,
-													qty_done: xGetCaItem.data.qty_done
+										let xAddRevisionItem = {
+											origin_id: pParam.id,
+											payment_request_id: pParam.payment_request_id,
+											prd_id: null,
+											qty_request: pParam.qty_request,
+											price_request: pParam.price_request,
+											discount_amount: pParam.discount_amount,
+											discount_percent: pParam.discount_percent,
+											tax_type: pParam.tax_type,
+											description: pParam.description,
+											item_type: pParam.item_type,
+											price_total: pParam.price_total,
+											product_id: xGetCaItem.data.product_id,
+											product_code: xGetCaItem.data.product_code,
+											product_name: xGetCaItem.data.product_name,
+											uom_id: xGetCaItem.data.uom_id,
+											uom_name: xGetCaItem.data.uom_name,
+											qty_done: xGetCaItem.data.qty_done
+										}
+										// check if CA is linked with FPB or not
+										if (xGetCaItem.data.prd_id != null) {
+											// update purchase request detail item qty_done with revised qty_request - old qty_request
+											var xPrDetailItem = await _purchaseRequestDetailRepoInstance.getByParam({id: pParam.prd_id})
+											if (xPrDetailItem.status_code == '00') {
+												let xQtyLeft = xPrDetailItem.data.qty_paid || 0
+												let xPrdUpdateParam = {
+													id: pParam.prd_id,
+													qty_paid: xQtyLeft - (xGetCaItem.data.qty_request - pParam.qty_request)
 												}
-												
-												console.log(`>>> xAddRevisionItem .>>>`, xAddRevisionItem);
-												xUpdateResult = await _repoInstance.save(xAddRevisionItem, 'add');
+												let xUpdatePrdItem = await _purchaseRequestDetailRepoInstance.save(xPrdUpdateParam, 'revision')
+												console.log(`>>> xUpdatePrdItem .>>>`, xUpdatePrdItem);
+												if (xUpdatePrdItem.status_code == '00') {
+													// create new revision item
+													xAddRevisionItem.prd_id = pParam.prd_id
+												}
 											}
+										}
+
+										// create new revision item
+										if (xFlagProcess) {
+											console.log(`>>> xAddRevisionItem .>>>`, xAddRevisionItem);
+											xUpdateResult = await _repoInstance.save(xAddRevisionItem, 'add');
 										}
 									}
 								} else {

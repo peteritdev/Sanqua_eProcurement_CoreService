@@ -250,6 +250,7 @@ class BudgetPlanRepository {
 				pParam.is_delete = 0;
 				pParam.created_by = pParam.user_id;
 				pParam.created_by_name = pParam.user_name;
+				pParam.created_by_plant_id = pParam.logged_plant_id;
 
 				xSaved = await _modelDb.create(pParam, { transaction: xTransaction });
 
@@ -277,6 +278,7 @@ class BudgetPlanRepository {
 				pParam.is_delete = 0;
 				pParam.created_by = pParam.user_id;
 				pParam.created_by_name = pParam.user_name;
+				pParam.created_by_plant_id = pParam.logged_plant_id;
 
 				// Need disable trigger first because it affect when add batch item.
 				sequelize.query(

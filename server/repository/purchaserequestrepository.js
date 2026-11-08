@@ -348,20 +348,13 @@ class PurchaseRequestRepository {
 	// 	return xJoResult;
 	// }
 
-	async list(pParam) {
-		var xData,
-			xTotalRecord = [];
-		var xSql,
-			xSqlCount = '';
+	// Shared WHERE-builder for list & listWithDetail — filter logic lives in ONE place
+	_buildFpbListFilterWhere(pParam) {
 		var xObjJsonWhere = {};
 		var xSqlWhere = ' (1=1) ';
 		var xSqlWhereOr = [];
-		var xSqlWhereOrOwnedDocument = [];
 		var xSqlOrderBy = '';
-		var xSqlLimit = '';
 		var xFlagFilterDepartment = false;
-		var xSqlGroupBy = '';
-		var xSqlFields = '';
 
 		if (pParam.hasOwnProperty('order_by')) {
 			if (pParam.order_by != '') {
@@ -427,7 +420,6 @@ class PurchaseRequestRepository {
 				xObjJsonWhere.status = pParam.status;
 			}
 		}
-
 		if (pParam.hasOwnProperty('user_id') && (pParam.is_admin == 0 || pParam.logged_is_admin == 0)) {
 			if (pParam.user_id != '') {
 				// xSqlWhereOr.push(' pr.created_by = :createdBy ');
@@ -436,10 +428,17 @@ class PurchaseRequestRepository {
 			}
 		}
 
-		if (pParam.hasOwnProperty('company_id')) {
-			if (pParam.company_id != '') {
+		if (pParam.hasOwnProperty('company_id') && pParam.company_id != '') {
+			// check if logged user is from company id 6 (PT. SANQUA) then show all data from all user otherwise show data from user company only
+			if (pParam.logged_company_id == 6) {
 				xSqlWhere += ' AND pr.company_id = :companyId ';
 				xObjJsonWhere.companyId = pParam.company_id;
+			} else {
+				xSqlWhere += ' AND pr.company_id = :companyId ';
+				xObjJsonWhere.companyId = pParam.company_id;
+				
+				xSqlWhere += ' AND (pr.created_by_plant_id <> 6 OR pr.created_by_plant_id is null)';
+				// xObjJsonWhere.plantId = pParam.pParam.logged_company_id;
 			}
 		}
 
@@ -614,90 +613,49 @@ class PurchaseRequestRepository {
 		// 	xSqlWhere += ` AND ( ${xSqlWhereOr.join(' OR ')} ) `;
 		// }
 
-		// if (xSqlWhereOrOwnedDocument.length > 0) {
-		// 	xSqlWhere += ` OR ( ${xSqlWhereOrOwnedDocument.join(' OR ')} ) `;
-		// }
+		return {
+			sqlWhere: xSqlWhere,
+			replacements: xObjJsonWhere,
+			orderBy: xSqlOrderBy
+		};
+	}
 
-		if (!pParam.hasOwnProperty('is_export')) {
-			xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
+	async list(pParam) {
+		var xData,
+			xTotalRecord = [];
+		var xSql,
+			xSqlCount = '';
+		var xSqlLimit = '';
+		var xSqlGroupBy = '';
+		var xSqlFields = '';
+
+		var xFilter = this._buildFpbListFilterWhere(pParam);
+		var xSqlWhere = xFilter.sqlWhere;
+		var xObjJsonWhere = xFilter.replacements;
+		var xSqlOrderBy = xFilter.orderBy;
+
+		xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
 			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item, pr.fpb_type,
-			pr.budget_plan_no,
+			pr.budget_plan_no, pr.created_by_plant_id, pr.subject, pr.event_date_start, pr.event_date_end, pr.event_location,
 			p.id AS "project_id", p.code AS "project_code", p.name AS "project_name", p.odoo_project_code, pr.approved_at`;
 
-			xSqlGroupBy = ` GROUP BY pr.id, 
-						pr.request_no, 
-						pr.requested_at, 
-						pr.employee_id, 
-						pr.employee_name, 
-						pr.department_id, 
+		xSqlGroupBy = ` GROUP BY pr.id,
+						pr.request_no,
+						pr.requested_at,
+						pr.employee_id,
+						pr.employee_name,
+						pr.department_id,
 						pr.department_name,
-							pr.status, 
-						pr.company_id, 
-						pr.company_code, 
-						pr.company_name,
+							pr.status,
+							pr.company_id,
+							pr.company_code,
+							pr.company_name,
+							pr.created_by_plant_id,
 						p.id,p.code,p.name,p.odoo_project_code`;
 
-			if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
-				if (pParam.offset != '' && pParam.limit != '') {
-					xSqlLimit = ` OFFSET ${pParam.offset} LIMIT ${pParam.limit} `;
-				}
-			}
-		} else {
-			if (pParam.is_export) {
-				xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name, pr.fpb_type,
-								pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item, pr.approved_at, 
-								pr.budget_plan_no,
-								prd.product_code,
-								prd.product_name,
-								prd.qty,
-								prd.budget_price_per_unit,
-								prd.budget_price_total,
-								prd.quotation_price_per_unit,
-								prd.quotation_price_total,
-								prd.estimate_date_use,
-								prd.pr_no,
-								prd.last_price,
-								prd.estimate_fulfillment,
-								prd.uom_name,
-								prd.status AS "item_detail_status",
-								prd.description,
-								prd.currency_id,
-								prd.currency_code,
-								prd.currency_symbol,
-								prd.paid_at,
-								prd.paid_by_name,
-								prd.store_link,
-								prd.purchase_type,
-								prd.ca_manual_no,
-								prd.ca_manual_date,
-								prd.ca_type,
-								p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code`;
-
-				xSqlGroupBy = ` `;
-			} else {
-				xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name, pr.fpb_type,
-			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item,
-			pr.budget_plan_no,
-			p.id AS "project_id", p.code AS "project_code",p.name AS "project_name",p.odoo_project_code, pr.approved_at`;
-
-				xSqlGroupBy = ` GROUP BY pr.id, 
-						pr.request_no, 
-						pr.requested_at, 
-						pr.employee_id, 
-						pr.employee_name, 
-						pr.department_id, 
-						pr.department_name,
-							pr.status, 
-						pr.company_id, 
-						pr.company_code, 
-						pr.company_name,
-						p.id,p.code,p.name,p.odoo_project_code`;
-
-				if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
-					if (pParam.offset != '' && pParam.limit != '') {
-						xSqlLimit = ` OFFSET ${pParam.offset} LIMIT ${pParam.limit} `;
-					}
-				}
+		if (pParam.hasOwnProperty('offset') && pParam.hasOwnProperty('limit')) {
+			if (pParam.offset != '' && pParam.limit != '') {
+				xSqlLimit = ` OFFSET ${pParam.offset} LIMIT ${pParam.limit} `;
 			}
 		}
 
@@ -731,6 +689,43 @@ class PurchaseRequestRepository {
 			status_msg: 'OK',
 			data: xData,
 			total_record: xTotalRecord[0].total_record
+		};
+	}
+
+	// Flat export query: header JOIN detail, one row per item, no pagination, no GROUP BY
+	async listWithDetail(pParam) {
+		var xData;
+		var xSql = '';
+
+		var xFilter = this._buildFpbListFilterWhere(pParam);
+		var xSqlWhere = xFilter.sqlWhere;
+		var xObjJsonWhere = xFilter.replacements;
+		var xSqlOrderBy = xFilter.orderBy;
+
+		var xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name, pr.fpb_type,
+			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.total_price, pr.total_quotation_price, pr.category_item, pr.approved_at,
+			pr.budget_plan_no, pr.created_by_plant_id, pr.subject, pr.event_date_start, pr.event_date_end, pr.event_location,
+			prd.product_code, prd.product_name, prd.qty, prd.budget_price_per_unit, prd.budget_price_total, prd.quotation_price_per_unit, prd.quotation_price_total,
+			prd.estimate_date_use, prd.pr_no, prd.last_price, prd.estimate_fulfillment, prd.uom_name, prd.status AS "item_detail_status", prd.description,
+			prd.currency_id, prd.currency_code, prd.currency_symbol, prd.paid_at, prd.paid_by_name, prd.store_link, prd.purchase_type, prd.ca_manual_no, prd.ca_manual_date, prd.ca_type,
+			p.id AS "project_id", p.code AS "project_code", p.name AS "project_name", p.odoo_project_code`;
+
+		xSql = ` SELECT ${xSqlFields}
+			 FROM tr_purchaserequests pr
+					LEFT JOIN tr_purchaserequestdetails prd ON pr.id = prd.request_id
+						LEFT JOIN ms_projects p ON p.id = pr.project_id
+			 WHERE ${xSqlWhere}
+			  ${xSqlOrderBy} `;
+
+		xData = await sequelize.query(xSql, {
+			replacements: xObjJsonWhere,
+			type: sequelize.QueryTypes.SELECT
+		});
+
+		return {
+			status_code: '00',
+			status_msg: 'OK',
+			data: xData
 		};
 	}
 
@@ -842,12 +837,20 @@ class PurchaseRequestRepository {
 			}
 		}
 
-		if (pParam.hasOwnProperty('company_id')) {
-			if (pParam.company_id != '') {
+		if (pParam.hasOwnProperty('company_id') && pParam.company_id != '') {
+			// check if logged user is from company id 6 (PT. SANQUA) then show all data from all user otherwise show data from user company only
+			if (pParam.logged_company_id == 6) {
 				xSqlWhere += ' AND pr.company_id = :companyId ';
 				xObjJsonWhere.companyId = pParam.company_id;
+			} else {
+				xSqlWhere += ' AND pr.company_id = :companyId ';
+				xObjJsonWhere.companyId = pParam.company_id;
+				
+				xSqlWhere += ' AND (pr.created_by_plant_id <> 6 OR pr.created_by_plant_id is null)';
+				// xObjJsonWhere.plantId = pParam.pParam.logged_company_id;
 			}
 		}
+		
 
 		if (pParam.hasOwnProperty('owned_document_no')) {
 			if (pParam.owned_document_no.length > 0) {
@@ -947,7 +950,7 @@ class PurchaseRequestRepository {
 
 		xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
 			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.created_by, pr.total_price, pr.total_quotation_price, pr.category_item,
-			pr.budget_plan_no, 
+			pr.budget_plan_no, pr.created_by_plant_id,
 			prd.product_code,
 			prd.product_name,
 			prd.qty,
@@ -1032,6 +1035,7 @@ class PurchaseRequestRepository {
 				pParam.is_delete = 0;
 				pParam.created_by = pParam.user_id;
 				pParam.created_by_name = pParam.user_name;
+				pParam.created_by_plant_id = pParam.logged_plant_id;
 
 				xSaved = await _modelDb.create(pParam, { transaction: xTransaction });
 
@@ -1098,7 +1102,7 @@ class PurchaseRequestRepository {
 					pParam.is_delete = 0;
 					pParam.created_by = pParam.user_id;
 					pParam.created_by_name = pParam.user_name;
-
+					pParam.created_by_plant_id = pParam.logged_plant_id;
 					//// Need disable trigger first because it affect when add batch item.
 					sequelize.query(
 						'ALTER TABLE "tr_purchaserequestdetails" DISABLE TRIGGER "trg_update_total_item_afterinsert"'
@@ -1409,7 +1413,7 @@ class PurchaseRequestRepository {
 
 		xSqlFields = ` pr.id, pr.request_no, pr.employee_id, pr.employee_name, pr.company_id, pr.company_name,
 					pr.department_id, pr.department_name, pr.category_item, pr.category_pr, pr.status as "fpb_status",
-					pr.budget_plan_no,
+					pr.budget_plan_no, pr.created_by_plant_id,
 					p.id as "project_id", p.odoo_project_code, p.name as "project_name", prd.qty, prd.uom_id, prd.uom_name,
 					prd.last_price, prd.budget_price_per_unit, prd.budget_price_total, prd.status as "item_status",
 					prd.product_id, prd.product_code, prd.product_name, prd.vendor_id, prd.vendor_code, prd.vendor_name,
@@ -1557,7 +1561,7 @@ class PurchaseRequestRepository {
 
 		xSqlFields = ` pr.id, pr.request_no, pr.requested_at, pr.employee_id, pr.employee_name, pr.department_id, pr.department_name,
 			pr.status, pr.company_id, pr.company_code, pr.company_name, pr.created_at, pr.created_by, pr.total_price, pr.total_quotation_price, pr.category_item,
-			pr.budget_plan_no, 
+			pr.budget_plan_no, pr.created_by_plant_id,
 			prd.product_code,
 			prd.product_name,
 			prd.qty,

@@ -17,6 +17,7 @@ const { check, validationResult } = require('express-validator');
 module.exports = {
 	purchaseRequest_Save,
 	purchaseRequest_List,
+	purchaseRequest_ExportWithDetail,
 	purchaseRequest_DropDown,
 	purchaseRequestDetail_Save,
 	purchaseRequest_Detail,
@@ -75,7 +76,7 @@ async function purchaseRequest_List(req, res) {
 					(el) => el.application.id === config.applicationId || el.application.id === 1
 				);
 
-				req.query.logged_is_admin = xLevel != undefined ? xLevel.is_admin : 0;
+				req.query.logged_is_admin = xLevel ? xLevel.is_admin : 0;
 				req.query.user_id = oAuthResult.token_data.result_verify.id;
 				if (oAuthResult.token_data.result_verify.employee_info.department.hasOwnProperty('unit')) {
 					if (oAuthResult.token_data.result_verify.employee_info.department.unit != null) {
@@ -123,6 +124,74 @@ async function purchaseRequest_List(req, res) {
 	res.status(200).send(joResult);
 }
 
+async function purchaseRequest_ExportWithDetail(req, res) {
+	var joResult;
+	var oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
+
+	if (oAuthResult.status_code == '00') {
+		if (oAuthResult.token_data.status_code == '00') {
+			// Validate first
+			var errors = validationResult(req).array();
+
+			if (errors.length != 0) {
+				joResult = JSON.stringify({
+					status_code: '-99',
+					status_msg: 'Parameter value has problem',
+					error_msg: errors
+				});
+			} else {
+				let xLevel = oAuthResult.token_data.result_verify.user_level.find(
+					(el) => el.application.id === config.applicationId || el.application.id === 1
+				);
+
+				req.query.logged_is_admin = xLevel ? xLevel.is_admin : 0;
+				req.query.user_id = oAuthResult.token_data.result_verify.id;
+				if (oAuthResult.token_data.result_verify.employee_info.department.hasOwnProperty('unit')) {
+					if (oAuthResult.token_data.result_verify.employee_info.department.unit != null) {
+						req.query.logged_department_id =
+							oAuthResult.token_data.result_verify.employee_info.department.unit.id;
+						req.query.logged_department_name =
+							oAuthResult.token_data.result_verify.employee_info.department.unit.name;
+					} else {
+						if (oAuthResult.token_data.result_verify.employee_info.department.section != null) {
+							req.query.logged_department_id =
+								oAuthResult.token_data.result_verify.employee_info.department.section.id;
+							req.query.logged_department_name =
+								oAuthResult.token_data.result_verify.employee_info.department.section.name;
+						}
+					}
+				} else {
+					if (oAuthResult.token_data.result_verify.employee_info.department.section != null) {
+						req.query.logged_department_id =
+							oAuthResult.token_data.result_verify.employee_info.department.section.id;
+						req.query.logged_department_name =
+							oAuthResult.token_data.result_verify.employee_info.department.section.name;
+					} else {
+						req.query.logged_department_id =
+							oAuthResult.token_data.result_verify.employee_info.department.id;
+						req.query.logged_department_name =
+							oAuthResult.token_data.result_verify.employee_info.department.name;
+					}
+				}
+
+				req.query.logged_company_id = oAuthResult.token_data.result_verify.employee_info.company != null ? oAuthResult.token_data.result_verify.employee_info.company.id : oAuthResult.token_data.result_verify.company.id;
+				req.query.logged_company_name = oAuthResult.token_data.result_verify.employee_info.company != null ? oAuthResult.token_data.result_verify.employee_info.company.name : oAuthResult.token_data.result_verify.company.name;
+				req.query.method = req.headers['x-method'];
+				req.query.token = req.headers['x-token'];
+				joResult = await _serviceInstance.exportWithDetail(req.query);
+				joResult = JSON.stringify(joResult);
+			}
+		} else {
+			joResult = JSON.stringify(oAuthResult);
+		}
+	} else {
+		joResult = JSON.stringify(oAuthResult);
+	}
+
+	res.setHeader('Content-Type', 'application/json');
+	res.status(200).send(joResult);
+}
+
 async function purchaseRequest_DropDown(req, res) {
 	var joResult;
 	var oAuthResult = await _oAuthServiceInstance.verifyToken(req.headers['x-token'], req.headers['x-method']);
@@ -141,6 +210,43 @@ async function purchaseRequest_DropDown(req, res) {
 					error_msg: errors
 				});
 			} else {
+				let xLevel = oAuthResult.token_data.result_verify.user_level.find(
+					(el) => el.application.id === config.applicationId || el.application.id === 1
+				);
+
+				req.query.logged_is_admin = xLevel ? xLevel.is_admin : 0;
+				req.query.user_id = oAuthResult.token_data.result_verify.id;
+				if (oAuthResult.token_data.result_verify.employee_info.department.hasOwnProperty('unit')) {
+					if (oAuthResult.token_data.result_verify.employee_info.department.unit != null) {
+						req.query.logged_department_id =
+							oAuthResult.token_data.result_verify.employee_info.department.unit.id;
+						req.query.logged_department_name =
+							oAuthResult.token_data.result_verify.employee_info.department.unit.name;
+					} else {
+						if (oAuthResult.token_data.result_verify.employee_info.department.section != null) {
+							req.query.logged_department_id =
+								oAuthResult.token_data.result_verify.employee_info.department.section.id;
+							req.query.logged_department_name =
+								oAuthResult.token_data.result_verify.employee_info.department.section.name;
+						}
+					}
+				} else {
+					if (oAuthResult.token_data.result_verify.employee_info.department.section != null) {
+						req.query.logged_department_id =
+							oAuthResult.token_data.result_verify.employee_info.department.section.id;
+						req.query.logged_department_name =
+							oAuthResult.token_data.result_verify.employee_info.department.section.name;
+					} else {
+						req.query.logged_department_id =
+							oAuthResult.token_data.result_verify.employee_info.department.id;
+						req.query.logged_department_name =
+							oAuthResult.token_data.result_verify.employee_info.department.name;
+					}
+				}
+
+				req.query.logged_company_id = oAuthResult.token_data.result_verify.employee_info.company != null ? oAuthResult.token_data.result_verify.employee_info.company.id : oAuthResult.token_data.result_verify.company.id;
+				req.query.logged_company_name = oAuthResult.token_data.result_verify.employee_info.company != null ? oAuthResult.token_data.result_verify.employee_info.company.name : oAuthResult.token_data.result_verify.company.name;
+				
 				req.query.method = req.headers['x-method'];
 				req.query.token = req.headers['x-token'];
 				joResult = await _serviceInstance.dropDown(req.query);
@@ -248,6 +354,7 @@ async function purchaseRequest_Save(req, res) {
 
 				req.body.employee_id = oAuthResult.token_data.result_verify.employee_info.id;
 				req.body.employee_name = oAuthResult.token_data.result_verify.employee_info.name;
+				req.body.logged_plant_id = oAuthResult.token_data.result_verify.company.plant_id;
 				if (oAuthResult.token_data.result_verify.employee_info.department.hasOwnProperty('unit')) {
 					if (oAuthResult.token_data.result_verify.employee_info.department.unit != null) {
 						req.body.department_id = oAuthResult.token_data.result_verify.employee_info.department.unit.id;
@@ -804,7 +911,7 @@ async function purchaseRequestProject_List(req, res) {
 					(el) => el.application.id === config.applicationId || el.application.id === 1
 				);
 
-				req.query.logged_is_admin = xLevel.is_admin;
+				req.query.logged_is_admin = xLevel ? xLevel.is_admin : 0;
 				req.query.user_id = oAuthResult.token_data.result_verify.id;
 				if (oAuthResult.token_data.result_verify.employee_info.department.hasOwnProperty('unit')) {
 					if (oAuthResult.token_data.result_verify.employee_info.department.unit != null) {
@@ -874,7 +981,7 @@ async function purchaseRequestProject_EstimateNotif(req, res) {
 					(el) => el.application.id === config.applicationId || el.application.id === 1
 				);
 
-				req.query.logged_is_admin = xLevel.is_admin;
+				req.query.logged_is_admin = xLevel ? xLevel.is_admin : 0;
 				req.query.user_id = oAuthResult.token_data.result_verify.id;
 				if (oAuthResult.token_data.result_verify.employee_info.department.hasOwnProperty('unit')) {
 					if (oAuthResult.token_data.result_verify.employee_info.department.unit != null) {
@@ -942,7 +1049,7 @@ async function purchaseRequest_TakeFPB(req, res) {
 					(el) => el.application.id === config.applicationId || el.application.id === 1
 				);
 
-				req.body.logged_is_admin = xLevel.is_admin;
+				req.body.logged_is_admin = xLevel ? xLevel.is_admin : 0;
 				req.body.user_id = oAuthResult.token_data.result_verify.id;
 				req.body.user_name = oAuthResult.token_data.result_verify.name;
 				req.body.token = req.headers['x-token'];
@@ -983,7 +1090,7 @@ async function purchaseRequest_TransactionHistory(req, res) {
 					(el) => el.application.id === config.applicationId || el.application.id === 1
 				);
 
-				req.query.logged_is_admin = xLevel.is_admin;
+				req.query.logged_is_admin = xLevel ? xLevel.is_admin : 0;
 				req.query.user_id = oAuthResult.token_data.result_verify.id;
 				if (oAuthResult.token_data.result_verify.employee_info.department.hasOwnProperty('unit')) {
 					if (oAuthResult.token_data.result_verify.employee_info.department.unit != null) {
@@ -1240,7 +1347,7 @@ async function purchaseRequestDetail_OutstandingItemList(req, res) {
 					(el) => el.application.id === config.applicationId || el.application.id === 1
 				);
 
-				req.query.logged_is_admin = xLevel.is_admin;
+				req.query.logged_is_admin = xLevel ? xLevel.is_admin : 0;
 				req.query.user_id = oAuthResult.token_data.result_verify.id;
 				if (oAuthResult.token_data.result_verify.employee_info.department.hasOwnProperty('unit')) {
 					if (oAuthResult.token_data.result_verify.employee_info.department.unit != null) {

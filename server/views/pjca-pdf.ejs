@@ -96,12 +96,30 @@
         <th
           style="
             width: 25%;
-            padding: 3px;
-            text-align: right;
-            vertical-align: bottom;
           "
         >
-          <span style="width: 240px; margin-left: -20px; font-size: 10px;">Doc No. FRM ACC.03.02 rev.01</span>
+          <table
+            cellspacing="0"
+            cellpadding="5"
+            style="width: 100%; text-align: right"
+          >
+            <tr>
+              <td style="width: 100%">
+                <%
+                if(data.data.company_id == 5 || data.data.company_id == 14){
+                %>
+                <span style="font-size: 14px; font-weight: normal;"><%= data.data.document_no %></span>
+                <%
+                    }
+                %>
+              </td>
+            </tr>
+            <tr style="vertical-align: bottom;">
+              <td style="width: 100%">
+                <span style="font-size: 10px;">Doc No. FRM ACC.03.02 rev.01</span>
+              </td>
+            </tr>
+          </table>
         </th>
       </tr>
       <tr>
@@ -117,7 +135,7 @@
                   >Kepada</span
                 >
               </td>
-              <td style="width: 60%" class="border-r"> <span style="margin-right: 2px; margin-left: -20px;">:</span>DEPARTMENT FINANCE</td>
+              <td style="width: 60%" class="border-r"> <span style="margin-right: 2px; margin-left: -20px;">:</span>DEPARTEMEN FINANCE</td>
               <td style="width: 30%">Untuk Payment Request</td>
             </tr>
             <tr>
@@ -127,7 +145,7 @@
                 >
               </td>
               <td style="width: 46.65%" class="border-r">
-                <span style="margin-right: 2px; margin-left: -20px;">:</span>DEPARTMENT <%=data.data.department_name%>
+                <span style="margin-right: 2px; margin-left: -20px;">:</span>DEPARTMENT <%= departmentData ? departmentData.name : data.data.department_name %>
               </td>
               <td style="width: 38.35%">
                 <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
@@ -195,7 +213,7 @@
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td>Rp </td>
+                      <td><%=data.data.currency ? data.data.currency : 'Rp'%> </td>
                       <td style="text-align: right; width: 100%;"><%=item.subtotal != null ? item.subtotal.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -218,7 +236,8 @@
                   if(item.discount_amount != null && item.discount_amount > 0){
                   %>
                     <br/>
-                    <%='Disc: Rp' + item.discount_amount%>
+                    <%='Diskon: ' + (data.data.currency ? data.data.currency : 'Rp') + item.discount_amount%>
+                    <!-- <%='Disc: Rp' + item.discount_amount%> -->
                   <%
                       }
                   %>
@@ -239,7 +258,7 @@
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td>Rp </td>
+                      <td><%=data.data.currency ? data.data.currency : 'Rp'%></td>
                       <td style="text-align: right; width: 100%;"><%=data.data.delivery_costs != null ? data.data.delivery_costs.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -287,7 +306,7 @@
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td>Rp </td>
+                      <td><%=data.data.currency ? data.data.currency : 'Rp'%></td>
                       <td style="text-align: right; width: 100%;"><%=data.data.service_costs != null ? data.data.service_costs.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -330,12 +349,12 @@
                 <td style="text-align: center" class="border-rb">
                 </td>
                 <td style="text-align: left" class="border-rb">
-                  Biaya lain-lain
+                  Biaya Lain-lain
                 </td>
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td>Rp </td>
+                      <td><%=data.data.currency ? data.data.currency : 'Rp'%></td>
                       <td style="text-align: right; width: 100%;"><%=data.data.other_costs != null ? data.data.other_costs.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -358,12 +377,12 @@
                 <td style="text-align: center" class="border-rb">
                 </td>
                 <td style="text-align: left" class="border-rb">
-                  Pph/Discount Global (<%=data.data.global_discount_percent%>%)
+                  PPh/Diskon Global (<%=data.data.global_discount_percent%>%)
                 </td>
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td>Rp </td>
+                      <td><%=data.data.currency ? data.data.currency : 'Rp'%></td>
                       <td style="text-align: right; width: 100%;"><%=data.data.global_discount != null ? data.data.global_discount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -391,7 +410,7 @@
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td>Rp </td>
+                      <td><%=data.data.currency ? data.data.currency : 'Rp'%></td>
                       <td style="text-align: right; width: 100%;"><%=data.data.total_tax_amount != null ? data.data.total_tax_amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -439,7 +458,7 @@
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td>Rp </td>
+                      <td><%=data.data.currency ? data.data.currency : 'Rp'%></td>
                       <td style="text-align: right; width: 100%;">- <%=data.data.total_pph_amount != null ? data.data.total_pph_amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -491,7 +510,7 @@
                       <table style="margin-left: auto;" cellspacing="0" cellpadding="0">
                         <tr>
                           <td style="width: 50px; text-align: right; padding-right: 5px;">CA: </td>
-                          <td style="width: 10px; text-align: right;">Rp </td>
+                          <td style="width: 10px; text-align: right;"><%=data.data.currency ? data.data.currency : 'Rp'%></td>
                           <td style="width: 120px; text-align: right;"><%=data.data.payment_request.total_price != null ? data.data.payment_request.total_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                         </tr>
                       </table>
@@ -502,7 +521,7 @@
                       <table style="margin-left: auto;" cellspacing="0" cellpadding="0">
                         <tr>
                           <td style="width: 50px; text-align: right; padding-right: 5px;">PJCA: </td>
-                          <td style="width: 10px; text-align: right;" class="border-b">Rp </td>
+                          <td style="width: 10px; text-align: right;" class="border-b"><%=data.data.currency ? data.data.currency : 'Rp'%></td>
                           <td style="width: 120px; text-align: right;" class="border-b"><%=data.data.total_price != null ? data.data.total_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                         </tr>
                       </table>
@@ -513,7 +532,7 @@
                       <table style="margin-left: auto;" cellspacing="0" cellpadding="0">
                         <tr>
                           <td style="width: 50px; text-align: right; padding-right: 5px;">Selisih: </td>
-                          <td >Rp </td>
+                          <td ><%=data.data.currency ? data.data.currency : 'Rp'%></td>
                           <td style="width: 120px; text-align: right;">(<%=data.data.difference_type%>) <%=data.data.difference_price != null ? data.data.difference_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%> </td>
                         </tr>
                       </table>
@@ -562,12 +581,12 @@
                 
               <tr>
                 <th colspan="2" style="text-align: left; font-weight: 400;" class="border-rb">
-                  TOTAL
+                  Total
                 </th>
                 <td style="text-align: right" class="border-rb">
                   <table style="margin-left: auto; width: 100%;" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td>Rp </td>
+                      <td><%=data.data.currency ? data.data.currency : 'Rp'%></td>
                       <td style="text-align: right; width: 100%;"><%=data.data.total_price != null ? data.data.total_price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 0%></td>
                     </tr>
                   </table>
@@ -608,7 +627,7 @@
             </tr>
             <tr>
               <th style="width: 25%; font-weight: 400;">Penanggung Jawab</th>
-              <th class="border-r" style="width: 25%; font-weight: 400;">Ka. Department</th>
+              <th class="border-r" style="width: 25%; font-weight: 400;">Ka. Departemen</th>
               <th
                 colspan="2" class="border-b" style="width: 50%; font-weight: 400;"
               >

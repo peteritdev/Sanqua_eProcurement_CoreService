@@ -51,6 +51,10 @@ module.exports = (app) => {
 	];
 	app.get(rootAPIPath + 'list', arrValidate, pjcaController.PJCA_List);
 
+	// Export "beserta detail" — flat header+item rows, no pagination
+	arrValidate = [];
+	app.get(rootAPIPath + 'export_with_detail', arrValidate, pjcaController.PJCA_ExportWithDetail);
+
 	arrValidate = [];
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id cannot be empty') ];
 	app.get(rootAPIPath + 'detail/:id', arrValidate, pjcaController.PJCA_Detail);

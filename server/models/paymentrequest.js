@@ -67,7 +67,9 @@ module.exports = (sequelize, DataTypes) => {
 		pph_percent: DataTypes.DOUBLE,
 		app_category: DataTypes.INTEGER, //1:Cash Advance, 2: Billing, 3: manual,
 		
-		generate_pdf_history: DataTypes.JSON
+		generate_pdf_history: DataTypes.JSON,
+		created_by_plant_id: DataTypes.INTEGER,
+		currency: DataTypes.STRING
 	});
 
 	PaymentRequest.associate = function(models) {
