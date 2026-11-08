@@ -61,7 +61,7 @@
             <tr>
                 <td style="font-size:9px;padding: 2px;text-align: left;border-right: none;" colspan="2">Departemen</td>
                 <td style="font-size:9px;padding: 2px;border-right: none;border-left: none;">:</td>
-                <td style="font-size:9px;padding: 2px;border-left: none;text-align: left;"><%= header.department_name %></td>
+                <td style="font-size:9px;padding: 2px;border-left: none;text-align: left;"><%= departmentData ? departmentData.name : header.department_name %></td>
                 <td style="padding: 3px;text-align: left;" colspan="2">
                     <% if(header.payment_type == 1){ %>
                         <img src="<%=imagePath%>checklist.png" width="15">
