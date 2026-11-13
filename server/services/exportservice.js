@@ -1989,13 +1989,15 @@ class ExportService {
 							xPayload
 						);
 					} else {
+						var xBillingBaseFont = (config.pdf && config.pdf.baseFont) ? config.pdf.baseFont : 11;
 						Object.assign(xPayload, {
 							header: xJoResultPayreq.data,
 							detail: xJoResultPayreq.data.payment_request_detail,
 							data: xJoResultPayreq,
+							baseFont: xBillingBaseFont,
 						})
-						html = await ejs.renderFile( 
-							path.join(__dirname, '../views/', "payreq-billing-pdf.ejs"), 
+						html = await ejs.renderFile(
+							path.join(__dirname, '../views/', "payreq-billing-pdf-v2.ejs"),
 							xPayload
 						);
 					}
