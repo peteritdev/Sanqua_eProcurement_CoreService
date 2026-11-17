@@ -127,7 +127,10 @@
       }
     },
     "pendingNotifDay": 1,
-    "puppeteerExecutablePath": null
+    "puppeteerExecutablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "pdf": {
+      "baseFont": 11
+    }
   },
 
   "development": {
@@ -255,8 +258,11 @@
       }
     },
     "pendingNotifDay": 1,
-    "puppeteerExecutablePath": "/usr/bin/chromium-browser"
-  },  
+    "puppeteerExecutablePath": "/usr/bin/chromium-browser",
+    "pdf": {
+      "baseFont": 11
+    }
+  },
 
   "staging": {
     "appPort": 9191, 
@@ -383,10 +389,13 @@
       }
     },
     "pendingNotifDay": 1,
-    "puppeteerExecutablePath": "/usr/bin/chromium-browser"
+    "puppeteerExecutablePath": "/usr/bin/chromium-browser",
+    "pdf": {
+      "baseFont": 11
+    }
   },
 
-  "production": {
+  "localhost": {
     "applicationId": 2,
     "applicationCode": "PROC",
     "applicationName": "eProcurement",
@@ -509,6 +518,9 @@
       }
     },
     "pendingNotifDay": 1,
-    "puppeteerExecutablePath": "/usr/bin/chromium-browser"
+    "puppeteerExecutablePath": "/usr/bin/chromium-browser",
+    "pdf": {
+      "baseFont": 11
+    }
   }  
 }
