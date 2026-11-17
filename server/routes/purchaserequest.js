@@ -1,4 +1,5 @@
 const purchaseRequestController = require('../controllers').purchaseRequest;
+const milestoneController = require('../controllers').milestone;
 
 const { check, validationResult } = require('express-validator');
 
@@ -288,4 +289,56 @@ module.exports = (app) => {
 		check('prd_ids', 'Parameter id must be array and cannot be empty').not().isEmpty().isArray()
 	];
 	app.post(rootAPIPath + 'save_detail/ca_manual', arrValidate, purchaseRequestController.purchaseRequestDetail_UpdateCAManual);
+
+	// *** MILESTONE (FPB item progress tracking) ***
+	arrValidate = [];
+	arrValidate = [
+		check('act').not().isEmpty().withMessage('Parameter act cannot be empty'),
+		check('name').not().isEmpty().withMessage('Parameter name cannot be empty')
+	];
+	app.post(rootAPIPath + 'milestone/save', arrValidate, milestoneController.milestone_Save);
+
+	arrValidate = [];
+	arrValidate = [
+		check('offset', 'Parameter offset must be integer and cannot be empty').not().isEmpty().isInt(),
+		check('limit').not().isEmpty().withMessage('Parameter limit cannot be empty')
+	];
+	app.get(rootAPIPath + 'milestone/list', arrValidate, milestoneController.milestone_List);
+
+	arrValidate = [];
+	app.get(rootAPIPath + 'milestone/dropdown', milestoneController.milestone_DropDown);
+
+	arrValidate = [];
+	arrValidate = [
+		check('id').not().isEmpty().withMessage('Parameter id cannot be empty')
+	];
+	app.post(rootAPIPath + 'milestone/delete/:id', arrValidate, milestoneController.milestone_Delete);
+
+	arrValidate = [];
+	arrValidate = [
+		check('fpb_item_id').not().isEmpty().withMessage('Parameter fpb_item_id cannot be empty'),
+		check('milestone_id').not().isEmpty().withMessage('Parameter milestone_id cannot be empty')
+	];
+	app.post(rootAPIPath + 'item/milestone/link', arrValidate, milestoneController.item_MilestoneLink);
+
+	arrValidate = [];
+	arrValidate = [
+		check('fpb_item_id').not().isEmpty().withMessage('Parameter fpb_item_id cannot be empty'),
+		check('milestone_id').not().isEmpty().withMessage('Parameter milestone_id cannot be empty')
+	];
+	app.post(rootAPIPath + 'item/milestone/unlink', arrValidate, milestoneController.item_MilestoneUnlink);
+
+	arrValidate = [];
+	arrValidate = [
+		check('fpb_item_id').not().isEmpty().withMessage('Parameter fpb_item_id cannot be empty'),
+		check('milestone_id').not().isEmpty().withMessage('Parameter milestone_id cannot be empty'),
+		check('status', 'Parameter status must be integer and cannot be empty').not().isEmpty().isInt()
+	];
+	app.post(rootAPIPath + 'item/milestone/update_status', arrValidate, milestoneController.item_MilestoneUpdateStatus);
+
+	arrValidate = [];
+	arrValidate = [
+		check('item_id').not().isEmpty().withMessage('Parameter item_id cannot be empty')
+	];
+	app.get(rootAPIPath + 'item/milestone/list', arrValidate, milestoneController.item_MilestoneList);
 };

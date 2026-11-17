@@ -33,6 +33,7 @@ const paymentRequest = require('./paymentrequest');
 const goodsReceipt = require('./goodsreceipt');
 const pjca = require('./pjca');
 const tax = require('./tax');
+const milestone = require('./milestone');
 
 const _export = require('./export');
 
@@ -68,5 +69,6 @@ module.exports = {
 	goodsReceipt,
 	pjca,
 	tax,
+	milestone,
 	vendorRegistration
 };
