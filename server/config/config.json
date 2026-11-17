@@ -129,7 +129,7 @@
     "pendingNotifDay": 1,
     "puppeteerExecutablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
     "pdf": {
-      "baseFont": 11
+      "baseFont": 12
     }
   },
 
@@ -260,7 +260,7 @@
     "pendingNotifDay": 1,
     "puppeteerExecutablePath": "/usr/bin/chromium-browser",
     "pdf": {
-      "baseFont": 11
+      "baseFont": 12
     }
   },
 
@@ -391,11 +391,11 @@
     "pendingNotifDay": 1,
     "puppeteerExecutablePath": "/usr/bin/chromium-browser",
     "pdf": {
-      "baseFont": 11
+      "baseFont": 12
     }
   },
 
-  "localhost": {
+  "production": {
     "applicationId": 2,
     "applicationCode": "PROC",
     "applicationName": "eProcurement",
@@ -520,7 +520,7 @@
     "pendingNotifDay": 1,
     "puppeteerExecutablePath": "/usr/bin/chromium-browser",
     "pdf": {
-      "baseFont": 11
+      "baseFont": 12
     }
   }  
 }
