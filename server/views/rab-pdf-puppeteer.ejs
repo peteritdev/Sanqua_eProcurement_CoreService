@@ -350,9 +350,9 @@
                     min-height: 35px;
                   "
                 >
-                  <% if( qrCode.approval3 != null && qrCode.approval3.length > 0
-                  ){ %>
                   <tr>
+                    <% if( qrCode.approval3 != null && qrCode.approval3.length > 0
+                    ){ %>
                     <% for(var i = 0; i < qrCode.approval3.length; i++ ) { %>
                     <td>
                       <img
@@ -361,11 +361,10 @@
                       />
                     </td>
                     <% }%>
-                  </tr>
-                  <% } %>
-                  <% if( qrCode.approval5 != null && qrCode.approval5.length > 0
-                  ){ %>
-                  <tr>
+                    <% } %>
+                    
+                    <% if( qrCode.approval5 != null && qrCode.approval5.length > 0
+                    ){ %>
                     <% for(var i = 0; i < qrCode.approval5.length; i++ ) { %>
                     <td>
                       <img
@@ -374,8 +373,8 @@
                       />
                     </td>
                     <% }%>
+                    <% } %>
                   </tr>
-                  <% } %>
                 </table>
                 <% } else { %>
                 <table
@@ -451,22 +450,21 @@
                 <% if( (qrCode.approval3 != null && qrCode.approval3.length > 0) || (qrCode.approval5 != null && qrCode.approval5.length > 0)
                 ){ %>
                 <table style="margin: auto; text-align: center">
-                  <% if( qrCode.approval3 != null && qrCode.approval3.length > 0
-                  ){ %>
                   <tr>
+                    <% if( qrCode.approval3 != null && qrCode.approval3.length > 0
+                    ){ %>
                     <% for(var i = 0; i < approver3.length; i++ ) { %>
                     <td><%=approver3[i].user.name%></td>
                     <% }%>
-                  </tr>
-                  <% } %>
-                  <% if( qrCode.approval5 != null && qrCode.approval5.length > 0
-                  ){ %>
-                  <tr>
+                    <% } %>
+                    
+                    <% if( qrCode.approval5 != null && qrCode.approval5.length > 0
+                    ){ %>
                     <% for(var i = 0; i < approver5.length; i++ ) { %>
                     <td><%=approver5[i].user.name%></td>
                     <% }%>
+                    <% } %>
                   </tr>
-                  <% } %>
                 </table>
                 <% } else { %>
                 <table style="margin: auto; text-align: center">
